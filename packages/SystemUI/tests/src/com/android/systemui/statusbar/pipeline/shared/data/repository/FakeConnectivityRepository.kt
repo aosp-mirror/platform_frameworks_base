@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.shared.data.repository
 
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
+import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnectionModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -25,6 +26,11 @@ class FakeConnectivityRepository : ConnectivityRepository {
     private val _forceHiddenIcons: MutableStateFlow<Set<ConnectivitySlot>> =
         MutableStateFlow(emptySet())
     override val forceHiddenSlots: StateFlow<Set<ConnectivitySlot>> = _forceHiddenIcons
+
+    override val defaultConnections: StateFlow<DefaultConnectionModel> =
+        MutableStateFlow(DefaultConnectionModel())
+
+    override val vcnSubId: MutableStateFlow<Int?> = MutableStateFlow(null)
 
     fun setForceHiddenIcons(hiddenIcons: Set<ConnectivitySlot>) {
         _forceHiddenIcons.value = hiddenIcons

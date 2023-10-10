@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
-import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -37,7 +36,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 /** Common interface for all of the location-based mobile icon view models. */
@@ -79,8 +77,24 @@ constructor(
     scope: CoroutineScope,
 ) : MobileIconViewModelCommon {
     /** Whether or not to show the error state of [SignalDrawable] */
-    private val showExclamationMark: Flow<Boolean> =
-        iconInteractor.isDefaultDataEnabled.mapLatest { !it }
+    private val showExclamationMark: StateFlow<Boolean> =
+        combine(
+                iconInteractor.isDefaultDataEnabled,
+                iconInteractor.isDefaultConnectionFailed,
+                iconInteractor.isInService,
+            ) { isDefaultDataEnabled, isDefaultConnectionFailed, isInService ->
+                !isDefaultDataEnabled || isDefaultConnectionFailed || !isInService
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), true)
+
+    private val shownLevel: StateFlow<Int> =
+        combine(
+                iconInteractor.level,
+                iconInteractor.isInService,
+            ) { level, isInService ->
+                if (isInService) level else 0
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
     override val isVisible: StateFlow<Boolean> =
         if (!constants.hasDataCapabilities) {
@@ -103,18 +117,25 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val icon: Flow<SignalIconModel> = run {
-        val initial = SignalIconModel.createEmptyState(iconInteractor.numberOfLevels.value)
+        val initial =
+            SignalIconModel(
+                level = shownLevel.value,
+                numberOfLevels = iconInteractor.numberOfLevels.value,
+                showExclamationMark = showExclamationMark.value,
+                carrierNetworkChange = iconInteractor.carrierNetworkChangeActive.value,
+            )
         combine(
-                iconInteractor.level,
+                shownLevel,
                 iconInteractor.numberOfLevels,
                 showExclamationMark,
-                iconInteractor.isInService,
-            ) { level, numberOfLevels, showExclamationMark, isInService ->
-                if (!isInService) {
-                    SignalIconModel.createEmptyState(numberOfLevels)
-                } else {
-                    SignalIconModel(level, numberOfLevels, showExclamationMark)
-                }
+                iconInteractor.carrierNetworkChangeActive,
+            ) { shownLevel, numberOfLevels, showExclamationMark, carrierNetworkChange ->
+                SignalIconModel(
+                    shownLevel,
+                    numberOfLevels,
+                    showExclamationMark,
+                    carrierNetworkChange,
+                )
             }
             .distinctUntilChanged()
             .logDiffsForTable(
@@ -126,19 +147,9 @@ constructor(
     }
 
     override val contentDescription: Flow<ContentDescription> = run {
-        val initial = ContentDescription.Resource(PHONE_SIGNAL_STRENGTH_NONE)
-        combine(
-                iconInteractor.level,
-                iconInteractor.isInService,
-            ) { level, isInService ->
-                val resId =
-                    when {
-                        isInService -> PHONE_SIGNAL_STRENGTH[level]
-                        else -> PHONE_SIGNAL_STRENGTH_NONE
-                    }
-                ContentDescription.Resource(resId)
-            }
-            .distinctUntilChanged()
+        val initial = ContentDescription.Resource(PHONE_SIGNAL_STRENGTH[0])
+        shownLevel
+            .map { ContentDescription.Resource(PHONE_SIGNAL_STRENGTH[it]) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 
@@ -146,11 +157,12 @@ constructor(
         combine(
                 iconInteractor.isDataConnected,
                 iconInteractor.isDataEnabled,
-                iconInteractor.isDefaultConnectionFailed,
                 iconInteractor.alwaysShowDataRatIcon,
-                iconInteractor.isConnected,
-            ) { dataConnected, dataEnabled, failedConnection, alwaysShow, connected ->
-                alwaysShow || (dataConnected && dataEnabled && !failedConnection && connected)
+                iconInteractor.mobileIsDefault,
+                iconInteractor.carrierNetworkChangeActive,
+            ) { dataConnected, dataEnabled, alwaysShow, mobileIsDefault, carrierNetworkChange ->
+                alwaysShow ||
+                    (!carrierNetworkChange && (dataEnabled && dataConnected && mobileIsDefault))
             }
             .distinctUntilChanged()
             .logDiffsForTable(
@@ -167,10 +179,13 @@ constructor(
                 showNetworkTypeIcon,
             ) { networkTypeIconGroup, shouldShow ->
                 val desc =
-                    if (networkTypeIconGroup.dataContentDescription != 0)
-                        ContentDescription.Resource(networkTypeIconGroup.dataContentDescription)
+                    if (networkTypeIconGroup.contentDescription != 0)
+                        ContentDescription.Resource(networkTypeIconGroup.contentDescription)
                     else null
-                val icon = Icon.Resource(networkTypeIconGroup.dataType, desc)
+                val icon =
+                    if (networkTypeIconGroup.iconId != 0)
+                        Icon.Resource(networkTypeIconGroup.iconId, desc)
+                    else null
                 return@combine when {
                     !shouldShow -> null
                     else -> icon

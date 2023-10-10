@@ -40,18 +40,18 @@
     <dimen name="bottom_sheet_margin">24dp</dimen>
     <dimen name="bottom_sheet_background_blur_radius">37dp</dimen>
 
-    <dimen name="privacy_chip_margin">12dp</dimen>
-    <dimen name="privacy_chip_icon_margin_in_between">9dp</dimen>
-    <dimen name="privacy_chip_padding_horizontal">9dp</dimen>
+    <dimen name="privacy_chips_max_width">110dp</dimen>
+    <dimen name="privacy_chips_bar_padding">9dp</dimen>
+    <dimen name="privacy_chip_margin">3dp</dimen>
+    <dimen name="privacy_chip_icon_margin_in_between">4dp</dimen>
+    <dimen name="privacy_chip_padding_horizontal">5dp</dimen>
     <dimen name="privacy_chip_icon_size">12dp</dimen>
-    <dimen name="privacy_chip_max_width">51dp</dimen>
+    <dimen name="privacy_chip_collapsed_icon_size">10dp</dimen>
     <dimen name="privacy_chip_height">24dp</dimen>
-    <dimen name="privacy_chip_min_width">30dp</dimen>
     <dimen name="privacy_chip_radius">12dp</dimen>
 
     <dimen name="privacy_chip_dot_size">8dp</dimen>
     <dimen name="privacy_chip_dot_radius">4dp</dimen>
-    <dimen name="privacy_chip_dot_margin_horizontal">8dp</dimen>
 
     <dimen name="privacy_chip_dot_bg_width">24dp</dimen>
     <dimen name="privacy_chip_dot_bg_height">18dp</dimen>

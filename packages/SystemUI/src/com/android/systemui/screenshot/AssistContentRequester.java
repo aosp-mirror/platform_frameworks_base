@@ -62,6 +62,7 @@ public class AssistContentRequester {
     private final String mPackageName;
     private final Executor mCallbackExecutor;
     private final Executor mSystemInteractionExecutor;
+    private final String mAttributionTag;
 
     // If system loses the callback, our internal cache of original callback will also get cleared.
     private final Map<Object, Callback> mPendingCallbacks =
@@ -74,6 +75,7 @@ public class AssistContentRequester {
         mPackageName = context.getApplicationContext().getPackageName();
         mCallbackExecutor = mainExecutor;
         mSystemInteractionExecutor = bgExecutor;
+        mAttributionTag = context.getAttributionTag();
     }
 
     /**
@@ -87,7 +89,8 @@ public class AssistContentRequester {
         mSystemInteractionExecutor.execute(() -> {
             try {
                 mActivityTaskManager.requestAssistDataForTask(
-                        new AssistDataReceiver(callback, this), taskId, mPackageName);
+                        new AssistDataReceiver(callback, this), taskId, mPackageName,
+                        mAttributionTag);
             } catch (RemoteException e) {
                 Log.e(TAG, "Requesting assist content failed for task: " + taskId, e);
             }

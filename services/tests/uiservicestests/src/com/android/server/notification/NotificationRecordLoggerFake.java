@@ -16,11 +16,17 @@
 
 package com.android.server.notification;
 
+import android.annotation.DurationMillisLong;
+
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Fake implementation of NotificationRecordLogger, for testing.
@@ -34,6 +40,7 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
         public int position = INVALID, buzzBeepBlink = INVALID;
         public boolean wasLogged;
         public InstanceId groupInstanceId;
+        @Nullable @DurationMillisLong public Long postDurationMillisLogged;
 
         CallRecord(NotificationRecord r, NotificationRecord old, int position,
                 int buzzBeepBlink, InstanceId groupId) {
@@ -60,7 +67,8 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
             this.event = event;
         }
     }
-    private List<CallRecord> mCalls = new ArrayList<>();
+    private final List<CallRecord> mCalls = new ArrayList<>();
+    private final Map<NotificationReported, CallRecord> mPendingLogs = new HashMap<>();
 
     public int numCalls() {
         return mCalls.size();
@@ -70,6 +78,10 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
         return mCalls;
     }
 
+    List<NotificationReported> getPendingLogs() {
+        return new ArrayList<>(mPendingLogs.keySet());
+    }
+
     CallRecord get(int index) {
         return mCalls.get(index);
     }
@@ -77,10 +89,32 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
         return mCalls.get(index).event;
     }
 
+    @Nullable
     @Override
-    public void maybeLogNotificationPosted(NotificationRecord r, NotificationRecord old,
-            int position, int buzzBeepBlink, InstanceId groupId) {
-        mCalls.add(new CallRecord(r, old, position, buzzBeepBlink, groupId));
+    public NotificationReported prepareToLogNotificationPosted(@Nullable NotificationRecord r,
+            @Nullable NotificationRecord old, int position, int buzzBeepBlink, InstanceId groupId) {
+        NotificationReported nr = NotificationRecordLogger.super.prepareToLogNotificationPosted(r,
+                old, position, buzzBeepBlink, groupId);
+        CallRecord callRecord = new CallRecord(r, old, position, buzzBeepBlink, groupId);
+        callRecord.wasLogged = false;
+        mCalls.add(callRecord);
+        if (nr != null) {
+            mPendingLogs.put(nr, callRecord);
+        }
+        return nr;
+    }
+
+    @Override
+    public void logNotificationPosted(NotificationReported nr) {
+        CallRecord callRecord = mPendingLogs.get(nr);
+        if (callRecord == null) {
+            throw new IllegalStateException(
+                    "Didn't find corresponding CallRecord in mPreparedCalls. Did you call "
+                            + "logNotificationPosted() twice!?");
+        }
+        mPendingLogs.remove(nr);
+        callRecord.wasLogged = true;
+        callRecord.postDurationMillisLogged = nr.post_duration_millis;
     }
 
     @Override

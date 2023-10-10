@@ -22,6 +22,7 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_NONE;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_WINDOWLESS;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
@@ -30,6 +31,7 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_WINDOWLESS;
 
 import android.window.StartingWindowInfo;
 
@@ -55,6 +57,7 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
         final boolean legacySplashScreen =
                 ((parameter & TYPE_PARAMETER_LEGACY_SPLASH_SCREEN) != 0);
         final boolean activityDrawn = (parameter & TYPE_PARAMETER_ACTIVITY_DRAWN) != 0;
+        final boolean windowlessSurface = (parameter & TYPE_PARAMETER_WINDOWLESS) != 0;
         final boolean topIsHome = windowInfo.taskInfo.topActivityType == ACTIVITY_TYPE_HOME;
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
@@ -67,10 +70,15 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                         + "isSolidColorSplashScreen=%b, "
                         + "legacySplashScreen=%b, "
                         + "activityDrawn=%b, "
+                        + "windowless=%b, "
                         + "topIsHome=%b",
                 newTask, taskSwitch, processRunning, allowTaskSnapshot, activityCreated,
-                isSolidColorSplashScreen, legacySplashScreen, activityDrawn, topIsHome);
+                isSolidColorSplashScreen, legacySplashScreen, activityDrawn, windowlessSurface,
+                topIsHome);
 
+        if (windowlessSurface) {
+            return STARTING_WINDOW_TYPE_WINDOWLESS;
+        }
         if (!topIsHome) {
             if (!processRunning || newTask || (taskSwitch && !activityCreated)) {
                 return getSplashscreenType(isSolidColorSplashScreen, legacySplashScreen);

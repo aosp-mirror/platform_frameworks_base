@@ -37,7 +37,7 @@ android_test {
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "mockito-target-extended-minus-junit4",
-        "truth-prebuilt",
+        "truth",
         "testables",
         "platform-test-annotations",
     ],

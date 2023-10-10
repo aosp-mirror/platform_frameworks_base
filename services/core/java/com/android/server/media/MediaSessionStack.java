@@ -40,6 +40,8 @@ class MediaSessionStack {
     private static final boolean DEBUG = MediaSessionService.DEBUG;
     private static final String TAG = "MediaSessionStack";
 
+    private static final int DUMP_EVENTS_MAX_COUNT = 70;
+
     /**
      * Listen the change in the media button session.
      */
@@ -64,8 +66,6 @@ class MediaSessionStack {
      * It could be null if the previous media button session is released.
      */
     private MediaSessionRecordImpl mMediaButtonSession;
-
-    private MediaSessionRecordImpl mCachedVolumeDefault;
 
     /**
      * Cache the result of the {@link #getActiveSessions} per user.
@@ -159,9 +159,6 @@ class MediaSessionStack {
             mSessions.remove(record);
             mSessions.add(0, record);
             clearCache(record.getUserId());
-        } else if (record.checkPlaybackActiveState(false)) {
-            // Just clear the volume cache when a state goes inactive
-            mCachedVolumeDefault = null;
         }
 
         // In most cases, playback state isn't needed for finding media button session,
@@ -332,15 +329,11 @@ class MediaSessionStack {
     }
 
     public MediaSessionRecordImpl getDefaultVolumeSession() {
-        if (mCachedVolumeDefault != null) {
-            return mCachedVolumeDefault;
-        }
         List<MediaSessionRecord> records = getPriorityList(true, UserHandle.USER_ALL);
         int size = records.size();
         for (int i = 0; i < size; i++) {
             MediaSessionRecord record = records.get(i);
             if (record.checkPlaybackActiveState(true) && record.canHandleVolumeKey()) {
-                mCachedVolumeDefault = record;
                 return record;
             }
         }
@@ -420,7 +413,6 @@ class MediaSessionStack {
     }
 
     private void clearCache(int userId) {
-        mCachedVolumeDefault = null;
         mCachedActiveLists.remove(userId);
         // mCachedActiveLists may also include the list of sessions for UserHandle.USER_ALL,
         // so they also need to be cleared.

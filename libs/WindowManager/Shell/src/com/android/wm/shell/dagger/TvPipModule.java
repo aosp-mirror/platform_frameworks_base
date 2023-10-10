@@ -31,6 +31,7 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipAppOpsListener;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
@@ -53,10 +54,10 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
-import java.util.Optional;
-
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
 
 /**
  * Provides TV specific dependencies for Pip.
@@ -70,7 +71,7 @@ public abstract class TvPipModule {
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
+            PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -83,6 +84,7 @@ public abstract class TvPipModule {
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            @ShellMainThread Handler mainHandler, // needed for registerReceiverForAllUsers()
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(
                 TvPipController.create(
@@ -90,7 +92,7 @@ public abstract class TvPipModule {
                         shellInit,
                         shellController,
                         tvPipBoundsState,
-                        pipSizeSpecHandler,
+                        pipDisplayLayoutState,
                         tvPipBoundsAlgorithm,
                         tvPipBoundsController,
                         pipAppOpsListener,
@@ -103,6 +105,7 @@ public abstract class TvPipModule {
                         pipParamsChangedForwarder,
                         displayController,
                         windowManagerShellWrapper,
+                        mainHandler,
                         mainExecutor));
     }
 
@@ -139,28 +142,36 @@ public abstract class TvPipModule {
     @WMSingleton
     @Provides
     static TvPipBoundsState provideTvPipBoundsState(Context context,
-            PipSizeSpecHandler pipSizeSpecHandler) {
-        return new TvPipBoundsState(context, pipSizeSpecHandler);
+            PipSizeSpecHandler pipSizeSpecHandler, PipDisplayLayoutState pipDisplayLayoutState) {
+        return new TvPipBoundsState(context, pipSizeSpecHandler, pipDisplayLayoutState);
     }
 
     @WMSingleton
     @Provides
-    static PipSizeSpecHandler providePipSizeSpecHelper(Context context) {
-        return new PipSizeSpecHandler(context);
+    static PipSizeSpecHandler providePipSizeSpecHelper(Context context,
+            PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PipSizeSpecHandler(context, pipDisplayLayoutState);
     }
 
     // Handler needed for loadDrawableAsync() in PipControlsViewController
     @WMSingleton
     @Provides
     static PipTransitionController provideTvPipTransition(
+            Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             Transitions transitions,
-            PipAnimationController pipAnimationController,
+            TvPipBoundsState tvPipBoundsState,
+            PipDisplayLayoutState pipDisplayLayoutState,
+            PipTransitionState pipTransitionState,
+            TvPipMenuController pipMenuController,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
-            TvPipBoundsState tvPipBoundsState, TvPipMenuController pipMenuController) {
-        return new TvPipTransition(shellInit, shellTaskOrganizer, transitions, tvPipBoundsState,
-                pipMenuController, tvPipBoundsAlgorithm, pipAnimationController);
+            PipAnimationController pipAnimationController,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper) {
+        return new TvPipTransition(context, shellInit, shellTaskOrganizer, transitions,
+                tvPipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
+                tvPipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
+                Optional.empty());
     }
 
     @WMSingleton
@@ -169,22 +180,17 @@ public abstract class TvPipModule {
             Context context,
             TvPipBoundsState tvPipBoundsState,
             SystemWindows systemWindows,
-            PipMediaController pipMediaController,
             @ShellMainThread Handler mainHandler) {
-        return new TvPipMenuController(context, tvPipBoundsState, systemWindows, pipMediaController,
-                mainHandler);
+        return new TvPipMenuController(context, tvPipBoundsState, systemWindows, mainHandler);
     }
 
-    // Handler needed for registerReceiverForAllUsers()
     @WMSingleton
     @Provides
     static TvPipNotificationController provideTvPipNotificationController(Context context,
             PipMediaController pipMediaController,
-            PipParamsChangedForwarder pipParamsChangedForwarder,
-            TvPipBoundsState tvPipBoundsState,
-            @ShellMainThread Handler mainHandler) {
+            PipParamsChangedForwarder pipParamsChangedForwarder) {
         return new TvPipNotificationController(context, pipMediaController,
-                pipParamsChangedForwarder, tvPipBoundsState, mainHandler);
+                pipParamsChangedForwarder);
     }
 
     @WMSingleton
@@ -206,7 +212,7 @@ public abstract class TvPipModule {
             TvPipMenuController tvPipMenuController,
             SyncTransactionQueue syncTransactionQueue,
             TvPipBoundsState tvPipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
+            PipDisplayLayoutState pipDisplayLayoutState,
             PipTransitionState pipTransitionState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
@@ -218,7 +224,7 @@ public abstract class TvPipModule {
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new TvPipTaskOrganizer(context,
-                syncTransactionQueue, pipTransitionState, tvPipBoundsState, pipSizeSpecHandler,
+                syncTransactionQueue, pipTransitionState, tvPipBoundsState, pipDisplayLayoutState,
                 tvPipBoundsAlgorithm, tvPipMenuController, pipAnimationController,
                 pipSurfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
                 splitScreenControllerOptional, displayController, pipUiEventLogger,

@@ -40,8 +40,8 @@ import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.util.Slog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +98,8 @@ final class PackageUtils {
         final List<ResolveInfo> companionServices = pm.queryIntentServicesAsUser(
                 COMPANION_SERVICE_INTENT, ResolveInfoFlags.of(0), userId);
 
-        final Map<String, List<ComponentName>> packageNameToServiceInfoList = new HashMap<>();
+        final Map<String, List<ComponentName>> packageNameToServiceInfoList =
+                new HashMap<>(companionServices.size());
 
         for (ResolveInfo resolveInfo : companionServices) {
             final ServiceInfo service = resolveInfo.serviceInfo;
@@ -112,19 +113,19 @@ final class PackageUtils {
                 continue;
             }
 
-            // Use LinkedList, because we'll need to prepend "primary" services, while appending the
-            // other (non-primary) services to the list.
-            final LinkedList<ComponentName> services =
-                    (LinkedList<ComponentName>) packageNameToServiceInfoList.computeIfAbsent(
-                            service.packageName, it -> new LinkedList<>());
+            // We'll need to prepend "primary" services, while appending the other (non-primary)
+            // services to the list.
+            final ArrayList<ComponentName> services =
+                    (ArrayList<ComponentName>) packageNameToServiceInfoList.computeIfAbsent(
+                            service.packageName, it -> new ArrayList<>(1));
 
             final ComponentName componentName = service.getComponentName();
 
-            if (isPrimaryCompanionDeviceService(pm, componentName)) {
+            if (isPrimaryCompanionDeviceService(pm, componentName, userId)) {
                 // "Primary" service should be at the head of the list.
-                services.addFirst(componentName);
+                services.add(0, componentName);
             } else {
-                services.addLast(componentName);
+                services.add(componentName);
             }
         }
 
@@ -132,9 +133,10 @@ final class PackageUtils {
     }
 
     private static boolean isPrimaryCompanionDeviceService(@NonNull PackageManager pm,
-            @NonNull ComponentName componentName) {
+            @NonNull ComponentName componentName, @UserIdInt int userId) {
         try {
-            return pm.getProperty(PROPERTY_PRIMARY_TAG, componentName).getBoolean();
+            return pm.getPropertyAsUser(PROPERTY_PRIMARY_TAG, componentName.getPackageName(),
+                    componentName.getClassName(), userId).getBoolean();
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }

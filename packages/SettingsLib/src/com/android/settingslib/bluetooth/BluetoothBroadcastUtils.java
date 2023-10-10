@@ -44,38 +44,4 @@ public final class BluetoothBroadcastUtils {
      * Bluetooth scheme.
      */
     public static final String SCHEME_BT_BROADCAST_METADATA = "BT:";
-
-    // BluetoothLeBroadcastMetadata
-    static final String PREFIX_BT_ADDRESS_TYPE = "T:";
-    static final String PREFIX_BT_DEVICE = "D:";
-    static final String PREFIX_BT_ADVERTISING_SID = "AS:";
-    static final String PREFIX_BT_BROADCAST_ID = "B:";
-    static final String PREFIX_BT_SYNC_INTERVAL = "SI:";
-    static final String PREFIX_BT_IS_ENCRYPTED = "E:";
-    static final String PREFIX_BT_BROADCAST_CODE = "C:";
-    static final String PREFIX_BT_PRESENTATION_DELAY = "PD:";
-    static final String PREFIX_BT_SUBGROUPS = "SG:";
-    static final String PREFIX_BT_ANDROID_VERSION = "V:";
-
-    // BluetoothLeBroadcastSubgroup
-    static final String PREFIX_BTSG_CODEC_ID = "CID:";
-    static final String PREFIX_BTSG_CODEC_CONFIG = "CC:";
-    static final String PREFIX_BTSG_AUDIO_CONTENT = "AC:";
-    static final String PREFIX_BTSG_CHANNEL_PREF = "CP:";
-    static final String PREFIX_BTSG_BROADCAST_CHANNEL = "BC:";
-
-    // BluetoothLeAudioCodecConfigMetadata
-    static final String PREFIX_BTCC_AUDIO_LOCATION = "AL:";
-    static final String PREFIX_BTCC_RAW_METADATA = "CCRM:";
-
-    // BluetoothLeAudioContentMetadata
-    static final String PREFIX_BTAC_PROGRAM_INFO = "PI:";
-    static final String PREFIX_BTAC_LANGUAGE = "L:";
-    static final String PREFIX_BTAC_RAW_METADATA = "ACRM:";
-
-    // BluetoothLeBroadcastChannel
-    static final String PREFIX_BTBC_CHANNEL_INDEX = "CI:";
-    static final String PREFIX_BTBC_CODEC_CONFIG = "BCCM:";
-
-    static final String DELIMITER_QR_CODE = ";";
 }

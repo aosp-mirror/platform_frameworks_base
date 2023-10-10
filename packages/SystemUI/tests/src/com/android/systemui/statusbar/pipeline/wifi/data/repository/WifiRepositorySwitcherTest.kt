@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
@@ -78,6 +79,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
             WifiRepositoryImpl(
                 fakeBroadcastDispatcher,
                 connectivityManager,
+                FakeConnectivityRepository(),
                 logger,
                 tableLogger,
                 mainExecutor,
@@ -103,7 +105,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
     }
 
     @Test
-    fun `switcher active repo - updates when demo mode changes`() =
+    fun switcherActiveRepo_updatesWhenDemoModeChanges() =
         testScope.runTest {
             assertThat(underTest.activeRepo.value).isSameInstanceAs(realImpl)
 

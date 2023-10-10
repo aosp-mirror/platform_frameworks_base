@@ -66,9 +66,9 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeControllerImpl;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -232,7 +232,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mOnUserInteractionCallback,
                         mCentralSurfaces,
                         mock(NotificationPresenter.class),
-                        mock(NotificationPanelViewController.class),
+                        mock(ShadeViewController.class),
                         mActivityLaunchAnimator,
                         notificationAnimationProvider,
                         mock(LaunchFullScreenIntentProvider.class),

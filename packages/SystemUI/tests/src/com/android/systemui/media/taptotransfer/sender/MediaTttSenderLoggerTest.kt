@@ -17,11 +17,12 @@
 package com.android.systemui.media.taptotransfer.sender
 
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogcatEchoTracker
+import com.android.systemui.log.LogcatEchoTracker
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -91,8 +92,16 @@ class MediaTttSenderLoggerTest : SysuiTestCase() {
     fun logStateMap_bufferHasInfo() {
         val map =
             mapOf(
-                "123" to ChipStateSender.ALMOST_CLOSE_TO_START_CAST,
-                "456" to ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+                "123" to
+                    Pair(
+                        InstanceId.fakeInstanceId(100),
+                        ChipStateSender.ALMOST_CLOSE_TO_START_CAST
+                    ),
+                "456" to
+                    Pair(
+                        InstanceId.fakeInstanceId(200),
+                        ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED
+                    ),
             )
 
         logger.logStateMap(map)

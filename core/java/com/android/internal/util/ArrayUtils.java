@@ -330,6 +330,16 @@ public class ArrayUtils {
         return array;
     }
 
+    @NonNull
+    public static int[] convertToIntArray(@NonNull ArraySet<Integer> set) {
+        final int size = set.size();
+        int[] array = new int[size];
+        for (int i = 0; i < size; i++) {
+            array[i] = set.valueAt(i);
+        }
+        return array;
+    }
+
     public static @Nullable long[] convertToLongArray(@Nullable int[] intArray) {
         if (intArray == null) return null;
         long[] array = new long[intArray.length];

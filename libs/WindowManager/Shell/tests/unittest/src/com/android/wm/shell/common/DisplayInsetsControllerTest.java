@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.RemoteException;
 import android.util.SparseArray;
@@ -32,7 +33,8 @@ import android.view.IDisplayWindowInsetsController;
 import android.view.IWindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets;
+import android.view.inputmethod.ImeTracker;
 
 import androidx.test.filters.SmallTest;
 
@@ -108,11 +110,13 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         mController.addInsetsChangedListener(SECOND_DISPLAY, secondListener);
 
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).topFocusedWindowChanged(null,
-                new InsetsVisibilities());
+                WindowInsets.Type.defaultVisible());
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsControlChanged(null, null);
-        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false);
-        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false);
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false,
+                null /* statsToken */);
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false,
+                null /* statsToken */);
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -128,11 +132,13 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         assertTrue(secondListener.hideInsetsCount == 0);
 
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).topFocusedWindowChanged(null,
-                new InsetsVisibilities());
+                WindowInsets.Type.defaultVisible());
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsControlChanged(null, null);
-        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false);
-        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false,
+                null /* statsToken */);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false,
+                null /* statsToken */);
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -175,8 +181,7 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         int hideInsetsCount = 0;
 
         @Override
-        public void topFocusedWindowChanged(ComponentName component,
-                InsetsVisibilities requestedVisibilities) {
+        public void topFocusedWindowChanged(ComponentName component, int requestedVisibleTypes) {
             topFocusedWindowChangedCount++;
         }
 
@@ -192,12 +197,12 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         }
 
         @Override
-        public void showInsets(int types, boolean fromIme) {
+        public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {
             showInsetsCount++;
         }
 
         @Override
-        public void hideInsets(int types, boolean fromIme) {
+        public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {
             hideInsetsCount++;
         }
     }

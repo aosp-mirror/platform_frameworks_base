@@ -25,6 +25,7 @@ import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_END_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__BIOMETRIC_PROMPT_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP;
@@ -35,6 +36,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_ALL_APPS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_SEARCH_RESULT;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNLOCK_ENTRANCE_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION;
@@ -94,16 +96,21 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
 
+import android.Manifest;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.Log;
@@ -125,6 +132,7 @@ import com.android.internal.util.PerfettoTrigger;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -136,6 +144,14 @@ import java.util.concurrent.TimeUnit;
  *
  * adb shell device_config put interaction_jank_monitor enabled true
  * adb shell device_config put interaction_jank_monitor sampling_interval 1
+ *
+ * On debuggable builds, an overlay can be used to display the name of the
+ * currently running cuj using:
+ *
+ * adb shell device_config put interaction_jank_monitor debug_overlay_enabled true
+ *
+ * NOTE: The overlay will interfere with metrics, so it should only be used
+ * for understanding which UI events correspeond to which CUJs.
  *
  * @hide
  */
@@ -153,6 +169,7 @@ public class InteractionJankMonitor {
             "trace_threshold_missed_frames";
     private static final String SETTINGS_THRESHOLD_FRAME_TIME_MILLIS_KEY =
             "trace_threshold_frame_time_millis";
+    private static final String SETTINGS_DEBUG_OVERLAY_ENABLED_KEY = "debug_overlay_enabled";
     /** Default to being enabled on debug builds. */
     private static final boolean DEFAULT_ENABLED = Build.IS_DEBUGGABLE;
     /** Default to collecting data for all CUJs. */
@@ -160,6 +177,7 @@ public class InteractionJankMonitor {
     /** Default to triggering trace if 3 frames are missed OR a frame takes at least 64ms */
     private static final int DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES = 3;
     private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
+    private static final boolean DEFAULT_DEBUG_OVERLAY_ENABLED = false;
 
     @VisibleForTesting
     public static final int MAX_LENGTH_OF_CUJ_NAME = 80;
@@ -237,89 +255,97 @@ public class InteractionJankMonitor {
     public static final int CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS = 66;
     public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE = 67;
     public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME = 68;
+    public static final int CUJ_IME_INSETS_ANIMATION = 69;
     public static final int CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION = 70;
+    public static final int CUJ_LAUNCHER_OPEN_SEARCH_RESULT = 71;
 
+    private static final int LAST_CUJ = CUJ_LAUNCHER_OPEN_SEARCH_RESULT;
     private static final int NO_STATSD_LOGGING = -1;
 
     // Used to convert CujType to InteractionType enum value for statsd logging.
     // Use NO_STATSD_LOGGING in case the measurement for a given CUJ should not be logged to statsd.
     @VisibleForTesting
-    public static final int[] CUJ_TO_STATSD_INTERACTION_TYPE = {
-            // This should be mapping to CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE.
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE,
-            NO_STATSD_LOGGING, // This is deprecated.
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_EXPAND,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_SWIPE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_QS_EXPAND_COLLAPSE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_QS_SCROLL_SWIPE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_RECENTS,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_ICON,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_ADD,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_REMOVE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_APPEAR,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_APPEAR,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_APPEAR,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_DISAPPEAR,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_DISAPPEAR,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_DISAPPEAR,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_FROM_AOD,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_ALL_APPS,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_WIDGET,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_QS_TILE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_ENTER,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_EXIT,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_LAUNCH_CAMERA,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_SLIDER,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__BIOMETRIC_PROMPT_TRANSITION,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_TOGGLE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_DIALOG_OPEN,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_EXPAND,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_COLLAPSE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNLOCK_ENTRANCE_ANIMATION,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_OCCLUSION,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__RECENTS_SCROLLING,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_SWIPE_TO_RECENTS,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
-            NO_STATSD_LOGGING,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION,
-    };
+    public static final int[] CUJ_TO_STATSD_INTERACTION_TYPE = new int[LAST_CUJ + 1];
 
-    private static volatile InteractionJankMonitor sInstance;
+    static {
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[1] = NO_STATSD_LOGGING; // This is deprecated.
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_SCROLL_FLING] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_ROW_EXPAND] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_EXPAND;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_ROW_SWIPE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_SWIPE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_QS_EXPAND_COLLAPSE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_QS_SCROLL_SWIPE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_RECENTS;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_ICON;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_CLOSE_TO_HOME] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_CLOSE_TO_PIP] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_QUICK_SWITCH] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_HEADS_UP_APPEAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_ADD] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_ADD;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_REMOVE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_REMOVE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_APP_START] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_PASSWORD_APPEAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_APPEAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_PATTERN_APPEAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_APPEAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_PIN_APPEAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_APPEAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_DISAPPEAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_PATTERN_DISAPPEAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_DISAPPEAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_PIN_DISAPPEAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_DISAPPEAR;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_TRANSITION_FROM_AOD] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_FROM_AOD;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_TRANSITION_TO_AOD] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_OPEN_ALL_APPS] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_ALL_APPS;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_ALL_APPS_SCROLL] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_WIDGET;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SETTINGS_PAGE_SCROLL] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_UNLOCK_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_UNLOCK_ANIMATION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_QS_TILE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PIP_TRANSITION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_USER_SWITCH] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SPLASHSCREEN_AVD] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SPLASHSCREEN_EXIT_ANIM] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SCREEN_OFF] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SCREEN_OFF_SHOW_AOD] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_ONE_HANDED_ENTER_TRANSITION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_ONE_HANDED_EXIT_TRANSITION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_UNFOLD_ANIM] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SUW_LOADING_TO_NEXT_FLOW] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SUW_LOADING_SCREEN_FOR_STATUS] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SPLIT_SCREEN_ENTER] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_ENTER;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SPLIT_SCREEN_EXIT] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_EXIT;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_LAUNCH_CAMERA] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_LAUNCH_CAMERA;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SPLIT_SCREEN_RESIZE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SETTINGS_SLIDER] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_SLIDER;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_TAKE_SCREENSHOT] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_VOLUME_CONTROL] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_BIOMETRIC_PROMPT_TRANSITION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__BIOMETRIC_PROMPT_TRANSITION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SETTINGS_TOGGLE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_TOGGLE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SHADE_DIALOG_OPEN] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_USER_DIALOG_OPEN] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_DIALOG_OPEN;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_TASKBAR_EXPAND] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_EXPAND;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_TASKBAR_COLLAPSE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_COLLAPSE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SHADE_CLEAR_ALL] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_UNLOCK_ENTRANCE_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNLOCK_ENTRANCE_ANIMATION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_OCCLUSION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_OCCLUSION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_RECENTS_SCROLLING] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__RECENTS_SCROLLING;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_SWIPE_TO_RECENTS;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_IME_INSETS_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_ANIMATION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_OPEN_SEARCH_RESULT] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_SEARCH_RESULT;
+    }
+
+    private static class InstanceHolder {
+        public static final InteractionJankMonitor INSTANCE =
+            new InteractionJankMonitor(new HandlerThread(DEFAULT_WORKER_NAME));
+    }
 
     private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
             this::updateProperties;
@@ -329,7 +355,11 @@ public class InteractionJankMonitor {
     @GuardedBy("mLock")
     private final SparseArray<Runnable> mTimeoutActions;
     private final HandlerThread mWorker;
+    private final DisplayResolutionTracker mDisplayResolutionTracker;
     private final Object mLock = new Object();
+    private @ColorInt int mDebugBgColor = Color.CYAN;
+    private double mDebugYOffset = 0.1;
+    private InteractionMonitorDebugOverlay mDebugOverlay;
 
     private volatile boolean mEnabled = DEFAULT_ENABLED;
     private int mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
@@ -406,7 +436,9 @@ public class InteractionJankMonitor {
             CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS,
             CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE,
             CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
-            CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION
+            CUJ_IME_INSETS_ANIMATION,
+            CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION,
+            CUJ_LAUNCHER_OPEN_SEARCH_RESULT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -418,15 +450,7 @@ public class InteractionJankMonitor {
      * @return instance of InteractionJankMonitor
      */
     public static InteractionJankMonitor getInstance() {
-        // Use DCL here since this method might be invoked very often.
-        if (sInstance == null) {
-            synchronized (InteractionJankMonitor.class) {
-                if (sInstance == null) {
-                    sInstance = new InteractionJankMonitor(new HandlerThread(DEFAULT_WORKER_NAME));
-                }
-            }
-        }
-        return sInstance;
+        return InstanceHolder.INSTANCE;
     }
 
     /**
@@ -435,11 +459,13 @@ public class InteractionJankMonitor {
      * @param worker the worker thread for the callbacks
      */
     @VisibleForTesting
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public InteractionJankMonitor(@NonNull HandlerThread worker) {
         mRunningTrackers = new SparseArray<>();
         mTimeoutActions = new SparseArray<>();
         mWorker = worker;
         mWorker.start();
+        mDisplayResolutionTracker = new DisplayResolutionTracker(worker.getThreadHandler());
         mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
         mEnabled = DEFAULT_ENABLED;
 
@@ -511,7 +537,8 @@ public class InteractionJankMonitor {
         final FrameMetricsWrapper frameMetrics = new FrameMetricsWrapper();
 
         return new FrameTracker(this, session, config.getHandler(), threadedRenderer, viewRoot,
-                surfaceControl, choreographer, frameMetrics, new FrameTracker.StatsLogWrapper(),
+                surfaceControl, choreographer, frameMetrics,
+                new FrameTracker.StatsLogWrapper(mDisplayResolutionTracker),
                 mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis,
                 eventsListener, config);
     }
@@ -523,7 +550,7 @@ public class InteractionJankMonitor {
         if (needRemoveTasks(action, session)) {
             getTracker(session.getCuj()).getHandler().runWithScissors(() -> {
                 removeTimeout(session.getCuj());
-                removeTracker(session.getCuj());
+                removeTracker(session.getCuj(), session.getReason());
             }, EXECUTOR_TASK_TIMEOUT);
         }
     }
@@ -582,6 +609,10 @@ public class InteractionJankMonitor {
     public boolean begin(@NonNull Configuration.Builder builder) {
         try {
             final Configuration config = builder.build();
+            postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+                EventLogTags.writeJankCujEventsBeginRequest(
+                        config.mCujType, unixNanos, elapsedNanos, realtimeNanos, config.mTag);
+            });
             final TrackerResult result = new TrackerResult();
             final boolean success = config.getHandler().runWithScissors(
                     () -> result.mResult = beginInternal(config), EXECUTOR_TASK_TIMEOUT);
@@ -655,6 +686,10 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
+        postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+            EventLogTags.writeJankCujEventsEndRequest(
+                    cujType, unixNanos, elapsedNanos, realtimeNanos);
+        });
         FrameTracker tracker = getTracker(cujType);
         // Skip this call since we haven't started a trace yet.
         if (tracker == null) return false;
@@ -681,7 +716,7 @@ public class InteractionJankMonitor {
         if (tracker == null) return false;
         // if the end call doesn't return true, another thread is handling end of the cuj.
         if (tracker.end(REASON_END_NORMAL)) {
-            removeTracker(cujType);
+            removeTracker(cujType, REASON_END_NORMAL);
         }
         return true;
     }
@@ -692,6 +727,10 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
+        postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+            EventLogTags.writeJankCujEventsCancelRequest(
+                    cujType, unixNanos, elapsedNanos, realtimeNanos);
+        });
         return cancel(cujType, REASON_CANCEL_NORMAL);
     }
 
@@ -728,14 +767,22 @@ public class InteractionJankMonitor {
         if (tracker == null) return false;
         // if the cancel call doesn't return true, another thread is handling cancel of the cuj.
         if (tracker.cancel(reason)) {
-            removeTracker(cujType);
+            removeTracker(cujType, reason);
         }
         return true;
     }
 
+    @UiThread
     private void putTracker(@CujType int cuj, @NonNull FrameTracker tracker) {
         synchronized (mLock) {
             mRunningTrackers.put(cuj, tracker);
+            if (mDebugOverlay != null) {
+                mDebugOverlay.onTrackerAdded(cuj, tracker);
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Added tracker for " + getNameOfCuj(cuj)
+                        + ". mRunningTrackers=" + listNamesOfCujs(mRunningTrackers));
+            }
         }
     }
 
@@ -745,9 +792,17 @@ public class InteractionJankMonitor {
         }
     }
 
-    private void removeTracker(@CujType int cuj) {
+    @UiThread
+    private void removeTracker(@CujType int cuj, int reason) {
         synchronized (mLock) {
             mRunningTrackers.remove(cuj);
+            if (mDebugOverlay != null) {
+                mDebugOverlay.onTrackerRemoved(cuj, reason, mRunningTrackers);
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Removed tracker for " + getNameOfCuj(cuj)
+                        + ". mRunningTrackers=" + listNamesOfCujs(mRunningTrackers));
+            }
         }
     }
 
@@ -760,6 +815,16 @@ public class InteractionJankMonitor {
         mTraceThresholdFrameTimeMillis = properties.getInt(
                 SETTINGS_THRESHOLD_FRAME_TIME_MILLIS_KEY,
                 DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS);
+        // Never allow the debug overlay to be used on user builds
+        boolean debugOverlayEnabled = Build.IS_DEBUGGABLE && properties.getBoolean(
+                SETTINGS_DEBUG_OVERLAY_ENABLED_KEY,
+                DEFAULT_DEBUG_OVERLAY_ENABLED);
+        if (debugOverlayEnabled && mDebugOverlay == null) {
+            mDebugOverlay = new InteractionMonitorDebugOverlay(mLock, mDebugBgColor, mDebugYOffset);
+        } else if (!debugOverlayEnabled && mDebugOverlay != null) {
+            mDebugOverlay.dispose();
+            mDebugOverlay = null;
+        }
         // The memory visibility is powered by the volatile field, mEnabled.
         mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
     }
@@ -800,6 +865,39 @@ public class InteractionJankMonitor {
     }
 
     /**
+     * Configures the debug overlay used for displaying interaction names on the screen while they
+     * occur.
+     *
+     * @param bgColor the background color of the box used to display the CUJ names
+     * @param yOffset number between 0 and 1 to indicate where the top of the box should be relative
+     *                to the height of the screen
+     */
+    public void configDebugOverlay(@ColorInt int bgColor, double yOffset) {
+        mDebugBgColor = bgColor;
+        mDebugYOffset = yOffset;
+    }
+
+    /**
+     * A helper method for getting a string representation of all running CUJs. For example,
+     * "(LOCKSCREEN_TRANSITION_FROM_AOD, IME_INSETS_ANIMATION)"
+     */
+    private static String listNamesOfCujs(SparseArray<FrameTracker> trackers) {
+        if (!DEBUG) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        for (int i = 0; i < trackers.size(); i++) {
+            sb.append(getNameOfCuj(trackers.keyAt(i)));
+            if (i < trackers.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+
+    /**
      * A helper method to translate CUJ type to CUJ name.
      *
      * @param cujType the cuj type defined in this file
@@ -811,17 +909,17 @@ public class InteractionJankMonitor {
         // 2. The returned string should be the same with the name defined in atoms.proto.
         switch (cujType) {
             case CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE:
-                return "SHADE_EXPAND_COLLAPSE";
+                return "NOTIFICATION_SHADE_EXPAND_COLLAPSE";
             case CUJ_NOTIFICATION_SHADE_SCROLL_FLING:
-                return "SHADE_SCROLL_FLING";
+                return "NOTIFICATION_SHADE_SCROLL_FLING";
             case CUJ_NOTIFICATION_SHADE_ROW_EXPAND:
-                return "SHADE_ROW_EXPAND";
+                return "NOTIFICATION_SHADE_ROW_EXPAND";
             case CUJ_NOTIFICATION_SHADE_ROW_SWIPE:
-                return "SHADE_ROW_SWIPE";
+                return "NOTIFICATION_SHADE_ROW_SWIPE";
             case CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE:
-                return "SHADE_QS_EXPAND_COLLAPSE";
+                return "NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE";
             case CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE:
-                return "SHADE_QS_SCROLL_SWIPE";
+                return "NOTIFICATION_SHADE_QS_SCROLL_SWIPE";
             case CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS:
                 return "LAUNCHER_APP_LAUNCH_FROM_RECENTS";
             case CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON:
@@ -911,9 +1009,9 @@ public class InteractionJankMonitor {
             case CUJ_SPLIT_SCREEN_EXIT:
                 return "SPLIT_SCREEN_EXIT";
             case CUJ_LOCKSCREEN_LAUNCH_CAMERA:
-                return "CUJ_LOCKSCREEN_LAUNCH_CAMERA";
+                return "LOCKSCREEN_LAUNCH_CAMERA";
             case CUJ_SPLIT_SCREEN_RESIZE:
-                return "CUJ_SPLIT_SCREEN_RESIZE";
+                return "SPLIT_SCREEN_RESIZE";
             case CUJ_SETTINGS_SLIDER:
                 return "SETTINGS_SLIDER";
             case CUJ_TAKE_SCREENSHOT:
@@ -946,8 +1044,12 @@ public class InteractionJankMonitor {
                 return "LAUNCHER_CLOSE_ALL_APPS_SWIPE";
             case CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME:
                 return "LAUNCHER_CLOSE_ALL_APPS_TO_HOME";
+            case CUJ_IME_INSETS_ANIMATION:
+                return "IME_INSETS_ANIMATION";
             case CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION:
                 return "LOCKSCREEN_CLOCK_MOVE_ANIMATION";
+            case CUJ_LAUNCHER_OPEN_SEARCH_RESULT:
+                return "LAUNCHER_OPEN_SEARCH_RESULT";
         }
         return "UNKNOWN";
     }
@@ -1197,6 +1299,14 @@ public class InteractionJankMonitor {
         public Handler getHandler() {
             return mHandler;
         }
+
+        /**
+         * @return the ID of the display this interaction in on.
+         */
+        @VisibleForTesting
+        public int getDisplayId() {
+            return (mSurfaceOnly ? mContext : mView.getContext()).getDisplayId();
+        }
     }
 
     /**
@@ -1271,5 +1381,22 @@ public class InteractionJankMonitor {
         public int getReason() {
             return mReason;
         }
+    }
+
+    @FunctionalInterface
+    private interface TimeFunction {
+        void invoke(long unixNanos, long elapsedNanos, long realtimeNanos);
+    }
+
+    private void postEventLogToWorkerThread(TimeFunction logFunction) {
+        final Instant now = Instant.now();
+        final long unixNanos = TimeUnit.NANOSECONDS.convert(now.getEpochSecond(), TimeUnit.SECONDS)
+                + now.getNano();
+        final long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        final long realtimeNanos = SystemClock.uptimeNanos();
+
+        mWorker.getThreadHandler().post(() -> {
+            logFunction.invoke(unixNanos, elapsedNanos, realtimeNanos);
+        });
     }
 }

@@ -34,6 +34,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.graphics.Region;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -69,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Handles windowing changes when desktop mode system setting changes
@@ -149,9 +151,19 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      * @param listener the listener to add.
      * @param callbackExecutor the executor to call the listener on.
      */
-    public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+    public void addVisibleTasksListener(DesktopModeTaskRepository.VisibleTasksListener listener,
             Executor callbackExecutor) {
         mDesktopModeTaskRepository.addVisibleTasksListener(listener, callbackExecutor);
+    }
+
+    /**
+     * Adds a listener to track changes to corners of desktop mode tasks.
+     * @param listener the listener to add.
+     * @param callbackExecutor the executor to call the listener on.
+     */
+    public void addTaskCornerListener(Consumer<Region> listener,
+            Executor callbackExecutor) {
+        mDesktopModeTaskRepository.setTaskCornerListener(listener, callbackExecutor);
     }
 
     @VisibleForTesting
@@ -252,10 +264,10 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     /**
      * Show apps on desktop
      */
-    void showDesktopApps() {
+    void showDesktopApps(int displayId) {
         // Bring apps to front, ignoring their visibility status to always ensure they are on top.
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        bringDesktopAppsToFront(wct);
+        bringDesktopAppsToFront(displayId, wct);
 
         if (!wct.isEmpty()) {
             if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -268,12 +280,12 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     }
 
     /** Get number of tasks that are marked as visible */
-    int getVisibleTaskCount() {
-        return mDesktopModeTaskRepository.getVisibleTaskCount();
+    int getVisibleTaskCount(int displayId) {
+        return mDesktopModeTaskRepository.getVisibleTaskCount(displayId);
     }
 
-    private void bringDesktopAppsToFront(WindowContainerTransaction wct) {
-        final ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks();
+    private void bringDesktopAppsToFront(int displayId, WindowContainerTransaction wct) {
+        final ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks(displayId);
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront: tasks=%s", activeTasks.size());
 
         final List<RunningTaskInfo> taskInfos = new ArrayList<>();
@@ -312,6 +324,37 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     }
 
     /**
+     * Update corner rects stored for a specific task
+     * @param taskId task to update
+     * @param taskCorners task's new corner handles
+     */
+    public void onTaskCornersChanged(int taskId, Region taskCorners) {
+        mDesktopModeTaskRepository.updateTaskCorners(taskId, taskCorners);
+    }
+
+    /**
+     * Remove corners saved for a task. Likely used due to task closure.
+     * @param taskId task to remove
+     */
+    public void removeCornersForTask(int taskId) {
+        mDesktopModeTaskRepository.removeTaskCorners(taskId);
+    }
+
+    /**
+     * Moves a specifc task to the front.
+     * @param taskInfo the task to show in front.
+     */
+    public void moveTaskToFront(RunningTaskInfo taskInfo) {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reorder(taskInfo.token, true /* onTop */);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTransitions.startTransition(TRANSIT_TO_FRONT, wct, null);
+        } else {
+            mShellTaskOrganizer.applyTransaction(wct);
+        }
+    }
+
+    /**
      * Turn desktop mode on or off
      * @param active the desired state for desktop mode setting
      */
@@ -343,6 +386,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
+        RunningTaskInfo triggerTask = request.getTriggerTask();
         // Only do anything if we are in desktop mode and opening/moving-to-front a task/app in
         // freeform
         if (!DesktopModeStatus.isActive(mContext)) {
@@ -356,19 +400,15 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
                     WindowManager.transitTypeToString(request.getType()));
             return null;
         }
-        if (request.getTriggerTask() == null
-                || request.getTriggerTask().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+        if (triggerTask == null || triggerTask.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
             ProtoLog.d(WM_SHELL_DESKTOP_MODE, "skip shell transition request: not freeform task");
             return null;
         }
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "handle shell transition request: %s", request);
 
-        WindowContainerTransaction wct = mTransitions.dispatchRequest(transition, request, this);
-        if (wct == null) {
-            wct = new WindowContainerTransaction();
-        }
-        bringDesktopAppsToFront(wct);
-        wct.reorder(request.getTriggerTask().token, true /* onTop */);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        bringDesktopAppsToFront(triggerTask.displayId, wct);
+        wct.reorder(triggerTask.token, true /* onTop */);
 
         return wct;
     }
@@ -415,10 +455,19 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     private final class DesktopModeImpl implements DesktopMode {
 
         @Override
-        public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+        public void addVisibleTasksListener(
+                DesktopModeTaskRepository.VisibleTasksListener listener,
                 Executor callbackExecutor) {
             mMainExecutor.execute(() -> {
-                DesktopModeController.this.addListener(listener, callbackExecutor);
+                DesktopModeController.this.addVisibleTasksListener(listener, callbackExecutor);
+            });
+        }
+
+        @Override
+        public void addDesktopGestureExclusionRegionListener(Consumer<Region> listener,
+                Executor callbackExecutor) {
+            mMainExecutor.execute(() -> {
+                DesktopModeController.this.addTaskCornerListener(listener, callbackExecutor);
             });
         }
     }
@@ -444,16 +493,17 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
             mController = null;
         }
 
-        public void showDesktopApps() {
+        @Override
+        public void showDesktopApps(int displayId) {
             executeRemoteCallWithTaskPermission(mController, "showDesktopApps",
-                    DesktopModeController::showDesktopApps);
+                    controller -> controller.showDesktopApps(displayId));
         }
 
         @Override
-        public int getVisibleTaskCount() throws RemoteException {
+        public int getVisibleTaskCount(int displayId) throws RemoteException {
             int[] result = new int[1];
             executeRemoteCallWithTaskPermission(mController, "getVisibleTaskCount",
-                    controller -> result[0] = controller.getVisibleTaskCount(),
+                    controller -> result[0] = controller.getVisibleTaskCount(displayId),
                     true /* blocking */
             );
             return result[0];

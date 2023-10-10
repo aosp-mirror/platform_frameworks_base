@@ -61,7 +61,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
     EdgeBackGestureHandler mEdgeBackGestureHandler;
 
     private NavigationBarTransitions mTransitions;
-    private final FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Before
     public void setup() {

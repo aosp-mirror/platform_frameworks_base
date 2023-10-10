@@ -31,7 +31,7 @@ message InputMethodManagerServiceProto {
     optional string cur_focused_window_soft_input_mode = 6;
     optional .android.view.inputmethod.EditorInfoProto cur_attribute = 7;
     optional string cur_id = 8;
-    optional bool show_requested = 9;
+    reserved 9; // deprecated show_requested
     optional bool show_explicitly_requested = 10;
     optional bool show_forced = 11;
     optional bool input_shown = 12;

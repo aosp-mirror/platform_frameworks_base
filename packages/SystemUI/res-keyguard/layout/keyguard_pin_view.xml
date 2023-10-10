@@ -29,6 +29,12 @@
     androidprv:layout_maxWidth="@dimen/keyguard_security_width">
 <include layout="@layout/keyguard_bouncer_message_area"/>
 
+<com.android.systemui.keyguard.bouncer.ui.BouncerMessageView
+    android:id="@+id/bouncer_message_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" />
+
 <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pin_container"
         android:layout_width="match_parent"
@@ -54,7 +60,7 @@
             androidprv:layout_constraintEnd_toEndOf="parent"
             androidprv:layout_constraintStart_toStartOf="parent"
             androidprv:layout_constraintBottom_toTopOf="@id/key1"
-            androidprv:layout_constraintVertical_bias="1.0">
+            androidprv:layout_constraintVertical_bias="0.5">
 
             <com.android.keyguard.PasswordTextView
                 android:id="@+id/pinEntry"
@@ -76,7 +82,7 @@
             androidprv:layout_constraintGuide_percent="0"
             android:orientation="horizontal" />
 
-        <androidx.constraintlayout.helper.widget.Flow
+        <com.android.keyguard.KeyguardPinFlowView
             android:id="@+id/flow1"
             android:layout_width="0dp"
             android:layout_height="0dp"

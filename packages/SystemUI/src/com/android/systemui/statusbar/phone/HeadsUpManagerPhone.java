@@ -184,7 +184,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             int minX = tmpArray[0];
             int maxX = tmpArray[0] + topRow.getWidth();
             int height = topRow.getIntrinsicHeight();
-            mTouchableRegion.set(minX, 0, maxX, mHeadsUpInset + height);
+            final boolean stretchToTop = tmpArray[1] <= mHeadsUpInset;
+            mTouchableRegion.set(minX, stretchToTop ? 0 : tmpArray[1], maxX, tmpArray[1] + height);
             return mTouchableRegion;
         }
     }
@@ -270,13 +271,15 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     /**
-     * Sets whether an entry's menu row is exposed and therefore it should stick in the heads up
+     * Sets whether an entry's guts are exposed and therefore it should stick in the heads up
      * area if it's pinned until it's hidden again.
      */
-    public void setMenuShown(@NonNull NotificationEntry entry, boolean menuShown) {
+    public void setGutsShown(@NonNull NotificationEntry entry, boolean gutsShown) {
         HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
-        if (headsUpEntry instanceof HeadsUpEntryPhone && entry.isRowPinned()) {
-            ((HeadsUpEntryPhone) headsUpEntry).setMenuShownPinned(menuShown);
+        if (!(headsUpEntry instanceof HeadsUpEntryPhone)) return;
+        HeadsUpEntryPhone headsUpEntryPhone = (HeadsUpEntryPhone)headsUpEntry;
+        if (entry.isRowPinned() || !gutsShown) {
+            headsUpEntryPhone.setGutsShownPinned(gutsShown);
         }
     }
 
@@ -410,7 +413,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
     protected class HeadsUpEntryPhone extends HeadsUpManager.HeadsUpEntry {
 
-        private boolean mMenuShownPinned;
+        private boolean mGutsShownPinned;
 
         /**
          * If the time this entry has been on was extended
@@ -420,7 +423,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
         @Override
         public boolean isSticky() {
-            return super.isSticky() || mMenuShownPinned;
+            return super.isSticky() || mGutsShownPinned;
         }
 
         public void setEntry(@NonNull final NotificationEntry entry) {
@@ -468,13 +471,13 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             }
         }
 
-        public void setMenuShownPinned(boolean menuShownPinned) {
-            if (mMenuShownPinned == menuShownPinned) {
+        public void setGutsShownPinned(boolean gutsShownPinned) {
+            if (mGutsShownPinned == gutsShownPinned) {
                 return;
             }
 
-            mMenuShownPinned = menuShownPinned;
-            if (menuShownPinned) {
+            mGutsShownPinned = gutsShownPinned;
+            if (gutsShownPinned) {
                 removeAutoRemovalCallbacks();
             } else {
                 updateEntry(false /* updatePostTime */);
@@ -484,7 +487,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         @Override
         public void reset() {
             super.reset();
-            mMenuShownPinned = false;
+            mGutsShownPinned = false;
             extended = false;
         }
 

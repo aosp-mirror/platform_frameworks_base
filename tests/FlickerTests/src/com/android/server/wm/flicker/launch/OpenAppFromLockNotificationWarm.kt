@@ -16,19 +16,20 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.RequiresDevice
+import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
-import androidx.test.filters.FlakyTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.common.FlickerComponentName
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -45,10 +46,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
-@Postsubmit
-open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter)
-    : OpenAppFromNotificationWarm(testSpec) {
+class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotificationWarm(flicker) {
 
     override val openingNotificationsFromLockScreen = true
 
@@ -56,87 +54,113 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter)
         get() = {
             // Needs to run at start of transition,
             // so before the transition defined in super.transition
-            transitions {
-                device.wakeUp()
-            }
+            transitions { device.wakeUp() }
 
             super.transition(this)
 
             // Needs to run at the end of the setup, so after the setup defined in super.transition
             setup {
-                eachRun {
-                    device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
-                }
+                device.sleep()
+                wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
             }
         }
 
     /**
-     * Checks that we start of with no top windows and then [testApp] becomes the first and
-     * only top window of the transition, with snapshot or splash screen windows optionally showing
-     * first.
+     * Checks that we start of with no top windows and then [testApp] becomes the first and only top
+     * window of the transition, with snapshot or splash screen windows optionally showing first.
      */
     @Test
-    @Postsubmit
-    open fun appWindowBecomesFirstAndOnlyTopWindow() {
-        testSpec.assertWm {
+    @Presubmit
+    fun appWindowBecomesFirstAndOnlyTopWindow() {
+        flicker.assertWm {
             this.hasNoVisibleAppWindow()
-                    .then()
-                    .isAppWindowOnTop(FlickerComponentName.SNAPSHOT, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(testApp.component)
+                .then()
+                .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
+                .then()
+                .isAppWindowOnTop(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
+                .then()
+                .isAppWindowOnTop(testApp)
         }
     }
+
+    /** Checks that the screen is locked at the start of the transition */
+    @Test
+    @Presubmit
+    fun screenLockedStart() {
+        flicker.assertWmStart { isKeyguardShowing() }
+    }
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarLayerPositionAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun taskBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun statusBarLayerPositionAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
 
     /**
-     * Checks that the screen is locked.
+     * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
+     * transition
      */
-    @Test
-    @Postsubmit
-    fun screenLockedStart() {
-        testSpec.assertLayersStart {
-            isEmpty()
-        }
-    }
+    @Presubmit @Test fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 229735718)
     @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsVisibleAtStartAndEnd() = super.navBarWindowIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 203538234)
     @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 246284526)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return com.android.server.wm.flicker.FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(repetitions = 3)
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
 
         /**
-         * Ensures that posted notifications will be visible on the lockscreen and not
-         * suppressed due to being marked as seen.
+         * Ensures that posted notifications will be visible on the lockscreen and not suppressed
+         * due to being marked as seen.
          */
         @ClassRule
         @JvmField
-        val disableUnseenNotifFilterRule = SettingOverrideRule(
-            Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-            /* value= */ "0",
-        )
+        val disableUnseenNotifFilterRule =
+            SettingOverrideRule(
+                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                /* value= */ "0",
+            )
     }
 }

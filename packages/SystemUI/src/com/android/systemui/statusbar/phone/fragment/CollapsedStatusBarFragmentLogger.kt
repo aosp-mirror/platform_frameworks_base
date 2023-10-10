@@ -17,9 +17,9 @@
 package com.android.systemui.statusbar.phone.fragment
 
 import com.android.systemui.log.dagger.CollapsedSbFragmentLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.statusbar.DisableFlagsLogger
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
+import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import javax.inject.Inject
 
 /** Used by [CollapsedStatusBarFragment] to log messages to a [LogBuffer]. */
@@ -37,7 +37,6 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
      */
     fun logDisableFlagChange(
         new: DisableFlagsLogger.DisableState,
-        newAfterLocalModification: DisableFlagsLogger.DisableState
     ) {
         buffer.log(
                 TAG,
@@ -45,17 +44,32 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
                 {
                     int1 = new.disable1
                     int2 = new.disable2
-                    long1 = newAfterLocalModification.disable1.toLong()
-                    long2 = newAfterLocalModification.disable2.toLong()
                 },
                 {
                     disableFlagsLogger.getDisableFlagsString(
                         old = null,
                         new = DisableFlagsLogger.DisableState(int1, int2),
-                        newAfterLocalModification =
-                            DisableFlagsLogger.DisableState(long1.toInt(), long2.toInt())
                     )
                 }
+        )
+    }
+
+    fun logVisibilityModel(model: StatusBarVisibilityModel) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            {
+                bool1 = model.showClock
+                bool2 = model.showNotificationIcons
+                bool3 = model.showOngoingCallChip
+                bool4 = model.showSystemInfo
+            },
+            { "New visibilities calculated internally. " +
+                    "showClock=$bool1 " +
+                    "showNotificationIcons=$bool2 " +
+                    "showOngoingCallChip=$bool3 " +
+                    "showSystemInfo=$bool4"
+            }
         )
     }
 }

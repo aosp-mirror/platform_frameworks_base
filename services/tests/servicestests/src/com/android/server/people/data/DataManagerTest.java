@@ -93,7 +93,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.people.PeopleService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import com.google.common.collect.Iterables;
 
@@ -1737,15 +1737,33 @@ public final class DataManagerTest {
             NotificationListenerService.Ranking ranking = (NotificationListenerService.Ranking)
                     invocationOnMock.getArguments()[1];
             ranking.populate(
-                    (String) invocationOnMock.getArguments()[0],
-                    0,
-                    false,
-                    0,
-                    0,
+                    /* key= */ (String) invocationOnMock.getArguments()[0],
+                    /* rank= */ 0,
+                    /* matchesInterruptionFilter= */ false,
+                    /* visibilityOverride= */ 0,
+                    /* suppressedVisualEffects= */ 0,
                     mParentNotificationChannel.getImportance(),
-                    null, null,
-                    mParentNotificationChannel, null, null, true, 0, false, -1, false, null, null,
-                    false, false, false, null, 0, false, 0);
+                    /* explanation= */ null,
+                    /* overrideGroupKey= */ null,
+                    mParentNotificationChannel,
+                    /* overridePeople= */ null,
+                    /* snoozeCriteria= */ null,
+                    /* showBadge= */ true,
+                    /* userSentiment= */ 0,
+                    /* hidden= */ false,
+                    /* lastAudiblyAlertedMs= */ -1,
+                    /* noisy= */ false,
+                    /* smartActions= */ null,
+                    /* smartReplies= */ null,
+                    /* canBubble= */ false,
+                    /* isTextChanged= */ false,
+                    /* isConversation= */ false,
+                    /* shortcutInfo= */ null,
+                    /* rankingAdjustment= */ 0,
+                    /* isBubble= */ false,
+                    /* proposedImportance= */ 0,
+                    /* sensitiveContent= */ false
+            );
             return true;
         }).when(mRankingMap).getRanking(eq(key),
                 any(NotificationListenerService.Ranking.class));
@@ -1763,15 +1781,33 @@ public final class DataManagerTest {
             NotificationListenerService.Ranking ranking = (NotificationListenerService.Ranking)
                     invocationOnMock.getArguments()[1];
             ranking.populate(
-                    (String) invocationOnMock.getArguments()[0],
-                    0,
-                    false,
-                    0,
-                    0,
-                    mNotificationChannel.getImportance(),
-                    null, null,
-                    mNotificationChannel, null, null, true, 0, false, -1, false, null, null, false,
-                    false, false, null, 0, false, 0);
+                    /* key= */ (String) invocationOnMock.getArguments()[0],
+                    /* rank= */ 0,
+                    /* matchesInterruptionFilter= */ false,
+                    /* visibilityOverride= */ 0,
+                    /* suppressedVisualEffects= */ 0,
+                    mParentNotificationChannel.getImportance(),
+                    /* explanation= */ null,
+                    /* overrideGroupKey= */ null,
+                    mParentNotificationChannel,
+                    /* overridePeople= */ null,
+                    /* snoozeCriteria= */ null,
+                    /* showBadge= */ true,
+                    /* userSentiment= */ 0,
+                    /* hidden= */ false,
+                    /* lastAudiblyAlertedMs= */ -1,
+                    /* noisy= */ false,
+                    /* smartActions= */ null,
+                    /* smartReplies= */ null,
+                    /* canBubble= */ false,
+                    /* isTextChanged= */ false,
+                    /* isConversation= */ false,
+                    /* shortcutInfo= */ null,
+                    /* rankingAdjustment= */ 0,
+                    /* isBubble= */ false,
+                    /* proposedImportance= */ 0,
+                    /* sensitiveContent= */ false
+            );
             return true;
         }).when(mRankingMap).getRanking(eq(CUSTOM_KEY),
                 any(NotificationListenerService.Ranking.class));

@@ -17,14 +17,15 @@
 #ifndef AAPT_COMPILE_PSEUDOLOCALEGENERATOR_H
 #define AAPT_COMPILE_PSEUDOLOCALEGENERATOR_H
 
-#include "StringPool.h"
+#include "androidfw/StringPool.h"
 #include "compile/Pseudolocalizer.h"
 #include "process/IResourceTableConsumer.h"
 
 namespace aapt {
 
-std::unique_ptr<StyledString> PseudolocalizeStyledString(
-    StyledString* string, Pseudolocalizer::Method method, StringPool* pool);
+std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
+                                                         Pseudolocalizer::Method method,
+                                                         android::StringPool* pool);
 
 struct PseudolocaleGenerator : public IResourceTableConsumer {
   bool Consume(IAaptContext* context, ResourceTable* table) override;

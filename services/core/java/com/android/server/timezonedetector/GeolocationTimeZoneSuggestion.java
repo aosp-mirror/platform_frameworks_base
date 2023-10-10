@@ -19,20 +19,15 @@ package com.android.server.timezonedetector;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.ShellCommand;
-import android.os.SystemClock;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.StringTokenizer;
 
 /**
- * A time zone suggestion from the location_time_zone_manager service to the time_zone_detector
- * service.
+ * A time zone suggestion from the location_time_zone_manager service (AKA the location-based time
+ * zone detection algorithm).
  *
  * <p>Geolocation-based suggestions have the following properties:
  *
@@ -63,24 +58,16 @@ import java.util.StringTokenizer;
  *     location_time_zone_manager may become uncertain if components further downstream cannot
  *     determine the device's location with sufficient accuracy, or if the location is known but no
  *     time zone can be determined because no time zone mapping information is available.</li>
- *     <li>{@code debugInfo} contains debugging metadata associated with the suggestion. This is
- *     used to record why the suggestion exists and how it was obtained. This information exists
- *     only to aid in debugging and therefore is used by {@link #toString()}, but it is not for use
- *     in detection logic and is not considered in {@link #hashCode()} or {@link #equals(Object)}.
  *     </li>
  * </ul>
- *
- * @hide
  */
 public final class GeolocationTimeZoneSuggestion {
 
     @ElapsedRealtimeLong private final long mEffectiveFromElapsedMillis;
     @Nullable private final List<String> mZoneIds;
-    @Nullable private ArrayList<String> mDebugInfo;
 
     private GeolocationTimeZoneSuggestion(
-            @ElapsedRealtimeLong long effectiveFromElapsedMillis,
-            @Nullable List<String> zoneIds) {
+            @ElapsedRealtimeLong long effectiveFromElapsedMillis, @Nullable List<String> zoneIds) {
         mEffectiveFromElapsedMillis = effectiveFromElapsedMillis;
         if (zoneIds == null) {
             // Unopinionated
@@ -104,8 +91,7 @@ public final class GeolocationTimeZoneSuggestion {
      */
     @NonNull
     public static GeolocationTimeZoneSuggestion createCertainSuggestion(
-            @ElapsedRealtimeLong long effectiveFromElapsedMillis,
-            @NonNull List<String> zoneIds) {
+            @ElapsedRealtimeLong long effectiveFromElapsedMillis, @NonNull List<String> zoneIds) {
         return new GeolocationTimeZoneSuggestion(effectiveFromElapsedMillis, zoneIds);
     }
 
@@ -124,25 +110,6 @@ public final class GeolocationTimeZoneSuggestion {
     @Nullable
     public List<String> getZoneIds() {
         return mZoneIds;
-    }
-
-    /** Returns debug information. See {@link GeolocationTimeZoneSuggestion} for details. */
-    @NonNull
-    public List<String> getDebugInfo() {
-        return mDebugInfo == null
-                ? Collections.emptyList() : Collections.unmodifiableList(mDebugInfo);
-    }
-
-    /**
-     * Associates information with the instance that can be useful for debugging / logging. The
-     * information is present in {@link #toString()} but is not considered for
-     * {@link #equals(Object)} and {@link #hashCode()}.
-     */
-    public void addDebugInfo(String... debugInfos) {
-        if (mDebugInfo == null) {
-            mDebugInfo = new ArrayList<>();
-        }
-        mDebugInfo.addAll(Arrays.asList(debugInfos));
     }
 
     @Override
@@ -169,55 +136,6 @@ public final class GeolocationTimeZoneSuggestion {
         return "GeolocationTimeZoneSuggestion{"
                 + "mEffectiveFromElapsedMillis=" + mEffectiveFromElapsedMillis
                 + ", mZoneIds=" + mZoneIds
-                + ", mDebugInfo=" + mDebugInfo
                 + '}';
-    }
-
-    /** @hide */
-    public static GeolocationTimeZoneSuggestion parseCommandLineArg(@NonNull ShellCommand cmd) {
-        String zoneIdsString = null;
-        String opt;
-        while ((opt = cmd.getNextArg()) != null) {
-            switch (opt) {
-                case "--zone_ids": {
-                    zoneIdsString  = cmd.getNextArgRequired();
-                    break;
-                }
-                default: {
-                    throw new IllegalArgumentException("Unknown option: " + opt);
-                }
-            }
-        }
-
-        long elapsedRealtimeMillis = SystemClock.elapsedRealtime();
-        List<String> zoneIds = parseZoneIdsArg(zoneIdsString);
-        GeolocationTimeZoneSuggestion suggestion =
-                new GeolocationTimeZoneSuggestion(elapsedRealtimeMillis, zoneIds);
-        suggestion.addDebugInfo("Command line injection");
-        return suggestion;
-    }
-
-    private static List<String> parseZoneIdsArg(String zoneIdsString) {
-        if ("UNCERTAIN".equals(zoneIdsString)) {
-            return null;
-        } else if ("EMPTY".equals(zoneIdsString)) {
-            return Collections.emptyList();
-        } else {
-            ArrayList<String> zoneIds = new ArrayList<>();
-            StringTokenizer tokenizer = new StringTokenizer(zoneIdsString, ",");
-            while (tokenizer.hasMoreTokens()) {
-                zoneIds.add(tokenizer.nextToken());
-            }
-            return zoneIds;
-        }
-    }
-
-    /** @hide */
-    public static void printCommandLineOpts(@NonNull PrintWriter pw) {
-        pw.println("Geolocation suggestion options:");
-        pw.println("  --zone_ids {UNCERTAIN|EMPTY|<Olson ID>+}");
-        pw.println();
-        pw.println("See " + GeolocationTimeZoneSuggestion.class.getName()
-                + " for more information");
     }
 }

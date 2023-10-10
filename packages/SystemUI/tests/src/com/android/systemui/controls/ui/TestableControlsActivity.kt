@@ -22,6 +22,8 @@ import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.policy.KeyguardStateController
 
+// IMPORTANT: onDestroy may be called outside of bounds of the test. That means that the mocks
+// may have been nulled before onDestroy happens.
 class TestableControlsActivity(
     uiController: ControlsUiController,
     broadcastDispatcher: BroadcastDispatcher,
@@ -37,4 +39,8 @@ class TestableControlsActivity(
         featureFlags,
         controlsSettingsDialogManager,
         keyguardStateController
-    )
+    ) {
+    override fun unregisterReceiver() {
+        // Do nothing. This will be called in `onDestroy`
+    }
+}

@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"პარამეტრები"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"გაყოფილ ეკრანში შესვლა"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"მენიუ"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"„ეკრანი ეკრანში“ რეჟიმის მენიუ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> იყენებს რეჟიმს „ეკრანი ეკრანში“"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"თუ არ გსურთ, რომ <xliff:g id="NAME">%s</xliff:g> ამ ფუნქციას იყენებდეს, აქ შეხებით შეგიძლიათ გახსნათ პარამეტრები და გამორთოთ ის."</string>
     <string name="pip_play" msgid="3496151081459417097">"დაკვრა"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ზომის შეცვლა"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"გადანახვა"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"გადანახვის გაუქმება"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"აპმა შეიძლება არ იმუშაოს გაყოფილი ეკრანის რეჟიმში."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ეკრანის გაყოფა არ არის მხარდაჭერილი აპის მიერ."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"აპმა შეიძლება არ იმუშაოს გაყოფილი ეკრანის რეჟიმში"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ეკრანის გაყოფა არ არის მხარდაჭერილი აპის მიერ"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ამ აპის გახსნა შესაძლებელია მხოლოდ 1 ფანჯარაში."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"აპმა შეიძლება არ იმუშაოს მეორეულ ეკრანზე."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"აპს არ გააჩნია მეორეული ეკრანის მხარდაჭერა."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"გაყოფილი ეკრანის რეჟიმის გამყოფი"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"ეკრანის გაყოფის გამყოფი"</string>
+    <string name="divider_title" msgid="1963391955593749442">"ეკრანის გაყოფის გამყოფი"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"მარცხენა ნაწილის სრულ ეკრანზე გაშლა"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"მარცხენა ეკრანი — 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"მარცხენა ეკრანი — 50%"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"არ გამოსწორდა?\nშეეხეთ წინა ვერსიის დასაბრუნებლად"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"კამერას პრობლემები არ აქვს? შეეხეთ უარყოფისთვის."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"მეტის ნახვა და გაკეთება"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"ეკრანის გასაყოფად ჩავლებით გადაიტანეთ სხვა აპში"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ეკრანის გასაყოფად ჩავლებით გადაიტანეთ სხვა აპში"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ორმაგად შეეხეთ აპის გარშემო სივრცეს, რათა ის სხვაგან გადაიტანოთ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"გასაგებია"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"დამატებითი ინფორმაციისთვის გააფართოეთ."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"ეკრანის ანაბეჭდი"</string>
     <string name="close_text" msgid="4986518933445178928">"დახურვა"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"მენიუს დახურვა"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"მენიუს გახსნა"</string>
 </resources>

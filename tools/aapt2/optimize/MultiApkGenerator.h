@@ -22,10 +22,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "androidfw/ConfigDescription.h"
-
-#include "Diagnostics.h"
 #include "LoadedApk.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/IDiagnostics.h"
 #include "configuration/ConfigurationParser.h"
 
 namespace aapt {
@@ -58,12 +57,13 @@ class MultiApkGenerator {
                                                      FilterChain* chain);
 
  private:
-  IDiagnostics* GetDiagnostics() {
+  android::IDiagnostics* GetDiagnostics() {
     return context_->GetDiagnostics();
   }
 
   bool UpdateManifest(const configuration::OutputArtifact& artifact,
-                      std::unique_ptr<xml::XmlResource>* updated_manifest, IDiagnostics* diag);
+                      std::unique_ptr<xml::XmlResource>* updated_manifest,
+                      android::IDiagnostics* diag);
 
   /**
    * Adds the <screen> elements to the parent node for the provided density configuration.

@@ -16,23 +16,22 @@
 
 package com.android.server.companion.virtual;
 
-import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
-import android.companion.AssociationRequest;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.VirtualDeviceParams.ActivityPolicy;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Handler;
@@ -44,6 +43,7 @@ import android.view.Display;
 import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppStreamingActivity;
 
 import java.util.List;
@@ -85,6 +85,21 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     }
 
     /**
+     * For communicating when activities are blocked from entering PIP on the display by this
+     * policy controller.
+     */
+    public interface PipBlockedCallback {
+        /** Called when an activity is blocked from entering PIP. */
+        void onEnteringPipBlocked(int uid);
+    }
+
+    /** Interface to listen for interception of intents. */
+    public interface IntentListenerCallback {
+        /** Returns true when an intent should be intercepted */
+        boolean shouldInterceptIntent(Intent intent);
+    }
+
+    /**
      * If required, allow the secure activity to display on remote device since
      * {@link android.os.Build.VERSION_CODES#TIRAMISU}.
      */
@@ -111,12 +126,17 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @GuardedBy("mGenericWindowPolicyControllerLock")
     final ArraySet<Integer> mRunningUids = new ArraySet<>();
     @Nullable private final ActivityListener mActivityListener;
+    @Nullable private final PipBlockedCallback mPipBlockedCallback;
+    @Nullable private final IntentListenerCallback mIntentListenerCallback;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListener =
+    @NonNull
+    @GuardedBy("mGenericWindowPolicyControllerLock")
+    private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListeners =
             new ArraySet<>();
-    @Nullable
-    private final @AssociationRequest.DeviceProfile String mDeviceProfile;
     @Nullable private final SecureWindowCallback mSecureWindowCallback;
+    @Nullable private final Set<String> mDisplayCategories;
+
+    private final boolean mShowTasksInHostDeviceRecents;
 
     /**
      * Creates a window policy controller that is generic to the different use cases of virtual
@@ -142,7 +162,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      *   launching.
      * @param secureWindowCallback Callback that is called when a secure window shows on the
      *   virtual display.
-     * @param deviceProfile The {@link AssociationRequest.DeviceProfile} of this virtual device.
+     * @param intentListenerCallback Callback that is called to intercept intents when matching
+     *   passed in filters.
+     * @param showTasksInHostDeviceRecents whether to show activities in recents on the host device.
      */
     public GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
             @NonNull ArraySet<UserHandle> allowedUsers,
@@ -152,9 +174,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull Set<ComponentName> blockedActivities,
             @ActivityPolicy int defaultActivityPolicy,
             @NonNull ActivityListener activityListener,
+            @NonNull PipBlockedCallback pipBlockedCallback,
             @NonNull ActivityBlockedCallback activityBlockedCallback,
             @NonNull SecureWindowCallback secureWindowCallback,
-            @AssociationRequest.DeviceProfile String deviceProfile) {
+            @NonNull IntentListenerCallback intentListenerCallback,
+            @NonNull Set<String> displayCategories,
+            boolean showTasksInHostDeviceRecents) {
         super();
         mAllowedUsers = allowedUsers;
         mAllowedCrossTaskNavigations = new ArraySet<>(allowedCrossTaskNavigations);
@@ -165,8 +190,11 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
-        mDeviceProfile = deviceProfile;
+        mPipBlockedCallback = pipBlockedCallback;
         mSecureWindowCallback = secureWindowCallback;
+        mIntentListenerCallback = intentListenerCallback;
+        mDisplayCategories = displayCategories;
+        mShowTasksInHostDeviceRecents = showTasksInHostDeviceRecents;
     }
 
     /**
@@ -178,12 +206,16 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     /** Register a listener for running applications changes. */
     public void registerRunningAppsChangedListener(@NonNull RunningAppsChangedListener listener) {
-        mRunningAppsChangedListener.add(listener);
+        synchronized (mGenericWindowPolicyControllerLock) {
+            mRunningAppsChangedListeners.add(listener);
+        }
     }
 
     /** Unregister a listener for running applications changes. */
     public void unregisterRunningAppsChangedListener(@NonNull RunningAppsChangedListener listener) {
-        mRunningAppsChangedListener.remove(listener);
+        synchronized (mGenericWindowPolicyControllerLock) {
+            mRunningAppsChangedListeners.remove(listener);
+        }
     }
 
     @Override
@@ -206,8 +238,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @Override
     public boolean canActivityBeLaunched(ActivityInfo activityInfo,
-            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
-            boolean isNewTask) {
+            Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask) {
         if (!isWindowingModeSupported(windowingMode)) {
             return false;
         }
@@ -240,6 +272,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             return false;
         }
 
+        if (mIntentListenerCallback != null && intent != null
+                && mIntentListenerCallback.shouldInterceptIntent(intent)) {
+            Slog.d(TAG, "Virtual device has intercepted intent");
+            return false;
+        }
+
         return true;
     }
 
@@ -263,14 +301,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     }
 
     @Override
-    public void onTopActivityChanged(ComponentName topActivity, int uid) {
+    public void onTopActivityChanged(ComponentName topActivity, int uid, @UserIdInt int userId) {
         // Don't send onTopActivityChanged() callback when topActivity is null because it's defined
         // as @NonNull in ActivityListener interface. Sends onDisplayEmpty() callback instead when
         // there is no activity running on virtual display.
         if (mActivityListener != null && topActivity != null) {
             // Post callback on the main thread so it doesn't block activity launching
             mHandler.post(() ->
-                    mActivityListener.onTopActivityChanged(mDisplayId, topActivity));
+                    mActivityListener.onTopActivityChanged(mDisplayId, topActivity, userId));
         }
     }
 
@@ -283,27 +321,32 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                 // Post callback on the main thread so it doesn't block activity launching
                 mHandler.post(() -> mActivityListener.onDisplayEmpty(mDisplayId));
             }
-        }
-        mHandler.post(() -> {
-            for (RunningAppsChangedListener listener : mRunningAppsChangedListener) {
-                listener.onRunningAppsChanged(runningUids);
+            if (!mRunningAppsChangedListeners.isEmpty()) {
+                final ArraySet<RunningAppsChangedListener> listeners =
+                        new ArraySet<>(mRunningAppsChangedListeners);
+                mHandler.post(() -> {
+                    for (RunningAppsChangedListener listener : listeners) {
+                        listener.onRunningAppsChanged(runningUids);
+                    }
+                });
             }
-        });
+        }
     }
 
     @Override
-    public boolean canShowTasksInRecents() {
-        if (mDeviceProfile == null) {
+    public boolean canShowTasksInHostDeviceRecents() {
+        return mShowTasksInHostDeviceRecents;
+    }
+
+    @Override
+    public boolean isEnteringPipAllowed(int uid) {
+        if (super.isEnteringPipAllowed(uid)) {
             return true;
         }
-       // TODO(b/234075973) : Remove this once proper API is ready.
-        switch (mDeviceProfile) {
-            case DEVICE_PROFILE_AUTOMOTIVE_PROJECTION:
-                return false;
-            case DEVICE_PROFILE_APP_STREAMING:
-            default:
-                return true;
-        }
+        mHandler.post(() -> {
+            mPipBlockedCallback.onEnteringPipBlocked(uid);
+        });
+        return false;
     }
 
     /**
@@ -316,6 +359,15 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
     }
 
+    private boolean activityMatchesDisplayCategory(ActivityInfo activityInfo) {
+        if (mDisplayCategories.isEmpty()) {
+            return activityInfo.requiredDisplayCategory == null;
+        }
+        return activityInfo.requiredDisplayCategory != null
+                    && mDisplayCategories.contains(activityInfo.requiredDisplayCategory);
+
+    }
+
     private boolean canContainActivity(ActivityInfo activityInfo, int windowFlags,
             int systemWindowFlags) {
         if ((activityInfo.flags & FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES) == 0) {
@@ -323,8 +375,16 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
         ComponentName activityComponent = activityInfo.getComponentName();
         if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent)) {
-            // The error dialog alerting users that streaming is blocked is always allowed.
+            // The error dialog alerting users that streaming is blocked is always allowed. Need to
+            // run before the clauses below to ensure error dialog always shows up.
             return true;
+        }
+        if (!activityMatchesDisplayCategory(activityInfo)) {
+            Slog.d(TAG, String.format(
+                    "The activity's required display category: %s is not found on virtual display"
+                            + " with the following categories: %s",
+                    activityInfo.requiredDisplayCategory, mDisplayCategories.toString()));
+            return false;
         }
         final UserHandle activityUser =
                 UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid);
@@ -353,5 +413,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             }
         }
         return true;
+    }
+
+    @VisibleForTesting
+    int getRunningAppsChangedListenersSizeForTesting() {
+        synchronized (mGenericWindowPolicyControllerLock) {
+            return mRunningAppsChangedListeners.size();
+        }
     }
 }

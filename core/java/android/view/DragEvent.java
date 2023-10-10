@@ -195,7 +195,7 @@ public class DragEvent implements Parcelable {
      * {@link #ACTION_DRAG_ENTERED} while the drag shadow is still within the View object's bounding
      * box, but not within a descendant view that can accept the data. The {@link #getX()} and
      * {@link #getY()} methods supply
-     * the X and Y position of of the drag point within the View object's bounding box.
+     * the X and Y position of the drag point within the View object's bounding box.
      * <p>
      * A View receives an {@link #ACTION_DRAG_ENTERED} event before receiving any
      * ACTION_DRAG_LOCATION events.
@@ -619,10 +619,11 @@ public class DragEvent implements Parcelable {
             }
             if (in.readInt() != 0) {
                 event.mDragSurface = SurfaceControl.CREATOR.createFromParcel(in);
+                event.mDragSurface.setUnreleasedWarningCallSite("DragEvent");
             }
             if (in.readInt() != 0) {
                 event.mDragAndDropPermissions =
-                        IDragAndDropPermissions.Stub.asInterface(in.readStrongBinder());;
+                        IDragAndDropPermissions.Stub.asInterface(in.readStrongBinder());
             }
             return event;
         }

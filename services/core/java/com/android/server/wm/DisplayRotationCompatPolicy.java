@@ -42,6 +42,7 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
@@ -223,7 +224,7 @@ final class DisplayRotationCompatPolicy {
         try {
             activity.mLetterboxUiController.setIsRefreshAfterRotationRequested(true);
             ProtoLog.v(WM_DEBUG_STATES,
-                    "Refershing activity for camera compatibility treatment, "
+                    "Refreshing activity for camera compatibility treatment, "
                             + "activityRecord=%s", activity);
             final ClientTransaction transaction = ClientTransaction.obtain(
                     activity.app.getThread(), activity.token);
@@ -245,7 +246,7 @@ final class DisplayRotationCompatPolicy {
     }
 
     /**
-     * Notifies that animation in {@link ScreenAnimationRotation} has finished.
+     * Notifies that animation in {@link ScreenRotationAnimation} has finished.
      *
      * <p>This class uses this signal as a trigger for notifying the user about forced rotation
      * reason with the {@link Toast}.
@@ -311,11 +312,14 @@ final class DisplayRotationCompatPolicy {
         }
     }
 
-    // Refreshing only when configuration changes after rotation.
+    // Refreshing only when configuration changes after rotation or camera split screen aspect ratio
+    // treatment is enabled
     private boolean shouldRefreshActivity(ActivityRecord activity, Configuration newConfig,
             Configuration lastReportedConfig) {
-        return newConfig.windowConfiguration.getDisplayRotation()
-                        != lastReportedConfig.windowConfiguration.getDisplayRotation()
+        final boolean displayRotationChanged = (newConfig.windowConfiguration.getDisplayRotation()
+                != lastReportedConfig.windowConfiguration.getDisplayRotation());
+        return (displayRotationChanged
+                || activity.mLetterboxUiController.isCameraCompatSplitScreenAspectRatioAllowed())
                 && isTreatmentEnabledForActivity(activity)
                 && activity.mLetterboxUiController.shouldRefreshActivityForCameraCompat();
     }
@@ -420,7 +424,18 @@ final class DisplayRotationCompatPolicy {
             // for the activity embedding case.
             if (topActivity.getTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
                     && isTreatmentEnabledForActivity(topActivity, /* mustBeFullscreen */ false)) {
-                showToast(R.string.display_rotation_camera_compat_toast_in_split_screen);
+                final PackageManager packageManager = mWmService.mContext.getPackageManager();
+                try {
+                    showToast(
+                            R.string.display_rotation_camera_compat_toast_in_multi_window,
+                            (String) packageManager.getApplicationLabel(
+                                    packageManager.getApplicationInfo(packageName, /* flags */ 0)));
+                } catch (PackageManager.NameNotFoundException e) {
+                    ProtoLog.e(WM_DEBUG_ORIENTATION,
+                            "DisplayRotationCompatPolicy: Multi-window toast not shown as "
+                                    + "package '%s' cannot be found.",
+                            packageName);
+                }
             }
         }
     }
@@ -429,6 +444,15 @@ final class DisplayRotationCompatPolicy {
     void showToast(@StringRes int stringRes) {
         UiThread.getHandler().post(
                 () -> Toast.makeText(mWmService.mContext, stringRes, Toast.LENGTH_LONG).show());
+    }
+
+    @VisibleForTesting
+    void showToast(@StringRes int stringRes, @NonNull String applicationLabel) {
+        UiThread.getHandler().post(
+                () -> Toast.makeText(
+                        mWmService.mContext,
+                        mWmService.mContext.getString(stringRes, applicationLabel),
+                        Toast.LENGTH_LONG).show());
     }
 
     private synchronized void notifyCameraClosed(@NonNull String cameraId) {

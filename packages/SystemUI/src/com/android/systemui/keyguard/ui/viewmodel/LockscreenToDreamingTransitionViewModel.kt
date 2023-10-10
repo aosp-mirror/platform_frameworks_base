@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
+import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_DREAMING_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.Flow
 class LockscreenToDreamingTransitionViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardTransitionInteractor,
+    interactor: KeyguardTransitionInteractor,
 ) {
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(

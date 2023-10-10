@@ -70,7 +70,7 @@ class AddUserDialog(
                 )
 
                 context.startActivityAsUser(
-                    CreateUserActivity.createIntentForStart(context),
+                    CreateUserActivity.createIntentForStart(context, isKeyguardShowing),
                     userHandle,
                 )
             }

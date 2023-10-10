@@ -16,7 +16,10 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.Nullable;
+import static android.content.res.AssetFileDescriptor.UNKNOWN_LENGTH;
+
+import static com.android.packageinstaller.PackageInstallerActivity.EXTRA_STAGED_SESSION_ID;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -24,40 +27,51 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
+import android.Manifest;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 
-import com.android.internal.app.AlertActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * If a package gets installed from an content URI this step loads the package and turns it into
- * and installation from a file. Then it re-starts the installation as usual.
+ * If a package gets installed from a content URI this step stages the installation session
+ * reading bytes from the URI.
  */
 public class InstallStaging extends AlertActivity {
     private static final String LOG_TAG = InstallStaging.class.getSimpleName();
 
-    private static final String STAGED_FILE = "STAGED_FILE";
+    private static final String STAGED_SESSION_ID = "STAGED_SESSION_ID";
+
+    private @Nullable PackageInstaller mInstaller;
 
     /** Currently running task that loads the file from the content URI into a file */
     private @Nullable StagingAsyncTask mStagingTask;
 
-    /** The file the package is in */
-    private @Nullable File mStagedFile;
+    /** The session the package is in */
+    private int mStagedSessionId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mInstaller = getPackageManager().getPackageInstaller();
+
+        setFinishOnTouchOutside(true);
         mAlert.setIcon(R.drawable.ic_file_download);
         mAlert.setTitle(getString(R.string.app_name_unknown));
         mAlert.setView(R.layout.install_content_view);
@@ -66,6 +80,9 @@ public class InstallStaging extends AlertActivity {
                     if (mStagingTask != null) {
                         mStagingTask.cancel(true);
                     }
+
+                    cleanupStagingSession();
+
                     setResult(RESULT_CANCELED);
                     finish();
                 }, null);
@@ -73,11 +90,7 @@ public class InstallStaging extends AlertActivity {
         requireViewById(R.id.staging).setVisibility(View.VISIBLE);
 
         if (savedInstanceState != null) {
-            mStagedFile = new File(savedInstanceState.getString(STAGED_FILE));
-
-            if (!mStagedFile.exists()) {
-                mStagedFile = null;
-            }
+            mStagedSessionId = savedInstanceState.getInt(STAGED_SESSION_ID, 0);
         }
     }
 
@@ -85,21 +98,41 @@ public class InstallStaging extends AlertActivity {
     protected void onResume() {
         super.onResume();
 
-        // This is the first onResume in a single life of the activity
+        // This is the first onResume in a single life of the activity.
         if (mStagingTask == null) {
-            // File does not exist, or became invalid
-            if (mStagedFile == null) {
-                // Create file delayed to be able to show error
+            if (mStagedSessionId > 0) {
+                final PackageInstaller.SessionInfo info = mInstaller.getSessionInfo(
+                        mStagedSessionId);
+                if (info == null || !info.isActive() || info.getResolvedBaseApkPath() == null) {
+                    Log.w(LOG_TAG, "Session " + mStagedSessionId + " in funky state; ignoring");
+                    if (info != null) {
+                        cleanupStagingSession();
+                    }
+                    mStagedSessionId = 0;
+                }
+            }
+
+            // Session does not exist, or became invalid.
+            if (mStagedSessionId <= 0) {
+                // Create session here to be able to show error.
+                final Uri packageUri = getIntent().getData();
+                final AssetFileDescriptor afd = openAssetFileDescriptor(packageUri);
                 try {
-                    mStagedFile = TemporaryFileManager.getStagedFile(this);
+                    ParcelFileDescriptor pfd = afd != null ? afd.getParcelFileDescriptor() : null;
+                    PackageInstaller.SessionParams params = createSessionParams(
+                            mInstaller, getIntent(), pfd, packageUri.toString());
+                    mStagedSessionId = mInstaller.createSession(params);
                 } catch (IOException e) {
+                    Log.w(LOG_TAG, "Failed to create a staging session", e);
                     showError();
                     return;
+                } finally {
+                    PackageUtil.safeClose(afd);
                 }
             }
 
             mStagingTask = new StagingAsyncTask();
-            mStagingTask.execute(getIntent().getData());
+            mStagingTask.execute();
         }
     }
 
@@ -107,7 +140,7 @@ public class InstallStaging extends AlertActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString(STAGED_FILE, mStagedFile.getPath());
+        outState.putInt(STAGED_SESSION_ID, mStagedSessionId);
     }
 
     @Override
@@ -119,11 +152,74 @@ public class InstallStaging extends AlertActivity {
         super.onDestroy();
     }
 
+    private AssetFileDescriptor openAssetFileDescriptor(Uri uri) {
+        try {
+            return getContentResolver().openAssetFileDescriptor(uri, "r");
+        } catch (Exception e) {
+            Log.w(LOG_TAG, "Failed to open asset file descriptor", e);
+            return null;
+        }
+    }
+
+    private static PackageInstaller.SessionParams createSessionParams(
+            @NonNull PackageInstaller installer, @NonNull Intent intent,
+            @Nullable ParcelFileDescriptor pfd, @NonNull String debugPathName) {
+        PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+        final Uri referrerUri = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+        params.setPackageSource(
+                referrerUri != null ? PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE
+                        : PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE);
+        params.setInstallAsInstantApp(false);
+        params.setReferrerUri(referrerUri);
+        params.setOriginatingUri(intent
+                .getParcelableExtra(Intent.EXTRA_ORIGINATING_URI));
+        params.setOriginatingUid(intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID,
+                Process.INVALID_UID));
+        params.setInstallerPackageName(intent.getStringExtra(
+                Intent.EXTRA_INSTALLER_PACKAGE_NAME));
+        params.setInstallReason(PackageManager.INSTALL_REASON_USER);
+        // Disable full screen intent usage by for sideloads.
+        params.setPermissionState(Manifest.permission.USE_FULL_SCREEN_INTENT,
+                PackageInstaller.SessionParams.PERMISSION_STATE_DENIED);
+
+        if (pfd != null) {
+            try {
+                final PackageInstaller.InstallInfo result = installer.readInstallInfo(pfd,
+                        debugPathName, 0);
+                params.setAppPackageName(result.getPackageName());
+                params.setInstallLocation(result.getInstallLocation());
+                params.setSize(result.calculateInstalledSize(params, pfd));
+            } catch (PackageInstaller.PackageParsingException | IOException e) {
+                Log.e(LOG_TAG, "Cannot parse package " + debugPathName + ". Assuming defaults.", e);
+                Log.e(LOG_TAG,
+                        "Cannot calculate installed size " + debugPathName
+                                + ". Try only apk size.");
+                params.setSize(pfd.getStatSize());
+            }
+        } else {
+            Log.e(LOG_TAG, "Cannot parse package " + debugPathName + ". Assuming defaults.");
+        }
+        return params;
+    }
+
+    private void cleanupStagingSession() {
+        if (mStagedSessionId > 0) {
+            try {
+                mInstaller.abandonSession(mStagedSessionId);
+            } catch (SecurityException ignored) {
+
+            }
+            mStagedSessionId = 0;
+        }
+    }
+
     /**
      * Show an error message and set result as error.
      */
     private void showError() {
-        (new ErrorDialog()).showAllowingStateLoss(getFragmentManager(), "error");
+        getFragmentManager().beginTransaction()
+                .add(new ErrorDialog(), "error").commitAllowingStateLoss();
 
         Intent result = new Intent();
         result.putExtra(Intent.EXTRA_INSTALL_RESULT,
@@ -164,57 +260,109 @@ public class InstallStaging extends AlertActivity {
         }
     }
 
-    private final class StagingAsyncTask extends AsyncTask<Uri, Void, Boolean> {
-        @Override
-        protected Boolean doInBackground(Uri... params) {
-            if (params == null || params.length <= 0) {
-                return false;
-            }
-            Uri packageUri = params[0];
-            try (InputStream in = getContentResolver().openInputStream(packageUri)) {
-                // Despite the comments in ContentResolver#openInputStream the returned stream can
-                // be null.
-                if (in == null) {
-                    return false;
-                }
+    private final class StagingAsyncTask extends
+            AsyncTask<Void, Integer, PackageInstaller.SessionInfo> {
+        private ProgressBar mProgressBar = null;
 
-                try (OutputStream out = new FileOutputStream(mStagedFile)) {
-                    byte[] buffer = new byte[1024 * 1024];
-                    int bytesRead;
-                    while ((bytesRead = in.read(buffer)) >= 0) {
-                        // Be nice and respond to a cancellation
-                        if (isCancelled()) {
-                            return false;
-                        }
-                        out.write(buffer, 0, bytesRead);
-                    }
-                }
-            } catch (IOException | SecurityException | IllegalStateException e) {
-                Log.w(LOG_TAG, "Error staging apk from content URI", e);
-                return false;
+        private long getContentSizeBytes() {
+            try (AssetFileDescriptor afd = openAssetFileDescriptor(getIntent().getData())) {
+                return afd != null ? afd.getLength() : UNKNOWN_LENGTH;
+            } catch (IOException ignored) {
+                return UNKNOWN_LENGTH;
             }
-            return true;
         }
 
         @Override
-        protected void onPostExecute(Boolean success) {
-            if (success) {
-                // Now start the installation again from a file
-                Intent installIntent = new Intent(getIntent());
-                installIntent.setClass(InstallStaging.this, DeleteStagedFileOnResult.class);
-                installIntent.setData(Uri.fromFile(mStagedFile));
+        protected void onPreExecute() {
+            final long sizeBytes = getContentSizeBytes();
 
-                if (installIntent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)) {
-                    installIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            mProgressBar = sizeBytes > 0 ? requireViewById(R.id.progress_indeterminate) : null;
+            if (mProgressBar != null) {
+                mProgressBar.setProgress(0);
+                mProgressBar.setMax(100);
+                mProgressBar.setIndeterminate(false);
+            }
+        }
+
+        @Override
+        protected PackageInstaller.SessionInfo doInBackground(Void... params) {
+            Uri packageUri = getIntent().getData();
+            try (PackageInstaller.Session session = mInstaller.openSession(mStagedSessionId);
+                 InputStream in = getContentResolver().openInputStream(packageUri)) {
+                session.setStagingProgress(0);
+
+                if (in == null) {
+                    return null;
                 }
 
-                installIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                startActivity(installIntent);
+                long sizeBytes = getContentSizeBytes();
 
-                InstallStaging.this.finish();
-            } else {
-                showError();
+                long totalRead = 0;
+                try (OutputStream out = session.openWrite("PackageInstaller", 0, sizeBytes)) {
+                    byte[] buffer = new byte[1024 * 1024];
+                    while (true) {
+                        int numRead = in.read(buffer);
+
+                        if (numRead == -1) {
+                            session.fsync(out);
+                            break;
+                        }
+
+                        if (isCancelled()) {
+                            break;
+                        }
+
+                        out.write(buffer, 0, numRead);
+                        if (sizeBytes > 0) {
+                            totalRead += numRead;
+                            float fraction = ((float) totalRead / (float) sizeBytes);
+                            session.setStagingProgress(fraction);
+                            publishProgress((int) (fraction * 100.0));
+                        }
+                    }
+                }
+
+                return mInstaller.getSessionInfo(mStagedSessionId);
+            } catch (IOException | SecurityException | IllegalStateException
+                     | IllegalArgumentException e) {
+                Log.w(LOG_TAG, "Error staging apk from content URI", e);
+                return null;
             }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            if (mProgressBar != null && progress != null && progress.length > 0) {
+                mProgressBar.setProgress(progress[0], true);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(PackageInstaller.SessionInfo sessionInfo) {
+            if (sessionInfo == null || !sessionInfo.isActive()
+                    || sessionInfo.getResolvedBaseApkPath() == null) {
+                Log.w(LOG_TAG, "Session info is invalid: " + sessionInfo);
+                cleanupStagingSession();
+                showError();
+                return;
+            }
+
+            // Pass the staged session to the installer.
+            Intent installIntent = new Intent(getIntent());
+            installIntent.setClass(InstallStaging.this, DeleteStagedFileOnResult.class);
+            installIntent.setData(Uri.fromFile(new File(sessionInfo.getResolvedBaseApkPath())));
+
+            installIntent.putExtra(EXTRA_STAGED_SESSION_ID, mStagedSessionId);
+
+            if (installIntent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)) {
+                installIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            }
+
+            installIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+            startActivity(installIntent);
+
+            InstallStaging.this.finish();
         }
     }
 }

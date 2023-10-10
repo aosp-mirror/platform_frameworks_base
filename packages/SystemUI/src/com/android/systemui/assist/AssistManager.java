@@ -320,7 +320,8 @@ public class AssistManager {
 
     private void startVoiceInteractor(Bundle args) {
         mAssistUtils.showSessionForActiveService(args,
-                VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE, null, null);
+                VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE, mContext.getAttributionTag(),
+                null, null);
     }
 
     public void launchVoiceAssistFromKeyguard() {

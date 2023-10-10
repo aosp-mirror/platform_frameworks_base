@@ -67,6 +67,48 @@ public interface KeyguardSecurityView {
     int PROMPT_REASON_TRUSTAGENT_EXPIRED = 8;
 
     /**
+     * Prompt that is shown when there is an incorrect primary authentication input.
+     */
+    int PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT = 9;
+
+    /**
+     * Prompt that is shown when there is an incorrect face biometric input.
+     */
+    int PROMPT_REASON_INCORRECT_FACE_INPUT = 10;
+
+    /**
+     * Prompt that is shown when there is an incorrect fingerprint biometric input.
+     */
+    int PROMPT_REASON_INCORRECT_FINGERPRINT_INPUT = 11;
+
+    /**
+     * Prompt that is shown when face authentication is in locked out state.
+     */
+    int PROMPT_REASON_FACE_LOCKED_OUT = 12;
+
+    /**
+     * Prompt that is shown when fingerprint authentication is in locked out state.
+     */
+    int PROMPT_REASON_FINGERPRINT_LOCKED_OUT = 13;
+
+    /**
+     * Default prompt that is shown on the bouncer.
+     */
+    int PROMPT_REASON_DEFAULT = 14;
+
+    /**
+     * Prompt that is shown when primary authentication is in locked out state after too many
+     * attempts
+     */
+    int PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT = 15;
+
+    /**
+     * Strong auth is required because the device has just booted because of an automatic
+     * mainline update.
+     */
+    int PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE = 16;
+
+    /**
      * Reset the view and prepare to take input. This should do things like clearing the
      * password or pattern and clear error messages.
      */
@@ -106,7 +148,7 @@ public interface KeyguardSecurityView {
      * @param message the message to show
      * @param colorState the color to use
      */
-    void showMessage(CharSequence message, ColorStateList colorState);
+    void showMessage(CharSequence message, ColorStateList colorState, boolean animated);
 
     /**
      * Starts the animation which should run when the security view appears.

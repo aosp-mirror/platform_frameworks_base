@@ -15,39 +15,41 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="com.android.server.wm.flicker.testapp">
+          package="com.android.server.wm.flicker.testapp">
 
     <uses-sdk android:minSdkVersion="29"
-         android:targetSdkVersion="29"/>
+              android:targetSdkVersion="29"/>
     <application android:allowBackup="false"
-         android:supportsRtl="true">
+                 android:supportsRtl="true">
+        <uses-library android:name="androidx.window.extensions" android:required="false"/>
+
         <activity android:name=".SimpleActivity"
-             android:taskAffinity="com.android.server.wm.flicker.testapp.SimpleActivity"
-             android:theme="@style/CutoutShortEdges"
-             android:label="SimpleApp"
-             android:exported="true">
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.SimpleActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:label="SimpleActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".ImeActivity"
-             android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivity"
-             android:theme="@style/CutoutShortEdges"
-             android:label="ImeApp"
-             android:exported="true">
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:label="ImeActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".ImeActivityAutoFocus"
-             android:theme="@style/CutoutShortEdges"
-             android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivityAutoFocus"
-             android:windowSoftInputMode="stateVisible"
-             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
-             android:label="ImeAppAutoFocus"
-             android:exported="true">
+                  android:theme="@style/CutoutShortEdges"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivityAutoFocus"
+                  android:windowSoftInputMode="stateVisible"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+                  android:label="ImeAppAutoFocus"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -64,34 +66,46 @@
             </intent-filter>
         </activity>
         <activity android:name=".SeamlessRotationActivity"
-             android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
-             android:theme="@style/CutoutShortEdges"
-             android:configChanges="orientation|screenSize"
-             android:label="SeamlessApp"
-             android:exported="true">
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:configChanges="orientation|screenSize"
+                  android:label="SeamlessActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".NonResizeableActivity"
-            android:theme="@style/CutoutShortEdges"
-            android:resizeableActivity="false"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.NonResizeableActivity"
-            android:label="NonResizeableApp"
-            android:exported="true"
-            android:showOnLockScreen="true">
+                  android:theme="@style/CutoutShortEdges"
+                  android:resizeableActivity="false"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.NonResizeableActivity"
+                  android:label="NonResizeableActivity"
+                  android:exported="true"
+                  android:showOnLockScreen="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ButtonActivity"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.ButtonActivity"
-            android:theme="@style/CutoutShortEdges"
-            android:configChanges="orientation|screenSize"
-            android:label="ButtonActivity"
-            android:exported="true">
+        <activity android:name=".NonResizeablePortraitActivity"
+                  android:theme="@style/CutoutNever"
+                  android:resizeableActivity="false"
+                  android:screenOrientation="portrait"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.NonResizeablePortraitActivity"
+                  android:label="NonResizeablePortraitActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".LaunchNewActivity"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchNewActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:configChanges="orientation|screenSize"
+                  android:label="LaunchNewActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -109,97 +123,202 @@
             </intent-filter>
         </activity>
         <activity android:name=".DialogThemedActivity"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.DialogThemedActivity"
-            android:configChanges="orientation|screenSize"
-            android:theme="@style/DialogTheme"
-            android:label="DialogThemedActivity"
-            android:exported="true">
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.DialogThemedActivity"
+                  android:configChanges="orientation|screenSize"
+                  android:theme="@style/DialogTheme"
+                  android:label="DialogThemedActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".PortraitOnlyActivity"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.PortraitOnlyActivity"
-            android:theme="@style/CutoutShortEdges"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize"
-            android:exported="true">
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.PortraitOnlyActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:screenOrientation="portrait"
+                  android:configChanges="orientation|screenSize"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".ImeEditorPopupDialogActivity"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.ImeEditorPopupDialogActivity"
-            android:configChanges="orientation|screenSize"
-            android:theme="@style/CutoutShortEdges"
-            android:label="ImeEditorPopupDialogActivity"
-            android:exported="true">
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.ImeEditorPopupDialogActivity"
+                  android:configChanges="orientation|screenSize"
+                  android:theme="@style/CutoutShortEdges"
+                  android:label="ImeEditorPopupDialogActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".ShowWhenLockedActivity"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.ShowWhenLockedActivity"
-            android:theme="@style/CutoutShortEdges"
-            android:configChanges="orientation|screenSize"
-            android:label="ShowWhenLockedActivity"
-            android:showWhenLocked="true"
-            android:exported="true">
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.ShowWhenLockedActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:configChanges="orientation|screenSize"
+                  android:label="ShowWhenLockedActivity"
+                  android:showWhenLocked="true"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".NotificationActivity"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.NotificationActivity"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.NotificationActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:configChanges="orientation|screenSize"
+                  android:label="NotificationActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ActivityEmbeddingMainActivity"
+            android:label="ActivityEmbedding Main"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
             android:theme="@style/CutoutShortEdges"
-            android:configChanges="orientation|screenSize"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ActivityEmbeddingSecondaryActivity"
+            android:label="ActivityEmbedding Secondary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false"/>
+        <activity
+            android:name=".ActivityEmbeddingPlaceholderPrimaryActivity"
+            android:label="ActivityEmbedding Placeholder Primary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".ActivityEmbeddingPlaceholderSecondaryActivity"
+            android:label="ActivityEmbedding Placeholder Secondary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false"/>
         <activity android:name=".MailActivity"
-            android:exported="true"
-            android:label="MailApp"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.MailActivity"
-            android:theme="@style/Theme.AppCompat.Light">
+                  android:exported="true"
+                  android:label="MailActivity"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.MailActivity"
+                  android:theme="@style/Theme.AppCompat.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".GameActivity"
-            android:taskAffinity="com.android.server.wm.flicker.testapp.GameActivity"
-            android:immersive="true"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:configChanges="screenSize"
-            android:label="GameApp"
-            android:exported="true">
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.GameActivity"
+                  android:immersive="true"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:configChanges="screenSize"
+                  android:label="GameActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".PipActivity"
+                  android:resizeableActivity="true"
+                  android:supportsPictureInPicture="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.PipActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:launchMode="singleTop"
+                  android:label="PipActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".SplitScreenActivity"
+                  android:resizeableActivity="true"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.SplitScreenActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:label="SplitScreenPrimaryActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".SplitScreenSecondaryActivity"
+                  android:resizeableActivity="true"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.SplitScreenSecondaryActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:label="SplitScreenSecondaryActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <meta-data android:name="android.app.shortcuts"
+                       android:resource="@xml/shortcuts" />
+        </activity>
+        <activity android:name=".SendNotificationActivity"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.SendNotificationActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:label="SendNotificationActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LaunchBubbleActivity"
+            android:label="LaunchBubbleActivity"
+            android:exported="true"
+            android:theme="@style/CutoutShortEdges"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".BubbleActivity"
+            android:label="BubbleActivity"
+            android:exported="false"
+            android:theme="@style/CutoutShortEdges"
+            android:resizeableActivity="true"/>
         <service
             android:name=".AssistantInteractionSessionService"
             android:exported="true"
-            android:permission="android.permission.BIND_VOICE_INTERACTION" />
+            android:permission="android.permission.BIND_VOICE_INTERACTION"/>
         <service
             android:name=".AssistantRecognitionService"
             android:exported="true"
             android:label="Test Voice Interaction Service">
             <intent-filter>
-                <action android:name="android.speech.RecognitionService" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.speech.RecognitionService"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <meta-data
                 android:name="android.speech"
-                android:resource="@xml/recognition_service" />
+                android:resource="@xml/recognition_service"/>
         </service>
         <service
             android:name=".AssistantInteractionService"
@@ -207,12 +326,12 @@
             android:label="Test Voice Interaction Service"
             android:permission="android.permission.BIND_VOICE_INTERACTION">
             <intent-filter>
-                <action android:name="android.service.voice.VoiceInteractionService" />
+                <action android:name="android.service.voice.VoiceInteractionService"/>
             </intent-filter>
             <meta-data
                 android:name="android.voice_interaction"
-                android:resource="@xml/interaction_service" />
+                android:resource="@xml/interaction_service"/>
         </service>
     </application>
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 </manifest>

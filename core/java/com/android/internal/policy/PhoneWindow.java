@@ -360,8 +360,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mLayoutInflater = LayoutInflater.from(context);
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
-        mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(
-                context.getApplicationInfo().isOnBackInvokedCallbackEnabled());
+        mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
     }
 
     /**
@@ -790,13 +789,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         if (mDecor != null) {
             mDecor.updatePictureInPictureOutlineProvider(isInPictureInPictureMode);
-        }
-    }
-
-    @Override
-    public void reportActivityRelaunched() {
-        if (mDecor != null && mDecor.getViewRootImpl() != null) {
-            mDecor.getViewRootImpl().reportActivityRelaunched();
         }
     }
 
@@ -2172,6 +2164,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
+        viewRoot.getOnBackInvokedDispatcher().updateContext(getContext());
         mProxyOnBackInvokedDispatcher.setActualDispatcher(viewRoot.getOnBackInvokedDispatcher());
         applyDecorFitsSystemWindows();
     }
@@ -2518,12 +2511,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final boolean targetPreQ = targetSdk < Build.VERSION_CODES.Q;
 
         if (!mForcedStatusBarColor) {
-            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
+            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, Color.BLACK);
         }
         if (!mForcedNavigationBarColor) {
-            mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
+            final int navBarCompatibleColor = context.getColor(R.color.navigation_bar_compatible);
+            final int navBarDefaultColor = context.getColor(R.color.navigation_bar_default);
+            final int navBarColor = a.getColor(R.styleable.Window_navigationBarColor,
+                    navBarDefaultColor);
+
+            mNavigationBarColor =
+                    navBarColor == navBarDefaultColor
+                            && !context.getResources().getBoolean(
+                                    R.bool.config_navBarDefaultTransparent)
+                    ? navBarCompatibleColor
+                    : navBarColor;
+
             mNavigationBarDividerColor = a.getColor(R.styleable.Window_navigationBarDividerColor,
-                    0x00000000);
+                    Color.TRANSPARENT);
         }
         if (!targetPreQ) {
             mEnsureStatusBarContrastWhenTransparent = a.getBoolean(
@@ -2546,6 +2550,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mDecor.mForceWindowDrawsBarBackgrounds) {
                 params.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
             }
+            params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        }
+        if (a.getBoolean(
+                R.styleable.Window_windowNoMoveAnimation,
+                false)) {
             params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         }
         final int sysUiVis = decor.getSystemUiVisibility();

@@ -17,25 +17,28 @@
 package com.android.server.wm;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.devicestate.DeviceStateManager;
-import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 
+import com.google.common.util.concurrent.MoreExecutors;
+
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -55,6 +58,8 @@ public class DeviceStateControllerTests {
     private DeviceStateManager mMockDeviceStateManager;
     private DeviceStateController.DeviceState mCurrentState =
             DeviceStateController.DeviceState.UNKNOWN;
+    private Consumer<DeviceStateController.DeviceState> mDelegate;
+    private Executor mExecutor = MoreExecutors.directExecutor();
 
     @Before
     public void setUp() {
@@ -64,25 +69,24 @@ public class DeviceStateControllerTests {
 
     private void initialize(boolean supportFold, boolean supportHalfFold) {
         mBuilder.setSupportFold(supportFold, supportHalfFold);
-        Consumer<DeviceStateController.DeviceState> delegate = (newFoldState) -> {
+        mDelegate = (newFoldState) -> {
             mCurrentState = newFoldState;
         };
-        mBuilder.setDelegate(delegate);
+        mBuilder.setDelegate(mDelegate);
         mBuilder.build();
-        verify(mMockDeviceStateManager).registerCallback(any(), any());
     }
 
     @Test
     public void testInitialization() {
         initialize(true /* supportFold */, true /* supportHalfFolded */);
-        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        mTarget.onDeviceStateReceivedByDisplayManager(mOpenDeviceStates[0]);
         assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
     }
 
     @Test
     public void testInitializationWithNoFoldSupport() {
         initialize(false /* supportFold */, false /* supportHalfFolded */);
-        mTarget.onStateChanged(mFoldedStates[0]);
+        mTarget.onDeviceStateReceivedByDisplayManager(mFoldedStates[0]);
         // Note that the folded state is ignored.
         assertEquals(DeviceStateController.DeviceState.UNKNOWN, mCurrentState);
     }
@@ -90,29 +94,68 @@ public class DeviceStateControllerTests {
     @Test
     public void testWithFoldSupported() {
         initialize(true /* supportFold */, false /* supportHalfFolded */);
-        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        mTarget.onDeviceStateReceivedByDisplayManager(mOpenDeviceStates[0]);
         assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
-        mTarget.onStateChanged(mFoldedStates[0]);
+        mTarget.onDeviceStateReceivedByDisplayManager(mFoldedStates[0]);
         assertEquals(DeviceStateController.DeviceState.FOLDED, mCurrentState);
-        mTarget.onStateChanged(mHalfFoldedStates[0]);
+        mTarget.onDeviceStateReceivedByDisplayManager(mHalfFoldedStates[0]);
         assertEquals(DeviceStateController.DeviceState.UNKNOWN, mCurrentState); // Ignored
     }
 
     @Test
     public void testWithHalfFoldSupported() {
         initialize(true /* supportFold */, true /* supportHalfFolded */);
-        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        mTarget.onDeviceStateReceivedByDisplayManager(mOpenDeviceStates[0]);
         assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
-        mTarget.onStateChanged(mFoldedStates[0]);
+        mTarget.onDeviceStateReceivedByDisplayManager(mFoldedStates[0]);
         assertEquals(DeviceStateController.DeviceState.FOLDED, mCurrentState);
-        mTarget.onStateChanged(mHalfFoldedStates[0]);
+        mTarget.onDeviceStateReceivedByDisplayManager(mHalfFoldedStates[0]);
         assertEquals(DeviceStateController.DeviceState.HALF_FOLDED, mCurrentState);
+        mTarget.onDeviceStateReceivedByDisplayManager(mConcurrentDisplayState);
+        assertEquals(DeviceStateController.DeviceState.CONCURRENT, mCurrentState);
+    }
+
+    @Test
+    public void testUnregisterDeviceStateCallback() {
+        initialize(true /* supportFold */, true /* supportHalfFolded */);
+        assertEquals(1, mTarget.mDeviceStateCallbacks.size());
+        assertTrue(mTarget.mDeviceStateCallbacks.containsKey(mDelegate));
+
+        mTarget.onDeviceStateReceivedByDisplayManager(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
+        mTarget.onDeviceStateReceivedByDisplayManager(mFoldedStates[0]);
+        assertEquals(DeviceStateController.DeviceState.FOLDED, mCurrentState);
+
+        // The callback should not receive state change when it is unregistered.
+        mTarget.unregisterDeviceStateCallback(mDelegate);
+        assertTrue(mTarget.mDeviceStateCallbacks.isEmpty());
+        mTarget.onDeviceStateReceivedByDisplayManager(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.FOLDED /* unchanged */, mCurrentState);
+    }
+
+    @Test
+    public void testCopyDeviceStateCallbacks() {
+        initialize(true /* supportFold */, true /* supportHalfFolded */);
+        assertEquals(1, mTarget.mDeviceStateCallbacks.size());
+        assertTrue(mTarget.mDeviceStateCallbacks.containsKey(mDelegate));
+
+        List<Pair<Consumer<DeviceStateController.DeviceState>, Executor>> entries =
+                mTarget.copyDeviceStateCallbacks();
+        mTarget.unregisterDeviceStateCallback(mDelegate);
+
+        // In contrast to List<Map.Entry> where the entries are tied to changes in the backing map,
+        // List<Pair> should still contain non-null callbacks and executors even though they were
+        // removed from the backing map via the unregister method above.
+        assertEquals(1, entries.size());
+        assertEquals(mDelegate, entries.get(0).first);
+        assertEquals(mExecutor, entries.get(0).second);
     }
 
     private final int[] mFoldedStates = {0};
     private final int[] mOpenDeviceStates = {1};
     private final int[] mHalfFoldedStates = {2};
     private final int[] mRearDisplayStates = {3};
+    private final int mConcurrentDisplayState = 4;
 
     private class DeviceStateControllerBuilder {
         private boolean mSupportFold = false;
@@ -140,6 +183,14 @@ public class DeviceStateControllerTests {
                 when(mMockContext.getResources()
                         .getIntArray(R.array.config_rearDisplayDeviceStates))
                         .thenReturn(mRearDisplayStates);
+                when(mMockContext.getResources()
+                        .getInteger(R.integer.config_deviceStateConcurrentRearDisplay))
+                        .thenReturn(mConcurrentDisplayState);
+            } else {
+                // Match the default value in framework resources
+                when(mMockContext.getResources()
+                        .getInteger(R.integer.config_deviceStateConcurrentRearDisplay))
+                        .thenReturn(-1);
             }
 
             if (enableFold) {
@@ -162,9 +213,8 @@ public class DeviceStateControllerTests {
             Resources mockRes = mock(Resources.class);
             when(mMockContext.getResources()).thenReturn((mockRes));
             mockFold(mSupportFold, mSupportHalfFold);
-            Handler mockHandler = mock(Handler.class);
-            mTarget = new DeviceStateController(mMockContext, mockHandler);
-            mTarget.registerDeviceStateCallback(mDelegate);
+            mTarget = new DeviceStateController(mMockContext, new WindowManagerGlobalLock());
+            mTarget.registerDeviceStateCallback(mDelegate, mExecutor);
         }
     }
 }

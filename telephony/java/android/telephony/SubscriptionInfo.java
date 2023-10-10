@@ -947,29 +947,30 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Get ICCID stripped PII information on user build.
+     * Get stripped PII information from the id.
      *
-     * @param iccId The original ICCID.
+     * @param id The raw id (e.g. ICCID, IMSI, etc...).
      * @return The stripped string.
      *
      * @hide
      */
-    public static String givePrintableIccid(String iccId) {
-        String iccIdToPrint = null;
-        if (iccId != null) {
-            if (iccId.length() > 9 && !TelephonyUtils.IS_DEBUGGABLE) {
-                iccIdToPrint = iccId.substring(0, 9) + Rlog.pii(false, iccId.substring(9));
+    @Nullable
+    public static String getPrintableId(@Nullable String id) {
+        String idToPrint = null;
+        if (id != null) {
+            if (id.length() > 9 && !TelephonyUtils.IS_DEBUGGABLE) {
+                idToPrint = id.substring(0, 9) + Rlog.pii(false, id.substring(9));
             } else {
-                iccIdToPrint = iccId;
+                idToPrint = id;
             }
         }
-        return iccIdToPrint;
+        return idToPrint;
     }
 
     @Override
     public String toString() {
-        String iccIdToPrint = givePrintableIccid(mIccId);
-        String cardStringToPrint = givePrintableIccid(mCardString);
+        String iccIdToPrint = getPrintableId(mIccId);
+        String cardStringToPrint = getPrintableId(mCardString);
         return "[SubscriptionInfo: id=" + mId
                 + " iccId=" + iccIdToPrint
                 + " simSlotIndex=" + mSimSlotIndex
@@ -1536,7 +1537,7 @@ public class SubscriptionInfo implements Parcelable {
          */
         @NonNull
         public Builder setGroupUuid(@Nullable String groupUuid) {
-            mGroupUuid = groupUuid == null ? null : ParcelUuid.fromString(groupUuid);
+            mGroupUuid = TextUtils.isEmpty(groupUuid) ? null : ParcelUuid.fromString(groupUuid);
             return this;
         }
 

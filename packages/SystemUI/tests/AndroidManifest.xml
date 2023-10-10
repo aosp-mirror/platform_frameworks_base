@@ -18,7 +18,7 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="android.uid.system"
-    package="com.android.systemui" >
+    package="com.android.systemui.tests" >
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
@@ -53,7 +53,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REGISTER_WINDOW_MANAGER_LISTENERS" />
 
-    <application android:debuggable="true" android:largeHeap="true"
+    <application android:debuggable="true" android:largeHeap="true" android:testOnly="true"
             android:enableOnBackInvokedCallback="true" >
         <uses-library android:name="android.test.runner" />
 
@@ -64,7 +64,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".wmshell.BubblesTestActivity"
+        <activity android:name="com.android.systemui.wmshell.BubblesTestActivity"
             android:allowEmbedded="true"
             android:documentLaunchMode="always"
             android:excludeFromRecents="true"
@@ -88,7 +88,7 @@
                   android:excludeFromRecents="true"
                   />
 
-        <activity android:name=".settings.brightness.BrightnessDialogTest$TestDialog"
+        <activity android:name="com.android.systemui.settings.brightness.BrightnessDialogTest$TestDialog"
             android:exported="false"
             android:excludeFromRecents="true"
             />
@@ -120,23 +120,31 @@
                   android:exported="false" />
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.UsbPermissionActivityTest$UsbPermissionActivityTestable"
+        <activity android:name="com.android.systemui.usb.UsbPermissionActivityTest$UsbPermissionActivityTestable"
                   android:exported="false"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true" />
 
-        <activity android:name=".user.CreateUserActivityTest$CreateUserActivityTestable"
+        <activity android:name="com.android.systemui.user.CreateUserActivityTest$CreateUserActivityTestable"
             android:exported="false"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true" />
 
-        <activity android:name=".sensorprivacy.SensorUseStartedActivityTest$SensorUseStartedActivityTestable"
+        <activity android:name="com.android.systemui.sensorprivacy.SensorUseStartedActivityTest$SensorUseStartedActivityTestable"
                   android:exported="false"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true" />
+
+        <activity android:name="com.android.systemui.activity.EmptyTestActivity"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name="androidx.startup.InitializationProvider"
@@ -164,6 +172,41 @@
             android:enabled="false"
             tools:replace="android:authorities"
             android:grantUriPermissions="true" />
+
+        <activity
+            android:name="com.android.systemui.screenshot.appclips.AppClipsTrampolineActivityTest$AppClipsTrampolineActivityTestable"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" />
+
+        <activity
+            android:name="com.android.systemui.screenshot.appclips.AppClipsActivityTest$AppClipsActivityTestable"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" />
+
+        <activity
+            android:name="com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" />
+
+        <activity
+            android:name="com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" />
+
+        <activity
+            android:name="com.android.systemui.notetask.LaunchNotesRoleSettingsTrampolineActivity"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" >
+            <intent-filter>
+                <action android:name="com.android.systemui.action.MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
     <instrumentation android:name="android.testing.TestableInstrumentation"

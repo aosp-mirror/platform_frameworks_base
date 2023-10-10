@@ -35,11 +35,11 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
+import dagger.Lazy;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /** An implementation of {@link ShadeController}. */
 @SysUISingleton
@@ -132,13 +132,13 @@ public final class ShadeControllerImpl implements ShadeController {
                     "animateCollapse(): mExpandedVisible=" + mExpandedVisible + "flags=" + flags);
         }
         if (getNotificationShadeWindowView() != null
-                && mNotificationPanelViewController.canPanelBeCollapsed()
+                && mNotificationPanelViewController.canBeCollapsed()
                 && (flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
             // release focus immediately to kick off focus change transition
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 
             mNotificationShadeWindowViewController.cancelExpandHelper();
-            mNotificationPanelViewController.collapsePanel(true, delayed, speedUpFactor);
+            mNotificationPanelViewController.collapse(true, delayed, speedUpFactor);
         }
     }
 
@@ -154,8 +154,18 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
+    public boolean isKeyguard() {
+        return mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+    }
+
+    @Override
     public boolean isShadeFullyOpen() {
-        return mNotificationPanelViewController.isShadeFullyOpen();
+        return mNotificationPanelViewController.isShadeFullyExpanded();
+    }
+
+    @Override
+    public boolean isExpandingOrCollapsing() {
+        return mNotificationPanelViewController.isExpandingOrCollapsing();
     }
 
     @Override
@@ -268,7 +278,7 @@ public final class ShadeControllerImpl implements ShadeController {
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-        mNotificationPanelViewController.collapsePanel(false, false, 1.0f);
+        mNotificationPanelViewController.collapse(false, false, 1.0f);
 
         mExpandedVisible = false;
         notifyVisibilityChanged(false);
@@ -290,7 +300,7 @@ public final class ShadeControllerImpl implements ShadeController {
         notifyExpandedVisibleChanged(false);
         mCommandQueue.recomputeDisableFlags(
                 mDisplayId,
-                mNotificationPanelViewController.hideStatusBarIconsWhenExpanded() /* animate */);
+                mNotificationPanelViewController.shouldHideStatusBarIconsWhenExpanded());
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
         // the bouncer appear animation.

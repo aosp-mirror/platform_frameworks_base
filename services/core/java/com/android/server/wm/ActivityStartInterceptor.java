@@ -33,7 +33,9 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_SDK_SANDBOX_ORDER_ID;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
@@ -226,16 +228,26 @@ class ActivityStartInterceptor {
                 getInterceptorInfo(null /* clearOptionsAnimation */);
 
         for (int i = 0; i < callbacks.size(); i++) {
+            final int orderId = callbacks.keyAt(i);
+            if (!shouldInterceptActivityLaunch(orderId, interceptorInfo)) {
+                continue;
+            }
+
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
-            final ActivityInterceptResult interceptResult = callback.intercept(interceptorInfo);
+            final ActivityInterceptResult interceptResult = callback.onInterceptActivityLaunch(
+                    interceptorInfo);
             if (interceptResult == null) {
                 continue;
             }
-            mIntent = interceptResult.intent;
-            mActivityOptions = interceptResult.activityOptions;
+            mIntent = interceptResult.getIntent();
+            mActivityOptions = interceptResult.getActivityOptions();
             mCallingPid = mRealCallingPid;
             mCallingUid = mRealCallingUid;
-            mRInfo = mSupervisor.resolveIntent(mIntent, null, mUserId, 0, mRealCallingUid);
+            if (interceptResult.isActivityResolved()) {
+                return true;
+            }
+            mRInfo = mSupervisor.resolveIntent(mIntent, null, mUserId, 0,
+                    mRealCallingUid, mRealCallingPid);
             mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags,
                     null /*profilerInfo*/);
             return true;
@@ -268,16 +280,21 @@ class ActivityStartInterceptor {
             return false;
         }
 
+        if (isKeepProfilesRunningEnabled() && !isPackageSuspended()) {
+            return false;
+        }
+
         IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT);
 
-        mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId, target);
+        mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId, target, mRInfo);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -298,10 +315,10 @@ class ActivityStartInterceptor {
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
         if (parent != null) {
             mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0,
-                    mRealCallingUid);
+                    mRealCallingUid, mRealCallingPid);
         } else {
             mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
-                    mRealCallingUid);
+                    mRealCallingUid, mRealCallingPid);
         }
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
@@ -309,8 +326,7 @@ class ActivityStartInterceptor {
 
     private boolean interceptSuspendedPackageIfNeeded() {
         // Do not intercept if the package is not suspended
-        if (mAInfo == null || mAInfo.applicationInfo == null ||
-                (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
+        if (!isPackageSuspended()) {
             return false;
         }
         final PackageManagerInternal pmi = mService.getPackageManagerInternalLocked();
@@ -334,7 +350,8 @@ class ActivityStartInterceptor {
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -353,7 +370,8 @@ class ActivityStartInterceptor {
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -388,7 +406,8 @@ class ActivityStartInterceptor {
         }
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -399,8 +418,11 @@ class ActivityStartInterceptor {
      * @return The intercepting intent if needed.
      */
     private Intent interceptWithConfirmCredentialsIfNeeded(ActivityInfo aInfo, int userId) {
+        if (!mService.mAmInternal.shouldConfirmCredentials(userId)) {
+            return null;
+        }
         if ((aInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0
-                || !mService.mAmInternal.shouldConfirmCredentials(userId)) {
+                && (mUserManager.isUserUnlocked(userId) || aInfo.directBootAware)) {
             return null;
         }
         final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
@@ -442,9 +464,21 @@ class ActivityStartInterceptor {
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
 
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
+    }
+
+    private boolean isPackageSuspended() {
+        return mAInfo != null && mAInfo.applicationInfo != null
+                && (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) != 0;
+    }
+
+    private static boolean isKeepProfilesRunningEnabled() {
+        DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        return dpmi == null || dpmi.isKeepProfilesRunningEnabled();
     }
 
     /**
@@ -456,6 +490,11 @@ class ActivityStartInterceptor {
         ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo(
                 r::clearOptionsAnimationForSiblings);
         for (int i = 0; i < callbacks.size(); i++) {
+            final int orderId = callbacks.keyAt(i);
+            if (!shouldNotifyOnActivityLaunch(orderId, info)) {
+                continue;
+            }
+
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
             callback.onActivityLaunched(taskInfo, r.info, info);
         }
@@ -463,9 +502,31 @@ class ActivityStartInterceptor {
 
     private ActivityInterceptorCallback.ActivityInterceptorInfo getInterceptorInfo(
             @Nullable Runnable clearOptionsAnimation) {
-        return new ActivityInterceptorCallback.ActivityInterceptorInfo(mRealCallingUid,
-                mRealCallingPid, mUserId, mCallingPackage, mCallingFeatureId, mIntent,
-                mRInfo, mAInfo, mResolvedType, mCallingPid, mCallingUid,
-                mActivityOptions, clearOptionsAnimation);
+        return new ActivityInterceptorCallback.ActivityInterceptorInfo.Builder(mCallingUid,
+                mCallingPid, mRealCallingUid, mRealCallingPid, mUserId, mIntent, mRInfo, mAInfo)
+                .setResolvedType(mResolvedType)
+                .setCallingPackage(mCallingPackage)
+                .setCallingFeatureId(mCallingFeatureId)
+                .setCheckedOptions(mActivityOptions)
+                .setClearOptionsAnimationRunnable(clearOptionsAnimation)
+                .build();
+    }
+
+    private boolean shouldInterceptActivityLaunch(
+            @ActivityInterceptorCallback.OrderedId int orderId,
+            @NonNull ActivityInterceptorCallback.ActivityInterceptorInfo info) {
+        if (orderId == MAINLINE_SDK_SANDBOX_ORDER_ID) {
+            return info.getIntent() != null && info.getIntent().isSandboxActivity(mServiceContext);
+        }
+        return true;
+    }
+
+    private boolean shouldNotifyOnActivityLaunch(
+            @ActivityInterceptorCallback.OrderedId int orderId,
+            @NonNull ActivityInterceptorCallback.ActivityInterceptorInfo info) {
+        if (orderId == MAINLINE_SDK_SANDBOX_ORDER_ID) {
+            return info.getIntent() != null && info.getIntent().isSandboxActivity(mServiceContext);
+        }
+        return true;
     }
 }

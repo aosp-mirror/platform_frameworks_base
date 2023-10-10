@@ -21,9 +21,9 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.RectF
+import android.util.Log
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.shared.navigationbar.RegionSamplingHelper
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 
@@ -31,20 +31,21 @@ import java.util.concurrent.Executor
 open class RegionSampler
 @JvmOverloads
 constructor(
-    val sampledView: View?,
+    val sampledView: View,
     mainExecutor: Executor?,
     val bgExecutor: Executor?,
     val regionSamplingEnabled: Boolean,
+    val isLockscreen: Boolean = false,
+    val wallpaperManager: WallpaperManager? = WallpaperManager.getInstance(sampledView.context),
     val updateForegroundColor: UpdateColorCallback,
-    val wallpaperManager: WallpaperManager? = WallpaperManager.getInstance(sampledView?.context)
 ) : WallpaperManager.LocalWallpaperColorConsumer {
     private var regionDarkness = RegionDarkness.DEFAULT
     private var samplingBounds = Rect()
     private val tmpScreenLocation = IntArray(2)
-    @VisibleForTesting var regionSampler: RegionSamplingHelper? = null
     private var lightForegroundColor = Color.WHITE
     private var darkForegroundColor = Color.BLACK
-    private val displaySize = Point()
+    @VisibleForTesting val displaySize = Point()
+    private var initialSampling: WallpaperColors? = null
 
     /**
      * Sets the colors to be used for Dark and Light Foreground.
@@ -56,6 +57,36 @@ constructor(
         lightForegroundColor = lightColor
         darkForegroundColor = darkColor
     }
+
+    private val layoutChangedListener =
+        object : View.OnLayoutChangeListener {
+
+            override fun onLayoutChange(
+                view: View?,
+                left: Int,
+                top: Int,
+                right: Int,
+                bottom: Int,
+                oldLeft: Int,
+                oldTop: Int,
+                oldRight: Int,
+                oldBottom: Int
+            ) {
+
+                // don't pass in negative bounds when region is in transition state
+                if (sampledView.locationOnScreen[0] < 0 || sampledView.locationOnScreen[1] < 0) {
+                    return
+                }
+
+                val currentViewRect = Rect(left, top, right, bottom)
+                val oldViewRect = Rect(oldLeft, oldTop, oldRight, oldBottom)
+
+                if (currentViewRect != oldViewRect) {
+                    stopRegionSampler()
+                    startRegionSampler()
+                }
+            }
+        }
 
     /**
      * Determines which foreground color to use based on region darkness.
@@ -84,40 +115,57 @@ constructor(
 
     /** Start region sampler */
     fun startRegionSampler() {
-        if (!regionSamplingEnabled || sampledView == null) {
+
+        if (!regionSamplingEnabled) {
+            if (DEBUG) Log.d(TAG, "startRegionSampler() | RegionSampling flag not enabled")
             return
         }
 
-        val sampledRegion = calculateSampledRegion(sampledView)
-        val regions = ArrayList<RectF>()
-        val sampledRegionWithOffset = convertBounds(sampledRegion)
+        sampledView.addOnLayoutChangeListener(layoutChangedListener)
 
+        val screenLocationBounds = calculateScreenLocation(sampledView)
+        if (screenLocationBounds == null) {
+            if (DEBUG) Log.d(TAG, "startRegionSampler() | passed in null region")
+            return
+        }
+        if (screenLocationBounds.isEmpty) {
+            if (DEBUG) Log.d(TAG, "startRegionSampler() | passed in empty region")
+            return
+        }
+
+        val sampledRegionWithOffset = convertBounds(screenLocationBounds)
         if (
             sampledRegionWithOffset.left < 0.0 ||
                 sampledRegionWithOffset.right > 1.0 ||
                 sampledRegionWithOffset.top < 0.0 ||
                 sampledRegionWithOffset.bottom > 1.0
         ) {
-            android.util.Log.e(
-                "RegionSampler",
-                "view out of bounds: $sampledRegion | " +
-                    "screen width: ${displaySize.x}, screen height: ${displaySize.y}",
-                Exception()
-            )
+            if (DEBUG)
+                Log.d(
+                    TAG,
+                    "startRegionSampler() | view out of bounds: $screenLocationBounds | " +
+                        "screen width: ${displaySize.x}, screen height: ${displaySize.y}",
+                    Exception()
+                )
             return
         }
 
+        val regions = ArrayList<RectF>()
         regions.add(sampledRegionWithOffset)
 
-        wallpaperManager?.removeOnColorsChangedListener(this)
-        wallpaperManager?.addOnColorsChangedListener(this, regions)
+        wallpaperManager?.addOnColorsChangedListener(
+            this,
+            regions,
+            if (isLockscreen) WallpaperManager.FLAG_LOCK else WallpaperManager.FLAG_SYSTEM
+        )
 
-        // TODO(b/265969235): conditionally set FLAG_LOCK or FLAG_SYSTEM once HS smartspace
-        // implemented
         bgExecutor?.execute(
             Runnable {
-                val initialSampling =
-                    wallpaperManager?.getWallpaperColors(WallpaperManager.FLAG_LOCK)
+                initialSampling =
+                    wallpaperManager?.getWallpaperColors(
+                        if (isLockscreen) WallpaperManager.FLAG_LOCK
+                        else WallpaperManager.FLAG_SYSTEM
+                    )
                 onColorsChanged(sampledRegionWithOffset, initialSampling)
             }
         )
@@ -126,6 +174,7 @@ constructor(
     /** Stop region sampler */
     fun stopRegionSampler() {
         wallpaperManager?.removeOnColorsChangedListener(this)
+        sampledView.removeOnLayoutChangeListener(layoutChangedListener)
     }
 
     /** Dump region sampler */
@@ -138,22 +187,23 @@ constructor(
         pw.println("passed-in sampledView: $sampledView")
         pw.println("calculated samplingBounds: $samplingBounds")
         pw.println(
-            "sampledView width: ${sampledView?.width}, sampledView height: ${sampledView?.height}"
+            "sampledView width: ${sampledView.width}, sampledView height: ${sampledView.height}"
         )
         pw.println("screen width: ${displaySize.x}, screen height: ${displaySize.y}")
         pw.println(
-            "sampledRegionWithOffset: ${convertBounds(calculateSampledRegion(sampledView!!))}"
+            "sampledRegionWithOffset: ${convertBounds(
+                    calculateScreenLocation(sampledView) ?: RectF())}"
         )
-        // TODO(b/265969235): mock initialSampling based on if component is on HS or LS wallpaper
-        // HS Smartspace - wallpaperManager?.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
-        // LS Smartspace, clock - wallpaperManager?.getWallpaperColors(WallpaperManager.FLAG_LOCK)
         pw.println(
-            "initialSampling for lockscreen: " +
-                "${wallpaperManager?.getWallpaperColors(WallpaperManager.FLAG_LOCK)}"
+            "initialSampling for ${if (isLockscreen) "lockscreen" else "homescreen" }" +
+                ": $initialSampling"
         )
     }
 
-    fun calculateSampledRegion(sampledView: View): RectF {
+    fun calculateScreenLocation(sampledView: View): RectF? {
+
+        if (!sampledView.isLaidOut) return null
+
         val screenLocation = tmpScreenLocation
         /**
          * The method getLocationOnScreen is used to obtain the view coordinates relative to its
@@ -181,7 +231,8 @@ constructor(
      */
     fun convertBounds(originalBounds: RectF): RectF {
 
-        // TODO(b/265969235): GRAB # PAGES + CURRENT WALLPAPER PAGE # FROM LAUNCHER
+        // TODO(b/265969235): GRAB # PAGES + CURRENT WALLPAPER PAGE # FROM LAUNCHER (--> HS
+        // Smartspace always on 1st page)
         // TODO(b/265968912): remove hard-coded value once LS wallpaper supported
         val wallpaperPageNum = 0
         val numScreens = 1
@@ -213,6 +264,11 @@ constructor(
                     WallpaperColors.HINT_SUPPORTS_DARK_TEXT
             )
         updateForegroundColor()
+    }
+
+    companion object {
+        private const val TAG = "RegionSampler"
+        private const val DEBUG = false
     }
 }
 

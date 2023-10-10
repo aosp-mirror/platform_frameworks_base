@@ -22,8 +22,6 @@ import static com.android.systemui.biometrics.BiometricDisplayListener.SensorTyp
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,16 +30,19 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.Surface;
-import android.view.Surface.Rotation;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,11 +52,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class BiometricDisplayListenerTest extends SysuiTestCase {
 
@@ -102,76 +101,6 @@ public class BiometricDisplayListenerTest extends SysuiTestCase {
         listener.enable();
         listener.disable();
         verify(mDisplayManager).unregisterDisplayListener(any());
-    }
-
-    @Test
-    public void detectsRotationChanges_forUdfps_relativeToRotationWhenEnabled() {
-        // Create a listener when the rotation is portrait.
-        when(mDisplay.getRotation()).thenReturn(Surface.ROTATION_0);
-        BiometricDisplayListener listener = new BiometricDisplayListener(
-                mContextSpy, mDisplayManager, mHandler, mUdfpsType, mOnChangedCallback);
-
-        // Rotate the device to landscape and then enable the listener.
-        when(mDisplay.getRotation()).thenReturn(Surface.ROTATION_90);
-        listener.enable();
-        verify(mDisplayManager).registerDisplayListener(mDisplayListenerCaptor.capture(),
-                same(mHandler), eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED));
-
-        // Rotate the device back to portrait and ensure the rotation is detected.
-        when(mDisplay.getRotation()).thenReturn(Surface.ROTATION_0);
-        mDisplayListenerCaptor.getValue().onDisplayChanged(999);
-        verify(mOnChangedCallback).invoke();
-    }
-
-    @Test
-    public void callsOnChanged_forUdfps_onlyWhenRotationChanges() {
-        final @Rotation int[] rotations =
-                new int[]{
-                        Surface.ROTATION_0,
-                        Surface.ROTATION_90,
-                        Surface.ROTATION_180,
-                        Surface.ROTATION_270
-                };
-
-        for (@Rotation int rot1 : rotations) {
-            for (@Rotation int rot2 : rotations) {
-                // Make the third rotation the same as the first one to simplify this test.
-                @Rotation int rot3 = rot1;
-
-                // Clean up prior interactions.
-                reset(mDisplayManager);
-                reset(mDisplay);
-                reset(mOnChangedCallback);
-
-                // Set up the mock for 3 invocations.
-                when(mDisplay.getRotation()).thenReturn(rot1, rot2, rot3);
-
-                BiometricDisplayListener listener = new BiometricDisplayListener(
-                        mContextSpy, mDisplayManager, mHandler, mUdfpsType, mOnChangedCallback);
-                listener.enable();
-
-                // The listener should record the current rotation and register a display listener.
-                verify(mDisplay).getRotation();
-                verify(mDisplayManager).registerDisplayListener(mDisplayListenerCaptor.capture(),
-                        same(mHandler), eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED));
-
-                // Test the first rotation since the listener was enabled.
-                mDisplayListenerCaptor.getValue().onDisplayChanged(123);
-                if (rot2 != rot1) {
-                    verify(mOnChangedCallback).invoke();
-                } else {
-                    verify(mOnChangedCallback, never()).invoke();
-                }
-
-                // Test continued rotations.
-                mDisplayListenerCaptor.getValue().onDisplayChanged(123);
-                if (rot3 != rot2) {
-                    verify(mOnChangedCallback, times(2)).invoke();
-                } else {
-                    verify(mOnChangedCallback, never()).invoke();
-                }
-            }
-        }
     }
 
     @Test

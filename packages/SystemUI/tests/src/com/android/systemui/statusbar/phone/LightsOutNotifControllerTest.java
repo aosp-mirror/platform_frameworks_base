@@ -30,6 +30,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.lifecycle.Observer;
@@ -107,7 +108,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
+                WindowInsets.Type.defaultVisible(),
                 null /* packageName */,
                 null /* letterboxDetails */);
         assertTrue(mLightsOutNotifController.areLightsOut());
@@ -121,7 +122,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
+                WindowInsets.Type.defaultVisible(),
                 null /* packageName */,
                 null /* letterboxDetails */);
         assertFalse(mLightsOutNotifController.areLightsOut());
@@ -153,7 +154,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
+                WindowInsets.Type.defaultVisible(),
                 null /* packageName */,
                 null /* letterboxDetails */);
 
@@ -174,7 +175,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
+                WindowInsets.Type.defaultVisible(),
                 null /* packageName */,
                 null /* letterboxDetails */);
 
@@ -195,7 +196,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
+                WindowInsets.Type.defaultVisible(),
                 null /* packageName */,
                 null /* letterboxDetails */);
 

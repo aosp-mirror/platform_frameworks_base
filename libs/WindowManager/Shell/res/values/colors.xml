@@ -17,8 +17,8 @@
  */
 -->
 <resources>
-    <color name="docked_divider_handle">#000000</color>
-    <color name="split_divider_background">@color/taskbar_background</color>
+    <color name="docked_divider_handle">#ffffff</color>
+    <color name="split_divider_background">@color/taskbar_background_dark</color>
     <drawable name="forced_resizable_background">#59000000</drawable>
     <color name="minimize_dock_shadow_start">#60000000</color>
     <color name="minimize_dock_shadow_end">#00000000</color>
@@ -39,7 +39,6 @@
     <color name="compat_controls_text">@android:color/system_neutral1_50</color>
 
     <!-- Letterbox Education -->
-    <color name="letterbox_education_accent_primary">@android:color/system_accent1_100</color>
     <color name="letterbox_education_text_secondary">@android:color/system_neutral2_200</color>
 
     <!-- Letterbox Dialog -->
@@ -54,4 +53,19 @@
     <color name="splash_screen_bg_light">#FFFFFF</color>
     <color name="splash_screen_bg_dark">#000000</color>
     <color name="splash_window_background_default">@color/splash_screen_bg_light</color>
+
+    <!-- Desktop Mode -->
+    <color name="desktop_mode_caption_handle_bar_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_handle_bar_dark">#1C1C17</color>
+    <color name="desktop_mode_caption_expand_button_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_expand_button_dark">#48473A</color>
+    <color name="desktop_mode_caption_close_button_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_close_button_dark">#1C1C17</color>
+    <color name="desktop_mode_caption_app_name_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_app_name_dark">#1C1C17</color>
+    <color name="desktop_mode_caption_menu_text_color">#191C1D</color>
+    <color name="desktop_mode_caption_menu_buttons_color_inactive">#191C1D</color>
+    <color name="desktop_mode_caption_menu_buttons_color_active">#00677E</color>
+    <color name="desktop_mode_resize_veil_light">#EFF1F2</color>
+    <color name="desktop_mode_resize_veil_dark">#1C1C17</color>
 </resources>

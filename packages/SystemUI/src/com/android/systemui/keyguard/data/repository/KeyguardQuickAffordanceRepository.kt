@@ -18,7 +18,9 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.content.Context
+import android.content.Intent
 import android.os.UserHandle
+import android.util.LayoutDirection
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -113,30 +115,6 @@ constructor(
                 initialValue = emptyMap(),
             )
 
-    private val _slotPickerRepresentations: List<KeyguardSlotPickerRepresentation> by lazy {
-        fun parseSlot(unparsedSlot: String): Pair<String, Int> {
-            val split = unparsedSlot.split(SLOT_CONFIG_DELIMITER)
-            check(split.size == 2)
-            val slotId = split[0]
-            val slotCapacity = split[1].toInt()
-            return slotId to slotCapacity
-        }
-
-        val unparsedSlots =
-            appContext.resources.getStringArray(R.array.config_keyguardQuickAffordanceSlots)
-
-        val seenSlotIds = mutableSetOf<String>()
-        unparsedSlots.mapNotNull { unparsedSlot ->
-            val (slotId, slotCapacity) = parseSlot(unparsedSlot)
-            check(!seenSlotIds.contains(slotId)) { "Duplicate slot \"$slotId\"!" }
-            seenSlotIds.add(slotId)
-            KeyguardSlotPickerRepresentation(
-                id = slotId,
-                maxSelectedAffordances = slotCapacity,
-            )
-        }
-    }
-
     init {
         legacySettingSyncer.startSyncing()
         dumpManager.registerDumpable("KeyguardQuickAffordances", Dumpster())
@@ -193,16 +171,27 @@ constructor(
                     pickerState as? KeyguardQuickAffordanceConfig.PickerScreenState.Disabled
                 KeyguardQuickAffordancePickerRepresentation(
                     id = config.key,
-                    name = config.pickerName,
+                    name = config.pickerName(),
                     iconResourceId = config.pickerIconResourceId,
                     isEnabled =
                         pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.Default,
-                    instructions = disabledPickerState?.instructions,
+                    explanation = disabledPickerState?.explanation,
                     actionText = disabledPickerState?.actionText,
-                    actionComponentName = disabledPickerState?.actionComponentName,
-                    configureIntent = defaultPickerState?.configureIntent,
+                    actionIntent =
+                        disabledPickerState?.actionIntent?.apply {
+                            addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                            )
+                        },
+                    configureIntent =
+                        defaultPickerState?.configureIntent?.apply {
+                            addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                            )
+                        },
                 )
             }
+            .sortedBy { it.name }
     }
 
     /**
@@ -211,7 +200,30 @@ constructor(
      * each slot and select which affordance(s) is/are installed in each slot on the keyguard.
      */
     fun getSlotPickerRepresentations(): List<KeyguardSlotPickerRepresentation> {
-        return _slotPickerRepresentations
+        fun parseSlot(unparsedSlot: String): Pair<String, Int> {
+            val split = unparsedSlot.split(SLOT_CONFIG_DELIMITER)
+            check(split.size == 2)
+            val slotId = split[0]
+            val slotCapacity = split[1].toInt()
+            return slotId to slotCapacity
+        }
+
+        val unparsedSlots =
+            appContext.resources.getStringArray(R.array.config_keyguardQuickAffordanceSlots)
+        if (appContext.resources.configuration.layoutDirection == LayoutDirection.RTL) {
+            unparsedSlots.reverse()
+        }
+
+        val seenSlotIds = mutableSetOf<String>()
+        return unparsedSlots.mapNotNull { unparsedSlot ->
+            val (slotId, slotCapacity) = parseSlot(unparsedSlot)
+            check(!seenSlotIds.contains(slotId)) { "Duplicate slot \"$slotId\"!" }
+            seenSlotIds.add(slotId)
+            KeyguardSlotPickerRepresentation(
+                id = slotId,
+                maxSelectedAffordances = slotCapacity,
+            )
+        }
     }
 
     private inner class Dumpster : Dumpable {
@@ -234,7 +246,9 @@ constructor(
                 pw.println("    $slotId$selectionText (capacity = $capacity)")
             }
             pw.println("Available affordances on device:")
-            configs.forEach { config -> pw.println("    ${config.key} (\"${config.pickerName}\")") }
+            configs.forEach { config ->
+                pw.println("    ${config.key} (\"${config.pickerName()}\")")
+            }
         }
     }
 

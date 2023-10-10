@@ -16,36 +16,32 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
-import static org.testng.Assert.expectThrows;
 
-import android.graphics.Insets;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.InsetsFrameProvider;
+import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
+import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
@@ -64,7 +60,7 @@ import java.io.StringWriter;
  */
 @SmallTest
 @Presubmit
-@WindowTestsBase.UseTestDisplay(
+@WindowTestsBase.SetupWindows(
         addWindows = { WindowTestsBase.W_STATUS_BAR, WindowTestsBase.W_NAVIGATION_BAR })
 @RunWith(WindowTestRunner.class)
 public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
@@ -133,8 +129,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final RoundedCorners roundedCorners = mHasRoundedCorners
                 ? mDisplayContent.calculateRoundedCornersForRotation(mRotation)
                 : RoundedCorners.NO_ROUNDED_CORNERS;
-        return new DisplayFrames(insetsState, info,
-                info.displayCutout, roundedCorners, new PrivacyIndicatorBounds());
+        return new DisplayFrames(insetsState, info, info.displayCutout, roundedCorners,
+                new PrivacyIndicatorBounds(), info.displayShape);
     }
 
     @Test
@@ -150,73 +146,23 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void addingWindow_withInsetsTypes() {
         mDisplayPolicy.removeWindowLw(mStatusBarWindow);  // Removes the existing one.
 
-        WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
+        final WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "statusBar");
+        final Binder owner = new Binder();
         win.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_STATUS_BAR),
-                new InsetsFrameProvider(ITYPE_TOP_GESTURES)
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.systemGestures())
         };
-        win.getFrame().set(0, 0, 500, 100);
-
         addWindow(win);
-        win.updateSourceFrame(win.getFrame());
-        InsetsStateController controller = mDisplayContent.getInsetsStateController();
-        controller.onPostLayout();
-
-        InsetsSourceProvider statusBarProvider = controller.getSourceProvider(ITYPE_STATUS_BAR);
-        assertEquals(new Rect(0, 0, 500, 100), statusBarProvider.getSource().getFrame());
-        assertEquals(Insets.of(0, 100, 0, 0),
-                statusBarProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
-                        false /* ignoreVisibility */));
-
-        InsetsSourceProvider topGesturesProvider = controller.getSourceProvider(ITYPE_TOP_GESTURES);
-        assertEquals(new Rect(0, 0, 500, 100), topGesturesProvider.getSource().getFrame());
-        assertEquals(Insets.of(0, 100, 0, 0),
-                topGesturesProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
-                        false /* ignoreVisibility */));
-
-        InsetsSourceProvider navigationBarProvider = controller.getSourceProvider(
-                ITYPE_NAVIGATION_BAR);
-        assertNotEquals(new Rect(0, 0, 500, 100), navigationBarProvider.getSource().getFrame());
-    }
-
-    @Test
-    public void addingWindow_InWindowTypeWithPredefinedInsets() {
-        mDisplayPolicy.removeWindowLw(mStatusBarWindow);  // Removes the existing one.
-        WindowState win = createWindow(null, TYPE_STATUS_BAR, "StatusBar");
-        win.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_STATUS_BAR)
-        };
         win.getFrame().set(0, 0, 500, 100);
-
-        addWindow(win);
         win.updateSourceFrame(win.getFrame());
         mDisplayContent.getInsetsStateController().onPostLayout();
 
-        InsetsSourceProvider provider =
-                mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR);
-        // In the new flexible insets setup, the insets frame should always respect the window
-        // layout result.
-        assertEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
-    }
-
-    @Test
-    public void addingWindow_throwsException_WithMultipleInsetTypes() {
-        WindowState win1 = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
-        win1.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_STATUS_BAR),
-                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR)
-        };
-
-        expectThrows(IllegalArgumentException.class, () -> addWindow(win1));
-
-        WindowState win2 = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
-
-        win2.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_CLIMATE_BAR),
-                new InsetsFrameProvider(ITYPE_EXTRA_NAVIGATION_BAR)
-        };
-
-        expectThrows(IllegalArgumentException.class, () -> addWindow(win2));
+        assertTrue(win.hasInsetsSourceProvider());
+        final SparseArray<InsetsSourceProvider> providers = win.getInsetsSourceProviders();
+        for (int i = providers.size() - 1; i >= 0; i--) {
+            final InsetsSourceProvider provider = providers.valueAt(i);
+            assertEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
+        }
     }
 
     /**
@@ -255,8 +201,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
         // Exclude comparing IME insets because currently the simulated layout only focuses on the
         // insets from status bar and navigation bar.
-        realInsetsState.removeSource(InsetsState.ITYPE_IME);
-        realInsetsState.removeSource(InsetsState.ITYPE_CAPTION_BAR);
+        realInsetsState.removeSource(InsetsSource.ID_IME);
 
         assertEquals(new ToStringComparatorWrapper<>(realInsetsState),
                 new ToStringComparatorWrapper<>(simulatedInsetsState));
@@ -270,9 +215,10 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 .rotationForActivityInDifferentOrientation(eq(mWindow.mActivityRecord));
         mWindow.mAboveInsetsState.set(
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
-        final Rect frame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
+        final int statusBarId = mStatusBarWindow.getControllableInsetProvider().getSource().getId();
+        final Rect frame = mWindow.getInsetsState().peekSource(statusBarId).getFrame();
         mDisplayContent.rotateInDifferentOrientationIfNeeded(mWindow.mActivityRecord);
-        final Rect rotatedFrame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
+        final Rect rotatedFrame = mWindow.getInsetsState().peekSource(statusBarId).getFrame();
 
         assertEquals(DISPLAY_WIDTH, frame.width());
         assertEquals(DISPLAY_HEIGHT, rotatedFrame.width());

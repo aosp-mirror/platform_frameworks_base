@@ -26,11 +26,13 @@ android_test {
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "platform-test-rules",
-        "truth-prebuilt",
+        "truth",
     ],
     test_suites: [
         "general-tests",
-        "vts",
     ],
-    sdk_version: "31",
+    data: [
+        ":SimpleTestIme",
+    ],
+    sdk_version: "current",
 }

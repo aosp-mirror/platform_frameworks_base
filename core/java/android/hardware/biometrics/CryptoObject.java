@@ -16,6 +16,9 @@
 
 package android.hardware.biometrics;
 
+import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.security.identity.IdentityCredential;
 import android.security.identity.PresentationSession;
@@ -24,6 +27,7 @@ import android.security.keystore2.AndroidKeyStoreProvider;
 import java.security.Signature;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 
 /**
@@ -60,6 +64,11 @@ public class CryptoObject {
 
     public CryptoObject(@NonNull PresentationSession session) {
         mCrypto = session;
+    }
+
+    @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
+    public CryptoObject(@NonNull KeyAgreement keyAgreement) {
+        mCrypto = keyAgreement;
     }
 
     /**
@@ -102,6 +111,15 @@ public class CryptoObject {
      */
     public PresentationSession getPresentationSession() {
         return mCrypto instanceof PresentationSession ? (PresentationSession) mCrypto : null;
+    }
+
+    /**
+     * Get {@link PresentationSession} object.
+     * @return {@link PresentationSession} object or null if this doesn't contain one.
+     */
+    @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
+    public KeyAgreement getKeyAgreement() {
+        return mCrypto instanceof KeyAgreement ? (KeyAgreement) mCrypto : null;
     }
 
     /**

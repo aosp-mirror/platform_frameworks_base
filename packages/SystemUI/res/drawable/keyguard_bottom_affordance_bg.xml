@@ -20,7 +20,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle">
-  <solid android:color="?androidprv:attr/colorSurface"/>
+  <solid android:color="?androidprv:attr/materialColorSurfaceContainerHigh"/>
   <size
       android:width="@dimen/keyguard_affordance_fixed_width"
       android:height="@dimen/keyguard_affordance_fixed_height"/>

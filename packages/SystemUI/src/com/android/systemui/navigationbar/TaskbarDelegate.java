@@ -20,8 +20,6 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
@@ -50,8 +48,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
-import android.view.InsetsVisibilities;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -225,7 +224,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
                     }
                 });
-        controller.overrideIconTintForNavMode(true);
 
         return controller;
     }
@@ -381,7 +379,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     @Override
     public void onSystemBarAttributesChanged(int displayId, int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme, int behavior,
-            InsetsVisibilities requestedVisibilities, String packageName,
+            @InsetsType int requestedVisibleTypes, String packageName,
             LetterboxDetails[] letterboxDetails) {
         mOverviewProxyService.onSystemBarAttributesChanged(displayId, behavior);
         boolean nbModeChanged = false;
@@ -401,11 +399,11 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void showTransient(int displayId, int[] types, boolean isGestureOnSystemBar) {
+    public void showTransient(int displayId, @InsetsType int types, boolean isGestureOnSystemBar) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_EXTRA_NAVIGATION_BAR)) {
+        if ((types & WindowInsets.Type.navigationBars()) == 0) {
             return;
         }
         if (!mTaskbarTransientShowing) {
@@ -415,11 +413,11 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void abortTransient(int displayId, int[] types) {
+    public void abortTransient(int displayId, @InsetsType int types) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_EXTRA_NAVIGATION_BAR)) {
+        if ((types & WindowInsets.Type.navigationBars()) == 0) {
             return;
         }
         clearTransient();
@@ -431,6 +429,19 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             mAutoHideController.suspendAutoHide();
         } else {
             mAutoHideController.resumeSuspendedAutoHide();
+        }
+    }
+
+    @Override
+    public void toggleTaskbar() {
+        if (mOverviewProxyService.getProxy() == null) {
+            return;
+        }
+
+        try {
+            mOverviewProxyService.getProxy().onTaskbarToggled();
+        } catch (RemoteException e) {
+            Log.e(TAG, "onTaskbarToggled() failed", e);
         }
     }
 

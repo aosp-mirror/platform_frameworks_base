@@ -42,10 +42,10 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "CtsPermission2TestCases",
+            "name": "CtsPermissionPolicyTestCases",
             "options": [
                 {
-                    "include-filter": "android.permission2.cts.RuntimePermissionProperties"
+                    "include-filter": "android.permissionpolicy.cts.RuntimePermissionProperties"
                 }
             ]
         },
@@ -110,6 +110,18 @@
             "options": [
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceStressTest"
+                }
+            ],
+            "file_patterns": ["(/|^)VoiceInteract[^/]*"]
+        },
+        {
+            "name": "CtsLocalVoiceInteraction",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
             ],
             "file_patterns": ["(/|^)VoiceInteract[^/]*"]
@@ -157,6 +169,74 @@
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
+            ]
+        },
+        {
+            "name": "FrameworksCoreTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.app.KeyguardManagerTest"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)KeyguardManager.java"
+            ]
+        },
+        {
+            "name": "FrameworksCoreTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.app.PropertyInvalidatedCacheTests"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)PropertyInvalidatedCache.java"
+            ]
+        },
+        {
+            "name": "FrameworksCoreGameManagerTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.app"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)GameManager[^/]*", "(/|^)GameMode[^/]*"
+            ]
+        },
+        {
+            "name": "HdmiCecTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.hardware.hdmi"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)DeviceFeature[^/]*", "(/|^)Hdmi[^/]*"
             ]
         }
     ],

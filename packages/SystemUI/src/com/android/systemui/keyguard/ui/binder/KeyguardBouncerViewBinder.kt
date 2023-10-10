@@ -112,7 +112,6 @@ object KeyguardBouncerViewBinder {
                         viewModel.isShowing.collect { isShowing ->
                             view.visibility = if (isShowing) View.VISIBLE else View.INVISIBLE
                             if (isShowing) {
-                                // Reset Security Container entirely.
                                 securityContainerController.reinflateViewFlipper {
                                     // Reset Security Container entirely.
                                     securityContainerController.onBouncerVisibilityChanged(
@@ -121,6 +120,7 @@ object KeyguardBouncerViewBinder {
                                     securityContainerController.showPrimarySecurityScreen(
                                         /* turningOff= */ false
                                     )
+                                    securityContainerController.setInitialMessage()
                                     securityContainerController.appear()
                                     securityContainerController.onResume(
                                         KeyguardSecurityView.SCREEN_ON
@@ -191,7 +191,11 @@ object KeyguardBouncerViewBinder {
 
                     launch {
                         viewModel.bouncerShowMessage.collect {
-                            securityContainerController.showMessage(it.message, it.colorStateList)
+                            securityContainerController.showMessage(
+                                it.message,
+                                it.colorStateList,
+                                /* animated= */ true
+                            )
                             viewModel.onMessageShown()
                         }
                     }

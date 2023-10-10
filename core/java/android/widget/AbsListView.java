@@ -248,6 +248,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public static final int CHOICE_MODE_MULTIPLE_MODAL = 3;
 
     /**
+     * When flinging the stretch towards scrolling content, it should destretch quicker than the
+     * fling would normally do. The visual effect of flinging the stretch looks strange as little
+     * appears to happen at first and then when the stretch disappears, the content starts
+     * scrolling quickly.
+     */
+    private static final float FLING_DESTRETCH_FACTOR = 4f;
+
+    /**
      * The thread that created this view.
      */
     private final Thread mOwnerThread;
@@ -4276,9 +4284,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         // fling further.
                         boolean flingVelocity = Math.abs(initialVelocity) > mMinimumVelocity;
                         if (flingVelocity && !mEdgeGlowTop.isFinished()) {
-                            mEdgeGlowTop.onAbsorb(initialVelocity);
+                            if (shouldAbsorb(mEdgeGlowTop, initialVelocity)) {
+                                mEdgeGlowTop.onAbsorb(initialVelocity);
+                            } else {
+                                if (mFlingRunnable == null) {
+                                    mFlingRunnable = new FlingRunnable();
+                                }
+                                mFlingRunnable.start(-initialVelocity);
+                            }
                         } else if (flingVelocity && !mEdgeGlowBottom.isFinished()) {
-                            mEdgeGlowBottom.onAbsorb(-initialVelocity);
+                            if (shouldAbsorb(mEdgeGlowBottom, -initialVelocity)) {
+                                mEdgeGlowBottom.onAbsorb(-initialVelocity);
+                            } else {
+                                if (mFlingRunnable == null) {
+                                    mFlingRunnable = new FlingRunnable();
+                                }
+                                mFlingRunnable.start(-initialVelocity);
+                            }
                         } else if (flingVelocity
                                 && !((mFirstPosition == 0
                                 && firstChildTop == contentTop - mOverscrollDistance)
@@ -4361,6 +4383,60 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    /**
+     * Returns true if edgeEffect should call onAbsorb() with veclocity or false if it should
+     * animate with a fling. It will animate with a fling if the velocity will remove the
+     * EdgeEffect through its normal operation.
+     *
+     * @param edgeEffect The EdgeEffect that might absorb the velocity.
+     * @param velocity The velocity of the fling motion
+     * @return true if the velocity should be absorbed or false if it should be flung.
+     */
+    private boolean shouldAbsorb(EdgeEffect edgeEffect, int velocity) {
+        if (velocity > 0) {
+            return true;
+        }
+        float distance = edgeEffect.getDistance() * getHeight();
+
+        // This is flinging without the spring, so let's see if it will fling past the overscroll
+        if (mFlingRunnable == null) {
+            mFlingRunnable = new FlingRunnable();
+        }
+        float flingDistance = mFlingRunnable.getSplineFlingDistance(-velocity);
+
+        return flingDistance < distance;
+    }
+
+    /**
+     * Used by consumeFlingInHorizontalStretch() and consumeFlinInVerticalStretch() for
+     * consuming deltas from EdgeEffects
+     * @param unconsumed The unconsumed delta that the EdgeEffets may consume
+     * @return The unconsumed delta after the EdgeEffects have had an opportunity to consume.
+     */
+    private int consumeFlingInStretch(int unconsumed) {
+        if (unconsumed < 0 && mEdgeGlowTop != null && mEdgeGlowTop.getDistance() != 0f) {
+            int size = getHeight();
+            float deltaDistance = unconsumed * FLING_DESTRETCH_FACTOR / size;
+            int consumed = Math.round(size / FLING_DESTRETCH_FACTOR
+                    * mEdgeGlowTop.onPullDistance(deltaDistance, 0.5f));
+            if (consumed != unconsumed) {
+                mEdgeGlowTop.finish();
+            }
+            return unconsumed - consumed;
+        }
+        if (unconsumed > 0 && mEdgeGlowBottom != null && mEdgeGlowBottom.getDistance() != 0f) {
+            int size = getHeight();
+            float deltaDistance = -unconsumed * FLING_DESTRETCH_FACTOR / size;
+            int consumed = Math.round(-size / FLING_DESTRETCH_FACTOR
+                    * mEdgeGlowBottom.onPullDistance(deltaDistance, 0.5f));
+            if (consumed != unconsumed) {
+                mEdgeGlowBottom.finish();
+            }
+            return unconsumed - consumed;
+        }
+        return unconsumed;
+    }
+
     private boolean shouldDisplayEdgeEffects() {
         return getOverScrollMode() != OVER_SCROLL_NEVER;
     }
@@ -4423,7 +4499,34 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
+                    // If we're moving down, we want the top item. If we're moving up, bottom item.
+                    final int motionIndex = delta > 0 ? 0 : getChildCount() - 1;
+
+                    int motionViewPrevTop = 0;
+                    View motionView = this.getChildAt(motionIndex);
+                    if (motionView != null) {
+                        motionViewPrevTop = motionView.getTop();
+                    }
+
+                    final int overscrollMode = getOverScrollMode();
+
                     if (!trackMotionScroll(delta, delta)) {
+                        return true;
+                    } else if (!event.isFromSource(InputDevice.SOURCE_MOUSE) && motionView != null
+                            && (overscrollMode == OVER_SCROLL_ALWAYS
+                            || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS
+                            && !contentFits()))) {
+                        int motionViewRealTop = motionView.getTop();
+                        float overscroll = (delta - (motionViewRealTop - motionViewPrevTop))
+                                / ((float) getHeight());
+                        if (delta > 0) {
+                            mEdgeGlowTop.onPullDistance(overscroll, 0.5f);
+                            mEdgeGlowTop.onRelease();
+                        } else {
+                            mEdgeGlowBottom.onPullDistance(-overscroll, 0.5f);
+                            mEdgeGlowBottom.onRelease();
+                        }
+                        invalidate();
                         return true;
                     }
                 }
@@ -4824,6 +4927,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mScroller = new OverScroller(getContext());
         }
 
+        float getSplineFlingDistance(int velocity) {
+            return (float) mScroller.getSplineFlingDistance(velocity);
+        }
+
         // Use AbsListView#fling(int) instead
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         void start(int initialVelocity) {
@@ -4946,6 +5053,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
 
                 if (mItemCount == 0 || getChildCount() == 0) {
+                    mEdgeGlowBottom.onRelease();
+                    mEdgeGlowTop.onRelease();
                     endFling();
                     return;
                 }
@@ -4956,7 +5065,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 // Flip sign to convert finger direction to list items direction
                 // (e.g. finger moving down means list is moving towards the top)
-                int delta = mLastFlingY - y;
+                int delta = consumeFlingInStretch(mLastFlingY - y);
 
                 // Pretend that each frame of a fling scroll is a touch scroll
                 if (delta > 0) {

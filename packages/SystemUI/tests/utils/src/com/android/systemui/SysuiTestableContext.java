@@ -18,6 +18,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.testing.LeakCheck;
@@ -54,6 +55,11 @@ public class SysuiTestableContext extends TestableContext {
         SysuiTestableContext context =
                 new SysuiTestableContext(getBaseContext().createDisplayContext(display));
         return context;
+    }
+
+    public SysuiTestableContext createDefaultDisplayContext() {
+        Display display = getBaseContext().getSystemService(DisplayManager.class).getDisplays()[0];
+        return (SysuiTestableContext) createDisplayContext(display);
     }
 
     public void cleanUpReceivers(String testName) {

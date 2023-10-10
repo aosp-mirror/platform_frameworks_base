@@ -116,12 +116,24 @@ public class BluetoothUtils {
         }
 
         List<LocalBluetoothProfile> profiles = cachedDevice.getProfiles();
+        int resId = 0;
         for (LocalBluetoothProfile profile : profiles) {
-            int resId = profile.getDrawableResource(btClass);
-            if (resId != 0) {
-                return new Pair<>(getBluetoothDrawable(context, resId), null);
+            int profileResId = profile.getDrawableResource(btClass);
+            if (profileResId != 0) {
+                // The device should show hearing aid icon if it contains any hearing aid related
+                // profiles
+                if (profile instanceof HearingAidProfile || profile instanceof HapClientProfile) {
+                    return new Pair<>(getBluetoothDrawable(context, profileResId), null);
+                }
+                if (resId == 0) {
+                    resId = profileResId;
+                }
             }
         }
+        if (resId != 0) {
+            return new Pair<>(getBluetoothDrawable(context, resId), null);
+        }
+
         if (btClass != null) {
             if (doesClassMatch(btClass, BluetoothClass.PROFILE_HEADSET)) {
                 return new Pair<>(
@@ -256,7 +268,8 @@ public class BluetoothUtils {
                 BluetoothDevice.METADATA_DEVICE_TYPE);
         if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)
                 || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_WATCH)
-                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_DEFAULT)) {
+                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_DEFAULT)
+                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_STYLUS)) {
             Log.d(TAG, "isAdvancedDetailsHeader: deviceType is " + deviceType);
             return true;
         }

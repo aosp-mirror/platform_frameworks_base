@@ -16,12 +16,9 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.app.Notification.FLAG_NO_CLEAR;
-import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
-import static com.android.systemui.statusbar.NotificationEntryHelper.modifySbn;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -70,6 +67,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -102,9 +100,63 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mNotificationTestHelper.setDefaultInflationFlags(FLAG_CONTENT_VIEW_ALL);
 
         FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
-        fakeFeatureFlags.set(Flags.NOTIFICATION_ANIMATE_BIG_PICTURE, true);
         fakeFeatureFlags.set(Flags.SENSITIVE_REVEAL_ANIM, false);
         mNotificationTestHelper.setFeatureFlags(fakeFeatureFlags);
+    }
+
+    @Test
+    public void testCanShowHeadsUp_notOnKeyguard_true() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        row.setOnKeyguard(false);
+
+        assertTrue(row.canShowHeadsUp());
+    }
+
+    @Test
+    public void testCanShowHeadsUp_dozing_true() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        StatusBarStateController statusBarStateControllerMock =
+                mNotificationTestHelper.getStatusBarStateController();
+        when(statusBarStateControllerMock.isDozing()).thenReturn(true);
+
+        assertTrue(row.canShowHeadsUp());
+    }
+
+    @Test
+    public void testCanShowHeadsUp_bypassEnabled_true() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        KeyguardBypassController keyguardBypassControllerMock =
+                mNotificationTestHelper.getKeyguardBypassController();
+        when(keyguardBypassControllerMock.getBypassEnabled()).thenReturn(true);
+
+        assertTrue(row.canShowHeadsUp());
+    }
+
+    @Test
+    public void testCanShowHeadsUp_stickyAndNotDemoted_true() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createStickyRow();
+
+        assertTrue(row.canShowHeadsUp());
+    }
+
+    @Test
+    public void testCanShowHeadsUp_false() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        row.setOnKeyguard(true);
+
+        StatusBarStateController statusBarStateControllerMock =
+                mNotificationTestHelper.getStatusBarStateController();
+        when(statusBarStateControllerMock.isDozing()).thenReturn(false);
+
+        KeyguardBypassController keyguardBypassControllerMock =
+                mNotificationTestHelper.getKeyguardBypassController();
+        when(keyguardBypassControllerMock.getBypassEnabled()).thenReturn(false);
+
+        assertFalse(row.canShowHeadsUp());
     }
 
     @Test
@@ -468,26 +520,24 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCanDismissNoClear() throws Exception {
+    public void testCanDismiss() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        modifySbn(row.getEntry())
-                .setFlag(mContext, FLAG_NO_CLEAR, true)
-                .build();
+        when(mNotificationTestHelper.getDismissibilityProvider().isDismissable(row.getEntry()))
+                .thenReturn(true);
         row.performDismiss(false);
-        verify(mNotificationTestHelper.mOnUserInteractionCallback)
+        verify(mNotificationTestHelper.getOnUserInteractionCallback())
                 .registerFutureDismissal(any(), anyInt());
     }
 
     @Test
-    public void testCannotDismissOngoing() throws Exception {
+    public void testCannotDismiss() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        modifySbn(row.getEntry())
-                .setFlag(mContext, FLAG_ONGOING_EVENT, true)
-                .build();
+        when(mNotificationTestHelper.getDismissibilityProvider().isDismissable(row.getEntry()))
+                .thenReturn(false);
         row.performDismiss(false);
-        verify(mNotificationTestHelper.mOnUserInteractionCallback, never())
+        verify(mNotificationTestHelper.getOnUserInteractionCallback(), never())
                 .registerFutureDismissal(any(), anyInt());
     }
 
@@ -567,24 +617,9 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void applyRoundnessAndInv_should_be_immediately_applied_on_childrenContainer_legacy()
-            throws Exception {
-        ExpandableNotificationRow group = mNotificationTestHelper.createGroup();
-        group.useRoundnessSourceTypes(false);
-        Assert.assertEquals(0f, group.getBottomRoundness(), 0.001f);
-        Assert.assertEquals(0f, group.getChildrenContainer().getBottomRoundness(), 0.001f);
-
-        group.requestBottomRoundness(1f, SourceType.from(""), false);
-
-        Assert.assertEquals(1f, group.getBottomRoundness(), 0.001f);
-        Assert.assertEquals(1f, group.getChildrenContainer().getBottomRoundness(), 0.001f);
-    }
-
-    @Test
     public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_childrenContainer()
             throws Exception {
         ExpandableNotificationRow group = mNotificationTestHelper.createGroup();
-        group.useRoundnessSourceTypes(true);
         Assert.assertEquals(0f, group.getBottomRoundness(), 0.001f);
         Assert.assertEquals(0f, group.getChildrenContainer().getBottomRoundness(), 0.001f);
 

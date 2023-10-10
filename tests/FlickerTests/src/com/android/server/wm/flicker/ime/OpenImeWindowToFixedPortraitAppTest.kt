@@ -15,22 +15,19 @@
  */
 package com.android.server.wm.flicker.ime
 
-import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
+import android.platform.test.annotations.Presubmit
+import android.tools.common.NavBar
+import android.tools.common.Rotation
+import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.traces.region.RegionSubject
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,92 +35,83 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window shown on the app with fixing portrait orientation.
- * To run this test: `atest FlickerTests:OpenImeWindowToFixedPortraitAppTest`
+ * Test IME window shown on the app with fixing portrait orientation. To run this test: `atest
+ * FlickerTests:OpenImeWindowToFixedPortraitAppTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group2
-class OpenImeWindowToFixedPortraitAppTest (private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                eachRun {
-                    testApp.launchViaIntent(wmHelper)
-                    testApp.openIME(device, wmHelper)
-                    // Enable letterbox when the app calls setRequestedOrientation
-                    device.executeShellCommand("cmd window set-ignore-orientation-request true")
-                }
-            }
-            transitions {
-                testApp.toggleFixPortraitOrientation(wmHelper)
-            }
-            teardown {
-                eachRun {
-                    testApp.exit()
-                    device.executeShellCommand("cmd window set-ignore-orientation-request false")
-                }
-            }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            testApp.launchViaIntent(wmHelper)
+            testApp.openIME(wmHelper)
+            // Enable letterbox when the app calls setRequestedOrientation
+            device.executeShellCommand("cmd window set-ignore-orientation-request true")
+        }
+        transitions { testApp.toggleFixPortraitOrientation(wmHelper) }
+        teardown {
+            testApp.exit()
+            device.executeShellCommand("cmd window set-ignore-orientation-request false")
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerVisibleStart() {
-        testSpec.assertLayersStart {
-            this.isVisible(FlickerComponentName.IME)
-        }
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.IME) }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerExistsEnd() {
-        testSpec.assertLayersEnd {
-            this.isVisible(FlickerComponentName.IME)
-        }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerVisibleRegionKeepsTheSame() {
         var imeLayerVisibleRegionBeforeTransition: RegionSubject? = null
-        testSpec.assertLayersStart {
-            imeLayerVisibleRegionBeforeTransition = this.visibleRegion(FlickerComponentName.IME)
+        flicker.assertLayersStart {
+            imeLayerVisibleRegionBeforeTransition = this.visibleRegion(ComponentNameMatcher.IME)
         }
-        testSpec.assertLayersEnd {
-            this.visibleRegion(FlickerComponentName.IME)
-                    .coversExactly(imeLayerVisibleRegionBeforeTransition!!.region)
+        flicker.assertLayersEnd {
+            this.visibleRegion(ComponentNameMatcher.IME)
+                .coversExactly(imeLayerVisibleRegionBeforeTransition!!.region)
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun appWindowWithLetterboxCoversExactlyOnScreen() {
-        val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
-        testSpec.assertLayersEnd {
-            this.visibleRegion(testApp.component, FlickerComponentName.LETTERBOX)
-                    .coversExactly(displayBounds)
+        val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
+        flicker.assertLayersEnd {
+            this.visibleRegion(testApp.or(ComponentNameMatcher.LETTERBOX))
+                .coversExactly(displayBounds)
         }
     }
 
     companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(
-                            supportedRotations = listOf(Surface.ROTATION_90, Surface.ROTATION_270),
-                            supportedNavigationModes = listOf(
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                            )
-                    )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations =
+                    listOf(
+                        Rotation.ROTATION_90,
+                    ),
+                supportedNavigationModes = listOf(NavBar.MODE_3BUTTON, NavBar.MODE_GESTURAL)
+            )
         }
     }
 }

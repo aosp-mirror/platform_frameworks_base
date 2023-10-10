@@ -16,6 +16,9 @@
 
 package com.android.systemui.biometrics.dagger
 
+import android.content.res.Resources
+import com.android.internal.R
+import com.android.systemui.biometrics.EllipseOverlapDetectorParams
 import com.android.systemui.biometrics.udfps.BoundingBoxOverlapDetector
 import com.android.systemui.biometrics.udfps.EllipseOverlapDetector
 import com.android.systemui.biometrics.udfps.OverlapDetector
@@ -33,10 +36,30 @@ interface UdfpsModule {
         @Provides
         @SysUISingleton
         fun providesOverlapDetector(featureFlags: FeatureFlags): OverlapDetector {
-            return if (featureFlags.isEnabled(Flags.UDFPS_ELLIPSE_DETECTION)) {
-                EllipseOverlapDetector()
+            if (featureFlags.isEnabled(Flags.UDFPS_ELLIPSE_DETECTION)) {
+                val selectedOption =
+                    Resources.getSystem()
+                        .getInteger(R.integer.config_selected_udfps_touch_detection)
+                val values =
+                    Resources.getSystem()
+                        .getStringArray(R.array.config_udfps_touch_detection_options)[
+                            selectedOption]
+                        .split(",")
+                        .map { it.toFloat() }
+
+                return if (values[0] == 1f) {
+                    EllipseOverlapDetector(
+                        EllipseOverlapDetectorParams(
+                            minOverlap = values[3],
+                            targetSize = values[2],
+                            stepSize = values[4].toInt()
+                        )
+                    )
+                } else {
+                    BoundingBoxOverlapDetector()
+                }
             } else {
-                BoundingBoxOverlapDetector()
+                return BoundingBoxOverlapDetector()
             }
         }
     }

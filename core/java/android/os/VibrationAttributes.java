@@ -145,7 +145,9 @@ public final class VibrationAttributes implements Parcelable {
      */
     @IntDef(prefix = { "FLAG_" }, flag = true, value = {
             FLAG_BYPASS_INTERRUPTION_POLICY,
-            FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
+            FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF,
+            FLAG_INVALIDATE_SETTINGS_CACHE,
+            FLAG_PIPELINED_EFFECT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flag{}
@@ -156,7 +158,7 @@ public final class VibrationAttributes implements Parcelable {
      * <p>Only privileged apps can ignore user settings that limit interruptions, and this
      * flag will be ignored otherwise.
      */
-    public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 0x1;
+    public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 1;
 
     /**
      * Flag requesting vibration effect to be played even when user settings are disabling it.
@@ -167,7 +169,7 @@ public final class VibrationAttributes implements Parcelable {
      *
      * @hide
      */
-    public static final int FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF = 0x2;
+    public static final int FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF = 1 << 1;
 
     /**
      * Flag requesting vibration effect to be played with fresh user settings values.
@@ -182,7 +184,19 @@ public final class VibrationAttributes implements Parcelable {
      *
      * @hide
      */
-    public static final int FLAG_INVALIDATE_SETTINGS_CACHE = 0x3;
+    public static final int FLAG_INVALIDATE_SETTINGS_CACHE = 1 << 2;
+
+    /**
+     * Flag requesting that this vibration effect be pipelined with other vibration effects from the
+     * same package that also carry this flag.
+     *
+     * <p>Pipelined effects won't cancel a running pipelined effect, but will instead play after
+     * it completes. However, only one pipelined effect can be waiting at a time - so if an effect
+     * is already waiting (but not running), it will be cancelled in favor of a newer one.
+     *
+     * @hide
+     */
+    public static final int FLAG_PIPELINED_EFFECT = 1 << 3;
 
     /**
      * All flags supported by vibrator service, update it when adding new flag.
@@ -190,7 +204,7 @@ public final class VibrationAttributes implements Parcelable {
      */
     public static final int FLAG_ALL_SUPPORTED =
             FLAG_BYPASS_INTERRUPTION_POLICY | FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
-                    | FLAG_INVALIDATE_SETTINGS_CACHE;
+                    | FLAG_INVALIDATE_SETTINGS_CACHE | FLAG_PIPELINED_EFFECT;
 
     /** Creates a new {@link VibrationAttributes} instance with given usage. */
     public static @NonNull VibrationAttributes createForUsage(@Usage int usage) {

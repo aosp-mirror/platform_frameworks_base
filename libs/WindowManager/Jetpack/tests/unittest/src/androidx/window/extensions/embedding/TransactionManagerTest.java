@@ -16,9 +16,9 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.view.WindowManager.TRANSIT_CHANGE;
-import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CLOSE;
+import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
@@ -86,27 +86,29 @@ public class TransactionManagerTest {
 
     @Test
     public void testSetTransactionOriginType() {
-        // Return TRANSIT_CHANGE if there is no trigger type set.
+        // Return TASK_FRAGMENT_TRANSIT_CHANGE if there is no trigger type set.
         TransactionRecord transactionRecord = mTransactionManager.startNewTransaction();
 
-        assertEquals(TRANSIT_CHANGE, transactionRecord.getTransactionTransitionType());
+        assertEquals(TASK_FRAGMENT_TRANSIT_CHANGE,
+                transactionRecord.getTransactionTransitionType());
 
         // Return the first set type.
         mTransactionManager.getCurrentTransactionRecord().abort();
         transactionRecord = mTransactionManager.startNewTransaction();
-        transactionRecord.setOriginType(TRANSIT_OPEN);
+        transactionRecord.setOriginType(TASK_FRAGMENT_TRANSIT_OPEN);
 
-        assertEquals(TRANSIT_OPEN, transactionRecord.getTransactionTransitionType());
+        assertEquals(TASK_FRAGMENT_TRANSIT_OPEN, transactionRecord.getTransactionTransitionType());
 
-        transactionRecord.setOriginType(TRANSIT_CLOSE);
+        transactionRecord.setOriginType(TASK_FRAGMENT_TRANSIT_CLOSE);
 
-        assertEquals(TRANSIT_OPEN, transactionRecord.getTransactionTransitionType());
+        assertEquals(TASK_FRAGMENT_TRANSIT_OPEN, transactionRecord.getTransactionTransitionType());
 
         // Reset when #startNewTransaction().
         transactionRecord.abort();
         transactionRecord = mTransactionManager.startNewTransaction();
 
-        assertEquals(TRANSIT_CHANGE, transactionRecord.getTransactionTransitionType());
+        assertEquals(TASK_FRAGMENT_TRANSIT_CHANGE,
+                transactionRecord.getTransactionTransitionType());
     }
 
     @Test

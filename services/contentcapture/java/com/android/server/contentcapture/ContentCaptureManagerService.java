@@ -42,6 +42,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
+import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.ContentResolver;
@@ -229,7 +230,7 @@ public final class ContentCaptureManagerService extends
 
     @Override // from SystemService
     public boolean isUserSupported(TargetUser user) {
-        return user.isFull() || user.isManagedProfile();
+        return user.isFull() || user.isProfile();
     }
 
     @Override // from SystemService
@@ -927,13 +928,16 @@ public final class ContentCaptureManagerService extends
             return mGlobalContentCaptureOptions.getOptions(userId, packageName);
         }
 
+        // ErrorProne says ContentCaptureManagerService.this.mLock needs to be guarded by
+        // 'service.mLock', which is the same as mLock.
+        @SuppressWarnings("GuardedBy")
         @Override
         public void notifyActivityEvent(int userId, @NonNull ComponentName activityComponent,
-                @ActivityEventType int eventType) {
+                @ActivityEventType int eventType, @NonNull ActivityId activityId) {
             synchronized (mLock) {
                 final ContentCapturePerUserService service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    service.onActivityEventLocked(activityComponent, eventType);
+                    service.onActivityEventLocked(activityId, activityComponent, eventType);
                 }
             }
         }

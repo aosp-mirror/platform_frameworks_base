@@ -32,7 +32,6 @@ import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
@@ -99,15 +98,15 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleConfigurationChangeItem() {
-        ConfigurationChangeItem emptyItem = ConfigurationChangeItem.obtain(null);
-        ConfigurationChangeItem item = ConfigurationChangeItem.obtain(config());
+        ConfigurationChangeItem emptyItem = ConfigurationChangeItem.obtain(null, 0);
+        ConfigurationChangeItem item = ConfigurationChangeItem.obtain(config(), 1);
         assertNotSame(item, emptyItem);
         assertFalse(item.equals(emptyItem));
 
         item.recycle();
         assertEquals(item, emptyItem);
 
-        ConfigurationChangeItem item2 = ConfigurationChangeItem.obtain(config());
+        ConfigurationChangeItem item2 = ConfigurationChangeItem.obtain(config(), 1);
         assertSame(item, item2);
         assertFalse(item2.equals(emptyItem));
     }
@@ -140,7 +139,6 @@ public class ObjectPoolTests {
         activityInfo.name = "name";
         Configuration overrideConfig = new Configuration();
         overrideConfig.assetsSeq = 5;
-        CompatibilityInfo compat = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
         String referrer = "referrer";
         int procState = 4;
         Bundle bundle = new Bundle();
@@ -149,15 +147,16 @@ public class ObjectPoolTests {
         persistableBundle.putInt("k", 4);
         IBinder assistToken = new Binder();
         IBinder shareableActivityToken = new Binder();
+        int deviceId = 3;
 
         Supplier<LaunchActivityItem> itemSupplier = () -> new LaunchActivityItemBuilder()
                 .setIntent(intent).setIdent(ident).setInfo(activityInfo).setCurConfig(config())
-                .setOverrideConfig(overrideConfig).setCompatInfo(compat).setReferrer(referrer)
+                .setOverrideConfig(overrideConfig).setReferrer(referrer)
                 .setProcState(procState).setState(bundle).setPersistentState(persistableBundle)
                 .setPendingResults(resultInfoList()).setPendingNewIntents(referrerIntentList())
                 .setIsForward(true).setAssistToken(assistToken)
                 .setShareableActivityToken(shareableActivityToken)
-                .setTaskFragmentToken(new Binder()).build();
+                .setTaskFragmentToken(new Binder()).setDeviceId(deviceId).build();
 
         LaunchActivityItem emptyItem = new LaunchActivityItemBuilder().build();
         LaunchActivityItem item = itemSupplier.get();

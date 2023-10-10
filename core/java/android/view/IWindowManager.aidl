@@ -22,6 +22,7 @@ import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 
 import android.app.IAssistDataReceiver;
+import android.content.ComponentName;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -53,7 +54,6 @@ import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.InputChannel;
@@ -66,7 +66,10 @@ import android.view.WindowManager;
 import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
+import android.window.AddToSurfaceSyncGroupResult;
+import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
+import android.window.ScreenCapture;
 
 /**
  * System private interface to the window manager.
@@ -114,6 +117,7 @@ interface IWindowManager
     @UnsupportedAppUsage
     int getInitialDisplayDensity(int displayId);
     int getBaseDisplayDensity(int displayId);
+    int getDisplayIdByUniqueId(String uniqueId);
     void setForcedDisplayDensityForUser(int displayId, int density, int userId);
     void clearForcedDisplayDensityForUser(int displayId, int userId);
     void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
@@ -225,9 +229,18 @@ interface IWindowManager
 
     float getCurrentAnimatorScale();
 
-    // For testing
-    @UnsupportedAppUsage(maxTargetSdk = 28)
-    void setInTouchMode(boolean showFocus);
+    // Request to change the touch mode on the display represented by the displayId parameter.
+    //
+    // If com.android.internal.R.bool.config_perDisplayFocusEnabled is false, then it will request
+    // to change the touch mode on all displays (disregarding displayId parameter).
+    void setInTouchMode(boolean inTouch, int displayId);
+
+    // Request to change the touch mode on all displays (disregarding the value
+    // com.android.internal.R.bool.config_perDisplayFocusEnabled).
+    void setInTouchModeOnAllDisplays(boolean inTouch);
+
+    // Returns the touch mode state for the display represented by the displayId parameter.
+    boolean isInTouchMode(int displayId);
 
     // For StrictMode flashing a red border on violations from the UI
     // thread.  The uid/pid is implicit from the Binder call, and the Window
@@ -270,6 +283,9 @@ interface IWindowManager
      */
     @UnsupportedAppUsage
     void removeRotationWatcher(IRotationWatcher watcher);
+
+    /** Registers the listener to the context token and returns the current proposed rotation. */
+    int registerProposedRotationListener(IBinder contextToken, IRotationWatcher listener);
 
     /**
      * Determine the preferred edge of the screen to pin the compact options menu against.
@@ -445,12 +461,6 @@ interface IWindowManager
      */
     @UnsupportedAppUsage
     int getDockedStackSide();
-
-    /**
-     * Sets the region the user can touch the divider. This region will be excluded from the region
-     * which is used to cause a focus switch when dispatching touch.
-     */
-    void setDockedTaskDividerTouchRegion(in Rect touchableRegion);
 
     /**
      * Registers a listener that will be called when the pinned task state changes.
@@ -710,15 +720,14 @@ interface IWindowManager
      * Called when a remote process updates the requested visibilities of insets on a display window
      * container.
      */
-    void updateDisplayWindowRequestedVisibilities(int displayId, in InsetsVisibilities vis);
+    void updateDisplayWindowRequestedVisibleTypes(int displayId, int requestedVisibleTypes);
 
     /**
      * Called to get the expected window insets.
      *
      * @return {@code true} if system bars are always consumed.
      */
-    boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
-            out InsetsState outInsetsState);
+    boolean getWindowInsets(int displayId, in IBinder token, out InsetsState outInsetsState);
 
     /**
      * Returns a list of {@link android.view.DisplayInfo} for the logical display. This is not
@@ -741,6 +750,11 @@ interface IWindowManager
      * @param flags see definition in SurfaceTracing.cpp
      */
     void setLayerTracingFlags(int flags);
+
+    /**
+     * Toggle active SurfaceFlinger transaction tracing.
+     */
+    void setActiveTransactionTracing(boolean active);
 
     /**
      * Forwards a scroll capture request to the appropriate window, if available.
@@ -961,4 +975,43 @@ interface IWindowManager
      * treatment.
      */
     boolean isLetterboxBackgroundMultiColored();
+
+    /**
+     * Captures the entire display specified by the displayId using the args provided. If the args
+     * are null or if the sourceCrop is invalid or null, the entire display bounds will be captured.
+     */
+    oneway void captureDisplay(int displayId, in @nullable ScreenCapture.CaptureArgs captureArgs,
+            in ScreenCapture.ScreenCaptureListener listener);
+
+    /**
+     * Returns {@code true} if the key will be handled globally and not forwarded to all apps.
+     *
+     * @param keyCode the key code to check
+     * @return {@code true} if the key will be handled globally.
+     */
+    boolean isGlobalKey(int keyCode);
+
+    /**
+     * Create or add to a SurfaceSyncGroup in WindowManager. WindowManager maintains some
+     * SurfaceSyncGroups to ensure multiple processes can sync with each other without sharing
+     * SurfaceControls
+     */
+    boolean addToSurfaceSyncGroup(in IBinder syncGroupToken, boolean parentSyncGroupMerge,
+                in @nullable ISurfaceSyncGroupCompletedListener completedListener,
+                out AddToSurfaceSyncGroupResult addToSurfaceSyncGroupResult);
+
+    /**
+     * Mark a SurfaceSyncGroup stored in WindowManager as ready.
+     */
+    oneway void markSurfaceSyncGroupReady(in IBinder syncGroupToken);
+
+    /**
+     * Invoked when a screenshot is taken of the default display to notify registered listeners.
+     *
+     * Should be invoked only by SysUI.
+     *
+     * @param displayId id of the display screenshot.
+     * @return List of ComponentNames corresponding to the activities that were notified.
+    */
+    List<ComponentName> notifyScreenshotListeners(int displayId);
 }

@@ -6,3 +6,10 @@ flag {
     description: "Flag for NFC mainline changes"
     bug: "292140387"
 }
+
+flag {
+    name: "enable_nfc_reader_option"
+    namespace: "nfc"
+    description: "Flag for NFC reader option API changes"
+    bug: "291187960"
+}

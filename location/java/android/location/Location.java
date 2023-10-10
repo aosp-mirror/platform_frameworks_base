@@ -709,9 +709,7 @@ public class Location implements Parcelable {
     /**
      * Returns the Mean Sea Level altitude of this location in meters.
      *
-     * <p>This is only valid if {@link #hasMslAltitude()} is true.
-     *
-     * @hide
+     * @throws IllegalStateException if {@link #hasMslAltitude()} is false.
      */
     public @FloatRange double getMslAltitudeMeters() {
         Preconditions.checkState(hasMslAltitude(),
@@ -721,8 +719,6 @@ public class Location implements Parcelable {
 
     /**
      * Sets the Mean Sea Level altitude of this location in meters.
-     *
-     * @hide
      */
     public void setMslAltitudeMeters(@FloatRange double mslAltitudeMeters) {
         mMslAltitudeMeters = mslAltitudeMeters;
@@ -731,8 +727,6 @@ public class Location implements Parcelable {
 
     /**
      * Returns true if this location has a Mean Sea Level altitude, false otherwise.
-     *
-     * @hide
      */
     public boolean hasMslAltitude() {
         return (mFieldsMask & HAS_MSL_ALTITUDE_MASK) != 0;
@@ -740,8 +734,6 @@ public class Location implements Parcelable {
 
     /**
      * Removes the Mean Sea Level altitude from this location.
-     *
-     * @hide
      */
     public void removeMslAltitude() {
         mFieldsMask &= ~HAS_MSL_ALTITUDE_MASK;
@@ -752,9 +744,7 @@ public class Location implements Parcelable {
      * percentile confidence level. This means that there is 68% chance that the true Mean Sea Level
      * altitude of this location falls within {@link #getMslAltitudeMeters()} +/- this uncertainty.
      *
-     * <p>This is only valid if {@link #hasMslAltitudeAccuracy()} is true.
-     *
-     * @hide
+     * @throws IllegalStateException if {@link #hasMslAltitudeAccuracy()} is false.
      */
     public @FloatRange(from = 0.0) float getMslAltitudeAccuracyMeters() {
         Preconditions.checkState(hasMslAltitudeAccuracy(),
@@ -764,8 +754,6 @@ public class Location implements Parcelable {
 
     /**
      * Sets the Mean Sea Level altitude accuracy of this location in meters.
-     *
-     * @hide
      */
     public void setMslAltitudeAccuracyMeters(
             @FloatRange(from = 0.0) float mslAltitudeAccuracyMeters) {
@@ -775,8 +763,6 @@ public class Location implements Parcelable {
 
     /**
      * Returns true if this location has a Mean Sea Level altitude accuracy, false otherwise.
-     *
-     * @hide
      */
     public boolean hasMslAltitudeAccuracy() {
         return (mFieldsMask & HAS_MSL_ALTITUDE_ACCURACY_MASK) != 0;
@@ -784,8 +770,6 @@ public class Location implements Parcelable {
 
     /**
      * Removes the Mean Sea Level altitude accuracy from this location.
-     *
-     * @hide
      */
     public void removeMslAltitudeAccuracy() {
         mFieldsMask &= ~HAS_MSL_ALTITUDE_ACCURACY_MASK;
@@ -847,7 +831,9 @@ public class Location implements Parcelable {
      * will be present for any location.
      *
      * <ul>
-     * <li> satellites - the number of satellites used to derive a GNSS fix
+     * <li> satellites - the number of satellites used to derive a GNSS fix. This key was deprecated
+     * in API 34 because the information can be obtained through more accurate means, such as by
+     * referencing {@link GnssStatus#usedInFix}.
      * </ul>
      */
     public @Nullable Bundle getExtras() {

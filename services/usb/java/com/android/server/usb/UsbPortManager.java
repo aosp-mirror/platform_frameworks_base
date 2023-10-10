@@ -46,11 +46,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.hardware.usb.IDisplayPortAltModeInfoListener;
 import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
+import android.hardware.usb.DisplayPortAltModeInfo;
 import android.hardware.usb.V1_0.IUsb;
 import android.hardware.usb.V1_0.PortRole;
 import android.hardware.usb.V1_0.PortRoleType;
@@ -63,6 +65,8 @@ import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HwBinder;
+import android.os.IBinder;
+import android.os.IInterface;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -73,6 +77,7 @@ import android.service.ServiceProtoEnums;
 import android.service.usb.UsbPortInfoProto;
 import android.service.usb.UsbPortManagerProto;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 
@@ -87,9 +92,12 @@ import com.android.server.usb.hal.port.RawPortInfo;
 import com.android.server.usb.hal.port.UsbPortHal;
 import com.android.server.usb.hal.port.UsbPortHalInstance;
 
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Allows trusted components to control the properties of physical USB ports
@@ -103,7 +111,7 @@ import java.util.Objects;
  * (but we don't care today).
  * </p>
  */
-public class UsbPortManager {
+public class UsbPortManager implements IBinder.DeathRecipient {
     private static final String TAG = "UsbPortManager";
 
     private static final int MSG_UPDATE_PORTS = 1;
@@ -155,6 +163,12 @@ public class UsbPortManager {
     private final ArrayMap<String, Integer> mContaminantStatus = new ArrayMap<>();
 
     private NotificationManager mNotificationManager;
+
+    // Maintains a list of DisplayPortAltModeInfo Event listeners,
+    // protected by mDisplayPortListenerLock for broadcasts/register/unregister events
+    private final Object mDisplayPortListenerLock = new Object();
+    private final ArrayMap<IBinder, IDisplayPortAltModeInfoListener> mDisplayPortListeners =
+            new ArrayMap<IBinder, IDisplayPortAltModeInfoListener>();
 
     /**
      * If there currently is a notification related to contaminated USB port management
@@ -671,6 +685,46 @@ public class UsbPortManager {
         }
     }
 
+    @Override
+    public void binderDied() {
+        // All calls should go to binderDied(IBinder deadBinder)
+        Slog.wtf(TAG, "binderDied() called unexpectedly");
+    }
+
+    public void binderDied(IBinder deadBinder) {
+        synchronized (mDisplayPortListenerLock) {
+            mDisplayPortListeners.remove(deadBinder);
+            Slog.d(TAG, "DisplayPortEventDispatcherListener died at " + deadBinder);
+        }
+    }
+
+    public boolean registerForDisplayPortEvents(
+        @NonNull IDisplayPortAltModeInfoListener listener) {
+        synchronized (mDisplayPortListenerLock) {
+            if (!mDisplayPortListeners.containsKey(listener.asBinder())) {
+                try {
+                    listener.asBinder().linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    logAndPrintException(null, "Caught RemoteException in " +
+                            "registerForDisplayPortEvents: ", e);
+                    return false;
+                }
+                mDisplayPortListeners.put(listener.asBinder(), listener);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void unregisterForDisplayPortEvents(
+            @NonNull IDisplayPortAltModeInfoListener listener) {
+        synchronized (mDisplayPortListenerLock) {
+            if (mDisplayPortListeners.remove(listener.asBinder()) != null) {
+                listener.asBinder().unlinkToDeath(this, 0);
+            }
+        }
+    }
+
     public void updatePorts(ArrayList<RawPortInfo> newPortInfo) {
         Message message = mHandler.obtainMessage();
         Bundle bundle = new Bundle();
@@ -680,7 +734,17 @@ public class UsbPortManager {
         mHandler.sendMessage(message);
     }
 
-    public void addSimulatedPort(String portId, int supportedModes, IndentingPrintWriter pw) {
+    public void addSimulatedPort(String portId, int supportedModes,
+            boolean supportsComplianceWarnings, boolean supportsDisplayPortAltMode,
+            IndentingPrintWriter pw) {
+        int supportedAltModes = supportsDisplayPortAltMode ?
+                UsbPort.FLAG_ALT_MODE_TYPE_DISPLAYPORT : 0;
+        DisplayPortAltModeInfo displayPortAltModeInfo = null;
+
+        if (supportsDisplayPortAltMode) {
+            displayPortAltModeInfo = new DisplayPortAltModeInfo();
+        }
+
         synchronized (mLock) {
             if (mSimulatedPorts.containsKey(portId)) {
                 pw.println("Port with same name already exists.  Please remove it first.");
@@ -690,7 +754,28 @@ public class UsbPortManager {
             pw.println("Adding simulated port: portId=" + portId
                     + ", supportedModes=" + UsbPort.modeToString(supportedModes));
             mSimulatedPorts.put(portId,
-                    new RawPortInfo(portId, supportedModes));
+                    new RawPortInfo(
+                            portId,
+                            supportedModes,
+                            UsbPortStatus.CONTAMINANT_PROTECTION_NONE,
+                            UsbPortStatus.MODE_NONE,
+                            false,
+                            UsbPortStatus.POWER_ROLE_NONE,
+                            false,
+                            UsbPortStatus.DATA_ROLE_NONE,
+                            false,
+                            false,
+                            UsbPortStatus.CONTAMINANT_PROTECTION_NONE,
+                            false,
+                            UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED,
+                            UsbPortStatus.DATA_STATUS_UNKNOWN,
+                            false,
+                            UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN,
+                            supportsComplianceWarnings,
+                            new int[] {},
+                            UsbPortStatus.PLUG_STATE_UNKNOWN,
+                            supportedAltModes,
+                            displayPortAltModeInfo));
             updatePortsLocked(pw, null);
         }
     }
@@ -752,6 +837,52 @@ public class UsbPortManager {
                     : UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED;
             updatePortsLocked(pw, null);
         }
+    }
+
+    /**
+     * Sets Compliance Warnings for simulated USB port objects.
+     */
+    public void simulateComplianceWarnings(String portId, String complianceWarningsString,
+            IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            final RawPortInfo portInfo = mSimulatedPorts.get(portId);
+            if (portInfo == null) {
+                pw.println("Simulated port not found");
+                return;
+            }
+
+            IntArray complianceWarnings = new IntArray();
+            for (String s : complianceWarningsString.split("[, ]")) {
+                if (s.length() > 0) {
+                    complianceWarnings.add(Integer.parseInt(s));
+                }
+            }
+            pw.println("Simulating Compliance Warnings: portId=" + portId
+                    + " Warnings=" + complianceWarningsString);
+            portInfo.complianceWarnings = complianceWarnings.toArray();
+            updatePortsLocked(pw, null);
+        }
+    }
+
+
+    public void simulateDisplayPortAltModeInfo(String portId, int partnerSinkStatus,
+            int cableStatus, int numLanes, boolean hpd, int linkTrainingStatus,
+            IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            final RawPortInfo portInfo = mSimulatedPorts.get(portId);
+            if (portInfo == null) {
+                pw.println("Simulated port not found");
+                return;
+            }
+
+            DisplayPortAltModeInfo displayPortAltModeInfo =
+                    new DisplayPortAltModeInfo(partnerSinkStatus, cableStatus, numLanes, hpd,
+                    linkTrainingStatus);
+            portInfo.displayPortAltModeInfo = displayPortAltModeInfo;
+            pw.println("Simulating DisplayPort Info: " + displayPortAltModeInfo);
+            updatePortsLocked(pw, null);
+        }
+
     }
 
     public void disconnectSimulatedPort(String portId, IndentingPrintWriter pw) {
@@ -842,7 +973,13 @@ public class UsbPortManager {
                         portInfo.contaminantDetectionStatus,
                         portInfo.usbDataStatus,
                         portInfo.powerTransferLimited,
-                        portInfo.powerBrickConnectionStatus, pw);
+                        portInfo.powerBrickConnectionStatus,
+                        portInfo.supportsComplianceWarnings,
+                        portInfo.complianceWarnings,
+                        portInfo.plugState,
+                        portInfo.supportedAltModes,
+                        portInfo.displayPortAltModeInfo,
+                        pw);
             }
         } else {
             for (RawPortInfo currentPortInfo : newPortInfo) {
@@ -857,7 +994,13 @@ public class UsbPortManager {
                         currentPortInfo.contaminantDetectionStatus,
                         currentPortInfo.usbDataStatus,
                         currentPortInfo.powerTransferLimited,
-                        currentPortInfo.powerBrickConnectionStatus, pw);
+                        currentPortInfo.powerBrickConnectionStatus,
+                        currentPortInfo.supportsComplianceWarnings,
+                        currentPortInfo.complianceWarnings,
+                        currentPortInfo.plugState,
+                        currentPortInfo.supportedAltModes,
+                        currentPortInfo.displayPortAltModeInfo,
+                        pw);
             }
         }
 
@@ -880,6 +1023,12 @@ public class UsbPortManager {
                     handlePortRemovedLocked(portInfo, pw);
                     break;
             }
+            if (portInfo.mComplianceWarningChange == portInfo.COMPLIANCE_WARNING_CHANGED) {
+                handlePortComplianceWarningLocked(portInfo, pw);
+            }
+            if (portInfo.mDisplayPortAltModeChange == portInfo.ALTMODE_INFO_CHANGED) {
+                handleDpAltModeLocked(portInfo, pw);
+            }
         }
     }
 
@@ -896,6 +1045,11 @@ public class UsbPortManager {
             int usbDataStatus,
             boolean powerTransferLimited,
             int powerBrickConnectionStatus,
+            boolean supportsComplianceWarnings,
+            @NonNull int[] complianceWarnings,
+            int plugState,
+            int supportedAltModes,
+            DisplayPortAltModeInfo displayPortAltModeInfo,
             IndentingPrintWriter pw) {
         // Only allow mode switch capability for dual role ports.
         // Validate that the current mode matches the supported modes we expect.
@@ -949,13 +1103,16 @@ public class UsbPortManager {
             portInfo = new PortInfo(mContext.getSystemService(UsbManager.class),
                 portId, supportedModes, supportedContaminantProtectionModes,
                 supportsEnableContaminantPresenceProtection,
-                supportsEnableContaminantPresenceDetection);
+                supportsEnableContaminantPresenceDetection,
+                supportsComplianceWarnings,
+                supportedAltModes);
             portInfo.setStatus(currentMode, canChangeMode,
                     currentPowerRole, canChangePowerRole,
                     currentDataRole, canChangeDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
                     contaminantDetectionStatus, usbDataStatus,
-                    powerTransferLimited, powerBrickConnectionStatus);
+                    powerTransferLimited, powerBrickConnectionStatus,
+                    complianceWarnings, plugState, displayPortAltModeInfo);
             mPorts.put(portId, portInfo);
         } else {
             // Validate that ports aren't changing definition out from under us.
@@ -987,13 +1144,13 @@ public class UsbPortManager {
                         + ", current=" + supportsEnableContaminantPresenceDetection);
             }
 
-
             if (portInfo.setStatus(currentMode, canChangeMode,
                     currentPowerRole, canChangePowerRole,
                     currentDataRole, canChangeDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
                     contaminantDetectionStatus, usbDataStatus,
-                    powerTransferLimited, powerBrickConnectionStatus)) {
+                    powerTransferLimited, powerBrickConnectionStatus,
+                    complianceWarnings, plugState, displayPortAltModeInfo)) {
                 portInfo.mDisposition = PortInfo.DISPOSITION_CHANGED;
             } else {
                 portInfo.mDisposition = PortInfo.DISPOSITION_READY;
@@ -1019,6 +1176,17 @@ public class UsbPortManager {
         handlePortLocked(portInfo, pw);
     }
 
+    private void handlePortComplianceWarningLocked(PortInfo portInfo, IndentingPrintWriter pw) {
+        logAndPrint(Log.INFO, pw, "USB port compliance warning changed: " + portInfo);
+        logToStatsdComplianceWarnings(portInfo);
+        sendComplianceWarningBroadcastLocked(portInfo);
+    }
+
+    private void handleDpAltModeLocked(PortInfo portInfo, IndentingPrintWriter pw) {
+        logAndPrint(Log.INFO, pw, "USB port DisplayPort Alt Mode Status Changed: " + portInfo);
+        sendDpAltModeCallbackLocked(portInfo, pw);
+    }
+
     private void handlePortRemovedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port removed: " + portInfo);
         handlePortLocked(portInfo, pw);
@@ -1042,6 +1210,32 @@ public class UsbPortManager {
         }
     }
 
+    // Constants have to be converted to stats-log constants
+    private static int[] toStatsLogConstant(@NonNull int[] complianceWarnings) {
+        IntArray complianceWarningsProto = new IntArray();
+        for (int warning : complianceWarnings) {
+            switch (warning) {
+                case UsbPortStatus.COMPLIANCE_WARNING_OTHER:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_OTHER);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_DEBUG_ACCESSORY);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_BC_1_2:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_BC_1_2);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_MISSING_RP);
+                    continue;
+            }
+        }
+        return complianceWarningsProto.toArray();
+    }
+
     private void sendPortChangedBroadcastLocked(PortInfo portInfo) {
         final Intent intent = new Intent(UsbManager.ACTION_USB_PORT_CHANGED);
         intent.addFlags(
@@ -1054,6 +1248,38 @@ public class UsbPortManager {
         // instead of from within the critical section.
         mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 Manifest.permission.MANAGE_USB));
+    }
+
+    private void sendComplianceWarningBroadcastLocked(PortInfo portInfo) {
+        if (portInfo.mComplianceWarningChange == portInfo.COMPLIANCE_WARNING_UNCHANGED) {
+            return;
+        }
+        final Intent intent = new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED);
+        intent.addFlags(
+                Intent.FLAG_RECEIVER_FOREGROUND |
+                        Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        intent.putExtra(UsbManager.EXTRA_PORT, ParcelableUsbPort.of(portInfo.mUsbPort));
+        intent.putExtra(UsbManager.EXTRA_PORT_STATUS, portInfo.mUsbPortStatus);
+
+        // Guard against possible reentrance by posting the broadcast from the handler
+        // instead of from within the critical section.
+        mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                Manifest.permission.MANAGE_USB));
+    }
+
+    private void sendDpAltModeCallbackLocked(PortInfo portInfo, IndentingPrintWriter pw) {
+        String portId = portInfo.mUsbPort.getId();
+        synchronized (mDisplayPortListenerLock) {
+            for (IDisplayPortAltModeInfoListener mListener : mDisplayPortListeners.values()) {
+                try {
+                    mListener.onDisplayPortAltModeInfoChanged(portId,
+                            portInfo.mUsbPortStatus.getDisplayPortAltModeInfo());
+                } catch (RemoteException e) {
+                    logAndPrintException(pw, "Caught RemoteException at "
+                            + "sendDpAltModeCallbackLocked", e);
+                }
+            }
+        }
     }
 
     private void enableContaminantDetectionIfNeeded(PortInfo portInfo, IndentingPrintWriter pw) {
@@ -1136,6 +1362,18 @@ public class UsbPortManager {
         }
     }
 
+    private void logToStatsdComplianceWarnings(PortInfo portInfo) {
+        // Don't report if there isn't anything to report
+        if (portInfo.mUsbPortStatus == null
+                || portInfo.mUsbPortStatus.getComplianceWarnings().length == 0) {
+            return;
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.USB_COMPLIANCE_WARNINGS_REPORTED,
+                portInfo.mUsbPort.getId(),
+                toStatsLogConstant(portInfo.mUsbPortStatus.getComplianceWarnings()));
+    }
+
     public static void logAndPrint(int priority, IndentingPrintWriter pw, String msg) {
         Slog.println(priority, TAG, msg);
         if (pw != null) {
@@ -1156,7 +1394,7 @@ public class UsbPortManager {
             switch (msg.what) {
                 case MSG_UPDATE_PORTS: {
                     Bundle b = msg.getData();
-                    ArrayList<RawPortInfo> PortInfo = b.getParcelableArrayList(PORT_INFO);
+                    ArrayList<RawPortInfo> PortInfo = b.getParcelableArrayList(PORT_INFO, com.android.server.usb.hal.port.RawPortInfo.class);
                     synchronized (mLock) {
                         updatePortsLocked(null, PortInfo);
                     }
@@ -1180,6 +1418,12 @@ public class UsbPortManager {
         public static final int DISPOSITION_READY = 2;
         public static final int DISPOSITION_REMOVED = 3;
 
+        public static final int COMPLIANCE_WARNING_UNCHANGED = 0;
+        public static final int COMPLIANCE_WARNING_CHANGED = 1;
+
+        public static final int ALTMODE_INFO_UNCHANGED = 0;
+        public static final int ALTMODE_INFO_CHANGED = 1;
+
         public final UsbPort mUsbPort;
         public UsbPortStatus mUsbPortStatus;
         public boolean mCanChangeMode;
@@ -1191,15 +1435,62 @@ public class UsbPortManager {
         public long mConnectedAtMillis;
         // 0 when port is connected. Else reports the last connected duration
         public long mLastConnectDurationMillis;
+        // default initialized to 0 which means no changes reported
+        public int mComplianceWarningChange;
+        // default initialized to 0 which means unchanged
+        public int mDisplayPortAltModeChange;
 
         PortInfo(@NonNull UsbManager usbManager, @NonNull String portId, int supportedModes,
                 int supportedContaminantProtectionModes,
                 boolean supportsEnableContaminantPresenceDetection,
-                boolean supportsEnableContaminantPresenceProtection) {
+                boolean supportsEnableContaminantPresenceProtection,
+                boolean supportsComplianceWarnings,
+                int supportedAltModes) {
             mUsbPort = new UsbPort(usbManager, portId, supportedModes,
                     supportedContaminantProtectionModes,
                     supportsEnableContaminantPresenceDetection,
-                    supportsEnableContaminantPresenceProtection);
+                    supportsEnableContaminantPresenceProtection,
+                    supportsComplianceWarnings,
+                    supportedAltModes);
+            mComplianceWarningChange = COMPLIANCE_WARNING_UNCHANGED;
+            mDisplayPortAltModeChange = ALTMODE_INFO_UNCHANGED;
+        }
+
+        public boolean complianceWarningsChanged(@NonNull int[] complianceWarnings) {
+            if (Arrays.equals(complianceWarnings, mUsbPortStatus.getComplianceWarnings())) {
+                mComplianceWarningChange = COMPLIANCE_WARNING_UNCHANGED;
+                return false;
+            }
+            mComplianceWarningChange = COMPLIANCE_WARNING_CHANGED;
+            return true;
+        }
+
+        public boolean displayPortAltModeChanged(DisplayPortAltModeInfo
+                displayPortAltModeInfo) {
+            DisplayPortAltModeInfo currentDisplayPortAltModeInfo =
+                    mUsbPortStatus.getDisplayPortAltModeInfo();
+
+            mDisplayPortAltModeChange = ALTMODE_INFO_UNCHANGED;
+
+            if (displayPortAltModeInfo == null
+                    && currentDisplayPortAltModeInfo != null) {
+                mDisplayPortAltModeChange = ALTMODE_INFO_CHANGED;
+                return true;
+            }
+
+            if (currentDisplayPortAltModeInfo == null) {
+                if (displayPortAltModeInfo != null) {
+                    mDisplayPortAltModeChange = ALTMODE_INFO_CHANGED;
+                    return true;
+                }
+                return false;
+            }
+
+            if (!(currentDisplayPortAltModeInfo.equals(displayPortAltModeInfo))) {
+                mDisplayPortAltModeChange = ALTMODE_INFO_CHANGED;
+                return true;
+            }
+            return false;
         }
 
         public boolean setStatus(int currentMode, boolean canChangeMode,
@@ -1221,7 +1512,8 @@ public class UsbPortManager {
                         supportedRoleCombinations, UsbPortStatus.CONTAMINANT_PROTECTION_NONE,
                         UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED,
                         UsbPortStatus.DATA_STATUS_UNKNOWN, false,
-                        UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN);
+                        UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN,
+                        new int[] {}, 0, null);
                 dispositionChanged = true;
             }
 
@@ -1266,8 +1558,78 @@ public class UsbPortManager {
                 mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                         supportedRoleCombinations, contaminantProtectionStatus,
                         contaminantDetectionStatus, usbDataStatus,
-                        powerTransferLimited, powerBrickConnectionStatus);
+                        powerTransferLimited, powerBrickConnectionStatus,
+                        new int[] {}, 0, null);
                 dispositionChanged = true;
+            }
+
+            if (mUsbPortStatus.isConnected() && mConnectedAtMillis == 0) {
+                mConnectedAtMillis = SystemClock.elapsedRealtime();
+                mLastConnectDurationMillis = 0;
+            } else if (!mUsbPortStatus.isConnected() && mConnectedAtMillis != 0) {
+                mLastConnectDurationMillis = SystemClock.elapsedRealtime() - mConnectedAtMillis;
+                mConnectedAtMillis = 0;
+            }
+
+            return dispositionChanged;
+        }
+
+        public boolean setStatus(int currentMode, boolean canChangeMode,
+                int currentPowerRole, boolean canChangePowerRole,
+                int currentDataRole, boolean canChangeDataRole,
+                int supportedRoleCombinations, int contaminantProtectionStatus,
+                int contaminantDetectionStatus, int usbDataStatus,
+                boolean powerTransferLimited, int powerBrickConnectionStatus,
+                @NonNull int[] complianceWarnings,
+                int plugState, DisplayPortAltModeInfo displayPortAltModeInfo) {
+            boolean dispositionChanged = false;
+            boolean complianceChanged = false;
+            boolean displayPortChanged = false;
+
+            if (mUsbPortStatus != null) {
+                complianceChanged = complianceWarningsChanged(complianceWarnings);
+                displayPortChanged = displayPortAltModeChanged(displayPortAltModeInfo);
+            }
+
+            mCanChangeMode = canChangeMode;
+            mCanChangePowerRole = canChangePowerRole;
+            mCanChangeDataRole = canChangeDataRole;
+            if (mUsbPortStatus == null
+                    || mUsbPortStatus.getCurrentMode() != currentMode
+                    || mUsbPortStatus.getCurrentPowerRole() != currentPowerRole
+                    || mUsbPortStatus.getCurrentDataRole() != currentDataRole
+                    || mUsbPortStatus.getSupportedRoleCombinations()
+                    != supportedRoleCombinations
+                    || mUsbPortStatus.getContaminantProtectionStatus()
+                    != contaminantProtectionStatus
+                    || mUsbPortStatus.getContaminantDetectionStatus()
+                    != contaminantDetectionStatus
+                    || mUsbPortStatus.getUsbDataStatus()
+                    != usbDataStatus
+                    || mUsbPortStatus.isPowerTransferLimited()
+                    != powerTransferLimited
+                    || mUsbPortStatus.getPowerBrickConnectionStatus()
+                    != powerBrickConnectionStatus
+                    || mUsbPortStatus.getPlugState()
+                    != plugState) {
+                if (mUsbPortStatus == null && complianceWarnings.length > 0) {
+                    mComplianceWarningChange = COMPLIANCE_WARNING_CHANGED;
+                }
+                mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
+                        supportedRoleCombinations, contaminantProtectionStatus,
+                        contaminantDetectionStatus, usbDataStatus,
+                        powerTransferLimited, powerBrickConnectionStatus,
+                        complianceWarnings, plugState, displayPortAltModeInfo);
+                dispositionChanged = true;
+            // Case used in order to send compliance warning broadcast or signal DisplayPort
+            // listeners. These targeted broadcasts don't use dispositionChanged to broadcast to
+            // general ACTION_USB_PORT_CHANGED.
+            } else if (complianceChanged || displayPortChanged) {
+                mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole,
+                        currentDataRole, supportedRoleCombinations,
+                        contaminantProtectionStatus, contaminantDetectionStatus,
+                        usbDataStatus, powerTransferLimited, powerBrickConnectionStatus,
+                        complianceWarnings, plugState, displayPortAltModeInfo);
             }
 
             if (mUsbPortStatus.isConnected() && mConnectedAtMillis == 0) {

@@ -105,6 +105,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private AppPredictor mAppPredictor;
     private AppPredictor.Callback mAppPredictorCallback;
 
+    // Represents the UserSpace in which the Initial Intents should be resolved.
+    private final UserHandle mInitialIntentsUserSpace;
+
     // For pinned direct share labels, if the text spans multiple lines, the TextView will consume
     // the full width, even if the characters actually take up less than that. Measure the actual
     // line widths and constrain the View's width based upon that so that the pin doesn't end up
@@ -142,11 +145,12 @@ public class ChooserListAdapter extends ResolverListAdapter {
             ChooserListCommunicator chooserListCommunicator,
             SelectableTargetInfo.SelectableTargetInfoCommunicator selectableTargetInfoCommunicator,
             PackageManager packageManager,
-            ChooserActivityLogger chooserActivityLogger) {
+            ChooserActivityLogger chooserActivityLogger,
+            UserHandle initialIntentsUserSpace) {
         // Don't send the initial intents through the shared ResolverActivity path,
         // we want to separate them into a different section.
         super(context, payloadIntents, null, rList, filterLastUsed,
-                resolverListController, chooserListCommunicator, false);
+                resolverListController, chooserListCommunicator, false, initialIntentsUserSpace);
 
         mMaxShortcutTargetsPerApp =
                 context.getResources().getInteger(R.integer.config_maxShortcutTargetsPerApp);
@@ -154,6 +158,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
         createPlaceHolders();
         mSelectableTargetInfoCommunicator = selectableTargetInfoCommunicator;
         mChooserActivityLogger = chooserActivityLogger;
+        mInitialIntentsUserSpace = initialIntentsUserSpace;
 
         if (initialIntents != null) {
             for (int i = 0; i < initialIntents.length; i++) {
@@ -202,6 +207,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     ri.noResourceId = true;
                     ri.icon = 0;
                 }
+                ri.userHandle = mInitialIntentsUserSpace;
                 mCallerTargets.add(new DisplayResolveInfo(ii, ri, ii, makePresentationGetter(ri)));
                 if (mCallerTargets.size() == MAX_SUGGESTED_APP_TARGETS) break;
             }
@@ -350,8 +356,14 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 // Consolidate multiple targets from same app.
                 Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
                 for (DisplayResolveInfo info : allTargets) {
+                    if (info.getResolveInfo().userHandle == null) {
+                        Log.e(TAG, "ResolveInfo with null UserHandle found: "
+                                + info.getResolveInfo());
+                    }
                     String resolvedTarget = info.getResolvedComponentName().getPackageName()
-                            + '#' + info.getDisplayLabel();
+                            + '#' + info.getDisplayLabel()
+                            + '#' + ResolverActivity.getResolveInfoUserHandle(
+                                    info.getResolveInfo(), getUserHandle()).getIdentifier();
                     DisplayResolveInfo multiDri = consolidated.get(resolvedTarget);
                     if (multiDri == null) {
                         consolidated.put(resolvedTarget, info);
@@ -367,7 +379,8 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 }
                 List<DisplayResolveInfo> groupedTargets = new ArrayList<>();
                 groupedTargets.addAll(consolidated.values());
-                Collections.sort(groupedTargets, new ChooserActivity.AzInfoComparator(mContext));
+                Collections.sort(groupedTargets,
+                        new ChooserActivity.AzInfoComparator(mContext));
                 return groupedTargets;
             }
             @Override

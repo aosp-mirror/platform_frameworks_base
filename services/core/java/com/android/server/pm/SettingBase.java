@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.ApplicationInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.permission.LegacyPermissionState;
@@ -125,34 +124,13 @@ public abstract class SettingBase implements Watchable, Snappable {
     }
 
     public SettingBase setFlags(int pkgFlags) {
-        this.mPkgFlags = pkgFlags
-                & (ApplicationInfo.FLAG_SYSTEM
-                        | ApplicationInfo.FLAG_EXTERNAL_STORAGE
-                        | ApplicationInfo.FLAG_TEST_ONLY);
+        this.mPkgFlags = pkgFlags;
         onChanged();
         return this;
     }
 
     public SettingBase setPrivateFlags(int pkgPrivateFlags) {
-        this.mPkgPrivateFlags = pkgPrivateFlags
-                & (ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
-                | ApplicationInfo.PRIVATE_FLAG_OEM
-                | ApplicationInfo.PRIVATE_FLAG_VENDOR
-                | ApplicationInfo.PRIVATE_FLAG_PRODUCT
-                | ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT
-                | ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER
-                | ApplicationInfo.PRIVATE_FLAG_ODM);
-        onChanged();
-        return this;
-    }
-
-    /**
-     * Unconditionally set both mPkgFlags and mPkgPrivateFlags.
-     * Should not be used outside pkgSetting initialization or update.
-     */
-    SettingBase setPkgFlags(int flags, int privateFlags) {
-        this.mPkgFlags = flags;
-        this.mPkgPrivateFlags = privateFlags;
+        this.mPkgPrivateFlags = pkgPrivateFlags;
         onChanged();
         return this;
     }

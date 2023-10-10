@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.controls.controller.ControlsController
@@ -40,6 +41,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
@@ -61,7 +63,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `state - when cannot show while locked - returns Hidden`() = runBlockingTest {
+    fun state_whenCannotShowWhileLocked_returnsHidden() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
         whenever(component.isEnabled()).thenReturn(true)
         whenever(component.getTileImageId()).thenReturn(R.drawable.controls_icon)
@@ -81,7 +83,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `state - when listing controller is missing - returns Hidden`() = runBlockingTest {
+    fun state_whenListingControllerIsMissing_returnsHidden() = runBlockingTest {
         whenever(component.isEnabled()).thenReturn(true)
         whenever(component.getTileImageId()).thenReturn(R.drawable.controls_icon)
         whenever(component.getTileTitleId()).thenReturn(R.string.quick_controls_title)
@@ -100,7 +102,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `onQuickAffordanceTriggered - canShowWhileLockedSetting is true`() = runBlockingTest {
+    fun onQuickAffordanceTriggered_canShowWhileLockedSettingIsTrue() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(true))
 
         val onClickedResult = underTest.onTriggered(expandable)
@@ -110,7 +112,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `onQuickAffordanceTriggered - canShowWhileLockedSetting is false`() = runBlockingTest {
+    fun onQuickAffordanceTriggered_canShowWhileLockedSettingIsFalse() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
 
         val onClickedResult = underTest.onTriggered(expandable)

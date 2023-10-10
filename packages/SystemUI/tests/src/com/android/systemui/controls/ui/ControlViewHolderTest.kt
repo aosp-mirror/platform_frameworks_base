@@ -66,7 +66,8 @@ class ControlViewHolderTest : SysuiTestCase() {
                     FakeExecutor(clock),
                     mock(ControlActionCoordinator::class.java),
                     mock(ControlsMetricsLogger::class.java),
-                    uid = 100
+                    uid = 100,
+                    0,
             )
 
             val cws = ControlWithState(
@@ -124,7 +125,7 @@ class ControlViewHolderTest : SysuiTestCase() {
             control
         )
         cvh.bindData(cws, false)
-        val chevronIcon = baseLayout.findViewById<View>(R.id.chevron_icon)
+        val chevronIcon = baseLayout.requireViewById<View>(R.id.chevron_icon)
 
         assertThat(chevronIcon.visibility).isEqualTo(View.VISIBLE)
     }

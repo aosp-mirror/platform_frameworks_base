@@ -76,8 +76,20 @@ custom_platform_bootclasspath {
             module: "com.android.btservices-bootclasspath-fragment",
         },
         {
+            apex: "com.android.configinfrastructure",
+            module: "com.android.configinfrastructure-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.conscrypt",
             module: "com.android.conscrypt-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.devicelock",
+            module: "com.android.devicelock-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.healthfitness",
+            module: "com.android.healthfitness-bootclasspath-fragment",
         },
         {
             apex: "com.android.i18n",

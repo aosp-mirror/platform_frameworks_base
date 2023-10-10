@@ -76,8 +76,8 @@ internal fun PeopleScreenEmpty(
             Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp),
             colors =
                 ButtonDefaults.buttonColors(
-                    containerColor = androidColors.colorAccentPrimary,
-                    contentColor = androidColors.textColorOnAccent,
+                    containerColor = androidColors.deprecated.colorAccentPrimary,
+                    contentColor = androidColors.deprecated.textColorOnAccent,
                 )
         ) {
             Text(stringResource(R.string.got_it))
@@ -90,8 +90,8 @@ private fun ExampleTile() {
     val androidColors = LocalAndroidColorScheme.current
     Surface(
         shape = RoundedCornerShape(28.dp),
-        color = androidColors.colorSurface,
-        contentColor = androidColors.textColorPrimary,
+        color = androidColors.deprecated.colorSurface,
+        contentColor = androidColors.deprecated.textColorPrimary,
     ) {
         Row(
             Modifier.padding(vertical = 20.dp, horizontal = 16.dp),

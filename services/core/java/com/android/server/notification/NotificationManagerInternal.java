@@ -27,6 +27,9 @@ public interface NotificationManagerInternal {
     NotificationChannelGroup getNotificationChannelGroup(String pkg, int uid, String channelId);
     void enqueueNotification(String pkg, String basePkg, int callingUid, int callingPid,
             String tag, int id, Notification notification, int userId);
+    void enqueueNotification(String pkg, String basePkg, int callingUid, int callingPid,
+            String tag, int id, Notification notification, int userId,
+            boolean byForegroundService);
     void cancelNotification(String pkg, String basePkg, int callingUid, int callingPid,
             String tag, int id, int userId);
 
@@ -34,6 +37,8 @@ public interface NotificationManagerInternal {
     boolean isNotificationShown(String pkg, String tag, int notificationId, int userId);
 
     void removeForegroundServiceFlagFromNotification(String pkg, int notificationId, int userId);
+
+    void removeUserInitiatedJobFlagFromNotification(String pkg, int notificationId, int userId);
 
     void onConversationRemoved(String pkg, int uid, Set<String> shortcuts);
 

@@ -30,6 +30,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -43,11 +44,13 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -93,18 +96,23 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
                 tableLogBuffer,
                 scope,
             )
-        viewModel =
+        val viewModelCommon =
             WifiViewModel(
-                    airplaneModeViewModel,
-                    connectivityConstants,
-                    context,
-                    tableLogBuffer,
-                    interactor,
-                    scope,
-                    statusBarPipelineFlags,
-                    wifiConstants,
-                )
-                .home
+                airplaneModeViewModel,
+                shouldShowSignalSpacerProvider = { MutableStateFlow(false) },
+                connectivityConstants,
+                context,
+                tableLogBuffer,
+                interactor,
+                scope,
+                wifiConstants,
+            )
+        viewModel =
+            viewModelForLocation(
+                viewModelCommon,
+                statusBarPipelineFlags,
+                StatusBarLocation.HOME,
+            )
     }
 
     // Note: The following tests are more like integration tests, since they stand up a full

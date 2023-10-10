@@ -69,11 +69,12 @@ public final class FontManagerService extends IFontManager.Stub {
     private static final String FONT_FILES_DIR = "/data/fonts/files";
     private static final String CONFIG_XML_FILE = "/data/fonts/config/config.xml";
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.UPDATE_FONTS)
     @RequiresPermission(Manifest.permission.UPDATE_FONTS)
     @Override
     public FontConfig getFontConfig() {
-        getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
-                "UPDATE_FONTS permission required.");
+        super.getFontConfig_enforcePermission();
+
         return getSystemFontConfig();
     }
 
@@ -187,7 +188,7 @@ public final class FontManagerService extends IFontManager.Stub {
 
         @Override
         public void setUpFsverity(String filePath) throws IOException {
-            VerityUtils.setUpFsverity(filePath, /* signature */ (byte[]) null);
+            VerityUtils.setUpFsverity(filePath);
         }
 
         @Override
@@ -238,7 +239,7 @@ public final class FontManagerService extends IFontManager.Stub {
         String[] certs = mContext.getResources().getStringArray(
                 R.array.config_fontManagerServiceCerts);
 
-        if (mDebugCertFilePath != null && (Build.IS_USERDEBUG || Build.IS_ENG)) {
+        if (mDebugCertFilePath != null && Build.IS_DEBUGGABLE) {
             String[] tmp = new String[certs.length + 1];
             System.arraycopy(certs, 0, tmp, 0, certs.length);
             tmp[certs.length] = mDebugCertFilePath;
@@ -250,8 +251,8 @@ public final class FontManagerService extends IFontManager.Stub {
     }
 
     /**
-     * Add debug certificate to the cert list. This must be called only on userdebug/eng
-     * build.
+     * Add debug certificate to the cert list. This must be called only on debuggable build.
+     *
      * @param debugCertPath a debug certificate file path
      */
     public void addDebugCertificate(@Nullable String debugCertPath) {

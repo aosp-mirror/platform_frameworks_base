@@ -26,12 +26,14 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 
 #include "SkColorFilter.h"
+#include "SkColorSpace.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
 #include "SkFontTypes.h"
 #include "SkMaskFilter.h"
 #include "SkPath.h"
 #include "SkPathEffect.h"
+#include "SkPathUtils.h"
 #include "SkShader.h"
 #include "SkBlendMode.h"
 #include "unicode/uloc.h"
@@ -495,17 +497,32 @@ namespace PaintGlue {
         return true;
     }
 
-    static jfloat doRunAdvance(const Paint* paint, const Typeface* typeface, const jchar buf[],
-            jint start, jint count, jint bufSize, jboolean isRtl, jint offset) {
+    static jfloat doRunAdvance(JNIEnv* env, const Paint* paint, const Typeface* typeface,
+                               const jchar buf[], jint start, jint count, jint bufSize,
+                               jboolean isRtl, jint offset, jfloatArray advances,
+                               jint advancesIndex) {
+        if (advances) {
+            size_t advancesLength = env->GetArrayLength(advances);
+            if ((size_t)(count + advancesIndex) > advancesLength) {
+                doThrowAIOOBE(env);
+                return 0;
+            }
+        }
         minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
-        if (offset == start + count) {
+        if (offset == start + count && advances == nullptr) {
             return MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count,
                     bufSize, nullptr);
         }
         std::unique_ptr<float[]> advancesArray(new float[count]);
         MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count, bufSize,
                 advancesArray.get());
-        return minikin::getRunAdvance(advancesArray.get(), buf, start, count, offset);
+
+        float result = minikin::getRunAdvance(advancesArray.get(), buf, start, count, offset);
+        if (advances) {
+            minikin::distributeAdvances(advancesArray.get(), buf, start, count);
+            env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray.get());
+        }
+        return result;
     }
 
     static jfloat getRunAdvance___CIIIIZI_F(JNIEnv *env, jclass, jlong paintHandle, jcharArray text,
@@ -513,9 +530,23 @@ namespace PaintGlue {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         const Typeface* typeface = paint->getAndroidTypeface();
         ScopedCharArrayRO textArray(env, text);
-        jfloat result = doRunAdvance(paint, typeface, textArray.get() + contextStart,
-                start - contextStart, end - start, contextEnd - contextStart, isRtl,
-                offset - contextStart);
+        jfloat result = doRunAdvance(env, paint, typeface, textArray.get() + contextStart,
+                                     start - contextStart, end - start, contextEnd - contextStart,
+                                     isRtl, offset - contextStart, nullptr, 0);
+        return result;
+    }
+
+    static jfloat getRunCharacterAdvance___CIIIIZI_FI_F(JNIEnv* env, jclass, jlong paintHandle,
+                                                        jcharArray text, jint start, jint end,
+                                                        jint contextStart, jint contextEnd,
+                                                        jboolean isRtl, jint offset,
+                                                        jfloatArray advances, jint advancesIndex) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = paint->getAndroidTypeface();
+        ScopedCharArrayRO textArray(env, text);
+        jfloat result = doRunAdvance(env, paint, typeface, textArray.get() + contextStart,
+                                     start - contextStart, end - start, contextEnd - contextStart,
+                                     isRtl, offset - contextStart, advances, advancesIndex);
         return result;
     }
 
@@ -778,7 +809,7 @@ namespace PaintGlue {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
-        return obj->getFillPath(*src, dst) ? JNI_TRUE : JNI_FALSE;
+        return skpathutils::FillPathWithPaint(*src, *obj, dst) ? JNI_TRUE : JNI_FALSE;
     }
 
     static jlong setShader(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong shaderHandle) {
@@ -1032,112 +1063,111 @@ namespace PaintGlue {
 }; // namespace PaintGlue
 
 static const JNINativeMethod methods[] = {
-    {"nGetNativeFinalizer", "()J", (void*) PaintGlue::getNativeFinalizer},
-    {"nInit","()J", (void*) PaintGlue::init},
-    {"nInitWithPaint","(J)J", (void*) PaintGlue::initWithPaint},
-    {"nBreakText","(J[CIIFI[F)I", (void*) PaintGlue::breakTextC},
-    {"nBreakText","(JLjava/lang/String;ZFI[F)I", (void*) PaintGlue::breakTextS},
-    {"nGetTextAdvances","(J[CIIIII[FI)F",
-            (void*) PaintGlue::getTextAdvances___CIIIII_FI},
-    {"nGetTextAdvances","(JLjava/lang/String;IIIII[FI)F",
-            (void*) PaintGlue::getTextAdvances__StringIIIII_FI},
+        {"nGetNativeFinalizer", "()J", (void*)PaintGlue::getNativeFinalizer},
+        {"nInit", "()J", (void*)PaintGlue::init},
+        {"nInitWithPaint", "(J)J", (void*)PaintGlue::initWithPaint},
+        {"nBreakText", "(J[CIIFI[F)I", (void*)PaintGlue::breakTextC},
+        {"nBreakText", "(JLjava/lang/String;ZFI[F)I", (void*)PaintGlue::breakTextS},
+        {"nGetTextAdvances", "(J[CIIIII[FI)F", (void*)PaintGlue::getTextAdvances___CIIIII_FI},
+        {"nGetTextAdvances", "(JLjava/lang/String;IIIII[FI)F",
+         (void*)PaintGlue::getTextAdvances__StringIIIII_FI},
 
-    {"nGetTextRunCursor", "(J[CIIIII)I", (void*) PaintGlue::getTextRunCursor___C},
-    {"nGetTextRunCursor", "(JLjava/lang/String;IIIII)I",
-            (void*) PaintGlue::getTextRunCursor__String},
-    {"nGetTextPath", "(JI[CIIFFJ)V", (void*) PaintGlue::getTextPath___C},
-    {"nGetTextPath", "(JILjava/lang/String;IIFFJ)V", (void*) PaintGlue::getTextPath__String},
-    {"nGetStringBounds", "(JLjava/lang/String;IIILandroid/graphics/Rect;)V",
-            (void*) PaintGlue::getStringBounds },
-    {"nGetCharArrayBounds", "(J[CIIILandroid/graphics/Rect;)V",
-            (void*) PaintGlue::getCharArrayBounds },
-    {"nHasGlyph", "(JILjava/lang/String;)Z", (void*) PaintGlue::hasGlyph },
-    {"nGetRunAdvance", "(J[CIIIIZI)F", (void*) PaintGlue::getRunAdvance___CIIIIZI_F},
-    {"nGetOffsetForAdvance", "(J[CIIIIZF)I",
-            (void*) PaintGlue::getOffsetForAdvance___CIIIIZF_I},
-    {"nGetFontMetricsIntForText", "(J[CIIIIZLandroid/graphics/Paint$FontMetricsInt;)V",
-      (void*)PaintGlue::getFontMetricsIntForText___C},
-    {"nGetFontMetricsIntForText",
-      "(JLjava/lang/String;IIIIZLandroid/graphics/Paint$FontMetricsInt;)V",
-      (void*)PaintGlue::getFontMetricsIntForText___String},
+        {"nGetTextRunCursor", "(J[CIIIII)I", (void*)PaintGlue::getTextRunCursor___C},
+        {"nGetTextRunCursor", "(JLjava/lang/String;IIIII)I",
+         (void*)PaintGlue::getTextRunCursor__String},
+        {"nGetTextPath", "(JI[CIIFFJ)V", (void*)PaintGlue::getTextPath___C},
+        {"nGetTextPath", "(JILjava/lang/String;IIFFJ)V", (void*)PaintGlue::getTextPath__String},
+        {"nGetStringBounds", "(JLjava/lang/String;IIILandroid/graphics/Rect;)V",
+         (void*)PaintGlue::getStringBounds},
+        {"nGetCharArrayBounds", "(J[CIIILandroid/graphics/Rect;)V",
+         (void*)PaintGlue::getCharArrayBounds},
+        {"nHasGlyph", "(JILjava/lang/String;)Z", (void*)PaintGlue::hasGlyph},
+        {"nGetRunAdvance", "(J[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___CIIIIZI_F},
+        {"nGetRunCharacterAdvance", "(J[CIIIIZI[FI)F",
+         (void*)PaintGlue::getRunCharacterAdvance___CIIIIZI_FI_F},
+        {"nGetOffsetForAdvance", "(J[CIIIIZF)I", (void*)PaintGlue::getOffsetForAdvance___CIIIIZF_I},
+        {"nGetFontMetricsIntForText", "(J[CIIIIZLandroid/graphics/Paint$FontMetricsInt;)V",
+         (void*)PaintGlue::getFontMetricsIntForText___C},
+        {"nGetFontMetricsIntForText",
+         "(JLjava/lang/String;IIIIZLandroid/graphics/Paint$FontMetricsInt;)V",
+         (void*)PaintGlue::getFontMetricsIntForText___String},
 
-    // --------------- @FastNative ----------------------
+        // --------------- @FastNative ----------------------
 
-    {"nSetTextLocales","(JLjava/lang/String;)I", (void*) PaintGlue::setTextLocales},
-    {"nSetFontFeatureSettings","(JLjava/lang/String;)V",
-                (void*) PaintGlue::setFontFeatureSettings},
-    {"nGetFontMetrics", "(JLandroid/graphics/Paint$FontMetrics;)F",
-                (void*)PaintGlue::getFontMetrics},
-    {"nGetFontMetricsInt", "(JLandroid/graphics/Paint$FontMetricsInt;)I",
-            (void*)PaintGlue::getFontMetricsInt},
+        {"nSetTextLocales", "(JLjava/lang/String;)I", (void*)PaintGlue::setTextLocales},
+        {"nSetFontFeatureSettings", "(JLjava/lang/String;)V",
+         (void*)PaintGlue::setFontFeatureSettings},
+        {"nGetFontMetrics", "(JLandroid/graphics/Paint$FontMetrics;)F",
+         (void*)PaintGlue::getFontMetrics},
+        {"nGetFontMetricsInt", "(JLandroid/graphics/Paint$FontMetricsInt;)I",
+         (void*)PaintGlue::getFontMetricsInt},
 
-    // --------------- @CriticalNative ------------------
+        // --------------- @CriticalNative ------------------
 
-    {"nReset","(J)V", (void*) PaintGlue::reset},
-    {"nSet","(JJ)V", (void*) PaintGlue::assign},
-    {"nGetFlags","(J)I", (void*) PaintGlue::getFlags},
-    {"nSetFlags","(JI)V", (void*) PaintGlue::setFlags},
-    {"nGetHinting","(J)I", (void*) PaintGlue::getHinting},
-    {"nSetHinting","(JI)V", (void*) PaintGlue::setHinting},
-    {"nSetAntiAlias","(JZ)V", (void*) PaintGlue::setAntiAlias},
-    {"nSetSubpixelText","(JZ)V", (void*) PaintGlue::setSubpixelText},
-    {"nSetLinearText","(JZ)V", (void*) PaintGlue::setLinearText},
-    {"nSetUnderlineText","(JZ)V", (void*) PaintGlue::setUnderlineText},
-    {"nSetStrikeThruText","(JZ)V", (void*) PaintGlue::setStrikeThruText},
-    {"nSetFakeBoldText","(JZ)V", (void*) PaintGlue::setFakeBoldText},
-    {"nSetFilterBitmap","(JZ)V", (void*) PaintGlue::setFilterBitmap},
-    {"nSetDither","(JZ)V", (void*) PaintGlue::setDither},
-    {"nGetStyle","(J)I", (void*) PaintGlue::getStyle},
-    {"nSetStyle","(JI)V", (void*) PaintGlue::setStyle},
-    {"nSetColor","(JI)V", (void*) PaintGlue::setColor},
-    {"nSetColor","(JJJ)V", (void*) PaintGlue::setColorLong},
-    {"nSetAlpha","(JI)V", (void*) PaintGlue::setAlpha},
-    {"nGetStrokeWidth","(J)F", (void*) PaintGlue::getStrokeWidth},
-    {"nSetStrokeWidth","(JF)V", (void*) PaintGlue::setStrokeWidth},
-    {"nGetStrokeMiter","(J)F", (void*) PaintGlue::getStrokeMiter},
-    {"nSetStrokeMiter","(JF)V", (void*) PaintGlue::setStrokeMiter},
-    {"nGetStrokeCap","(J)I", (void*) PaintGlue::getStrokeCap},
-    {"nSetStrokeCap","(JI)V", (void*) PaintGlue::setStrokeCap},
-    {"nGetStrokeJoin","(J)I", (void*) PaintGlue::getStrokeJoin},
-    {"nSetStrokeJoin","(JI)V", (void*) PaintGlue::setStrokeJoin},
-    {"nGetFillPath","(JJJ)Z", (void*) PaintGlue::getFillPath},
-    {"nSetShader","(JJ)J", (void*) PaintGlue::setShader},
-    {"nSetColorFilter","(JJ)J", (void*) PaintGlue::setColorFilter},
-    {"nSetXfermode","(JI)V", (void*) PaintGlue::setXfermode},
-    {"nSetPathEffect","(JJ)J", (void*) PaintGlue::setPathEffect},
-    {"nSetMaskFilter","(JJ)J", (void*) PaintGlue::setMaskFilter},
-    {"nSetTypeface","(JJ)V", (void*) PaintGlue::setTypeface},
-    {"nGetTextAlign","(J)I", (void*) PaintGlue::getTextAlign},
-    {"nSetTextAlign","(JI)V", (void*) PaintGlue::setTextAlign},
-    {"nSetTextLocalesByMinikinLocaleListId","(JI)V",
-            (void*) PaintGlue::setTextLocalesByMinikinLocaleListId},
-    {"nIsElegantTextHeight","(J)Z", (void*) PaintGlue::isElegantTextHeight},
-    {"nSetElegantTextHeight","(JZ)V", (void*) PaintGlue::setElegantTextHeight},
-    {"nGetTextSize","(J)F", (void*) PaintGlue::getTextSize},
-    {"nSetTextSize","(JF)V", (void*) PaintGlue::setTextSize},
-    {"nGetTextScaleX","(J)F", (void*) PaintGlue::getTextScaleX},
-    {"nSetTextScaleX","(JF)V", (void*) PaintGlue::setTextScaleX},
-    {"nGetTextSkewX","(J)F", (void*) PaintGlue::getTextSkewX},
-    {"nSetTextSkewX","(JF)V", (void*) PaintGlue::setTextSkewX},
-    {"nGetLetterSpacing","(J)F", (void*) PaintGlue::getLetterSpacing},
-    {"nSetLetterSpacing","(JF)V", (void*) PaintGlue::setLetterSpacing},
-    {"nGetWordSpacing","(J)F", (void*) PaintGlue::getWordSpacing},
-    {"nSetWordSpacing","(JF)V", (void*) PaintGlue::setWordSpacing},
-    {"nGetStartHyphenEdit", "(J)I", (void*) PaintGlue::getStartHyphenEdit},
-    {"nGetEndHyphenEdit", "(J)I", (void*) PaintGlue::getEndHyphenEdit},
-    {"nSetStartHyphenEdit", "(JI)V", (void*) PaintGlue::setStartHyphenEdit},
-    {"nSetEndHyphenEdit", "(JI)V", (void*) PaintGlue::setEndHyphenEdit},
-    {"nAscent","(J)F", (void*) PaintGlue::ascent},
-    {"nDescent","(J)F", (void*) PaintGlue::descent},
-    {"nGetUnderlinePosition","(J)F", (void*) PaintGlue::getUnderlinePosition},
-    {"nGetUnderlineThickness","(J)F", (void*) PaintGlue::getUnderlineThickness},
-    {"nGetStrikeThruPosition","(J)F", (void*) PaintGlue::getStrikeThruPosition},
-    {"nGetStrikeThruThickness","(J)F", (void*) PaintGlue::getStrikeThruThickness},
-    {"nSetShadowLayer", "(JFFFJJ)V", (void*)PaintGlue::setShadowLayer},
-    {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
-    {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
+        {"nReset", "(J)V", (void*)PaintGlue::reset},
+        {"nSet", "(JJ)V", (void*)PaintGlue::assign},
+        {"nGetFlags", "(J)I", (void*)PaintGlue::getFlags},
+        {"nSetFlags", "(JI)V", (void*)PaintGlue::setFlags},
+        {"nGetHinting", "(J)I", (void*)PaintGlue::getHinting},
+        {"nSetHinting", "(JI)V", (void*)PaintGlue::setHinting},
+        {"nSetAntiAlias", "(JZ)V", (void*)PaintGlue::setAntiAlias},
+        {"nSetSubpixelText", "(JZ)V", (void*)PaintGlue::setSubpixelText},
+        {"nSetLinearText", "(JZ)V", (void*)PaintGlue::setLinearText},
+        {"nSetUnderlineText", "(JZ)V", (void*)PaintGlue::setUnderlineText},
+        {"nSetStrikeThruText", "(JZ)V", (void*)PaintGlue::setStrikeThruText},
+        {"nSetFakeBoldText", "(JZ)V", (void*)PaintGlue::setFakeBoldText},
+        {"nSetFilterBitmap", "(JZ)V", (void*)PaintGlue::setFilterBitmap},
+        {"nSetDither", "(JZ)V", (void*)PaintGlue::setDither},
+        {"nGetStyle", "(J)I", (void*)PaintGlue::getStyle},
+        {"nSetStyle", "(JI)V", (void*)PaintGlue::setStyle},
+        {"nSetColor", "(JI)V", (void*)PaintGlue::setColor},
+        {"nSetColor", "(JJJ)V", (void*)PaintGlue::setColorLong},
+        {"nSetAlpha", "(JI)V", (void*)PaintGlue::setAlpha},
+        {"nGetStrokeWidth", "(J)F", (void*)PaintGlue::getStrokeWidth},
+        {"nSetStrokeWidth", "(JF)V", (void*)PaintGlue::setStrokeWidth},
+        {"nGetStrokeMiter", "(J)F", (void*)PaintGlue::getStrokeMiter},
+        {"nSetStrokeMiter", "(JF)V", (void*)PaintGlue::setStrokeMiter},
+        {"nGetStrokeCap", "(J)I", (void*)PaintGlue::getStrokeCap},
+        {"nSetStrokeCap", "(JI)V", (void*)PaintGlue::setStrokeCap},
+        {"nGetStrokeJoin", "(J)I", (void*)PaintGlue::getStrokeJoin},
+        {"nSetStrokeJoin", "(JI)V", (void*)PaintGlue::setStrokeJoin},
+        {"nGetFillPath", "(JJJ)Z", (void*)PaintGlue::getFillPath},
+        {"nSetShader", "(JJ)J", (void*)PaintGlue::setShader},
+        {"nSetColorFilter", "(JJ)J", (void*)PaintGlue::setColorFilter},
+        {"nSetXfermode", "(JI)V", (void*)PaintGlue::setXfermode},
+        {"nSetPathEffect", "(JJ)J", (void*)PaintGlue::setPathEffect},
+        {"nSetMaskFilter", "(JJ)J", (void*)PaintGlue::setMaskFilter},
+        {"nSetTypeface", "(JJ)V", (void*)PaintGlue::setTypeface},
+        {"nGetTextAlign", "(J)I", (void*)PaintGlue::getTextAlign},
+        {"nSetTextAlign", "(JI)V", (void*)PaintGlue::setTextAlign},
+        {"nSetTextLocalesByMinikinLocaleListId", "(JI)V",
+         (void*)PaintGlue::setTextLocalesByMinikinLocaleListId},
+        {"nIsElegantTextHeight", "(J)Z", (void*)PaintGlue::isElegantTextHeight},
+        {"nSetElegantTextHeight", "(JZ)V", (void*)PaintGlue::setElegantTextHeight},
+        {"nGetTextSize", "(J)F", (void*)PaintGlue::getTextSize},
+        {"nSetTextSize", "(JF)V", (void*)PaintGlue::setTextSize},
+        {"nGetTextScaleX", "(J)F", (void*)PaintGlue::getTextScaleX},
+        {"nSetTextScaleX", "(JF)V", (void*)PaintGlue::setTextScaleX},
+        {"nGetTextSkewX", "(J)F", (void*)PaintGlue::getTextSkewX},
+        {"nSetTextSkewX", "(JF)V", (void*)PaintGlue::setTextSkewX},
+        {"nGetLetterSpacing", "(J)F", (void*)PaintGlue::getLetterSpacing},
+        {"nSetLetterSpacing", "(JF)V", (void*)PaintGlue::setLetterSpacing},
+        {"nGetWordSpacing", "(J)F", (void*)PaintGlue::getWordSpacing},
+        {"nSetWordSpacing", "(JF)V", (void*)PaintGlue::setWordSpacing},
+        {"nGetStartHyphenEdit", "(J)I", (void*)PaintGlue::getStartHyphenEdit},
+        {"nGetEndHyphenEdit", "(J)I", (void*)PaintGlue::getEndHyphenEdit},
+        {"nSetStartHyphenEdit", "(JI)V", (void*)PaintGlue::setStartHyphenEdit},
+        {"nSetEndHyphenEdit", "(JI)V", (void*)PaintGlue::setEndHyphenEdit},
+        {"nAscent", "(J)F", (void*)PaintGlue::ascent},
+        {"nDescent", "(J)F", (void*)PaintGlue::descent},
+        {"nGetUnderlinePosition", "(J)F", (void*)PaintGlue::getUnderlinePosition},
+        {"nGetUnderlineThickness", "(J)F", (void*)PaintGlue::getUnderlineThickness},
+        {"nGetStrikeThruPosition", "(J)F", (void*)PaintGlue::getStrikeThruPosition},
+        {"nGetStrikeThruThickness", "(J)F", (void*)PaintGlue::getStrikeThruThickness},
+        {"nSetShadowLayer", "(JFFFJJ)V", (void*)PaintGlue::setShadowLayer},
+        {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
+        {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
 };
-
 
 int register_android_graphics_Paint(JNIEnv* env) {
     return RegisterMethodsOrDie(env, "android/graphics/Paint", methods, NELEM(methods));

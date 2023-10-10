@@ -55,9 +55,9 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.After;
 import org.junit.Before;
@@ -397,7 +397,7 @@ public class UserSystemPackageInstallerTest {
 
         // Static overlay for allowlisted package1 -> should be installed, like package1
         final AndroidPackage overlayPackage1 = ((ParsedPackage) PackageImpl.forTesting(overlayName1)
-                .setOverlay(true)
+                .setResourceOverlay(true)
                 .setOverlayIsStatic(true)
                 .setOverlayTarget(packageName1)
                 .hideAsParsed())
@@ -405,7 +405,7 @@ public class UserSystemPackageInstallerTest {
 
         // Static overlay for non-allowlisted package2 -> should not be installed, like package2
         final AndroidPackage overlayPackage2 = ((ParsedPackage) PackageImpl.forTesting(overlayName2)
-                .setOverlay(true)
+                .setResourceOverlay(true)
                 .setOverlayIsStatic(true)
                 .setOverlayTarget(packageName2)
                 .hideAsParsed())
@@ -413,7 +413,7 @@ public class UserSystemPackageInstallerTest {
 
         // Non-static overlay for package1 -> not explicitly allowlisted, so shouldn't be installed
         final AndroidPackage overlayPackage3 = ((ParsedPackage) PackageImpl.forTesting(overlayName3)
-                .setOverlay(true)
+                .setResourceOverlay(true)
                 .setOverlayIsStatic(false) // non-static
                 .setOverlayTarget(packageName1)
                 .hideAsParsed())

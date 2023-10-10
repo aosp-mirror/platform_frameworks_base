@@ -40,6 +40,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -115,6 +116,10 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         Looper looper = mTestableLooper.getLooper();
         Handler mainHandler = new Handler(looper);
+        // TODO(b/259908270): remove
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                DevicePolicyManager.ADD_ISFINANCED_DEVICE_FLAG, "true",
+                /* makeDefault= */ false);
         when(mUserTracker.getUserInfo()).thenReturn(mock(UserInfo.class));
         mFooterUtils = new QSSecurityFooterUtils(getContext(),
                 getContext().getSystemService(DevicePolicyManager.class), mUserTracker,
@@ -122,6 +127,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
         when(mSecurityController.getDeviceOwnerComponentOnAnyUser())
                 .thenReturn(DEVICE_OWNER_COMPONENT);
+        when(mSecurityController.isFinancedDevice()).thenReturn(false);
+        // TODO(b/259908270): remove
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
     }
@@ -184,6 +191,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.isDeviceManaged()).thenReturn(true);
         when(mSecurityController.getDeviceOwnerOrganizationName())
                 .thenReturn(MANAGING_ORGANIZATION);
+        when(mSecurityController.isFinancedDevice()).thenReturn(true);
+        // TODO(b/259908270): remove
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
 
@@ -495,6 +504,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Test
     public void testGetManagementTitleForFinancedDevice() {
         when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.isFinancedDevice()).thenReturn(true);
+        // TODO(b/259908270): remove
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
 
@@ -524,6 +535,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Test
     public void testGetManagementMessage_deviceOwner_asFinancedDevice() {
         when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.isFinancedDevice()).thenReturn(true);
+        // TODO(b/259908270): remove
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
 
@@ -574,14 +587,14 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(addLink(mContext.getString(R.string.monitoring_description_two_named_vpns,
                                  VPN_PACKAGE, VPN_PACKAGE_2)),
                 mFooterUtils.getVpnMessage(false, true, VPN_PACKAGE, VPN_PACKAGE_2));
-        assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
-                                 VPN_PACKAGE)),
+        assertEquals(addLink(mContext.getString(
+                R.string.monitoring_description_managed_device_named_vpn, VPN_PACKAGE)),
                 mFooterUtils.getVpnMessage(true, false, VPN_PACKAGE, null));
         assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
                                  VPN_PACKAGE)),
                 mFooterUtils.getVpnMessage(false, false, VPN_PACKAGE, null));
-        assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
-                                 VPN_PACKAGE_2)),
+        assertEquals(addLink(mContext.getString(
+                R.string.monitoring_description_managed_device_named_vpn, VPN_PACKAGE_2)),
                 mFooterUtils.getVpnMessage(true, true, null, VPN_PACKAGE_2));
         assertEquals(addLink(mContext.getString(
                                  R.string.monitoring_description_managed_profile_named_vpn,
@@ -689,6 +702,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.isDeviceManaged()).thenReturn(true);
         when(mSecurityController.getDeviceOwnerOrganizationName())
                 .thenReturn(MANAGING_ORGANIZATION);
+        when(mSecurityController.isFinancedDevice()).thenReturn(true);
+        // TODO(b/259908270): remove
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
 
@@ -711,6 +726,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.isDeviceManaged()).thenReturn(true);
         when(mSecurityController.getDeviceOwnerOrganizationName())
                 .thenReturn(MANAGING_ORGANIZATION);
+        when(mSecurityController.isFinancedDevice()).thenReturn(true);
+        // TODO(b/259908270): remove
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
 

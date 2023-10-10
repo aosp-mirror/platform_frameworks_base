@@ -16,6 +16,7 @@
 
 #include "ShaderCache.h"
 #include <GrDirectContext.h>
+#include <SkData.h>
 #include <gui/TraceUtils.h>
 #include <log/log.h>
 #include <openssl/sha.h>
@@ -32,7 +33,8 @@ namespace skiapipeline {
 // Cache size limits.
 static const size_t maxKeySize = 1024;
 static const size_t maxValueSize = 2 * 1024 * 1024;
-static const size_t maxTotalSize = 1024 * 1024;
+static const size_t maxTotalSize = 4 * 1024 * 1024;
+static_assert(maxKeySize + maxValueSize < maxTotalSize);
 
 ShaderCache::ShaderCache() {
     // There is an "incomplete FileBlobCache type" compilation error, if ctor is moved to header.

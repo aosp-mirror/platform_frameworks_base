@@ -15,6 +15,7 @@
  */
 package com.android.server.audio;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.media.AudioSystem;
 import android.os.Looper;
+import android.os.PermissionEnforcer;
 import android.os.UserHandle;
 import android.util.Log;
 
@@ -37,8 +39,11 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
@@ -49,11 +54,18 @@ public class AudioServiceTest {
 
     private static final int MAX_MESSAGE_HANDLING_DELAY_MS = 100;
 
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
+
     private Context mContext;
     private AudioSystemAdapter mAudioSystem;
-    @Spy private SystemServerAdapter mSpySystemServer;
     private SettingsAdapter mSettingsAdapter;
+
+    @Spy private NoOpSystemServerAdapter mSpySystemServer;
     @Mock private AppOpsManager mMockAppOpsManager;
+    @Mock private AudioPolicyFacade mMockAudioPolicy;
+    @Mock private PermissionEnforcer mMockPermissionEnforcer;
+
     // the class being unit-tested here
     private AudioService mAudioService;
 
@@ -67,13 +79,12 @@ public class AudioServiceTest {
         }
         mContext = InstrumentationRegistry.getTargetContext();
         mAudioSystem = new NoOpAudioSystemAdapter();
-        mSpySystemServer = spy(new NoOpSystemServerAdapter());
         mSettingsAdapter = new NoOpSettingsAdapter();
-        mMockAppOpsManager = mock(AppOpsManager.class);
         when(mMockAppOpsManager.noteOp(anyInt(), anyInt(), anyString(), anyString(), anyString()))
                 .thenReturn(AppOpsManager.MODE_ALLOWED);
         mAudioService = new AudioService(mContext, mAudioSystem, mSpySystemServer,
-                mSettingsAdapter, null, mMockAppOpsManager);
+                mSettingsAdapter, mMockAudioPolicy, null, mMockAppOpsManager,
+                mMockPermissionEnforcer);
     }
 
     /**
@@ -152,5 +163,16 @@ public class AudioServiceTest {
         Assert.assertEquals(ringVol, mAudioService.getStreamVolume(AudioSystem.STREAM_RING));
         Assert.assertEquals(ringMaxVol, mAudioService.getStreamVolume(
                 AudioSystem.STREAM_NOTIFICATION));
+    }
+
+    @Test
+    public void testAudioPolicyException() throws Exception {
+        Log.i(TAG, "running testAudioPolicyException");
+        Assert.assertNotNull(mAudioService);
+        // Ensure that AudioPolicy inavailability doesn't bring down SystemServer
+        when(mMockAudioPolicy.isHotwordStreamSupported(anyBoolean())).thenThrow(
+                    new IllegalStateException(), new IllegalStateException());
+        Assert.assertEquals(false, mAudioService.isHotwordStreamSupported(false));
+        Assert.assertEquals(false, mAudioService.isHotwordStreamSupported(true));
     }
 }

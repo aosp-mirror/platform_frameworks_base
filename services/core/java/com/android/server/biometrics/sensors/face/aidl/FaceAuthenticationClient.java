@@ -25,8 +25,10 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.face.IFace;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceAuthenticationFrame;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
@@ -38,6 +40,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -45,7 +49,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
-import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import java.util.ArrayList;
@@ -54,59 +58,65 @@ import java.util.function.Supplier;
 /**
  * Face-specific authentication client for the {@link IFace} AIDL HAL interface.
  */
-class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
+class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAuthenticateOptions>
         implements LockoutConsumer {
     private static final String TAG = "FaceAuthenticationClient";
 
-    @NonNull private final UsageStats mUsageStats;
-    @NonNull private final LockoutCache mLockoutCache;
-    @Nullable private final NotificationManager mNotificationManager;
-    @Nullable private ICancellationSignal mCancellationSignal;
-    @Nullable private SensorPrivacyManager mSensorPrivacyManager;
-
+    @NonNull
+    private final UsageStats mUsageStats;
+    @NonNull
+    private final AuthSessionCoordinator mAuthSessionCoordinator;
+    @Nullable
+    private final NotificationManager mNotificationManager;
     private final int[] mBiometricPromptIgnoreList;
     private final int[] mBiometricPromptIgnoreListVendor;
     private final int[] mKeyguardIgnoreList;
     private final int[] mKeyguardIgnoreListVendor;
-
-    @FaceManager.FaceAcquired private int mLastAcquire = FaceManager.FACE_ACQUIRED_UNKNOWN;
+    @Nullable
+    private ICancellationSignal mCancellationSignal;
+    @Nullable
+    private SensorPrivacyManager mSensorPrivacyManager;
+    @FaceManager.FaceAcquired
+    private int mLastAcquire = FaceManager.FACE_ACQUIRED_UNKNOWN;
 
     FaceAuthenticationClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
-            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull ClientMonitorCallbackConverter listener, long operationId,
+            boolean restricted, @NonNull FaceAuthenticateOptions options, int cookie,
+            boolean requireConfirmation,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull UsageStats usageStats,
             @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
-            boolean isKeyguardBypassEnabled) {
-        this(context, lazyDaemon, token, requestId, listener, targetUserId, operationId,
-                restricted, owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
+            @Authenticators.Types int sensorStrength) {
+        this(context, lazyDaemon, token, requestId, listener, operationId,
+                restricted, options, cookie, requireConfirmation, logger, biometricContext,
                 isStrongBiometric, usageStats, lockoutCache, allowBackgroundAuthentication,
-                isKeyguardBypassEnabled, context.getSystemService(SensorPrivacyManager.class));
+                context.getSystemService(SensorPrivacyManager.class), sensorStrength);
     }
 
     @VisibleForTesting
     FaceAuthenticationClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
-            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull ClientMonitorCallbackConverter listener, long operationId,
+            boolean restricted, @NonNull FaceAuthenticateOptions options, int cookie,
+            boolean requireConfirmation,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull UsageStats usageStats,
             @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
-            boolean isKeyguardBypassEnabled, SensorPrivacyManager sensorPrivacyManager) {
-        super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
-                owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
-                isStrongBiometric, null /* taskStackListener */, lockoutCache,
-                allowBackgroundAuthentication,
-                false /* shouldVibrate */,
-                isKeyguardBypassEnabled);
+            SensorPrivacyManager sensorPrivacyManager,
+            @Authenticators.Types int biometricStrength) {
+        super(context, lazyDaemon, token, listener, operationId, restricted,
+                options, cookie, requireConfirmation, logger, biometricContext,
+                isStrongBiometric, null /* taskStackListener */, null /* lockoutCache */,
+                allowBackgroundAuthentication, false /* shouldVibrate */,
+                biometricStrength);
         setRequestId(requestId);
         mUsageStats = usageStats;
-        mLockoutCache = lockoutCache;
         mNotificationManager = context.getSystemService(NotificationManager.class);
         mSensorPrivacyManager = sensorPrivacyManager;
+        mAuthSessionCoordinator = biometricContext.getAuthSessionCoordinator();
 
         final Resources resources = getContext().getResources();
         mBiometricPromptIgnoreList = resources.getIntArray(
@@ -138,7 +148,7 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
             if (mSensorPrivacyManager != null
                     && mSensorPrivacyManager
                     .isSensorPrivacyEnabled(SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE,
-                    SensorPrivacyManager.Sensors.CAMERA)) {
+                            SensorPrivacyManager.Sensors.CAMERA)) {
                 onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
                 mCallback.onClientFinished(this, false /* success */);
@@ -156,8 +166,17 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            return session.getSession().authenticateWithContext(
-                    mOperationId, getOperationContext());
+            final OperationContextExt opContext = getOperationContext();
+            final ICancellationSignal cancel = session.getSession().authenticateWithContext(
+                    mOperationId, opContext.toAidlContext(getOptions()));
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            });
+            return cancel;
         } else {
             return session.getSession().authenticate(mOperationId);
         }
@@ -165,6 +184,8 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
 
     @Override
     protected void stopHalOperation() {
+        unsubscribeBiometricContext();
+
         if (mCancellationSignal != null) {
             try {
                 mCancellationSignal.cancel();
@@ -222,7 +243,6 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
         if (error == BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL) {
             BiometricNotificationUtils.showReEnrollmentNotification(getContext());
         }
-
         super.onError(error, vendorCode);
     }
 
@@ -245,6 +265,8 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
         mLastAcquire = acquireInfo;
         final boolean shouldSend = shouldSendAcquiredMessage(acquireInfo, vendorCode);
         onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
+        PerformanceTracker pt = PerformanceTracker.getInstanceForSensorId(getSensorId());
+        pt.incrementAcquireForUser(getTargetUserId(), isCryptoOperation());
     }
 
     /**
@@ -272,12 +294,15 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
 
     @Override
     public void onLockoutTimed(long durationMillis) {
-        super.onLockoutTimed(durationMillis);
-        mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_TIMED);
+        mAuthSessionCoordinator.lockOutTimed(getTargetUserId(), getSensorStrength(), getSensorId(),
+                durationMillis, getRequestId());
         // Lockout metrics are logged as an error code.
         final int error = BiometricFaceConstants.FACE_ERROR_LOCKOUT;
         getLogger().logOnError(getContext(), getOperationContext(),
                 error, 0 /* vendorCode */, getTargetUserId());
+
+        PerformanceTracker.getInstanceForSensorId(getSensorId())
+                .incrementTimedLockoutForUser(getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
@@ -288,12 +313,15 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
 
     @Override
     public void onLockoutPermanent() {
-        super.onLockoutPermanent();
-        mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_PERMANENT);
+        mAuthSessionCoordinator.lockedOutFor(getTargetUserId(), getSensorStrength(), getSensorId(),
+                getRequestId());
         // Lockout metrics are logged as an error code.
         final int error = BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
         getLogger().logOnError(getContext(), getOperationContext(),
                 error, 0 /* vendorCode */, getTargetUserId());
+
+        PerformanceTracker.getInstanceForSensorId(getSensorId())
+                .incrementPermanentLockoutForUser(getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);

@@ -354,6 +354,15 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    public static void formatDuration(long time, long now, StringBuilder sb) {
+        if (time == 0) {
+            sb.append("--");
+            return;
+        }
+        formatDuration(time-now, sb, 0);
+    }
+
+    /** @hide Just for debugging; not internationalized. */
     public static void formatDuration(long time, long now, PrintWriter pw) {
         if (time == 0) {
             pw.print("--");

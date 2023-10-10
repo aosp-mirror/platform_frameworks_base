@@ -18,17 +18,27 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
+import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
+import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
+import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.util.mockito.mock
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -36,17 +46,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
     private lateinit var underTest: DreamingToLockscreenTransitionViewModel
     private lateinit var repository: FakeKeyguardTransitionRepository
-    private lateinit var transitionAnimation: KeyguardTransitionAnimationFlow
 
     @Before
     fun setUp() {
         repository = FakeKeyguardTransitionRepository()
-        val interactor = KeyguardTransitionInteractor(repository)
-        underTest = DreamingToLockscreenTransitionViewModel(interactor)
+        val interactor = KeyguardTransitionInteractor(repository, TestScope().backgroundScope)
+        underTest = DreamingToLockscreenTransitionViewModel(interactor, mock())
     }
 
     @Test
@@ -58,17 +68,15 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
             val job =
                 underTest.dreamOverlayTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
 
-            // Should start running here...
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0f, STARTED))
             repository.sendTransitionStep(step(0f))
             repository.sendTransitionStep(step(0.3f))
             repository.sendTransitionStep(step(0.5f))
             repository.sendTransitionStep(step(0.6f))
-            // ...up to here
             repository.sendTransitionStep(step(0.8f))
             repository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(5)
+            assertThat(values.size).isEqualTo(7)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
 
             job.cancel()
@@ -82,7 +90,7 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
             val job = underTest.dreamOverlayAlpha.onEach { values.add(it) }.launchIn(this)
 
             // Should start running here...
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0f, STARTED))
             repository.sendTransitionStep(step(0f))
             repository.sendTransitionStep(step(0.1f))
             repository.sendTransitionStep(step(0.5f))
@@ -104,7 +112,7 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
             val job = underTest.lockscreenAlpha.onEach { values.add(it) }.launchIn(this)
 
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0f, STARTED))
             repository.sendTransitionStep(step(0f))
             repository.sendTransitionStep(step(0.1f))
             repository.sendTransitionStep(step(0.2f))
@@ -126,7 +134,7 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
             val job =
                 underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
 
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0f, STARTED))
             repository.sendTransitionStep(step(0f))
             repository.sendTransitionStep(step(0.3f))
             repository.sendTransitionStep(step(0.5f))
@@ -138,13 +146,44 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
             job.cancel()
         }
 
-    private fun step(
-        value: Float,
-        state: TransitionState = TransitionState.RUNNING
-    ): TransitionStep {
+    @Test
+    fun transitionEnded() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<TransitionStep>()
+
+            val job = underTest.transitionEnded.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(TransitionStep(DOZING, DREAMING, 0.0f, STARTED))
+            repository.sendTransitionStep(TransitionStep(DOZING, DREAMING, 1.0f, FINISHED))
+
+            repository.sendTransitionStep(TransitionStep(DREAMING, LOCKSCREEN, 0.0f, STARTED))
+            repository.sendTransitionStep(TransitionStep(DREAMING, LOCKSCREEN, 0.1f, RUNNING))
+            repository.sendTransitionStep(TransitionStep(DREAMING, LOCKSCREEN, 1.0f, FINISHED))
+
+            repository.sendTransitionStep(TransitionStep(LOCKSCREEN, DREAMING, 0.0f, STARTED))
+            repository.sendTransitionStep(TransitionStep(LOCKSCREEN, DREAMING, 0.5f, RUNNING))
+            repository.sendTransitionStep(TransitionStep(LOCKSCREEN, DREAMING, 1.0f, FINISHED))
+
+            repository.sendTransitionStep(TransitionStep(DREAMING, GONE, 0.0f, STARTED))
+            repository.sendTransitionStep(TransitionStep(DREAMING, GONE, 0.5f, RUNNING))
+            repository.sendTransitionStep(TransitionStep(DREAMING, GONE, 1.0f, CANCELED))
+
+            repository.sendTransitionStep(TransitionStep(DREAMING, AOD, 0.0f, STARTED))
+            repository.sendTransitionStep(TransitionStep(DREAMING, AOD, 1.0f, FINISHED))
+
+            assertThat(values.size).isEqualTo(3)
+            values.forEach {
+                assertThat(it.transitionState == FINISHED || it.transitionState == CANCELED)
+                    .isTrue()
+            }
+
+            job.cancel()
+        }
+
+    private fun step(value: Float, state: TransitionState = RUNNING): TransitionStep {
         return TransitionStep(
-            from = KeyguardState.DREAMING,
-            to = KeyguardState.LOCKSCREEN,
+            from = DREAMING,
+            to = LOCKSCREEN,
             value = value,
             transitionState = state,
             ownerName = "DreamingToLockscreenTransitionViewModelTest"

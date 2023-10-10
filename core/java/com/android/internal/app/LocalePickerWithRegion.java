@@ -21,6 +21,7 @@ import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -60,6 +61,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     private int mTopDistance = 0;
     private CharSequence mTitle = null;
     private OnActionExpandListener mOnActionExpandListener;
+    private boolean mIsNumberingSystem = false;
 
     /**
      * Other classes can register to be notified when a locale was selected.
@@ -89,6 +91,18 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         boolean hasSpecificPackageName();
     }
 
+    private static LocalePickerWithRegion createNumberingSystemPicker(
+            LocaleSelectedListener listener, LocaleStore.LocaleInfo parent,
+            boolean translatedOnly, OnActionExpandListener onActionExpandListener,
+            LocaleCollectorBase localePickerCollector) {
+        LocalePickerWithRegion localePicker = new LocalePickerWithRegion();
+        localePicker.setOnActionExpandListener(onActionExpandListener);
+        localePicker.setIsNumberingSystem(true);
+        boolean shouldShowTheList = localePicker.setListener(listener, parent,
+                translatedOnly, localePickerCollector);
+        return shouldShowTheList ? localePicker : null;
+    }
+
     private static LocalePickerWithRegion createCountryPicker(
             LocaleSelectedListener listener, LocaleStore.LocaleInfo parent,
             boolean translatedOnly, OnActionExpandListener onActionExpandListener,
@@ -102,15 +116,21 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
 
     public static LocalePickerWithRegion createLanguagePicker(Context context,
             LocaleSelectedListener listener, boolean translatedOnly) {
-        return createLanguagePicker(context, listener, translatedOnly, null, null);
+        return createLanguagePicker(context, listener, translatedOnly, null, null, null);
     }
 
     public static LocalePickerWithRegion createLanguagePicker(Context context,
-            LocaleSelectedListener listener, boolean translatedOnly, String appPackageName,
-            OnActionExpandListener onActionExpandListener) {
+            LocaleSelectedListener listener, boolean translatedOnly, LocaleList explicitLocales) {
+        return createLanguagePicker(context, listener, translatedOnly, explicitLocales, null, null);
+    }
+
+    /** Creates language picker UI */
+    public static LocalePickerWithRegion createLanguagePicker(Context context,
+            LocaleSelectedListener listener, boolean translatedOnly, LocaleList explicitLocales,
+            String appPackageName, OnActionExpandListener onActionExpandListener) {
         LocaleCollectorBase localePickerController;
         if (TextUtils.isEmpty(appPackageName)) {
-            localePickerController = new SystemLocaleCollector(context);
+            localePickerController = new SystemLocaleCollector(context, explicitLocales);
         } else {
             localePickerController = new AppLocaleCollector(context, appPackageName);
         }
@@ -119,6 +139,10 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         localePicker.setListener(listener, /* parent */ null, translatedOnly,
                 localePickerController);
         return localePicker;
+    }
+
+    private void setIsNumberingSystem(boolean isNumberingSystem) {
+        mIsNumberingSystem = isNumberingSystem;
     }
 
     /**
@@ -177,6 +201,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         final boolean hasSpecificPackageName =
                 mLocalePickerCollector != null && mLocalePickerCollector.hasSpecificPackageName();
         mAdapter = new SuggestedLocaleAdapter(mLocaleList, countryMode, hasSpecificPackageName);
+        mAdapter.setNumberingSystemMode(mIsNumberingSystem);
         final LocaleHelper.LocaleInfoComparator comp =
                 new LocaleHelper.LocaleInfoComparator(sortingLocale, countryMode);
         mAdapter.sort(comp);
@@ -206,7 +231,6 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     @Override
     public void onResume() {
         super.onResume();
-
         if (mParentLocale != null) {
             getActivity().setTitle(mParentLocale.getFullNameNative());
         } else {
@@ -243,16 +267,32 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         // Special case for resetting the app locale to equal the system locale.
         boolean isSystemLocale = locale.isSystemLocale();
         boolean isRegionLocale = locale.getParent() != null;
+        boolean mayHaveDifferentNumberingSystem = locale.hasNumberingSystems();
 
-        if (isSystemLocale || isRegionLocale) {
+        if (isSystemLocale
+                // The suggeseted locale would contain the country code except an edge case for
+                // SUGGESTION_TYPE_CURRENT where the application itself set the preferred locale.
+                // In this case, onLocaleSelected() will still set the app locale.
+                || locale.isSuggested()
+                || (isRegionLocale && !mayHaveDifferentNumberingSystem)
+                || mIsNumberingSystem) {
             if (mListener != null) {
                 mListener.onLocaleSelected(locale);
             }
             returnToParentFrame();
         } else {
-            LocalePickerWithRegion selector = LocalePickerWithRegion.createCountryPicker(
-                    mListener, locale, mTranslatedOnly /* translate only */,
-                    mOnActionExpandListener, this.mLocalePickerCollector);
+            LocalePickerWithRegion selector;
+            if (mayHaveDifferentNumberingSystem) {
+                selector =
+                        LocalePickerWithRegion.createNumberingSystemPicker(
+                        mListener, locale, mTranslatedOnly /* translate only */,
+                        mOnActionExpandListener, this.mLocalePickerCollector);
+            } else {
+                selector = LocalePickerWithRegion.createCountryPicker(
+                        mListener, locale, mTranslatedOnly /* translate only */,
+                        mOnActionExpandListener, this.mLocalePickerCollector);
+            }
+
             if (selector != null) {
                 getFragmentManager().beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -270,8 +310,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             inflater.inflate(R.menu.language_selection_list, menu);
 
             final MenuItem searchMenuItem = menu.findItem(R.id.locale_search_menu);
-            if (mLocalePickerCollector.hasSpecificPackageName()
-                    && mOnActionExpandListener != null) {
+            if (mOnActionExpandListener != null) {
                 searchMenuItem.setOnActionExpandListener(mOnActionExpandListener);
             }
 

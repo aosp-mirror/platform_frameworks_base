@@ -63,11 +63,29 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithmInterfac
         if (pipBoundsState.isImeShowing()) {
             insets.bottom -= pipBoundsState.getImeHeight();
         }
+        // if PiP is stashed we only adjust the vertical position if it's outside of insets and
+        // ignore all keep clear areas, since it's already on the side
+        if (pipBoundsState.isStashed()) {
+            if (startingBounds.bottom > insets.bottom || startingBounds.top < insets.top) {
+                // bring PiP back to be aligned by bottom inset
+                startingBounds.offset(0, insets.bottom - startingBounds.bottom);
+            }
+            return startingBounds;
+        }
         Rect pipBounds = new Rect(startingBounds);
 
-        // move PiP towards corner if user hasn't moved it manually or the flag is on
-        if (mKeepClearAreaGravityEnabled
-                || (!pipBoundsState.hasUserMovedPip() && !pipBoundsState.hasUserResizedPip())) {
+        boolean shouldApplyGravity = false;
+        // if PiP is outside of screen insets, reposition using gravity
+        if (!insets.contains(pipBounds)) {
+            shouldApplyGravity = true;
+        }
+        // if user has not interacted with PiP, reposition using gravity
+        if (!pipBoundsState.hasUserMovedPip() && !pipBoundsState.hasUserResizedPip()) {
+            shouldApplyGravity = true;
+        }
+
+        // apply gravity that will position PiP in bottom left or bottom right corner within insets
+        if (mKeepClearAreaGravityEnabled || shouldApplyGravity) {
             float snapFraction = pipBoundsAlgorithm.getSnapFraction(startingBounds);
             int verticalGravity = Gravity.BOTTOM;
             int horizontalGravity;

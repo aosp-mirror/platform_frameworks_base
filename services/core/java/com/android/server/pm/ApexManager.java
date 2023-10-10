@@ -16,8 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,7 +25,6 @@ import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
 import android.apex.CompressedApexInfoList;
 import android.apex.IApexService;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
@@ -42,7 +39,6 @@ import android.sysprop.ApexProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.PrintWriterPrinter;
 import android.util.Singleton;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -53,12 +49,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.build.UnboundedSdkLevel;
-import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.component.ParsedApexSystemService;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;
@@ -70,12 +62,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 /**
  * ApexManager class handles communications with the apex service to perform operation and queries,
@@ -87,8 +77,6 @@ public abstract class ApexManager {
 
     public static final int MATCH_ACTIVE_PACKAGE = 1 << 0;
     static final int MATCH_FACTORY_PACKAGE = 1 << 1;
-
-    private static final String VNDK_APEX_MODULE_NAME_PREFIX = "com.android.vndk.";
 
     private static final Singleton<ApexManager> sApexManagerSingleton =
             new Singleton<ApexManager>() {
@@ -112,6 +100,17 @@ public abstract class ApexManager {
         return sApexManagerSingleton.get();
     }
 
+    static class ScanResult {
+        public final ApexInfo apexInfo;
+        public final AndroidPackage pkg;
+        public final String packageName;
+        ScanResult(ApexInfo apexInfo, AndroidPackage pkg, String packageName) {
+            this.apexInfo = apexInfo;
+            this.pkg = pkg;
+            this.packageName = packageName;
+        }
+    }
+
     /**
      * Minimal information about APEX mount points and the original APEX package they refer to.
      * @hide
@@ -120,32 +119,39 @@ public abstract class ApexManager {
         @Nullable public final String apexModuleName;
         public final File apexDirectory;
         public final File preInstalledApexPath;
+        public final boolean isFactory;
         public final File apexFile;
         public final boolean activeApexChanged;
 
         private ActiveApexInfo(File apexDirectory, File preInstalledApexPath, File apexFile) {
-            this(null, apexDirectory, preInstalledApexPath, apexFile, false);
+            this(null, apexDirectory, preInstalledApexPath, true, apexFile, false);
         }
 
         private ActiveApexInfo(@Nullable String apexModuleName, File apexDirectory,
-                File preInstalledApexPath, File apexFile, boolean activeApexChanged) {
+                File preInstalledApexPath, boolean isFactory, File apexFile,
+                boolean activeApexChanged) {
             this.apexModuleName = apexModuleName;
             this.apexDirectory = apexDirectory;
             this.preInstalledApexPath = preInstalledApexPath;
+            this.isFactory = isFactory;
             this.apexFile = apexFile;
             this.activeApexChanged = activeApexChanged;
         }
 
-        private ActiveApexInfo(ApexInfo apexInfo) {
+        public ActiveApexInfo(ApexInfo apexInfo) {
             this(
                     apexInfo.moduleName,
                     new File(Environment.getApexDirectory() + File.separator
                             + apexInfo.moduleName),
                     new File(apexInfo.preinstalledModulePath),
+                    apexInfo.isFactory,
                     new File(apexInfo.modulePath),
                     apexInfo.activeApexChanged);
         }
     }
+
+    abstract ApexInfo[] getAllApexInfos();
+    abstract void notifyScanResult(List<ScanResult> scanResults);
 
     /**
      * Returns {@link ActiveApexInfo} records relative to all active APEX packages.
@@ -153,73 +159,6 @@ public abstract class ApexManager {
      * @hide
      */
     public abstract List<ActiveApexInfo> getActiveApexInfos();
-
-    /**
-     * Called by package manager service to scan apex package files when device boots up.
-     *
-     * @param packageParser The package parser to support apex package parsing and caching parsed
-     *                      results.
-     * @param executorService An executor to support parallel package parsing.
-     */
-    abstract void scanApexPackagesTraced(@NonNull PackageParser2 packageParser,
-            @NonNull ExecutorService executorService);
-
-    /**
-     * Retrieves information about an APEX package.
-     *
-     * @param packageName the package name to look for. Note that this is the package name reported
-     *                    in the APK container manifest (i.e. AndroidManifest.xml), which might
-     *                    differ from the one reported in the APEX manifest (i.e.
-     *                    apex_manifest.json).
-     * @param flags the type of package to return. This may match to active packages
-     *              and factory (pre-installed) packages.
-     * @return a PackageInfo object with the information about the package, or null if the package
-     *         is not found.
-     */
-    @Nullable
-    public abstract PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags);
-
-    /**
-     * Retrieves information about all active APEX packages.
-     *
-     * @return a List of PackageInfo object, each one containing information about a different
-     *         active package.
-     */
-    abstract List<PackageInfo> getActivePackages();
-
-    /**
-     * Retrieves information about all active pre-installed APEX packages.
-     *
-     * @return a List of PackageInfo object, each one containing information about a different
-     *         active pre-installed package.
-     */
-    abstract List<PackageInfo> getFactoryPackages();
-
-    /**
-     * Retrieves information about all inactive APEX packages.
-     *
-     * @return a List of PackageInfo object, each one containing information about a different
-     *         inactive package.
-     */
-    abstract List<PackageInfo> getInactivePackages();
-
-    /**
-     * Checks if {@code packageName} is an apex package.
-     *
-     * @param packageName package to check.
-     * @return {@code true} if {@code packageName} is an apex package.
-     */
-    abstract boolean isApexPackage(String packageName);
-
-    /**
-     * Whether the APEX package is pre-installed or not.
-     *
-     * @param packageInfo the package to check
-     * @return {@code true} if this package is pre-installed, {@code false} otherwise.
-     */
-    public static boolean isFactory(@NonNull PackageInfo packageInfo) {
-        return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-    }
 
     /**
      * Returns the active apex package's name that contains the (apk) package.
@@ -423,9 +362,14 @@ public abstract class ApexManager {
 
     /**
      * Performs a non-staged install of the given {@code apexFile}.
+     *
+     * If {@code force} is {@code true}, then  update is forced even for APEXes that do not support
+     * non-staged update. This feature is only available on debuggable builds to improve development
+     * velocity of the teams that have their code packaged in an APEX.
+     *
+     * @return {@code ApeInfo} about the newly installed APEX package.
      */
-    abstract void installPackage(File apexFile, PackageParser2 packageParser, boolean force)
-            throws PackageManagerException;
+    abstract ApexInfo installPackage(File apexFile, boolean force) throws PackageManagerException;
 
     /**
      * Get a list of apex system services implemented in an apex.
@@ -447,10 +391,8 @@ public abstract class ApexManager {
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
-     * @param packageName a {@link String} containing a package name, or {@code null}. If set, only
-     *                    information about that specific package will be dumped.
      */
-    abstract void dump(PrintWriter pw, @Nullable String packageName);
+    abstract void dump(PrintWriter pw);
 
     @IntDef(
             flag = true,
@@ -492,9 +434,6 @@ public abstract class ApexManager {
         @GuardedBy("mLock")
         private Map<String, String> mErrorWithApkInApex = new ArrayMap<>();
 
-        @GuardedBy("mLock")
-        private List<PackageInfo> mAllPackagesCache;
-
         /**
          * An APEX is a file format that delivers the apex-payload wrapped in an apk container. The
          * apk container has a reference name, called {@code packageName}, which is found inside the
@@ -514,16 +453,6 @@ public abstract class ApexManager {
         private ArrayMap<String, String> mApexModuleNameToActivePackageName;
 
         /**
-         * Whether an APEX package is active or not.
-         *
-         * @param packageInfo the package to check
-         * @return {@code true} if this package is active, {@code false} otherwise.
-         */
-        private static boolean isActive(PackageInfo packageInfo) {
-            return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
-        }
-
-        /**
          * Retrieve the service from ServiceManager. If the service is not running, it will be
          * started, and this function will block until it is ready.
          */
@@ -532,6 +461,77 @@ public abstract class ApexManager {
             // Since apexd is a trusted platform component, synchronized calls are allowable
             return IApexService.Stub.asInterface(
                     Binder.allowBlocking(ServiceManager.waitForService("apexservice")));
+        }
+
+        @Override
+        ApexInfo[] getAllApexInfos() {
+            try {
+                return waitForApexService().getAllPackages();
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Unable to retrieve packages from apexservice: " + re.toString());
+                throw new RuntimeException(re);
+            }
+        }
+
+        @Override
+        void notifyScanResult(List<ScanResult> scanResults) {
+            synchronized (mLock) {
+                notifyScanResultLocked(scanResults);
+            }
+        }
+
+        @GuardedBy("mLock")
+        private void notifyScanResultLocked(List<ScanResult> scanResults) {
+            mPackageNameToApexModuleName = new ArrayMap<>();
+            mApexModuleNameToActivePackageName = new ArrayMap<>();
+            for (ScanResult scanResult : scanResults) {
+                ApexInfo ai = scanResult.apexInfo;
+                String packageName = scanResult.packageName;
+                for (ParsedApexSystemService service :
+                        scanResult.pkg.getApexSystemServices()) {
+                    String minSdkVersion = service.getMinSdkVersion();
+                    if (minSdkVersion != null && !UnboundedSdkLevel.isAtLeast(minSdkVersion)) {
+                        Slog.d(TAG, String.format(
+                                "ApexSystemService %s with min_sdk_version=%s is skipped",
+                                service.getName(), service.getMinSdkVersion()));
+                        continue;
+                    }
+                    String maxSdkVersion = service.getMaxSdkVersion();
+                    if (maxSdkVersion != null && !UnboundedSdkLevel.isAtMost(maxSdkVersion)) {
+                        Slog.d(TAG, String.format(
+                                "ApexSystemService %s with max_sdk_version=%s is skipped",
+                                service.getName(), service.getMaxSdkVersion()));
+                        continue;
+                    }
+
+                    if (ai.isActive) {
+                        String name = service.getName();
+                        for (int j = 0; j < mApexSystemServices.size(); j++) {
+                            ApexSystemServiceInfo info = mApexSystemServices.get(j);
+                            if (info.getName().equals(name)) {
+                                throw new IllegalStateException(TextUtils.formatSimple(
+                                        "Duplicate apex-system-service %s from %s, %s", name,
+                                        info.mJarPath, service.getJarPath()));
+                            }
+                        }
+                        ApexSystemServiceInfo info = new ApexSystemServiceInfo(
+                                service.getName(), service.getJarPath(),
+                                service.getInitOrder());
+                        mApexSystemServices.add(info);
+                    }
+                }
+                Collections.sort(mApexSystemServices);
+                mPackageNameToApexModuleName.put(packageName, ai.moduleName);
+                if (ai.isActive) {
+                    if (mApexModuleNameToActivePackageName.containsKey(ai.moduleName)) {
+                        throw new IllegalStateException(
+                                "Two active packages have the same APEX module name: "
+                                        + ai.moduleName);
+                    }
+                    mApexModuleNameToActivePackageName.put(
+                            ai.moduleName, packageName);
+                }
+            }
         }
 
         @Override
@@ -559,228 +559,6 @@ public abstract class ApexManager {
                     return Collections.emptyList();
                 }
             }
-        }
-
-        @Override
-        void scanApexPackagesTraced(@NonNull PackageParser2 packageParser,
-                @NonNull ExecutorService executorService) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanApexPackagesTraced");
-            try {
-                synchronized (mLock) {
-                    scanApexPackagesInternalLocked(packageParser, executorService);
-                }
-            } finally {
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-        }
-
-        @GuardedBy("mLock")
-        private void scanApexPackagesInternalLocked(PackageParser2 packageParser,
-                ExecutorService executorService) {
-            final ApexInfo[] allPkgs;
-            try {
-                mAllPackagesCache = new ArrayList<>();
-                mPackageNameToApexModuleName = new ArrayMap<>();
-                mApexModuleNameToActivePackageName = new ArrayMap<>();
-                allPkgs = waitForApexService().getAllPackages();
-            } catch (RemoteException re) {
-                Slog.e(TAG, "Unable to retrieve packages from apexservice: " + re.toString());
-                throw new RuntimeException(re);
-            }
-            if (allPkgs.length == 0) {
-                return;
-            }
-            final int flags = PackageManager.GET_META_DATA
-                    | PackageManager.GET_SIGNING_CERTIFICATES
-                    | PackageManager.GET_SIGNATURES;
-            ArrayMap<File, ApexInfo> parsingApexInfo = new ArrayMap<>();
-            ParallelPackageParser parallelPackageParser =
-                    new ParallelPackageParser(packageParser, executorService);
-
-            for (ApexInfo ai : allPkgs) {
-                File apexFile = new File(ai.modulePath);
-                parallelPackageParser.submit(apexFile,
-                        ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES);
-                parsingApexInfo.put(apexFile, ai);
-            }
-
-            HashSet<String> activePackagesSet = new HashSet<>();
-            HashSet<String> factoryPackagesSet = new HashSet<>();
-            // Process results one by one
-            for (int i = 0; i < parsingApexInfo.size(); i++) {
-                ParallelPackageParser.ParseResult parseResult = parallelPackageParser.take();
-                Throwable throwable = parseResult.throwable;
-                ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
-
-                if (throwable == null) {
-                    // Calling hideAsFinal to assign derived fields for the app info flags.
-                    parseResult.parsedPackage.hideAsFinal();
-                    final PackageInfo packageInfo = PackageInfoWithoutStateUtils.generate(
-                            parseResult.parsedPackage, ai, flags);
-                    if (packageInfo == null) {
-                        throw new IllegalStateException("Unable to generate package info: "
-                                + ai.modulePath);
-                    }
-                    mAllPackagesCache.add(packageInfo);
-                    for (ParsedApexSystemService service :
-                            parseResult.parsedPackage.getApexSystemServices()) {
-                        String minSdkVersion = service.getMinSdkVersion();
-                        if (minSdkVersion != null && !UnboundedSdkLevel.isAtLeast(minSdkVersion)) {
-                            Slog.d(TAG, String.format(
-                                    "ApexSystemService %s with min_sdk_version=%s is skipped",
-                                    service.getName(), service.getMinSdkVersion()));
-                            continue;
-                        }
-                        String maxSdkVersion = service.getMaxSdkVersion();
-                        if (maxSdkVersion != null && !UnboundedSdkLevel.isAtMost(maxSdkVersion)) {
-                            Slog.d(TAG, String.format(
-                                    "ApexSystemService %s with max_sdk_version=%s is skipped",
-                                    service.getName(), service.getMaxSdkVersion()));
-                            continue;
-                        }
-
-                        if (ai.isActive) {
-                            String name = service.getName();
-                            for (int j = 0; j < mApexSystemServices.size(); j++) {
-                                ApexSystemServiceInfo info = mApexSystemServices.get(j);
-                                if (info.getName().equals(name)) {
-                                    throw new IllegalStateException(TextUtils.formatSimple(
-                                            "Duplicate apex-system-service %s from %s, %s", name,
-                                            info.mJarPath, service.getJarPath()));
-                                }
-                            }
-                            ApexSystemServiceInfo info = new ApexSystemServiceInfo(
-                                    service.getName(), service.getJarPath(),
-                                    service.getInitOrder());
-                            mApexSystemServices.add(info);
-                        }
-                    }
-                    Collections.sort(mApexSystemServices);
-                    mPackageNameToApexModuleName.put(packageInfo.packageName, ai.moduleName);
-                    if (ai.isActive) {
-                        if (activePackagesSet.contains(packageInfo.packageName)) {
-                            throw new IllegalStateException(
-                                    "Two active packages have the same name: "
-                                            + packageInfo.packageName);
-                        }
-                        activePackagesSet.add(packageInfo.packageName);
-                        if (mApexModuleNameToActivePackageName.containsKey(ai.moduleName)) {
-                            throw new IllegalStateException(
-                                    "Two active packages have the same APEX module name: "
-                                            + ai.moduleName);
-                        }
-                        mApexModuleNameToActivePackageName.put(
-                                ai.moduleName, packageInfo.packageName);
-                    }
-                    if (ai.isFactory) {
-                        // Don't throw when the duplicating APEX is VNDK APEX
-                        if (factoryPackagesSet.contains(packageInfo.packageName)
-                                && !ai.moduleName.startsWith(VNDK_APEX_MODULE_NAME_PREFIX)) {
-                            throw new IllegalStateException(
-                                    "Two factory packages have the same name: "
-                                            + packageInfo.packageName);
-                        }
-                        factoryPackagesSet.add(packageInfo.packageName);
-                    }
-                } else if (throwable instanceof PackageManagerException) {
-                    final PackageManagerException e = (PackageManagerException) throwable;
-                    // Skip parsing non-coreApp apex file if system is in minimal boot state.
-                    if (e.error == PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED) {
-                        Slog.w(TAG, "Scan apex failed, not a coreApp:" + ai.modulePath);
-                        continue;
-                    }
-                    throw new IllegalStateException("Unable to parse: " + ai.modulePath, throwable);
-                } else {
-                    throw new IllegalStateException("Unexpected exception occurred while parsing "
-                            + ai.modulePath, throwable);
-                }
-            }
-        }
-
-        @Override
-        @Nullable
-        public PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags) {
-            synchronized (mLock) {
-                Preconditions.checkState(mAllPackagesCache != null,
-                        "APEX packages have not been scanned");
-                boolean matchActive = (flags & MATCH_ACTIVE_PACKAGE) != 0;
-                boolean matchFactory = (flags & MATCH_FACTORY_PACKAGE) != 0;
-                for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                    if (!packageInfo.packageName.equals(packageName)) {
-                        continue;
-                    }
-                    if ((matchActive && isActive(packageInfo))
-                            || (matchFactory && isFactory(packageInfo))) {
-                        return packageInfo;
-                    }
-                }
-                return null;
-            }
-        }
-
-        @Override
-        List<PackageInfo> getActivePackages() {
-            synchronized (mLock) {
-                Preconditions.checkState(mAllPackagesCache != null,
-                        "APEX packages have not been scanned");
-                final List<PackageInfo> activePackages = new ArrayList<>();
-                for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                    if (isActive(packageInfo)) {
-                        activePackages.add(packageInfo);
-                    }
-                }
-                return activePackages;
-            }
-        }
-
-        @Override
-        List<PackageInfo> getFactoryPackages() {
-            synchronized (mLock) {
-                Preconditions.checkState(mAllPackagesCache != null,
-                        "APEX packages have not been scanned");
-                final List<PackageInfo> factoryPackages = new ArrayList<>();
-                for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                    if (isFactory(packageInfo)) {
-                        factoryPackages.add(packageInfo);
-                    }
-                }
-                return factoryPackages;
-            }
-        }
-
-        @Override
-        List<PackageInfo> getInactivePackages() {
-            synchronized (mLock) {
-                Preconditions.checkState(mAllPackagesCache != null,
-                        "APEX packages have not been scanned");
-                final List<PackageInfo> inactivePackages = new ArrayList<>();
-                for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                    if (!isActive(packageInfo)) {
-                        inactivePackages.add(packageInfo);
-                    }
-                }
-                return inactivePackages;
-            }
-        }
-
-        @Override
-        boolean isApexPackage(String packageName) {
-            if (!isApexSupported()) return false;
-            synchronized (mLock) {
-                Preconditions.checkState(mAllPackagesCache != null,
-                        "APEX packages have not been scanned");
-                for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                    final PackageInfo packageInfo = mAllPackagesCache.get(i);
-                    if (packageInfo.packageName.equals(packageName)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         @Override
@@ -1136,55 +914,14 @@ public abstract class ApexManager {
         }
 
         @Override
-        void installPackage(File apexFile, PackageParser2 packageParser, boolean force)
+        ApexInfo installPackage(File apexFile, boolean force)
                 throws PackageManagerException {
             try {
-                final int flags = PackageManager.GET_META_DATA
-                        | PackageManager.GET_SIGNING_CERTIFICATES
-                        | PackageManager.GET_SIGNATURES;
-                final ParsedPackage parsedPackage = packageParser.parsePackage(
-                        apexFile, flags, /* useCaches= */ false);
-                final PackageInfo newApexPkg = PackageInfoWithoutStateUtils.generate(parsedPackage,
-                        /* apexInfo= */ null, flags);
-                if (newApexPkg == null) {
-                    throw new PackageManagerException(PackageManager.INSTALL_FAILED_INVALID_APK,
-                            "Failed to generate package info for " + apexFile.getAbsolutePath());
-                }
-                final PackageInfo existingApexPkg = getPackageInfo(newApexPkg.packageName,
-                        MATCH_ACTIVE_PACKAGE);
-                if (existingApexPkg == null) {
-                    Slog.w(TAG, "Attempting to install new APEX package " + newApexPkg.packageName);
-                    throw new PackageManagerException(PackageManager.INSTALL_FAILED_PACKAGE_CHANGED,
-                            "It is forbidden to install new APEX packages");
-                }
-                checkApexSignature(existingApexPkg, newApexPkg);
-                ApexInfo apexInfo = waitForApexService().installAndActivatePackage(
-                        apexFile.getAbsolutePath(), force);
-                final ParsedPackage parsedPackage2 = packageParser.parsePackage(
-                        new File(apexInfo.modulePath), flags, /* useCaches= */ false);
-                final PackageInfo finalApexPkg = PackageInfoWithoutStateUtils.generate(
-                        parsedPackage2, apexInfo, flags);
-                // Installation was successful, time to update mAllPackagesCache
-                synchronized (mLock) {
-                    if (isFactory(existingApexPkg)) {
-                        existingApexPkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
-                        mAllPackagesCache.add(finalApexPkg);
-                    } else {
-                        for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                            if (mAllPackagesCache.get(i).equals(existingApexPkg)) {
-                                mAllPackagesCache.set(i, finalApexPkg);
-                                break;
-                            }
-                        }
-                    }
-                }
+                return waitForApexService().installAndActivatePackage(apexFile.getAbsolutePath(),
+                        force);
             } catch (RemoteException e) {
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                         "apexservice not available");
-            } catch (PackageManagerException e) {
-                // Catching it in order not to fall back to Exception which rethrows the
-                // PackageManagerException with a common error code.
-                throw e;
             } catch (Exception e) {
                 // TODO(b/187864524): is INSTALL_FAILED_INTERNAL_ERROR is the right error code here?
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
@@ -1220,42 +957,8 @@ public abstract class ApexManager {
             return null;
         }
 
-        /**
-         * Dump information about the packages contained in a particular cache
-         * @param packagesCache the cache to print information about.
-         * @param packageName a {@link String} containing a package name, or {@code null}. If set,
-         *                    only information about that specific package will be dumped.
-         * @param ipw the {@link IndentingPrintWriter} object to send information to.
-         */
-        void dumpFromPackagesCache(
-                List<PackageInfo> packagesCache,
-                @Nullable String packageName,
-                IndentingPrintWriter ipw) {
-            ipw.println();
-            ipw.increaseIndent();
-            for (int i = 0, size = packagesCache.size(); i < size; i++) {
-                final PackageInfo pi = packagesCache.get(i);
-                if (packageName != null && !packageName.equals(pi.packageName)) {
-                    continue;
-                }
-                ipw.println(pi.packageName);
-                ipw.increaseIndent();
-                ipw.println("Version: " + pi.versionCode);
-                ipw.println("Path: " + pi.applicationInfo.sourceDir);
-                ipw.println("IsActive: " + isActive(pi));
-                ipw.println("IsFactory: " + isFactory(pi));
-                ipw.println("ApplicationInfo: ");
-                ipw.increaseIndent();
-                pi.applicationInfo.dump(new PrintWriterPrinter(ipw), "");
-                ipw.decreaseIndent();
-                ipw.decreaseIndent();
-            }
-            ipw.decreaseIndent();
-            ipw.println();
-        }
-
         @Override
-        void dump(PrintWriter pw, @Nullable String packageName) {
+        void dump(PrintWriter pw) {
             final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
             try {
                 ipw.println();
@@ -1288,18 +991,6 @@ public abstract class ApexManager {
                 }
                 ipw.decreaseIndent();
                 ipw.println();
-                synchronized (mLock) {
-                    if (mAllPackagesCache == null) {
-                        ipw.println("APEX packages have not been scanned");
-                        return;
-                    }
-                }
-                ipw.println("Active APEX packages:");
-                dumpFromPackagesCache(getActivePackages(), packageName, ipw);
-                ipw.println("Inactive APEX packages:");
-                dumpFromPackagesCache(getInactivePackages(), packageName, ipw);
-                ipw.println("Factory APEX packages:");
-                dumpFromPackagesCache(getFactoryPackages(), packageName, ipw);
             } catch (RemoteException e) {
                 ipw.println("Couldn't communicate with apexd.");
             }
@@ -1312,6 +1003,16 @@ public abstract class ApexManager {
      */
     @VisibleForTesting
     static final class ApexManagerFlattenedApex extends ApexManager {
+        @Override
+        ApexInfo[] getAllApexInfos() {
+            return null;
+        }
+
+        @Override
+        void notifyScanResult(List<ScanResult> scanResults) {
+            // No-op
+        }
+
         @Override
         public List<ActiveApexInfo> getActiveApexInfos() {
             // There is no apexd running in case of flattened apex
@@ -1337,37 +1038,6 @@ public abstract class ApexManager {
                 }
             }
             return result;
-        }
-
-        @Override
-        void scanApexPackagesTraced(@NonNull PackageParser2 packageParser,
-                @NonNull ExecutorService executorService) {
-            // No-op
-        }
-
-        @Override
-        public PackageInfo getPackageInfo(String packageName, int flags) {
-            return null;
-        }
-
-        @Override
-        List<PackageInfo> getActivePackages() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        List<PackageInfo> getFactoryPackages() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        List<PackageInfo> getInactivePackages() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        boolean isApexPackage(String packageName) {
-            return false;
         }
 
         @Override
@@ -1505,7 +1175,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        void installPackage(File apexFile, PackageParser2 packageParser, boolean force) {
+        ApexInfo installPackage(File apexFile, boolean force) {
             throw new UnsupportedOperationException("APEX updates are not supported");
         }
 
@@ -1517,13 +1187,12 @@ public abstract class ApexManager {
         }
 
         @Override
-        public File getBackingApexFile(File file) {
-            return null;
+        void dump(PrintWriter pw) {
         }
 
         @Override
-        void dump(PrintWriter pw, String packageName) {
-            // No-op
+        public File getBackingApexFile(File file) {
+            return null;
         }
     }
 }

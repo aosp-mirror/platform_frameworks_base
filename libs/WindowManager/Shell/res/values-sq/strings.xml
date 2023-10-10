@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Cilësimet"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Hyr në ekranin e ndarë"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menyja"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menyja e \"Figurës brenda figurës\""</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> është në figurë brenda figurës"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Nëse nuk dëshiron që <xliff:g id="NAME">%s</xliff:g> ta përdorë këtë funksion, trokit për të hapur cilësimet dhe për ta çaktivizuar."</string>
     <string name="pip_play" msgid="3496151081459417097">"Luaj"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Ndrysho përmasat"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Fshih"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Mos e fshih"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Aplikacioni mund të mos funksionojë me ekranin e ndarë."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplikacioni nuk mbështet ekranin e ndarë."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikacioni mund të mos funksionojë me ekranin e ndarë"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikacioni nuk mbështet ekranin e ndarë"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ky aplikacion mund të hapet vetëm në 1 dritare."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacioni mund të mos funksionojë në një ekran dytësor."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacioni nuk mbështet nisjen në ekrane dytësore."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Ndarësi i ekranit të ndarë"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Ndarësi i ekranit të ndarë"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Ndarësi i ekranit të ndarë"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Ekrani i plotë majtas"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Majtas 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Majtas 50%"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nuk u rregullua?\nTrokit për ta rikthyer"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nuk ka probleme me kamerën? Trokit për ta shpërfillur."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Shiko dhe bëj më shumë"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Zvarrite në një aplikacion tjetër për ekranin e ndarë"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Zvarrite në një aplikacion tjetër për ekranin e ndarë"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Trokit dy herë jashtë një aplikacioni për ta ripozicionuar"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"E kuptova"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Zgjeroje për më shumë informacion."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Pamja e ekranit"</string>
     <string name="close_text" msgid="4986518933445178928">"Mbyll"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Mbyll menynë"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Hap menynë"</string>
 </resources>

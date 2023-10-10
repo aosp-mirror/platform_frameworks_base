@@ -86,4 +86,9 @@ public class SubscriptSpan extends MetricAffectingSpan implements ParcelableSpan
     public void updateMeasureState(@NonNull TextPaint textPaint) {
         textPaint.baselineShift -= (int) (textPaint.ascent() / 2);
     }
+
+    @Override
+    public String toString() {
+        return "SubscriptSpan{}";
+    }
 }

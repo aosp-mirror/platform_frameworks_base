@@ -80,9 +80,9 @@ consumption limit, then the available resources are decreased to match the scale
 Regulations are unique events invoked by the ~~government~~ system in order to get the whole economy
 moving smoothly.
 
-# Previous Implementations
+# Significant Changes
 
-## V0
+## Tare Improvement Proposal #1 (TIP1)
 
 The initial implementation/proposal combined the supply of resources with the allocation in a single
 mechanism. It defined the maximum number of resources (ARCs) available at a time, and then divided
@@ -98,9 +98,24 @@ allocated as part of the rewards. There were several problems with that mechanis
 These problems effectively meant that misallocation was a big problem, demand wasn't well reflected,
 and some apps may not have been able to perform work even though they otherwise should have been.
 
-Tare Improvement Proposal #1 (TIP1) separated allocation (to apps) from supply (by the system) and
+TIP1 separated allocation (to apps) from supply (by the system) and
 allowed apps to accrue credits as appropriate while still limiting the total number of credits
 consumed.
+
+## Tare Improvement Proposal #3 (TIP3)
+
+TIP1 introduced Consumption Limits, which control the total number of ARCs that can be used to
+perform actions, based on the production costs of each action. The Consumption Limits were initially
+determined manually, but could increase in the system if apps used the full consumption limit before
+the device had drained to 50% battery. As with any system that relies on manually deciding
+parameters, the only mechanism to identify an optimal value is through experimentation, which can
+take many iterations and requires extended periods of time to observe results. The limits are also
+chosen and adjusted without consideration of the resulting battery drain of each possible value. In
+addition, having the system potentially increase the limit without considering a decrease introduced
+potential for battery life to get worse as time goes on and the user installed more background-work
+demanding apps.
+
+TIP3 uses a target background battery drain rate to dynamically adjust the Consumption Limit.
 
 # Potential Future Changes
 

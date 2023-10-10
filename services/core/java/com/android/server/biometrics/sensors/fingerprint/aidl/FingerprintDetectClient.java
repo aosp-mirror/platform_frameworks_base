@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -29,6 +31,7 @@ import android.util.Slog;
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -46,20 +49,26 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
     private static final String TAG = "FingerprintDetectClient";
 
     private final boolean mIsStrongBiometric;
+    private final FingerprintAuthenticateOptions mOptions;
     @NonNull private final SensorOverlays mSensorOverlays;
     @Nullable private ICancellationSignal mCancellationSignal;
 
     FingerprintDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int sensorId,
+            @NonNull ClientMonitorCallbackConverter listener,
+            @NonNull FingerprintAuthenticateOptions options,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
-            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric) {
-        super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
+            @Nullable IUdfpsOverlayController udfpsOverlayController,
+            @Nullable IUdfpsOverlay udfpsOverlay,
+            boolean isStrongBiometric) {
+        super(context, lazyDaemon, token, listener, options.getUserId(),
+                options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController*/);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
+                null /* sideFpsController*/, udfpsOverlay);
+        mOptions = options;
     }
 
     @Override
@@ -71,18 +80,22 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
     @Override
     protected void stopHalOperation() {
         mSensorOverlays.hide(getSensorId());
+        unsubscribeBiometricContext();
 
-        try {
-            mCancellationSignal.cancel();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-            mCallback.onClientFinished(this, false /* success */);
+        if (mCancellationSignal != null) {
+            try {
+                mCancellationSignal.cancel();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+                mCallback.onClientFinished(this, false /* success */);
+            }
         }
     }
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD, this);
+        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+                this);
 
         try {
             mCancellationSignal = doDetectInteraction();
@@ -97,7 +110,17 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            return session.getSession().detectInteractionWithContext(getOperationContext());
+            final OperationContextExt opContext = getOperationContext();
+            final ICancellationSignal cancel = session.getSession().detectInteractionWithContext(
+                    opContext.toAidlContext(mOptions));
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            });
+            return cancel;
         } else {
             return session.getSession().detectInteraction();
         }

@@ -18,6 +18,8 @@ package com.android.systemui.log.table
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
@@ -38,7 +40,8 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogDiffsForTableTest : SysuiTestCase() {
 
-    private val testScope = TestScope(UnconfinedTestDispatcher())
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     private lateinit var systemClock: FakeSystemClock
     private lateinit var tableLogBuffer: TableLogBuffer
@@ -46,7 +49,15 @@ class LogDiffsForTableTest : SysuiTestCase() {
     @Before
     fun setUp() {
         systemClock = FakeSystemClock()
-        tableLogBuffer = TableLogBuffer(MAX_SIZE, BUFFER_NAME, systemClock)
+        tableLogBuffer =
+            TableLogBuffer(
+                MAX_SIZE,
+                BUFFER_NAME,
+                systemClock,
+                mock(),
+                testDispatcher,
+                testScope.backgroundScope,
+            )
     }
 
     // ---- Flow<Boolean> tests ----
@@ -91,6 +102,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         SEPARATOR +
                         FULL_NAME +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "false"
                 )
 
@@ -121,7 +133,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             val logs = dumpLog()
             assertThat(logs)
                 .contains(
-                    TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + FULL_NAME + SEPARATOR + "false"
+                    TABLE_LOG_DATE_FORMAT.format(100L) +
+                        SEPARATOR +
+                        FULL_NAME +
+                        SEPARATOR +
+                        IS_INITIAL_PREFIX +
+                        "false"
                 )
             assertThat(logs)
                 .contains(
@@ -164,7 +181,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             // Input flow: true@100, true@200, true@300, false@400, false@500, true@600
             // Output log: true@100, --------, --------, false@400, ---------, true@600
             val expected1 =
-                TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + FULL_NAME + SEPARATOR + "true"
+                TABLE_LOG_DATE_FORMAT.format(100L) +
+                    SEPARATOR +
+                    FULL_NAME +
+                    SEPARATOR +
+                    IS_INITIAL_PREFIX +
+                    "true"
             val expected4 =
                 TABLE_LOG_DATE_FORMAT.format(400L) + SEPARATOR + FULL_NAME + SEPARATOR + "false"
             val expected6 =
@@ -203,7 +225,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             val job = launch { flowWithLogging.collect() }
             assertThat(dumpLog())
                 .contains(
-                    TABLE_LOG_DATE_FORMAT.format(50L) + SEPARATOR + FULL_NAME + SEPARATOR + "false"
+                    TABLE_LOG_DATE_FORMAT.format(50L) +
+                        SEPARATOR +
+                        FULL_NAME +
+                        SEPARATOR +
+                        IS_INITIAL_PREFIX +
+                        "false"
                 )
 
             systemClock.setCurrentTimeMillis(100L)
@@ -269,7 +296,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             val logs = dumpLog()
             assertThat(logs)
                 .contains(
-                    TABLE_LOG_DATE_FORMAT.format(3000L) + SEPARATOR + FULL_NAME + SEPARATOR + "1234"
+                    TABLE_LOG_DATE_FORMAT.format(3000L) +
+                        SEPARATOR +
+                        FULL_NAME +
+                        SEPARATOR +
+                        IS_INITIAL_PREFIX +
+                        "1234"
                 )
 
             job.cancel()
@@ -299,7 +331,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             val logs = dumpLog()
             assertThat(logs)
                 .contains(
-                    TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + FULL_NAME + SEPARATOR + "1234"
+                    TABLE_LOG_DATE_FORMAT.format(100L) +
+                        SEPARATOR +
+                        FULL_NAME +
+                        SEPARATOR +
+                        IS_INITIAL_PREFIX +
+                        "1234"
                 )
             assertThat(logs)
                 .contains(
@@ -345,7 +382,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             val logs = dumpLog()
             assertThat(logs)
                 .contains(
-                    TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + FULL_NAME + SEPARATOR + "1"
+                    TABLE_LOG_DATE_FORMAT.format(100L) +
+                        SEPARATOR +
+                        FULL_NAME +
+                        SEPARATOR +
+                        IS_INITIAL_PREFIX +
+                        "1"
                 )
             assertThat(logs)
                 .contains(
@@ -388,7 +430,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             // Input flow: 1@100, 2@200, 3@300, 3@400, 3@500, 2@600, 6@700, 6@800
             // Output log: 1@100, 2@200, 3@300, -----, -----, 2@600, 6@700, -----
             val expected1 =
-                TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + FULL_NAME + SEPARATOR + "1"
+                TABLE_LOG_DATE_FORMAT.format(100L) +
+                    SEPARATOR +
+                    FULL_NAME +
+                    SEPARATOR +
+                    IS_INITIAL_PREFIX +
+                    "1"
             val expected2 =
                 TABLE_LOG_DATE_FORMAT.format(200L) + SEPARATOR + FULL_NAME + SEPARATOR + "2"
             val expected3 =
@@ -432,7 +479,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             val job = launch { flowWithLogging.collect() }
             assertThat(dumpLog())
                 .contains(
-                    TABLE_LOG_DATE_FORMAT.format(50L) + SEPARATOR + FULL_NAME + SEPARATOR + "1111"
+                    TABLE_LOG_DATE_FORMAT.format(50L) +
+                        SEPARATOR +
+                        FULL_NAME +
+                        SEPARATOR +
+                        IS_INITIAL_PREFIX +
+                        "1111"
                 )
 
             systemClock.setCurrentTimeMillis(100L)
@@ -502,6 +554,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         SEPARATOR +
                         FULL_NAME +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "val1234"
                 )
 
@@ -532,7 +585,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             val logs = dumpLog()
             assertThat(logs)
                 .contains(
-                    TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + FULL_NAME + SEPARATOR + "val1"
+                    TABLE_LOG_DATE_FORMAT.format(100L) +
+                        SEPARATOR +
+                        FULL_NAME +
+                        SEPARATOR +
+                        IS_INITIAL_PREFIX +
+                        "val1"
                 )
             assertThat(logs)
                 .contains(
@@ -574,7 +632,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             val logs = dumpLog()
             assertThat(logs)
                 .contains(
-                    TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + FULL_NAME + SEPARATOR + "start"
+                    TABLE_LOG_DATE_FORMAT.format(100L) +
+                        SEPARATOR +
+                        FULL_NAME +
+                        SEPARATOR +
+                        IS_INITIAL_PREFIX +
+                        "start"
                 )
             assertThat(logs)
                 .contains(
@@ -621,7 +684,12 @@ class LogDiffsForTableTest : SysuiTestCase() {
             // Input flow: start@100, start@200, new@300, new@400, newer@500, newest@600, newest@700
             // Output log: start@100, ---------, new@300, -------, newer@500, newest@600, ----------
             val expected1 =
-                TABLE_LOG_DATE_FORMAT.format(100L) + SEPARATOR + FULL_NAME + SEPARATOR + "start"
+                TABLE_LOG_DATE_FORMAT.format(100L) +
+                    SEPARATOR +
+                    FULL_NAME +
+                    SEPARATOR +
+                    IS_INITIAL_PREFIX +
+                    "start"
             val expected3 =
                 TABLE_LOG_DATE_FORMAT.format(300L) + SEPARATOR + FULL_NAME + SEPARATOR + "new"
             val expected5 =
@@ -667,6 +735,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         SEPARATOR +
                         FULL_NAME +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "initial"
                 )
 
@@ -761,6 +830,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         "." +
                         TestDiffable.COL_FULL +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "true"
                 )
             assertThat(logs)
@@ -771,6 +841,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         "." +
                         TestDiffable.COL_INT +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "1234"
                 )
             assertThat(logs)
@@ -781,6 +852,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         "." +
                         TestDiffable.COL_STRING +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "string1234"
                 )
             assertThat(logs)
@@ -791,6 +863,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         "." +
                         TestDiffable.COL_BOOLEAN +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "false"
                 )
             job.cancel()
@@ -979,6 +1052,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         "." +
                         TestDiffable.COL_INT +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "0"
                 )
             assertThat(logs)
@@ -989,6 +1063,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         "." +
                         TestDiffable.COL_STRING +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "string0"
                 )
             assertThat(logs)
@@ -999,6 +1074,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         "." +
                         TestDiffable.COL_BOOLEAN +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         "false"
                 )
 
@@ -1118,6 +1194,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         SEPARATOR +
                         FULL_NAME +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         listOf(1234).toString()
                 )
 
@@ -1155,6 +1232,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         SEPARATOR +
                         FULL_NAME +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         listOf("val0", "val00").toString()
                 )
             assertThat(logs)
@@ -1221,6 +1299,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                     SEPARATOR +
                     FULL_NAME +
                     SEPARATOR +
+                    IS_INITIAL_PREFIX +
                     listOf("val0", "val00").toString()
             val expected3 =
                 TABLE_LOG_DATE_FORMAT.format(300L) +
@@ -1276,6 +1355,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                         SEPARATOR +
                         FULL_NAME +
                         SEPARATOR +
+                        IS_INITIAL_PREFIX +
                         listOf(1111).toString()
                 )
 

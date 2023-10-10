@@ -22,6 +22,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.expresslog.Counter;
 
 /** Rate limiter for adding errors into dropbox. */
 public class DropboxRateLimiter {
@@ -30,10 +31,16 @@ public class DropboxRateLimiter {
     // process/eventType) further entries will be rejected until RATE_LIMIT_BUFFER_DURATION has
     // elapsed, after which the current count for this breakdown will be reset.
     private static final long RATE_LIMIT_BUFFER_DURATION = 10 * DateUtils.MINUTE_IN_MILLIS;
-    // The time duration after which the rate limit buffer will be cleared.
-    private static final long RATE_LIMIT_BUFFER_EXPIRY = 3 * RATE_LIMIT_BUFFER_DURATION;
+    // Indicated how many buffer durations to wait before the rate limit buffer will be cleared.
+    // E.g. if set to 3 will wait 3xRATE_LIMIT_BUFFER_DURATION before clearing the buffer.
+    private static final long RATE_LIMIT_BUFFER_EXPIRY_FACTOR = 3;
     // The number of entries to keep per breakdown of process/eventType.
     private static final int RATE_LIMIT_ALLOWED_ENTRIES = 6;
+
+    // If a process is rate limited twice in a row we consider it crash-looping and rate limit it
+    // more aggressively.
+    private static final int STRICT_RATE_LIMIT_ALLOWED_ENTRIES = 1;
+    private static final long STRICT_RATE_LIMIT_BUFFER_DURATION = 20 * DateUtils.MINUTE_IN_MILLIS;
 
     @GuardedBy("mErrorClusterRecords")
     private final ArrayMap<String, ErrorRecord> mErrorClusterRecords = new ArrayMap<>();
@@ -70,15 +77,27 @@ public class DropboxRateLimiter {
                 return new RateLimitResult(false, 0);
             }
 
-            if (now - errRecord.getStartTime() > RATE_LIMIT_BUFFER_DURATION) {
+            final long timeSinceFirstError = now - errRecord.getStartTime();
+            if (timeSinceFirstError > errRecord.getBufferDuration()) {
                 final int errCount = recentlyDroppedCount(errRecord);
                 errRecord.setStartTime(now);
                 errRecord.setCount(1);
+
+                // If this error happened exactly the next "rate limiting cycle" after the last
+                // error and the previous cycle was rate limiting then increment the successive
+                // rate limiting cycle counter. If a full "cycle" has passed since the last error
+                // then this is no longer a continuous occurrence and will be rate limited normally.
+                if (errCount > 0 && timeSinceFirstError < 2 * errRecord.getBufferDuration()) {
+                    errRecord.incrementSuccessiveRateLimitCycles();
+                } else {
+                    errRecord.setSuccessiveRateLimitCycles(0);
+                }
+
                 return new RateLimitResult(false, errCount);
             }
 
             errRecord.incrementCount();
-            if (errRecord.getCount() > RATE_LIMIT_ALLOWED_ENTRIES) {
+            if (errRecord.getCount() > errRecord.getAllowedEntries()) {
                 return new RateLimitResult(true, recentlyDroppedCount(errRecord));
             }
         }
@@ -90,21 +109,27 @@ public class DropboxRateLimiter {
      * dropped. Resets every RATE_LIMIT_BUFFER_DURATION if events are still actively created or
      * RATE_LIMIT_BUFFER_EXPIRY if not. */
     private int recentlyDroppedCount(ErrorRecord errRecord) {
-        if (errRecord == null || errRecord.getCount() < RATE_LIMIT_ALLOWED_ENTRIES) return 0;
-        return errRecord.getCount() - RATE_LIMIT_ALLOWED_ENTRIES;
+        if (errRecord == null || errRecord.getCount() < errRecord.getAllowedEntries()) return 0;
+        return errRecord.getCount() - errRecord.getAllowedEntries();
     }
 
 
-    private void maybeRemoveExpiredRecords(long now) {
-        if (now - mLastMapCleanUp <= RATE_LIMIT_BUFFER_EXPIRY) return;
+    private void maybeRemoveExpiredRecords(long currentTime) {
+        if (currentTime - mLastMapCleanUp
+                <= RATE_LIMIT_BUFFER_EXPIRY_FACTOR * RATE_LIMIT_BUFFER_DURATION) {
+            return;
+        }
 
         for (int i = mErrorClusterRecords.size() - 1; i >= 0; i--) {
-            if (now - mErrorClusterRecords.valueAt(i).getStartTime() > RATE_LIMIT_BUFFER_EXPIRY) {
+            if (mErrorClusterRecords.valueAt(i).hasExpired(currentTime)) {
+                Counter.logIncrement(
+                        "stability_errors.value_dropbox_buffer_expired_count",
+                        mErrorClusterRecords.valueAt(i).getCount());
                 mErrorClusterRecords.removeAt(i);
             }
         }
 
-        mLastMapCleanUp = now;
+        mLastMapCleanUp = currentTime;
     }
 
     /** Resets the rate limiter memory. */
@@ -149,10 +174,12 @@ public class DropboxRateLimiter {
     private class ErrorRecord {
         long mStartTime;
         int mCount;
+        int mSuccessiveRateLimitCycles;
 
         ErrorRecord(long startTime, int count) {
             mStartTime = startTime;
             mCount = count;
+            mSuccessiveRateLimitCycles = 0;
         }
 
         public void setStartTime(long startTime) {
@@ -167,12 +194,41 @@ public class DropboxRateLimiter {
             mCount++;
         }
 
+        public void setSuccessiveRateLimitCycles(int successiveRateLimitCycles) {
+            mSuccessiveRateLimitCycles = successiveRateLimitCycles;
+        }
+
+        public void incrementSuccessiveRateLimitCycles() {
+            mSuccessiveRateLimitCycles++;
+        }
+
         public long getStartTime() {
             return mStartTime;
         }
 
         public int getCount() {
             return mCount;
+        }
+
+        public int getSuccessiveRateLimitCycles() {
+            return mSuccessiveRateLimitCycles;
+        }
+
+        public boolean isRepeated() {
+            return mSuccessiveRateLimitCycles >= 2;
+        }
+
+        public int getAllowedEntries() {
+            return isRepeated() ? STRICT_RATE_LIMIT_ALLOWED_ENTRIES : RATE_LIMIT_ALLOWED_ENTRIES;
+        }
+
+        public long getBufferDuration() {
+            return isRepeated() ? STRICT_RATE_LIMIT_BUFFER_DURATION : RATE_LIMIT_BUFFER_DURATION;
+        }
+
+        public boolean hasExpired(long currentTime) {
+            long bufferExpiry = RATE_LIMIT_BUFFER_EXPIRY_FACTOR * getBufferDuration();
+            return currentTime - mStartTime > bufferExpiry;
         }
     }
 

@@ -45,6 +45,8 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
+import com.android.internal.accessibility.util.AccessibilityUtils;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -58,12 +60,12 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.util.Assert;
 
+import dagger.Lazy;
+
 import java.util.Locale;
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Class to register system actions with accessibility framework.
@@ -473,7 +475,7 @@ public class SystemActions implements CoreStartable {
         KeyEvent event = KeyEvent.obtain(downTime, time, action, keyCode, 0, 0,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM,
                 InputDevice.SOURCE_KEYBOARD, null);
-        InputManager.getInstance()
+        mContext.getSystemService(InputManager.class)
                 .injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         event.recycle();
     }
@@ -520,8 +522,11 @@ public class SystemActions implements CoreStartable {
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 
-    private void handleHeadsetHook() {
-        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+    @VisibleForTesting
+    void handleHeadsetHook() {
+        if (!AccessibilityUtils.interceptHeadsetHookForActiveCall(mContext)) {
+            sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+        }
     }
 
     private void handleAccessibilityButton() {
@@ -611,6 +616,7 @@ public class SystemActions implements CoreStartable {
                 case INTENT_ACTION_DPAD_CENTER: {
                     Intent intent = new Intent(intentAction);
                     intent.setPackage(context.getPackageName());
+                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     return PendingIntent.getBroadcast(context, 0, intent,
                             PendingIntent.FLAG_IMMUTABLE);
                 }
