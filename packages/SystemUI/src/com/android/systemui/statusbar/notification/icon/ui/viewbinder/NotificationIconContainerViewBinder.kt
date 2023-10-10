@@ -15,8 +15,11 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.graphics.Rect
 import android.view.View
+import android.view.ViewPropertyAnimator
 import android.widget.FrameLayout
 import androidx.collection.ArrayMap
 import androidx.lifecycle.Lifecycle
@@ -46,6 +49,9 @@ import com.android.systemui.util.children
 import com.android.systemui.util.kotlin.mapValuesNotNullTo
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.kotlin.stateFlow
+import com.android.systemui.util.ui.isAnimating
+import com.android.systemui.util.ui.stopAnimating
+import com.android.systemui.util.ui.value
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
@@ -73,14 +79,22 @@ object NotificationIconContainerViewBinder {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch { viewModel.animationsEnabled.collect(view::setAnimationsEnabled) }
                 launch {
-                    viewModel.isDozing.collect { (isDozing, animate) ->
-                        val animateIfNotBlanking = animate && !dozeParameters.displayNeedsBlanking
-                        view.setDozing(
-                            /* dozing = */ isDozing,
-                            /* fade = */ animateIfNotBlanking,
-                            /* delay = */ 0,
-                            /* endRunnable = */ viewModel::completeDozeAnimation,
-                        )
+                    viewModel.isDozing.collect { isDozing ->
+                        if (isDozing.isAnimating) {
+                            val animate = !dozeParameters.displayNeedsBlanking
+                            view.setDozing(
+                                /* dozing = */ isDozing.value,
+                                /* fade = */ animate,
+                                /* delay = */ 0,
+                                /* endRunnable = */ isDozing::stopAnimating,
+                            )
+                        } else {
+                            view.setDozing(
+                                /* dozing = */ isDozing.value,
+                                /* fade= */ false,
+                                /* delay= */ 0,
+                            )
+                        }
                     }
                 }
                 // TODO(b/278765923): this should live where AOD is bound, not inside of the NIC
@@ -92,7 +106,6 @@ object NotificationIconContainerViewBinder {
                         configuration,
                         featureFlags,
                         screenOffAnimationController,
-                        onAnimationEnd = viewModel::completeVisibilityAnimation,
                     )
                 }
                 launch {
@@ -225,33 +238,38 @@ object NotificationIconContainerViewBinder {
         configuration: ConfigurationState,
         featureFlags: FeatureFlagsClassic,
         screenOffAnimationController: ScreenOffAnimationController,
-        onAnimationEnd: () -> Unit,
     ): Unit = coroutineScope {
         val iconAppearTranslation =
             configuration.getDimensionPixelSize(R.dimen.shelf_appear_translation).stateIn(this)
         val statusViewMigrated = featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)
-        viewModel.isVisible.collect { (isVisible, animate) ->
+        viewModel.isVisible.collect { isVisible ->
             view.animate().cancel()
+            val animatorListener =
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        isVisible.stopAnimating()
+                    }
+                }
             when {
-                !animate -> {
+                !isVisible.isAnimating -> {
                     view.alpha = 1f
                     if (!statusViewMigrated) {
                         view.translationY = 0f
                     }
-                    view.visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
+                    view.visibility = if (isVisible.value) View.VISIBLE else View.INVISIBLE
                 }
                 featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION) -> {
                     animateInIconTranslation(view, statusViewMigrated)
-                    if (isVisible) {
-                        CrossFadeHelper.fadeIn(view, onAnimationEnd)
+                    if (isVisible.value) {
+                        CrossFadeHelper.fadeIn(view, animatorListener)
                     } else {
-                        CrossFadeHelper.fadeOut(view, onAnimationEnd)
+                        CrossFadeHelper.fadeOut(view, animatorListener)
                     }
                 }
-                !isVisible -> {
+                !isVisible.value -> {
                     // Let's make sure the icon are translated to 0, since we cancelled it above
                     animateInIconTranslation(view, statusViewMigrated)
-                    CrossFadeHelper.fadeOut(view, onAnimationEnd)
+                    CrossFadeHelper.fadeOut(view, animatorListener)
                 }
                 view.visibility != View.VISIBLE -> {
                     // No fading here, let's just appear the icons instead!
@@ -262,14 +280,14 @@ object NotificationIconContainerViewBinder {
                         animate = screenOffAnimationController.shouldAnimateAodIcons(),
                         iconAppearTranslation.value,
                         statusViewMigrated,
+                        animatorListener,
                     )
-                    onAnimationEnd()
                 }
                 else -> {
                     // Let's make sure the icons are translated to 0, since we cancelled it above
                     animateInIconTranslation(view, statusViewMigrated)
                     // We were fading out, let's fade in instead
-                    CrossFadeHelper.fadeIn(view, onAnimationEnd)
+                    CrossFadeHelper.fadeIn(view, animatorListener)
                 }
             }
         }
@@ -280,18 +298,20 @@ object NotificationIconContainerViewBinder {
         animate: Boolean,
         iconAppearTranslation: Int,
         statusViewMigrated: Boolean,
+        animatorListener: Animator.AnimatorListener,
     ) {
         if (animate) {
             if (!statusViewMigrated) {
                 view.translationY = -iconAppearTranslation.toFloat()
             }
             view.alpha = 0f
-            animateInIconTranslation(view, statusViewMigrated)
             view
                 .animate()
                 .alpha(1f)
                 .setInterpolator(Interpolators.LINEAR)
                 .setDuration(AOD_ICONS_APPEAR_DURATION)
+                .apply { if (statusViewMigrated) animateInIconTranslation() }
+                .setListener(animatorListener)
                 .start()
         } else {
             view.alpha = 1.0f
@@ -303,14 +323,12 @@ object NotificationIconContainerViewBinder {
 
     private fun animateInIconTranslation(view: View, statusViewMigrated: Boolean) {
         if (!statusViewMigrated) {
-            view
-                .animate()
-                .setInterpolator(Interpolators.DECELERATE_QUINT)
-                .translationY(0f)
-                .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .start()
+            view.animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
         }
     }
+
+    private fun ViewPropertyAnimator.animateInIconTranslation(): ViewPropertyAnimator =
+        setInterpolator(Interpolators.DECELERATE_QUINT).translationY(0f)
 
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200
 

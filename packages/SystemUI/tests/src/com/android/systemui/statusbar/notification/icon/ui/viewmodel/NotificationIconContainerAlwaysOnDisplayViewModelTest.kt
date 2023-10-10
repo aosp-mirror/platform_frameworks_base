@@ -44,7 +44,9 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
 import com.android.systemui.user.domain.UserDomainLayerModule
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.ui.AnimatedValue
+import com.android.systemui.util.ui.isAnimating
+import com.android.systemui.util.ui.stopAnimating
+import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -243,6 +245,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 )
             )
             val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            runCurrent()
 
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
@@ -266,6 +269,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
     fun isDozing_startAodTransition() =
         scope.runTest {
             val isDozing by collectLastValue(underTest.isDozing)
+            runCurrent()
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     from = KeyguardState.GONE,
@@ -274,13 +278,15 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 )
             )
             runCurrent()
-            assertThat(isDozing).isEqualTo(AnimatedValue(true, isAnimating = true))
+            assertThat(isDozing?.value).isTrue()
+            assertThat(isDozing?.isAnimating).isTrue()
         }
 
     @Test
     fun isDozing_startDozeTransition() =
         scope.runTest {
             val isDozing by collectLastValue(underTest.isDozing)
+            runCurrent()
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     from = KeyguardState.GONE,
@@ -289,13 +295,15 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 )
             )
             runCurrent()
-            assertThat(isDozing).isEqualTo(AnimatedValue(true, isAnimating = false))
+            assertThat(isDozing?.value).isTrue()
+            assertThat(isDozing?.isAnimating).isFalse()
         }
 
     @Test
     fun isDozing_startDozeToAodTransition() =
         scope.runTest {
             val isDozing by collectLastValue(underTest.isDozing)
+            runCurrent()
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     from = KeyguardState.DOZING,
@@ -304,13 +312,15 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 )
             )
             runCurrent()
-            assertThat(isDozing).isEqualTo(AnimatedValue(true, isAnimating = true))
+            assertThat(isDozing?.value).isTrue()
+            assertThat(isDozing?.isAnimating).isTrue()
         }
 
     @Test
     fun isNotDozing_startAodToGoneTransition() =
         scope.runTest {
             val isDozing by collectLastValue(underTest.isDozing)
+            runCurrent()
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     from = KeyguardState.AOD,
@@ -319,13 +329,15 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 )
             )
             runCurrent()
-            assertThat(isDozing).isEqualTo(AnimatedValue(false, isAnimating = true))
+            assertThat(isDozing?.value).isFalse()
+            assertThat(isDozing?.isAnimating).isTrue()
         }
 
     @Test
     fun isDozing_stopAnimation() =
         scope.runTest {
             val isDozing by collectLastValue(underTest.isDozing)
+            runCurrent()
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     from = KeyguardState.AOD,
@@ -335,7 +347,8 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            underTest.completeDozeAnimation()
+            assertThat(isDozing?.isAnimating).isEqualTo(true)
+            isDozing?.stopAnimating()
             runCurrent()
 
             assertThat(isDozing?.isAnimating).isEqualTo(false)
@@ -345,6 +358,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
     fun isNotVisible_pulseExpanding() =
         scope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
+            runCurrent()
             notifsKeyguardRepository.setPulseExpanding(true)
             runCurrent()
 
@@ -355,6 +369,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
     fun isNotVisible_notOnKeyguard_dontShowAodIconsWhenShade() =
         scope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
+            runCurrent()
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     to = KeyguardState.GONE,
@@ -364,13 +379,15 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
             whenever(screenOffAnimController.shouldShowAodIconsWhenShade()).thenReturn(false)
             runCurrent()
 
-            assertThat(isVisible).isEqualTo(AnimatedValue(false, isAnimating = false))
+            assertThat(isVisible?.value).isFalse()
+            assertThat(isVisible?.isAnimating).isFalse()
         }
 
     @Test
     fun isVisible_bypassEnabled() =
         scope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
+            runCurrent()
             deviceEntryRepository.setBypassEnabled(true)
             runCurrent()
 
@@ -381,6 +398,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
     fun isNotVisible_pulseExpanding_notBypassing() =
         scope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
+            runCurrent()
             notifsKeyguardRepository.setPulseExpanding(true)
             deviceEntryRepository.setBypassEnabled(false)
             runCurrent()
@@ -398,26 +416,30 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
             notifsKeyguardRepository.setNotificationsFullyHidden(true)
             runCurrent()
 
-            assertThat(isVisible).isEqualTo(AnimatedValue(true, isAnimating = true))
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isTrue()
         }
 
     @Test
     fun isVisible_notifsFullyHidden_bypassDisabled_aodDisabled() =
         scope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
+            runCurrent()
             notifsKeyguardRepository.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParams.alwaysOn).thenReturn(false)
             notifsKeyguardRepository.setNotificationsFullyHidden(true)
             runCurrent()
 
-            assertThat(isVisible).isEqualTo(AnimatedValue(true, isAnimating = false))
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isFalse()
         }
 
     @Test
     fun isVisible_notifsFullyHidden_bypassDisabled_displayNeedsBlanking() =
         scope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
+            runCurrent()
             notifsKeyguardRepository.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParams.alwaysOn).thenReturn(true)
@@ -425,7 +447,8 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
             notifsKeyguardRepository.setNotificationsFullyHidden(true)
             runCurrent()
 
-            assertThat(isVisible).isEqualTo(AnimatedValue(true, isAnimating = false))
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isFalse()
         }
 
     @Test
@@ -440,13 +463,15 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
             notifsKeyguardRepository.setNotificationsFullyHidden(true)
             runCurrent()
 
-            assertThat(isVisible).isEqualTo(AnimatedValue(true, isAnimating = true))
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isTrue()
         }
 
     @Test
     fun isVisible_stopAnimation() =
         scope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
+            runCurrent()
             notifsKeyguardRepository.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParams.alwaysOn).thenReturn(true)
@@ -454,7 +479,8 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
             notifsKeyguardRepository.setNotificationsFullyHidden(true)
             runCurrent()
 
-            underTest.completeVisibilityAnimation()
+            assertThat(isVisible?.isAnimating).isEqualTo(true)
+            isVisible?.stopAnimating()
             runCurrent()
 
             assertThat(isVisible?.isAnimating).isEqualTo(false)
