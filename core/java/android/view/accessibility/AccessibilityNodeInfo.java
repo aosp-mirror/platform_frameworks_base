@@ -1562,9 +1562,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * describes the action.
      * </p>
      * <p>
-     * Use {@link androidx.core.view.ViewCompat#addAccessibilityAction(View,
-     * AccessibilityNodeInfoCompat.AccessibilityActionCompat)} to register an action directly on the
-     * view.
+     * Use {@link androidx.core.view.ViewCompat#addAccessibilityAction(View, CharSequence,
+     * AccessibilityViewCommand)} to register an action directly on the view.
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
@@ -5167,8 +5166,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </p>
      * <aside class="note">
      * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#addAccessibilityAction(View,
-     * AccessibilityNodeInfoCompat.AccessibilityActionCompat)} to register an action directly on the
-     * view.
+     * CharSequence, AccessibilityViewCommand)} to register an action directly on the view.
      * </p>
      */
     public static final class AccessibilityAction implements Parcelable {

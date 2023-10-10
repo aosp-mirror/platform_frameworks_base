@@ -4266,8 +4266,7 @@ public final class SurfaceControl implements Parcelable {
          * be somewhat arbitrary, and so there are some somewhat arbitrary decisions in
          * this API as well.
          * <p>
-         * @param sc         The {@link SurfaceControl} to set the
-         *                   {@link TrustedPresentationCallback} on
+         * @param sc         The {@link SurfaceControl} to set the callback on
          * @param thresholds The {@link TrustedPresentationThresholds} that will specify when the to
          *                   invoke the callback.
          * @param executor   The {@link Executor} where the callback will be invoked on.
@@ -4300,10 +4299,9 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Clears the {@link TrustedPresentationCallback} for a specific {@link SurfaceControl}
+         * Clears the callback for a specific {@link SurfaceControl}
          *
-         * @param sc The SurfaceControl that the {@link TrustedPresentationCallback} should be
-         *           cleared from
+         * @param sc The SurfaceControl that the callback should be cleared from
          * @return This transaction
          */
         @NonNull
