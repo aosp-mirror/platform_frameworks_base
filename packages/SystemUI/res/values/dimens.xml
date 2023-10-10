@@ -846,7 +846,7 @@
     <!-- Amount the button should shake when it's not long-pressed for long enough. -->
     <dimen name="keyguard_affordance_shake_amplitude">8dp</dimen>
 
-    <dimen name="keyguard_affordance_horizontal_offset">32dp</dimen>
+    <dimen name="keyguard_affordance_horizontal_offset">16dp</dimen>
     <dimen name="keyguard_affordance_vertical_offset">32dp</dimen>
     <!-- Value should be at least sum of 'keyguard_affordance_width' +
          'keyguard_affordance_horizontal_offset' -->
