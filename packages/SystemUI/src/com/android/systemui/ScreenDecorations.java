@@ -93,6 +93,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import kotlin.Pair;
 
 import java.io.PrintWriter;
@@ -1088,6 +1090,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         }
     }
 
+    @NeverCompile
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ScreenDecorations state:");

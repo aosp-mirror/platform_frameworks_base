@@ -24,6 +24,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,6 +110,7 @@ public class SysUiState implements Dumpable {
         }
     }
 
+    @NeverCompile
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("SysUiState state:");

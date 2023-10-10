@@ -239,6 +239,8 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 
 import dagger.Lazy;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -1763,6 +1765,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
+    @NeverCompile
     @Override
     public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);

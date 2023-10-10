@@ -105,6 +105,8 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import dagger.Lazy;
 
 import java.io.PrintWriter;
@@ -2015,6 +2017,7 @@ public class QuickSettingsController implements Dumpable {
                 (int) ((y - getInitialTouchY()) / displayDensity), (int) (vel / displayDensity));
     }
 
+    @NeverCompile
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println(TAG + ":");
