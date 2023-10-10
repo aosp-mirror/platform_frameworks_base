@@ -39,6 +39,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.communal.data.repository.CommunalRepositoryModule;
+import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule;
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -96,6 +97,7 @@ import kotlinx.coroutines.CoroutineDispatcher;
         KeyguardUserSwitcherComponent.class},
         includes = {
             CommunalRepositoryModule.class,
+            CommunalTutorialRepositoryModule.class,
             CommunalWidgetRepositoryModule.class,
             FalsingModule.class,
             KeyguardDataQuickAffordanceModule.class,
