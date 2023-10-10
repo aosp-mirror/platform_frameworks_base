@@ -168,12 +168,12 @@
     <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Konfigurer"</string>
     <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Ikke nu"</string>
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Dette er påkrævet for at forbedre sikkerheden og ydeevnen"</string>
-    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Konfigurer oplåsning med fingeraftryk igen"</string>
-    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Oplåsning med fingeraftryk"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Konfigurer oplåsning med fingeraftryk"</string>
-    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Hvis du vil konfigurere oplåsning med fingeraftryk igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere oplåsning med fingeraftryk igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
-    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Hvis du vil konfigurere oplåsning med fingeraftryk igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere oplåsning med fingeraftryk igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
-    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Oplåsning med fingeraftryk kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Konfigurer fingeroplåsning igen"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Fingeroplåsning"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Konfigurer fingeroplåsning"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Hvis du vil konfigurere fingeroplåsning igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere fingeroplåsning igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Hvis du vil konfigurere fingeroplåsning igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere fingeroplåsning igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Fingeroplåsning kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Konfigurer ansigtsoplåsning igen"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Ansigtsoplåsning"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Konfigurer ansigtsoplåsning"</string>
