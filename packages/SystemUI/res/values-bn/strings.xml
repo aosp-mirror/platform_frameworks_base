@@ -1183,10 +1183,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"\'সেটিংস\' থেকে ডিফল্ট নোট নেওয়ার অ্যাপ সেট করুন"</string>
     <string name="install_app" msgid="5066668100199613936">"অ্যাপ ইনস্টল করুন"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"এক্সটার্নাল ডিসপ্লে আয়না?"</string>
-    <!-- no translation found for mirror_display (2515262008898122928) -->
-    <skip />
-    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
-    <skip />
+    <string name="mirror_display" msgid="2515262008898122928">"ডিসপ্লে দেখান"</string>
+    <string name="dismiss_dialog" msgid="2195508495854675882">"বাতিল করুন"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"মাইক্রোফোন ও ক্যামেরা"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"সম্প্রতি ব্যবহার করা অ্যাপ"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"সাম্প্রতিক অ্যাক্সেস দেখুন"</string>

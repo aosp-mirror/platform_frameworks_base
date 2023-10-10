@@ -1183,10 +1183,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"குறிப்பு எடுப்பதற்கான இயல்புநிலை ஆப்ஸை அமைப்புகளில் அமையுங்கள்"</string>
     <string name="install_app" msgid="5066668100199613936">"ஆப்ஸை நிறுவுங்கள்"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"வெளிப்புறக் காட்சிக்கு மிரர் செய்யவா?"</string>
-    <!-- no translation found for mirror_display (2515262008898122928) -->
-    <skip />
-    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
-    <skip />
+    <string name="mirror_display" msgid="2515262008898122928">"டிஸ்பிளேயை மிரர் செய்"</string>
+    <string name="dismiss_dialog" msgid="2195508495854675882">"வேண்டாம்"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"மைக்ரோஃபோனும் கேமராவும்"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"சமீபத்திய ஆப்ஸ் பயன்பாடு"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"சமீபத்திய அணுகலைக் காட்டு"</string>
