@@ -33,6 +33,8 @@ import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnail
 import com.android.systemui.mediaprojection.appselector.data.ShellRecentTaskListProvider
 import com.android.systemui.mediaprojection.appselector.view.MediaProjectionRecentsViewController
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider
+import com.android.systemui.mediaprojection.appselector.view.WindowMetricsProvider
+import com.android.systemui.mediaprojection.appselector.view.WindowMetricsProviderImpl
 import com.android.systemui.mediaprojection.devicepolicy.MediaProjectionDevicePolicyModule
 import com.android.systemui.mediaprojection.devicepolicy.PersonalProfile
 import com.android.systemui.mediaprojection.permission.MediaProjectionPermissionActivity
@@ -105,6 +107,8 @@ interface MediaProjectionAppSelectorModule {
     fun taskPreviewSizeProviderAsLifecycleObserver(
         impl: TaskPreviewSizeProvider
     ): DefaultLifecycleObserver
+
+    @Binds fun windowMetricsProvider(impl: WindowMetricsProviderImpl): WindowMetricsProvider
 
     companion object {
         @Provides
