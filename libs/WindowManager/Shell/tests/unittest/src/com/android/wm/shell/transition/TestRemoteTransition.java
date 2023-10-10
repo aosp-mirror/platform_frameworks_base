@@ -31,6 +31,7 @@ import android.window.WindowContainerTransaction;
  */
 public class TestRemoteTransition extends IRemoteTransition.Stub {
     private boolean mCalled = false;
+    private boolean mConsumed = false;
     final WindowContainerTransaction mRemoteFinishWCT = new WindowContainerTransaction();
 
     @Override
@@ -48,6 +49,11 @@ public class TestRemoteTransition extends IRemoteTransition.Stub {
             IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
     }
 
+    @Override
+    public void onTransitionConsumed(IBinder iBinder, boolean b) throws RemoteException {
+        mConsumed = true;
+    }
+
     /**
      * Check whether this remote transition
      * {@link #startAnimation(IBinder, TransitionInfo, SurfaceControl.Transaction,
@@ -55,5 +61,13 @@ public class TestRemoteTransition extends IRemoteTransition.Stub {
      */
     public boolean isCalled() {
         return mCalled;
+    }
+
+    /**
+     * Check whether this remote transition's {@link #onTransitionConsumed(IBinder, boolean)}
+     * is called
+     */
+    public boolean isConsumed() {
+        return mConsumed;
     }
 }

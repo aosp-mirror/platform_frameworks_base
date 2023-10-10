@@ -285,6 +285,10 @@ public class ShellTransitionTests extends ShellTestCase {
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
             }
+
+            @Override
+            public void onTransitionConsumed(IBinder iBinder, boolean b) throws RemoteException {
+            }
         };
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
@@ -427,6 +431,10 @@ public class ShellTransitionTests extends ShellTestCase {
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
             }
+
+            @Override
+            public void onTransitionConsumed(IBinder iBinder, boolean b) throws RemoteException {
+            }
         };
 
         TransitionFilter filter = new TransitionFilter();
@@ -472,6 +480,10 @@ public class ShellTransitionTests extends ShellTestCase {
             public void mergeAnimation(IBinder token, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
+            }
+
+            @Override
+            public void onTransitionConsumed(IBinder iBinder, boolean b) throws RemoteException {
             }
         };
 

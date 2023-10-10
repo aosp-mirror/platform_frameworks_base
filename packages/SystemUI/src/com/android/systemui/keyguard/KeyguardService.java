@@ -269,6 +269,11 @@ public class KeyguardService extends Service {
                 }
             }
 
+            @Override
+            public void onTransitionConsumed(IBinder transition, boolean aborted)
+                    throws RemoteException {
+            }
+
             private static void initAlphaForAnimationTargets(@NonNull SurfaceControl.Transaction t,
                     @NonNull RemoteAnimationTarget[] targets) {
                 for (RemoteAnimationTarget target : targets) {
