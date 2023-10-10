@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.row;
+package com.android.systemui.statusbar.notification.footer.ui.view;
 
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 
@@ -35,6 +35,8 @@ import androidx.annotation.NonNull;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.notification.row.FooterViewButton;
+import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.util.DumpUtilsKt;
@@ -93,6 +95,7 @@ public class FooterView extends StackScrollerDecorView {
         updateColors();
     }
 
+    /** Show a message instead of the footer buttons. */
     public void setFooterLabelVisible(boolean isVisible) {
         if (isVisible) {
             mManageButton.setVisibility(View.GONE);
@@ -105,14 +108,22 @@ public class FooterView extends StackScrollerDecorView {
         }
     }
 
+    /** Set onClickListener for the manage/history button. */
     public void setManageButtonClickListener(OnClickListener listener) {
         mManageButton.setOnClickListener(listener);
     }
 
+    /** Set onClickListener for the clear all (end) button. */
     public void setClearAllButtonClickListener(OnClickListener listener) {
         mClearAllButton.setOnClickListener(listener);
     }
 
+    /**
+     * Whether the touch is outside the Clear all button.
+     *
+     * TODO(b/293167744): This is an artifact from the time when we could press underneath the
+     * shade to dismiss it. Check if it's safe to remove.
+     */
     public boolean isOnEmptySpace(float touchX, float touchY) {
         return touchX < mContent.getX()
                 || touchX > mContent.getX() + mContent.getWidth()
@@ -120,6 +131,7 @@ public class FooterView extends StackScrollerDecorView {
                 || touchY > mContent.getY() + mContent.getHeight();
     }
 
+    /** Show "History" instead of "Manage" on the start button. */
     public void showHistory(boolean showHistory) {
         if (mShowHistory == showHistory) {
             return;
@@ -141,6 +153,7 @@ public class FooterView extends StackScrollerDecorView {
                 .setCompoundDrawablesRelative(mSeenNotifsFilteredIcon, null, null, null);
     }
 
+    /** Whether the start button shows "History" (true) or "Manage" (false). */
     public boolean isHistoryShown() {
         return mShowHistory;
     }
