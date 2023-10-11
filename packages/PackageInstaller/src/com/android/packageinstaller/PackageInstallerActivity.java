@@ -366,7 +366,7 @@ public class PackageInstallerActivity extends AlertActivity {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            String resolvedPath = info.getResolvedBaseApkPath();
+            String resolvedPath = info != null ? info.getResolvedBaseApkPath() : null;
             if (info == null || !info.isSealed() || resolvedPath == null) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
