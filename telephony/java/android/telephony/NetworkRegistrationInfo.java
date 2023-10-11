@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,6 +30,8 @@ import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
 import android.telephony.Annotation.NetworkType;
 import android.text.TextUtils;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -206,6 +209,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     /**
      * MMS service
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final int SERVICE_TYPE_MMS = 6;
 
     /** @hide  */
@@ -702,6 +706,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      *
      * @return {@code true} if network is a non-terrestrial network else {@code false}.
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public boolean isNonTerrestrialNetwork() {
         return mIsNonTerrestrialNetwork;
     }
@@ -1186,6 +1191,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
          *                                            else {@code false}.
          * @return The builder.
          */
+        @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
         public @NonNull Builder setIsNonTerrestrialNetwork(boolean isNonTerrestrialNetwork) {
             mIsNonTerrestrialNetwork = isNonTerrestrialNetwork;
             return this;
