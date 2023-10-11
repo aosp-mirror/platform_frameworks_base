@@ -10526,6 +10526,8 @@ public class CarrierConfigManager {
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "LTE", new int[]{3731, 5965, 8618, 11179, 13384});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "LTE_CA", new int[]{3831, 6065, 8718, 11379, 13484});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "NR_SA", new int[]{5288, 6795, 6955, 7562, 9713});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "NR_NSA", new int[]{5463, 6827, 8029, 9007, 9428});
