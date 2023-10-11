@@ -200,20 +200,6 @@ doc_defaults {
     },
 }
 
-doc_defaults {
-    name: "framework-dokka-docs-default",
-}
-
-droiddoc {
-    name: "doc-comment-check-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    args: framework_docs_only_args + " -referenceonly -parsecomments",
-    installable: false,
-}
-
 droiddoc {
     name: "offline-sdk-docs",
     defaults: ["framework-docs-default"],
@@ -267,70 +253,6 @@ droiddoc {
 }
 
 droiddoc {
-    name: "online-sdk-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-sdk-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-}
-
-droiddoc {
-    name: "online-system-api-sdk-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-system-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-system-api-sdk-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -referenceonly " +
-        " -title \"Android SDK - Including system APIs.\" " +
-        " -hide 101 " +
-        " -hide 104 " +
-        " -hide 108 " +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-    installable: false,
-}
-
-droiddoc {
     name: "ds-docs-java",
     defaults: ["framework-docs-default"],
     srcs: [
@@ -361,7 +283,6 @@ droiddoc {
 
 droiddoc {
     name: "ds-docs-kt",
-    defaults: ["framework-dokka-docs-default"],
     srcs: [
         ":framework-doc-stubs",
     ],
@@ -439,45 +360,4 @@ droiddoc {
         " -toroot / " +
         " -atLinksNavtree " +
         " -navtreeonly ",
-}
-
-droiddoc {
-    name: "online-sdk-dev-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-sdk-dev-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-}
-
-droiddoc {
-    name: "hidden-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    proofread_file: "hidden-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -referenceonly " +
-        " -title \"Android SDK - Including hidden APIs.\"",
 }
