@@ -81,6 +81,7 @@ public class TileServices extends IQSService.Stub {
     private final UserTracker mUserTracker;
     private final StatusBarIconController mStatusBarIconController;
     private final PanelInteractor mPanelInteractor;
+    private final TileLifecycleManager.Factory mTileLifecycleManagerFactory;
     private final CustomTileAddedRepository mCustomTileAddedRepository;
     private final DelayableExecutor mBackgroundExecutor;
 
@@ -96,6 +97,7 @@ public class TileServices extends IQSService.Stub {
             CommandQueue commandQueue,
             StatusBarIconController statusBarIconController,
             PanelInteractor panelInteractor,
+            TileLifecycleManager.Factory tileLifecycleManagerFactory,
             CustomTileAddedRepository customTileAddedRepository,
             @Background DelayableExecutor backgroundExecutor) {
         mHost = host;
@@ -109,6 +111,7 @@ public class TileServices extends IQSService.Stub {
         mStatusBarIconController = statusBarIconController;
         mCommandQueue.addCallback(mRequestListeningCallback);
         mPanelInteractor = panelInteractor;
+        mTileLifecycleManagerFactory = tileLifecycleManagerFactory;
         mCustomTileAddedRepository = customTileAddedRepository;
         mBackgroundExecutor = backgroundExecutor;
     }
@@ -137,8 +140,8 @@ public class TileServices extends IQSService.Stub {
 
     protected TileServiceManager onCreateTileService(ComponentName component,
             BroadcastDispatcher broadcastDispatcher) {
-        return new TileServiceManager(this, mHandlerProvider.get(), component,
-                broadcastDispatcher, mUserTracker, mCustomTileAddedRepository, mBackgroundExecutor);
+        return new TileServiceManager(this, mHandlerProvider.get(), component, mUserTracker,
+                mTileLifecycleManagerFactory, mCustomTileAddedRepository);
     }
 
     public void freeService(CustomTileInterface tile, TileServiceManager service) {
@@ -323,7 +326,7 @@ public class TileServices extends IQSService.Stub {
                 if (info.applicationInfo.isSystemApp()) {
                     final StatusBarIcon statusIcon = icon != null
                             ? new StatusBarIcon(userHandle, packageName, icon, 0, 0,
-                                    contentDescription)
+                            contentDescription)
                             : null;
                     final String slot = getStatusBarIconSlotName(componentName);
                     mMainHandler.post(new Runnable() {
@@ -356,11 +359,11 @@ public class TileServices extends IQSService.Stub {
         synchronized (mServices) {
             mTokenMap.forEach((iBinder, customTile) ->
                     sb.append(iBinder.toString())
-                    .append(":")
-                    .append(customTile.getComponent().flattenToShortString())
-                    .append(":")
-                    .append(customTile.getUser())
-                    .append(","));
+                            .append(":")
+                            .append(customTile.getComponent().flattenToShortString())
+                            .append(":")
+                            .append(customTile.getUser())
+                            .append(","));
         }
         sb.append("]");
         return sb.toString();
