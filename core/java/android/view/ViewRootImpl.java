@@ -96,6 +96,7 @@ import static android.view.accessibility.Flags.reduceWindowContentChangedEventTh
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
+import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -371,6 +372,8 @@ public final class ViewRootImpl implements ViewParent,
      * Minimum time to wait before reporting changes to keep clear areas.
      */
     private static final int KEEP_CLEAR_AREA_REPORT_RATE_MILLIS = 100;
+
+    private static final long NANOS_PER_SEC = 1000000000;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
@@ -819,6 +822,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean mInsetsAnimationRunning;
 
+    private long mPreviousFrameDrawnTime = -1;
+
     /**
      * The resolved pointer icon type requested by this window.
      * A null value indicates the resolved pointer icon has not yet been calculated.
@@ -1048,11 +1053,14 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mChildBoundingInsetsChanged = false;
 
     private String mTag = TAG;
+    private String mFpsTraceName;
 
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
+    private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
+        sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
     }
 
     public ViewRootImpl(Context context, Display display) {
@@ -1293,6 +1301,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 attrs = mWindowAttributes;
                 setTag();
+                mFpsTraceName = "FPS of " + getTitle();
 
                 if (DEBUG_KEEP_SCREEN_ON && (mClientWindowLayoutFlags
                         & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0
@@ -4660,6 +4669,31 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Called from draw() to collect metrics for frame rate decision.
+     */
+    private void collectFrameRateDecisionMetrics() {
+        if (!Trace.isEnabled()) {
+            if (mPreviousFrameDrawnTime > 0) mPreviousFrameDrawnTime = -1;
+            return;
+        }
+
+        if (mPreviousFrameDrawnTime < 0) {
+            mPreviousFrameDrawnTime = mChoreographer.getExpectedPresentationTimeNanos();
+            return;
+        }
+
+        long expectedDrawnTime = mChoreographer.getExpectedPresentationTimeNanos();
+        long timeDiff = expectedDrawnTime - mPreviousFrameDrawnTime;
+        if (timeDiff <= 0) {
+            return;
+        }
+
+        long fps = NANOS_PER_SEC / timeDiff;
+        Trace.setCounter(mFpsTraceName, fps);
+        mPreviousFrameDrawnTime = expectedDrawnTime;
+    }
+
     private void reportDrawFinished(@Nullable Transaction t, int seqId) {
         if (DEBUG_BLAST) {
             Log.d(mTag, "reportDrawFinished");
@@ -4977,6 +5011,9 @@ public final class ViewRootImpl implements ViewParent,
 
         if (DEBUG_FPS) {
             trackFPS();
+        }
+        if (sToolkitMetricsForFrameRateDecisionFlagValue) {
+            collectFrameRateDecisionMetrics();
         }
 
         if (!sFirstDrawComplete) {
