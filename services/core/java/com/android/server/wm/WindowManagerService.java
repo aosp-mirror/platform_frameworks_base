@@ -547,6 +547,8 @@ public class WindowManagerService extends IWindowManager.Stub
     @VisibleForTesting
     WindowManagerPolicy mPolicy;
 
+    final WindowManagerFlags mFlags;
+
     final IActivityManager mActivityManager;
     final ActivityManagerInternal mAmInternal;
     final UserManagerInternal mUmInternal;
@@ -1153,6 +1155,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
         mContext = context;
+        mFlags = new WindowManagerFlags();
         mIsPc = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mAllowBootMessages = showBootMsgs;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
