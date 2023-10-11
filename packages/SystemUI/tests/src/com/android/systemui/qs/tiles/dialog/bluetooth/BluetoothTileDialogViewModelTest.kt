@@ -32,6 +32,7 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -95,8 +96,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 dispatcher,
             )
-        `when`(deviceItemInteractor.deviceItemUpdate)
-            .thenReturn(MutableStateFlow(null).asStateFlow())
+        `when`(deviceItemInteractor.deviceItemUpdate).thenReturn(MutableSharedFlow())
         `when`(bluetoothStateInteractor.bluetoothStateUpdate)
             .thenReturn(MutableStateFlow(null).asStateFlow())
         `when`(deviceItemInteractor.deviceItemUpdateRequest)

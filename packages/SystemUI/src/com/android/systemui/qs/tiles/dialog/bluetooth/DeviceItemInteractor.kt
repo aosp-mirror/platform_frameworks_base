@@ -34,10 +34,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.withContext
 
@@ -55,10 +55,10 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
 
-    private val mutableDeviceItemUpdate: MutableStateFlow<List<DeviceItem>?> =
-        MutableStateFlow(null)
+    private val mutableDeviceItemUpdate: MutableSharedFlow<List<DeviceItem>> =
+        MutableSharedFlow(extraBufferCapacity = 1)
     internal val deviceItemUpdate
-        get() = mutableDeviceItemUpdate.asStateFlow()
+        get() = mutableDeviceItemUpdate.asSharedFlow()
 
     internal val deviceItemUpdateRequest: SharedFlow<Unit> =
         conflatedCallbackFlow {
@@ -119,16 +119,15 @@ constructor(
 
     internal suspend fun updateDeviceItems(context: Context) {
         withContext(backgroundDispatcher) {
-            val mostRecentlyConnectedDevices = bluetoothAdapter?.mostRecentlyConnectedDevices
-
-            mutableDeviceItemUpdate.value =
+            mutableDeviceItemUpdate.tryEmit(
                 bluetoothTileDialogRepository.cachedDevices
                     .mapNotNull { cachedDevice ->
                         deviceItemFactoryList
                             .firstOrNull { it.isFilterMatched(cachedDevice, audioManager) }
                             ?.create(context, cachedDevice)
                     }
-                    .sort(displayPriority, mostRecentlyConnectedDevices)
+                    .sort(displayPriority, bluetoothAdapter?.mostRecentlyConnectedDevices)
+            )
         }
     }
 
