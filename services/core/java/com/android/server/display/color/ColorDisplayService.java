@@ -78,6 +78,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -148,10 +149,12 @@ public final class ColorDisplayService extends SystemService {
             1f, 1f, 1f, 1f
     };
 
+    private final DisplayManagerFlags mDisplayManagerFlags = new DisplayManagerFlags();
+
     @VisibleForTesting
     final DisplayWhiteBalanceTintController mDisplayWhiteBalanceTintController =
             new DisplayWhiteBalanceTintController(
-                    LocalServices.getService(DisplayManagerInternal.class));
+                    LocalServices.getService(DisplayManagerInternal.class), mDisplayManagerFlags);
     private final NightDisplayTintController mNightDisplayTintController =
             new NightDisplayTintController();
     private final TintController mGlobalSaturationTintController =
@@ -716,15 +719,16 @@ public final class ColorDisplayService extends SystemService {
                         tintController.computeMatrixForCct(to));
                 tintController.setAppliedCct(to);
             } else {
+                final long duration = tintController.getTransitionDurationMilliseconds(to > from);
                 Slog.d(TAG, tintController.getClass().getSimpleName() + " animation started: toCct="
-                        + to + " fromCct=" + from);
+                        + to + " fromCct=" + from + " with duration=" + duration);
                 ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
                 tintController.setAnimator(valueAnimator);
                 final CctEvaluator evaluator = tintController.getEvaluator();
                 if (evaluator != null) {
                     valueAnimator.setEvaluator(evaluator);
                 }
-                valueAnimator.setDuration(tintController.getTransitionDurationMilliseconds());
+                valueAnimator.setDuration(duration);
                 valueAnimator.setInterpolator(AnimationUtils.loadInterpolator(
                         getContext(), android.R.interpolator.linear));
                 valueAnimator.addUpdateListener((ValueAnimator animator) -> {
