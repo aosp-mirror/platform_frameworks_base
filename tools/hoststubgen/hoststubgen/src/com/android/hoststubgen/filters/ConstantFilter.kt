@@ -46,8 +46,11 @@ class ConstantFilter(
         }
         methodPolicy = policy
 
-        // TODO: Need to think about the realistic default behavior.
-        classPolicy = if (policy != FilterPolicy.Throw) policy else FilterPolicy.Remove
+        // If the default policy is "throw", we convert it to "keep" for classes and fields.
+        classPolicy = when (policy) {
+            FilterPolicy.Throw -> FilterPolicy.Keep
+            else -> policy
+        }
         fieldPolicy = classPolicy
     }
 
