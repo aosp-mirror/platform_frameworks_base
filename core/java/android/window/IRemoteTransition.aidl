@@ -59,4 +59,12 @@ oneway interface IRemoteTransition {
     void mergeAnimation(in IBinder transition, in TransitionInfo info,
             in SurfaceControl.Transaction t, in IBinder mergeTarget,
             in IRemoteTransitionFinishedCallback finishCallback);
+
+    /**
+     * Called when a different handler has consumed the transition
+     *
+     * @param transition An identifier for the transition that was consumed.
+     * @param aborted Whether the transition is aborted or not.
+     */
+    void onTransitionConsumed(in IBinder transition, in boolean aborted);
 }
