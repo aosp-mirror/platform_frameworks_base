@@ -1790,7 +1790,12 @@ public final class SurfaceControl implements Parcelable {
         public float xDpi;
         public float yDpi;
 
+        // Some modes have peak refresh rate lower than the panel vsync rate.
         public float refreshRate;
+        // Fixed rate of vsync deadlines for the panel.
+        // This can be higher then the peak refresh rate for some panel technologies
+        // See: VrrConfig.aidl
+        public float vsyncRate;
         public long appVsyncOffsetNanos;
         public long presentationDeadlineNanos;
         public int[] supportedHdrTypes;
@@ -1811,6 +1816,7 @@ public final class SurfaceControl implements Parcelable {
                     + ", xDpi=" + xDpi
                     + ", yDpi=" + yDpi
                     + ", refreshRate=" + refreshRate
+                    + ", vsyncRate=" + vsyncRate
                     + ", appVsyncOffsetNanos=" + appVsyncOffsetNanos
                     + ", presentationDeadlineNanos=" + presentationDeadlineNanos
                     + ", supportedHdrTypes=" + Arrays.toString(supportedHdrTypes)
@@ -1828,6 +1834,7 @@ public final class SurfaceControl implements Parcelable {
                     && Float.compare(that.xDpi, xDpi) == 0
                     && Float.compare(that.yDpi, yDpi) == 0
                     && Float.compare(that.refreshRate, refreshRate) == 0
+                    && Float.compare(that.vsyncRate, vsyncRate) == 0
                     && appVsyncOffsetNanos == that.appVsyncOffsetNanos
                     && presentationDeadlineNanos == that.presentationDeadlineNanos
                     && Arrays.equals(supportedHdrTypes, that.supportedHdrTypes)
@@ -1836,8 +1843,9 @@ public final class SurfaceControl implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, width, height, xDpi, yDpi, refreshRate, appVsyncOffsetNanos,
-                    presentationDeadlineNanos, group, Arrays.hashCode(supportedHdrTypes));
+            return Objects.hash(id, width, height, xDpi, yDpi, refreshRate, vsyncRate,
+                    appVsyncOffsetNanos, presentationDeadlineNanos, group,
+                    Arrays.hashCode(supportedHdrTypes));
         }
     }
 
