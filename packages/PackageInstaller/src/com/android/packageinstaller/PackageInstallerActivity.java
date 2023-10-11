@@ -609,7 +609,7 @@ public class PackageInstallerActivity extends AlertActivity {
                 CharSequence label = mPm.getApplicationLabel(mPkgInfo.applicationInfo);
                 if (mLocalLOGV) Log.i(TAG, "creating snippet for " + label);
                 mAppSnippet = new PackageUtil.AppSnippet(label,
-                        mPm.getApplicationIcon(mPkgInfo.applicationInfo));
+                        mPm.getApplicationIcon(mPkgInfo.applicationInfo), getBaseContext());
             } break;
 
             case ContentResolver.SCHEME_FILE: {
@@ -647,7 +647,7 @@ public class PackageInstallerActivity extends AlertActivity {
         mPkgInfo = generateStubPackageInfo(info.getAppPackageName());
         mAppSnippet = new PackageUtil.AppSnippet(info.getAppLabel(),
                 info.getAppIcon() != null ? new BitmapDrawable(getResources(), info.getAppIcon())
-                        : getPackageManager().getDefaultActivityIcon());
+                        : getPackageManager().getDefaultActivityIcon(), getBaseContext());
         return true;
     }
 
