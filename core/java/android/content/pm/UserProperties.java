@@ -49,6 +49,7 @@ public final class UserProperties implements Parcelable {
     private static final String ATTR_SHOW_IN_LAUNCHER = "showInLauncher";
     private static final String ATTR_START_WITH_PARENT = "startWithParent";
     private static final String ATTR_SHOW_IN_SETTINGS = "showInSettings";
+    private static final String ATTR_HIDE_IN_SETTINGS_IN_QUIET_MODE = "hideInSettingsInQuietMode";
     private static final String ATTR_INHERIT_DEVICE_POLICY = "inheritDevicePolicy";
     private static final String ATTR_USE_PARENTS_CONTACTS = "useParentsContacts";
     private static final String ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA =
@@ -78,6 +79,7 @@ public final class UserProperties implements Parcelable {
             INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT,
             INDEX_DELETE_APP_WITH_PARENT,
             INDEX_ALWAYS_VISIBLE,
+            INDEX_HIDE_IN_SETTINGS_IN_QUIET_MODE,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -94,6 +96,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT = 9;
     private static final int INDEX_DELETE_APP_WITH_PARENT = 10;
     private static final int INDEX_ALWAYS_VISIBLE = 11;
+    private static final int INDEX_HIDE_IN_SETTINGS_IN_QUIET_MODE = 12;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -324,6 +327,7 @@ public final class UserProperties implements Parcelable {
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
             setShowInSettings(orig.getShowInSettings());
+            setHideInSettingsInQuietMode(orig.getHideInSettingsInQuietMode());
             setUseParentsContacts(orig.getUseParentsContacts());
         }
         if (hasQueryOrManagePermission) {
@@ -407,6 +411,42 @@ public final class UserProperties implements Parcelable {
         setPresent(INDEX_SHOW_IN_SETTINGS);
     }
     private @ShowInSettings int mShowInSettings;
+
+    /**
+     * Returns whether a user should be shown in the Settings app depending on the quiet mode.
+     * This is generally inapplicable for non-profile users.
+     *
+     * <p> {@link #getShowInSettings()} returns whether / how a user should be shown in Settings.
+     * However, if this behaviour should be changed based on the quiet mode of the user, then this
+     * property can be used. If the property is not set then the user is shown in the Settings app
+     * irrespective of whether the user is in quiet mode or not. If the property is set, then the
+     * user is shown in the Settings app only if the user is not in the quiet mode. Please note that
+     * this property takes effect only if {@link #getShowInSettings()} does not return
+     * {@link #SHOW_IN_SETTINGS_NO}.
+     *
+     * <p> The caller must have {@link android.Manifest.permission#MANAGE_USERS} to query this
+     * property.
+     *
+     * @return true if a profile should be shown in the Settings only when the user is not in the
+     * quiet mode.
+     *
+     * See also {@link #getShowInSettings()}, {@link #setShowInSettings(int)},
+     * {@link ShowInSettings}
+     *
+     * @hide
+     */
+    public boolean getHideInSettingsInQuietMode() {
+        if (isPresent(INDEX_HIDE_IN_SETTINGS_IN_QUIET_MODE)) return mHideInSettingsInQuietMode;
+        if (mDefaultProperties != null) return mDefaultProperties.mHideInSettingsInQuietMode;
+        throw new SecurityException(
+                "You don't have permission to query HideInSettingsInQuietMode");
+    }
+    /** @hide */
+    public void setHideInSettingsInQuietMode(boolean hideInSettingsInQuietMode) {
+        this.mHideInSettingsInQuietMode = hideInSettingsInQuietMode;
+        setPresent(INDEX_HIDE_IN_SETTINGS_IN_QUIET_MODE);
+    }
+    private boolean mHideInSettingsInQuietMode;
 
     /**
      * Returns whether a profile should be started when its parent starts (unless in quiet mode).
@@ -724,6 +764,9 @@ public final class UserProperties implements Parcelable {
                 case ATTR_SHOW_IN_SETTINGS:
                     setShowInSettings(parser.getAttributeInt(i));
                     break;
+                case ATTR_HIDE_IN_SETTINGS_IN_QUIET_MODE:
+                    setHideInSettingsInQuietMode(parser.getAttributeBoolean(i));
+                    break;
                 case ATTR_INHERIT_DEVICE_POLICY:
                     setInheritDevicePolicy(parser.getAttributeInt(i));
                     break;
@@ -777,6 +820,10 @@ public final class UserProperties implements Parcelable {
         if (isPresent(INDEX_SHOW_IN_SETTINGS)) {
             serializer.attributeInt(null, ATTR_SHOW_IN_SETTINGS, mShowInSettings);
         }
+        if (isPresent(INDEX_HIDE_IN_SETTINGS_IN_QUIET_MODE)) {
+            serializer.attributeBoolean(null, ATTR_HIDE_IN_SETTINGS_IN_QUIET_MODE,
+                    mHideInSettingsInQuietMode);
+        }
         if (isPresent(INDEX_INHERIT_DEVICE_POLICY)) {
             serializer.attributeInt(null, ATTR_INHERIT_DEVICE_POLICY,
                     mInheritDevicePolicy);
@@ -823,6 +870,7 @@ public final class UserProperties implements Parcelable {
         dest.writeInt(mShowInLauncher);
         dest.writeBoolean(mStartWithParent);
         dest.writeInt(mShowInSettings);
+        dest.writeBoolean(mHideInSettingsInQuietMode);
         dest.writeInt(mInheritDevicePolicy);
         dest.writeBoolean(mUseParentsContacts);
         dest.writeBoolean(mUpdateCrossProfileIntentFiltersOnOTA);
@@ -845,6 +893,7 @@ public final class UserProperties implements Parcelable {
         mShowInLauncher = source.readInt();
         mStartWithParent = source.readBoolean();
         mShowInSettings = source.readInt();
+        mHideInSettingsInQuietMode = source.readBoolean();
         mInheritDevicePolicy = source.readInt();
         mUseParentsContacts = source.readBoolean();
         mUpdateCrossProfileIntentFiltersOnOTA = source.readBoolean();
@@ -881,6 +930,7 @@ public final class UserProperties implements Parcelable {
         private @ShowInLauncher int mShowInLauncher = SHOW_IN_LAUNCHER_WITH_PARENT;
         private boolean mStartWithParent = false;
         private @ShowInSettings int mShowInSettings = SHOW_IN_SETTINGS_WITH_PARENT;
+        private boolean mHideInSettingsInQuietMode = false;
         private @InheritDevicePolicy int mInheritDevicePolicy = INHERIT_DEVICE_POLICY_NO;
         private boolean mUseParentsContacts = false;
         private boolean mUpdateCrossProfileIntentFiltersOnOTA = false;
@@ -907,6 +957,12 @@ public final class UserProperties implements Parcelable {
         /** Sets the value for {@link #mShowInSettings} */
         public Builder setShowInSettings(@ShowInSettings int showInSettings) {
             mShowInSettings = showInSettings;
+            return this;
+        }
+
+        /** Sets the value for {@link #mHideInSettingsInQuietMode} */
+        public Builder setHideInSettingsInQuietMode(boolean hideInSettingsInQuietMode) {
+            mHideInSettingsInQuietMode = hideInSettingsInQuietMode;
             return this;
         }
 
@@ -972,6 +1028,7 @@ public final class UserProperties implements Parcelable {
                     mShowInLauncher,
                     mStartWithParent,
                     mShowInSettings,
+                    mHideInSettingsInQuietMode,
                     mInheritDevicePolicy,
                     mUseParentsContacts,
                     mUpdateCrossProfileIntentFiltersOnOTA,
@@ -989,6 +1046,7 @@ public final class UserProperties implements Parcelable {
             @ShowInLauncher int showInLauncher,
             boolean startWithParent,
             @ShowInSettings int showInSettings,
+            boolean hideInSettingsInQuietMode,
             @InheritDevicePolicy int inheritDevicePolicy,
             boolean useParentsContacts, boolean updateCrossProfileIntentFiltersOnOTA,
             @CrossProfileIntentFilterAccessControlLevel int crossProfileIntentFilterAccessControl,
@@ -1001,6 +1059,7 @@ public final class UserProperties implements Parcelable {
         setShowInLauncher(showInLauncher);
         setStartWithParent(startWithParent);
         setShowInSettings(showInSettings);
+        setHideInSettingsInQuietMode(hideInSettingsInQuietMode);
         setInheritDevicePolicy(inheritDevicePolicy);
         setUseParentsContacts(useParentsContacts);
         setUpdateCrossProfileIntentFiltersOnOTA(updateCrossProfileIntentFiltersOnOTA);
