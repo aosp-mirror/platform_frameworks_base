@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
+import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
@@ -1108,6 +1110,16 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
 
         // THEN no NPE when fingerprintManager is null
+    }
+
+    @Test
+    public void bubbleBarVisibility() {
+        createCentralSurfaces();
+        mCentralSurfaces.onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);
+        verify(mBubbles).onStatusBarVisibilityChanged(false);
+
+        mCentralSurfaces.onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
+        verify(mBubbles).onStatusBarVisibilityChanged(true);
     }
 
     /**
