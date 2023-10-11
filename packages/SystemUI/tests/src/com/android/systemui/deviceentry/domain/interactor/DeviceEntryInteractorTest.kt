@@ -90,6 +90,16 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun isUnlocked_whenAuthMethodIsSimAndUnlocked_isFalse() =
+        testScope.runTest {
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Sim)
+            utils.deviceEntryRepository.setUnlocked(true)
+
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            assertThat(isUnlocked).isFalse()
+        }
+
+    @Test
     fun isDeviceEntered_onLockscreenWithSwipe_isFalse() =
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)

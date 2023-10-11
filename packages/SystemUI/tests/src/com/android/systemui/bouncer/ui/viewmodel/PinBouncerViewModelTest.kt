@@ -63,6 +63,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             viewModelScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
+            simBouncerInteractor = utils.simBouncerInteractor,
+            authenticationMethod = AuthenticationMethodModel.Pin,
         )
 
     @Before
@@ -89,6 +91,52 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             assertThat(pin).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(underTest.authenticationMethod).isEqualTo(AuthenticationMethodModel.Pin)
+        }
+
+    @Test
+    fun simBouncerViewModel_simAreaIsVisible() =
+        testScope.runTest {
+            val underTest =
+                PinBouncerViewModel(
+                    applicationContext = context,
+                    viewModelScope = testScope.backgroundScope,
+                    interactor = bouncerInteractor,
+                    isInputEnabled = MutableStateFlow(true).asStateFlow(),
+                    simBouncerInteractor = utils.simBouncerInteractor,
+                    authenticationMethod = AuthenticationMethodModel.Sim,
+                )
+
+            assertThat(underTest.isSimAreaVisible).isTrue()
+        }
+
+    @Test
+    fun onErrorDialogDismissed_clearsDialogMessage() =
+        testScope.runTest {
+            val dialogMessage by collectLastValue(underTest.errorDialogMessage)
+            utils.simBouncerRepository.setSimVerificationErrorMessage("abc")
+            assertThat(dialogMessage).isEqualTo("abc")
+
+            underTest.onErrorDialogDismissed()
+
+            assertThat(dialogMessage).isNull()
+        }
+
+    @Test
+    fun simBouncerViewModel_autoConfirmEnabled_hintedPinLengthIsNull() =
+        testScope.runTest {
+            val underTest =
+                PinBouncerViewModel(
+                    applicationContext = context,
+                    viewModelScope = testScope.backgroundScope,
+                    interactor = bouncerInteractor,
+                    isInputEnabled = MutableStateFlow(true).asStateFlow(),
+                    simBouncerInteractor = utils.simBouncerInteractor,
+                    authenticationMethod = AuthenticationMethodModel.Sim,
+                )
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+
+            assertThat(hintedPinLength).isNull()
         }
 
     @Test
