@@ -17,7 +17,6 @@ package android.service.notification;
 
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.annotation.TestApi;
 import android.app.Notification;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -40,7 +39,6 @@ import java.util.List;
  * @hide
  */
 @SuppressLint({"ParcelNotFinal", "ParcelCreator"})
-@TestApi
 public class NotificationRankingUpdate implements Parcelable {
     private final NotificationListenerService.RankingMap mRankingMap;
 
@@ -101,7 +99,7 @@ public class NotificationRankingUpdate implements Parcelable {
                 throw new RuntimeException(e);
             } finally {
                 mapParcel.recycle();
-                if (buffer != null) {
+                if (buffer != null && mRankingMapFd != null) {
                     mRankingMapFd.unmap(buffer);
                     mRankingMapFd.close();
                 }
@@ -140,7 +138,6 @@ public class NotificationRankingUpdate implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     public final boolean isFdNotNullAndClosed() {
         return mRankingMapFd != null && mRankingMapFd.getFd() == -1;
     }
