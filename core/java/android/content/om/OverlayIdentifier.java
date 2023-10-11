@@ -39,7 +39,6 @@ import java.util.Objects;
  * -->
  *
  * @see OverlayInfo#getOverlayIdentifier()
- * @see OverlayManagerTransaction.Builder#unregisterFabricatedOverlay(OverlayIdentifier)
  */
 @DataClass(genConstructor = false, genBuilder = false, genHiddenBuilder = false,
         genEqualsHashCode = true, genToString = false)
