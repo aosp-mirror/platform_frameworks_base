@@ -16,8 +16,11 @@
 
 package android.graphics;
 
+import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
+
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -2125,7 +2128,7 @@ public class Paint {
      * @return the font's recommended interline spacing.
      */
     public float getFontMetrics(FontMetrics metrics) {
-        return nGetFontMetrics(mNativePaint, metrics);
+        return nGetFontMetrics(mNativePaint, metrics, false);
     }
 
     /**
@@ -2136,6 +2139,32 @@ public class Paint {
         FontMetrics fm = new FontMetrics();
         getFontMetrics(fm);
         return fm;
+    }
+
+    /**
+     * Get the font metrics used for the locale
+     *
+     * Obtain the metrics of the font that is used for the specified locale by
+     * {@link #setTextLocales(LocaleList)}. If multiple locales are specified, the minimum ascent
+     * and maximum descent will be set.
+     *
+     * This API is useful for determining the default line height of the empty text field, e.g.
+     * {@link android.widget.EditText}.
+     *
+     * Note, if the {@link android.graphics.Typeface} is created from the custom font files, its
+     * metrics are reserved, i.e. the ascent will be the custom font's ascent or smaller, the
+     * descent will be the custom font's descent or larger.
+     *
+     * Note, if the {@link android.graphics.Typeface} is a system fallback, e.g.
+     * {@link android.graphics.Typeface#SERIF}, the default font's metrics are reserved, i.e. the
+     * ascent will be the serif font's ascent or smaller, the descent will be the serif font's
+     * descent or larger.
+     *
+     * @param metrics an output parameter. All members will be set by calling this function.
+     */
+    @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+    public void getFontMetricsForLocale(@NonNull FontMetrics metrics) {
+        nGetFontMetrics(mNativePaint, metrics, true);
     }
 
     /**
@@ -2318,13 +2347,39 @@ public class Paint {
      * @return the font's interline spacing.
      */
     public int getFontMetricsInt(FontMetricsInt fmi) {
-        return nGetFontMetricsInt(mNativePaint, fmi);
+        return nGetFontMetricsInt(mNativePaint, fmi, false);
     }
 
     public FontMetricsInt getFontMetricsInt() {
         FontMetricsInt fm = new FontMetricsInt();
         getFontMetricsInt(fm);
         return fm;
+    }
+
+    /**
+     * Get the font metrics used for the locale
+     *
+     * Obtain the metrics of the font that is used for the specified locale by
+     * {@link #setTextLocales(LocaleList)}. If multiple locales are specified, the minimum ascent
+     * and maximum descent will be set.
+     *
+     * This API is useful for determining the default line height of the empty text field, e.g.
+     * {@link android.widget.EditText}.
+     *
+     * Note, if the {@link android.graphics.Typeface} is created from the custom font files, its
+     * metrics are reserved, i.e. the ascent will be the custom font's ascent or smaller, the
+     * descent will be the custom font's descent or larger.
+     *
+     * Note, if the {@link android.graphics.Typeface} is a system fallback, e.g.
+     * {@link android.graphics.Typeface#SERIF}, the default font's metrics are reserved, i.e. the
+     * ascent will be the serif font's ascent or smaller, the descent will be the serif font's
+     * descent or larger.
+     *
+     * @param metrics an output parameter. All members will be set by calling this function.
+     */
+    @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+    public void getFontMetricsIntForLocale(@NonNull FontMetricsInt metrics) {
+        nGetFontMetricsInt(mNativePaint, metrics, true);
     }
 
     /**
@@ -3446,9 +3501,11 @@ public class Paint {
     @FastNative
     private static native void nSetFontFeatureSettings(long paintPtr, String settings);
     @FastNative
-    private static native float nGetFontMetrics(long paintPtr, FontMetrics metrics);
+    private static native float nGetFontMetrics(long paintPtr, FontMetrics metrics,
+            boolean useLocale);
     @FastNative
-    private static native int nGetFontMetricsInt(long paintPtr, FontMetricsInt fmi);
+    private static native int nGetFontMetricsInt(long paintPtr, FontMetricsInt fmi,
+            boolean useLocale);
 
     // ---------------- @CriticalNative ------------------------
 
