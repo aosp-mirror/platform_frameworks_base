@@ -36,6 +36,7 @@ aconfig_srcjars = [
     ":sdk_sandbox_flags_lib{.generated_srcjars}",
     ":android.permission.flags-aconfig-java{.generated_srcjars}",
     ":hwui_flags_java_lib{.generated_srcjars}",
+    ":framework_graphics_flags_java_lib{.generated_srcjars}",
     ":display_flags_lib{.generated_srcjars}",
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
     ":android.app.flags-aconfig-java{.generated_srcjars}",
@@ -333,6 +334,12 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "framework_graphics_flags_java_lib",
+    aconfig_declarations: "framework_graphics_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Display
 java_aconfig_library {
     name: "display_flags_lib",
@@ -424,7 +431,7 @@ aconfig_declarations {
     package: "android.service.autofill",
     srcs: [
         "services/autofill/bugfixes.aconfig",
-        "services/autofill/features.aconfig"
+        "services/autofill/features.aconfig",
     ],
 }
 
