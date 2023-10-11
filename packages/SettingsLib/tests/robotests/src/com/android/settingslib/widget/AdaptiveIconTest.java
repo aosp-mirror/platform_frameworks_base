@@ -36,10 +36,10 @@ import android.graphics.drawable.Icon;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 
-import com.android.settingslib.widget.adaptiveicon.R;
 import com.android.settingslib.drawer.ActivityTile;
 import com.android.settingslib.drawer.CategoryKey;
 import com.android.settingslib.drawer.Tile;
+import com.android.settingslib.widget.adaptiveicon.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -105,15 +105,15 @@ public class AdaptiveIconTest {
 
         icon.setBackgroundColor(mContext, tile);
 
-        assertThat(icon.mBackgroundColor).isEqualTo(mContext.getColor(
-                com.android.settingslib.widget.R.color.homepage_generic_icon_background));
+        assertThat(icon.mBackgroundColor).isEqualTo(
+                mContext.getColor(R.color.homepage_generic_icon_background));
     }
 
     @Test
     public void onBindTile_externalTileWithBackgroundColorHint_shouldUpdateIcon() {
         final Tile tile = spy(new ActivityTile(mActivityInfo, CategoryKey.CATEGORY_HOMEPAGE));
         mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON_BACKGROUND_HINT,
-                com.android.settingslib.widget.R.color.bt_outline_color);
+                R.color.bt_outline_color);
         doReturn(Icon.createWithResource(mContext, com.android.settingslib.R.drawable.ic_system_update))
                 .when(tile).getIcon(mContext);
 
@@ -121,8 +121,7 @@ public class AdaptiveIconTest {
                 new AdaptiveIcon(mContext, new ColorDrawable(Color.BLACK));
         icon.setBackgroundColor(mContext, tile);
 
-        assertThat(icon.mBackgroundColor).isEqualTo(mContext.getColor(
-                com.android.settingslib.widget.R.color.bt_outline_color));
+        assertThat(icon.mBackgroundColor).isEqualTo(mContext.getColor(R.color.bt_outline_color));
     }
 
     @Test

@@ -18,18 +18,5 @@
 # to the corresponding module.
 # NOTE: keep this file and ./Android.bp in sync.
 
-LOCAL_STATIC_JAVA_LIBRARIES += \
-    androidx.annotation_annotation
-
 LOCAL_STATIC_ANDROID_LIBRARIES += \
-    androidx.appcompat_appcompat \
-    androidx.coordinatorlayout_coordinatorlayout \
-    androidx.core_core \
-    androidx.fragment_fragment \
-    androidx.lifecycle_lifecycle-runtime \
-    androidx.loader_loader \
-    androidx.localbroadcastmanager_localbroadcastmanager \
-    androidx.preference_preference \
-    androidx.recyclerview_recyclerview \
     SettingsLib
-
