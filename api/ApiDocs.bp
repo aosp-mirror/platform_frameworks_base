@@ -195,6 +195,8 @@ framework_docs_only_args = " -android -manifest $(location :frameworks-base-core
 
 doc_defaults {
     name: "framework-docs-default",
+    sdk_version: "none",
+    system_modules: "none",
     libs: framework_docs_only_libs + [
         "stub-annotations",
         "unsupportedappusage",
