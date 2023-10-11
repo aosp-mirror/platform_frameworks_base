@@ -147,7 +147,6 @@ int JTvInputHal::removeStream(int deviceId, int streamId) {
 }
 
 int JTvInputHal::setTvMessageEnabled(int deviceId, int streamId, int type, bool enabled) {
-    Mutex::Autolock autoLock(&mLock);
     if (!mTvInput->setTvMessageEnabled(deviceId, streamId,
                                        static_cast<AidlTvMessageEventType>(type), enabled)
                  .isOk()) {
@@ -188,7 +187,7 @@ static const std::map<std::pair<AidlAudioDeviceType, std::string>, audio_devices
 
 void JTvInputHal::onDeviceAvailable(const TvInputDeviceInfoWrapper& info) {
     {
-        Mutex::Autolock autoLock(&mLock);
+        Mutex::Autolock autoLock(&mStreamLock);
         mConnections.add(info.deviceId, KeyedVector<int, Connection>());
     }
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -275,7 +274,7 @@ void JTvInputHal::onDeviceAvailable(const TvInputDeviceInfoWrapper& info) {
 
 void JTvInputHal::onDeviceUnavailable(int deviceId) {
     {
-        Mutex::Autolock autoLock(&mLock);
+        Mutex::Autolock autoLock(&mStreamLock);
         KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
         for (size_t i = 0; i < connections.size(); ++i) {
             removeStream(deviceId, connections.keyAt(i));
@@ -289,7 +288,7 @@ void JTvInputHal::onDeviceUnavailable(int deviceId) {
 
 void JTvInputHal::onStreamConfigurationsChanged(int deviceId, int cableConnectionStatus) {
     {
-        Mutex::Autolock autoLock(&mLock);
+        Mutex::Autolock autoLock(&mStreamLock);
         KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
         for (size_t i = 0; i < connections.size(); ++i) {
             removeStream(deviceId, connections.keyAt(i));
@@ -330,7 +329,7 @@ void JTvInputHal::onTvMessage(int deviceId, int streamId, AidlTvMessageEventType
 void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded) {
     sp<BufferProducerThread> thread;
     {
-        Mutex::Autolock autoLock(&mLock);
+        Mutex::Autolock autoLock(&mStreamLock);
         KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
         Connection& connection = connections.editValueFor(streamId);
         if (connection.mThread == NULL) {
