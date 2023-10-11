@@ -25,7 +25,6 @@ import android.view.ContextThemeWrapper
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.ContentDescription
@@ -35,6 +34,7 @@ import com.android.systemui.qs.FakeFgsManagerController
 import com.android.systemui.qs.QSSecurityFooterUtils
 import com.android.systemui.qs.footer.FooterActionsTestUtils
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
+import com.android.systemui.res.R
 import com.android.systemui.security.data.model.SecurityModel
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.statusbar.policy.FakeSecurityController
@@ -372,9 +372,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     ),
             )
 
-        val job = launch {
-            underTest.observeDeviceMonitoringDialogRequests(quickSettingsContext = mock())
-        }
+        val job = launch { underTest.observeDeviceMonitoringDialogRequests(mock()) }
 
         advanceUntilIdle()
         assertThat(nDialogRequests).isEqualTo(3)
