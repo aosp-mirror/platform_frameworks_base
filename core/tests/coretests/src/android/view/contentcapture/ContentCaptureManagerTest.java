@@ -31,6 +31,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Collections;
+
 /**
  * Unit test for {@link ContentCaptureManager}.
  *
@@ -69,7 +71,11 @@ public class ContentCaptureManagerTest {
         ContentCaptureOptions options =
                 createOptions(
                         new ContentCaptureOptions.ContentProtectionOptions(
-                                /* enableReceiver= */ false, BUFFER_SIZE));
+                                /* enableReceiver= */ false,
+                                BUFFER_SIZE,
+                                /* requiredGroups= */ Collections.emptyList(),
+                                /* optionalGroups= */ Collections.emptyList(),
+                                /* optionalGroupsThreshold= */ 0));
 
         ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, options);
@@ -82,7 +88,11 @@ public class ContentCaptureManagerTest {
         ContentCaptureOptions options =
                 createOptions(
                         new ContentCaptureOptions.ContentProtectionOptions(
-                                /* enableReceiver= */ true, /* bufferSize= */ 0));
+                                /* enableReceiver= */ true,
+                                /* bufferSize= */ 0,
+                                /* requiredGroups= */ Collections.emptyList(),
+                                /* optionalGroups= */ Collections.emptyList(),
+                                /* optionalGroupsThreshold= */ 0));
 
         ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, options);
@@ -95,7 +105,11 @@ public class ContentCaptureManagerTest {
         ContentCaptureOptions options =
                 createOptions(
                         new ContentCaptureOptions.ContentProtectionOptions(
-                                /* enableReceiver= */ true, BUFFER_SIZE));
+                                /* enableReceiver= */ true,
+                                BUFFER_SIZE,
+                                /* requiredGroups= */ Collections.emptyList(),
+                                /* optionalGroups= */ Collections.emptyList(),
+                                /* optionalGroupsThreshold= */ 0));
 
         ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, options);

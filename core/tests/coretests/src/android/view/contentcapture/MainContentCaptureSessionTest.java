@@ -47,6 +47,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -112,7 +113,11 @@ public class MainContentCaptureSessionTest {
                 createOptions(
                         /* enableContentCaptureReceiver= */ true,
                         new ContentCaptureOptions.ContentProtectionOptions(
-                                /* enableReceiver= */ true, -BUFFER_SIZE));
+                                /* enableReceiver= */ true,
+                                -BUFFER_SIZE,
+                                /* requiredGroups= */ Collections.emptyList(),
+                                /* optionalGroups= */ Collections.emptyList(),
+                                /* optionalGroupsThreshold= */ 0));
         MainContentCaptureSession session = createSession(options);
         session.mContentProtectionEventProcessor = mMockContentProtectionEventProcessor;
 
@@ -313,7 +318,11 @@ public class MainContentCaptureSessionTest {
         return createOptions(
                 enableContentCaptureReceiver,
                 new ContentCaptureOptions.ContentProtectionOptions(
-                        enableContentProtectionReceiver, BUFFER_SIZE));
+                        enableContentProtectionReceiver,
+                        BUFFER_SIZE,
+                        /* requiredGroups= */ Collections.emptyList(),
+                        /* optionalGroups= */ Collections.emptyList(),
+                        /* optionalGroupsThreshold= */ 0));
     }
 
     private ContentCaptureManager createManager(ContentCaptureOptions options) {
