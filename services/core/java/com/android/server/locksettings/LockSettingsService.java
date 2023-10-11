@@ -348,17 +348,17 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
-            mLockSettingsService.onStartUser(user.getUserIdentifier());
+            mLockSettingsService.onUserStarting(user.getUserIdentifier());
         }
 
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
-            mLockSettingsService.onUnlockUser(user.getUserIdentifier());
+            mLockSettingsService.onUserUnlocking(user.getUserIdentifier());
         }
 
         @Override
         public void onUserStopped(@NonNull TargetUser user) {
-            mLockSettingsService.onCleanupUser(user.getUserIdentifier());
+            mLockSettingsService.onUserStopped(user.getUserIdentifier());
         }
     }
 
@@ -780,7 +780,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @VisibleForTesting
-    void onCleanupUser(int userId) {
+    void onUserStopped(int userId) {
         hideEncryptionNotification(new UserHandle(userId));
         // User is stopped with its CE key evicted. Restore strong auth requirement to the default
         // flags after boot since stopping and restarting a user later is equivalent to rebooting
@@ -792,7 +792,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void onStartUser(final int userId) {
+    private void onUserStarting(final int userId) {
         maybeShowEncryptionNotificationForUser(userId, "user started");
     }
 
@@ -828,7 +828,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void onUnlockUser(final int userId) {
+    private void onUserUnlocking(final int userId) {
         // Perform tasks which require locks in LSS on a handler, as we are callbacks from
         // ActivityManager.unlockUser()
         mHandler.post(new Runnable() {
