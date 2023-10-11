@@ -228,6 +228,9 @@ public final class AutofillManagerService
     private int mMaxInputLengthForAutofill;
 
     @GuardedBy("mFlagLock")
+    private boolean mAutofillCredmanIntegrationEnabled;
+
+    @GuardedBy("mFlagLock")
     private boolean mIsFillFieldsFromCurrentSessionOnly;
 
     // Default flag values for Autofill PCC
@@ -705,13 +708,16 @@ public final class AutofillManagerService
                     DeviceConfig.NAMESPACE_AUTOFILL,
                     AutofillFeatureFlags.DEVICE_CONFIG_MAX_INPUT_LENGTH_FOR_AUTOFILL,
                     AutofillFeatureFlags.DEFAULT_MAX_INPUT_LENGTH_FOR_AUTOFILL);
+            mAutofillCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
             mIsFillFieldsFromCurrentSessionOnly = Flags.fillFieldsFromCurrentSessionOnly();
             if (verbose) {
                 Slog.v(mTag, "setDeviceConfigProperties() for PCC: "
                         + "mPccClassificationEnabled=" + mPccClassificationEnabled
                         + ", mPccPreferProviderOverPcc=" + mPccPreferProviderOverPcc
                         + ", mPccUseFallbackDetection=" + mPccUseFallbackDetection
-                        + ", mPccProviderHints=" + mPccProviderHints);
+                        + ", mPccProviderHints=" + mPccProviderHints
+                        + ", mAutofillCredmanIntegrationEnabled="
+                        + mAutofillCredmanIntegrationEnabled);
             }
         }
     }
@@ -966,6 +972,15 @@ public final class AutofillManagerService
     public boolean isPccClassificationFlagEnabled() {
         synchronized (mFlagLock) {
             return mPccClassificationEnabled;
+        }
+    }
+
+    /**
+     * Whether the Autofill-Credman integration feature flag is enabled.
+     */
+    public boolean isAutofillCredmanIntegrationEnabled() {
+        synchronized (mFlagLock) {
+            return mAutofillCredmanIntegrationEnabled;
         }
     }
 
@@ -2110,6 +2125,9 @@ public final class AutofillManagerService
                         pw.print(";");
                         pw.print("mPccProviderHints=");
                         pw.println(mPccProviderHints);
+                        pw.print(";");
+                        pw.print("mAutofillCredmanIntegrationEnabled=");
+                        pw.println(mAutofillCredmanIntegrationEnabled);
                     }
                     // Dump per-user services
                     dumpLocked("", pw);
