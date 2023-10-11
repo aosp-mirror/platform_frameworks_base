@@ -67,6 +67,7 @@ import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillCallback;
 import android.service.autofill.FillEventHistory;
+import android.service.autofill.Flags;
 import android.service.autofill.IFillCallback;
 import android.service.autofill.UserData;
 import android.text.TextUtils;
@@ -434,6 +435,14 @@ public final class AutofillManager {
     public static final int STATE_UNKNOWN_FAILED = 6;
 
     /**
+     * Same as {@link #STATE_ACTIVE}, but when pending authentication after
+     * {@link AutofillManagerClient#authenticate(int, int, IntentSender, Intent, boolean)}
+     *
+     * @hide
+     */
+    public static final int STATE_PENDING_AUTHENTICATION = 7;
+
+    /**
      * Timeout in ms for calls to the field classification service.
      * @hide
      */
@@ -737,6 +746,10 @@ public final class AutofillManager {
     // Indicate whether WebView should always be included in the assist structure
     private boolean mShouldAlwaysIncludeWebviewInAssistStructure;
 
+    // Controls logic around apps changing some properties of their views when activity loses
+    // focus due to autofill showing biometric activity, password manager, or password breach check.
+    private boolean mRelayoutFix;
+
     // Indicates whether called the showAutofillDialog() method.
     private boolean mShowAutofillDialogCalled = false;
 
@@ -958,6 +971,8 @@ public final class AutofillManager {
 
         mShouldAlwaysIncludeWebviewInAssistStructure =
                 AutofillFeatureFlags.shouldAlwaysIncludeWebviewInAssistStructure();
+
+        mRelayoutFix = Flags.relayout();
     }
 
     /**
@@ -1721,7 +1736,13 @@ public final class AutofillManager {
         synchronized (mLock) {
             if (mForAugmentedAutofillOnly) {
                 if (sVerbose) {
-                    Log.v(TAG,  "notifyViewVisibilityChanged(): ignoring on augmented only mode");
+                    Log.v(TAG, "notifyViewVisibilityChanged(): ignoring on augmented only mode");
+                }
+                return;
+            }
+            if (mRelayoutFix && mState == STATE_PENDING_AUTHENTICATION) {
+                if (sVerbose) {
+                    Log.v(TAG, "notifyViewVisibilityChanged(): ignoring in auth pending mode");
                 }
                 return;
             }
@@ -2348,6 +2369,7 @@ public final class AutofillManager {
             if (!isActiveLocked()) {
                 return;
             }
+            mState = STATE_ACTIVE;
             // If authenticate activity closes itself during onCreate(), there is no onStop/onStart
             // of app activity.  We enforce enter event to re-show fill ui in such case.
             // CTS example:
@@ -2836,6 +2858,9 @@ public final class AutofillManager {
             Intent fillInIntent, boolean authenticateInline) {
         synchronized (mLock) {
             if (sessionId == mSessionId) {
+                if (mRelayoutFix) {
+                    mState = STATE_PENDING_AUTHENTICATION;
+                }
                 final AutofillClient client = getClient();
                 if (client != null) {
                     // clear mOnInvisibleCalled and we will see if receive onInvisibleForAutofill()
@@ -3569,6 +3594,8 @@ public final class AutofillManager {
                 return "UNKNOWN";
             case STATE_ACTIVE:
                 return "ACTIVE";
+            case STATE_PENDING_AUTHENTICATION:
+                return "PENDING_AUTHENTICATION";
             case STATE_FINISHED:
                 return "FINISHED";
             case STATE_SHOWING_SAVE_UI:
@@ -3598,7 +3625,12 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private boolean isActiveLocked() {
-        return mState == STATE_ACTIVE;
+        return mState == STATE_ACTIVE || isPendingAuthenticationLocked();
+    }
+
+    @GuardedBy("mLock")
+    private boolean isPendingAuthenticationLocked() {
+        return mRelayoutFix && mState == STATE_PENDING_AUTHENTICATION;
     }
 
     @GuardedBy("mLock")

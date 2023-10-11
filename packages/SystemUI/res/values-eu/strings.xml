@@ -676,8 +676,8 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"Atzera: itzuli aurreko egoerara (atzera egiteko botoia)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"Atzitu hasierako pantaila"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Ikusi irekitako aplikazioen ikuspegi orokorra"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Joan azken aplikazioetako batetik bestera (aurrera)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Joan azken aplikazioetako batetik bestera (atzera)"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Joan azkenaldian erabilitako aplikazio batetik bestera (aurrera)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Joan azkenaldian erabilitako aplikazio batetik bestera (atzera)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Atzitu aplikazio guztien zerrenda eta bilatu (adibidez, bilatzeko aukeraren edo Exekutatzeko tresna aplikazioaren bidez)"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Ezkutatu eta erakutsi (berriro) zereginen barra"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Atzitu sistemaren ezarpenak"</string>
@@ -1183,10 +1183,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Ezarri oharren aplikazio lehenetsia ezarpenetan"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalatu aplikazioa"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Kanpoko pantailan islatu nahi duzu?"</string>
-    <!-- no translation found for mirror_display (2515262008898122928) -->
-    <skip />
-    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
-    <skip />
+    <string name="mirror_display" msgid="2515262008898122928">"Islatu pantaila"</string>
+    <string name="dismiss_dialog" msgid="2195508495854675882">"Baztertu"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofonoa eta kamera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Aplikazioen azken erabilera"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Ikusi azkenaldiko sarbidea"</string>

@@ -1183,10 +1183,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ဆက်တင်များတွင် မူရင်းမှတ်စုများအက်ပ် သတ်မှတ်ပါ"</string>
     <string name="install_app" msgid="5066668100199613936">"အက်ပ် ထည့်သွင်းရန်"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ပြင်ပဖန်သားပြင်သို့ စကရင်ပွားမလား။"</string>
-    <!-- no translation found for mirror_display (2515262008898122928) -->
-    <skip />
-    <!-- no translation found for dismiss_dialog (2195508495854675882) -->
-    <skip />
+    <string name="mirror_display" msgid="2515262008898122928">"ဖန်သားပြင်ကို စကရင်ပွားရန်"</string>
+    <string name="dismiss_dialog" msgid="2195508495854675882">"ပယ်ရန်"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"မိုက်ခရိုဖုန်းနှင့် ကင်မရာ"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"လတ်တလော အက်ပ်အသုံးပြုမှု"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"လတ်တလောအသုံးပြုမှုကို ကြည့်ရန်"</string>

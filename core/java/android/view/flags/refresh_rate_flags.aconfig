@@ -20,3 +20,10 @@ flag {
     description: "Feature flag for using expected presentation time of the Choreographer"
     bug: "278730197"
 }
+
+flag {
+  name: "set_frame_rate_callback"
+  namespace: "core_graphics"
+  description: "Enable the `setFrameRate` callback"
+  bug: "299946220"
+}

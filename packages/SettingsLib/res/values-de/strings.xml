@@ -157,8 +157,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"WLAN: zwei Balken"</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"WLAN: drei Balken"</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"WLAN: volle Signalstärke"</string>
-    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
-    <skip />
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Mit deinem Gerät verbunden."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Offenes Netzwerk"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Sicheres Netzwerk"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>

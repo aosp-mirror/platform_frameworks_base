@@ -47,6 +47,7 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
@@ -1592,6 +1593,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     private void removePinnedRootTaskInSurfaceTransaction(Task rootTask) {
+        rootTask.mTransitionController.requestTransitionIfNeeded(TRANSIT_TO_BACK, 0 /* flags */,
+                rootTask, rootTask.mDisplayContent, null /* remoteTransition */,
+                null /* displayChange */);
         /**
          * Workaround: Force-stop all the activities in the root pinned task before we reparent them
          * to the fullscreen root task.  This is to guarantee that when we are removing a root task,

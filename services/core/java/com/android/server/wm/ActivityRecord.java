@@ -5367,18 +5367,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // rather than just direct membership.
                 inFinishingTransition = mTransitionController.inFinishingTransition(this);
                 if (!inFinishingTransition && (visible || !mDisplayContent.isSleeping())) {
-                    Slog.e(TAG, "setVisibility=" + visible
-                            + " while transition is not collecting or finishing "
-                            + this + " caller=" + Debug.getCallers(8));
-                    // Force showing the parents because they may be hidden by previous transition.
                     if (visible) {
-                        final Transaction t = getSyncTransaction();
-                        for (WindowContainer<?> p = getParent(); p != null && p != mDisplayContent;
-                                p = p.getParent()) {
-                            if (p.mSurfaceControl != null) {
-                                t.show(p.mSurfaceControl);
-                            }
-                        }
+                        mTransitionController.onVisibleWithoutCollectingTransition(this,
+                                Debug.getCallers(1, 1));
+                    } else {
+                        Slog.w(TAG, "Set invisible without transition " + this);
                     }
                 }
             }

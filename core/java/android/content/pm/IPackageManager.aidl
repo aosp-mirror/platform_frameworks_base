@@ -308,6 +308,8 @@ interface IPackageManager {
 
     boolean isPackageQuarantinedForUser(String packageName, int userId);
 
+    boolean isPackageStoppedForUser(String packageName, int userId);
+
     Bundle getSuspendedPackageAppExtras(String packageName, int userId);
 
     /**

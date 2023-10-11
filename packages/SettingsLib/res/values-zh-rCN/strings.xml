@@ -157,8 +157,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"WLAN 信号强度为两格。"</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"WLAN 信号强度为三格。"</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"WLAN 信号满格。"</string>
-    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
-    <skip />
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"已连接到您的设备。"</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"开放网络"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"安全网络"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android 操作系统"</string>

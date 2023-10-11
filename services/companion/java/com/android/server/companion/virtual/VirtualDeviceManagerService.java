@@ -38,6 +38,7 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
+import android.companion.virtualnative.IVirtualDeviceManagerNative;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
@@ -88,8 +89,11 @@ public class VirtualDeviceManagerService extends SystemService {
 
     private static final String TAG = "VirtualDeviceManagerService";
 
+    private static final String VIRTUAL_DEVICE_NATIVE_SERVICE = "virtualdevice_native";
+
     private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
+    private final VirtualDeviceManagerNativeImpl mNativeImpl;
     private final VirtualDeviceManagerInternal mLocalService;
     private VirtualDeviceLog mVirtualDeviceLog = new VirtualDeviceLog(getContext());
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -125,6 +129,7 @@ public class VirtualDeviceManagerService extends SystemService {
     public VirtualDeviceManagerService(Context context) {
         super(context);
         mImpl = new VirtualDeviceManagerImpl();
+        mNativeImpl = Flags.enableNativeVdm() ? new VirtualDeviceManagerNativeImpl() : null;
         mLocalService = new LocalService();
     }
 
@@ -155,6 +160,9 @@ public class VirtualDeviceManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.VIRTUAL_DEVICE_SERVICE, mImpl);
+        if (Flags.enableNativeVdm()) {
+            publishBinderService(VIRTUAL_DEVICE_NATIVE_SERVICE, mNativeImpl);
+        }
         publishLocalService(VirtualDeviceManagerInternal.class, mLocalService);
         ActivityTaskManagerInternal activityTaskManagerInternal = getLocalService(
                 ActivityTaskManagerInternal.class);
@@ -587,6 +595,19 @@ public class VirtualDeviceManagerService extends SystemService {
             }
 
             mVirtualDeviceLog.dump(fout);
+        }
+    }
+
+    final class VirtualDeviceManagerNativeImpl extends IVirtualDeviceManagerNative.Stub {
+        @Override // Binder call
+        public int[] getDeviceIdsForUid(int uid) {
+            return mLocalService
+                    .getDeviceIdsForUid(uid).stream().mapToInt(Integer::intValue).toArray();
+        }
+
+        @Override // Binder call
+        public int getDevicePolicy(int deviceId, int policyType) {
+            return mImpl.getDevicePolicy(deviceId, policyType);
         }
     }
 

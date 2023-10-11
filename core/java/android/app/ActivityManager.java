@@ -4288,7 +4288,7 @@ public class ActivityManager {
     }
 
     /**
-     * Start monitoring changes to the imoportance of uids running in the system.
+     * Start monitoring changes to the importance of uids running in the system.
      * @param listener The listener callback that will receive change reports.
      * @param importanceCutpoint The level of importance in which the caller is interested
      * in differences.  For example, if {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}

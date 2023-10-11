@@ -2007,6 +2007,20 @@ public abstract class NotificationListenerService extends Service {
             return mSmartActions == null ? Collections.emptyList() : mSmartActions;
         }
 
+
+        /**
+         * Sets the smart {@link Notification.Action} objects.
+         *
+         * Should ONLY be used in cases where smartActions need to be removed from, then restored
+         * on, Ranking objects during Parceling, when they are transmitted between processes via
+         * Shared Memory.
+         *
+         * @hide
+         */
+        public void setSmartActions(@Nullable ArrayList<Notification.Action> smartActions) {
+            mSmartActions = smartActions;
+        }
+
         /**
          * Returns a list of smart replies that can be added by the
          * {@link NotificationAssistantService}
@@ -2353,11 +2367,9 @@ public abstract class NotificationListenerService extends Service {
 
         /**
          * Get a reference to the actual Ranking object corresponding to the key.
-         * Used only by unit tests.
          *
          * @hide
          */
-        @VisibleForTesting
         public Ranking getRawRankingObject(String key) {
             return mRankings.get(key);
         }

@@ -189,6 +189,8 @@ import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.settings.SecureSettings;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import com.google.android.collect.Lists;
 
 import java.io.PrintWriter;
@@ -4430,6 +4432,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     @SuppressLint("MissingPermission")
+    @NeverCompile
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("KeyguardUpdateMonitor state:");

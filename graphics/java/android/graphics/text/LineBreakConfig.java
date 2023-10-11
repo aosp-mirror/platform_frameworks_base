@@ -134,10 +134,25 @@ public final class LineBreakConfig {
      */
     public static final int LINE_BREAK_STYLE_STRICT = 3;
 
+    /**
+     * The line break style that used for preventing automatic line breaking.
+     *
+     * This is useful when you want to preserve some words in the same line by using
+     * {@link android.text.style.LineBreakConfigSpan} or
+     * {@link android.text.style.LineBreakConfigSpan.NoBreakSpan} as a shorthand.
+     * Note that even if this style is specified, the grapheme based line break is still performed
+     * for preventing clipping text.
+     *
+     * @see android.text.style.LineBreakConfigSpan
+     * @see android.text.style.LineBreakConfigSpan.NoBreakSpan
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static final int LINE_BREAK_STYLE_NO_BREAK = 4;
+
     /** @hide */
     @IntDef(prefix = { "LINE_BREAK_STYLE_" }, value = {
             LINE_BREAK_STYLE_NONE, LINE_BREAK_STYLE_LOOSE, LINE_BREAK_STYLE_NORMAL,
-            LINE_BREAK_STYLE_STRICT, LINE_BREAK_STYLE_UNSPECIFIED
+            LINE_BREAK_STYLE_STRICT, LINE_BREAK_STYLE_UNSPECIFIED, LINE_BREAK_STYLE_NO_BREAK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LineBreakStyle {}

@@ -65,6 +65,8 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.util.Optional;
 
@@ -476,6 +478,7 @@ public class NavigationBarControllerImpl implements
         return mNavigationBars.get(mDisplayTracker.getDefaultDisplayId());
     }
 
+    @NeverCompile
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mIsLargeScreen=" + mIsLargeScreen);

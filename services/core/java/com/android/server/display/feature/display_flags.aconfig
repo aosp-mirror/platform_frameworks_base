@@ -72,3 +72,11 @@ flag {
     bug: "299521647"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "back_up_smooth_display_and_force_peak_refresh_rate"
+    namespace: "display_manager"
+    description: "Feature flag for backing up Smooth Display and Force Peak Refresh Rate"
+    bug: "211737588"
+    is_fixed_read_only: true
+}

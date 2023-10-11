@@ -25,6 +25,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.DumpsysTableLogger
 import com.android.systemui.dump.Row
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import dalvik.annotation.optimization.NeverCompile
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -39,6 +40,7 @@ constructor(val dumpManager: DumpManager, val notificationPipeline: NotifPipelin
         Log.i("NotificationMemory", "Registered dumpable.")
     }
 
+    @NeverCompile
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         val memoryUse =
             NotificationMemoryMeter.notificationMemoryUse(notificationPipeline.allNotifs)

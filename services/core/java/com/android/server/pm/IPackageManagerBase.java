@@ -961,6 +961,12 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     }
 
     @Override
+    public final boolean isPackageStoppedForUser(@NonNull String packageName,
+            @UserIdInt int userId) {
+        return snapshot().isPackageStoppedForUser(packageName, userId);
+    }
+
+    @Override
     @Deprecated
     public final boolean isSafeMode() {
         // allow instant applications

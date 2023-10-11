@@ -1,0 +1,8 @@
+package: "android.widget.flags"
+
+flag {
+    namespace: "toolkit"
+    name: "enable_platform_widget_differential_motion_fling"
+    description: "Enables differential motion fling in platform widgets"
+    bug: "293332089"
+}

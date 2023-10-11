@@ -143,6 +143,7 @@ public class SecureSettings {
         Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
         Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED,
         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+        Settings.Secure.VOLUME_DIALOG_DISMISS_TIMEOUT,
         Settings.Secure.VOLUME_HUSH_GESTURE,
         Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT,
         Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
@@ -245,6 +246,9 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
         Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
-        Settings.Secure.HUB_MODE_TUTORIAL_STATE
+        Settings.Secure.HUB_MODE_TUTORIAL_STATE,
+        Settings.Secure.STYLUS_BUTTONS_ENABLED,
+        Settings.Secure.STYLUS_HANDWRITING_ENABLED,
+        Settings.Secure.DEFAULT_NOTE_TASK_PROFILE
     };
 }

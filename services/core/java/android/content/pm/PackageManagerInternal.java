@@ -1428,6 +1428,12 @@ public abstract class PackageManagerInternal {
             @UserIdInt int userId);
 
     /**
+     * Sends the PACKAGE_RESTARTED broadcast on the package manager handler thread.
+     */
+    public abstract void sendPackageRestartedBroadcast(@NonNull String packageName,
+            int uid, @Intent.Flags int flags);
+
+    /**
      * Return a list of all historical install sessions for the given user.
      */
     public abstract ParceledListSlice<PackageInstaller.SessionInfo> getHistoricalSessions(

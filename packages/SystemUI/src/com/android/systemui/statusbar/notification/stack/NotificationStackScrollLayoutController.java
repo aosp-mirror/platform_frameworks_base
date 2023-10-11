@@ -64,7 +64,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.ViewRefactorFlag;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -207,7 +207,7 @@ public class NotificationStackScrollLayoutController {
     private boolean mIsInTransitionToAod = false;
 
     private final FeatureFlags mFeatureFlags;
-    private final ViewRefactorFlag mShelfRefactor;
+    private final RefactorFlag mShelfRefactor;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
@@ -719,7 +719,7 @@ public class NotificationStackScrollLayoutController {
         mShadeController = shadeController;
         mNotifIconAreaController = notifIconAreaController;
         mFeatureFlags = featureFlags;
-        mShelfRefactor = new ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
+        mShelfRefactor = new RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;

@@ -123,7 +123,8 @@ public final class SurfaceControl implements Parcelable {
     private static native long nativeMirrorSurface(long mirrorOfObject);
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
-    private static native void nativeApplyTransaction(long transactionObj, boolean sync);
+    private static native void nativeApplyTransaction(long transactionObj, boolean sync,
+            boolean oneWay);
     private static native void nativeMergeTransaction(long transactionObj,
             long otherTransactionObj);
     private static native void nativeClearTransaction(long transactionObj);
@@ -2785,8 +2786,20 @@ public final class SurfaceControl implements Parcelable {
          * as a new transaction.
          */
         public void apply() {
-            apply(false);
+            apply(/*sync*/ false);
         }
+
+        /**
+         * Applies the transaction as a one way binder call. This transaction will be applied out
+         * of order with other transactions that are applied synchronously. This method is not
+         * safe. It should only be used when the order does not matter.
+         *
+         * @hide
+         */
+        public void applyAsyncUnsafe() {
+            apply(/*sync*/ false, /*oneWay*/ true);
+        }
+
 
         /**
          * Clear the transaction object, without applying it.
@@ -2817,9 +2830,13 @@ public final class SurfaceControl implements Parcelable {
          * @hide
          */
         public void apply(boolean sync) {
+            apply(sync, /*oneWay*/ false);
+        }
+
+        private void apply(boolean sync, boolean oneWay) {
             applyResizedSurfaces();
             notifyReparentedSurfaces();
-            nativeApplyTransaction(mNativeObject, sync);
+            nativeApplyTransaction(mNativeObject, sync, oneWay);
         }
 
         /**
@@ -4373,7 +4390,7 @@ public final class SurfaceControl implements Parcelable {
         void applyGlobalTransaction(boolean sync) {
             applyResizedSurfaces();
             notifyReparentedSurfaces();
-            nativeApplyTransaction(mNativeObject, sync);
+            nativeApplyTransaction(mNativeObject, sync, /*oneWay*/ false);
         }
 
         @Override

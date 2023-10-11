@@ -72,6 +72,8 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.Utils;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -934,6 +936,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         return mListeningAndVisibilityLifecycleOwner;
     }
 
+    @NeverCompile
     @Override
     public void dump(PrintWriter pw, String[] args) {
         IndentingPrintWriter indentingPw = new IndentingPrintWriter(pw, /* singleIndent= */ "  ");

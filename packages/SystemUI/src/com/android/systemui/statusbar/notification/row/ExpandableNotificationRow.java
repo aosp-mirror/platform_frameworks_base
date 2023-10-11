@@ -27,7 +27,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -40,8 +39,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Trace;
-import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.IndentingPrintWriter;
@@ -73,15 +70,15 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.CallLayout;
-import com.android.systemui.res.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.ViewRefactorFlag;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -274,8 +271,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
     private Path mExpandingClipPath;
-    private final ViewRefactorFlag mInlineReplyAnimation =
-            new ViewRefactorFlag(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION);
+    private final RefactorFlag mInlineReplyAnimation =
+            RefactorFlag.forView(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION);
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.

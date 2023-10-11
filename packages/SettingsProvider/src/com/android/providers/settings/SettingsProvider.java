@@ -121,6 +121,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.display.RefreshRateSettingsUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.providers.settings.SettingsState.Setting;
@@ -3878,7 +3879,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 222;
+            private static final int SETTINGS_VERSION = 223;
 
             private final int mUserId;
 
@@ -5935,10 +5936,6 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 218) {
                     // Version 219: Removed
-                    // TODO(b/211737588): Back up the Smooth Display setting
-                    // Future upgrades to the `peak_refresh_rate` and `min_refresh_rate` settings
-                    // should account for the database in a non-upgraded and upgraded (change id:
-                    // Ib2cb2dd100f06f5452083b7606109a486e795a0e) state.
                     currentVersion = 219;
                 }
 
@@ -6002,6 +5999,56 @@ public class SettingsProvider extends ContentProvider {
                                 defEnableWifiAlwaysRequested);
                     }
                     currentVersion = 222;
+                }
+
+                // Version 222: Set peak refresh rate and min refresh rate to infinity if it's
+                // meant to be the highest possible refresh rate. This is needed so that we can
+                // back up and restore those settings on other devices. Other devices might have
+                // different highest possible refresh rates.
+                if (currentVersion == 222) {
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    final Setting peakRefreshRateSetting =
+                            systemSettings.getSettingLocked(Settings.System.PEAK_REFRESH_RATE);
+                    final Setting minRefreshRateSetting =
+                            systemSettings.getSettingLocked(Settings.System.MIN_REFRESH_RATE);
+                    float highestRefreshRate = RefreshRateSettingsUtils
+                            .findHighestRefreshRateForDefaultDisplay(getContext());
+
+                    if (!peakRefreshRateSetting.isNull()) {
+                        try {
+                            float peakRefreshRate =
+                                    Float.parseFloat(peakRefreshRateSetting.getValue());
+                            if (Math.round(peakRefreshRate) == Math.round(highestRefreshRate)) {
+                                systemSettings.insertSettingLocked(
+                                        Settings.System.PEAK_REFRESH_RATE,
+                                        String.valueOf(Float.POSITIVE_INFINITY),
+                                        /* tag= */ null,
+                                        /* makeDefault= */ false,
+                                        SettingsState.SYSTEM_PACKAGE_NAME);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Do nothing. Leave the value as is.
+                        }
+                    }
+
+                    if (!minRefreshRateSetting.isNull()) {
+                        try {
+                            float minRefreshRate =
+                                    Float.parseFloat(minRefreshRateSetting.getValue());
+                            if (Math.round(minRefreshRate) == Math.round(highestRefreshRate)) {
+                                systemSettings.insertSettingLocked(
+                                        Settings.System.MIN_REFRESH_RATE,
+                                        String.valueOf(Float.POSITIVE_INFINITY),
+                                        /* tag= */ null,
+                                        /* makeDefault= */ false,
+                                        SettingsState.SYSTEM_PACKAGE_NAME);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Do nothing. Leave the value as is.
+                        }
+                    }
+
+                    currentVersion = 223;
                 }
 
                 // vXXX: Add new settings above this point.

@@ -71,6 +71,10 @@ public class LineBreakConfigSpan {
             .setHyphenation(LineBreakConfig.HYPHENATION_DISABLED)
             .build();
 
+    private static final LineBreakConfig sNoBreakConfig = new LineBreakConfig.Builder()
+            .setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_NO_BREAK)
+            .build();
+
     /**
      * A specialized {@link LineBreakConfigSpan} that used for preventing hyphenation.
      */
@@ -82,6 +86,26 @@ public class LineBreakConfigSpan {
         @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
         public NoHyphenationSpan() {
             super(sNoHyphenationConfig);
+        }
+    }
+
+    /**
+     * A specialized {@link LineBreakConfigSpan} that used for preventing line break.
+     *
+     * This is useful when you want to preserve some words in the same line.
+     * Note that even if this style is specified, the grapheme based line break is still performed
+     * for preventing clipping text.
+     *
+     * @see LineBreakConfigSpan
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static final class NoBreakSpan extends LineBreakConfigSpan {
+        /**
+         * Construct a new {@link NoBreakSpan}.
+         */
+        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+        public NoBreakSpan() {
+            super(sNoBreakConfig);
         }
     }
 }
