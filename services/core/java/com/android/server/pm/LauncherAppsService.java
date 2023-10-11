@@ -130,6 +130,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -216,6 +218,7 @@ public class LauncherAppsService extends SystemService {
         private final ShortcutChangeHandler mShortcutChangeHandler;
 
         private final Handler mCallbackHandler;
+        private final ExecutorService mOnDumpExecutor = Executors.newSingleThreadExecutor();
 
         private PackageInstallerService mPackageInstallerService;
 
@@ -1569,24 +1572,37 @@ public class LauncherAppsService extends SystemService {
          */
         private void forEachViewCaptureWindow(
                 @NonNull BiConsumer<String, InputStream> outputtingConsumer) {
-            for (int i = mDumpCallbacks.beginBroadcast() - 1; i >= 0; i--) {
-                String packageName = (String) mDumpCallbacks.getBroadcastCookie(i);
-                String fileName = WM_TRACE_DIR + packageName + "_" + i + VC_FILE_SUFFIX;
+            try {
+                // This multi-threading prevents ctrl-C command line command aborting from putting
+                // the mDumpCallbacks RemoteCallbackList in a bad Broadcast state. We need to wait
+                // for it to complete even though it is on a background thread.
+                mOnDumpExecutor.submit(() -> {
+                    try {
+                        for (int i = mDumpCallbacks.beginBroadcast() - 1; i >= 0; i--) {
+                            String packageName = (String) mDumpCallbacks.getBroadcastCookie(i);
+                            String fileName = WM_TRACE_DIR + packageName + "_" + i + VC_FILE_SUFFIX;
 
-                try {
-                    // Order is important here. OnDump needs to be called before the BiConsumer
-                    // accepts & starts blocking on reading the input stream.
-                    ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
-                    mDumpCallbacks.getBroadcastItem(i).onDump(pipe[1]);
+                            try {
+                                // Order is important here. OnDump needs to be called before the
+                                // BiConsumer accepts & starts blocking on reading the input stream.
+                                ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+                                mDumpCallbacks.getBroadcastItem(i).onDump(pipe[1]);
 
-                    InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pipe[0]);
-                    outputtingConsumer.accept(fileName, is);
-                    is.close();
-                } catch (Exception e) {
-                    Log.d(TAG, "failed to pipe view capture data", e);
-                }
+                                InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(
+                                        pipe[0]);
+                                outputtingConsumer.accept(fileName, is);
+                                is.close();
+                            } catch (Exception e) {
+                                Log.d(TAG, "failed to pipe view capture data", e);
+                            }
+                        }
+                    } finally {
+                        mDumpCallbacks.finishBroadcast();
+                    }
+                }).get();
+            } catch (InterruptedException | ExecutionException e) {
+                Log.e(TAG, "background work was interrupted", e);
             }
-            mDumpCallbacks.finishBroadcast();
         }
 
         @RequiresPermission(READ_FRAME_BUFFER)
