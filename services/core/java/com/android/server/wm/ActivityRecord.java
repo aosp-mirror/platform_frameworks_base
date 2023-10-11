@@ -9262,13 +9262,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Slog.w(TAG, errorMessage);
         }
 
-        // Configuration's equality doesn't consider seq so if only seq number changes in resolved
-        // override configuration. Therefore ConfigurationContainer doesn't change merged override
-        // configuration, but it's used to push configuration changes so explicitly update that.
-        if (getMergedOverrideConfiguration().seq != getResolvedOverrideConfiguration().seq) {
-            onMergedOverrideConfigurationChanged();
-        }
-
         // Before PiP animation is done, th windowing mode of the activity is still the previous
         // mode (see RootWindowContainer#moveActivityToPinnedRootTask). So once the windowing mode
         // of activity is changed, it is the signal of the last step to update the PiP states.
