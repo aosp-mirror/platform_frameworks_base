@@ -63,8 +63,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        whenever(controllerFactory.create(eq(0))).thenReturn(controller0)
-        whenever(controllerFactory.create(eq(1))).thenReturn(controller1)
+        whenever(controllerFactory.create(eq(0), any())).thenReturn(controller0)
+        whenever(controllerFactory.create(eq(1), any())).thenReturn(controller1)
     }
 
     @Test
@@ -74,8 +74,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             val onSaved = { _: Uri -> }
             screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
 
-            verify(controllerFactory).create(eq(0))
-            verify(controllerFactory).create(eq(1))
+            verify(controllerFactory).create(eq(0), any())
+            verify(controllerFactory).create(eq(1), any())
 
             val capturer = ArgumentCaptor<ScreenshotData>()
 
@@ -107,8 +107,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
                 callback
             )
 
-            verify(controllerFactory).create(eq(0))
-            verify(controllerFactory, never()).create(eq(1))
+            verify(controllerFactory).create(eq(0), any())
+            verify(controllerFactory, never()).create(eq(1), any())
 
             val capturer = ArgumentCaptor<ScreenshotData>()
 
@@ -139,7 +139,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     @Test
     fun executeScreenshots_allowedTypes_allCaptured() =
         testScope.runTest {
-            whenever(controllerFactory.create(any())).thenReturn(controller0)
+            whenever(controllerFactory.create(any(), any())).thenReturn(controller0)
 
             setDisplays(
                 display(TYPE_INTERNAL, id = 0),

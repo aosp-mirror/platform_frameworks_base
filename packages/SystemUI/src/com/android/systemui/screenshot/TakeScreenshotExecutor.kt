@@ -135,7 +135,9 @@ constructor(
     }
 
     private fun getScreenshotController(id: Int): ScreenshotController {
-        return screenshotControllers.computeIfAbsent(id) { screenshotControllerFactory.create(id) }
+        return screenshotControllers.computeIfAbsent(id) {
+            screenshotControllerFactory.create(id, /* showUIOnExternalDisplay= */ false)
+        }
     }
 
     /** For java compatibility only. see [executeScreenshots] */
