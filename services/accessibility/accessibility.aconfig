@@ -41,3 +41,10 @@ flag {
     description: "Whether to set min span of ScaleGestureDetector to zero."
     bug: "295327792"
 }
+
+flag {
+    name: "deprecate_package_list_observer"
+    namespace: "accessibility"
+    description: "Stops using the deprecated PackageListObserver."
+    bug: "304561459"
+}
