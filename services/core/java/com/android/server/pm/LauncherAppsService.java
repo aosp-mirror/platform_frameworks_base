@@ -107,19 +107,22 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.SizedInputStream;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.io.DataInputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1515,7 +1518,7 @@ public class LauncherAppsService extends SystemService {
                     forEachViewCaptureWindow((fileName, is) -> {
                         try {
                             zipOs.putNextEntry(new ZipEntry("FS" + fileName));
-                            is.transferTo(zipOs);
+                            transferViewCaptureData(is, zipOs);
                             zipOs.closeEntry();
                         } catch (IOException e) {
                             getErrPrintWriter().write("Failed to output " + fileName
@@ -1556,12 +1559,22 @@ public class LauncherAppsService extends SystemService {
         private void dumpViewCaptureDataToWmTrace(@NonNull String fileName,
                 @NonNull InputStream is) {
             Path outPath = Paths.get(fileName);
-            try {
-                Files.copy(is, outPath, StandardCopyOption.REPLACE_EXISTING);
+            try (OutputStream os = Files.newOutputStream(outPath, StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING)) {
+                transferViewCaptureData(is, os);
                 Files.setPosixFilePermissions(outPath, WM_TRACE_FILE_PERMISSIONS);
             } catch (IOException e) {
                 Log.d(TAG, "failed to write data to " + fileName + " in wmtrace dir", e);
             }
+        }
+
+        /**
+         * Raw input stream reads hang on the final read when transferring data in via the pipe.
+         * The fix used below is to count and read the exact amount of bytes being sent.
+         */
+        private void transferViewCaptureData(InputStream is, OutputStream os) throws IOException {
+            DataInputStream dataInputStream = new DataInputStream(is);
+            new SizedInputStream(dataInputStream, dataInputStream.readInt()).transferTo(os);
         }
 
         /**
