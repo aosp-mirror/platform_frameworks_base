@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.ComponentName;
@@ -611,6 +613,15 @@ public class ActivityClient {
                     taskFragmentToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @RequiresPermission(INTERNAL_SYSTEM_WINDOW)
+    void setActivityRecordInputSinkEnabled(IBinder activityToken, boolean enabled) {
+        try {
+            getActivityClientController().setActivityRecordInputSinkEnabled(activityToken, enabled);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 
