@@ -2232,9 +2232,7 @@ public final class ViewRootImpl implements ViewParent,
             mStopped = stopped;
             final ThreadedRenderer renderer = mAttachInfo.mThreadedRenderer;
             if (renderer != null) {
-                if (DEBUG_DRAW) {
-                    Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
-                }
+                if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
                 renderer.setStopped(mStopped);
             }
             if (!mStopped) {
@@ -8604,10 +8602,6 @@ public final class ViewRootImpl implements ViewParent,
         mWinFrame.set(frame);
         if (withinRelayout) {
             mLastLayoutFrame.set(frame);
-        }
-
-        if (mOnBackInvokedDispatcher.isSystemGestureExclusionNeeded()) {
-            setRootSystemGestureExclusionRects(List.of(frame));
         }
 
         final WindowConfiguration winConfig = getCompatWindowConfiguration();

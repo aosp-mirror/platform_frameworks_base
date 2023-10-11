@@ -16,9 +16,6 @@
 
 package android.window;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -37,8 +34,8 @@ import android.view.IWindowSession;
 
 import androidx.annotation.VisibleForTesting;
 
+
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,18 +57,6 @@ import java.util.TreeMap;
  * @hide
  */
 public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
-    @Retention(SOURCE)
-    @IntDef({
-        BACK_CALLBACK_ENABLED,
-        BACK_CALLBACK_DISABLED,
-        BACK_CALLBACK_DISABLED_LEGACY_WINDOW_SWIPE_TO_DISMISS
-    })
-    public @interface OnBackInvokedCallbackType {}
-
-    public static final int BACK_CALLBACK_ENABLED = 0;
-    public static final int BACK_CALLBACK_DISABLED = 1;
-    public static final int BACK_CALLBACK_DISABLED_LEGACY_WINDOW_SWIPE_TO_DISMISS = 2;
-
     private IWindowSession mWindowSession;
     private IWindow mWindow;
     private static final String TAG = "WindowOnBackDispatcher";
@@ -283,6 +268,13 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     /**
+     * Returns false if the legacy back behavior should be used.
+     */
+    public boolean isOnBackInvokedCallbackEnabled() {
+        return Checker.isOnBackInvokedCallbackEnabled(mChecker.getContext());
+    }
+
+    /**
      * Dump information about this WindowOnBackInvokedDispatcher
      * @param prefix the prefix that will be prepended to each line of the produced output
      * @param writer the writer that will receive the resulting text
@@ -395,20 +387,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
     }
 
-    /** Returns false if the legacy back behavior should be used. */
-    public boolean isOnBackInvokedCallbackEnabled() {
-        return isOnBackInvokedCallbackEnabled(mChecker.getContext());
-    }
-
-    /**
-     * Returns true if system gesture exclusion is needed for global gesture compatibility with
-     * windowSwipeToDismiss styleable.
-     */
-    public boolean isSystemGestureExclusionNeeded() {
-        return Checker.getBackCallbackType(mChecker.getContext())
-                == BACK_CALLBACK_DISABLED_LEGACY_WINDOW_SWIPE_TO_DISMISS;
-    }
-
     /**
      * Returns false if the legacy back behavior should be used.
      * <p>
@@ -416,7 +394,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * {@link OnBackInvokedCallback}.
      */
     public static boolean isOnBackInvokedCallbackEnabled(@NonNull Context context) {
-        return Checker.getBackCallbackType(context) == BACK_CALLBACK_ENABLED;
+        return Checker.isOnBackInvokedCallbackEnabled(context);
     }
 
     @Override
@@ -468,24 +446,22 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             return mContext.get();
         }
 
-        @OnBackInvokedCallbackType
-        private static int getBackCallbackType(@Nullable Context context) {
+        private static boolean isOnBackInvokedCallbackEnabled(@Nullable Context context) {
             // new back is enabled if the feature flag is enabled AND the app does not explicitly
             // request legacy back.
             boolean featureFlagEnabled = ENABLE_PREDICTIVE_BACK;
             if (!featureFlagEnabled) {
-                return BACK_CALLBACK_DISABLED;
+                return false;
             }
 
             if (ALWAYS_ENFORCE_PREDICTIVE_BACK) {
-                Log.i(TAG, "getBackCallbackType: always enable");
-                return BACK_CALLBACK_ENABLED;
+                return true;
             }
 
             // If the context is null, return false to use legacy back.
             if (context == null) {
                 Log.w(TAG, "OnBackInvokedCallback is not enabled because context is null.");
-                return BACK_CALLBACK_DISABLED;
+                return false;
             }
 
             boolean requestsPredictiveBack = false;
@@ -552,15 +528,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                         Log.i(TAG, "falling back to windowSwipeToDismiss: " + windowSwipeToDismiss);
                     }
 
-                    if (!windowSwipeToDismiss) {
-                        return BACK_CALLBACK_DISABLED_LEGACY_WINDOW_SWIPE_TO_DISMISS;
-                    } else {
-                        return BACK_CALLBACK_ENABLED;
-                    }
+                    requestsPredictiveBack = windowSwipeToDismiss;
                 }
             }
 
-            return requestsPredictiveBack ? BACK_CALLBACK_ENABLED : BACK_CALLBACK_DISABLED;
+            return requestsPredictiveBack;
         }
     }
 }
