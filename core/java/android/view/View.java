@@ -12115,12 +12115,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * a precision touch gesture in a small area in either the X or Y dimension, such as
      * an edge swipe or dragging a <code>SeekBar</code> thumb.</p>
      *
-     * <p>On Wear OS, these rects control where system-level swipe-to-dismiss gesture can start. If
-     * the attribute {@code android:windowSwipeToDismiss} has been set to {@code false}, the system
-     * will create an exclusion rect with size equal to the window frame size. In order words, the
-     * system swipe-to-dismiss will not apply, and the app must handle gestural input within itself.
-     * </p>
-     *
      * <p>Note: the system will put a limit of <code>200dp</code> on the vertical extent of the
      * exclusions it takes into account. The limit does not apply while the navigation
      * bar is {@link #SYSTEM_UI_FLAG_IMMERSIVE_STICKY stickily} hidden, nor to the
