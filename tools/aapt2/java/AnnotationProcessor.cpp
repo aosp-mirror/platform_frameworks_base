@@ -49,16 +49,19 @@ struct AnnotationRule {
     kDeprecated = 0x01,
     kSystemApi = 0x02,
     kTestApi = 0x04,
+    kFlaggedApi = 0x08,
   };
 
   StringPiece doc_str;
   uint32_t bit_mask;
   StringPiece annotation;
+  bool preserve_params;
 };
 
-static std::array<AnnotationRule, 2> sAnnotationRules = {{
-    {"@SystemApi", AnnotationRule::kSystemApi, "@android.annotation.SystemApi"},
-    {"@TestApi", AnnotationRule::kTestApi, "@android.annotation.TestApi"},
+static std::array<AnnotationRule, 3> sAnnotationRules = {{
+    {"@SystemApi", AnnotationRule::kSystemApi, "@android.annotation.SystemApi", true},
+    {"@TestApi", AnnotationRule::kTestApi, "@android.annotation.TestApi", false},
+    {"@FlaggedApi", AnnotationRule::kFlaggedApi, "@android.annotation.FlaggedApi", true},
 }};
 
 void AnnotationProcessor::AppendCommentLine(std::string comment) {
@@ -73,12 +76,11 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
     std::string::size_type idx = comment.find(rule.doc_str.data());
     if (idx != std::string::npos) {
       // Captures all parameters associated with the specified annotation rule
-      // by matching the first pair of parantheses after the rule.
-      std::regex re(std::string(rule.doc_str) += "\\s*\\((.+)\\)");
+      // by matching the first pair of parentheses after the rule.
+      std::regex re(std::string(rule.doc_str).append(R"(\s*\((.+)\))"));
       std::smatch match_result;
       const bool is_match = std::regex_search(comment, match_result, re);
-      // We currently only capture and preserve parameters for SystemApi.
-      if (is_match && rule.bit_mask == AnnotationRule::kSystemApi) {
+      if (is_match && rule.preserve_params) {
         annotation_parameter_map_[rule.bit_mask] = match_result[1].str();
         comment.erase(comment.begin() + match_result.position(),
                       comment.begin() + match_result.position() + match_result.length());
