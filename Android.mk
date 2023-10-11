@@ -69,9 +69,6 @@ $(SDK_METADATA): $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/framework-doc-stub
 .PHONY: framework-doc-stubs
 framework-doc-stubs: $(SDK_METADATA)
 
-# Run this for checkbuild
-checkbuild: doc-comment-check-docs
-
 # Include subdirectory makefiles
 # ============================================================
 
