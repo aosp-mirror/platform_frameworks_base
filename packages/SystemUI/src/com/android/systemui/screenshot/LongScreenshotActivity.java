@@ -19,6 +19,7 @@ package com.android.systemui.screenshot;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
@@ -44,10 +45,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.view.OneShotPreDrawListener;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 import com.android.systemui.screenshot.CropView.CropBoundary;
 import com.android.systemui.screenshot.ScrollCaptureController.LongScreenshot;
 import com.android.systemui.settings.UserTracker;
@@ -421,13 +422,15 @@ public class LongScreenshotActivity extends Activity {
             Log.e(TAG, "failed to export", e);
             return;
         }
+        Uri exported = ContentProvider.getUriWithoutUserId(result.uri);
+        Log.e(TAG, action + " uri=" + exported);
 
         switch (action) {
             case EDIT:
-                doEdit(result.uri);
+                doEdit(exported);
                 break;
             case SHARE:
-                doShare(result.uri);
+                doShare(exported);
                 break;
             case SAVE:
                 // Nothing more to do
