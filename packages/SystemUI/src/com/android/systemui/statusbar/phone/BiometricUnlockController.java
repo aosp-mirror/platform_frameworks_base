@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
-import static com.android.systemui.keyguard.WakefulnessLifecycle.UNKNOWN_LAST_WAKE_TIME;
 
 import android.annotation.IntDef;
 import android.content.res.Resources;
@@ -30,7 +28,6 @@ import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Trace;
-import android.view.HapticFeedbackConstants;
 
 import androidx.annotation.Nullable;
 
@@ -47,16 +44,17 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.logging.BiometricUnlockLogger;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -73,12 +71,14 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
 /**
  * Controller which coordinates all the biometric unlocking actions with the UI.
  */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 public class BiometricUnlockController extends KeyguardUpdateMonitorCallback implements Dumpable {
-    private static final long RECENT_POWER_BUTTON_PRESS_THRESHOLD_MS = 400L;
     private static final long BIOMETRIC_WAKELOCK_TIMEOUT_MS = 15 * 1000;
     private static final String BIOMETRIC_WAKE_LOCK_NAME = "wake-and-unlock:wakelock";
     private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
@@ -175,6 +175,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final BiometricUnlockLogger mLogger;
     private final SystemClock mSystemClock;
     private final boolean mOrderUnlockAndWake;
+    private final DeviceEntryHapticsInteractor mHapticsInteractor;
 
     private long mLastFpFailureUptimeMillis;
     private int mNumConsecutiveFpFailures;
@@ -284,7 +285,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             ScreenOffAnimationController screenOffAnimationController,
             VibratorHelper vibrator,
             SystemClock systemClock,
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            DeviceEntryHapticsInteractor hapticsInteractor
     ) {
         mPowerManager = powerManager;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -314,6 +316,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mFeatureFlags = featureFlags;
         mOrderUnlockAndWake = resources.getBoolean(
                 com.android.internal.R.bool.config_orderUnlockAndWake);
+        mHapticsInteractor = hapticsInteractor;
 
         dumpManager.registerDumpable(this);
     }
@@ -434,7 +437,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (mode == MODE_WAKE_AND_UNLOCK
                 || mode == MODE_WAKE_AND_UNLOCK_PULSING || mode == MODE_UNLOCK_COLLAPSING
                 || mode == MODE_WAKE_AND_UNLOCK_FROM_DREAM || mode == MODE_DISMISS_BOUNCER) {
-            vibrateSuccess(biometricSourceType);
+            mHapticsInteractor.vibrateSuccess();
             onBiometricUnlockedWithKeyguardDismissal(biometricSourceType);
         }
         startWakeAndUnlock(mode);
@@ -723,7 +726,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 && !mUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                 KeyguardUpdateMonitor.getCurrentUser()))
                 || (biometricSourceType == BiometricSourceType.FINGERPRINT)) {
-            vibrateError(biometricSourceType);
+            mHapticsInteractor.vibrateError();
         }
 
         cleanup();
@@ -748,45 +751,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
 
         cleanup();
-    }
-
-    // these haptics are for device-entry only
-    private void vibrateSuccess(BiometricSourceType type) {
-        if (mAuthController.isSfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())
-                && lastWakeupFromPowerButtonWithinHapticThreshold()) {
-            mLogger.d("Skip auth success haptic. Power button was recently pressed.");
-            return;
-        }
-        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            mVibratorHelper.performHapticFeedback(
-                    mKeyguardViewController.getViewRootImpl().getView(),
-                    HapticFeedbackConstants.CONFIRM
-            );
-        } else {
-            mVibratorHelper.vibrateAuthSuccess(
-                    getClass().getSimpleName() + ", type =" + type + "device-entry::success");
-        }
-    }
-
-    private boolean lastWakeupFromPowerButtonWithinHapticThreshold() {
-        final boolean lastWakeupFromPowerButton = mWakefulnessLifecycle.getLastWakeReason()
-                == PowerManager.WAKE_REASON_POWER_BUTTON;
-        return lastWakeupFromPowerButton
-                && mWakefulnessLifecycle.getLastWakeTime() != UNKNOWN_LAST_WAKE_TIME
-                && mSystemClock.uptimeMillis() - mWakefulnessLifecycle.getLastWakeTime()
-                < RECENT_POWER_BUTTON_PRESS_THRESHOLD_MS;
-    }
-
-    private void vibrateError(BiometricSourceType type) {
-        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            mVibratorHelper.performHapticFeedback(
-                    mKeyguardViewController.getViewRootImpl().getView(),
-                    HapticFeedbackConstants.REJECT
-            );
-        } else {
-            mVibratorHelper.vibrateAuthError(
-                    getClass().getSimpleName() + ", type =" + type + "device-entry::error");
-        }
     }
 
     private void cleanup() {
