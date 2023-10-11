@@ -1140,7 +1140,8 @@ public final class ViewRootImpl implements ViewParent,
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
         final String name = DisplayProperties.debug_vri_package().orElse(null);
-        mExtraDisplayListenerLogging = !TextUtils.isEmpty(name) && name.equals(mBasePackageName);
+        // TODO: b/306170135 - return to using textutils check on package name.
+        mExtraDisplayListenerLogging = true;
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
         mLocation.fillInStackTrace();
@@ -1684,7 +1685,8 @@ public final class ViewRootImpl implements ViewParent,
                         mHandler,
                         DisplayManager.EVENT_FLAG_DISPLAY_ADDED
                         | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
+                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED,
+                        mBasePackageName);
     }
 
     /**
@@ -2117,6 +2119,10 @@ public final class ViewRootImpl implements ViewParent,
                 if (mExtraDisplayListenerLogging) {
                     Slog.i(mTag, "DisplayState - old: " + oldDisplayState
                             + ", new: " + newDisplayState);
+                }
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                    Trace.traceCounter(Trace.TRACE_TAG_WINDOW_MANAGER,
+                            "vri#screenState[" + mTag + "] state=", newDisplayState);
                 }
                 if (oldDisplayState != newDisplayState) {
                     mAttachInfo.mDisplayState = newDisplayState;

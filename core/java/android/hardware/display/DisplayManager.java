@@ -30,6 +30,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -757,7 +758,8 @@ public final class DisplayManager {
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
             @Nullable Handler handler, @EventsMask long eventsMask) {
-        mGlobal.registerDisplayListener(listener, handler, eventsMask);
+        mGlobal.registerDisplayListener(listener, handler, eventsMask,
+                ActivityThread.currentPackageName());
     }
 
     /**
