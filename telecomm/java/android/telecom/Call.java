@@ -942,6 +942,7 @@ public final class Call {
          * @return the Telecom identifier associated with this {@link Call} . This is not a stable
          * identifier and is not guaranteed to be unique across device reboots.
          */
+        @FlaggedApi(Flags.FLAG_CALL_DETAILS_ID_CHANGES)
         public @NonNull String getId() { return mTelecomCallId; }
 
         /** {@hide} */

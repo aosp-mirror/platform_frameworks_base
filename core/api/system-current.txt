@@ -13228,7 +13228,7 @@ package android.telecom {
     method public void requestStreamingState(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.StreamingCall> CREATOR;
-    field public static final String EXTRA_CALL_ID = "android.telecom.extra.CALL_ID";
+    field @FlaggedApi("com.android.server.telecom.flags.call_details_id_changes") public static final String EXTRA_CALL_ID = "android.telecom.extra.CALL_ID";
     field public static final int STATE_DISCONNECTED = 3; // 0x3
     field public static final int STATE_HOLDING = 2; // 0x2
     field public static final int STATE_STREAMING = 1; // 0x1
