@@ -118,6 +118,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private final Object mGenericWindowPolicyControllerLock = new Object();
     @Nullable private final ActivityBlockedCallback mActivityBlockedCallback;
     private int mDisplayId = Display.INVALID_DISPLAY;
+    private boolean mIsMirrorDisplay = false;
 
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
@@ -203,8 +204,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     /**
      * Expected to be called once this object is associated with a newly created display.
      */
-    public void setDisplayId(int displayId) {
+    void setDisplayId(int displayId, boolean isMirrorDisplay) {
         mDisplayId = displayId;
+        mIsMirrorDisplay = isMirrorDisplay;
     }
 
     /**
@@ -256,9 +258,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @Nullable Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
             int launchingFromDisplayId, boolean isNewTask) {
         if (!canContainActivity(activityInfo, windowingMode, launchingFromDisplayId, isNewTask)) {
-            if (mActivityBlockedCallback != null) {
-                mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
-            }
+            notifyActivityBlocked(activityInfo);
             return false;
         }
         if (mIntentListenerCallback != null && intent != null
@@ -273,6 +273,11 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     public boolean canContainActivity(@NonNull ActivityInfo activityInfo,
             @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
             boolean isNewTask) {
+        // Mirror displays cannot contain activities.
+        if (mIsMirrorDisplay) {
+            Slog.d(TAG, "Mirror virtual displays cannot contain activities.");
+            return false;
+        }
         if (!isWindowingModeSupported(windowingMode)) {
             Slog.d(TAG, "Virtual device doesn't support windowing mode " + windowingMode);
             return false;
@@ -344,9 +349,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             // TODO(b/201712607): Add checks for the apps that use SurfaceView#setSecure.
             if ((windowFlags & FLAG_SECURE) != 0
                     || (systemWindowFlags & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
-                if (mActivityBlockedCallback != null) {
-                    mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
-                }
+                notifyActivityBlocked(activityInfo);
                 return false;
             }
         }
@@ -426,6 +429,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
         return activityInfo.requiredDisplayCategory != null
                     && mDisplayCategories.contains(activityInfo.requiredDisplayCategory);
+    }
+
+    private void notifyActivityBlocked(ActivityInfo activityInfo) {
+        // Don't trigger activity blocked callback for mirror displays, because we can't show
+        // any activity or presentation on it anyway.
+        if (!mIsMirrorDisplay && mActivityBlockedCallback != null) {
+            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
+        }
     }
 
     private static boolean isAllowedByPolicy(boolean allowedByDefault,
