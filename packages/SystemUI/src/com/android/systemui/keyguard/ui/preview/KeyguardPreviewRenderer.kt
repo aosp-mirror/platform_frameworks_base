@@ -29,12 +29,12 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.DisplayInfo
 import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.WindowManager.LayoutParams.TYPE_KEYGUARD
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
@@ -129,7 +129,7 @@ constructor(
         bundle.getBoolean(ClockPreviewConstants.KEY_HIDE_CLOCK, false)
     private val wallpaperColors: WallpaperColors? = bundle.getParcelable(KEY_COLORS)
     private val displayId = bundle.getInt(KEY_DISPLAY_ID, DEFAULT_DISPLAY)
-    private val display: Display = displayManager.getDisplay(displayId)
+    private val display: Display? = displayManager.getDisplay(displayId)
 
     private var host: SurfaceControlViewHost
 
@@ -179,7 +179,7 @@ constructor(
 
     fun render() {
         mainHandler.post {
-            val previewContext = context.createDisplayContext(display)
+            val previewContext = display?.let { context.createDisplayContext(it) } ?: context
 
             val rootView = FrameLayout(previewContext)
 
@@ -189,16 +189,18 @@ constructor(
                 setUpBottomArea(rootView)
             }
 
-            val windowContext = context.createWindowContext(display, TYPE_KEYGUARD, null)
-            val windowManagerOfDisplay = windowContext.getSystemService(WindowManager::class.java)
+            var displayInfo: DisplayInfo? = null
+            display?.let {
+                displayInfo = DisplayInfo()
+                it.getDisplayInfo(displayInfo)
+            }
             rootView.measure(
                 View.MeasureSpec.makeMeasureSpec(
-                    windowManagerOfDisplay?.currentWindowMetrics?.bounds?.width()
-                        ?: windowManager.currentWindowMetrics.bounds.width(),
+                    displayInfo?.logicalWidth ?: windowManager.currentWindowMetrics.bounds.width(),
                     View.MeasureSpec.EXACTLY
                 ),
                 View.MeasureSpec.makeMeasureSpec(
-                    windowManagerOfDisplay?.currentWindowMetrics?.bounds?.height()
+                    displayInfo?.logicalHeight
                         ?: windowManager.currentWindowMetrics.bounds.height(),
                     View.MeasureSpec.EXACTLY
                 ),
