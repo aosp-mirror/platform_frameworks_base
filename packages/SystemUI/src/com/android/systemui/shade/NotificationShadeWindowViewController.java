@@ -48,7 +48,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor;
+import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
@@ -106,7 +106,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final NotificationInsetsController mNotificationInsetsController;
     private final boolean mIsTrackpadCommonEnabled;
     private final FeatureFlags mFeatureFlags;
-    private final KeyEventInteractor mKeyEventInteractor;
+    private final SysUIKeyEventHandler mSysUIKeyEventHandler;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private GestureDetector mPulsingWakeupGestureHandler;
@@ -185,7 +185,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             SystemClock clock,
             BouncerMessageInteractor bouncerMessageInteractor,
             BouncerLogger bouncerLogger,
-            KeyEventInteractor keyEventInteractor,
+            SysUIKeyEventHandler sysUIKeyEventHandler,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor) {
         mLockscreenShadeTransitionController = transitionController;
@@ -214,7 +214,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mNotificationInsetsController = notificationInsetsController;
         mIsTrackpadCommonEnabled = featureFlags.isEnabled(TRACKPAD_GESTURE_COMMON);
         mFeatureFlags = featureFlags;
-        mKeyEventInteractor = keyEventInteractor;
+        mSysUIKeyEventHandler = sysUIKeyEventHandler;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
 
@@ -529,17 +529,17 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
             @Override
             public boolean interceptMediaKey(KeyEvent event) {
-                return mKeyEventInteractor.interceptMediaKey(event);
+                return mSysUIKeyEventHandler.interceptMediaKey(event);
             }
 
             @Override
             public boolean dispatchKeyEventPreIme(KeyEvent event) {
-                return mKeyEventInteractor.dispatchKeyEventPreIme(event);
+                return mSysUIKeyEventHandler.dispatchKeyEventPreIme(event);
             }
 
             @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
-                return mKeyEventInteractor.dispatchKeyEvent(event);
+                return mSysUIKeyEventHandler.dispatchKeyEvent(event);
             }
         });
 

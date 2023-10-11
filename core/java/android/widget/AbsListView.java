@@ -80,6 +80,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
+import android.view.flags.Flags;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -92,7 +93,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
-import android.widget.flags.Flags;
 import android.widget.RemoteViews.InteractionHandler;
 
 import com.android.internal.R;
@@ -4518,7 +4518,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final int overscrollMode = getOverScrollMode();
 
                     if (!trackMotionScroll(delta, delta)) {
-                        if (Flags.platformWidgetHapticScrollFeedback()) {
+                        if (Flags.scrollFeedbackApi()) {
                             initHapticScrollFeedbackProviderIfNotExists();
                             mHapticScrollFeedbackProvider.onScrollProgress(
                                     event.getDeviceId(), event.getSource(), axis, delta);
@@ -4534,7 +4534,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         float overscroll = (delta - (motionViewRealTop - motionViewPrevTop))
                                 / ((float) getHeight());
                         boolean hitTopLimit = delta > 0;
-                        if (Flags.platformWidgetHapticScrollFeedback()) {
+                        if (Flags.scrollFeedbackApi()) {
                             initHapticScrollFeedbackProviderIfNotExists();
                             mHapticScrollFeedbackProvider.onScrollLimit(
                                     event.getDeviceId(), event.getSource(), axis,

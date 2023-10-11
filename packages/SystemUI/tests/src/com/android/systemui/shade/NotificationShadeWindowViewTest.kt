@@ -48,7 +48,7 @@ import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.SystemPropertiesHelper
-import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor
+import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
@@ -253,7 +253,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                     securityModel = Mockito.mock(KeyguardSecurityModel::class.java),
                 ),
                 BouncerLogger(logcatLogBuffer("BouncerLog")),
-                Mockito.mock(KeyEventInteractor::class.java),
+                Mockito.mock(SysUIKeyEventHandler::class.java),
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
             )

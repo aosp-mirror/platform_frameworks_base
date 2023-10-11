@@ -6,3 +6,10 @@ flag {
   description: "Gates whether to use a MediaRouter2-based implementation of InfoMediaManager, instead of the legacy MediaRouter2Manager-based implementation."
   bug: "192657812"
 }
+
+flag {
+  name: "enable_tv_media_output_dialog"
+  namespace: "tv_system_ui"
+  description: "Gates all the changes for the tv specific media output dialog"
+  bug: "303205631"
+}

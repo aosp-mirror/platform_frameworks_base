@@ -143,6 +143,8 @@ import com.android.wm.shell.util.SplitBounds;
 import com.android.wm.shell.util.TransitionUtil;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -3109,6 +3111,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 null /* taskInfo */, false /* allowEnterPip */, TYPE_DOCK_DIVIDER);
     }
 
+    @NeverCompile
     @Override
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";

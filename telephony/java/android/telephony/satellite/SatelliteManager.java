@@ -1628,7 +1628,7 @@ public final class SatelliteManager {
      * @param subId The subscription ID of the carrier.
      * @param enableSatellite {@code true} to enable the satellite and {@code false} to disable.
      * @param executor The executor on which the error code listener will be called.
-     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
+     * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
@@ -1662,7 +1662,7 @@ public final class SatelliteManager {
      *                 will return a {@code boolean} with value {@code true} if the satellite
      *                 is enabled and {@code false} otherwise.
      *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
-     *                 will return a {@link SatelliteException} with the {@link SatelliteError}.
+     *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
@@ -1688,7 +1688,7 @@ public final class SatelliteManager {
      * @param subId The subscription ID of the carrier.
      * @param reason Reason for disallowing satellite communication.
      * @param executor The executor on which the error code listener will be called.
-     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
+     * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
@@ -1731,7 +1731,7 @@ public final class SatelliteManager {
      * @param subId The subscription ID of the carrier.
      * @param reason Reason for disallowing satellite communication.
      * @param executor The executor on which the error code listener will be called.
-     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
+     * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.

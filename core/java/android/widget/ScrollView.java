@@ -47,8 +47,8 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
+import android.view.flags.Flags;
 import android.view.inspector.InspectableProperty;
-import android.widget.flags.Flags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1011,14 +1011,14 @@ public class ScrollView extends FrameLayout {
                     if (newScrollY != oldScrollY) {
                         super.scrollTo(mScrollX, newScrollY);
                         if (hitLimit) {
-                            if (Flags.platformWidgetHapticScrollFeedback()) {
+                            if (Flags.scrollFeedbackApi()) {
                                 initHapticScrollFeedbackProviderIfNotExists();
                                 mHapticScrollFeedbackProvider.onScrollLimit(
                                         event.getDeviceId(), event.getSource(), axis,
                                         /* isStart= */ newScrollY == 0);
                             }
                         } else {
-                            if (Flags.platformWidgetHapticScrollFeedback()) {
+                            if (Flags.scrollFeedbackApi()) {
                                 initHapticScrollFeedbackProviderIfNotExists();
                                 mHapticScrollFeedbackProvider.onScrollProgress(
                                         event.getDeviceId(), event.getSource(), axis, delta);

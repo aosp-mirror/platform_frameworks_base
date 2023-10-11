@@ -6142,9 +6142,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         continue;
                     }
                     final AutofillId viewId = dataset.getFieldIds().get(i);
+                    final ViewState viewState = mViewStates.get(viewId);
+                    if (mService.getMaster().getIsFillFieldsFromCurrentSessionOnly()
+                            && viewState != null && viewState.id.getSessionId() != id) {
+                        if (sVerbose) {
+                            Slog.v(TAG, "Skipping filling view: " +
+                                    viewId + " as it isn't part of the current session: " + id);
+                        }
+                        continue;
+                    }
                     ids.add(viewId);
                     values.add(dataset.getFieldValues().get(i));
-                    final ViewState viewState = mViewStates.get(viewId);
                     if (viewState != null
                             && (viewState.getState() & ViewState.STATE_WAITING_DATASET_AUTH) != 0) {
                         if (sVerbose) {

@@ -15,7 +15,10 @@ interface CommunalRepository {
 class CommunalRepositoryImpl
 @Inject
 constructor(
-    featureFlags: FeatureFlagsClassic,
+    private val featureFlags: FeatureFlagsClassic,
 ) : CommunalRepository {
-    override val isCommunalEnabled = featureFlags.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED)
+    override val isCommunalEnabled: Boolean
+        get() =
+            featureFlags.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) &&
+                featureFlags.isEnabled(Flags.COMMUNAL_HUB)
 }

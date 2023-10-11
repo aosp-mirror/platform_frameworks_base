@@ -674,7 +674,7 @@
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"डिव्हाइस अनलॉक"</string>
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"अनलॉक करण्याची दुसरी पद्धत वापरून पहा"</string>
     <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"तुमचे फिंगरप्रिंट ओळखले जात नाही, तेव्हा फेस अनलॉक वापरा, जसे की तुमची बोटे ओली असताना"</string>
-    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"तुमचा चेहरा ओळखला जात नाही, तेव्हा फिंगरप्रिंट अनलॉक वापरा, जसे की पुरेसा प्रकाश नसताना"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"पुरेसा प्रकाश नसणे इत्यादिमुळे तुमचा चेहरा ओळखला जात नाही, अशावेळी फिंगरप्रिंट अनलॉक वापरा"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"फेस अनलॉकसंबंधित समस्या"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"फेस मॉडेल हटवण्यासाठी टॅप करा, त्यानंतर तुमचा चेहरा पुन्हा जोडा"</string>

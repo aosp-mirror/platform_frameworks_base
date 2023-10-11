@@ -16,6 +16,10 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN;
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -280,6 +284,7 @@ public class DynamicLayout extends Layout {
          * @see android.widget.TextView#setLineBreakWordStyle
          */
         @NonNull
+        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
         public Builder setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
             mLineBreakConfig = lineBreakConfig;
             return this;
@@ -303,6 +308,7 @@ public class DynamicLayout extends Layout {
          * @see Layout.Builder#setUseBoundsForWidth(boolean)
          */
         @NonNull
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
         public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
             mUseBoundsForWidth = useBoundsForWidth;
             return this;

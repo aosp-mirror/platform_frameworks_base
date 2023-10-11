@@ -13,55 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.keyevent.domain.interactor
 
-import android.view.KeyEvent
-import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.KeyguardKeyEventInteractor
+import com.android.systemui.keyevent.data.repository.KeyEventRepository
 import javax.inject.Inject
 
 /**
- * Sends key events to the appropriate interactors and then acts upon key events that haven't
- * already been handled but should be handled by SystemUI.
+ * Business logic for all key event state. This includes all key events, regardless of whether
+ * they've been handled or not by a consumer.
+ *
+ * For key events that SysUI wants to properly handle, see [SysUIKeyEventHandler].
  */
 @SysUISingleton
 class KeyEventInteractor
 @Inject
 constructor(
-    private val backActionInteractor: BackActionInteractor,
-    private val keyguardKeyEventInteractor: KeyguardKeyEventInteractor,
+    repository: KeyEventRepository,
 ) {
-    fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (keyguardKeyEventInteractor.dispatchKeyEvent(event)) {
-            return true
-        }
-
-        when (event.keyCode) {
-            KeyEvent.KEYCODE_BACK -> {
-                if (event.handleAction()) {
-                    backActionInteractor.onBackRequested()
-                }
-                return true
-            }
-        }
-        return false
-    }
-
-    fun interceptMediaKey(event: KeyEvent): Boolean {
-        return keyguardKeyEventInteractor.interceptMediaKey(event)
-    }
-
-    fun dispatchKeyEventPreIme(event: KeyEvent): Boolean {
-        return keyguardKeyEventInteractor.dispatchKeyEventPreIme(event)
-    }
-
-    companion object {
-        // Most actions shouldn't be handled on the down event and instead handled on subsequent
-        // key events like ACTION_UP.
-        fun KeyEvent.handleAction(): Boolean {
-            return action != KeyEvent.ACTION_DOWN
-        }
-    }
+    val isPowerButtonDown = repository.isPowerButtonDown
 }

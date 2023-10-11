@@ -16,6 +16,9 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -439,6 +442,7 @@ public class StaticLayout extends Layout {
          * @see Layout.Builder#setUseBoundsForWidth(boolean)
          */
         @NonNull
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
         public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
             mUseBoundsForWidth = useBoundsForWidth;
             return this;

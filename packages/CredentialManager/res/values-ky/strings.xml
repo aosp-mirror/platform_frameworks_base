@@ -70,12 +70,12 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Жабуу"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна кирүү үчүн сакталган ачкычты колдоносузбу?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн сакталган сырсөздү колдоносузбу?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна кирүү жолун тандайсызбы?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна төмөнкү аккаунт менен киресизби?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн кирүү параметрлеринин кулпусу ачылсынбы?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн сакталган киргизүүчү ачкычты тандаңыз"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн сакталган сырсөздү тандаңыз"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн кирүү маалыматын тандаңыз"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна кирүү жолун тандаңыз"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна кайсы аккаунт менен киресиз:"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн параметр тандайсызбы?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Бул маалыматты <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда пайдаланасызбы?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Башка жол менен кирүү"</string>

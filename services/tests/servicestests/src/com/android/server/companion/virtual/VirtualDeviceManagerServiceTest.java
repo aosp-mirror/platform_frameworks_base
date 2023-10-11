@@ -233,6 +233,7 @@ public class VirtualDeviceManagerServiceTest {
     private VirtualDeviceManagerService mVdms;
     private VirtualDeviceManagerInternal mLocalService;
     private VirtualDeviceManagerService.VirtualDeviceManagerImpl mVdm;
+    private VirtualDeviceManagerService.VirtualDeviceManagerNativeImpl mVdmNative;
     private VirtualDeviceLog mVirtualDeviceLog;
     @Mock
     private InputController.NativeWrapper mNativeWrapperMock;
@@ -340,6 +341,7 @@ public class VirtualDeviceManagerServiceTest {
         mSetFlagsRule.disableFlags(Flags.FLAG_DYNAMIC_POLICY);
         mSetFlagsRule.disableFlags(Flags.FLAG_STREAM_PERMISSIONS);
         mSetFlagsRule.disableFlags(Flags.FLAG_VDM_CUSTOM_HOME);
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_NATIVE_VDM);
 
         doReturn(true).when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
         doNothing().when(mInputManagerInternalMock).setPointerAcceleration(anyFloat(), anyInt());
@@ -384,6 +386,7 @@ public class VirtualDeviceManagerServiceTest {
         mVdms = new VirtualDeviceManagerService(mContext);
         mLocalService = mVdms.getLocalServiceInstance();
         mVdm = mVdms.new VirtualDeviceManagerImpl();
+        mVdmNative = mVdms.new VirtualDeviceManagerNativeImpl();
         mVirtualDeviceLog = new VirtualDeviceLog(mContext);
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1);
         mSensorController = mDeviceImpl.getSensorControllerForTest();
@@ -440,11 +443,15 @@ public class VirtualDeviceManagerServiceTest {
     public void getDevicePolicy_invalidDeviceId_returnsDefault() {
         assertThat(mVdm.getDevicePolicy(DEVICE_ID_INVALID, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
+        assertThat(mVdmNative.getDevicePolicy(DEVICE_ID_INVALID, POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
     @Test
     public void getDevicePolicy_defaultDeviceId_returnsDefault() {
         assertThat(mVdm.getDevicePolicy(DEVICE_ID_DEFAULT, POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_DEFAULT);
+        assertThat(mVdmNative.getDevicePolicy(DEVICE_ID_DEFAULT, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
@@ -452,11 +459,15 @@ public class VirtualDeviceManagerServiceTest {
     public void getDevicePolicy_nonExistentDeviceId_returnsDefault() {
         assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId() + 1, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
+        assertThat(mVdmNative.getDevicePolicy(mDeviceImpl.getDeviceId() + 1, POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
     @Test
     public void getDevicePolicy_unspecifiedPolicy_returnsDefault() {
         assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_DEFAULT);
+        assertThat(mVdmNative.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);
     }
 
@@ -471,6 +482,8 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
 
         assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_CUSTOM);
+        assertThat(mVdmNative.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_CUSTOM);
     }
 
@@ -567,8 +580,8 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void getDeviceIdsForUid_noRunningApps_returnsNull() {
-        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
-        assertThat(deviceIds).isEmpty();
+        assertThat(mLocalService.getDeviceIdsForUid(UID_1)).isEmpty();
+        assertThat(mVdmNative.getDeviceIdsForUid(UID_1)).isEmpty();
     }
 
     @Test
@@ -577,8 +590,8 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1).onRunningAppsChanged(
                 Sets.newArraySet(UID_2));
 
-        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
-        assertThat(deviceIds).isEmpty();
+        assertThat(mLocalService.getDeviceIdsForUid(UID_1)).isEmpty();
+        assertThat(mVdmNative.getDeviceIdsForUid(UID_1)).isEmpty();
     }
 
     @Test
@@ -587,8 +600,9 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1).onRunningAppsChanged(
                 Sets.newArraySet(UID_1));
 
-        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
-        assertThat(deviceIds).containsExactly(mDeviceImpl.getDeviceId());
+        int deviceId = mDeviceImpl.getDeviceId();
+        assertThat(mLocalService.getDeviceIdsForUid(UID_1)).containsExactly(deviceId);
+        assertThat(mVdmNative.getDeviceIdsForUid(UID_1)).asList().containsExactly(deviceId);
     }
 
     @Test
@@ -598,8 +612,9 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1).onRunningAppsChanged(
                 Sets.newArraySet(UID_1, UID_2));
 
-        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
-        assertThat(deviceIds).containsExactly(mDeviceImpl.getDeviceId());
+        int deviceId = mDeviceImpl.getDeviceId();
+        assertThat(mLocalService.getDeviceIdsForUid(UID_1)).containsExactly(deviceId);
+        assertThat(mVdmNative.getDeviceIdsForUid(UID_1)).asList().containsExactly(deviceId);
     }
 
     @Test
@@ -611,8 +626,9 @@ public class VirtualDeviceManagerServiceTest {
         secondDevice.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_2).onRunningAppsChanged(
                 Sets.newArraySet(UID_1));
 
-        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
-        assertThat(deviceIds).containsExactly(secondDevice.getDeviceId());
+        int deviceId = secondDevice.getDeviceId();
+        assertThat(mLocalService.getDeviceIdsForUid(UID_1)).containsExactly(deviceId);
+        assertThat(mVdmNative.getDeviceIdsForUid(UID_1)).asList().containsExactly(deviceId);
     }
 
     @Test
@@ -628,8 +644,9 @@ public class VirtualDeviceManagerServiceTest {
         secondDevice.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_2).onRunningAppsChanged(
                 Sets.newArraySet(UID_1, UID_2));
 
-        Set<Integer> deviceIds = mLocalService.getDeviceIdsForUid(UID_1);
-        assertThat(deviceIds).containsExactly(
+        assertThat(mLocalService.getDeviceIdsForUid(UID_1)).containsExactly(
+                mDeviceImpl.getDeviceId(), secondDevice.getDeviceId());
+        assertThat(mVdmNative.getDeviceIdsForUid(UID_1)).asList().containsExactly(
                 mDeviceImpl.getDeviceId(), secondDevice.getDeviceId());
     }
 

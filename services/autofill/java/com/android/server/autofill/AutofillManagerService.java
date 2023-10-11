@@ -58,6 +58,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
+import android.service.autofill.Flags;
 import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -225,6 +226,9 @@ public final class AutofillManagerService
 
     @GuardedBy("mFlagLock")
     private int mMaxInputLengthForAutofill;
+
+    @GuardedBy("mFlagLock")
+    private boolean mIsFillFieldsFromCurrentSessionOnly;
 
     // Default flag values for Autofill PCC
 
@@ -701,6 +705,7 @@ public final class AutofillManagerService
                     DeviceConfig.NAMESPACE_AUTOFILL,
                     AutofillFeatureFlags.DEVICE_CONFIG_MAX_INPUT_LENGTH_FOR_AUTOFILL,
                     AutofillFeatureFlags.DEFAULT_MAX_INPUT_LENGTH_FOR_AUTOFILL);
+            mIsFillFieldsFromCurrentSessionOnly = Flags.fillFieldsFromCurrentSessionOnly();
             if (verbose) {
                 Slog.v(mTag, "setDeviceConfigProperties() for PCC: "
                         + "mPccClassificationEnabled=" + mPccClassificationEnabled
@@ -1001,6 +1006,15 @@ public final class AutofillManagerService
     public int getMaxInputLengthForAutofill() {
         synchronized (mFlagLock) {
             return mMaxInputLengthForAutofill;
+        }
+    }
+
+    /**
+     * Return if autofill should only fill in fields from current session.
+     */
+    public boolean getIsFillFieldsFromCurrentSessionOnly() {
+        synchronized (mFlagLock) {
+            return mIsFillFieldsFromCurrentSessionOnly;
         }
     }
 

@@ -8,6 +8,13 @@ flag {
 }
 
 flag {
+  name: "fill_fields_from_current_session_only"
+  namespace: "autofill"
+  description: "Only fill autofill fields that are part of the current session."
+  bug: "270722825"
+}
+
+flag {
   name: "relayout"
   namespace: "autofill"
   description: "Mitigation for relayout issue"

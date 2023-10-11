@@ -1,0 +1,8 @@
+package: "com.android.text.flags"
+
+flag {
+  name: "custom_locale_fallback"
+  namespace: "text"
+  description: "A feature flag that adds custom locale fallback to the vendor customization XML. This enables vendors to add their locale specific fonts, e.g. Japanese font."
+  bug: ""
+}

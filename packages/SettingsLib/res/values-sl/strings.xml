@@ -157,8 +157,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Dve črtici signala Wi-Fi."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Tri črtice signala Wi-Fi."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Poln signal Wi-Fi."</string>
-    <!-- no translation found for accessibility_wifi_other_device (2815627624555795918) -->
-    <skip />
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Povezava z napravo je vzpostavljena."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Odprto omrežje"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Varno omrežje"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"OS Android"</string>
