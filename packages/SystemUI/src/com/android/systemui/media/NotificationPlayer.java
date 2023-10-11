@@ -51,11 +51,12 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
         Uri uri;
         boolean looping;
         AudioAttributes attributes;
+        float volume;
         long requestTime;
 
         public String toString() {
             return "{ code=" + code + " looping=" + looping + " attributes=" + attributes
-                    + " uri=" + uri + " }";
+                    + " volume=" + volume + " uri=" + uri + " }";
         }
     }
 
@@ -101,6 +102,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                     player.setAudioAttributes(mCmd.attributes);
                     player.setDataSource(mCmd.context, mCmd.uri);
                     player.setLooping(mCmd.looping);
+                    player.setVolume(mCmd.volume);
                     player.setOnCompletionListener(NotificationPlayer.this);
                     player.setOnErrorListener(NotificationPlayer.this);
                     player.prepare();
@@ -401,10 +403,11 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
      *          (see {@link MediaPlayer#setLooping(boolean)})
      * @param stream the AudioStream to use.
      *          (see {@link MediaPlayer#setAudioStreamType(int)})
+     * @param volume the volume for the audio with values in range [0.0, 1.0]
      * @deprecated use {@link #play(Context, Uri, boolean, AudioAttributes)} instead.
      */
     @Deprecated
-    public void play(Context context, Uri uri, boolean looping, int stream) {
+    public void play(Context context, Uri uri, boolean looping, int stream, float volume) {
         if (DEBUG) { Log.d(mTag, "play uri=" + uri.toString()); }
         PlayerBase.deprecateStreamTypeForPlayback(stream, "NotificationPlayer", "play");
         Command cmd = new Command();
@@ -414,6 +417,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
         cmd.uri = uri;
         cmd.looping = looping;
         cmd.attributes = new AudioAttributes.Builder().setInternalLegacyStreamType(stream).build();
+        cmd.volume = volume;
         synchronized (mCmdQueue) {
             enqueueLocked(cmd);
             mState = PLAY;
@@ -432,8 +436,10 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
      *          (see {@link MediaPlayer#setLooping(boolean)})
      * @param attributes the AudioAttributes to use.
      *          (see {@link MediaPlayer#setAudioAttributes(AudioAttributes)})
+     * @param volume the volume for the audio with values in range [0.0, 1.0]
      */
-    public void play(Context context, Uri uri, boolean looping, AudioAttributes attributes) {
+    public void play(Context context, Uri uri, boolean looping, AudioAttributes attributes,
+            float volume) {
         if (DEBUG) { Log.d(mTag, "play uri=" + uri.toString()); }
         Command cmd = new Command();
         cmd.requestTime = SystemClock.uptimeMillis();
@@ -442,6 +448,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
         cmd.uri = uri;
         cmd.looping = looping;
         cmd.attributes = attributes;
+        cmd.volume = volume;
         synchronized (mCmdQueue) {
             enqueueLocked(cmd);
             mState = PLAY;

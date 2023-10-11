@@ -103,5 +103,8 @@ public class SystemSettings {
         Settings.System.SCREEN_FLASH_NOTIFICATION_COLOR,
         Settings.System.PEAK_REFRESH_RATE,
         Settings.System.MIN_REFRESH_RATE,
+        Settings.System.NOTIFICATION_COOLDOWN_ENABLED,
+        Settings.System.NOTIFICATION_COOLDOWN_ALL,
+        Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
     };
 }
