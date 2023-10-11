@@ -1,0 +1,8 @@
+package: "android.companion"
+
+flag {
+    name: "new_association_builder"
+    namespace: "companion"
+    description: "Controls if the new Builder is exposed to test apis."
+    bug: "296251481"
+}
