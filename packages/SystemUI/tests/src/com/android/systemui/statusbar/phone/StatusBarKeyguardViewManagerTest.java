@@ -19,8 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +34,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.service.trust.TrustAgentService;
 import android.testing.AndroidTestingRunner;
@@ -175,7 +175,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM, true);
         mFeatureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false);
-        mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, true);
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
         mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false);
 

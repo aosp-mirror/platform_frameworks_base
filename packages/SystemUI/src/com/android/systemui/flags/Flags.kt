@@ -667,8 +667,6 @@ object Flags {
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
 
     // 2200 - biometrics (udfps, sfps, BiometricPrompt, etc.)
-    // TODO(b/259264861): Tracking Bug
-    @JvmField val UDFPS_NEW_TOUCH_DETECTION = releasedFlag("udfps_new_touch_detection")
 
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = releasedFlag("track_stylus_ever_used")

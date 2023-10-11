@@ -18,15 +18,12 @@ package com.android.systemui.biometrics;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.TestableLooper;
-import android.view.MotionEvent;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -44,8 +41,7 @@ public class UdfpsKeyguardViewLegacyControllerTest extends
         UdfpsKeyguardViewLegacyControllerBaseTest {
     @Override
     public UdfpsKeyguardViewControllerLegacy createUdfpsKeyguardViewController() {
-        return createUdfpsKeyguardViewController(/* useModernBouncer */ false,
-                /* useExpandedOverlay */ false);
+        return createUdfpsKeyguardViewController(/* useModernBouncer */ false);
     }
 
     @Test
@@ -215,38 +211,5 @@ public class UdfpsKeyguardViewLegacyControllerTest extends
 
         sendStatusBarStateChanged(StatusBarState.SHADE_LOCKED);
         assertTrue(mController.shouldPauseAuth());
-    }
-
-    @Test
-    // TODO(b/259264861): Tracking Bug
-    public void testUdfpsExpandedOverlayOn() {
-        // GIVEN view is attached and useExpandedOverlay is true
-        mController = createUdfpsKeyguardViewController(false, true);
-        mController.onViewAttached();
-        captureKeyGuardViewManagerCallback();
-
-        // WHEN a touch is received
-        mKeyguardViewManagerCallback.onTouch(
-                MotionEvent.obtain(0, 0, 0, 0, 0, 0));
-
-        // THEN udfpsController onTouch is not called
-        assertTrue(mView.mUseExpandedOverlay);
-        verify(mUdfpsController, never()).onTouch(any());
-    }
-
-    @Test
-    // TODO(b/259264861): Tracking Bug
-    public void testUdfpsExpandedOverlayOff() {
-        // GIVEN view is attached and useExpandedOverlay is false
-        mController.onViewAttached();
-        captureKeyGuardViewManagerCallback();
-
-        // WHEN a touch is received
-        mKeyguardViewManagerCallback.onTouch(
-                MotionEvent.obtain(0, 0, 0, 0, 0, 0));
-
-        // THEN udfpsController onTouch is called
-        assertFalse(mView.mUseExpandedOverlay);
-        verify(mUdfpsController).onTouch(any());
     }
 }

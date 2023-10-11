@@ -106,10 +106,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 mock(SystemClock::class.java),
                 mKeyguardUpdateMonitor,
             )
-        return createUdfpsKeyguardViewController(
-            /* useModernBouncer */ true, /* useExpandedOverlay */
-            false
-        )
+        return createUdfpsKeyguardViewController(/* useModernBouncer */ true)
     }
 
     @Test

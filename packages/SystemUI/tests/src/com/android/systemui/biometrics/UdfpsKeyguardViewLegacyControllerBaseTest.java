@@ -30,7 +30,6 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
@@ -116,7 +115,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     }
 
     public UdfpsKeyguardViewControllerLegacy createUdfpsKeyguardViewController() {
-        return createUdfpsKeyguardViewController(false, false);
+        return createUdfpsKeyguardViewController(false);
     }
 
     public void captureKeyGuardViewManagerCallback() {
@@ -126,8 +125,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     }
 
     protected UdfpsKeyguardViewControllerLegacy createUdfpsKeyguardViewController(
-            boolean useModernBouncer, boolean useExpandedOverlay) {
-        mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, useExpandedOverlay);
+            boolean useModernBouncer) {
         UdfpsKeyguardViewControllerLegacy controller = new UdfpsKeyguardViewControllerLegacy(
                 mView,
                 mStatusBarStateController,

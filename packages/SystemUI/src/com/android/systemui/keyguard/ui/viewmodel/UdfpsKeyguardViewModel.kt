@@ -17,20 +17,10 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.graphics.Rect
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
-class UdfpsKeyguardViewModel
-@Inject
-constructor(
-    private val featureFlags: FeatureFlags,
-) {
+class UdfpsKeyguardViewModel @Inject constructor() {
     var sensorBounds: Rect = Rect()
-
-    fun useExpandedOverlay(): Boolean {
-        return featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
-    }
 }

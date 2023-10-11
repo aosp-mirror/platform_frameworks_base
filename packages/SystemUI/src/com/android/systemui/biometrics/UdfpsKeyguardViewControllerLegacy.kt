@@ -19,7 +19,6 @@ package com.android.systemui.biometrics
 import android.animation.ValueAnimator
 import android.content.res.Configuration
 import android.util.MathUtils
-import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
@@ -27,16 +26,15 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.res.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
@@ -80,8 +78,6 @@ open class UdfpsKeyguardViewControllerLegacy(
     ),
     UdfpsKeyguardViewControllerAdapter {
     private val uniqueIdentifier = this.toString()
-    private val useExpandedOverlay: Boolean =
-        featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
     private var showingUdfpsBouncer = false
     private var udfpsRequested = false
     private var qsExpansion = 0f
@@ -192,24 +188,6 @@ open class UdfpsKeyguardViewControllerLegacy(
                 updateAlpha()
                 updatePauseAuth()
             }
-
-            /**
-             * Forward touches to the UdfpsController. This allows the touch to start from outside
-             * the sensor area and then slide their finger into the sensor area.
-             */
-            override fun onTouch(event: MotionEvent) {
-                // Don't forward touches if the shade has already started expanding.
-                if (transitionToFullShadeProgress != 0f) {
-                    return
-                }
-
-                // Forwarding touches not needed with expanded overlay
-                if (useExpandedOverlay) {
-                    return
-                } else {
-                    udfpsController.onTouch(event)
-                }
-            }
         }
 
     private val occludingAppBiometricUI: OccludingAppBiometricUI =
@@ -294,7 +272,6 @@ open class UdfpsKeyguardViewControllerLegacy(
         keyguardViewManager.setOccludingAppBiometricUI(occludingAppBiometricUI)
         lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
-        view.mUseExpandedOverlay = useExpandedOverlay
         view.startIconAsyncInflate {
             val animationViewInternal: View =
                 view.requireViewById(R.id.udfps_animation_view_internal)

@@ -33,7 +33,6 @@ import com.android.systemui.aconfig.AConfigModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.authentication.AuthenticationModule;
-import com.android.systemui.biometrics.AlternateUdfpsTouchProvider;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
 import com.android.systemui.biometrics.FingerprintReEnrollNotification;
 import com.android.systemui.biometrics.UdfpsDisplayModeProvider;
@@ -298,9 +297,6 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract UdfpsDisplayModeProvider optionalUdfpsDisplayModeProvider();
-
-    @BindsOptionalOf
-    abstract AlternateUdfpsTouchProvider optionalUdfpsTouchProvider();
 
     @BindsOptionalOf
     abstract FingerprintInteractiveToAuthProvider optionalFingerprintInteractiveToAuthProvider();
