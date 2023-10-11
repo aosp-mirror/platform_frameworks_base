@@ -20,3 +20,10 @@ flag {
   description: "APIs to help enable animations involving gainmaps"
   bug: "296482289"
 }
+
+flag {
+  name: "gainmap_constructor_with_metadata"
+  namespace: "core_graphics"
+  description: "APIs to create a new gainmap with a bitmap for metadata."
+  bug: "304478551"
+}
