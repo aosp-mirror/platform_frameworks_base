@@ -1429,7 +1429,7 @@ public abstract class PackageManagerInternal {
             @UserIdInt int userId);
 
     /**
-     * Sends the PACKAGE_RESTARTED broadcast on the package manager handler thread.
+     * Sends the PACKAGE_RESTARTED broadcast.
      */
     public abstract void sendPackageRestartedBroadcast(@NonNull String packageName,
             int uid, @Intent.Flags int flags);
@@ -1439,4 +1439,10 @@ public abstract class PackageManagerInternal {
      */
     public abstract ParceledListSlice<PackageInstaller.SessionInfo> getHistoricalSessions(
             int userId);
+
+    /**
+     * Sends the ACTION_PACKAGE_DATA_CLEARED broadcast.
+     */
+    public abstract void sendPackageDataClearedBroadcast(@NonNull String packageName,
+            int uid, int userId, boolean isRestore, boolean isInstantApp);
 }

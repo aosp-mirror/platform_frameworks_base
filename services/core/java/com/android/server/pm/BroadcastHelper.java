@@ -100,6 +100,22 @@ public final class BroadcastHelper {
         mAppsFilter = injector.getAppsFilter();
     }
 
+    /**
+     * Sends a broadcast to registered clients on userId for the given Intent.
+     */
+    void sendPackageBroadcastWithIntent(Intent intent, int userId, boolean isInstantApp,
+            @Intent.Flags int flags,
+            int[] visibilityAllowList,
+            final IIntentReceiver finishedReceiver,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @Nullable Bundle bOptions) {
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT | flags);
+        SparseArray<int[]> broadcastAllowList = new SparseArray<>();
+        broadcastAllowList.put(userId, visibilityAllowList);
+        broadcastIntent(intent, finishedReceiver, isInstantApp, userId, broadcastAllowList,
+                filterExtrasForReceiver, bOptions);
+    }
+
     void sendPackageBroadcast(final String action, final String pkg, final Bundle extras,
             final int flags, final String targetPkg, final IIntentReceiver finishedReceiver,
             final int[] userIds, int[] instantUserIds,
@@ -152,8 +168,6 @@ public final class BroadcastHelper {
         for (int userId : userIds) {
             final Intent intent = new Intent(action,
                     pkg != null ? Uri.fromParts(PACKAGE_SCHEME, pkg, null) : null);
-            final String[] requiredPermissions =
-                    isInstantApp ? INSTANT_APP_BROADCAST_PERMISSION : null;
             if (extras != null) {
                 intent.putExtras(extras);
             }
@@ -172,28 +186,39 @@ public final class BroadcastHelper {
             }
             intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT | flags);
-            if (DEBUG_BROADCASTS) {
-                RuntimeException here = new RuntimeException("here");
-                here.fillInStackTrace();
-                Slog.d(TAG, "Sending to user " + userId + ": "
-                        + intent.toShortString(false, true, false, false)
-                        + " " + intent.getExtras(), here);
-            }
-            final boolean ordered;
-            if (mAmInternal.isModernQueueEnabled()) {
-                // When the modern broadcast stack is enabled, deliver all our
-                // broadcasts as unordered, since the modern stack has better
-                // support for sequencing cold-starts, and it supports
-                // delivering resultTo for non-ordered broadcasts
-                ordered = false;
-            } else {
-                ordered = (finishedReceiver != null);
-            }
-            mAmInternal.broadcastIntent(
-                    intent, finishedReceiver, requiredPermissions, ordered, userId,
-                    broadcastAllowList == null ? null : broadcastAllowList.get(userId),
+            broadcastIntent(intent, finishedReceiver, isInstantApp, userId, broadcastAllowList,
                     filterExtrasForReceiver, bOptions);
         }
+    }
+
+
+    private void broadcastIntent(Intent intent, IIntentReceiver finishedReceiver,
+            boolean isInstantApp, int userId, @Nullable SparseArray<int[]> broadcastAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @Nullable Bundle bOptions) {
+        final String[] requiredPermissions =
+                isInstantApp ? INSTANT_APP_BROADCAST_PERMISSION : null;
+        if (DEBUG_BROADCASTS) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.d(TAG, "Sending to user " + userId + ": "
+                    + intent.toShortString(false, true, false, false)
+                    + " " + intent.getExtras(), here);
+        }
+        final boolean ordered;
+        if (mAmInternal.isModernQueueEnabled()) {
+            // When the modern broadcast stack is enabled, deliver all our
+            // broadcasts as unordered, since the modern stack has better
+            // support for sequencing cold-starts, and it supports
+            // delivering resultTo for non-ordered broadcasts
+            ordered = false;
+        } else {
+            ordered = (finishedReceiver != null);
+        }
+        mAmInternal.broadcastIntent(
+                intent, finishedReceiver, requiredPermissions, ordered, userId,
+                broadcastAllowList == null ? null : broadcastAllowList.get(userId),
+                filterExtrasForReceiver, bOptions);
     }
 
     void sendResourcesChangedBroadcast(@NonNull Computer snapshot,

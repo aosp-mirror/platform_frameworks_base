@@ -6972,14 +6972,50 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, uid);
             extras.putInt(Intent.EXTRA_USER_HANDLE, userId);
-            extras.putLong(Intent.EXTRA_TIME, SystemClock.elapsedRealtime());
-            mHandler.post(() -> {
+            if (android.content.pm.Flags.stayStopped()) {
+                extras.putLong(Intent.EXTRA_TIME, SystemClock.elapsedRealtime());
+                // Sent async using the PM handler, to maintain ordering with PACKAGE_UNSTOPPED
+                mHandler.post(() -> {
+                    mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_RESTARTED,
+                            packageName, extras,
+                            flags, null, null,
+                            userIds, null, broadcastAllowList, null,
+                            null);
+                });
+            } else {
                 mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_RESTARTED,
                         packageName, extras,
                         flags, null, null,
                         userIds, null, broadcastAllowList, null,
                         null);
-            });
+            }
+            mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_RESTARTED,
+                    packageName, extras, userIds, null /* instantUserIds */,
+                    broadcastAllowList, mHandler);
+        }
+
+        @Override
+        public void sendPackageDataClearedBroadcast(@NonNull String packageName,
+                int uid, int userId, boolean isRestore, boolean isInstantApp) {
+            int[] visibilityAllowList =
+                    snapshotComputer().getVisibilityAllowList(packageName, userId);
+            final Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
+                    Uri.fromParts("package", packageName, null /* fragment */));
+            intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                    | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            intent.putExtra(Intent.EXTRA_UID, uid);
+            intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+            if (isRestore) {
+                intent.putExtra(Intent.EXTRA_IS_RESTORE, true);
+            }
+            if (isInstantApp) {
+                intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+            }
+            mBroadcastHelper.sendPackageBroadcastWithIntent(intent, userId, isInstantApp,
+                    0 /* flags */, visibilityAllowList, null /* finishedReceiver */,
+                    null /* filterExtrasForReceiver */, null /* bOptions */);
+            mPackageMonitorCallbackHelper.notifyPackageMonitorWithIntent(intent, userId,
+                    visibilityAllowList, mHandler);
         }
     }
 
