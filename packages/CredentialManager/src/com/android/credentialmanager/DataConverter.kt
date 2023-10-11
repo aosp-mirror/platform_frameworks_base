@@ -61,14 +61,20 @@ import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
+import android.credentials.flags.Flags
 import java.time.Instant
+
 
 fun getAppLabel(
     pm: PackageManager,
     appPackageName: String
 ): String? {
     return try {
-        val pkgInfo = getPackageInfo(pm, appPackageName)
+        val pkgInfo = if (Flags.instantAppsEnabled()) {
+            getPackageInfo(pm, appPackageName)
+        } else {
+            pm.getPackageInfo(appPackageName, PackageManager.PackageInfoFlags.of(0))
+        }
         val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
         applicationInfo.loadSafeLabel(
             pm, 0f,
@@ -91,7 +97,14 @@ private fun getServiceLabelAndIcon(
         // Test data has only package name not component name.
         // For test data usage only.
         try {
-            val pkgInfo = getPackageInfo(pm, providerFlattenedComponentName)
+            val pkgInfo = if (Flags.instantAppsEnabled()) {
+                getPackageInfo(pm, providerFlattenedComponentName)
+            } else {
+                pm.getPackageInfo(
+                        providerFlattenedComponentName,
+                        PackageManager.PackageInfoFlags.of(0)
+                )
+            }
             val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
             providerLabel =
                 applicationInfo.loadSafeLabel(
@@ -115,7 +128,14 @@ private fun getServiceLabelAndIcon(
             // Added for mdoc use case where the provider may not need to register a service and
             // instead only relies on the registration api.
             try {
-                val pkgInfo = getPackageInfo(pm, providerFlattenedComponentName)
+                val pkgInfo = if (Flags.instantAppsEnabled()) {
+                    getPackageInfo(pm, providerFlattenedComponentName)
+                } else {
+                    pm.getPackageInfo(
+                            component.packageName,
+                            PackageManager.PackageInfoFlags.of(0)
+                    )
+                }
                 val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
                 providerLabel =
                     applicationInfo.loadSafeLabel(
@@ -143,12 +163,12 @@ private fun getPackageInfo(
     pm: PackageManager,
     packageName: String
 ): PackageInfo {
-    val flags = PackageManager.MATCH_INSTANT
+    val packageManagerFlags = PackageManager.MATCH_INSTANT
 
     return pm.getPackageInfo(
        packageName,
        PackageManager.PackageInfoFlags.of(
-               (flags).toLong())
+               (packageManagerFlags).toLong())
     )
 }
 
