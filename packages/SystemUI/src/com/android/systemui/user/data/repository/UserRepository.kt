@@ -23,7 +23,6 @@ import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.res.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -31,6 +30,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
@@ -132,7 +132,6 @@ constructor(
                         Settings.Global.ADD_USERS_WHEN_LOCKED,
                         Settings.Global.USER_SWITCHER_ENABLED,
                     ),
-                userId = UserHandle.USER_SYSTEM,
             )
             .onStart { emit(Unit) } // Forces an initial update.
             .map { getSettings() }
@@ -247,7 +246,7 @@ constructor(
     private suspend fun getSettings(): UserSwitcherSettingsModel {
         return withContext(backgroundDispatcher) {
             val isSimpleUserSwitcher =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     SETTING_SIMPLE_USER_SWITCHER,
                     if (
                         appContext.resources.getBoolean(
@@ -258,18 +257,16 @@ constructor(
                     } else {
                         0
                     },
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             val isAddUsersFromLockscreen =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     0,
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             val isUserSwitcherEnabled =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     Settings.Global.USER_SWITCHER_ENABLED,
                     if (
                         appContext.resources.getBoolean(
@@ -280,7 +277,6 @@ constructor(
                     } else {
                         0
                     },
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             UserSwitcherSettingsModel(

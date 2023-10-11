@@ -25,13 +25,13 @@ import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.EnableZenModeDialog
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.mockito.argumentCaptor

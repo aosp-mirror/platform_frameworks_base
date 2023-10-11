@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,34 +21,36 @@ import android.os.Handler;
 
 import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.systemui.util.settings.SettingsProxy;
 import com.android.systemui.util.settings.SystemSettings;
+import com.android.systemui.util.settings.UserSettingsProxy;
 
 /**
- * Helper for managing global settings through use of {@link SettingsProxy}. This should
- * <em>not</em> be used for {@link SecureSettings} or {@link SystemSettings} since those must be
- * user-aware (instead, use {@link UserSettingObserver}).
+ * Helper for managing secure and system settings through use of {@link UserSettingsProxy},
+ * which is the common superclass of {@link SecureSettings} and {@link SystemSettings}.
  */
-public abstract class SettingObserver extends ContentObserver implements Listenable {
-    private final SettingsProxy mSettingsProxy;
+public abstract class UserSettingObserver extends ContentObserver implements Listenable {
+    private final UserSettingsProxy mSettingsProxy;
     private final String mSettingName;
     private final int mDefaultValue;
 
     private boolean mListening;
+    private int mUserId;
     private int mObservedValue;
 
     protected abstract void handleValueChanged(int value, boolean observedChange);
 
-    public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName) {
-        this(settingsProxy, handler, settingName, 0);
+    public UserSettingObserver(UserSettingsProxy settingsProxy, Handler handler, String settingName,
+            int userId) {
+        this(settingsProxy, handler, settingName, userId, 0);
     }
 
-    public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName,
-            int defaultValue) {
+    public UserSettingObserver(UserSettingsProxy settingsProxy, Handler handler, String settingName,
+            int userId, int defaultValue) {
         super(handler);
         mSettingsProxy = settingsProxy;
         mSettingName = settingName;
         mObservedValue = mDefaultValue = defaultValue;
+        mUserId = userId;
     }
 
     public int getValue() {
@@ -61,11 +63,11 @@ public abstract class SettingObserver extends ContentObserver implements Listena
      * @param value The new value for the setting.
      */
     public void setValue(int value) {
-        mSettingsProxy.putInt(mSettingName, value);
+        mSettingsProxy.putIntForUser(mSettingName, value, mUserId);
     }
 
     private int getValueFromProvider() {
-        return mSettingsProxy.getInt(mSettingName, mDefaultValue);
+        return mSettingsProxy.getIntForUser(mSettingName, mDefaultValue, mUserId);
     }
 
     @Override
@@ -74,8 +76,8 @@ public abstract class SettingObserver extends ContentObserver implements Listena
         mListening = listening;
         if (listening) {
             mObservedValue = getValueFromProvider();
-            mSettingsProxy.registerContentObserver(
-                    mSettingsProxy.getUriFor(mSettingName), false, this);
+            mSettingsProxy.registerContentObserverForUser(
+                    mSettingsProxy.getUriFor(mSettingName), false, this, mUserId);
         } else {
             mSettingsProxy.unregisterContentObserver(this);
             mObservedValue = mDefaultValue;
@@ -88,6 +90,21 @@ public abstract class SettingObserver extends ContentObserver implements Listena
         final boolean changed = value != mObservedValue;
         mObservedValue = value;
         handleValueChanged(value, changed);
+    }
+
+    /**
+     * Set user handle for which to observe the setting.
+     */
+    public void setUserId(int userId) {
+        mUserId = userId;
+        if (mListening) {
+            setListening(false);
+            setListening(true);
+        }
+    }
+
+    public int getCurrentUser() {
+        return mUserId;
     }
 
     public String getKey() {

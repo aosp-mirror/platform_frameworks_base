@@ -23,6 +23,8 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.settings.UserTracker;
 
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FakeSettings implements SecureSettings, GlobalSettings, SystemSettings {
+public class FakeSettings implements SecureSettings, SystemSettings {
     private final Map<SettingsKey, String> mValues = new HashMap<>();
     private final Map<SettingsKey, List<ContentObserver>> mContentObservers =
             new HashMap<>();
@@ -64,7 +66,7 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     }
 
     @Override
-    public void registerContentObserverForUser(Uri uri, boolean notifyDescendents,
+    public void registerContentObserverForUser(Uri uri, boolean notifyDescendants,
             ContentObserver settingsObserver, int userHandle) {
         List<ContentObserver> observers;
         if (userHandle == UserHandle.USER_ALL) {
@@ -147,7 +149,7 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     }
 
     @Override
-    public boolean putString(String name, String value, String tag, boolean makeDefault) {
+    public boolean putString(@NonNull String name, String value, String tag, boolean makeDefault) {
         return putString(name, value);
     }
 

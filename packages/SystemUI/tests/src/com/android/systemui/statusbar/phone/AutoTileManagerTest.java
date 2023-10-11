@@ -50,15 +50,15 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -288,7 +288,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         inOrderSafety.verify(mSafetyController).removeCallback(any());
         inOrderSafety.verify(mSafetyController).addCallback(any());
 
-        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        UserSettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertTrue(setting.isListening());
     }
@@ -342,7 +342,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         inOrderSafety.verify(mSafetyController).removeCallback(any());
         inOrderSafety.verify(mSafetyController).addCallback(any());
 
-        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        UserSettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertFalse(setting.isListening());
     }

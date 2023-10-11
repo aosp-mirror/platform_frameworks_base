@@ -20,6 +20,8 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;
@@ -75,7 +77,7 @@ class SecureSettingsImpl implements SecureSettings {
     }
 
     @Override
-    public boolean putString(String name, String value, String tag, boolean makeDefault) {
+    public boolean putString(@NonNull String name, String value, String tag, boolean makeDefault) {
         return Settings.Secure.putString(mContentResolver, name, value, tag, makeDefault);
     }
 }
