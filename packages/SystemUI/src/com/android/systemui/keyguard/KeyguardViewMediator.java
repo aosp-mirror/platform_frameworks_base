@@ -1557,6 +1557,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mExternallyEnabled = enabled;
 
             if (!enabled && mShowing) {
+                if (mLockPatternUtils.isUserInLockdown(KeyguardUpdateMonitor.getCurrentUser())) {
+                    Log.d(TAG, "keyguardEnabled(false) overridden by user lockdown");
+                    return;
+                }
                 if (mExitSecureCallback != null) {
                     if (DEBUG) Log.d(TAG, "in process of verifyUnlock request, ignoring");
                     // we're in the process of handling a request to verify the user
@@ -1782,9 +1786,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             return;
         }
 
-        // if another app is disabling us, don't show
+        // if another app is disabling us, don't show unless we're in lockdown mode
         if (!mExternallyEnabled
-            && !mLockPatternUtils.isUserInLockdown(KeyguardUpdateMonitor.getCurrentUser())) {
+                && !mLockPatternUtils.isUserInLockdown(KeyguardUpdateMonitor.getCurrentUser())) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
 
             mNeedToReshowWhenReenabled = true;
