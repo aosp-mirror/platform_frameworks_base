@@ -1725,25 +1725,8 @@ public class NotificationStackScrollLayoutController {
         }
 
         @Override
-        public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {
-            mView.generateAddAnimation(child, fromMoreCard);
-        }
-
-        @Override
-        public void generateChildOrderChangedEvent() {
-            mView.generateChildOrderChangedEvent();
-        }
-
-        @Override
         public int getContainerChildCount() {
             return mView.getContainerChildCount();
-        }
-
-        @Override
-        public void setNotificationActivityStarter(
-                NotificationActivityStarter notificationActivityStarter) {
-            NotificationStackScrollLayoutController.this
-                    .setNotificationActivityStarter(notificationActivityStarter);
         }
 
         @Override
@@ -1838,16 +1821,6 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setExpandingNotification(ExpandableNotificationRow row) {
             mView.setExpandingNotification(row);
-        }
-
-        @Override
-        public boolean containsView(View v) {
-            return mView.containsView(v);
-        }
-
-        @Override
-        public void setWillExpand(boolean willExpand) {
-            mView.setWillExpand(willExpand);
         }
 
         @Override
