@@ -31,6 +31,7 @@ import android.hardware.weaver.IWeaver;
 import android.hardware.weaver.WeaverConfig;
 import android.hardware.weaver.WeaverReadResponse;
 import android.hardware.weaver.WeaverReadStatus;
+import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -500,7 +501,7 @@ class SyntheticPasswordManager {
 
     private final Context mContext;
     private LockSettingsStorage mStorage;
-    private IWeaver mWeaver;
+    private volatile IWeaver mWeaver;
     private WeaverConfig mWeaverConfig;
     private PasswordSlotManager mPasswordSlotManager;
 
@@ -531,6 +532,21 @@ class SyntheticPasswordManager {
         }
     }
 
+    private class WeaverDiedRecipient implements IBinder.DeathRecipient {
+        // Not synchronized on the outer class, since setting the pointer to null is atomic, and we
+        // don't want to have to worry about any sort of deadlock here.
+        @Override
+        public void binderDied() {
+            // Weaver died.  Try to recover by setting mWeaver to null, which makes
+            // getWeaverService() look up the service again.  This is done only as a simple
+            // robustness measure; it should not be relied on.  If this triggers, the root cause is
+            // almost certainly a bug in the device's Weaver implementation, which must be fixed.
+            Slog.wtf(TAG, "Weaver service has died");
+            mWeaver.asBinder().unlinkToDeath(this, 0);
+            mWeaver = null;
+        }
+    }
+
     private @Nullable IWeaver getWeaverServiceInternal() {
         // Try to get the AIDL service first
         try {
@@ -538,6 +554,11 @@ class SyntheticPasswordManager {
                     ServiceManager.waitForDeclaredService(IWeaver.DESCRIPTOR + "/default"));
             if (aidlWeaver != null) {
                 Slog.i(TAG, "Using AIDL weaver service");
+                try {
+                    aidlWeaver.asBinder().linkToDeath(new WeaverDiedRecipient(), 0);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to register Weaver death recipient", e);
+                }
                 return aidlWeaver;
             }
         } catch (SecurityException e) {
