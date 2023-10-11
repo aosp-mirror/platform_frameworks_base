@@ -24,9 +24,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.security.keymaster.IKeyAttestationApplicationIdProvider;
-import android.security.keymaster.KeyAttestationApplicationId;
-import android.security.keymaster.KeyAttestationPackageInfo;
+import android.security.keystore.IKeyAttestationApplicationIdProvider;
+import android.security.keystore.KeyAttestationApplicationId;
+import android.security.keystore.KeyAttestationPackageInfo;
+import android.security.keystore.Signature;
 
 /**
  * @hide
@@ -64,14 +65,25 @@ public class KeyAttestationApplicationIdProviderService
             for (int i = 0; i < packageNames.length; ++i) {
                 PackageInfo packageInfo = mPackageManager.getPackageInfoAsUser(packageNames[i],
                         PackageManager.GET_SIGNATURES, userId);
-                keyAttestationPackageInfos[i] = new KeyAttestationPackageInfo(packageNames[i],
-                        packageInfo.getLongVersionCode(), packageInfo.signatures);
+                KeyAttestationPackageInfo pInfo = new KeyAttestationPackageInfo();
+                pInfo.packageName = new String(packageNames[i]);
+                pInfo.versionCode = packageInfo.getLongVersionCode();
+                pInfo.signatures = new Signature[packageInfo.signatures.length];
+                for (int index = 0; index < packageInfo.signatures.length; index++) {
+                    Signature sign = new Signature();
+                    sign.data = packageInfo.signatures[index].toByteArray();
+                    pInfo.signatures[index] = sign;
+                }
+
+                keyAttestationPackageInfos[i] = pInfo;
             }
         } catch (NameNotFoundException nnfe) {
             throw new RemoteException(nnfe.getMessage());
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        return new KeyAttestationApplicationId(keyAttestationPackageInfos);
+        KeyAttestationApplicationId attestAppId = new KeyAttestationApplicationId();
+        attestAppId.packageInfos = keyAttestationPackageInfos;
+        return attestAppId;
     }
 }

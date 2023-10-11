@@ -183,6 +183,7 @@ java_library_static {
         "cbor-java",
         "display_flags_lib",
         "icu4j_calendar_astronomer",
+        "android.security.aaid_aidl-java",
         "netd-client",
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
