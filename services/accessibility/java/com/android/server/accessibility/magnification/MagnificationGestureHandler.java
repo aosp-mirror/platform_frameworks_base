@@ -57,11 +57,11 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
     protected final boolean mDetectShortcutTrigger;
 
     /**
-     * {@code true} if this detector should detect and respond to triple-tap
+     * {@code true} if this detector should detect and respond to single-finger triple-tap
      * gestures for engaging and disengaging magnification,
      * {@code false} if it should ignore such gestures
      */
-    protected final boolean mDetectTripleTap;
+    protected final boolean mDetectSingleFingerTripleTap;
 
     /** Callback interface to report that magnification is interactive with a user. */
     public interface Callback {
@@ -85,12 +85,12 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
     private final AccessibilityTraceManager mTrace;
     protected final Callback mCallback;
 
-    protected MagnificationGestureHandler(int displayId, boolean detectTripleTap,
+    protected MagnificationGestureHandler(int displayId, boolean detectSingleFingerTripleTap,
             boolean detectShortcutTrigger,
             AccessibilityTraceManager trace,
             @NonNull Callback callback) {
         mDisplayId = displayId;
-        mDetectTripleTap = detectTripleTap;
+        mDetectSingleFingerTripleTap = detectSingleFingerTripleTap;
         mDetectShortcutTrigger = detectShortcutTrigger;
         mTrace = trace;
         mCallback = callback;
@@ -128,7 +128,7 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
     }
 
     private boolean shouldDispatchTransformedEvent(MotionEvent event) {
-        if ((!mDetectTripleTap && !mDetectShortcutTrigger) || !event.isFromSource(
+        if ((!mDetectSingleFingerTripleTap && !mDetectShortcutTrigger) || !event.isFromSource(
                 SOURCE_TOUCHSCREEN)) {
             return true;
         }
