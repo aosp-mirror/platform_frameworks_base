@@ -1,6 +1,4 @@
 // Signature format: 2.0
-// - add-additional-overrides=no
-// - migrating=Migration in progress see b/299366704
 package android.test.mock {
 
   public class MockContext extends android.content.Context {
@@ -11,7 +9,7 @@ package android.test.mock {
   @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {
     method @Deprecated public String getDefaultBrowserPackageName(int);
     method @Deprecated public boolean setDefaultBrowserPackageName(String, int);
-    method public boolean setInstantAppCookie(@NonNull byte[]);
+    method @Deprecated public boolean setInstantAppCookie(@NonNull byte[]);
   }
 
 }
