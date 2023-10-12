@@ -23,9 +23,7 @@ import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.SchemePolicy
 
-abstract class BaseAppOpPolicy(
-    private val persistence: BaseAppOpPersistence
-) : SchemePolicy() {
+abstract class BaseAppOpPolicy(private val persistence: BaseAppOpPersistence) : SchemePolicy() {
     override val objectScheme: String
         get() = AppOpUri.SCHEME
 

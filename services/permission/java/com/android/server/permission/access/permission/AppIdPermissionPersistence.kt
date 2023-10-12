@@ -57,11 +57,12 @@ class AppIdPermissionPersistence {
         isPermissionTree: Boolean
     ) {
         val systemState = state.mutateSystemState(WriteMode.NONE)
-        val permissions = if (isPermissionTree) {
-            systemState.mutatePermissionTrees()
-        } else {
-            systemState.mutatePermissions()
-        }
+        val permissions =
+            if (isPermissionTree) {
+                systemState.mutatePermissionTrees()
+            } else {
+                systemState.mutatePermissions()
+            }
         forEachTag {
             when (val tagName = tagName) {
                 TAG_PERMISSION -> parsePermission(permissions)
@@ -71,10 +72,13 @@ class AppIdPermissionPersistence {
         permissions.forEachReversedIndexed { permissionIndex, _, permission ->
             val packageName = permission.packageName
             val externalState = state.externalState
-            if (packageName !in externalState.packageStates &&
-                packageName !in externalState.disabledSystemPackageStates) {
+            if (
+                packageName !in externalState.packageStates &&
+                    packageName !in externalState.disabledSystemPackageStates
+            ) {
                 Slog.w(
-                    LOG_TAG, "Dropping permission ${permission.name} from unknown package" +
+                    LOG_TAG,
+                    "Dropping permission ${permission.name} from unknown package" +
                         " $packageName when parsing permissions"
                 )
                 permissions.removeAt(permissionIndex)
@@ -88,11 +92,12 @@ class AppIdPermissionPersistence {
     ) {
         val name = getAttributeValueOrThrow(ATTR_NAME).intern()
         @Suppress("DEPRECATION")
-        val permissionInfo = PermissionInfo().apply {
-            this.name = name
-            packageName = getAttributeValueOrThrow(ATTR_PACKAGE_NAME).intern()
-            protectionLevel = getAttributeIntHexOrThrow(ATTR_PROTECTION_LEVEL)
-        }
+        val permissionInfo =
+            PermissionInfo().apply {
+                this.name = name
+                packageName = getAttributeValueOrThrow(ATTR_PACKAGE_NAME).intern()
+                protectionLevel = getAttributeIntHexOrThrow(ATTR_PROTECTION_LEVEL)
+            }
         val type = getAttributeIntOrThrow(ATTR_TYPE)
         when (type) {
             Permission.TYPE_MANIFEST -> {}
@@ -125,15 +130,14 @@ class AppIdPermissionPersistence {
         tagName: String,
         permissions: IndexedMap<String, Permission>
     ) {
-        tag(tagName) {
-            permissions.forEachIndexed { _, _, it -> serializePermission(it) }
-        }
+        tag(tagName) { permissions.forEachIndexed { _, _, it -> serializePermission(it) } }
     }
 
     private fun BinaryXmlSerializer.serializePermission(permission: Permission) {
         val type = permission.type
         when (type) {
-            Permission.TYPE_MANIFEST, Permission.TYPE_DYNAMIC -> {}
+            Permission.TYPE_MANIFEST,
+            Permission.TYPE_DYNAMIC -> {}
             Permission.TYPE_CONFIG -> return
             else -> {
                 Slog.w(LOG_TAG, "Skipping serializing permission $name with unknown type $type")
@@ -228,11 +232,12 @@ class AppIdPermissionPersistence {
         tag(TAG_PERMISSION) {
             attributeInterned(ATTR_NAME, name)
             // Never serialize one-time permissions as granted.
-            val serializedFlags = if (flags.hasBits(PermissionFlags.ONE_TIME)) {
-                flags andInv PermissionFlags.RUNTIME_GRANTED
-            } else {
-                flags
-            }
+            val serializedFlags =
+                if (flags.hasBits(PermissionFlags.ONE_TIME)) {
+                    flags andInv PermissionFlags.RUNTIME_GRANTED
+                } else {
+                    flags
+                }
             attributeInt(ATTR_FLAGS, serializedFlags)
         }
     }

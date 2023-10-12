@@ -36,7 +36,9 @@ inline fun <K, V> IndexedMap<K, V>.anyIndexed(predicate: (Int, K, V) -> Boolean)
 
 inline fun <K, V, R> IndexedMap<K, V>.firstNotNullOfOrNullIndexed(transform: (Int, K, V) -> R): R? {
     forEachIndexed { index, key, value ->
-        transform(index, key, value)?.let { return it }
+        transform(index, key, value)?.let {
+            return it
+        }
     }
     return null
 }
@@ -75,9 +77,7 @@ inline fun <K, V, R, C : MutableCollection<R>> IndexedMap<K, V>.mapIndexedTo(
     destination: C,
     transform: (Int, K, V) -> R,
 ): C {
-    forEachIndexed { index, key, value ->
-        transform(index, key, value).let { destination += it }
-    }
+    forEachIndexed { index, key, value -> transform(index, key, value).let { destination += it } }
     return destination
 }
 
@@ -85,14 +85,14 @@ inline fun <K, V, R, C : MutableCollection<R>> IndexedMap<K, V>.mapNotNullIndexe
     destination: C,
     transform: (Int, K, V) -> R?
 ): C {
-    forEachIndexed { index, key, value ->
-        transform(index, key, value)?.let { destination += it }
-    }
+    forEachIndexed { index, key, value -> transform(index, key, value)?.let { destination += it } }
     return destination
 }
 
 inline fun <K, V> MutableIndexedMap<K, V>.getOrPut(key: K, defaultValue: () -> V): V {
-    get(key)?.let { return it }
+    get(key)?.let {
+        return it
+    }
     return defaultValue().also { put(key, it) }
 }
 

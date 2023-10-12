@@ -18,12 +18,8 @@ package com.android.server.permission.access.immutable
 
 import android.util.SparseBooleanArray
 
-/**
- * Immutable set with index-based access and [Int] elements.
- */
-sealed class IntSet(
-    internal val array: SparseBooleanArray
-) : Immutable<MutableIntSet> {
+/** Immutable set with index-based access and [Int] elements. */
+sealed class IntSet(internal val array: SparseBooleanArray) : Immutable<MutableIntSet> {
     val size: Int
         get() = array.size()
 
@@ -40,12 +36,8 @@ sealed class IntSet(
     override fun toString(): String = array.toString()
 }
 
-/**
- * Mutable set with index-based access and [Int] elements.
- */
-class MutableIntSet(
-    array: SparseBooleanArray = SparseBooleanArray()
-) : IntSet(array) {
+/** Mutable set with index-based access and [Int] elements. */
+class MutableIntSet(array: SparseBooleanArray = SparseBooleanArray()) : IntSet(array) {
     constructor(intSet: IntSet) : this(intSet.array.clone())
 
     fun add(element: Int): Boolean =

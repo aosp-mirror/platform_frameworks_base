@@ -70,9 +70,7 @@ inline fun <T> IndexedListSet<T>.reduceIndexed(
     accumulator: (Int, Int, T) -> Int
 ): Int {
     var value = initialValue
-    forEachIndexed { index, element ->
-        value = accumulator(value, index, element)
-    }
+    forEachIndexed { index, element -> value = accumulator(value, index, element) }
     return value
 }
 

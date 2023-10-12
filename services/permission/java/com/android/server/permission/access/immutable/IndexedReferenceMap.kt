@@ -33,8 +33,7 @@ sealed class IndexedReferenceMap<K, I : Immutable<M>, M : I>(
 
     operator fun contains(key: K): Boolean = map.containsKey(key)
 
-    @Suppress("ReplaceGetOrSet")
-    operator fun get(key: K): I? = map.get(key)?.get()
+    @Suppress("ReplaceGetOrSet") operator fun get(key: K): I? = map.get(key)?.get()
 
     fun indexOfKey(key: K): Int = map.indexOfKey(key)
 
@@ -55,7 +54,9 @@ sealed class IndexedReferenceMap<K, I : Immutable<M>, M : I>(
 class MutableIndexedReferenceMap<K, I : Immutable<M>, M : I>(
     map: ArrayMap<K, MutableReference<I, M>> = ArrayMap()
 ) : IndexedReferenceMap<K, I, M>(map) {
-    constructor(indexedReferenceMap: IndexedReferenceMap<K, I, M>) : this(
+    constructor(
+        indexedReferenceMap: IndexedReferenceMap<K, I, M>
+    ) : this(
         ArrayMap(indexedReferenceMap.map).apply {
             for (i in 0 until size) {
                 setValueAt(i, valueAt(i).toImmutable())
@@ -63,8 +64,7 @@ class MutableIndexedReferenceMap<K, I : Immutable<M>, M : I>(
         }
     )
 
-    @Suppress("ReplaceGetOrSet")
-    fun mutate(key: K): M? = map.get(key)?.mutate()
+    @Suppress("ReplaceGetOrSet") fun mutate(key: K): M? = map.get(key)?.mutate()
 
     fun put(key: K, value: M): I? = map.put(key, MutableReference(value))?.get()
 

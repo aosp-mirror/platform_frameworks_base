@@ -72,7 +72,9 @@ inline fun <K, I : Immutable<M>, M : I> MutableIndexedReferenceMap<K, I, M>.muta
     key: K,
     defaultValue: () -> M
 ): M {
-    mutate(key)?.let { return it }
+    mutate(key)?.let {
+        return it
+    }
     return defaultValue().also { put(key, it) }
 }
 

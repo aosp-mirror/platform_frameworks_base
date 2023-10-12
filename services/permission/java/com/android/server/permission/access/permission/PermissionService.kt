@@ -41,10 +41,10 @@ import android.os.RemoteException
 import android.os.ServiceManager
 import android.os.UserHandle
 import android.os.UserManager
-import android.permission.flags.Flags
 import android.permission.IOnPermissionsChangeListener
 import android.permission.PermissionControllerManager
 import android.permission.PermissionManager
+import android.permission.flags.Flags
 import android.provider.Settings
 import android.util.ArrayMap
 import android.util.ArraySet
@@ -88,28 +88,25 @@ import com.android.server.pm.UserManagerInternal
 import com.android.server.pm.UserManagerService
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils
 import com.android.server.pm.permission.LegacyPermission
-import com.android.server.pm.permission.Permission as LegacyPermission2
 import com.android.server.pm.permission.LegacyPermissionSettings
 import com.android.server.pm.permission.LegacyPermissionState
+import com.android.server.pm.permission.Permission as LegacyPermission2
 import com.android.server.pm.permission.PermissionManagerServiceInterface
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageState
 import com.android.server.policy.SoftRestrictedPermissionPolicy
-import libcore.util.EmptyArray
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import libcore.util.EmptyArray
 
-/**
- * Modern implementation of [PermissionManagerServiceInterface].
- */
-class PermissionService(
-    private val service: AccessCheckingService
-) : PermissionManagerServiceInterface {
+/** Modern implementation of [PermissionManagerServiceInterface]. */
+class PermissionService(private val service: AccessCheckingService) :
+    PermissionManagerServiceInterface {
     private val policy =
         service.getSchemePolicy(UidUri.SCHEME, PermissionUri.SCHEME) as AppIdPermissionPolicy
 
@@ -131,8 +128,7 @@ class PermissionService(
     private lateinit var onPermissionFlagsChangedListener: OnPermissionFlagsChangedListener
 
     private val storageVolumeLock = Any()
-    @GuardedBy("storageVolumeLock")
-    private val mountedStorageVolumes = ArraySet<String?>()
+    @GuardedBy("storageVolumeLock") private val mountedStorageVolumes = ArraySet<String?>()
     @GuardedBy("storageVolumeLock")
     private val storageVolumePackageNames = ArrayMap<String?, MutableList<String>>()
 
@@ -144,8 +140,8 @@ class PermissionService(
      * A permission backup might contain apps that are not installed. In this case we delay the
      * restoration until the app is installed.
      *
-     * This array (`userId -> noDelayedBackupLeft`) is `true` for all the users where
-     * there is **no more** delayed backup left.
+     * This array (`userId -> noDelayedBackupLeft`) is `true` for all the users where there is **no
+     * more** delayed backup left.
      */
     private val isDelayedPermissionBackupFinished = SparseBooleanArray()
 
@@ -154,9 +150,10 @@ class PermissionService(
         packageManagerInternal = LocalServices.getService(PackageManagerInternal::class.java)
         packageManagerLocal =
             LocalManagerRegistry.getManagerOrThrow(PackageManagerLocal::class.java)
-        platformCompat = IPlatformCompat.Stub.asInterface(
-            ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE)
-        )
+        platformCompat =
+            IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE)
+            )
         systemConfig = SystemConfig.getInstance()
         userManagerInternal = LocalServices.getService(UserManagerInternal::class.java)
         userManagerService = UserManagerService.getInstance()
@@ -166,8 +163,8 @@ class PermissionService(
         PackageManager.invalidatePackageInfoCache()
         PermissionManager.disablePackageNamePermissionCache()
 
-        handlerThread = ServiceThread(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND, true)
-            .apply { start() }
+        handlerThread =
+            ServiceThread(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND, true).apply { start() }
         handler = Handler(handlerThread.looper)
         onPermissionsChangeListeners = OnPermissionsChangeListeners(FgThread.get().looper)
         onPermissionFlagsChangedListener = OnPermissionFlagsChangedListener()
@@ -181,9 +178,7 @@ class PermissionService(
                 return emptyList()
             }
 
-            val permissionGroups = service.getState {
-                with(policy) { getPermissionGroups() }
-            }
+            val permissionGroups = service.getState { with(policy) { getPermissionGroups() } }
 
             return permissionGroups.mapNotNullIndexedTo(ArrayList()) { _, _, permissionGroup ->
                 if (snapshot.isPackageVisibleToUid(permissionGroup.packageName, callingUid)) {
@@ -206,9 +201,9 @@ class PermissionService(
                 return null
             }
 
-            permissionGroup = service.getState {
-                with(policy) { getPermissionGroups()[permissionGroupName] }
-            } ?: return null
+            permissionGroup =
+                service.getState { with(policy) { getPermissionGroups()[permissionGroupName] } }
+                    ?: return null
 
             if (!snapshot.isPackageVisibleToUid(permissionGroup.packageName, callingUid)) {
                 return null
@@ -242,29 +237,28 @@ class PermissionService(
                 return null
             }
 
-            permission = service.getState {
-                with(policy) { getPermissions()[permissionName] }
-            } ?: return null
+            permission =
+                service.getState { with(policy) { getPermissions()[permissionName] } }
+                    ?: return null
 
             if (!snapshot.isPackageVisibleToUid(permission.packageName, callingUid)) {
                 return null
             }
 
             val opPackage = snapshot.getPackageState(opPackageName)?.androidPackage
-            targetSdkVersion = when {
-                // System sees all flags.
-                isRootOrSystemOrShellUid(callingUid) -> Build.VERSION_CODES.CUR_DEVELOPMENT
-                opPackage != null -> opPackage.targetSdkVersion
-                else -> Build.VERSION_CODES.CUR_DEVELOPMENT
-            }
+            targetSdkVersion =
+                when {
+                    // System sees all flags.
+                    isRootOrSystemOrShellUid(callingUid) -> Build.VERSION_CODES.CUR_DEVELOPMENT
+                    opPackage != null -> opPackage.targetSdkVersion
+                    else -> Build.VERSION_CODES.CUR_DEVELOPMENT
+                }
         }
 
         return permission.generatePermissionInfo(flags, targetSdkVersion)
     }
 
-    /**
-     * Generate a new [PermissionInfo] from [Permission] and adjust it accordingly.
-     */
+    /** Generate a new [PermissionInfo] from [Permission] and adjust it accordingly. */
     private fun Permission.generatePermissionInfo(
         flags: Int,
         targetSdkVersion: Int = Build.VERSION_CODES.CUR_DEVELOPMENT
@@ -296,22 +290,27 @@ class PermissionService(
                 return null
             }
 
-            val permissions = service.getState {
-                if (permissionGroupName != null) {
-                    val permissionGroup =
-                        with(policy) { getPermissionGroups()[permissionGroupName] } ?: return null
+            val permissions =
+                service.getState {
+                    if (permissionGroupName != null) {
+                        val permissionGroup =
+                            with(policy) { getPermissionGroups()[permissionGroupName] }
+                                ?: return null
 
-                    if (!snapshot.isPackageVisibleToUid(permissionGroup.packageName, callingUid)) {
-                        return null
+                        if (
+                            !snapshot.isPackageVisibleToUid(permissionGroup.packageName, callingUid)
+                        ) {
+                            return null
+                        }
                     }
+
+                    with(policy) { getPermissions() }
                 }
 
-                with(policy) { getPermissions() }
-            }
-
             return permissions.mapNotNullIndexedTo(ArrayList()) { _, _, permission ->
-                if (permission.groupName == permissionGroupName &&
-                    snapshot.isPackageVisibleToUid(permission.packageName, callingUid)
+                if (
+                    permission.groupName == permissionGroupName &&
+                        snapshot.isPackageVisibleToUid(permission.packageName, callingUid)
                 ) {
                     permission.generatePermissionInfo(flags)
                 } else {
@@ -334,9 +333,7 @@ class PermissionService(
     private inline fun getPermissionsWithProtectionOrProtectionFlags(
         predicate: (Permission) -> Boolean
     ): List<PermissionInfo> {
-        val permissions = service.getState {
-            with(policy) { getPermissions() }
-        }
+        val permissions = service.getState { with(policy) { getPermissions() } }
 
         return permissions.mapNotNullIndexedTo(ArrayList()) { _, _, permission ->
             if (predicate(permission)) {
@@ -348,18 +345,16 @@ class PermissionService(
     }
 
     override fun getPermissionGids(permissionName: String, userId: Int): IntArray {
-        val permission = service.getState {
-            with(policy) { getPermissions()[permissionName] }
-        } ?: return EmptyArray.INT
+        val permission =
+            service.getState { with(policy) { getPermissions()[permissionName] } }
+                ?: return EmptyArray.INT
         return permission.getGidsForUser(userId)
     }
 
     override fun getInstalledPermissions(packageName: String): Set<String> {
         requireNotNull(packageName) { "packageName cannot be null" }
 
-        val permissions = service.getState {
-            with(policy) { getPermissions() }
-        }
+        val permissions = service.getState { with(policy) { getPermissions() } }
 
         return permissions.mapNotNullIndexedTo(ArraySet()) { _, _, permission ->
             if (permission.packageName == packageName) {
@@ -398,9 +393,8 @@ class PermissionService(
             permissionInfo.protectionLevel =
                 PermissionInfo.fixProtectionLevel(permissionInfo.protectionLevel)
 
-            val newPermission = Permission(
-                permissionInfo, true, Permission.TYPE_DYNAMIC, permissionTree.appId
-            )
+            val newPermission =
+                Permission(permissionInfo, true, Permission.TYPE_DYNAMIC, permissionTree.appId)
 
             with(policy) { addPermission(newPermission, !async) }
         }
@@ -431,7 +425,7 @@ class PermissionService(
         val callingUid = Binder.getCallingUid()
         val permissionTree = with(policy) { findPermissionTree(permissionName) }
         if (permissionTree != null && permissionTree.appId == UserHandle.getAppId(callingUid)) {
-                return permissionTree
+            return permissionTree
         }
 
         throw SecurityException(
@@ -447,8 +441,9 @@ class PermissionService(
         // if that plus the size of 'info' would exceed our stated maximum.
         if (permissionTree.appId != Process.SYSTEM_UID) {
             val permissionTreeFootprint = calculatePermissionTreeFootprint(permissionTree)
-            if (permissionTreeFootprint + permissionInfo.calculateFootprint() >
-                MAX_PERMISSION_TREE_FOOTPRINT
+            if (
+                permissionTreeFootprint + permissionInfo.calculateFootprint() >
+                    MAX_PERMISSION_TREE_FOOTPRINT
             ) {
                 throw SecurityException("Permission tree size cap exceeded")
             }
@@ -483,14 +478,16 @@ class PermissionService(
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)
             if (packageState == null) {
                 Slog.e(
-                    LOG_TAG, "checkUidPermission: PackageState not found for AndroidPackage" +
+                    LOG_TAG,
+                    "checkUidPermission: PackageState not found for AndroidPackage" +
                         " $androidPackage"
                 )
                 return PackageManager.PERMISSION_DENIED
             }
-            val isPermissionGranted = service.getState {
-                isPermissionGranted(packageState, userId, permissionName, deviceId)
-            }
+            val isPermissionGranted =
+                service.getState {
+                    isPermissionGranted(packageState, userId, permissionName, deviceId)
+                }
             return if (isPermissionGranted) {
                 PackageManager.PERMISSION_GRANTED
             } else {
@@ -505,9 +502,7 @@ class PermissionService(
         }
     }
 
-    /**
-     * Internal implementation that should only be called by [checkUidPermission].
-     */
+    /** Internal implementation that should only be called by [checkUidPermission]. */
     private fun isSystemUidPermissionGranted(uid: Int, permissionName: String): Boolean {
         val uidPermissions = systemConfig.systemPermissions[uid] ?: return false
         if (permissionName in uidPermissions) {
@@ -532,12 +527,14 @@ class PermissionService(
             return PackageManager.PERMISSION_DENIED
         }
 
-        val packageState = packageManagerLocal.withFilteredSnapshot(Binder.getCallingUid(), userId)
-            .use { it.getPackageState(packageName) } ?: return PackageManager.PERMISSION_DENIED
+        val packageState =
+            packageManagerLocal.withFilteredSnapshot(Binder.getCallingUid(), userId).use {
+                it.getPackageState(packageName)
+            }
+                ?: return PackageManager.PERMISSION_DENIED
 
-        val isPermissionGranted = service.getState {
-            isPermissionGranted(packageState, userId, permissionName, deviceId)
-        }
+        val isPermissionGranted =
+            service.getState { isPermissionGranted(packageState, userId, permissionName, deviceId) }
         return if (isPermissionGranted) {
             PackageManager.PERMISSION_GRANTED
         } else {
@@ -566,8 +563,15 @@ class PermissionService(
         }
 
         val fullerPermissionName = FULLER_PERMISSIONS[permissionName]
-        if (fullerPermissionName != null &&
-            isSinglePermissionGranted(appId, userId, isInstantApp, fullerPermissionName, deviceId)
+        if (
+            fullerPermissionName != null &&
+                isSinglePermissionGranted(
+                    appId,
+                    userId,
+                    isInstantApp,
+                    fullerPermissionName,
+                    deviceId
+                )
         ) {
             return true
         }
@@ -575,9 +579,7 @@ class PermissionService(
         return false
     }
 
-    /**
-     * Internal implementation that should only be called by [isPermissionGranted].
-     */
+    /** Internal implementation that should only be called by [isPermissionGranted]. */
     private fun GetStateScope.isSinglePermissionGranted(
         appId: Int,
         userId: Int,
@@ -604,20 +606,27 @@ class PermissionService(
         requireNotNull(packageName) { "packageName cannot be null" }
         Preconditions.checkArgumentNonnegative(userId, "userId")
 
-        val packageState = packageManagerLocal.withUnfilteredSnapshot()
-            .use { it.getPackageState(packageName) }
+        val packageState =
+            packageManagerLocal.withUnfilteredSnapshot().use { it.getPackageState(packageName) }
         if (packageState == null) {
             Slog.w(LOG_TAG, "getGrantedPermissions: Unknown package $packageName")
             return emptySet()
         }
 
         service.getState {
-            val permissionFlags = with(policy) { getUidPermissionFlags(packageState.appId, userId) }
-                ?: return emptySet()
+            val permissionFlags =
+                with(policy) { getUidPermissionFlags(packageState.appId, userId) }
+                    ?: return emptySet()
 
             return permissionFlags.mapNotNullIndexedTo(ArraySet()) { _, permissionName, _ ->
-                if (isPermissionGranted(
-                        packageState, userId, permissionName, Context.DEVICE_ID_DEFAULT)) {
+                if (
+                    isPermissionGranted(
+                        packageState,
+                        userId,
+                        permissionName,
+                        Context.DEVICE_ID_DEFAULT
+                    )
+                ) {
                     permissionName
                 } else {
                     null
@@ -635,8 +644,8 @@ class PermissionService(
             // permission state is not found, now we always return at least global GIDs. This is
             // more consistent with the pre-S-refactor behavior. This is also because we are now
             // actively trimming the per-UID objects when empty.
-            val permissionFlags = with(policy) { getUidPermissionFlags(appId, userId) }
-                ?: return globalGids.copyOf()
+            val permissionFlags =
+                with(policy) { getUidPermissionFlags(appId, userId) } ?: return globalGids.copyOf()
 
             val gids = GrowingIntArray.wrap(globalGids)
             permissionFlags.forEachIndexed { _, permissionName, flags ->
@@ -644,8 +653,8 @@ class PermissionService(
                     return@forEachIndexed
                 }
 
-                val permission = with(policy) { getPermissions()[permissionName] }
-                    ?: return@forEachIndexed
+                val permission =
+                    with(policy) { getPermissions()[permissionName] } ?: return@forEachIndexed
                 val permissionGids = permission.getGidsForUser(userId)
                 if (permissionGids.isEmpty()) {
                     return@forEachIndexed
@@ -662,9 +671,7 @@ class PermissionService(
         deviceId: Int,
         userId: Int
     ) {
-        setRuntimePermissionGranted(
-            packageName, userId, permissionName, deviceId, isGranted = true
-        )
+        setRuntimePermissionGranted(packageName, userId, permissionName, deviceId, isGranted = true)
     }
 
     override fun revokeRuntimePermission(
@@ -675,7 +682,12 @@ class PermissionService(
         reason: String?
     ) {
         setRuntimePermissionGranted(
-            packageName, userId, permissionName, deviceId, isGranted = false, revokeReason = reason
+            packageName,
+            userId,
+            permissionName,
+            deviceId,
+            isGranted = false,
+            revokeReason = reason
         )
     }
 
@@ -684,8 +696,12 @@ class PermissionService(
         userId: Int
     ) {
         setRuntimePermissionGranted(
-            packageName, userId, Manifest.permission.POST_NOTIFICATIONS, Context.DEVICE_ID_DEFAULT,
-            isGranted = false, skipKillUid = true
+            packageName,
+            userId,
+            Manifest.permission.POST_NOTIFICATIONS,
+            Context.DEVICE_ID_DEFAULT,
+            isGranted = false,
+            skipKillUid = true
         )
     }
 
@@ -704,19 +720,24 @@ class PermissionService(
     ) {
         val methodName = if (isGranted) "grantRuntimePermission" else "revokeRuntimePermission"
         val callingUid = Binder.getCallingUid()
-        val isDebugEnabled = if (isGranted) {
-            PermissionManager.DEBUG_TRACE_GRANTS
-        } else {
-            PermissionManager.DEBUG_TRACE_PERMISSION_UPDATES
-        }
-        if (isDebugEnabled &&
-            PermissionManager.shouldTraceGrant(packageName, permissionName, userId)) {
+        val isDebugEnabled =
+            if (isGranted) {
+                PermissionManager.DEBUG_TRACE_GRANTS
+            } else {
+                PermissionManager.DEBUG_TRACE_PERMISSION_UPDATES
+            }
+        if (
+            isDebugEnabled &&
+                PermissionManager.shouldTraceGrant(packageName, permissionName, userId)
+        ) {
             val callingUidName = packageManagerInternal.getNameForUid(callingUid)
             Slog.i(
-                LOG_TAG, "$methodName(packageName = $packageName," +
+                LOG_TAG,
+                "$methodName(packageName = $packageName," +
                     " permissionName = $permissionName" +
                     (if (isGranted) "" else "skipKillUid = $skipKillUid, reason = $revokeReason") +
-                    ", userId = $userId," + " callingUid = $callingUidName ($callingUid))",
+                    ", userId = $userId," +
+                    " callingUid = $callingUidName ($callingUid))",
                 RuntimeException()
             )
         }
@@ -727,23 +748,31 @@ class PermissionService(
         }
 
         enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = true, enforceShellRestriction = true, methodName
+            userId,
+            enforceFullPermission = true,
+            enforceShellRestriction = true,
+            methodName
         )
-        val enforcedPermissionName = if (isGranted) {
-            Manifest.permission.GRANT_RUNTIME_PERMISSIONS
-        } else {
-            Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
-        }
+        val enforcedPermissionName =
+            if (isGranted) {
+                Manifest.permission.GRANT_RUNTIME_PERMISSIONS
+            } else {
+                Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
+            }
         context.enforceCallingOrSelfPermission(enforcedPermissionName, methodName)
 
         val packageState: PackageState?
-        val permissionControllerPackageName = packageManagerInternal.getKnownPackageNames(
-            KnownPackages.PACKAGE_PERMISSION_CONTROLLER, UserHandle.USER_SYSTEM
-        ).first()
+        val permissionControllerPackageName =
+            packageManagerInternal
+                .getKnownPackageNames(
+                    KnownPackages.PACKAGE_PERMISSION_CONTROLLER,
+                    UserHandle.USER_SYSTEM
+                )
+                .first()
         val permissionControllerPackageState: PackageState?
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
-            packageState = snapshot.filtered(callingUid, userId)
-                .use { it.getPackageState(packageName) }
+            packageState =
+                snapshot.filtered(callingUid, userId).use { it.getPackageState(packageName) }
             permissionControllerPackageState =
                 snapshot.getPackageState(permissionControllerPackageName)
         }
@@ -756,11 +785,13 @@ class PermissionService(
             return
         }
 
-        val canManageRolePermission = isRootOrSystemUid(callingUid) ||
-            UserHandle.getAppId(callingUid) == permissionControllerPackageState!!.appId
-        val overridePolicyFixed = context.checkCallingOrSelfPermission(
-            Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
-        ) == PackageManager.PERMISSION_GRANTED
+        val canManageRolePermission =
+            isRootOrSystemUid(callingUid) ||
+                UserHandle.getAppId(callingUid) == permissionControllerPackageState!!.appId
+        val overridePolicyFixed =
+            context.checkCallingOrSelfPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
+            ) == PackageManager.PERMISSION_GRANTED
 
         service.mutateState {
             with(onPermissionFlagsChangedListener) {
@@ -773,8 +804,15 @@ class PermissionService(
             }
 
             setRuntimePermissionGranted(
-                packageState, userId, permissionName, deviceId, isGranted, canManageRolePermission,
-                overridePolicyFixed, reportError = true, methodName
+                packageState,
+                userId,
+                permissionName,
+                deviceId,
+                isGranted,
+                canManageRolePermission,
+                overridePolicyFixed,
+                reportError = true,
+                methodName
             )
         }
     }
@@ -791,8 +829,9 @@ class PermissionService(
                     PackageInstaller.SessionParams.PERMISSION_STATE_DENIED -> {}
                     else -> {
                         Slog.w(
-                            LOG_TAG, "setRequestedPermissionStates: Unknown permission state" +
-                            " $permissionState for permission $permissionName"
+                            LOG_TAG,
+                            "setRequestedPermissionStates: Unknown permission state" +
+                                " $permissionState for permission $permissionName"
                         )
                         return@forEachIndexed
                     }
@@ -800,35 +839,50 @@ class PermissionService(
                 if (permissionName !in packageState.androidPackage!!.requestedPermissions) {
                     return@forEachIndexed
                 }
-                val permission = with(policy) { getPermissions()[permissionName] }
-                    ?: return@forEachIndexed
+                val permission =
+                    with(policy) { getPermissions()[permissionName] } ?: return@forEachIndexed
                 when {
                     permission.isDevelopment || permission.isRuntime -> {
-                        if (permissionState ==
-                            PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED) {
+                        if (
+                            permissionState ==
+                                PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
+                        ) {
                             setRuntimePermissionGranted(
-                                packageState, userId, permissionName, Context.DEVICE_ID_DEFAULT,
-                                isGranted = true, canManageRolePermission = false,
-                                overridePolicyFixed = false, reportError = false,
+                                packageState,
+                                userId,
+                                permissionName,
+                                Context.DEVICE_ID_DEFAULT,
+                                isGranted = true,
+                                canManageRolePermission = false,
+                                overridePolicyFixed = false,
+                                reportError = false,
                                 "setRequestedPermissionStates"
                             )
                             updatePermissionFlags(
-                                packageState.appId, userId, permissionName,
+                                packageState.appId,
+                                userId,
+                                permissionName,
                                 Context.DEVICE_ID_DEFAULT,
                                 PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED or
-                                PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, 0,
+                                    PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
+                                0,
                                 canUpdateSystemFlags = false,
                                 reportErrorForUnknownPermission = false,
-                                isPermissionRequested = true, "setRequestedPermissionStates",
+                                isPermissionRequested = true,
+                                "setRequestedPermissionStates",
                                 packageState.packageName
                             )
                         }
                     }
-                    permission.isAppOp && permissionName in
+                    permission.isAppOp &&
+                        permissionName in
                             PackageInstallerService.INSTALLER_CHANGEABLE_APP_OP_PERMISSIONS ->
                         setAppOpPermissionGranted(
-                            packageState, userId, permissionName, permissionState ==
-                                    PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
+                            packageState,
+                            userId,
+                            permissionName,
+                            permissionState ==
+                                PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
                         )
                     else -> {}
                 }
@@ -836,9 +890,7 @@ class PermissionService(
         }
     }
 
-    /**
-     * Set whether a runtime permission is granted, without any validation on caller.
-     */
+    /** Set whether a runtime permission is granted, without any validation on caller. */
     private fun MutateStateScope.setRuntimePermissionGranted(
         packageState: PackageState,
         userId: Int,
@@ -876,8 +928,11 @@ class PermissionService(
                     // their permissions as always granted
                     return
                 }
-                if (isGranted && packageState.getUserStateOrDefault(userId).isInstantApp &&
-                    !permission.isInstant) {
+                if (
+                    isGranted &&
+                        packageState.getUserStateOrDefault(userId).isInstantApp &&
+                        !permission.isInstant
+                ) {
                     if (reportError) {
                         throw SecurityException(
                             "Cannot grant non-instant permission $permissionName to package" +
@@ -913,7 +968,8 @@ class PermissionService(
         if (oldFlags.hasBits(PermissionFlags.SYSTEM_FIXED)) {
             if (reportError) {
                 Slog.e(
-                    LOG_TAG, "$methodName: Cannot change system fixed permission $permissionName" +
+                    LOG_TAG,
+                    "$methodName: Cannot change system fixed permission $permissionName" +
                         " for package $packageName"
                 )
             }
@@ -923,7 +979,8 @@ class PermissionService(
         if (oldFlags.hasBits(PermissionFlags.POLICY_FIXED) && !overridePolicyFixed) {
             if (reportError) {
                 Slog.e(
-                    LOG_TAG, "$methodName: Cannot change policy fixed permission $permissionName" +
+                    LOG_TAG,
+                    "$methodName: Cannot change policy fixed permission $permissionName" +
                         " for package $packageName"
                 )
             }
@@ -933,7 +990,8 @@ class PermissionService(
         if (isGranted && oldFlags.hasBits(PermissionFlags.RESTRICTION_REVOKED)) {
             if (reportError) {
                 Slog.e(
-                    LOG_TAG, "$methodName: Cannot grant hard-restricted non-exempt permission" +
+                    LOG_TAG,
+                    "$methodName: Cannot grant hard-restricted non-exempt permission" +
                         " $permissionName to package $packageName"
                 )
             }
@@ -942,14 +1000,19 @@ class PermissionService(
 
         if (isGranted && oldFlags.hasBits(PermissionFlags.SOFT_RESTRICTED)) {
             // TODO: Refactor SoftRestrictedPermissionPolicy.
-            val softRestrictedPermissionPolicy = SoftRestrictedPermissionPolicy.forPermission(
-                context, AndroidPackageUtils.generateAppInfoWithoutState(androidPackage),
-                androidPackage, UserHandle.of(userId), permissionName
-            )
+            val softRestrictedPermissionPolicy =
+                SoftRestrictedPermissionPolicy.forPermission(
+                    context,
+                    AndroidPackageUtils.generateAppInfoWithoutState(androidPackage),
+                    androidPackage,
+                    UserHandle.of(userId),
+                    permissionName
+                )
             if (!softRestrictedPermissionPolicy.mayGrantPermission()) {
                 if (reportError) {
                     Slog.e(
-                        LOG_TAG, "$methodName: Cannot grant soft-restricted non-exempt permission" +
+                        LOG_TAG,
+                        "$methodName: Cannot grant soft-restricted non-exempt permission" +
                             " $permissionName to package $packageName"
                     )
                 }
@@ -965,15 +1028,17 @@ class PermissionService(
         setPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId, newFlags)
 
         if (permission.isRuntime) {
-            val action = if (isGranted) {
-                MetricsProto.MetricsEvent.ACTION_PERMISSION_GRANTED
-            } else {
-                MetricsProto.MetricsEvent.ACTION_PERMISSION_REVOKED
-            }
-            val log = LogMaker(action).apply {
-                setPackageName(packageName)
-                addTaggedData(MetricsProto.MetricsEvent.FIELD_PERMISSION, permissionName)
-            }
+            val action =
+                if (isGranted) {
+                    MetricsProto.MetricsEvent.ACTION_PERMISSION_GRANTED
+                } else {
+                    MetricsProto.MetricsEvent.ACTION_PERMISSION_REVOKED
+                }
+            val log =
+                LogMaker(action).apply {
+                    setPackageName(packageName)
+                    addTaggedData(MetricsProto.MetricsEvent.FIELD_PERMISSION, permissionName)
+                }
             metricsLogger.write(log)
         }
     }
@@ -984,8 +1049,8 @@ class PermissionService(
         permissionName: String,
         isGranted: Boolean
     ) {
-        val appOpPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME) as
-            AppIdAppOpPolicy
+        val appOpPolicy =
+            service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME) as AppIdAppOpPolicy
         val appOpName = AppOpsManager.permissionToOp(permissionName)!!
         val mode = if (isGranted) AppOpsManager.MODE_ALLOWED else AppOpsManager.MODE_ERRORED
         with(appOpPolicy) { setAppOpMode(packageState.appId, userId, appOpName, mode) }
@@ -1003,17 +1068,20 @@ class PermissionService(
         }
 
         enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = true, enforceShellRestriction = false,
+            userId,
+            enforceFullPermission = true,
+            enforceShellRestriction = false,
             "getPermissionFlags"
         )
         enforceCallingOrSelfAnyPermission(
-            "getPermissionFlags", Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            "getPermissionFlags",
+            Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
             Manifest.permission.GET_RUNTIME_PERMISSIONS
         )
 
-        val packageState = packageManagerLocal.withFilteredSnapshot()
-            .use { it.getPackageState(packageName) }
+        val packageState =
+            packageManagerLocal.withFilteredSnapshot().use { it.getPackageState(packageName) }
         if (packageState == null) {
             Slog.w(LOG_TAG, "getPermissionFlags: Unknown package $packageName")
             return 0
@@ -1045,12 +1113,17 @@ class PermissionService(
         }
 
         enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = true, enforceShellRestriction = false,
+            userId,
+            enforceFullPermission = true,
+            enforceShellRestriction = false,
             "isPermissionRevokedByPolicy"
         )
 
-        val packageState = packageManagerLocal.withFilteredSnapshot(Binder.getCallingUid(), userId)
-            .use { it.getPackageState(packageName) } ?: return false
+        val packageState =
+            packageManagerLocal.withFilteredSnapshot(Binder.getCallingUid(), userId).use {
+                it.getPackageState(packageName)
+            }
+                ?: return false
 
         service.getState {
             if (isPermissionGranted(packageState, userId, permissionName, deviceId)) {
@@ -1069,12 +1142,13 @@ class PermissionService(
         // TODO(b/173235285): Some caller may pass USER_ALL as userId.
         // Preconditions.checkArgumentNonnegative(userId, "userId")
 
-        val packageState = packageManagerLocal.withUnfilteredSnapshot()
-            .use { it.getPackageState(packageName) } ?: return false
+        val packageState =
+            packageManagerLocal.withUnfilteredSnapshot().use { it.getPackageState(packageName) }
+                ?: return false
 
-        val permissionFlags = service.getState {
-            with(policy) { getUidPermissionFlags(packageState.appId, userId) }
-        } ?: return false
+        val permissionFlags =
+            service.getState { with(policy) { getUidPermissionFlags(packageState.appId, userId) } }
+                ?: return false
         return permissionFlags.anyIndexed { _, _, it -> it.hasBits(REVIEW_REQUIRED_FLAGS) }
     }
 
@@ -1090,13 +1164,18 @@ class PermissionService(
         }
 
         enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = true, enforceShellRestriction = false,
+            userId,
+            enforceFullPermission = true,
+            enforceShellRestriction = false,
             "shouldShowRequestPermissionRationale"
         )
 
         val callingUid = Binder.getCallingUid()
-        val packageState = packageManagerLocal.withFilteredSnapshot(callingUid, userId)
-            .use { it.getPackageState(packageName) } ?: return false
+        val packageState =
+            packageManagerLocal.withFilteredSnapshot(callingUid, userId).use {
+                it.getPackageState(packageName)
+            }
+                ?: return false
         val appId = packageState.appId
         if (UserHandle.getAppId(callingUid) != appId) {
             return false
@@ -1115,17 +1194,24 @@ class PermissionService(
         }
 
         if (permissionName == Manifest.permission.ACCESS_BACKGROUND_LOCATION) {
-            val isBackgroundRationaleChangeEnabled = Binder::class.withClearedCallingIdentity {
-                try {
-                    platformCompat.isChangeEnabledByPackageName(
-                        BACKGROUND_RATIONALE_CHANGE_ID, packageName, userId
-                    )
-                } catch (e: RemoteException) {
-                    Slog.e(LOG_TAG, "shouldShowRequestPermissionRationale: Unable to check if" +
-                        " compatibility change is enabled", e)
-                    false
+            val isBackgroundRationaleChangeEnabled =
+                Binder::class.withClearedCallingIdentity {
+                    try {
+                        platformCompat.isChangeEnabledByPackageName(
+                            BACKGROUND_RATIONALE_CHANGE_ID,
+                            packageName,
+                            userId
+                        )
+                    } catch (e: RemoteException) {
+                        Slog.e(
+                            LOG_TAG,
+                            "shouldShowRequestPermissionRationale: Unable to check if" +
+                                " compatibility change is enabled",
+                            e
+                        )
+                        false
+                    }
                 }
-            }
             if (isBackgroundRationaleChangeEnabled) {
                 return true
             }
@@ -1144,20 +1230,30 @@ class PermissionService(
         userId: Int
     ) {
         val callingUid = Binder.getCallingUid()
-        if (PermissionManager.DEBUG_TRACE_PERMISSION_UPDATES &&
-            PermissionManager.shouldTraceGrant(packageName, permissionName, userId)) {
-            val flagMaskString = DebugUtils.flagsToString(
-                PackageManager::class.java, "FLAG_PERMISSION_", flagMask.toLong()
-            )
-            val flagValuesString = DebugUtils.flagsToString(
-                PackageManager::class.java, "FLAG_PERMISSION_", flagValues.toLong()
-            )
+        if (
+            PermissionManager.DEBUG_TRACE_PERMISSION_UPDATES &&
+                PermissionManager.shouldTraceGrant(packageName, permissionName, userId)
+        ) {
+            val flagMaskString =
+                DebugUtils.flagsToString(
+                    PackageManager::class.java,
+                    "FLAG_PERMISSION_",
+                    flagMask.toLong()
+                )
+            val flagValuesString =
+                DebugUtils.flagsToString(
+                    PackageManager::class.java,
+                    "FLAG_PERMISSION_",
+                    flagValues.toLong()
+                )
             val callingUidName = packageManagerInternal.getNameForUid(callingUid)
             Slog.i(
-                LOG_TAG, "updatePermissionFlags(packageName = $packageName," +
+                LOG_TAG,
+                "updatePermissionFlags(packageName = $packageName," +
                     " permissionName = $permissionName, flagMask = $flagMaskString," +
                     " flagValues = $flagValuesString, userId = $userId," +
-                    " callingUid = $callingUidName ($callingUid))", RuntimeException()
+                    " callingUid = $callingUidName ($callingUid))",
+                RuntimeException()
             )
         }
 
@@ -1167,11 +1263,14 @@ class PermissionService(
         }
 
         enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = true, enforceShellRestriction = true,
+            userId,
+            enforceFullPermission = true,
+            enforceShellRestriction = true,
             "updatePermissionFlags"
         )
         enforceCallingOrSelfAnyPermission(
-            "updatePermissionFlags", Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            "updatePermissionFlags",
+            Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
         )
 
@@ -1208,8 +1307,10 @@ class PermissionService(
         // Different from the old implementation, which returns when package doesn't exist but
         // throws when package exists but isn't visible, we now return in both cases to avoid
         // leaking the package existence.
-        if (androidPackage == null ||
-            packageManagerInternal.filterAppAccess(packageName, callingUid, userId, false)) {
+        if (
+            androidPackage == null ||
+                packageManagerInternal.filterAppAccess(packageName, callingUid, userId, false)
+        ) {
             Slog.w(LOG_TAG, "updatePermissionFlags: Unknown package $packageName")
             return
         }
@@ -1219,26 +1320,35 @@ class PermissionService(
         // permissions.
         val canUpdateSystemFlags = isRootOrSystemUid(callingUid)
 
-        val isPermissionRequested = if (permissionName in androidPackage.requestedPermissions) {
-            // Fast path, the current package has requested the permission.
-            true
-        } else {
-            // Slow path, go through all shared user packages.
-            val sharedUserPackageNames =
-                packageManagerInternal.getSharedUserPackagesForPackage(packageName, userId)
-            sharedUserPackageNames.any { sharedUserPackageName ->
-                val sharedUserPackage = packageManagerInternal.getPackage(sharedUserPackageName)
-                sharedUserPackage != null &&
-                    permissionName in sharedUserPackage.requestedPermissions
+        val isPermissionRequested =
+            if (permissionName in androidPackage.requestedPermissions) {
+                // Fast path, the current package has requested the permission.
+                true
+            } else {
+                // Slow path, go through all shared user packages.
+                val sharedUserPackageNames =
+                    packageManagerInternal.getSharedUserPackagesForPackage(packageName, userId)
+                sharedUserPackageNames.any { sharedUserPackageName ->
+                    val sharedUserPackage = packageManagerInternal.getPackage(sharedUserPackageName)
+                    sharedUserPackage != null &&
+                        permissionName in sharedUserPackage.requestedPermissions
+                }
             }
-        }
 
         val appId = packageState.appId
         service.mutateState {
             updatePermissionFlags(
-                appId, userId, permissionName, deviceId, flagMask, flagValues, canUpdateSystemFlags,
-                reportErrorForUnknownPermission = true, isPermissionRequested,
-                "updatePermissionFlags", packageName
+                appId,
+                userId,
+                permissionName,
+                deviceId,
+                flagMask,
+                flagValues,
+                canUpdateSystemFlags,
+                reportErrorForUnknownPermission = true,
+                isPermissionRequested,
+                "updatePermissionFlags",
+                packageName
             )
         }
     }
@@ -1246,17 +1356,25 @@ class PermissionService(
     override fun updatePermissionFlagsForAllApps(flagMask: Int, flagValues: Int, userId: Int) {
         val callingUid = Binder.getCallingUid()
         if (PermissionManager.DEBUG_TRACE_PERMISSION_UPDATES) {
-            val flagMaskString = DebugUtils.flagsToString(
-                PackageManager::class.java, "FLAG_PERMISSION_", flagMask.toLong()
-            )
-            val flagValuesString = DebugUtils.flagsToString(
-                PackageManager::class.java, "FLAG_PERMISSION_", flagValues.toLong()
-            )
+            val flagMaskString =
+                DebugUtils.flagsToString(
+                    PackageManager::class.java,
+                    "FLAG_PERMISSION_",
+                    flagMask.toLong()
+                )
+            val flagValuesString =
+                DebugUtils.flagsToString(
+                    PackageManager::class.java,
+                    "FLAG_PERMISSION_",
+                    flagValues.toLong()
+                )
             val callingUidName = packageManagerInternal.getNameForUid(callingUid)
             Slog.i(
-                LOG_TAG, "updatePermissionFlagsForAllApps(flagMask = $flagMaskString," +
+                LOG_TAG,
+                "updatePermissionFlagsForAllApps(flagMask = $flagMaskString," +
                     " flagValues = $flagValuesString, userId = $userId," +
-                    " callingUid = $callingUidName ($callingUid))", RuntimeException()
+                    " callingUid = $callingUidName ($callingUid))",
+                RuntimeException()
             )
         }
 
@@ -1266,11 +1384,14 @@ class PermissionService(
         }
 
         enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = true, enforceShellRestriction = true,
+            userId,
+            enforceFullPermission = true,
+            enforceShellRestriction = true,
             "updatePermissionFlagsForAllApps"
         )
         enforceCallingOrSelfAnyPermission(
-            "updatePermissionFlagsForAllApps", Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            "updatePermissionFlagsForAllApps",
+            Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
         )
 
@@ -1278,26 +1399,30 @@ class PermissionService(
         // flag, we now properly sanitize all flags as in updatePermissionFlags().
         val canUpdateSystemFlags = isRootOrSystemUid(callingUid)
 
-        val packageStates = packageManagerLocal.withUnfilteredSnapshot()
-            .use { it.packageStates }
+        val packageStates = packageManagerLocal.withUnfilteredSnapshot().use { it.packageStates }
         service.mutateState {
             packageStates.forEach { (packageName, packageState) ->
                 val androidPackage = packageState.androidPackage ?: return@forEach
                 androidPackage.requestedPermissions.forEach { permissionName ->
                     updatePermissionFlags(
-                        packageState.appId, userId, permissionName, Context.DEVICE_ID_DEFAULT,
-                        flagMask, flagValues, canUpdateSystemFlags,
+                        packageState.appId,
+                        userId,
+                        permissionName,
+                        Context.DEVICE_ID_DEFAULT,
+                        flagMask,
+                        flagValues,
+                        canUpdateSystemFlags,
                         reportErrorForUnknownPermission = false,
-                        isPermissionRequested = true, "updatePermissionFlagsForAllApps", packageName
+                        isPermissionRequested = true,
+                        "updatePermissionFlagsForAllApps",
+                        packageName
                     )
                 }
             }
         }
     }
 
-    /**
-     * Update flags for a permission, without any validation on caller.
-     */
+    /** Update flags for a permission, without any validation on caller. */
     private fun MutateStateScope.updatePermissionFlags(
         appId: Int,
         userId: Int,
@@ -1311,20 +1436,19 @@ class PermissionService(
         methodName: String,
         packageName: String
     ) {
-        @Suppress("NAME_SHADOWING")
-        var flagMask = flagMask
-        @Suppress("NAME_SHADOWING")
-        var flagValues = flagValues
+        @Suppress("NAME_SHADOWING") var flagMask = flagMask
+        @Suppress("NAME_SHADOWING") var flagValues = flagValues
         // Only the system can change these flags and nothing else.
         if (!canUpdateSystemFlags) {
             // Different from the old implementation, which allowed non-system UIDs to remove (but
             // not add) permission restriction flags, we now consistently ignore them altogether.
-            val ignoredMask = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED or
-                PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT or
-                PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT or
-                PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT or
-                PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT or
-                PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION
+            val ignoredMask =
+                PackageManager.FLAG_PERMISSION_SYSTEM_FIXED or
+                    PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT or
+                    PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT or
+                    PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT or
+                    PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT or
+                    PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION
             flagMask = flagMask andInv ignoredMask
             flagValues = flagValues andInv ignoredMask
         }
@@ -1340,7 +1464,8 @@ class PermissionService(
         val oldFlags = getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
         if (!isPermissionRequested && oldFlags == 0) {
             Slog.w(
-                LOG_TAG, "$methodName: Permission $permissionName isn't requested by package" +
+                LOG_TAG,
+                "$methodName: Permission $permissionName isn't requested by package" +
                     " $packageName"
             )
             return
@@ -1365,21 +1490,29 @@ class PermissionService(
         }
 
         enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = false, enforceShellRestriction = false,
+            userId,
+            enforceFullPermission = false,
+            enforceShellRestriction = false,
             "getAllowlistedRestrictedPermissions"
         )
 
         val callingUid = Binder.getCallingUid()
-        val packageState = packageManagerLocal.withFilteredSnapshot(callingUid, userId)
-            .use { it.getPackageState(packageName) } ?: return null
+        val packageState =
+            packageManagerLocal.withFilteredSnapshot(callingUid, userId).use {
+                it.getPackageState(packageName)
+            }
+                ?: return null
         val androidPackage = packageState.androidPackage ?: return null
 
-        val isCallerPrivileged = context.checkCallingOrSelfPermission(
-            Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
-        ) == PackageManager.PERMISSION_GRANTED
+        val isCallerPrivileged =
+            context.checkCallingOrSelfPermission(
+                Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+            ) == PackageManager.PERMISSION_GRANTED
 
-        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) &&
-            !isCallerPrivileged) {
+        if (
+            allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) &&
+                !isCallerPrivileged
+        ) {
             throw SecurityException(
                 "Querying system allowlist requires " +
                     Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
@@ -1389,8 +1522,12 @@ class PermissionService(
         val isCallerInstallerOnRecord =
             packageManagerInternal.isCallerInstallerOfRecord(androidPackage, callingUid)
 
-        if (allowlistedFlags.hasAnyBit(PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE or
-                PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER)) {
+        if (
+            allowlistedFlags.hasAnyBit(
+                PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE or
+                    PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
+            )
+        ) {
             if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
                 throw SecurityException(
                     "Querying upgrade or installer allowlist requires being installer on record" +
@@ -1400,7 +1537,9 @@ class PermissionService(
         }
 
         return getAllowlistedRestrictedPermissionsUnchecked(
-            packageState.appId, allowlistedFlags, userId
+            packageState.appId,
+            allowlistedFlags,
+            userId
         )
     }
 
@@ -1414,8 +1553,11 @@ class PermissionService(
             with(policy) { getPermissionFlags(appId, userId, permissionName) }
         } else {
             if (permissionName !in DevicePermissionPolicy.DEVICE_AWARE_PERMISSIONS) {
-                Slog.i(LOG_TAG, "$permissionName is not device aware permission, " +
-                        " get the flags for default device.")
+                Slog.i(
+                    LOG_TAG,
+                    "$permissionName is not device aware permission, " +
+                        " get the flags for default device."
+                )
                 return with(policy) { getPermissionFlags(appId, userId, permissionName) }
             }
             val virtualDeviceManagerInternal = virtualDeviceManagerInternal
@@ -1423,8 +1565,7 @@ class PermissionService(
                 Slog.e(LOG_TAG, "Virtual device manager service is not available.")
                 return 0
             }
-            val persistentDeviceId =
-                    virtualDeviceManagerInternal.getPersistentIdForDevice(deviceId)
+            val persistentDeviceId = virtualDeviceManagerInternal.getPersistentIdForDevice(deviceId)
             if (persistentDeviceId != null) {
                 with(devicePolicy) {
                     getPermissionFlags(appId, persistentDeviceId, userId, permissionName)
@@ -1444,13 +1585,14 @@ class PermissionService(
         flags: Int
     ): Boolean {
         return if (!Flags.deviceAwarePermissionApis() || deviceId == Context.DEVICE_ID_DEFAULT) {
-            with(policy) {
-               setPermissionFlags(appId, userId, permissionName, flags)
-            }
+            with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
         } else {
             if (permissionName !in DevicePermissionPolicy.DEVICE_AWARE_PERMISSIONS) {
-                Slog.i(LOG_TAG, "$permissionName is not device aware permission, " +
-                        " set the flags for default device.")
+                Slog.i(
+                    LOG_TAG,
+                    "$permissionName is not device aware permission, " +
+                        " set the flags for default device."
+                )
                 return with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
             }
 
@@ -1459,8 +1601,7 @@ class PermissionService(
                 Slog.e(LOG_TAG, "Virtual device manager service is not available.")
                 return false
             }
-            val persistentDeviceId =
-                    virtualDeviceManagerInternal.getPersistentIdForDevice(deviceId)
+            val persistentDeviceId = virtualDeviceManagerInternal.getPersistentIdForDevice(deviceId)
             if (persistentDeviceId != null) {
                 with(devicePolicy) {
                     setPermissionFlags(appId, persistentDeviceId, userId, permissionName, flags)
@@ -1473,17 +1614,17 @@ class PermissionService(
     }
 
     /**
-     * This method does not enforce checks on the caller, should only be called after
-     * required checks.
+     * This method does not enforce checks on the caller, should only be called after required
+     * checks.
      */
     private fun getAllowlistedRestrictedPermissionsUnchecked(
         appId: Int,
         allowlistedFlags: Int,
         userId: Int
     ): ArrayList<String>? {
-        val permissionFlags = service.getState {
-            with(policy) { getUidPermissionFlags(appId, userId) }
-        } ?: return null
+        val permissionFlags =
+            service.getState { with(policy) { getUidPermissionFlags(appId, userId) } }
+                ?: return null
 
         var queryFlags = 0
         if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM)) {
@@ -1512,14 +1653,18 @@ class PermissionService(
             return false
         }
 
-        val permissionNames = getAllowlistedRestrictedPermissions(
-            packageName, allowlistedFlags, userId
-        ) ?: ArrayList(1)
+        val permissionNames =
+            getAllowlistedRestrictedPermissions(packageName, allowlistedFlags, userId)
+                ?: ArrayList(1)
 
         if (permissionName !in permissionNames) {
             permissionNames += permissionName
             return setAllowlistedRestrictedPermissions(
-                packageName, permissionNames, allowlistedFlags, userId, isAddingPermission = true
+                packageName,
+                permissionNames,
+                allowlistedFlags,
+                userId,
+                isAddingPermission = true
             )
         }
         return false
@@ -1531,14 +1676,22 @@ class PermissionService(
         permissionNames: List<String>,
         userId: Int
     ) {
-        val newPermissionNames = getAllowlistedRestrictedPermissionsUnchecked(appId,
-            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER, userId
-        )?.let {
-            ArraySet(permissionNames).apply { this += it }.toList()
-        } ?: permissionNames
+        val newPermissionNames =
+            getAllowlistedRestrictedPermissionsUnchecked(
+                    appId,
+                    PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER,
+                    userId
+                )
+                ?.let { ArraySet(permissionNames).apply { this += it }.toList() }
+                ?: permissionNames
 
-        setAllowlistedRestrictedPermissionsUnchecked(androidPackage, appId, newPermissionNames,
-            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER, userId)
+        setAllowlistedRestrictedPermissionsUnchecked(
+            androidPackage,
+            appId,
+            newPermissionNames,
+            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER,
+            userId
+        )
     }
 
     override fun removeAllowlistedRestrictedPermission(
@@ -1552,13 +1705,17 @@ class PermissionService(
             return false
         }
 
-        val permissions = getAllowlistedRestrictedPermissions(
-            packageName, allowlistedFlags, userId
-        ) ?: return false
+        val permissions =
+            getAllowlistedRestrictedPermissions(packageName, allowlistedFlags, userId)
+                ?: return false
 
         if (permissions.remove(permissionName)) {
             return setAllowlistedRestrictedPermissions(
-                packageName, permissions, allowlistedFlags, userId, isAddingPermission = false
+                packageName,
+                permissions,
+                allowlistedFlags,
+                userId,
+                isAddingPermission = false
             )
         }
 
@@ -1572,16 +1729,22 @@ class PermissionService(
             return false
         }
 
-        if (packageManagerLocal.withFilteredSnapshot()
-                .use { it.getPackageState(permission.packageName) } == null) {
+        if (
+            packageManagerLocal.withFilteredSnapshot().use {
+                it.getPackageState(permission.packageName)
+            } == null
+        ) {
             return false
         }
 
         val isImmutablyRestrictedPermission =
             permission.isHardOrSoftRestricted && permission.isImmutablyRestricted
-        if (isImmutablyRestrictedPermission && context.checkCallingOrSelfPermission(
-                Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
-            ) != PackageManager.PERMISSION_GRANTED) {
+        if (
+            isImmutablyRestrictedPermission &&
+                context.checkCallingOrSelfPermission(
+                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+                ) != PackageManager.PERMISSION_GRANTED
+        ) {
             throw SecurityException(
                 "Cannot modify allowlist of an immutably restricted permission: ${permission.name}"
             )
@@ -1599,13 +1762,16 @@ class PermissionService(
     ): Boolean {
         Preconditions.checkArgument(allowlistedFlags.countOneBits() == 1)
 
-        val isCallerPrivileged = context.checkCallingOrSelfPermission(
-            Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
-        ) == PackageManager.PERMISSION_GRANTED
+        val isCallerPrivileged =
+            context.checkCallingOrSelfPermission(
+                Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+            ) == PackageManager.PERMISSION_GRANTED
 
         val callingUid = Binder.getCallingUid()
-        val packageState = packageManagerLocal.withFilteredSnapshot(callingUid, userId)
-            .use { snapshot -> snapshot.packageStates[packageName] ?: return false }
+        val packageState =
+            packageManagerLocal.withFilteredSnapshot(callingUid, userId).use { snapshot ->
+                snapshot.packageStates[packageName] ?: return false
+            }
         val androidPackage = packageState.androidPackage ?: return false
 
         val isCallerInstallerOnRecord =
@@ -1627,15 +1793,19 @@ class PermissionService(
         }
 
         setAllowlistedRestrictedPermissionsUnchecked(
-            androidPackage, packageState.appId, permissionNames, allowlistedFlags, userId
+            androidPackage,
+            packageState.appId,
+            permissionNames,
+            allowlistedFlags,
+            userId
         )
 
         return true
     }
 
     /**
-     * This method does not enforce checks on the caller, should only be called after
-     * required checks.
+     * This method does not enforce checks on the caller, should only be called after required
+     * checks.
      */
     private fun setAllowlistedRestrictedPermissionsUnchecked(
         androidPackage: AndroidPackage,
@@ -1712,22 +1882,24 @@ class PermissionService(
                         }
                     }
 
-                    newFlags = if (permission.isHardRestricted && !isExempt) {
-                        newFlags or PermissionFlags.RESTRICTION_REVOKED
-                    } else {
-                        newFlags andInv PermissionFlags.RESTRICTION_REVOKED
-                    }
-                    newFlags = if (permission.isSoftRestricted && !isExempt) {
-                        newFlags or PermissionFlags.SOFT_RESTRICTED
-                    } else {
-                        newFlags andInv PermissionFlags.SOFT_RESTRICTED
-                    }
-                    mask = mask or PermissionFlags.RESTRICTION_REVOKED or
-                        PermissionFlags.SOFT_RESTRICTED
+                    newFlags =
+                        if (permission.isHardRestricted && !isExempt) {
+                            newFlags or PermissionFlags.RESTRICTION_REVOKED
+                        } else {
+                            newFlags andInv PermissionFlags.RESTRICTION_REVOKED
+                        }
+                    newFlags =
+                        if (permission.isSoftRestricted && !isExempt) {
+                            newFlags or PermissionFlags.SOFT_RESTRICTED
+                        } else {
+                            newFlags andInv PermissionFlags.SOFT_RESTRICTED
+                        }
+                    mask =
+                        mask or
+                            PermissionFlags.RESTRICTION_REVOKED or
+                            PermissionFlags.SOFT_RESTRICTED
 
-                    updatePermissionFlags(
-                        appId, userId, requestedPermission, mask, newFlags
-                    )
+                    updatePermissionFlags(appId, userId, requestedPermission, mask, newFlags)
                 }
             }
         }
@@ -1735,12 +1907,8 @@ class PermissionService(
 
     override fun resetRuntimePermissions(androidPackage: AndroidPackage, userId: Int) {
         service.mutateState {
-            with(policy) {
-                resetRuntimePermissions(androidPackage.packageName, userId)
-            }
-            with(devicePolicy) {
-                resetRuntimePermissions(androidPackage.packageName, userId)
-            }
+            with(policy) { resetRuntimePermissions(androidPackage.packageName, userId) }
+            with(devicePolicy) { resetRuntimePermissions(androidPackage.packageName, userId) }
         }
     }
 
@@ -1748,12 +1916,8 @@ class PermissionService(
         packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
             service.mutateState {
                 snapshot.packageStates.forEach { (_, packageState) ->
-                    with(policy) {
-                        resetRuntimePermissions(packageState.packageName, userId)
-                    }
-                    with(devicePolicy) {
-                        resetRuntimePermissions(packageState.packageName, userId)
-                    }
+                    with(policy) { resetRuntimePermissions(packageState.packageName, userId) }
+                    with(devicePolicy) { resetRuntimePermissions(packageState.packageName, userId) }
                 }
             }
         }
@@ -1761,7 +1925,8 @@ class PermissionService(
 
     override fun addOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
         context.enforceCallingOrSelfPermission(
-            Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS, "addOnPermissionsChangeListener"
+            Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS,
+            "addOnPermissionsChangeListener"
         )
 
         onPermissionsChangeListeners.addListener(listener)
@@ -1786,9 +1951,7 @@ class PermissionService(
         requireNotNull(permissionName) { "permissionName cannot be null" }
         val packageNames = ArraySet<String>()
 
-        val permission = service.getState {
-            with(policy) { getPermissions()[permissionName] }
-        }
+        val permission = service.getState { with(policy) { getPermissions()[permissionName] } }
         if (permission == null || !permission.isAppOp) {
             packageNames.toTypedArray()
         }
@@ -1814,8 +1977,8 @@ class PermissionService(
                 androidPackage.requestedPermissions.forEach requestedPermissions@{ permissionName ->
                     val permission = permissions[permissionName] ?: return@requestedPermissions
                     if (permission.isAppOp) {
-                        val packageNames = appOpPermissionPackageNames
-                            .getOrPut(permissionName) { ArraySet() }
+                        val packageNames =
+                            appOpPermissionPackageNames.getOrPut(permissionName) { ArraySet() }
                         packageNames += androidPackage.packageName
                     }
                 }
@@ -1828,14 +1991,18 @@ class PermissionService(
         Preconditions.checkArgumentNonnegative(userId, "userId cannot be null")
         val backup = CompletableFuture<ByteArray>()
         permissionControllerManager.getRuntimePermissionBackup(
-            UserHandle.of(userId), PermissionThread.getExecutor(), backup::complete
+            UserHandle.of(userId),
+            PermissionThread.getExecutor(),
+            backup::complete
         )
 
         return try {
             backup.get(BACKUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
         } catch (e: Exception) {
             when (e) {
-                is TimeoutException, is InterruptedException, is ExecutionException -> {
+                is TimeoutException,
+                is InterruptedException,
+                is ExecutionException -> {
                     Slog.e(LOG_TAG, "Cannot create permission backup for user $userId", e)
                     null
                 }
@@ -1852,7 +2019,8 @@ class PermissionService(
             isDelayedPermissionBackupFinished -= userId
         }
         permissionControllerManager.stageAndApplyRuntimePermissionsBackup(
-            backup, UserHandle.of(userId)
+            backup,
+            UserHandle.of(userId)
         )
     }
 
@@ -1866,7 +2034,9 @@ class PermissionService(
             }
         }
         permissionControllerManager.applyStagedRuntimePermissionBackup(
-            packageName, UserHandle.of(userId), PermissionThread.getExecutor()
+            packageName,
+            UserHandle.of(userId),
+            PermissionThread.getExecutor()
         ) { hasMoreBackup ->
             if (hasMoreBackup) {
                 return@applyStagedRuntimePermissionBackup
@@ -1913,21 +2083,15 @@ class PermissionService(
     ): IndexedMap<Int, MutableIndexedSet<String>> {
         val appIds = MutableIndexedSet<Int>()
 
-        val packageStates = packageManagerLocal.withUnfilteredSnapshot().use {
-            it.packageStates
-        }
+        val packageStates = packageManagerLocal.withUnfilteredSnapshot().use { it.packageStates }
         state.userStates.forEachIndexed { _, _, userState ->
-            userState.appIdPermissionFlags.forEachIndexed { _, appId, _ ->
-                appIds.add(appId)
-            }
-            userState.appIdAppOpModes.forEachIndexed { _, appId, _ ->
-                appIds.add(appId)
-            }
-            userState.packageVersions.forEachIndexed packageVersions@ { _, packageName, _ ->
+            userState.appIdPermissionFlags.forEachIndexed { _, appId, _ -> appIds.add(appId) }
+            userState.appIdAppOpModes.forEachIndexed { _, appId, _ -> appIds.add(appId) }
+            userState.packageVersions.forEachIndexed packageVersions@{ _, packageName, _ ->
                 val appId = packageStates[packageName]?.appId ?: return@packageVersions
                 appIds.add(appId)
             }
-            userState.packageAppOpModes.forEachIndexed packageAppOpModes@ { _, packageName, _ ->
+            userState.packageAppOpModes.forEachIndexed packageAppOpModes@{ _, packageName, _ ->
                 val appId = packageStates[packageName]?.appId ?: return@packageAppOpModes
                 appIds.add(appId)
             }
@@ -1935,7 +2099,8 @@ class PermissionService(
 
         val appIdPackageNames = MutableIndexedMap<Int, MutableIndexedSet<String>>()
         packageStates.forEach { (_, packageState) ->
-            appIdPackageNames.getOrPut(packageState.appId) { MutableIndexedSet() }
+            appIdPackageNames
+                .getOrPut(packageState.appId) { MutableIndexedSet() }
                 .add(packageState.packageName)
         }
         // add non-package app IDs which might not be reported by package manager.
@@ -1966,10 +2131,7 @@ class PermissionService(
         println("Permission groups:")
         withIndent {
             state.systemState.permissionGroups.forEachIndexed { _, _, permissionGroup ->
-                println(
-                    "${permissionGroup.name}: " +
-                        "packageName=${permissionGroup.packageName}"
-                )
+                println("${permissionGroup.name}: " + "packageName=${permissionGroup.packageName}")
             }
         }
 
@@ -1998,7 +2160,9 @@ class PermissionService(
                     println("Permissions:")
                     withIndent {
                         userState.appIdPermissionFlags[appId]?.forEachIndexed {
-                            _, permissionName, flags ->
+                            _,
+                            permissionName,
+                            flags ->
                             val isGranted = PermissionFlags.isPermissionGranted(flags)
                             println(
                                 "$permissionName: granted=$isGranted, flags=" +
@@ -2008,7 +2172,9 @@ class PermissionService(
                     }
 
                     userState.appIdDevicePermissionFlags[appId]?.forEachIndexed {
-                            _, deviceId, devicePermissionFlags ->
+                        _,
+                        deviceId,
+                        devicePermissionFlags ->
                         println("Permissions (Device $deviceId):")
                         withIndent {
                             devicePermissionFlags.forEachIndexed { _, permissionName, flags ->
@@ -2023,7 +2189,8 @@ class PermissionService(
 
                     println("App ops:")
                     withIndent {
-                        userState.appIdAppOpModes[appId]?.forEachIndexed {_, appOpName, appOpMode ->
+                        userState.appIdAppOpModes[appId]?.forEachIndexed { _, appOpName, appOpMode
+                            ->
                             println("$appOpName: mode=${AppOpsManager.modeToName(appOpMode)}")
                         }
                     }
@@ -2035,7 +2202,9 @@ class PermissionService(
                             println("App ops:")
                             withIndent {
                                 userState.packageAppOpModes[packageName]?.forEachIndexed {
-                                        _, appOpName, appOpMode ->
+                                    _,
+                                    appOpName,
+                                    appOpMode ->
                                     val modeName = AppOpsManager.modeToName(appOpMode)
                                     println("$appOpName: mode=$modeName")
                                 }
@@ -2054,24 +2223,30 @@ class PermissionService(
     }
 
     override fun getPermissionTEMP(permissionName: String): LegacyPermission2? {
-        val permission = service.getState {
-            with(policy) { getPermissions()[permissionName] }
-        } ?: return null
+        val permission =
+            service.getState { with(policy) { getPermissions()[permissionName] } } ?: return null
 
         return LegacyPermission2(
-            permission.permissionInfo, permission.type, permission.isReconciled, permission.appId,
-            permission.gids, permission.areGidsPerUser
+            permission.permissionInfo,
+            permission.type,
+            permission.isReconciled,
+            permission.appId,
+            permission.gids,
+            permission.areGidsPerUser
         )
     }
 
     override fun getLegacyPermissions(): List<LegacyPermission> =
-        service.getState {
-            with(policy) { getPermissions() }
-        }.mapIndexedTo(ArrayList()) { _, _, permission ->
-            LegacyPermission(
-                permission.permissionInfo, permission.type, permission.appId, permission.gids
-            )
-        }
+        service
+            .getState { with(policy) { getPermissions() } }
+            .mapIndexedTo(ArrayList()) { _, _, permission ->
+                LegacyPermission(
+                    permission.permissionInfo,
+                    permission.type,
+                    permission.appId,
+                    permission.gids
+                )
+            }
 
     override fun readLegacyPermissionsTEMP(legacyPermissionSettings: LegacyPermissionSettings) {
         // Package settings has been read when this method is called.
@@ -2092,9 +2267,7 @@ class PermissionService(
     ): List<LegacyPermission> =
         permissions.mapIndexedTo(ArrayList()) { _, _, permission ->
             // We don't need to provide UID and GIDs, which are only retrieved when dumping.
-            LegacyPermission(
-                permission.permissionInfo, permission.type, 0, EmptyArray.INT
-            )
+            LegacyPermission(permission.permissionInfo, permission.type, 0, EmptyArray.INT)
         }
 
     override fun getLegacyPermissionState(appId: Int): LegacyPermissionState {
@@ -2103,17 +2276,18 @@ class PermissionService(
         service.getState {
             val permissions = with(policy) { getPermissions() }
             userIds.forEachIndexed { _, userId ->
-                val permissionFlags = with(policy) { getUidPermissionFlags(appId, userId) }
-                    ?: return@forEachIndexed
+                val permissionFlags =
+                    with(policy) { getUidPermissionFlags(appId, userId) } ?: return@forEachIndexed
 
                 permissionFlags.forEachIndexed permissionFlags@{ _, permissionName, flags ->
                     val permission = permissions[permissionName] ?: return@permissionFlags
-                    val legacyPermissionState = LegacyPermissionState.PermissionState(
-                        permissionName,
-                        permission.isRuntime,
-                        PermissionFlags.isPermissionGranted(flags),
-                        PermissionFlags.toApiFlags(flags)
-                    )
+                    val legacyPermissionState =
+                        LegacyPermissionState.PermissionState(
+                            permissionName,
+                            permission.isRuntime,
+                            PermissionFlags.isPermissionGranted(flags),
+                            PermissionFlags.toApiFlags(flags)
+                        )
                     legacyState.putPermissionState(legacyPermissionState, userId)
                 }
             }
@@ -2137,16 +2311,13 @@ class PermissionService(
     override fun onSystemReady() {
         service.onSystemReady()
         virtualDeviceManagerInternal =
-                LocalServices.getService(VirtualDeviceManagerInternal::class.java)
-        permissionControllerManager = PermissionControllerManager(
-            context, PermissionThread.getHandler()
-        )
+            LocalServices.getService(VirtualDeviceManagerInternal::class.java)
+        permissionControllerManager =
+            PermissionControllerManager(context, PermissionThread.getHandler())
     }
 
     override fun onUserCreated(userId: Int) {
-        withCorkedPackageInfoCache {
-            service.onUserAdded(userId)
-        }
+        withCorkedPackageInfoCache { service.onUserAdded(userId) }
     }
 
     override fun onUserRemoved(userId: Int) {
@@ -2176,9 +2347,8 @@ class PermissionService(
             // of onPackageAdded() and reuse this order in onStorageVolumeAdded(). We need the
             // packages to be iterated in onStorageVolumeAdded() in the same order so that the
             // ownership of permissions is consistent.
-            storageVolumePackageNames.getOrPut(packageState.volumeUuid) {
-                mutableListOf()
-            } += packageState.packageName
+            storageVolumePackageNames.getOrPut(packageState.volumeUuid) { mutableListOf() } +=
+                packageState.packageName
             if (packageState.volumeUuid !in mountedStorageVolumes) {
                 // Wait for the storage volume to be mounted and batch the state mutation there.
                 return
@@ -2218,23 +2388,26 @@ class PermissionService(
                 return
             }
         }
-        val userIds = if (userId == UserHandle.USER_ALL) {
-            userManagerService.userIdsIncludingPreCreated
-        } else {
-            intArrayOf(userId)
-        }
+        val userIds =
+            if (userId == UserHandle.USER_ALL) {
+                userManagerService.userIdsIncludingPreCreated
+            } else {
+                intArrayOf(userId)
+            }
         @Suppress("NAME_SHADOWING")
-        userIds.forEach { userId ->
-            service.onPackageInstalled(androidPackage.packageName, userId)
-        }
+        userIds.forEach { userId -> service.onPackageInstalled(androidPackage.packageName, userId) }
 
         @Suppress("NAME_SHADOWING")
         userIds.forEach { userId ->
             // TODO: Remove when this callback receives packageState directly.
             val packageState =
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)!!
-            addAllowlistedRestrictedPermissionsUnchecked(androidPackage, packageState.appId,
-                params.allowlistedRestrictedPermissions, userId)
+            addAllowlistedRestrictedPermissionsUnchecked(
+                androidPackage,
+                packageState.appId,
+                params.allowlistedRestrictedPermissions,
+                userId
+            )
             setRequestedPermissionStates(packageState, userId, params.permissionStates)
         }
     }
@@ -2247,11 +2420,12 @@ class PermissionService(
         sharedUserPkgs: List<AndroidPackage>,
         userId: Int
     ) {
-        val userIds = if (userId == UserHandle.USER_ALL) {
-            userManagerService.userIdsIncludingPreCreated
-        } else {
-            intArrayOf(userId)
-        }
+        val userIds =
+            if (userId == UserHandle.USER_ALL) {
+                userManagerService.userIdsIncludingPreCreated
+            } else {
+                intArrayOf(userId)
+            }
         userIds.forEach { service.onPackageUninstalled(packageName, appId, it) }
         val packageState = packageManagerInternal.packageStates[packageName]
         if (packageState == null) {
@@ -2268,31 +2442,26 @@ class PermissionService(
         }
     }
 
-    /**
-     * Check whether a UID is root or system UID.
-     */
+    /** Check whether a UID is root or system UID. */
     private fun isRootOrSystemUid(uid: Int) =
         when (UserHandle.getAppId(uid)) {
-            Process.ROOT_UID, Process.SYSTEM_UID -> true
+            Process.ROOT_UID,
+            Process.SYSTEM_UID -> true
             else -> false
         }
 
-    /**
-     * Check whether a UID is shell UID.
-     */
+    /** Check whether a UID is shell UID. */
     private fun isShellUid(uid: Int) = UserHandle.getAppId(uid) == Process.SHELL_UID
 
-    /**
-     * Check whether a UID is root, system or shell UID.
-     */
+    /** Check whether a UID is root, system or shell UID. */
     private fun isRootOrSystemOrShellUid(uid: Int) = isRootOrSystemUid(uid) || isShellUid(uid)
 
     /**
      * This method should typically only be used when granting or revoking permissions, since the
      * app may immediately restart after this call.
      *
-     * If you're doing surgery on app code/data, use [PackageFreezer] to guard your work against
-     * the app being relaunched.
+     * If you're doing surgery on app code/data, use [PackageFreezer] to guard your work against the
+     * app being relaunched.
      */
     private fun killUid(uid: Int, reason: String) {
         val activityManager = ActivityManager.getService()
@@ -2309,9 +2478,7 @@ class PermissionService(
         }
     }
 
-    /**
-     * @see PackageManagerLocal.withFilteredSnapshot
-     */
+    /** @see PackageManagerLocal.withFilteredSnapshot */
     private fun PackageManagerLocal.withFilteredSnapshot(
         callingUid: Int,
         userId: Int
@@ -2329,35 +2496,27 @@ class PermissionService(
         packageName: String
     ): PackageState? = packageStates[packageName]
 
-    /**
-     * Check whether a UID belongs to an instant app.
-     */
+    /** Check whether a UID belongs to an instant app. */
     private fun PackageManagerLocal.UnfilteredSnapshot.isUidInstantApp(uid: Int): Boolean =
         // Unfortunately we don't have the API for getting the owner UID of an isolated UID or the
         // API for getting the SharedUserApi object for an app ID yet, so for now we just keep
         // calling the old API.
         packageManagerInternal.getInstantAppPackageName(uid) != null
 
-    /**
-     * Check whether a package is visible to a UID within the same user as the UID.
-     */
+    /** Check whether a package is visible to a UID within the same user as the UID. */
     private fun PackageManagerLocal.UnfilteredSnapshot.isPackageVisibleToUid(
         packageName: String,
         uid: Int
     ): Boolean = isPackageVisibleToUid(packageName, UserHandle.getUserId(uid), uid)
 
-    /**
-     * Check whether a package in a particular user is visible to a UID.
-     */
+    /** Check whether a package in a particular user is visible to a UID. */
     private fun PackageManagerLocal.UnfilteredSnapshot.isPackageVisibleToUid(
         packageName: String,
         userId: Int,
         uid: Int
     ): Boolean = filtered(uid, userId).use { it.getPackageState(packageName) != null }
 
-    /**
-     * @see PackageManagerLocal.UnfilteredSnapshot.filtered
-     */
+    /** @see PackageManagerLocal.UnfilteredSnapshot.filtered */
     private fun PackageManagerLocal.UnfilteredSnapshot.filtered(
         callingUid: Int,
         userId: Int
@@ -2380,13 +2539,16 @@ class PermissionService(
         val callingUid = Binder.getCallingUid()
         val callingUserId = UserHandle.getUserId(callingUid)
         if (userId != callingUserId) {
-            val permissionName = if (enforceFullPermission) {
-                Manifest.permission.INTERACT_ACROSS_USERS_FULL
-            } else {
-                Manifest.permission.INTERACT_ACROSS_USERS
-            }
-            if (context.checkCallingOrSelfPermission(permissionName) !=
-                PackageManager.PERMISSION_GRANTED) {
+            val permissionName =
+                if (enforceFullPermission) {
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL
+                } else {
+                    Manifest.permission.INTERACT_ACROSS_USERS
+                }
+            if (
+                context.checkCallingOrSelfPermission(permissionName) !=
+                    PackageManager.PERMISSION_GRANTED
+            ) {
                 val exceptionMessage = buildString {
                     if (message != null) {
                         append(message)
@@ -2403,9 +2565,11 @@ class PermissionService(
             }
         }
         if (enforceShellRestriction && isShellUid(callingUid)) {
-            val isShellRestricted = userManagerInternal.hasUserRestriction(
-                UserManager.DISALLOW_DEBUGGING_FEATURES, userId
-            )
+            val isShellRestricted =
+                userManagerInternal.hasUserRestriction(
+                    UserManager.DISALLOW_DEBUGGING_FEATURES,
+                    userId
+                )
             if (isShellRestricted) {
                 val exceptionMessage = buildString {
                     if (message != null) {
@@ -2430,10 +2594,11 @@ class PermissionService(
         message: String?,
         vararg permissionNames: String
     ) {
-        val hasAnyPermission = permissionNames.any { permissionName ->
-            context.checkCallingOrSelfPermission(permissionName) ==
-                PackageManager.PERMISSION_GRANTED
-        }
+        val hasAnyPermission =
+            permissionNames.any { permissionName ->
+                context.checkCallingOrSelfPermission(permissionName) ==
+                    PackageManager.PERMISSION_GRANTED
+            }
         if (!hasAnyPermission) {
             val exceptionMessage = buildString {
                 if (message != null) {
@@ -2449,9 +2614,7 @@ class PermissionService(
         }
     }
 
-    /**
-     * Callback invoked when interesting actions have been taken on a permission.
-     */
+    /** Callback invoked when interesting actions have been taken on a permission. */
     private inner class OnPermissionFlagsChangedListener :
         AppIdPermissionPolicy.OnPermissionFlagsChangedListener() {
         private var isPermissionFlagsChanged = false
@@ -2482,9 +2645,8 @@ class PermissionService(
             isPermissionFlagsChanged = true
 
             val uid = UserHandle.getUid(userId, appId)
-            val permission = service.getState {
-                with(policy) { getPermissions()[permissionName] }
-            } ?: return
+            val permission =
+                service.getState { with(policy) { getPermissions()[permissionName] } } ?: return
             val wasPermissionGranted = PermissionFlags.isPermissionGranted(oldFlags)
             val isPermissionGranted = PermissionFlags.isPermissionGranted(newFlags)
 
@@ -2518,16 +2680,20 @@ class PermissionService(
             runtimePermissionChangedUids.clear()
 
             if (!isKillRuntimePermissionRevokedUidsSkipped) {
-                val reason = if (killRuntimePermissionRevokedUidsReasons.isNotEmpty()) {
-                    killRuntimePermissionRevokedUidsReasons.joinToString(", ")
-                } else {
-                    PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED
-                }
+                val reason =
+                    if (killRuntimePermissionRevokedUidsReasons.isNotEmpty()) {
+                        killRuntimePermissionRevokedUidsReasons.joinToString(", ")
+                    } else {
+                        PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED
+                    }
                 runtimePermissionRevokedUids.forEachIndexed {
-                    _, uid, areOnlyNotificationsPermissionsRevoked ->
+                    _,
+                    uid,
+                    areOnlyNotificationsPermissionsRevoked ->
                     handler.post {
-                        if (areOnlyNotificationsPermissionsRevoked &&
-                            isAppBackupAndRestoreRunning(uid)
+                        if (
+                            areOnlyNotificationsPermissionsRevoked &&
+                                isAppBackupAndRestoreRunning(uid)
                         ) {
                             return@post
                         }
@@ -2547,19 +2713,27 @@ class PermissionService(
         }
 
         private fun isAppBackupAndRestoreRunning(uid: Int): Boolean {
-            if (checkUidPermission(uid, Manifest.permission.BACKUP, Context.DEVICE_ID_DEFAULT) !=
-                PackageManager.PERMISSION_GRANTED) {
+            if (
+                checkUidPermission(uid, Manifest.permission.BACKUP, Context.DEVICE_ID_DEFAULT) !=
+                    PackageManager.PERMISSION_GRANTED
+            ) {
                 return false
             }
             return try {
                 val contentResolver = context.contentResolver
                 val userId = UserHandle.getUserId(uid)
-                val isInSetup = Settings.Secure.getIntForUser(
-                    contentResolver, Settings.Secure.USER_SETUP_COMPLETE, userId
-                ) == 0
-                val isInDeferredSetup = Settings.Secure.getIntForUser(
-                    contentResolver, Settings.Secure.USER_SETUP_PERSONALIZATION_STATE, userId
-                ) == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED
+                val isInSetup =
+                    Settings.Secure.getIntForUser(
+                        contentResolver,
+                        Settings.Secure.USER_SETUP_COMPLETE,
+                        userId
+                    ) == 0
+                val isInDeferredSetup =
+                    Settings.Secure.getIntForUser(
+                        contentResolver,
+                        Settings.Secure.USER_SETUP_PERSONALIZATION_STATE,
+                        userId
+                    ) == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED
                 isInSetup || isInDeferredSetup
             } catch (e: Settings.SettingNotFoundException) {
                 Slog.w(LOG_TAG, "Failed to check if the user is in restore: $e")
@@ -2620,31 +2794,34 @@ class PermissionService(
         @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
         private val BACKGROUND_RATIONALE_CHANGE_ID = 147316723L
 
-        private val FULLER_PERMISSIONS = ArrayMap<String, String>().apply {
-            this[Manifest.permission.ACCESS_COARSE_LOCATION] =
-                Manifest.permission.ACCESS_FINE_LOCATION
-            this[Manifest.permission.INTERACT_ACROSS_USERS] =
-                Manifest.permission.INTERACT_ACROSS_USERS_FULL
-        }
+        private val FULLER_PERMISSIONS =
+            ArrayMap<String, String>().apply {
+                this[Manifest.permission.ACCESS_COARSE_LOCATION] =
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                this[Manifest.permission.INTERACT_ACROSS_USERS] =
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL
+            }
 
-        private val NOTIFICATIONS_PERMISSIONS = arraySetOf(
-            Manifest.permission.POST_NOTIFICATIONS
-        )
+        private val NOTIFICATIONS_PERMISSIONS = arraySetOf(Manifest.permission.POST_NOTIFICATIONS)
 
-        private const val REVIEW_REQUIRED_FLAGS = PermissionFlags.LEGACY_GRANTED or
-            PermissionFlags.IMPLICIT
-        private const val UNREQUESTABLE_MASK = PermissionFlags.RESTRICTION_REVOKED or
-            PermissionFlags.SYSTEM_FIXED or PermissionFlags.POLICY_FIXED or
-            PermissionFlags.USER_FIXED
+        private const val REVIEW_REQUIRED_FLAGS =
+            PermissionFlags.LEGACY_GRANTED or PermissionFlags.IMPLICIT
+        private const val UNREQUESTABLE_MASK =
+            PermissionFlags.RESTRICTION_REVOKED or
+                PermissionFlags.SYSTEM_FIXED or
+                PermissionFlags.POLICY_FIXED or
+                PermissionFlags.USER_FIXED
 
         private val BACKUP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(60)
 
-        /** Cap the size of permission trees that 3rd party apps can define; in characters of text  */
+        /**
+         * Cap the size of permission trees that 3rd party apps can define; in characters of text
+         */
         private const val MAX_PERMISSION_TREE_FOOTPRINT = 32768
 
         private const val PERMISSION_ALLOWLIST_MASK =
             PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE or
-            PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM or
-            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
+                PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM or
+                PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
     }
 }
