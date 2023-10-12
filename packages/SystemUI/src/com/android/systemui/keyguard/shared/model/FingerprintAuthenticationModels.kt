@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.shared.model
 
+import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD
+import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
 import android.hardware.fingerprint.FingerprintManager
 import android.os.SystemClock.elapsedRealtime
 
@@ -39,7 +41,12 @@ data class HelpFingerprintAuthenticationStatus(
 
 /** Fingerprint acquired message. */
 data class AcquiredFingerprintAuthenticationStatus(val acquiredInfo: Int) :
-    FingerprintAuthenticationStatus()
+    FingerprintAuthenticationStatus() {
+
+    val fingerprintCaptureStarted: Boolean = acquiredInfo == FINGERPRINT_ACQUIRED_START
+
+    val fingerprintCaptureCompleted: Boolean = acquiredInfo == FINGERPRINT_ACQUIRED_GOOD
+}
 
 /** Fingerprint authentication failed message. */
 object FailFingerprintAuthenticationStatus : FingerprintAuthenticationStatus()
