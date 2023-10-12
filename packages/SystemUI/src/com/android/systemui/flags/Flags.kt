@@ -413,7 +413,7 @@ object Flags {
         releasedFlag("incompatible_charging_battery_icon")
 
     // TODO(b/293585143): Tracking Bug
-    val INSTANT_TETHER = unreleasedFlag("instant_tether")
+    val INSTANT_TETHER = unreleasedFlag("instant_tether", teamfood = true)
 
     // TODO(b/294588085): Tracking Bug
     val WIFI_SECONDARY_NETWORKS = releasedFlag("wifi_secondary_networks")
