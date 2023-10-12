@@ -152,6 +152,16 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     }
 
     @Override
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishTransaction) {
+        try {
+            mRemote.getRemoteTransition().onTransitionConsumed(transition, aborted);
+        } catch (RemoteException e) {
+            Log.e(Transitions.TAG, "Error calling onTransitionConsumed()", e);
+        }
+    }
+
+    @Override
     public String toString() {
         return "OneShotRemoteHandler:" + mRemote.getDebugName() + ":"
                 + mRemote.getRemoteTransition();

@@ -2532,7 +2532,7 @@ public class NotificationManagerService extends SystemService {
 
         if (mFlagResolver.isEnabled(NotificationFlags.ENABLE_ATTENTION_HELPER_REFACTOR)) {
             mAttentionHelper = new NotificationAttentionHelper(getContext(), lightsManager,
-                mAccessibilityManager, mPackageManagerClient, usageStats,
+                mAccessibilityManager, mPackageManagerClient, userManager, usageStats,
                 mNotificationManagerPrivate, mZenModeHelper, flagResolver);
         }
 
@@ -3369,6 +3369,10 @@ public class NotificationManagerService extends SystemService {
         mAppUsageStats.reportEvent(r.getSbn().getPackageName(),
                 getRealUserId(r.getSbn().getUserId()),
                 UsageEvents.Event.USER_INTERACTION);
+
+        if (Flags.politeNotifications()) {
+            mAttentionHelper.onUserInteraction(r);
+        }
     }
 
     private int getRealUserId(int userId) {
@@ -8612,7 +8616,7 @@ public class NotificationManagerService extends SystemService {
                     .setCategory(MetricsEvent.NOTIFICATION_ALERT)
                     .setType(MetricsEvent.TYPE_OPEN)
                     .setSubtype(buzzBeepBlink));
-            EventLogTags.writeNotificationAlert(key, buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
+            EventLogTags.writeNotificationAlert(key, buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0, 0);
         }
         record.setAudiblyAlerted(buzz || beep);
         return buzzBeepBlink;
@@ -8757,7 +8761,7 @@ public class NotificationManagerService extends SystemService {
                     if (DBG) Slog.v(TAG, "Playing sound " + soundUri
                             + " with attributes " + record.getAudioAttributes());
                     player.playAsync(soundUri, record.getSbn().getUser(), looping,
-                            record.getAudioAttributes());
+                            record.getAudioAttributes(), 1.0f);
                     return true;
                 }
             } catch (RemoteException e) {

@@ -79,7 +79,7 @@ class ImplGeneratingAdapter(
             // StaticInitMerger will merge it with the existing one, if any.
             visitMethod(
                 Opcodes.ACC_PRIVATE or Opcodes.ACC_STATIC,
-                "<clinit>",
+                CLASS_INITIALIZER_NAME,
                 "()V",
                 null,
                 null

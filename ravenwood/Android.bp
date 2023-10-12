@@ -1,0 +1,33 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "ravenwood-annotations",
+    srcs: [
+        "annotations-src/**/*.java",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+// File that contains the standard command line arguments to hoststubgen.
+filegroup {
+    name: "ravenwood-standard-options",
+    srcs: [
+        "ravenwood-standard-options.txt",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+java_library {
+    name: "ravenwood-annotations-lib",
+    srcs: [":ravenwood-annotations"],
+    sdk_version: "core_current",
+    host_supported: true,
+    visibility: ["//visibility:public"],
+}

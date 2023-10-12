@@ -16,22 +16,23 @@
 
 package com.android.systemui.util.settings;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import com.android.systemui.settings.UserTracker;
-
 import javax.inject.Inject;
 
+// use UserHandle.USER_SYSTEM everywhere
+@SuppressLint("StaticSettingsProvider")
 class GlobalSettingsImpl implements GlobalSettings {
     private final ContentResolver mContentResolver;
-    private final UserTracker mUserTracker;
 
     @Inject
-    GlobalSettingsImpl(ContentResolver contentResolver, UserTracker userTracker) {
+    GlobalSettingsImpl(ContentResolver contentResolver) {
         mContentResolver = contentResolver;
-        mUserTracker = userTracker;
     }
 
     @Override
@@ -40,43 +41,23 @@ class GlobalSettingsImpl implements GlobalSettings {
     }
 
     @Override
-    public UserTracker getUserTracker() {
-        return mUserTracker;
-    }
-
-    @Override
     public Uri getUriFor(String name) {
         return Settings.Global.getUriFor(name);
     }
 
     @Override
-    public String getStringForUser(String name, int userHandle) {
-        return Settings.Global.getStringForUser(mContentResolver, name,
-                getRealUserHandle(userHandle));
+    public String getString(String name) {
+        return Settings.Global.getString(mContentResolver, name);
     }
 
     @Override
-    public boolean putString(String name, String value, boolean overrideableByRestore) {
-        throw new UnsupportedOperationException(
-                "This method only exists publicly for Settings.System and Settings.Secure");
+    public boolean putString(String name, String value) {
+        return Settings.Global.putString(mContentResolver, name, value);
     }
 
     @Override
-    public boolean putStringForUser(String name, String value, int userHandle) {
-        return Settings.Global.putStringForUser(mContentResolver, name, value,
-                getRealUserHandle(userHandle));
-    }
-
-    @Override
-    public boolean putStringForUser(String name, String value, String tag, boolean makeDefault,
-            int userHandle, boolean overrideableByRestore) {
-        return Settings.Global.putStringForUser(
-                mContentResolver, name, value, tag, makeDefault, getRealUserHandle(userHandle),
-                overrideableByRestore);
-    }
-
-    @Override
-    public boolean putString(String name, String value, String tag, boolean makeDefault) {
+    public boolean putString(@NonNull String name, @Nullable String value, @Nullable String tag,
+            boolean makeDefault) {
         return Settings.Global.putString(mContentResolver, name, value, tag, makeDefault);
     }
 }

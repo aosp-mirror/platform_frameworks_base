@@ -31,7 +31,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.UserHandle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -56,15 +55,15 @@ import javax.inject.Named;
 
 /**
  * Concrete implementation of the a Flag manager that returns default values for debug builds
- *
+ * <p>
  * Flags can be set (or unset) via the following adb command:
- *
+ * <p>
  * adb shell cmd statusbar flag <id> <on|off|toggle|erase>
- *
+ * <p>
  * Alternatively, you can change flags via a broadcast intent:
- *
+ * <p>
  * adb shell am broadcast -a com.android.systemui.action.SET_FLAG --ei id <id> [--ez value <0|1>]
- *
+ * <p>
  * To restore a flag back to its default, leave the `--ez value <0|1>` off of the command.
  */
 @SysUISingleton
@@ -319,8 +318,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
             Log.w(TAG, "Failed to set flag " + name + " to " + value);
             return;
         }
-        mGlobalSettings.putStringForUser(mFlagManager.nameToSettingsKey(name), data,
-                UserHandle.USER_CURRENT);
+        mGlobalSettings.putString(mFlagManager.nameToSettingsKey(name), data);
     }
 
     <T> void eraseFlag(Flag<T> flag) {
@@ -354,8 +352,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
     /** Works just like {@link #eraseFlag(String)} except that it doesn't restart SystemUI. */
     private void eraseInternal(String name) {
         // We can't actually "erase" things from settings, but we can set them to empty!
-        mGlobalSettings.putStringForUser(mFlagManager.nameToSettingsKey(name), "",
-                UserHandle.USER_CURRENT);
+        mGlobalSettings.putString(mFlagManager.nameToSettingsKey(name), "");
         Log.i(TAG, "Erase name " + name);
     }
 

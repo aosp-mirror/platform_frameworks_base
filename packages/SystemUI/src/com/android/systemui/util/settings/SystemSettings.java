@@ -21,5 +21,5 @@ package com.android.systemui.util.settings;
  *
  * See {@link SettingsProxy} for details.
  */
-public interface SystemSettings extends SettingsProxy {
+public interface SystemSettings extends UserSettingsProxy {
 }

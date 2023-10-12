@@ -692,10 +692,10 @@ public class LockIconViewController implements Dumpable {
                 mVelocityTracker.addMovement(event);
                 // Compute pointer velocity in pixels per second.
                 mVelocityTracker.computeCurrentVelocity(1000);
-                float velocity = UdfpsController.computePointerSpeed(mVelocityTracker,
+                float velocity = computePointerSpeed(mVelocityTracker,
                         mActivePointerId);
                 if (event.getClassification() != MotionEvent.CLASSIFICATION_DEEP_PRESS
-                        && UdfpsController.exceedsVelocityThreshold(velocity)) {
+                        && exceedsVelocityThreshold(velocity)) {
                     Log.v(TAG, "lock icon long-press rescheduled due to "
                             + "high pointer velocity=" + velocity);
                     mLongPressCancelRunnable.run();
@@ -711,6 +711,23 @@ public class LockIconViewController implements Dumpable {
         }
 
         return true;
+    }
+
+    /**
+     * Calculate the pointer speed given a velocity tracker and the pointer id.
+     * This assumes that the velocity tracker has already been passed all relevant motion events.
+     */
+    private static float computePointerSpeed(@NonNull VelocityTracker tracker, int pointerId) {
+        final float vx = tracker.getXVelocity(pointerId);
+        final float vy = tracker.getYVelocity(pointerId);
+        return (float) Math.sqrt(Math.pow(vx, 2.0) + Math.pow(vy, 2.0));
+    }
+
+    /**
+     * Whether the velocity exceeds the acceptable UDFPS debouncing threshold.
+     */
+    private static boolean exceedsVelocityThreshold(float velocity) {
+        return velocity > 750f;
     }
 
     private boolean actionableDownEventStartedOnView(MotionEvent event) {

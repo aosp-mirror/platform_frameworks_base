@@ -62,7 +62,7 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     }
 
     private val deviceProvisionedUri = globalSettings.getUriFor(Settings.Global.DEVICE_PROVISIONED)
-    private val frpActiveUri = secureSettings.getUriFor(Settings.Secure.SECURE_FRP_MODE)
+    private val frpActiveUri = globalSettings.getUriFor(Settings.Global.SECURE_FRP_MODE)
     private val userSetupUri = secureSettings.getUriFor(Settings.Secure.USER_SETUP_COMPLETE)
 
     private val deviceProvisioned = AtomicBoolean(false)
@@ -148,7 +148,7 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
                     .set(globalSettings.getInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0)
         }
         if (updateFrp) {
-            frpActive.set(globalSettings.getInt(Settings.Secure.SECURE_FRP_MODE, 0) != 0)
+            frpActive.set(globalSettings.getInt(Settings.Global.SECURE_FRP_MODE, 0) != 0)
         }
         synchronized(lock) {
             if (updateUser == ALL_USERS) {

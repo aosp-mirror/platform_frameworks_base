@@ -18,7 +18,6 @@ package com.android.settingslib.spa.widget.scaffold
 
 import androidx.appcompat.R
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.FindInPage
 import androidx.compose.material3.Icon
@@ -31,6 +30,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import com.android.settingslib.spa.framework.compose.LocalNavController
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 
 /** Action that navigates back to last page. */
 @Composable
@@ -53,7 +53,7 @@ internal fun CollapseAction(onClick: () -> Unit) {
 private fun BackAction(contentDescription: String, onClick: () -> Unit) {
     IconButton(onClick) {
         Icon(
-            imageVector = Icons.Outlined.ArrowBack,
+            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = contentDescription,
             modifier = Modifier.autoMirrored(),
         )

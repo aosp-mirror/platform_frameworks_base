@@ -3486,6 +3486,8 @@
   <java-symbol type="array" name="config_displayWhiteBalanceDisplaySteps" />
   <java-symbol type="bool" name="config_displayWhiteBalanceLightModeAllowed" />
   <java-symbol type="integer" name="config_displayWhiteBalanceTransitionTime" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceTransitionTimeIncrease" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceTransitionTimeDecrease" />
 
   <!-- Device states where the sensor based rotation values should be reversed around the Z axis
        for the default display.

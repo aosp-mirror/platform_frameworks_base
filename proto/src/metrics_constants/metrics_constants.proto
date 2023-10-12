@@ -90,8 +90,14 @@ message MetricsEvent {
     // Make sound through the speaker.
     ALERT_BEEP = 2;
 
-    // Flash a notificaiton light.
+    // Flash a notification light.
     ALERT_BLINK = 4;
+
+    // Alert was attenuated by polite notif. feature.
+    ALERT_POLITE = 8;
+
+    // Alert was muted by polite notif. feature.
+    ALERT_MUTED = 16;
   }
 
   // Reasons that a notification might be dismissed.

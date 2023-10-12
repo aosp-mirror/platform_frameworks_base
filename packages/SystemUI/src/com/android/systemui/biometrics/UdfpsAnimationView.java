@@ -37,9 +37,6 @@ public abstract class UdfpsAnimationView extends FrameLayout {
     private float mDialogSuggestedAlpha = 1f;
     private float mNotificationShadeExpansion = 0f;
 
-    // Used for Udfps ellipse detection when flag is true, set by AnimationViewController
-    boolean mUseExpandedOverlay = false;
-
     // mAlpha takes into consideration the status bar expansion amount and dialog suggested alpha
     private int mAlpha;
     boolean mPauseAuth;

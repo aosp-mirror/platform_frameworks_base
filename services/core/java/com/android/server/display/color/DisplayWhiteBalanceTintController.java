@@ -34,6 +34,7 @@ import android.view.SurfaceControl.DisplayPrimaries;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 
@@ -65,6 +66,8 @@ final class DisplayWhiteBalanceTintController extends ColorTemperatureTintContro
     boolean mSetUp = false;
     private final float[] mMatrixDisplayWhiteBalance = new float[16];
     private long mTransitionDuration;
+    private long mTransitionDurationIncrease;
+    private long mTransitionDurationDecrease;
     private Boolean mIsAvailable;
     // This feature becomes disallowed if the device is in an unsupported strong/light state.
     private boolean mIsAllowed = true;
@@ -74,8 +77,12 @@ final class DisplayWhiteBalanceTintController extends ColorTemperatureTintContro
 
     private final DisplayManagerInternal mDisplayManagerInternal;
 
-    DisplayWhiteBalanceTintController(DisplayManagerInternal dm) {
+    private final DisplayManagerFlags mDisplayManagerFlags;
+
+    DisplayWhiteBalanceTintController(DisplayManagerInternal dm,
+            DisplayManagerFlags displayManagerFlags) {
         mDisplayManagerInternal = dm;
+        mDisplayManagerFlags = displayManagerFlags;
     }
 
     @Override
@@ -138,6 +145,16 @@ final class DisplayWhiteBalanceTintController extends ColorTemperatureTintContro
 
         mTransitionDuration = res.getInteger(
                 R.integer.config_displayWhiteBalanceTransitionTime);
+
+        if (!mDisplayManagerFlags.isAdaptiveTone2Enabled()) {
+            mTransitionDurationDecrease = mTransitionDuration;
+            mTransitionDurationIncrease = mTransitionDuration;
+        } else {
+            mTransitionDurationIncrease = res.getInteger(
+                    R.integer.config_displayWhiteBalanceTransitionTimeIncrease);
+            mTransitionDurationDecrease = res.getInteger(
+                    R.integer.config_displayWhiteBalanceTransitionTimeDecrease);
+        }
 
         int[] cctRangeMinimums = res.getIntArray(
                 R.array.config_displayWhiteBalanceDisplayRangeMinimums);
@@ -323,6 +340,11 @@ final class DisplayWhiteBalanceTintController extends ColorTemperatureTintContro
     }
 
     @Override
+    public long getTransitionDurationMilliseconds(boolean isIncreasing) {
+        return isIncreasing ? mTransitionDurationIncrease : mTransitionDurationDecrease;
+    }
+
+    @Override
     public void dump(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("    mSetUp = " + mSetUp);
@@ -348,6 +370,9 @@ final class DisplayWhiteBalanceTintController extends ColorTemperatureTintContro
             pw.println("    mMatrixDisplayWhiteBalance = "
                     + matrixToString(mMatrixDisplayWhiteBalance, 4));
             pw.println("    mIsAllowed = " + mIsAllowed);
+            pw.println("    mTransitionDuration = " + mTransitionDuration);
+            pw.println("    mTransitionDurationIncrease = " + mTransitionDurationIncrease);
+            pw.println("    mTransitionDurationDecrease = " + mTransitionDurationDecrease);
         }
     }
 

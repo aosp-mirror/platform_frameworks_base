@@ -2693,7 +2693,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         boolean shouldAnimate = true;
         if (mSplitTransitions.isPendingEnter(transition)) {
-            shouldAnimate = startPendingEnterAnimation(
+            shouldAnimate = startPendingEnterAnimation(transition,
                     mSplitTransitions.mPendingEnter, info, startTransaction, finishTransaction);
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
             final SplitScreenTransitions.DismissSession dismiss = mSplitTransitions.mPendingDismiss;
@@ -2732,7 +2732,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    private boolean startPendingEnterAnimation(
+    private boolean startPendingEnterAnimation(@NonNull IBinder transition,
             @NonNull SplitScreenTransitions.EnterSession enterTransition,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t,
             @NonNull SurfaceControl.Transaction finishT) {
@@ -2761,21 +2761,22 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
 
-        if (mSplitTransitions.mPendingEnter.mExtraTransitType
+        SplitScreenTransitions.EnterSession pendingEnter = mSplitTransitions.mPendingEnter;
+        if (pendingEnter.mExtraTransitType
                 == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE) {
             // Open to side should only be used when split already active and foregorund.
             if (mainChild == null && sideChild == null) {
                 Log.w(TAG, splitFailureMessage("startPendingEnterAnimation",
                         "Launched a task in split, but didn't receive any task in transition."));
                 // This should happen when the target app is already on front, so just cancel.
-                mSplitTransitions.mPendingEnter.cancel(null);
+                pendingEnter.cancel(null);
                 return true;
             }
         } else {
             if (mainChild == null || sideChild == null) {
                 final int dismissTop = mainChild != null ? STAGE_TYPE_MAIN :
                         (sideChild != null ? STAGE_TYPE_SIDE : STAGE_TYPE_UNDEFINED);
-                mSplitTransitions.mPendingEnter.cancel(
+                pendingEnter.cancel(
                         (cancelWct, cancelT) -> prepareExitSplitScreen(dismissTop, cancelWct));
                 Log.w(TAG, splitFailureMessage("startPendingEnterAnimation",
                         "launched 2 tasks in split, but didn't receive "
@@ -2785,6 +2786,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
                 if (mRecentTasks.isPresent() && sideChild != null) {
                     mRecentTasks.get().removeSplitPair(sideChild.getTaskInfo().taskId);
+                }
+                if (pendingEnter.mRemoteHandler != null) {
+                    // Pass false for aborted since WM didn't abort, business logic chose to
+                    // terminate/exit early
+                    pendingEnter.mRemoteHandler.onTransitionConsumed(transition,
+                            false /*aborted*/, finishT);
                 }
                 mSplitUnsupportedToast.show();
                 return true;

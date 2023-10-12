@@ -102,9 +102,10 @@ constructor(
         showSeeAll: Boolean,
         showPairNewDevice: Boolean
     ) {
-        seeAllViewGroup.visibility = if (showSeeAll) VISIBLE else GONE
-        pairNewDeviceViewGroup.visibility = if (showPairNewDevice) VISIBLE else GONE
-        deviceItemAdapter.refreshDeviceItemList(deviceItem)
+        deviceItemAdapter.refreshDeviceItemList(deviceItem) {
+            seeAllViewGroup.visibility = if (showSeeAll) VISIBLE else GONE
+            pairNewDeviceViewGroup.visibility = if (showPairNewDevice) VISIBLE else GONE
+        }
     }
 
     internal fun onBluetoothStateUpdated(isEnabled: Boolean, subtitleResId: Int) {
@@ -173,8 +174,8 @@ constructor(
 
         internal fun getItem(position: Int) = asyncListDiffer.currentList[position]
 
-        internal fun refreshDeviceItemList(updated: List<DeviceItem>) {
-            asyncListDiffer.submitList(updated)
+        internal fun refreshDeviceItemList(updated: List<DeviceItem>, callback: () -> Unit) {
+            asyncListDiffer.submitList(updated, callback)
         }
 
         internal inner class DeviceItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {

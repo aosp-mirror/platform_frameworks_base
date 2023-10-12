@@ -27,10 +27,11 @@ import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -78,7 +79,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        dispatcher = StandardTestDispatcher()
+        dispatcher = UnconfinedTestDispatcher()
         testScope = TestScope(dispatcher)
         interactor =
             DeviceItemInteractor(
@@ -107,9 +108,10 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                 listOf(createFactory({ true }, deviceItem1))
             )
 
+            val latest by collectLastValue(interactor.deviceItemUpdate)
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemUpdate.value).isEmpty()
+            assertThat(latest).isEqualTo(emptyList<DeviceItem>())
         }
     }
 
@@ -121,9 +123,10 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                 listOf(createFactory({ false }, deviceItem1))
             )
 
+            val latest by collectLastValue(interactor.deviceItemUpdate)
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemUpdate.value).isEmpty()
+            assertThat(latest).isEqualTo(emptyList<DeviceItem>())
         }
     }
 
@@ -135,10 +138,10 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                 listOf(createFactory({ true }, deviceItem1))
             )
 
+            val latest by collectLastValue(interactor.deviceItemUpdate)
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemUpdate.value).hasSize(1)
-            assertThat(interactor.deviceItemUpdate.value!![0]).isEqualTo(deviceItem1)
+            assertThat(latest).isEqualTo(listOf(deviceItem1))
         }
     }
 
@@ -150,11 +153,10 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                 listOf(createFactory({ false }, deviceItem1), createFactory({ true }, deviceItem2))
             )
 
+            val latest by collectLastValue(interactor.deviceItemUpdate)
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemUpdate.value).hasSize(2)
-            assertThat(interactor.deviceItemUpdate.value!![0]).isEqualTo(deviceItem2)
-            assertThat(interactor.deviceItemUpdate.value!![1]).isEqualTo(deviceItem2)
+            assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem2))
         }
     }
 
@@ -177,10 +179,10 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
             `when`(deviceItem2.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
 
+            val latest by collectLastValue(interactor.deviceItemUpdate)
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemUpdate.value)
-                .isEqualTo(listOf(deviceItem2, deviceItem1))
+            assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem1))
         }
     }
 
@@ -200,10 +202,10 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
             `when`(deviceItem2.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
 
+            val latest by collectLastValue(interactor.deviceItemUpdate)
             interactor.updateDeviceItems(mContext)
 
-            assertThat(interactor.deviceItemUpdate.value)
-                .isEqualTo(listOf(deviceItem2, deviceItem1))
+            assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem1))
         }
     }
 

@@ -667,8 +667,6 @@ object Flags {
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
 
     // 2200 - biometrics (udfps, sfps, BiometricPrompt, etc.)
-    // TODO(b/259264861): Tracking Bug
-    @JvmField val UDFPS_NEW_TOUCH_DETECTION = releasedFlag("udfps_new_touch_detection")
 
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = releasedFlag("track_stylus_ever_used")
@@ -786,8 +784,7 @@ object Flags {
 
     // TODO(b/290213663): Tracking Bug
     @JvmField
-    val ONE_WAY_HAPTICS_API_MIGRATION =
-            unreleasedFlag("oneway_haptics_api_migration", teamfood = true)
+    val ONE_WAY_HAPTICS_API_MIGRATION = releasedFlag("oneway_haptics_api_migration")
 
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField

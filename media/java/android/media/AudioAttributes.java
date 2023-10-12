@@ -875,18 +875,7 @@ public final class AudioAttributes implements Parcelable {
         /**
          * Sets the attribute describing what is the intended use of the audio signal,
          * such as alarm or ringtone.
-         * @param usage one of {@link AttributeSdkUsage#USAGE_UNKNOWN},
-         *     {@link AttributeSdkUsage#USAGE_MEDIA},
-         *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION},
-         *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION_SIGNALLING},
-         *     {@link AttributeSdkUsage#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_RINGTONE},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_EVENT},
-         *     {@link AttributeSdkUsage#USAGE_ASSISTANT},
-         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_ACCESSIBILITY},
-         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_NAVIGATION_GUIDANCE},
-         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_SONIFICATION},
-         *     {@link AttributeSdkUsage#USAGE_GAME}.
+         * @param usage the usage to set.
          * @return the same Builder instance.
          */
         public Builder setUsage(@AttributeSdkUsage int usage) {

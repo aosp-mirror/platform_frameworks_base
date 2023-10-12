@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.pipeline.airplane.data.repository
 
 import android.os.Handler
-import android.os.UserHandle
 import android.provider.Settings.Global
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -66,13 +65,7 @@ constructor(
     override val isAirplaneMode: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val observer =
-                    object :
-                        SettingObserver(
-                            globalSettings,
-                            bgHandler,
-                            Global.AIRPLANE_MODE_ON,
-                            UserHandle.USER_ALL
-                        ) {
+                    object : SettingObserver(globalSettings, bgHandler, Global.AIRPLANE_MODE_ON) {
                         override fun handleValueChanged(value: Int, observedChange: Boolean) {
                             trySend(value == 1)
                         }

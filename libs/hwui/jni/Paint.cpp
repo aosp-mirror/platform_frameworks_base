@@ -593,7 +593,7 @@ namespace PaintGlue {
         return result;
     }
 
-    static SkScalar getMetricsInternal(jlong paintHandle, SkFontMetrics *metrics) {
+    static SkScalar getMetricsInternal(jlong paintHandle, SkFontMetrics* metrics, bool useLocale) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
         const int kElegantAscent = 1900;
@@ -622,6 +622,17 @@ namespace PaintGlue {
             metrics->fLeading = size * kElegantLeading / 2048;
             spacing = metrics->fDescent - metrics->fAscent + metrics->fLeading;
         }
+
+        if (useLocale) {
+            minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(paint, typeface);
+            minikin::MinikinExtent extent =
+                    typeface->fFontCollection->getReferenceExtentForLocale(minikinPaint);
+            metrics->fAscent = std::min(extent.ascent, metrics->fAscent);
+            metrics->fDescent = std::max(extent.descent, metrics->fDescent);
+            metrics->fTop = std::min(metrics->fAscent, metrics->fTop);
+            metrics->fBottom = std::max(metrics->fDescent, metrics->fBottom);
+        }
+
         return spacing;
     }
 
@@ -634,7 +645,7 @@ namespace PaintGlue {
                 MinikinUtils::getFontExtent(paint, bidiFlags, typeface, buf, start, count, bufSize);
 
         SkFontMetrics metrics;
-        getMetricsInternal(paintHandle, &metrics);
+        getMetricsInternal(paintHandle, &metrics, false /* useLocale */);
 
         metrics.fAscent = extent.ascent;
         metrics.fDescent = extent.descent;
@@ -686,19 +697,20 @@ namespace PaintGlue {
         }
     }
 
-    static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
+    static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj,
+                                 jboolean useLocale) {
         SkFontMetrics metrics;
-        SkScalar spacing = getMetricsInternal(paintHandle, &metrics);
+        SkScalar spacing = getMetricsInternal(paintHandle, &metrics, useLocale);
         GraphicsJNI::set_metrics(env, metricsObj, metrics);
         return SkScalarToFloat(spacing);
     }
 
-    static jint getFontMetricsInt(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
+    static jint getFontMetricsInt(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj,
+                                  jboolean useLocale) {
         SkFontMetrics metrics;
-        getMetricsInternal(paintHandle, &metrics);
+        getMetricsInternal(paintHandle, &metrics, useLocale);
         return GraphicsJNI::set_metrics_int(env, metricsObj, metrics);
     }
-
 
     // ------------------ @CriticalNative ---------------------------
 
@@ -1002,19 +1014,19 @@ namespace PaintGlue {
 
     static jfloat ascent(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
-        getMetricsInternal(paintHandle, &metrics);
+        getMetricsInternal(paintHandle, &metrics, false /* useLocale */);
         return SkScalarToFloat(metrics.fAscent);
     }
 
     static jfloat descent(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
-        getMetricsInternal(paintHandle, &metrics);
+        getMetricsInternal(paintHandle, &metrics, false /* useLocale */);
         return SkScalarToFloat(metrics.fDescent);
     }
 
     static jfloat getUnderlinePosition(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
-        getMetricsInternal(paintHandle, &metrics);
+        getMetricsInternal(paintHandle, &metrics, false /* useLocale */);
         SkScalar position;
         if (metrics.hasUnderlinePosition(&position)) {
             return SkScalarToFloat(position);
@@ -1026,7 +1038,7 @@ namespace PaintGlue {
 
     static jfloat getUnderlineThickness(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
-        getMetricsInternal(paintHandle, &metrics);
+        getMetricsInternal(paintHandle, &metrics, false /* useLocale */);
         SkScalar thickness;
         if (metrics.hasUnderlineThickness(&thickness)) {
             return SkScalarToFloat(thickness);
@@ -1121,9 +1133,9 @@ static const JNINativeMethod methods[] = {
         {"nSetTextLocales", "(JLjava/lang/String;)I", (void*)PaintGlue::setTextLocales},
         {"nSetFontFeatureSettings", "(JLjava/lang/String;)V",
          (void*)PaintGlue::setFontFeatureSettings},
-        {"nGetFontMetrics", "(JLandroid/graphics/Paint$FontMetrics;)F",
+        {"nGetFontMetrics", "(JLandroid/graphics/Paint$FontMetrics;Z)F",
          (void*)PaintGlue::getFontMetrics},
-        {"nGetFontMetricsInt", "(JLandroid/graphics/Paint$FontMetricsInt;)I",
+        {"nGetFontMetricsInt", "(JLandroid/graphics/Paint$FontMetricsInt;Z)I",
          (void*)PaintGlue::getFontMetricsInt},
 
         // --------------- @CriticalNative ------------------

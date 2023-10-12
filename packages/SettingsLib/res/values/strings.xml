@@ -518,6 +518,8 @@
     <string name="category_personal">Personal</string>
     <!-- Header for items under the work user [CHAR LIMIT=30] -->
     <string name="category_work">Work</string>
+    <!-- Header for items under the private profile user [CHAR LIMIT=30] -->
+    <string name="category_private">Private</string>
     <!-- Header for items under the clone user [CHAR LIMIT=30] -->
     <string name="category_clone">Clone</string>
 

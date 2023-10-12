@@ -60,10 +60,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         repository = FakeKeyguardTransitionRepository()
         val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-                set(Flags.UDFPS_NEW_TOUCH_DETECTION, true)
-            }
+            FakeFeatureFlags().apply { set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false) }
         val interactor =
             KeyguardTransitionInteractorFactory.create(
                     scope = TestScope().backgroundScope,

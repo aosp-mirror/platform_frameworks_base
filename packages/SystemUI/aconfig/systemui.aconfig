@@ -21,3 +21,11 @@ flag {
         "(containing the \"Clear all\" button). Should not bring any behavior changes"
     bug: "293167744"
 }
+
+flag {
+    name: "notification_lifetime_extension_refactor"
+    namespace: "systemui"
+    description: "Enables moving notification lifetime extension management from SystemUI to "
+        "Notification Manager Service"
+    bug: "299448097"
+}
