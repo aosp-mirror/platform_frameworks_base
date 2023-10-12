@@ -214,8 +214,11 @@ class StorageManagerService extends IStorageManager.Stub
     // external storage service.
     public static final int FAILED_MOUNT_RESET_TIMEOUT_SECONDS = 10;
 
-     /** Extended timeout for the system server watchdog. */
+    /** Extended timeout for the system server watchdog. */
     private static final int SLOW_OPERATION_WATCHDOG_TIMEOUT_MS = 60 * 1000;
+
+    /** Extended timeout for the system server watchdog for vold#partition operation. */
+    private static final int PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS = 3 * 60 * 1000;
 
     @GuardedBy("mLock")
     private final Set<Integer> mFuseMountedUser = new ArraySet<>();
@@ -2463,10 +2466,12 @@ class StorageManagerService extends IStorageManager.Stub
     @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     @Override
     public void partitionPublic(String diskId) {
-
         super.partitionPublic_enforcePermission();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
+
+        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_PUBLIC, -1);
             waitForLatch(latch, "partitionPublic", 3 * DateUtils.MINUTE_IN_MILLIS);
@@ -2483,6 +2488,9 @@ class StorageManagerService extends IStorageManager.Stub
         enforceAdminUser();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
+
+        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_PRIVATE, -1);
             waitForLatch(latch, "partitionPrivate", 3 * DateUtils.MINUTE_IN_MILLIS);
@@ -2499,6 +2507,9 @@ class StorageManagerService extends IStorageManager.Stub
         enforceAdminUser();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
+
+        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_MIXED, ratio);
             waitForLatch(latch, "partitionMixed", 3 * DateUtils.MINUTE_IN_MILLIS);
