@@ -707,7 +707,7 @@ class ActivityStarter {
                 }
             }
 
-            int res;
+            int res = START_CANCELED;
             synchronized (mService.mGlobalLock) {
                 final boolean globalConfigWillChange = mRequest.globalConfig != null
                         && mService.getGlobalConfiguration().diff(mRequest.globalConfig) != 0;
@@ -719,21 +719,19 @@ class ActivityStarter {
                         + "will change = %b", globalConfigWillChange);
 
                 final long origId = Binder.clearCallingIdentity();
-
-                res = resolveToHeavyWeightSwitcherIfNeeded();
-                if (res != START_SUCCESS) {
-                    return res;
-                }
-
                 try {
+                    res = resolveToHeavyWeightSwitcherIfNeeded();
+                    if (res != START_SUCCESS) {
+                        return res;
+                    }
+
                     res = executeRequest(mRequest);
                 } finally {
+                    Binder.restoreCallingIdentity(origId);
                     mRequest.logMessage.append(" result code=").append(res);
                     Slog.i(TAG, mRequest.logMessage.toString());
                     mRequest.logMessage.setLength(0);
                 }
-
-                Binder.restoreCallingIdentity(origId);
 
                 if (globalConfigWillChange) {
                     // If the caller also wants to switch to a new configuration, do so now.
