@@ -781,7 +781,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 password, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
-        mService.onCleanupUser(PRIMARY_USER_ID);
+        mService.onUserStopped(PRIMARY_USER_ID);
         assertNull(mLocalService.getUserPasswordMetrics(PRIMARY_USER_ID));
 
         assertTrue(mLocalService.unlockUserWithToken(handle, token, PRIMARY_USER_ID));
