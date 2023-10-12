@@ -2843,7 +2843,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData systemWallpaper = mWallpaperMap.get(mCurrentUserId);
         WallpaperData lockWallpaper = mLockWallpaperMap.get(mCurrentUserId);
         boolean systemValid = systemWallpaper != null;
-        boolean lockValid = lockWallpaper != null && !isLockscreenLiveWallpaperEnabled();
+        boolean lockValid = lockWallpaper != null && isLockscreenLiveWallpaperEnabled();
         return systemValid && lockValid ? new WallpaperData[]{systemWallpaper, lockWallpaper}
                 : systemValid ? new WallpaperData[]{systemWallpaper}
                 : lockValid ? new WallpaperData[]{lockWallpaper}
