@@ -1,4 +1,4 @@
-package: "com.android.systemui.communal"
+package: "com.android.systemui"
 
 flag {
     name: "communal_hub"
