@@ -31,6 +31,7 @@ import android.telephony.PinResult;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -39,9 +40,9 @@ import android.widget.ImageView;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.res.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 
 public class KeyguardSimPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardSimPinView> {
@@ -324,7 +325,11 @@ public class KeyguardSimPinViewController
         } else {
             SubscriptionInfo info = mKeyguardUpdateMonitor.getSubscriptionInfoForSubId(mSubId);
             CharSequence displayName = info != null ? info.getDisplayName() : ""; // don't crash
-            msg = rez.getString(R.string.kg_sim_pin_instructions_multi, displayName);
+            if (!TextUtils.isEmpty(displayName)) {
+                msg = rez.getString(R.string.kg_sim_pin_instructions_multi, displayName);
+            } else {
+                msg = rez.getString(R.string.kg_sim_pin_instructions);
+            }
             if (info != null) {
                 color = info.getIconTint();
             }
