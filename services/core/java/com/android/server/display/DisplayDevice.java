@@ -23,7 +23,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
 import android.util.Slog;
@@ -201,20 +201,6 @@ abstract class DisplayDevice {
      * @param state The new display state.
      * @param brightnessState The new display brightnessState.
      * @param sdrBrightnessState The new display brightnessState for SDR layers.
-     * @return A runnable containing work to be deferred until after we have
-     * exited the critical section, or null if none.
-     */
-    public Runnable requestDisplayStateLocked(int state, float brightnessState,
-            float sdrBrightnessState) {
-        return requestDisplayStateLocked(state, brightnessState, sdrBrightnessState, null);
-    }
-
-    /**
-     * Sets the display state, if supported.
-     *
-     * @param state The new display state.
-     * @param brightnessState The new display brightnessState.
-     * @param sdrBrightnessState The new display brightnessState for SDR layers.
      * @param displayOffloadSession {@link DisplayOffloadSession} associated with current device.
      * @return A runnable containing work to be deferred until after we have exited the critical
      *     section, or null if none.
@@ -223,7 +209,7 @@ abstract class DisplayDevice {
             int state,
             float brightnessState,
             float sdrBrightnessState,
-            @Nullable DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
+            @Nullable DisplayOffloadSession displayOffloadSession) {
         return null;
     }
 
