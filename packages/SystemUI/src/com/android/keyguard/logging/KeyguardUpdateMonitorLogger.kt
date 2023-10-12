@@ -660,19 +660,6 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
-    fun logFpEnrolledUpdated(userId: Int, oldValue: Boolean, newValue: Boolean) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            {
-                int1 = userId
-                bool1 = oldValue
-                bool2 = newValue
-            },
-            { "Fp enrolled state changed for userId: $int1 old: $bool1, new: $bool2" }
-        )
-    }
-
     fun logTrustUsuallyManagedUpdated(
         userId: Int,
         oldValue: Boolean,

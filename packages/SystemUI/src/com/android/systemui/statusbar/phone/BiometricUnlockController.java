@@ -734,8 +734,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
         // Suppress all face auth errors if fingerprint can be used to authenticate
         if ((biometricSourceType == BiometricSourceType.FACE
-                && !mUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                mSelectedUserInteractor.get().getSelectedUserId()))
+                && !mUpdateMonitor.isUnlockWithFingerprintPossible(
+                    mSelectedUserInteractor.get().getSelectedUserId()))
                 || (biometricSourceType == BiometricSourceType.FINGERPRINT)) {
             mHapticsInteractor.vibrateError();
         }

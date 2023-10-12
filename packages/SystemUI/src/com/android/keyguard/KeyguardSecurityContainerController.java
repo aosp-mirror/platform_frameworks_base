@@ -755,7 +755,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
         mView.onResume(
                 mSecurityModel.getSecurityMode(mSelectedUserInteractor.getSelectedUserId()),
-                mKeyguardStateController.isFaceAuthEnabled());
+                mKeyguardStateController.isFaceEnrolled());
     }
 
     /** Sets an initial message that would override the default message */

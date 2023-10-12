@@ -405,7 +405,7 @@ constructor(
     /** Whether we want to wait to show the bouncer in case passive auth succeeds. */
     private fun usePrimaryBouncerPassiveAuthDelay(): Boolean {
         val canRunFaceAuth =
-            keyguardStateController.isFaceAuthEnabled &&
+            keyguardStateController.isFaceEnrolled &&
                 keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE) &&
                 keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()
         val canRunActiveUnlock =

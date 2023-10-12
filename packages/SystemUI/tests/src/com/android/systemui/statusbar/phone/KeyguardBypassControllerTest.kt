@@ -86,7 +86,7 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
 
         whenever(packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(true)
-        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
+        whenever(keyguardStateController.isFaceEnrolled).thenReturn(true)
     }
 
     @After
@@ -158,7 +158,7 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
         keyguardBypassController.registerOnBypassStateChangedListener(bypassListener)
         verify(keyguardStateController).addCallback(callback.capture())
 
-        callback.value.onFaceAuthEnabledChanged()
+        callback.value.onFaceEnrolledChanged()
         verify(bypassListener).onBypassStateChanged(anyBoolean())
     }
 

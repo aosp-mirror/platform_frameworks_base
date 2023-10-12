@@ -1457,7 +1457,7 @@ public class KeyguardIndicationController {
     }
 
     private boolean canUnlockWithFingerprint() {
-        return mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+        return mKeyguardUpdateMonitor.isUnlockWithFingerprintPossible(
                 getCurrentUser()) && mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed();
     }
 

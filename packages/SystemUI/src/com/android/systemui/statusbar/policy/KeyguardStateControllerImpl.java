@@ -85,7 +85,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private boolean mTrustManaged;
     private boolean mTrusted;
     private boolean mDebugUnlocked = false;
-    private boolean mFaceAuthEnabled;
+    private boolean mFaceEnrolled;
 
     private float mDismissAmount = 0f;
     private boolean mDismissingFromTouch = false;
@@ -216,7 +216,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     private void notifyKeyguardFaceAuthEnabledChanged() {
         // Copy the list to allow removal during callback.
-        new ArrayList<>(mCallbacks).forEach(Callback::onFaceAuthEnabledChanged);
+        new ArrayList<>(mCallbacks).forEach(Callback::onFaceEnrolledChanged);
     }
 
     private void notifyUnlockedChanged() {
@@ -260,16 +260,16 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
                 || (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB && mDebugUnlocked);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
-        boolean faceAuthEnabled = mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(user);
+        boolean faceEnrolled = mKeyguardUpdateMonitor.isFaceEnrolled(user);
         boolean changed = secure != mSecure || canDismissLockScreen != mCanDismissLockScreen
                 || trustManaged != mTrustManaged || mTrusted != trusted
-                || mFaceAuthEnabled != faceAuthEnabled;
+                || mFaceEnrolled != faceEnrolled;
         if (changed || updateAlways) {
             mSecure = secure;
             mCanDismissLockScreen = canDismissLockScreen;
             mTrusted = trusted;
             mTrustManaged = trustManaged;
-            mFaceAuthEnabled = faceAuthEnabled;
+            mFaceEnrolled = faceEnrolled;
             mLogger.logKeyguardStateUpdate(
                     mSecure, mCanDismissLockScreen, mTrusted, mTrustManaged);
             notifyUnlockedChanged();
@@ -290,8 +290,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
-    public boolean isFaceAuthEnabled() {
-        return mFaceAuthEnabled;
+    public boolean isFaceEnrolled() {
+        return mFaceEnrolled;
     }
 
     @Override
@@ -416,7 +416,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         pw.println("  mTrustManaged: " + mTrustManaged);
         pw.println("  mTrusted: " + mTrusted);
         pw.println("  mDebugUnlocked: " + mDebugUnlocked);
-        pw.println("  mFaceAuthEnabled: " + mFaceAuthEnabled);
+        pw.println("  mFaceEnrolled: " + mFaceEnrolled);
         pw.println("  isKeyguardFadingAway: " + isKeyguardFadingAway());
         pw.println("  isKeyguardGoingAway: " + isKeyguardGoingAway());
         pw.println("  isLaunchTransitionFadingAway: " + isLaunchTransitionFadingAway());

@@ -58,7 +58,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     private var pendingUnlock: PendingUnlock? = null
     private val listeners = mutableListOf<OnBypassStateChangedListener>()
     private val faceAuthEnabledChangedCallback = object : KeyguardStateController.Callback {
-        override fun onFaceAuthEnabledChanged() = notifyListeners()
+        override fun onFaceEnrolledChanged() = notifyListeners()
     }
 
     @IntDef(
@@ -98,7 +98,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 FACE_UNLOCK_BYPASS_NEVER -> false
                 else -> field
             }
-            return enabled && mKeyguardStateController.isFaceAuthEnabled &&
+            return enabled && mKeyguardStateController.isFaceEnrolled &&
                     isPostureAllowedForFaceAuth()
         }
         private set(value) {

@@ -237,9 +237,9 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import dagger.Lazy;
-
 import dalvik.annotation.optimization.NeverCompile;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -2584,7 +2584,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                     && mFingerprintManager.get() != null
                                     && mFingerprintManager.get().isPowerbuttonFps()
                                     && mKeyguardUpdateMonitor
-                                    .getCachedIsUnlockWithFingerprintPossible(
+                                    .isUnlockWithFingerprintPossible(
                                             mUserTracker.getUserId())
                                     && !touchToUnlockAnytime;
                     if (DEBUG_WAKEUP_DELAY) {
