@@ -3114,10 +3114,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void notifyKeyguardTrustedChanged() {
-        synchronized (mGlobalLock) {
-            if (mAtmService.mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
-                mRoot.ensureActivitiesVisible(null, 0, false /* preserveWindows */);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (mAtmService.mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
+                    mRoot.ensureActivitiesVisible(null, 0, false /* preserveWindows */);
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
