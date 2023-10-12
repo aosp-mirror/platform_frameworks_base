@@ -19,6 +19,7 @@ package com.android.server.media;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.os.UserHandle.ALL;
 import static android.os.UserHandle.CURRENT;
+
 import static com.android.server.media.MediaKeyDispatcher.KEY_EVENT_LONG_PRESS;
 import static com.android.server.media.MediaKeyDispatcher.isDoubleTapOverridden;
 import static com.android.server.media.MediaKeyDispatcher.isLongPressOverridden;
@@ -1900,6 +1901,15 @@ public class MediaSessionService extends SystemService implements Monitor {
                     if (record == null) {
                         Log.w(TAG, "Failed to find session to dispatch key event, token="
                                 + sessionToken + ". Fallbacks to the default handling.");
+                        dispatchVolumeKeyEventLocked(packageName, opPackageName, pid, uid, true,
+                                keyEvent, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
+                        return;
+                    }
+                    if (Flags.fallbackToDefaultHandlingWhenMediaSessionHasFixedVolumeHandling()
+                            && !record.canHandleVolumeKey()) {
+                        Log.d(TAG, "Session with packageName=" + record.getPackageName()
+                                + " doesn't support volume adjustment."
+                                + " Fallbacks to the default handling.");
                         dispatchVolumeKeyEventLocked(packageName, opPackageName, pid, uid, true,
                                 keyEvent, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                         return;
