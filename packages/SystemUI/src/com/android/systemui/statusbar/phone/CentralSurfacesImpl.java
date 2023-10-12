@@ -312,8 +312,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             };
 
     void onStatusBarWindowStateChanged(@WindowVisibleState int state) {
-        updateBubblesVisibility();
         mStatusBarWindowState = state;
+        updateBubblesVisibility();
     }
 
     @Override
@@ -1726,7 +1726,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         StatusBarMode mode = mStatusBarModeRepository.getStatusBarMode().getValue();
         mBubblesOptional.ifPresent(bubbles -> bubbles.onStatusBarVisibilityChanged(
                 mode != StatusBarMode.LIGHTS_OUT
-                        && mode != StatusBarMode.LIGHTS_OUT_TRANSPARENT));
+                        && mode != StatusBarMode.LIGHTS_OUT_TRANSPARENT
+                        && mStatusBarWindowState != WINDOW_STATE_HIDDEN));
     }
 
     void checkBarMode(
