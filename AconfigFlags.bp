@@ -14,6 +14,7 @@
 
 aconfig_srcjars = [
     ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
+    ":android.companion.flags-aconfig-java{.generated_srcjars}",
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.radio.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
@@ -448,12 +449,25 @@ aconfig_declarations {
     package: "android.service.autofill",
     srcs: [
         "services/autofill/bugfixes.aconfig",
-        "services/autofill/features.aconfig"
+        "services/autofill/features.aconfig",
     ],
 }
 
 java_aconfig_library {
     name: "android.service.autofill.flags-aconfig-java",
     aconfig_declarations: "android.service.autofill.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Companion
+aconfig_declarations {
+    name: "android.companion.flags-aconfig",
+    package: "android.companion",
+    srcs: ["core/java/android/companion/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.companion.flags-aconfig-java",
+    aconfig_declarations: "android.companion.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

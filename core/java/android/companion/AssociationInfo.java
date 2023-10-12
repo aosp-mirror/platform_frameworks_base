@@ -15,6 +15,7 @@
  */
 package android.companion;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -412,6 +413,7 @@ public final class AssociationInfo implements Parcelable {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_NEW_ASSOCIATION_BUILDER)
     @TestApi
     public static final class Builder {
         private final int mId;
