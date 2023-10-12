@@ -45,6 +45,7 @@ import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.ServiceConnection;
 import android.net.Network;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -240,6 +241,14 @@ public final class JobServiceContext implements ServiceConnection {
     private int mDeathMarkStopReason = JobParameters.STOP_REASON_UNDEFINED;
     private int mDeathMarkInternalStopReason;
     private String mDeathMarkDebugReason;
+
+    private long mInitialDownloadedBytesFromSource;
+
+    private long mInitialUploadedBytesFromSource;
+
+    private long mInitialDownloadedBytesFromCalling;
+
+    private long mInitialUploadedBytesFromCalling;
 
     // Debugging: reason this job was last stopped.
     public String mStoppedReason;
@@ -471,6 +480,14 @@ public final class JobServiceContext implements ServiceConnection {
             }
             mJobPackageTracker.noteActive(job);
             final int sourceUid = job.getSourceUid();
+
+            // Measure UID baseline traffic for deltas
+            mInitialDownloadedBytesFromSource = TrafficStats.getUidRxBytes(sourceUid);
+            mInitialUploadedBytesFromSource = TrafficStats.getUidTxBytes(sourceUid);
+
+            mInitialDownloadedBytesFromCalling = TrafficStats.getUidRxBytes(job.getUid());
+            mInitialUploadedBytesFromCalling = TrafficStats.getUidTxBytes(job.getUid());
+
             FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     job.isProxyJob() ? new int[]{sourceUid, job.getUid()} : new int[]{sourceUid},
                     // Given that the source tag is set by the calling app, it should be connected
@@ -516,7 +533,11 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getEstimatedNetworkUploadBytes(),
                     job.getWorkCount(),
                     ActivityManager.processStateAmToProto(mService.getUidProcState(job.getUid())),
-                    job.getNamespaceHash());
+                    job.getNamespaceHash(),
+                    /* system_measured_source_download_bytes */ 0,
+                    /* system_measured_source_upload_bytes */ 0,
+                    /* system_measured_calling_download_bytes */ 0,
+                    /* system_measured_calling_upload_bytes */ 0);
             sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
@@ -1585,7 +1606,15 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getWorkCount(),
                 ActivityManager
                         .processStateAmToProto(mService.getUidProcState(completedJob.getUid())),
-                completedJob.getNamespaceHash());
+                completedJob.getNamespaceHash(),
+                TrafficStats.getUidRxBytes(completedJob.getSourceUid())
+                        - mInitialDownloadedBytesFromSource,
+                TrafficStats.getUidTxBytes(completedJob.getSourceUid())
+                        - mInitialUploadedBytesFromSource,
+                TrafficStats.getUidRxBytes(completedJob.getUid())
+                        - mInitialDownloadedBytesFromCalling,
+                TrafficStats.getUidTxBytes(completedJob.getUid())
+                        - mInitialUploadedBytesFromCalling);
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
