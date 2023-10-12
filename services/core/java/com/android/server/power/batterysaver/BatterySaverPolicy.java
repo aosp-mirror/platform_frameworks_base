@@ -32,7 +32,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
-import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 
@@ -41,6 +40,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ConcurrentUtils;
+import com.android.server.utils.UserSettingDeviceConfigMediator;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -809,12 +809,13 @@ public class BatterySaverPolicy extends ContentObserver implements
 
         private static Policy fromSettings(String settings, String deviceSpecificSettings,
                 DeviceConfig.Properties properties, String configSuffix, Policy defaultPolicy) {
-            final KeyValueListParser parser = new KeyValueListParser(',');
+            final UserSettingDeviceConfigMediator userSettingDeviceConfigMediator =
+                    new UserSettingDeviceConfigMediator.SettingsOverridesIndividualMediator(',');
             configSuffix = TextUtils.emptyIfNull(configSuffix);
 
             // Device-specific parameters.
             try {
-                parser.setString(deviceSpecificSettings == null ? "" : deviceSpecificSettings);
+                userSettingDeviceConfigMediator.setSettingsString(deviceSpecificSettings);
             } catch (IllegalArgumentException e) {
                 Slog.wtf(TAG, "Bad device specific battery saver constants: "
                         + deviceSpecificSettings);
@@ -822,68 +823,58 @@ public class BatterySaverPolicy extends ContentObserver implements
 
             // Non-device-specific parameters.
             try {
-                parser.setString(settings == null ? "" : settings);
+                userSettingDeviceConfigMediator.setSettingsString(settings);
+                userSettingDeviceConfigMediator.setDeviceConfigProperties(properties);
             } catch (IllegalArgumentException e) {
                 Slog.wtf(TAG, "Bad battery saver constants: " + settings);
             }
 
             // The Settings value overrides everything, since that will be set by the user.
             // The DeviceConfig value takes second place, with the default as the last choice.
-            final float adjustBrightnessFactor = parser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR,
-                    properties.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR + configSuffix,
-                            defaultPolicy.adjustBrightnessFactor));
-            final boolean advertiseIsEnabled = parser.getBoolean(KEY_ADVERTISE_IS_ENABLED,
-                    properties.getBoolean(KEY_ADVERTISE_IS_ENABLED + configSuffix,
-                            defaultPolicy.advertiseIsEnabled));
-            final boolean deferFullBackup = parser.getBoolean(KEY_DEFER_FULL_BACKUP,
-                    properties.getBoolean(KEY_DEFER_FULL_BACKUP + configSuffix,
-                            defaultPolicy.deferFullBackup));
-            final boolean deferKeyValueBackup = parser.getBoolean(KEY_DEFER_KEYVALUE_BACKUP,
-                    properties.getBoolean(KEY_DEFER_KEYVALUE_BACKUP + configSuffix,
-                            defaultPolicy.deferKeyValueBackup));
-            final boolean disableAnimation = parser.getBoolean(KEY_DISABLE_ANIMATION,
-                    properties.getBoolean(KEY_DISABLE_ANIMATION + configSuffix,
-                            defaultPolicy.disableAnimation));
-            final boolean disableAod = parser.getBoolean(KEY_DISABLE_AOD,
-                    properties.getBoolean(KEY_DISABLE_AOD + configSuffix,
-                            defaultPolicy.disableAod));
-            final boolean disableLaunchBoost = parser.getBoolean(KEY_DISABLE_LAUNCH_BOOST,
-                    properties.getBoolean(KEY_DISABLE_LAUNCH_BOOST + configSuffix,
-                            defaultPolicy.disableLaunchBoost));
-            final boolean disableOptionalSensors = parser.getBoolean(KEY_DISABLE_OPTIONAL_SENSORS,
-                    properties.getBoolean(KEY_DISABLE_OPTIONAL_SENSORS + configSuffix,
-                            defaultPolicy.disableOptionalSensors));
-            final boolean disableVibrationConfig = parser.getBoolean(KEY_DISABLE_VIBRATION,
-                    properties.getBoolean(KEY_DISABLE_VIBRATION + configSuffix,
-                            defaultPolicy.disableVibration));
-            final boolean enableBrightnessAdjustment = parser.getBoolean(
-                    KEY_ENABLE_BRIGHTNESS_ADJUSTMENT,
-                    properties.getBoolean(KEY_ENABLE_BRIGHTNESS_ADJUSTMENT + configSuffix,
-                            defaultPolicy.enableAdjustBrightness));
-            final boolean enableDataSaver = parser.getBoolean(KEY_ENABLE_DATASAVER,
-                    properties.getBoolean(KEY_ENABLE_DATASAVER + configSuffix,
-                            defaultPolicy.enableDataSaver));
-            final boolean enableFirewall = parser.getBoolean(KEY_ENABLE_FIREWALL,
-                    properties.getBoolean(KEY_ENABLE_FIREWALL + configSuffix,
-                            defaultPolicy.enableFirewall));
-            final boolean enableNightMode = parser.getBoolean(KEY_ENABLE_NIGHT_MODE,
-                    properties.getBoolean(KEY_ENABLE_NIGHT_MODE + configSuffix,
-                            defaultPolicy.enableNightMode));
-            final boolean enableQuickDoze = parser.getBoolean(KEY_ENABLE_QUICK_DOZE,
-                    properties.getBoolean(KEY_ENABLE_QUICK_DOZE + configSuffix,
-                            defaultPolicy.enableQuickDoze));
-            final boolean forceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY,
-                    properties.getBoolean(KEY_FORCE_ALL_APPS_STANDBY + configSuffix,
-                            defaultPolicy.forceAllAppsStandby));
-            final boolean forceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK,
-                    properties.getBoolean(KEY_FORCE_BACKGROUND_CHECK + configSuffix,
-                            defaultPolicy.forceBackgroundCheck));
-            final int locationMode = parser.getInt(KEY_LOCATION_MODE,
-                    properties.getInt(KEY_LOCATION_MODE + configSuffix,
-                            defaultPolicy.locationMode));
-            final int soundTriggerMode = parser.getInt(KEY_SOUNDTRIGGER_MODE,
-                    properties.getInt(KEY_SOUNDTRIGGER_MODE + configSuffix,
-                            defaultPolicy.soundTriggerMode));
+            final float adjustBrightnessFactor = userSettingDeviceConfigMediator.getFloat(
+                    KEY_ADJUST_BRIGHTNESS_FACTOR + configSuffix,
+                    defaultPolicy.adjustBrightnessFactor);
+            final boolean advertiseIsEnabled = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_ADVERTISE_IS_ENABLED + configSuffix,
+                    defaultPolicy.advertiseIsEnabled);
+            final boolean deferFullBackup = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_DEFER_FULL_BACKUP + configSuffix, defaultPolicy.deferFullBackup);
+            final boolean deferKeyValueBackup = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_DEFER_KEYVALUE_BACKUP + configSuffix,
+                    defaultPolicy.deferKeyValueBackup);
+            final boolean disableAnimation = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_DISABLE_ANIMATION + configSuffix, defaultPolicy.disableAnimation);
+            final boolean disableAod = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_DISABLE_AOD + configSuffix, defaultPolicy.disableAod);
+            final boolean disableLaunchBoost = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_DISABLE_LAUNCH_BOOST + configSuffix,
+                    defaultPolicy.disableLaunchBoost);
+            final boolean disableOptionalSensors = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_DISABLE_OPTIONAL_SENSORS + configSuffix,
+                    defaultPolicy.disableOptionalSensors);
+            final boolean disableVibrationConfig = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_DISABLE_VIBRATION + configSuffix, defaultPolicy.disableVibration);
+            final boolean enableBrightnessAdjustment = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_ENABLE_BRIGHTNESS_ADJUSTMENT + configSuffix,
+                    defaultPolicy.enableAdjustBrightness);
+            final boolean enableDataSaver = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_ENABLE_DATASAVER + configSuffix, defaultPolicy.enableDataSaver);
+            final boolean enableFirewall = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_ENABLE_FIREWALL + configSuffix, defaultPolicy.enableFirewall);
+            final boolean enableNightMode = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_ENABLE_NIGHT_MODE + configSuffix, defaultPolicy.enableNightMode);
+            final boolean enableQuickDoze = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_ENABLE_QUICK_DOZE + configSuffix, defaultPolicy.enableQuickDoze);
+            final boolean forceAllAppsStandby = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_FORCE_ALL_APPS_STANDBY + configSuffix,
+                    defaultPolicy.forceAllAppsStandby);
+            final boolean forceBackgroundCheck = userSettingDeviceConfigMediator.getBoolean(
+                    KEY_FORCE_BACKGROUND_CHECK + configSuffix,
+                    defaultPolicy.forceBackgroundCheck);
+            final int locationMode = userSettingDeviceConfigMediator.getInt(
+                    KEY_LOCATION_MODE + configSuffix, defaultPolicy.locationMode);
+            final int soundTriggerMode = userSettingDeviceConfigMediator.getInt(
+                    KEY_SOUNDTRIGGER_MODE + configSuffix, defaultPolicy.soundTriggerMode);
             return new Policy(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
