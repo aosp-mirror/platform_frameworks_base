@@ -1531,6 +1531,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     int mBootPhase;
 
+    /**
+     * The time stamp that all apps have received BOOT_COMPLETED.
+     */
+    volatile long mBootCompletedTimestamp;
+
     @GuardedBy("this")
     boolean mDeterministicUidIdle = false;
 
@@ -5126,10 +5131,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                         public void performReceive(Intent intent, int resultCode,
                                 String data, Bundle extras, boolean ordered,
                                 boolean sticky, int sendingUser) {
-                            synchronized (mProcLock) {
-                                mAppProfiler.requestPssAllProcsLPr(
-                                        SystemClock.uptimeMillis(), true, false);
-                            }
+                            mBootCompletedTimestamp = SystemClock.uptimeMillis();
+                            // Defer the full Pss collection as the system is really busy now.
+                            mHandler.postDelayed(() -> {
+                                synchronized (mProcLock) {
+                                    mAppProfiler.requestPssAllProcsLPr(
+                                            SystemClock.uptimeMillis(), true, false);
+                                }
+                            }, mConstants.FULL_PSS_MIN_INTERVAL);
                         }
                     });
             maybeLogUserspaceRebootEvent();
