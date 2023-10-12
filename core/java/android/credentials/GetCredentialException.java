@@ -18,7 +18,7 @@ package android.credentials;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
+import android.content.Context;
 import android.os.CancellationSignal;
 import android.os.OutcomeReceiver;
 
@@ -28,8 +28,8 @@ import java.util.concurrent.Executor;
 
 /**
  * Represents an error encountered during the
- * {@link CredentialManager#getCredential(GetCredentialRequest,
- * Activity, CancellationSignal, Executor, OutcomeReceiver)} operation.
+ * {@link CredentialManager#getCredential(Context, GetCredentialRequest,
+ * CancellationSignal, Executor, OutcomeReceiver)} operation.
  */
 public class GetCredentialException extends Exception {
     /**
@@ -41,7 +41,7 @@ public class GetCredentialException extends Exception {
 
     /**
      * The error type value for when no credential is found available for the given {@link
-     * CredentialManager#getCredential(GetCredentialRequest, Activity, CancellationSignal,
+     * CredentialManager#getCredential(Context, GetCredentialRequest, CancellationSignal,
      * Executor, OutcomeReceiver)} request.
      */
     @NonNull

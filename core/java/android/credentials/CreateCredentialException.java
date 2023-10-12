@@ -18,7 +18,7 @@ package android.credentials;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
+import android.content.Context;
 import android.os.CancellationSignal;
 import android.os.OutcomeReceiver;
 
@@ -28,8 +28,8 @@ import java.util.concurrent.Executor;
 
 /**
  * Represents an error encountered during the
- * {@link CredentialManager#createCredential(CreateCredentialRequest,
- * Activity, CancellationSignal, Executor, OutcomeReceiver)} operation.
+ * {@link CredentialManager#createCredential(Context, CreateCredentialRequest,
+ * CancellationSignal, Executor, OutcomeReceiver)} operation.
  */
 public class CreateCredentialException extends Exception {
     /**
@@ -41,7 +41,7 @@ public class CreateCredentialException extends Exception {
 
     /**
      * The error type value for when no create options are available from any provider(s),
-     * for the given {@link CredentialManager#createCredential(CreateCredentialRequest, Activity,
+     * for the given {@link CredentialManager#createCredential(Context, CreateCredentialRequest,
      * CancellationSignal, Executor, OutcomeReceiver)} request.
      */
     @NonNull

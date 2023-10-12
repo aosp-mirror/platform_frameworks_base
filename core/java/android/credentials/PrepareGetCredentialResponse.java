@@ -22,7 +22,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.IntentSender;
@@ -36,7 +35,7 @@ import java.util.concurrent.Executor;
 /**
  * A response object that prefetches user app credentials and provides metadata about them. It can
  * then be used to issue the full credential retrieval flow via the
- * {@link CredentialManager#getCredential(PendingGetCredentialHandle, Activity, CancellationSignal,
+ * {@link CredentialManager#getCredential(Context, PendingGetCredentialHandle, CancellationSignal,
  * Executor, OutcomeReceiver)} method to perform the remaining flows such as consent collection
  * and credential selection, to officially retrieve a credential.
  */
@@ -44,7 +43,7 @@ public final class PrepareGetCredentialResponse {
 
     /**
      * A handle that represents a pending get-credential operation. Pass this handle to {@link
-     * CredentialManager#getCredential(PendingGetCredentialHandle, Activity, CancellationSignal,
+     * CredentialManager#getCredential(Context, PendingGetCredentialHandle, CancellationSignal,
      * Executor, OutcomeReceiver)} to perform the remaining flows to officially retrieve a
      * credential.
      */
@@ -144,7 +143,7 @@ public final class PrepareGetCredentialResponse {
 
     /**
      * Returns a handle that represents this pending get-credential operation. Pass this handle to
-     * {@link CredentialManager#getCredential(PendingGetCredentialHandle, Activity,
+     * {@link CredentialManager#getCredential(Context, PendingGetCredentialHandle,
      * CancellationSignal, Executor, OutcomeReceiver)} to perform the remaining flows to officially
      * retrieve a credential.
      */
