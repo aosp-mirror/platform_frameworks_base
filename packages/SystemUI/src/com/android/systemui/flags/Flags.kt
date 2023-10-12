@@ -402,7 +402,7 @@ object Flags {
         unreleasedFlag("signal_callback_deprecation", teamfood = true)
 
     // TODO(b/301610137): Tracking bug
-    @JvmField val NEW_NETWORK_SLICE_UI = unreleasedFlag("new_network_slice_ui")
+    @JvmField val NEW_NETWORK_SLICE_UI = unreleasedFlag("new_network_slice_ui", teamfood = true)
 
     // TODO(b/265892345): Tracking Bug
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag("plug_in_status_bar_chip")
