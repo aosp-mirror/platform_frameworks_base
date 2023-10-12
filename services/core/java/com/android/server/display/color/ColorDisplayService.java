@@ -234,7 +234,9 @@ public final class ColorDisplayService extends SystemService {
         }
     }
 
-    @VisibleForTesting void onUserChanged(int userHandle) {
+    // should be called in handler thread (same thread that started animation)
+    @VisibleForTesting
+    void onUserChanged(int userHandle) {
         final ContentResolver cr = getContext().getContentResolver();
 
         if (mCurrentUser != UserHandle.USER_NULL) {
@@ -471,6 +473,15 @@ public final class ColorDisplayService extends SystemService {
         if (mReduceBrightColorsTintController.isAvailable(getContext())) {
             mReduceBrightColorsTintController.setActivated(null);
         }
+    }
+
+    // should be called in handler thread (same thread that started animation)
+    @VisibleForTesting
+    void cancelAllAnimators() {
+        mNightDisplayTintController.cancelAnimator();
+        mGlobalSaturationTintController.cancelAnimator();
+        mReduceBrightColorsTintController.cancelAnimator();
+        mDisplayWhiteBalanceTintController.cancelAnimator();
     }
 
     private boolean resetReduceBrightColors() {
