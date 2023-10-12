@@ -345,6 +345,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                     // Keyguard handler cannot handle it, process through original mixed
                     mActiveTransitions.remove(keyguardMixed);
                 }
+            } else if (mPipHandler != null) {
+                mPipHandler.syncPipSurfaceState(info, startTransaction, finishTransaction);
             }
         }
 
