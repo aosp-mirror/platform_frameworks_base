@@ -77,7 +77,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.AlarmManagerInternal;
-import com.android.server.PersistentDataBlockManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;

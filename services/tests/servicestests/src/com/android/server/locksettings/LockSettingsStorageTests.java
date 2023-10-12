@@ -53,8 +53,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
-import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;

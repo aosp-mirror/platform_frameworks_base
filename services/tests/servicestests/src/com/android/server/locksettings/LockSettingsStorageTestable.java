@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 
-import com.android.server.PersistentDataBlockManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
