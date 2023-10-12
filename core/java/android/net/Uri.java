@@ -882,11 +882,10 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
 
         static Uri readFrom(Parcel parcel) {
-            final StringUri stringUri = new StringUri(parcel.readString8());
             return new OpaqueUri(
-                stringUri.parseScheme(),
-                stringUri.getSsp(),
-                stringUri.getFragmentPart()
+                parcel.readString8(),
+                Part.readFrom(parcel),
+                Part.readFrom(parcel)
             );
         }
 
@@ -896,7 +895,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeInt(TYPE_ID);
-            parcel.writeString8(toString());
+            parcel.writeString8(scheme);
+            ssp.writeTo(parcel);
+            fragment.writeTo(parcel);
         }
 
         public boolean isHierarchical() {
@@ -1195,25 +1196,22 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 Part query, Part fragment) {
             this.scheme = scheme;
             this.authority = Part.nonNull(authority);
-            this.path = generatePath(path);
+            this.path = path == null ? PathPart.NULL : path;
             this.query = Part.nonNull(query);
             this.fragment = Part.nonNull(fragment);
         }
 
-        private PathPart generatePath(PathPart originalPath) {
+        static Uri readFrom(Parcel parcel) {
+            final String scheme = parcel.readString8();
+            final Part authority = Part.readFrom(parcel);
             // In RFC3986 the path should be determined based on whether there is a scheme or
             // authority present (https://www.rfc-editor.org/rfc/rfc3986.html#section-3.3).
             final boolean hasSchemeOrAuthority =
                     (scheme != null && scheme.length() > 0) || !authority.isEmpty();
-            final PathPart newPath = hasSchemeOrAuthority ? PathPart.makeAbsolute(originalPath)
-                                                          : originalPath;
-            return newPath == null ? PathPart.NULL : newPath;
-        }
-
-        static Uri readFrom(Parcel parcel) {
-            final StringUri stringUri = new StringUri(parcel.readString8());
-            return new HierarchicalUri(stringUri.getScheme(), stringUri.getAuthorityPart(),
-                    stringUri.getPathPart(), stringUri.getQueryPart(), stringUri.getFragmentPart());
+            final PathPart path = PathPart.readFrom(hasSchemeOrAuthority, parcel);
+            final Part query = Part.readFrom(parcel);
+            final Part fragment = Part.readFrom(parcel);
+            return new HierarchicalUri(scheme, authority, path, query, fragment);
         }
 
         public int describeContents() {
@@ -1222,7 +1220,11 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeInt(TYPE_ID);
-            parcel.writeString8(toString());
+            parcel.writeString8(scheme);
+            authority.writeTo(parcel);
+            path.writeTo(parcel);
+            query.writeTo(parcel);
+            fragment.writeTo(parcel);
         }
 
         public boolean isHierarchical() {
