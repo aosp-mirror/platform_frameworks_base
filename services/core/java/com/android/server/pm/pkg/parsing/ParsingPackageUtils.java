@@ -18,6 +18,7 @@ package com.android.server.pm.pkg.parsing;
 
 import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.Flags.preventSdkLibApp;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
@@ -403,8 +404,9 @@ public class ParsingPackageUtils {
 
         try {
             final File baseApk = new File(lite.getBaseApkPath());
+            boolean shouldSkipComponents = lite.isIsSdkLibrary() && preventSdkLibApp();
             final ParseResult<ParsingPackage> result = parseBaseApk(input, baseApk,
-                    lite.getPath(), assetLoader, flags);
+                    lite.getPath(), assetLoader, flags, shouldSkipComponents);
             if (result.isError()) {
                 return input.error(result);
             }
@@ -456,10 +458,11 @@ public class ParsingPackageUtils {
         final PackageLite lite = liteResult.getResult();
         final SplitAssetLoader assetLoader = new DefaultSplitAssetLoader(lite, flags);
         try {
+            boolean shouldSkipComponents =  lite.isIsSdkLibrary() && preventSdkLibApp();
             final ParseResult<ParsingPackage> result = parseBaseApk(input,
                     apkFile,
                     apkFile.getCanonicalPath(),
-                    assetLoader, flags);
+                    assetLoader, flags, shouldSkipComponents);
             if (result.isError()) {
                 return input.error(result);
             }
@@ -594,7 +597,8 @@ public class ParsingPackageUtils {
     }
 
     private ParseResult<ParsingPackage> parseBaseApk(ParseInput input, File apkFile,
-            String codePath, SplitAssetLoader assetLoader, int flags) {
+            String codePath, SplitAssetLoader assetLoader, int flags,
+            boolean shouldSkipComponents) {
         final String apkPath = apkFile.getAbsolutePath();
 
         final String volumeUuid = getVolumeUuid(apkPath);
@@ -619,7 +623,7 @@ public class ParsingPackageUtils {
             final Resources res = new Resources(assets, mDisplayMetrics, null);
 
             ParseResult<ParsingPackage> result = parseBaseApk(input, apkPath, codePath, res,
-                    parser, flags);
+                    parser, flags, shouldSkipComponents);
             if (result.isError()) {
                 return input.error(result.getErrorCode(),
                         apkPath + " (at " + parser.getPositionDescription() + "): "
@@ -719,11 +723,12 @@ public class ParsingPackageUtils {
      * @param res     The resources from which to resolve values
      * @param parser  The manifest parser
      * @param flags   Flags how to parse
+     * @param shouldSkipComponents If the package is a sdk-library
      * @return Parsed package or null on error.
      */
     private ParseResult<ParsingPackage> parseBaseApk(ParseInput input, String apkPath,
-            String codePath, Resources res, XmlResourceParser parser, int flags)
-            throws XmlPullParserException, IOException {
+            String codePath, Resources res, XmlResourceParser parser, int flags,
+            boolean shouldSkipComponents) throws XmlPullParserException, IOException {
         final String splitName;
         final String pkgName;
 
@@ -751,7 +756,8 @@ public class ParsingPackageUtils {
             final ParsingPackage pkg = mCallback.startParsingPackage(
                     pkgName, apkPath, codePath, manifestArray, isCoreApp);
             final ParseResult<ParsingPackage> result =
-                    parseBaseApkTags(input, pkg, manifestArray, res, parser, flags);
+                    parseBaseApkTags(input, pkg, manifestArray, res, parser, flags,
+                            shouldSkipComponents);
             if (result.isError()) {
                 return result;
             }
@@ -987,10 +993,9 @@ public class ParsingPackageUtils {
                 return ParsingUtils.unknownTag("<application>", pkg, parser, input);
         }
     }
-
     private ParseResult<ParsingPackage> parseBaseApkTags(ParseInput input, ParsingPackage pkg,
-            TypedArray sa, Resources res, XmlResourceParser parser, int flags)
-            throws XmlPullParserException, IOException {
+            TypedArray sa, Resources res, XmlResourceParser parser, int flags,
+            boolean shouldSkipComponents) throws XmlPullParserException, IOException {
         ParseResult<ParsingPackage> sharedUserResult = parseSharedUser(input, pkg, sa);
         if (sharedUserResult.isError()) {
             return sharedUserResult;
@@ -1027,7 +1032,8 @@ public class ParsingPackageUtils {
                     }
                 } else {
                     foundApp = true;
-                    result = parseBaseApplication(input, pkg, res, parser, flags);
+                    result = parseBaseApplication(input, pkg, res, parser, flags,
+                            shouldSkipComponents);
                 }
             } else {
                 result = parseBaseApkTag(tagName, input, pkg, res, parser, flags);
@@ -1972,8 +1978,8 @@ public class ParsingPackageUtils {
      * code moves around.
      */
     private ParseResult<ParsingPackage> parseBaseApplication(ParseInput input,
-            ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags)
-            throws XmlPullParserException, IOException {
+            ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags,
+            boolean shouldSkipComponents) throws XmlPullParserException, IOException {
         final String pkgName = pkg.getPackageName();
         int targetSdk = pkg.getTargetSdkVersion();
 
@@ -2213,6 +2219,9 @@ public class ParsingPackageUtils {
                     isActivity = true;
                     // fall-through
                 case "receiver":
+                    if (shouldSkipComponents) {
+                        continue;
+                    }
                     ParseResult<ParsedActivity> activityResult =
                             ParsedActivityUtils.parseActivityOrReceiver(mSeparateProcesses, pkg,
                                     res, parser, flags, sUseRoundIcon, null /*defaultSplitName*/,
@@ -2232,6 +2241,9 @@ public class ParsingPackageUtils {
                     result = activityResult;
                     break;
                 case "service":
+                    if (shouldSkipComponents) {
+                        continue;
+                    }
                     ParseResult<ParsedService> serviceResult =
                             ParsedServiceUtils.parseService(mSeparateProcesses, pkg, res, parser,
                                     flags, sUseRoundIcon, null /*defaultSplitName*/,
@@ -2245,6 +2257,9 @@ public class ParsingPackageUtils {
                     result = serviceResult;
                     break;
                 case "provider":
+                    if (shouldSkipComponents) {
+                        continue;
+                    }
                     ParseResult<ParsedProvider> providerResult =
                             ParsedProviderUtils.parseProvider(mSeparateProcesses, pkg, res, parser,
                                     flags, sUseRoundIcon, null /*defaultSplitName*/,
@@ -2256,6 +2271,9 @@ public class ParsingPackageUtils {
                     result = providerResult;
                     break;
                 case "activity-alias":
+                    if (shouldSkipComponents) {
+                        continue;
+                    }
                     activityResult = ParsedActivityUtils.parseActivityAlias(pkg, res,
                             parser, sUseRoundIcon, null /*defaultSplitName*/,
                             input);
@@ -2414,7 +2432,7 @@ public class ParsingPackageUtils {
     /**
      * For parsing non-MainComponents. Main ones have an order and some special handling which is
      * done directly in {@link #parseBaseApplication(ParseInput, ParsingPackage, Resources,
-     * XmlResourceParser, int)}.
+     * XmlResourceParser, int, boolean)}.
      */
     private ParseResult parseBaseAppChildTag(ParseInput input, String tag, ParsingPackage pkg,
             Resources res, XmlResourceParser parser, int flags)
