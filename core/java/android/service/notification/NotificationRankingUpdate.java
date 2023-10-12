@@ -26,6 +26,7 @@ import android.system.ErrnoException;
 import android.system.OsConstants;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 
@@ -138,6 +139,7 @@ public class NotificationRankingUpdate implements Parcelable {
      *
      * @hide
      */
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     public final boolean isFdNotNullAndClosed() {
         return mRankingMapFd != null && mRankingMapFd.getFd() == -1;
     }
