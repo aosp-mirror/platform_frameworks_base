@@ -68,6 +68,7 @@ aconfig_srcjars = [
     ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
     ":com.android.input.flags-aconfig-java{.generated_srcjars}",
     ":com.android.internal.foldables.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.internal.pm.pkg.component.flags-aconfig-java{.generated_srcjars}",
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
     ":com.android.media.flags.editing-aconfig-java{.generated_srcjars}",
     ":com.android.net.thread.flags-aconfig-java{.generated_srcjars}",
@@ -1135,5 +1136,24 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.wearable.flags-aconfig-java",
     aconfig_declarations: "android.app.wearable.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+aconfig_declarations {
+    name: "com.android.internal.pm.pkg.component.flags-aconfig",
+    package: "com.android.internal.pm.pkg.component.flags",
+    srcs: ["core/java/com/android/internal/pm/pkg/component/flags/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.internal.pm.pkg.component.flags-aconfig-java",
+    aconfig_declarations: "com.android.internal.pm.pkg.component.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "com.android.internal.pm.pkg.component.flags-aconfig-java-host",
+    aconfig_declarations: "com.android.internal.pm.pkg.component.flags-aconfig",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

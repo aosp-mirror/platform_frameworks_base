@@ -1273,11 +1273,17 @@
          null to indicate no split types are offered. -->
     <attr name="splitTypes" format="string" />
 
-    <!-- Flag to specify if this app wants to run the dex within its APK but not extracted or
-         locally compiled variants. This keeps the dex code protected by the APK signature. Such
-         apps will always run in JIT mode (same when they are first installed), and the system will
-         never generate ahead-of-time compiled code for them. Depending on the app's workload,
-         there may be some run time performance change, noteably the cold start time. -->
+    <!-- Flag to specify if this app (or process) wants to run the dex within its APK but not
+         extracted or locally compiled variants. This keeps the dex code protected by the APK
+         signature. Such apps (or processes) will always run in JIT mode (same when they are first
+         installed). If enabled at the app level, the system will never generate ahead-of-time
+         compiled code for the app. Depending on the app's workload, there may be some run time
+         performance change, noteably the cold start time.
+
+         <p>This attribute can be applied to either
+         {@link android.R.styleable#AndroidManifestProcess process} or
+         {@link android.R.styleable#AndroidManifestApplication application} tags. If enabled at the
+         app level, any process level attribute is effectively ignored.  -->
     <attr name="useEmbeddedDex" format="boolean" />
 
     <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
@@ -2793,6 +2799,7 @@
         <attr name="gwpAsanMode" />
         <attr name="memtagMode" />
         <attr name="nativeHeapZeroInitialized" />
+        <attr name="useEmbeddedDex" />
     </declare-styleable>
 
     <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied
