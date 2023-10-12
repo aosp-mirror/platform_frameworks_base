@@ -18,6 +18,7 @@ package com.android.wm.shell;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 
+import android.annotation.SuppressLint;
 import android.app.WindowConfiguration;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
@@ -29,6 +30,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -44,9 +46,14 @@ public class RootDisplayAreaOrganizer extends DisplayAreaOrganizer {
     /** Display area leashes, which is mapped by display IDs. */
     private final SparseArray<SurfaceControl> mLeashes = new SparseArray<>();
 
-    public RootDisplayAreaOrganizer(Executor executor) {
+    public RootDisplayAreaOrganizer(@NonNull Executor executor, @NonNull ShellInit shellInit) {
         super(executor);
-        List<DisplayAreaAppearedInfo> infos = registerOrganizer(FEATURE_ROOT);
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    @SuppressLint("MissingPermission") // Only called by SysUI.
+    private void onInit() {
+        final List<DisplayAreaAppearedInfo> infos = registerOrganizer(FEATURE_ROOT);
         for (int i = infos.size() - 1; i >= 0; --i) {
             onDisplayAreaAppeared(infos.get(i).getDisplayAreaInfo(), infos.get(i).getLeash());
         }
