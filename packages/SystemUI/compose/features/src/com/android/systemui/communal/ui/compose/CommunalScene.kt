@@ -16,14 +16,8 @@
 
 package com.android.systemui.communal.ui.compose
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
@@ -51,13 +45,6 @@ class CommunalScene @Inject constructor() : ComposableScene {
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        Box(
-            modifier = modifier.fillMaxSize().background(Color.White),
-        ) {
-            Text(
-                modifier = Modifier.align(Alignment.Center),
-                text = "Hello Communal!",
-            )
-        }
+        CommunalHub(modifier)
     }
 }
