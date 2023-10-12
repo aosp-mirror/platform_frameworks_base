@@ -29,7 +29,6 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -120,8 +119,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
                     fromScene = SceneKey.Lockscreen,
                     toScene = SceneKey.Shade,
                     progress = progress,
-                    isInitiatedByUserInput = false,
-                    isUserInputOngoing = flowOf(false),
+                    isUserInputDriven = false,
                 )
             assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
 

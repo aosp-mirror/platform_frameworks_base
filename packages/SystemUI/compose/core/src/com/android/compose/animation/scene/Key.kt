@@ -22,7 +22,7 @@ import androidx.annotation.VisibleForTesting
  * A base class to create unique keys, associated to an [identity] that is used to check the
  * equality of two key instances.
  */
-sealed class Key(val name: String, val identity: Any) {
+sealed class Key(val debugName: String, val identity: Any) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (this.javaClass != other?.javaClass) return false
@@ -34,7 +34,7 @@ sealed class Key(val name: String, val identity: Any) {
     }
 
     override fun toString(): String {
-        return "Key(name=$name)"
+        return "Key(debugName=$debugName)"
     }
 }
 
@@ -49,7 +49,7 @@ class SceneKey(
     val rootElementKey = ElementKey(name, identity)
 
     override fun toString(): String {
-        return "SceneKey(name=$name)"
+        return "SceneKey(debugName=$debugName)"
     }
 }
 
@@ -71,7 +71,7 @@ class ElementKey(
     }
 
     override fun toString(): String {
-        return "ElementKey(name=$name)"
+        return "ElementKey(debugName=$debugName)"
     }
 
     companion object {
@@ -89,6 +89,6 @@ class ElementKey(
 /** Key for a shared value of an element. */
 class ValueKey(name: String, identity: Any = Object()) : Key(name, identity) {
     override fun toString(): String {
-        return "ValueKey(name=$name)"
+        return "ValueKey(debugName=$debugName)"
     }
 }

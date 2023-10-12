@@ -90,4 +90,13 @@ private class SceneScopeImpl(
             canOverflow,
         )
     }
+
+    @Composable
+    override fun MovableElement(
+        key: ElementKey,
+        modifier: Modifier,
+        content: @Composable MovableElementScope.() -> Unit,
+    ) {
+        MovableElement(layoutImpl, scene, key, modifier, content)
+    }
 }
