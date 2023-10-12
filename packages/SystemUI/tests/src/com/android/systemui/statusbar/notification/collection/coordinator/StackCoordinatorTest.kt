@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfte
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
@@ -57,6 +58,7 @@ class StackCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var groupExpansionManagerImpl: GroupExpansionManagerImpl
     @Mock private lateinit var notificationIconAreaController: NotificationIconAreaController
     @Mock private lateinit var renderListInteractor: RenderNotificationListInteractor
+    @Mock private lateinit var activeNotificationsInteractor: ActiveNotificationsInteractor
     @Mock private lateinit var stackController: NotifStackController
     @Mock private lateinit var section: NotifSection
 
@@ -75,6 +77,7 @@ class StackCoordinatorTest : SysuiTestCase() {
                 groupExpansionManagerImpl,
                 notificationIconAreaController,
                 renderListInteractor,
+                activeNotificationsInteractor,
             )
         coordinator.attach(pipeline)
         afterRenderListListener = withArgCaptor {

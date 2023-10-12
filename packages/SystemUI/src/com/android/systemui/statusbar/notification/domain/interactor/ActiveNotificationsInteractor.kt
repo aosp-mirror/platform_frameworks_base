@@ -15,6 +15,7 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
@@ -52,4 +53,14 @@ constructor(
      */
     val areAnyNotificationsPresentValue: Boolean
         get() = repository.activeNotifications.value.renderList.isNotEmpty()
+
+    /** Are there are any notifications that can be cleared by the "Clear all" button? */
+    val hasClearableNotifications: Flow<Boolean> =
+        repository.notifStats
+            .map { it.hasClearableAlertingNotifs || it.hasClearableSilentNotifs }
+            .distinctUntilChanged()
+
+    fun setNotifStats(notifStats: NotifStats) {
+        repository.notifStats.value = notifStats
+    }
 }

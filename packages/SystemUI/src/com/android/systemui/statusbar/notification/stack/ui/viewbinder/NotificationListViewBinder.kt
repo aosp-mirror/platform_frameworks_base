@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 import android.view.LayoutInflater
 import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.traceSection
+import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.nano.MetricsProto
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.reinflateAndBindLatest
 import com.android.systemui.common.ui.view.setImportantForAccessibilityYesNo
@@ -46,6 +48,7 @@ class NotificationListViewBinder
 @Inject
 constructor(
     private val viewModel: NotificationListViewModel,
+    private val metricsLogger: MetricsLogger,
     private val configuration: ConfigurationState,
     private val configurationController: ConfigurationController,
     private val falsingManager: FalsingManager,
@@ -100,7 +103,17 @@ constructor(
                     attachToRoot = false,
                 ) { footerView: FooterView ->
                     traceSection("bind FooterView") {
-                        val disposableHandle = FooterViewBinder.bind(footerView, footerViewModel)
+                        val disposableHandle =
+                            FooterViewBinder.bind(
+                                footerView,
+                                footerViewModel,
+                                clearAllNotifications = {
+                                    metricsLogger.action(
+                                        MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES
+                                    )
+                                    parentView.clearAllNotifications()
+                                },
+                            )
                         parentView.setFooterView(footerView)
                         return@reinflateAndBindLatest disposableHandle
                     }

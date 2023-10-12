@@ -470,7 +470,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
                 @Override
                 public void onSnooze(StatusBarNotification sbn,
-                                     NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
+                        NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
                     mNotificationsController.setNotificationSnoozed(sbn, snoozeOption);
                 }
 
@@ -592,7 +592,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
                 @Override
                 public boolean updateSwipeProgress(View animView, boolean dismissable,
-                                                   float swipeProgress) {
+                        float swipeProgress) {
                     // Returning true prevents alpha fading.
                     return false;
                 }
@@ -759,8 +759,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mView.setClearAllAnimationListener(this::onAnimationEnd);
         mView.setClearAllListener((selection) -> mUiEventLogger.log(
                 NotificationPanelEvent.fromSelection(selection)));
-        mView.setFooterClearAllListener(() ->
-                mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
+        if (!FooterViewRefactor.isEnabled()) {
+            mView.setFooterClearAllListener(() ->
+                    mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
+        }
         mView.setIsRemoteInputActive(mRemoteInputManager.isRemoteInputActive());
         mRemoteInputManager.addControllerCallback(new RemoteInputController.Callback() {
             @Override
@@ -1090,7 +1092,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setOverScrollAmount(float amount, boolean onTop, boolean animate,
-                                    boolean cancelAnimators) {
+            boolean cancelAnimators) {
         mView.setOverScrollAmount(amount, onTop, animate, cancelAnimators);
     }
 
@@ -1408,14 +1410,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Return whether there are any clearable notifications
      */
     public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
-        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the clear all
-        //  button in the refactored code
+        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the footer
+        //  visibility in the refactored code
         return hasNotifications(selection, true /* clearable */);
     }
 
     public boolean hasNotifications(@SelectedRows int selection, boolean isClearable) {
-        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the clear all
-        //  button in the refactored code
+        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the footer
+        //  visibility in the refactored code
         boolean hasAlertingMatchingClearable = isClearable
                 ? mNotifStats.getHasClearableAlertingNotifs()
                 : mNotifStats.getHasNonClearableAlertingNotifs();
@@ -1454,7 +1456,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     public RemoteInputController.Delegate createDelegate() {
         return new RemoteInputController.Delegate() {
             public void setRemoteInputActive(NotificationEntry entry,
-                                             boolean remoteInputActive) {
+                    boolean remoteInputActive) {
                 mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
                 entry.notifyHeightChanged(true /* needsAnimation */);
                 updateFooter();
@@ -1573,7 +1575,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     private void onAnimationEnd(List<ExpandableNotificationRow> viewsToRemove,
-                                @SelectedRows int selectedRows) {
+            @SelectedRows int selectedRows) {
         if (selectedRows == ROWS_ALL) {
             mNotifCollection.dismissAllNotifications(
                     mLockscreenUserManager.getCurrentUserId());
@@ -1665,7 +1667,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Set rounded rect clipping bounds on this view.
      */
     public void setRoundedClippingBounds(int left, int top, int right, int bottom, int topRadius,
-                                         int bottomRadius) {
+            int bottomRadius) {
         mView.setRoundedClippingBounds(left, top, right, bottom, topRadius, bottomRadius);
     }
 
@@ -2021,7 +2023,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private class NotifStackControllerImpl implements NotifStackController {
         @Override
         public void setNotifStats(@NonNull NotifStats notifStats) {
-            // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once clear all visibility
+            // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once footer visibility
             // is handled in the refactored stack.
             mNotifStats = notifStats;
 

@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
@@ -41,6 +42,7 @@ internal constructor(
     private val groupExpansionManagerImpl: GroupExpansionManagerImpl,
     private val notificationIconAreaController: NotificationIconAreaController,
     private val renderListInteractor: RenderNotificationListInteractor,
+    private val activeNotificationsInteractor: ActiveNotificationsInteractor,
 ) : Coordinator {
 
     override fun attach(pipeline: NotifPipeline) {
@@ -50,7 +52,13 @@ internal constructor(
 
     fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
         traceSection("StackCoordinator.onAfterRenderList") {
-            controller.setNotifStats(calculateNotifStats(entries))
+            val notifStats = calculateNotifStats(entries)
+            if (FooterViewRefactor.isEnabled) {
+                activeNotificationsInteractor.setNotifStats(notifStats)
+            }
+            // TODO(b/293167744): This shouldn't be done if the footer flag is on, once the footer
+            //  visibility is handled in the new stack.
+            controller.setNotifStats(notifStats)
             if (NotificationIconContainerRefactor.isEnabled || FooterViewRefactor.isEnabled) {
                 renderListInteractor.setRenderedList(entries)
             } else {
