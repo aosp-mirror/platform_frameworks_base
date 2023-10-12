@@ -43,3 +43,10 @@ flag {
     description: "Feature flag to enable the feature to retrieve package info without installation."
     bug: "269149275"
 }
+
+flag {
+    name: "use_art_service_v2"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the features that rely on new ART Service APIs that are in the VIC version of the ART module."
+    bug: "304741685"
+}
