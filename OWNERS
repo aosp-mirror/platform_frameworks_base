@@ -34,3 +34,6 @@ per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
 
 per-file ZYGOTE_OWNERS = file:/ZYGOTE_OWNERS
 per-file SQLITE_OWNERS = file:/SQLITE_OWNERS
+
+per-file *ravenwood* = file:ravenwood/OWNERS
+per-file *Ravenwood* = file:ravenwood/OWNERS

@@ -36,7 +36,6 @@ import java.util.function.Consumer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyString
@@ -479,7 +478,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
                 verify(flagManager, times(numReads))
                     .readFlagValue(eq(name), any<FlagSerializer<*>>())
                 verify(flagManager).nameToSettingsKey(eq(name))
-                verify(globalSettings).putStringForUser(eq("key-$name"), eq(data), anyInt())
+                verify(globalSettings).putString(eq("key-$name"), eq(data))
                 verify(flagManager).dispatchListenersAndMaybeRestart(eq(name), any())
             }
             .verifyNoMoreInteractions()

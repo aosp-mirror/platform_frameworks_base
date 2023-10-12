@@ -86,7 +86,16 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     @Override
     public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
             @Nullable SurfaceControl.Transaction finishT) {
-        mRequestedRemotes.remove(transition);
+        RemoteTransition remoteTransition = mRequestedRemotes.remove(transition);
+        if (remoteTransition == null) {
+            return;
+        }
+
+        try {
+            remoteTransition.getRemoteTransition().onTransitionConsumed(transition, aborted);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error delegating onTransitionConsumed()", e);
+        }
     }
 
     @Override

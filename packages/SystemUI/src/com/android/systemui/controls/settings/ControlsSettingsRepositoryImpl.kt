@@ -22,7 +22,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.qs.SettingObserver
+import com.android.systemui.qs.UserSettingObserver
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
@@ -64,7 +64,8 @@ constructor(
             .flatMapLatest { userInfo ->
                 conflatedCallbackFlow {
                         val observer =
-                            object : SettingObserver(secureSettings, null, setting, userInfo.id) {
+                            object :
+                                UserSettingObserver(secureSettings, null, setting, userInfo.id) {
                                 override fun handleValueChanged(
                                     value: Int,
                                     observedChange: Boolean

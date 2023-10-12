@@ -29,7 +29,7 @@ import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,14 +56,14 @@ class UserRepositoryImplTest : SysuiTestCase() {
 
     private lateinit var underTest: UserRepositoryImpl
 
-    private lateinit var globalSettings: FakeSettings
+    private lateinit var globalSettings: FakeGlobalSettings
     private lateinit var tracker: FakeUserTracker
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        globalSettings = FakeSettings()
+        globalSettings = FakeGlobalSettings()
         tracker = FakeUserTracker()
     }
 
@@ -282,20 +282,17 @@ class UserRepositoryImplTest : SysuiTestCase() {
             com.android.internal.R.bool.config_expandLockScreenUserSwitcher,
             true,
         )
-        globalSettings.putIntForUser(
+        globalSettings.putInt(
             UserRepositoryImpl.SETTING_SIMPLE_USER_SWITCHER,
             if (isSimpleUserSwitcher) 1 else 0,
-            UserHandle.USER_SYSTEM,
         )
-        globalSettings.putIntForUser(
+        globalSettings.putInt(
             Settings.Global.ADD_USERS_WHEN_LOCKED,
             if (isAddUsersFromLockscreen) 1 else 0,
-            UserHandle.USER_SYSTEM,
         )
-        globalSettings.putIntForUser(
+        globalSettings.putInt(
             Settings.Global.USER_SWITCHER_ENABLED,
             if (isUserSwitcherEnabled) 1 else 0,
-            UserHandle.USER_SYSTEM,
         )
     }
 

@@ -113,6 +113,7 @@ public final class VirtualDevice implements Parcelable {
      * <p class="note">This identifier may not be unique across virtual devices, in case there are
      * more than one virtual devices corresponding to the same physical device.
      */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public @Nullable String getPersistentDeviceId() {
         return mPersistentId;
     }

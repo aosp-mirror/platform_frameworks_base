@@ -21,7 +21,7 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -36,7 +36,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 class RetailModeSettingsRepositoryTest : SysuiTestCase() {
 
-    private val globalSettings = FakeSettings()
+    private val globalSettings = FakeGlobalSettings()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)

@@ -1172,6 +1172,12 @@ public final class DevicePolicyResources {
             public static final String WORK_CATEGORY_HEADER = PREFIX + "WORK_CATEGORY_HEADER";
 
             /**
+             * Header for items under the private user
+             */
+            public static final String PRIVATE_CATEGORY_HEADER =
+                    PREFIX + "PRIVATE_CATEGORY_HEADER";
+
+            /**
              * Header for items under the personal user
              */
             public static final String PERSONAL_CATEGORY_HEADER =
@@ -1206,6 +1212,12 @@ public final class DevicePolicyResources {
              * Text for toggle to enable auto-sycing work data
              */
             public static final String AUTO_SYNC_WORK_DATA = PREFIX + "AUTO_SYNC_WORK_DATA";
+
+            /**
+             * Text for toggle to enable auto-sycing private data
+             */
+            public static final String AUTO_SYNC_PRIVATE_DATA = PREFIX
+                    + "AUTO_SYNC_PRIVATE_DATA";
 
             /**
              * Summary for "More security settings" section when a work profile is on the device.

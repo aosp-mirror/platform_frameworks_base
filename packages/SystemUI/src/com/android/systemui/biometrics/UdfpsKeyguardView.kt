@@ -43,10 +43,6 @@ class UdfpsKeyguardView(
         return fingerprintDrawablePlaceHolder
     }
 
-    fun useExpandedOverlay(useExpandedOverlay: Boolean) {
-        mUseExpandedOverlay = useExpandedOverlay
-    }
-
     fun isVisible(): Boolean {
         return visible
     }

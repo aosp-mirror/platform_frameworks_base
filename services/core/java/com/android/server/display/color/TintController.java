@@ -75,6 +75,10 @@ abstract class TintController {
         return TRANSITION_DURATION;
     }
 
+    public long getTransitionDurationMilliseconds(boolean direction) {
+        return TRANSITION_DURATION;
+    }
+
     /**
      * Dump debug information.
      */

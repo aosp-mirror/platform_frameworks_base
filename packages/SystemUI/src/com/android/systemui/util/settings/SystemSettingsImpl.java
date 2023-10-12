@@ -20,6 +20,8 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;
@@ -74,7 +76,7 @@ class SystemSettingsImpl implements SystemSettings {
     }
 
     @Override
-    public boolean putString(String name, String value, String tag, boolean makeDefault) {
+    public boolean putString(@NonNull String name, String value, String tag, boolean makeDefault) {
         throw new UnsupportedOperationException(
                 "This method only exists publicly for Settings.Secure and Settings.Global");
     }

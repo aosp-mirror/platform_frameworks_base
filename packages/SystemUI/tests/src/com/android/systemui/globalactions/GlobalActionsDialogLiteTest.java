@@ -78,6 +78,8 @@ import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -105,8 +107,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private TelephonyListenerManager mTelephonyListenerManager;
-    @Mock private GlobalSettings mGlobalSettings;
-    @Mock private SecureSettings mSecureSettings;
+    private GlobalSettings mGlobalSettings;
+    private SecureSettings mSecureSettings;
     @Mock private Resources mResources;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private UserTracker mUserTracker;
@@ -147,6 +149,9 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         when(mUserContextProvider.getUserContext()).thenReturn(mContext);
         when(mResources.getConfiguration()).thenReturn(
                 getContext().getResources().getConfiguration());
+
+        mGlobalSettings = new FakeGlobalSettings();
+        mSecureSettings = new FakeSettings();
 
         mGlobalActionsDialogLite = new GlobalActionsDialogLite(mContext,
                 mWindowManagerFuncs,
@@ -592,8 +597,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         UserInfo currentUser = mockCurrentUser(FLAG_ADMIN);
 
         when(mGlobalActionsDialogLite.getCurrentUser()).thenReturn(currentUser);
-        when(mGlobalSettings.getIntForUser(Settings.Secure.BUGREPORT_IN_POWER_MENU,
-                0, currentUser.id)).thenReturn(1);
+        mSecureSettings.putIntForUser(Settings.Secure.BUGREPORT_IN_POWER_MENU, 1,
+                currentUser.id);
 
         GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();
@@ -605,8 +610,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         UserInfo currentUser = mockCurrentUser(0);
 
         when(mGlobalActionsDialogLite.getCurrentUser()).thenReturn(currentUser);
-        doReturn(1).when(mGlobalSettings)
-                .getIntForUser(Settings.Secure.BUGREPORT_IN_POWER_MENU, 0, currentUser.id);
+        mSecureSettings.putIntForUser(Settings.Secure.BUGREPORT_IN_POWER_MENU, 1,
+                currentUser.id);
 
         GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();

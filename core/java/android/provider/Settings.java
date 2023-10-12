@@ -5354,6 +5354,37 @@ public final class Settings {
         public static final Uri NOTIFICATION_SOUND_CACHE_URI = getUriFor(NOTIFICATION_SOUND_CACHE);
 
         /**
+         * When enabled, notifications attention effects: sound, vibration, flashing
+         * will have a cooldown timer.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String NOTIFICATION_COOLDOWN_ENABLED =
+            "notification_cooldown_enabled";
+
+        /**
+         * When enabled, notification cooldown will apply to all notifications.
+         * Otherwise cooldown will only apply to conversations.
+         *
+         * The value 1 - enable, 0 - disable
+         * Only valid if {@code NOTIFICATION_COOLDOWN_ENABLED} is enabled.
+         * @hide
+         */
+        public static final String NOTIFICATION_COOLDOWN_ALL =
+            "notification_cooldown_all";
+
+        /**
+         * When enabled, notification attention effects will be restricted to vibration only
+         * as long as the screen is unlocked.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED =
+            "notification_cooldown_vibrate_unlocked";
+
+        /**
          * Persistent store for the system-wide default alarm alert.
          *
          * @see #RINGTONE
@@ -12469,6 +12500,13 @@ public final class Settings {
         @Readable
         public static final String WIRELESS_CHARGING_STARTED_SOUND =
                 "wireless_charging_started_sound";
+
+        /**
+         * Whether to auto enable reverse charging once plugged-in.
+         * @hide
+         */
+        public static final String REVERSE_CHARGING_AUTO_ON =
+                "settings_key_reverse_charging_auto_turn_on";
 
         /**
          * URI for "wired charging started" sound.

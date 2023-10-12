@@ -20,7 +20,6 @@ import android.annotation.SuppressLint
 import android.annotation.UiThread
 import android.content.Context
 import android.graphics.PixelFormat
-import android.graphics.Point
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
@@ -29,7 +28,6 @@ import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTING
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
 import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
-import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.os.Build
 import android.os.RemoteException
@@ -54,7 +52,6 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.flags.Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
@@ -65,7 +62,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.settings.SecureSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Provider
 
@@ -83,7 +79,6 @@ const val SETTING_REMOVE_ENROLLMENT_UI = "udfps_overlay_remove_enrollment_ui"
 @UiThread
 class UdfpsControllerOverlay @JvmOverloads constructor(
         private val context: Context,
-        fingerprintManager: FingerprintManager,
         private val inflater: LayoutInflater,
         private val windowManager: WindowManager,
         private val accessibilityManager: AccessibilityManager,
@@ -97,7 +92,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val keyguardStateController: KeyguardStateController,
         private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
         private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
-        private val secureSettings: SecureSettings,
         val requestId: Long,
         @ShowReason val requestReason: Int,
         private val controllerCallback: IUdfpsOverlayControllerCallback,
@@ -107,7 +101,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val primaryBouncerInteractor: PrimaryBouncerInteractor,
         private val alternateBouncerInteractor: AlternateBouncerInteractor,
         private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
-        private val udfpsUtils: UdfpsUtils,
         private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
         private val udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>,
 ) {
@@ -134,10 +127,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
         // Avoid announcing window title.
         accessibilityTitle = " "
-
-        if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-            inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
-        }
+        inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
     }
 
     /** If the overlay is currently showing. */
@@ -206,7 +196,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         overlayTouchListener!!
                     )
                     overlayTouchListener?.onTouchExplorationStateChanged(true)
-                    useExpandedOverlay = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 }
             } catch (e: RuntimeException) {
                 Log.e(TAG, "showUdfpsOverlay | failed to add window", e)
@@ -331,25 +320,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         return wasShowing
     }
 
-    /**
-     * This function computes the angle of touch relative to the sensor and maps
-     * the angle to a list of help messages which are announced if accessibility is enabled.
-     *
-     */
-    fun onTouchOutsideOfSensorArea(scaledTouch: Point) {
-        val theStr =
-            udfpsUtils.onTouchOutsideOfSensorArea(
-                touchExplorationEnabled,
-                context,
-                scaledTouch.x,
-                scaledTouch.y,
-                overlayParams
-            )
-        if (theStr != null) {
-            animationViewController?.doAnnounceForAccessibility(theStr)
-        }
-    }
-
     /** Cancel this request. */
     fun cancel() {
         try {
@@ -367,10 +337,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     ): WindowManager.LayoutParams {
         val paddingX = animation?.paddingX ?: 0
         val paddingY = animation?.paddingY ?: 0
-        if (!featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION) && animation != null &&
-                animation.listenForTouchesOutsideView()) {
-            flags = flags or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-        }
 
         val isEnrollment = when (requestReason) {
             REASON_ENROLL_FIND_SENSOR, REASON_ENROLL_ENROLLING -> true
@@ -379,19 +345,15 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
 
         // Use expanded overlay unless touchExploration enabled
         var rotatedBounds =
-            if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-                if (accessibilityManager.isTouchExplorationEnabled && isEnrollment) {
-                    Rect(overlayParams.sensorBounds)
-                } else {
-                    Rect(
-                        0,
-                        0,
-                        overlayParams.naturalDisplayWidth,
-                        overlayParams.naturalDisplayHeight
-                    )
-                }
-            } else {
+            if (accessibilityManager.isTouchExplorationEnabled && isEnrollment) {
                 Rect(overlayParams.sensorBounds)
+            } else {
+                Rect(
+                    0,
+                    0,
+                    overlayParams.naturalDisplayWidth,
+                    overlayParams.naturalDisplayHeight
+                )
             }
 
         val rot = overlayParams.rotation
@@ -399,9 +361,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             if (!shouldRotate(animation)) {
                 Log.v(
                     TAG, "Skip rotating UDFPS bounds " + Surface.rotationToString(rot) +
-                            " animation=$animation" +
-                            " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
-                            " isOccluded=${keyguardStateController.isOccluded}"
+                        " animation=$animation" +
+                        " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
+                        " isOccluded=${keyguardStateController.isOccluded}"
                 )
             } else {
                 Log.v(TAG, "Rotate UDFPS bounds " + Surface.rotationToString(rot))
@@ -412,14 +374,12 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     rot
                 )
 
-                if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-                    RotationUtils.rotateBounds(
-                            sensorBounds,
-                            overlayParams.naturalDisplayWidth,
-                            overlayParams.naturalDisplayHeight,
-                            rot
-                    )
-                }
+                RotationUtils.rotateBounds(
+                    sensorBounds,
+                    overlayParams.naturalDisplayWidth,
+                    overlayParams.naturalDisplayHeight,
+                    rot
+                )
             }
         }
 

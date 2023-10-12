@@ -1,0 +1,9 @@
+package: "com.android.internal.foldables.flags"
+
+flag {
+    name: "fold_lock_setting_enabled"
+    namespace: "display_manager"
+    description: "Feature flag for Fold Lock Setting"
+    bug: "274447767"
+    is_fixed_read_only: true
+}

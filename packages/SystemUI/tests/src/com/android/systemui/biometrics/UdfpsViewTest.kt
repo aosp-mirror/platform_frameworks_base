@@ -16,8 +16,6 @@
 
 package com.android.systemui.biometrics
 
-import android.graphics.PointF
-import android.graphics.RectF
 import android.hardware.biometrics.SensorLocationInternal
 import android.testing.TestableLooper
 import android.testing.ViewUtils
@@ -42,7 +40,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import org.mockito.Mockito.`when` as whenever
 
 private const val SENSOR_X = 50
 private const val SENSOR_Y = 250
@@ -80,56 +77,7 @@ class UdfpsViewTest : SysuiTestCase() {
         ViewUtils.detachView(view)
     }
 
-    @Test
-    fun layoutSizeFitsSensor() {
-        val params = withArgCaptor<RectF> {
-            verify(animationViewController).onSensorRectUpdated(capture())
-        }
-        assertThat(params.width()).isAtLeast(2f * SENSOR_RADIUS)
-        assertThat(params.height()).isAtLeast(2f * SENSOR_RADIUS)
-    }
-
-    @Test
-    fun isWithinSensorAreaAndPaused() = isWithinSensorArea(paused = true)
-
-    @Test
-    fun isWithinSensorAreaAndNotPaused() = isWithinSensorArea(paused = false)
-
-    private fun isWithinSensorArea(paused: Boolean) {
-        whenever(animationViewController.shouldPauseAuth()).thenReturn(paused)
-        whenever(animationViewController.touchTranslation).thenReturn(PointF(0f, 0f))
-        val end = (SENSOR_RADIUS * 2) - 1
-        for (x in 1 until end) {
-            for (y in 1 until end) {
-                assertThat(view.isWithinSensorArea(x.toFloat(), y.toFloat())).isEqualTo(!paused)
-            }
-        }
-    }
-
-    @Test
-    fun isWithinSensorAreaWhenTranslated() {
-        val offset = PointF(100f, 200f)
-        whenever(animationViewController.touchTranslation).thenReturn(offset)
-        val end = (SENSOR_RADIUS * 2) - 1
-        for (x in 0 until offset.x.toInt() step 2) {
-            for (y in 0 until offset.y.toInt() step 2) {
-                assertThat(view.isWithinSensorArea(x.toFloat(), y.toFloat())).isFalse()
-            }
-        }
-        for (x in offset.x.toInt() + 1 until offset.x.toInt() + end) {
-            for (y in offset.y.toInt() + 1 until offset.y.toInt() + end) {
-                assertThat(view.isWithinSensorArea(x.toFloat(), y.toFloat())).isTrue()
-            }
-        }
-    }
-
-    @Test
-    fun isNotWithinSensorArea() {
-        whenever(animationViewController.touchTranslation).thenReturn(PointF(0f, 0f))
-        assertThat(view.isWithinSensorArea(SENSOR_RADIUS * 2.5f, SENSOR_RADIUS.toFloat()))
-            .isFalse()
-        assertThat(view.isWithinSensorArea(SENSOR_RADIUS.toFloat(), SENSOR_RADIUS * 2.5f)).isFalse()
-    }
+    // TODO: Add test to verify view is size of screen
 
     @Test
     fun startAndStopIllumination() {

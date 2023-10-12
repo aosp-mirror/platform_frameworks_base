@@ -1,0 +1,37 @@
+# File containing standard options to HostStubGen for Ravenwood
+
+--debug
+
+# Keep all classes / methods / fields, but make the methods throw.
+--default-throw
+
+# Uncomment below lines to enable each feature.
+# --enable-non-stub-method-check
+
+#--default-method-call-hook
+#    com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+#--default-class-load-hook
+#    com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+
+# Standard annotations.
+# Note, each line is a single argument, so we need newlines after each `--xxx-annotation`.
+--keep-annotation
+    android.ravenwood.annotations.RavenwoodKeep
+
+--keep-class-annotation
+    android.ravenwood.annotations.RavenwoodWholeClassKeep
+
+--throw-annotation
+    android.ravenwood.annotations.RavenwoodThrow
+
+--remove-annotation
+    android.ravenwood.annotations.RavenwoodRemove
+
+--substitute-annotation
+    android.ravenwood.annotations.RavenwoodSubstitute
+
+--native-substitute-annotation
+    android.ravenwood.annotations.RavenwoodNativeSubstitutionClass
+
+--class-load-hook-annotation
+    android.ravenwood.annotations.RavenwoodClassLoadHook

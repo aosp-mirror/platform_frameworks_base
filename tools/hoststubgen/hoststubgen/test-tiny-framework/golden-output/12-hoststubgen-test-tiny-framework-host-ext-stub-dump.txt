@@ -372,7 +372,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializer
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 2, attributes: 3
+  interfaces: 0, fields: 1, methods: 1, attributes: 3
   public static boolean sInitialized;
     descriptor: Z
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
@@ -382,17 +382,6 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
     flags: (0x0001) ACC_PUBLIC
     Code:
       stack=3, locals=1, args_size=1
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-
-  static {};
-    descriptor: ()V
-    flags: (0x0008) ACC_STATIC
-    Code:
-      stack=3, locals=0, args_size=0
          x: new           #x                 // class java/lang/RuntimeException
          x: dup
          x: ldc           #x                 // String Stub!

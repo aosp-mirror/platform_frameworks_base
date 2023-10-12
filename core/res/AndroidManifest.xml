@@ -7233,9 +7233,11 @@
                 android:description="@string/permdesc_fullScreenIntent"
                 android:protectionLevel="normal|appop" />
 
-    <!-- Required for the assistant apps targeting {@link android.os.Build.VERSION_CODES#V}
+    <!-- @SystemApi Required for the privileged assistant apps targeting
+         {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
          that receive voice trigger from the trusted hotword detection service.
          <p>Protection level: signature|privileged|appop
+         @FlaggedApi("android.permission.flags.voice_activation_permission_apis")
          @hide -->
     <permission android:name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO"
                 android:protectionLevel="signature|privileged|appop" />

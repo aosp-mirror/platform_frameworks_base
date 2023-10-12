@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -27,7 +28,6 @@ import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -377,7 +377,7 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      * @hide
      */
-    @SuppressLint("UnflaggedApi")
+    @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS)
     @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7;
 

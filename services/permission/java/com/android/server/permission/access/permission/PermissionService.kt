@@ -1738,6 +1738,9 @@ class PermissionService(
             with(policy) {
                 resetRuntimePermissions(androidPackage.packageName, userId)
             }
+            with(devicePolicy) {
+                resetRuntimePermissions(androidPackage.packageName, userId)
+            }
         }
     }
 
@@ -1746,6 +1749,9 @@ class PermissionService(
             service.mutateState {
                 snapshot.packageStates.forEach { (_, packageState) ->
                     with(policy) {
+                        resetRuntimePermissions(packageState.packageName, userId)
+                    }
+                    with(devicePolicy) {
                         resetRuntimePermissions(packageState.packageName, userId)
                     }
                 }

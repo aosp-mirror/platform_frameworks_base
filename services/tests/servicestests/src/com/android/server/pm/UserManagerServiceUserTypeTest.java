@@ -90,6 +90,7 @@ public class UserManagerServiceUserTypeTest {
                 .setMediaSharedWithParent(true)
                 .setCredentialShareableWithParent(false)
                 .setShowInSettings(900)
+                .setHideInSettingsInQuietMode(true)
                 .setInheritDevicePolicy(340)
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(true);
@@ -160,6 +161,7 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(type.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertFalse(type.getDefaultUserPropertiesReference().isCredentialShareableWithParent());
         assertEquals(900, type.getDefaultUserPropertiesReference().getShowInSettings());
+        assertTrue(type.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
         assertEquals(340, type.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
         assertTrue(type.getDefaultUserPropertiesReference().getDeleteAppWithParent());
@@ -217,6 +219,7 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(props.isCredentialShareableWithParent());
         assertFalse(props.getDeleteAppWithParent());
         assertFalse(props.getAlwaysVisible());
+        assertFalse(props.getHideInSettingsInQuietMode());
 
         assertFalse(type.hasBadge());
     }
@@ -304,6 +307,7 @@ public class UserManagerServiceUserTypeTest {
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
                 .setShowInSettings(20)
+                .setHideInSettingsInQuietMode(false)
                 .setInheritDevicePolicy(21)
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(false);
@@ -344,6 +348,7 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(aospType.getDefaultUserPropertiesReference()
                 .isCredentialShareableWithParent());
         assertEquals(20, aospType.getDefaultUserPropertiesReference().getShowInSettings());
+        assertFalse(aospType.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
         assertEquals(21, aospType.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
         assertTrue(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
@@ -390,6 +395,7 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(aospType.getDefaultUserPropertiesReference()
                 .isCredentialShareableWithParent());
         assertEquals(23, aospType.getDefaultUserPropertiesReference().getShowInSettings());
+        assertTrue(aospType.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
         assertEquals(450, aospType.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
         assertFalse(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
