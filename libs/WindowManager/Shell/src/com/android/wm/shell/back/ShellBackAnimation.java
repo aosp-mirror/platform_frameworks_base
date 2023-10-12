@@ -34,6 +34,9 @@ public abstract class ShellBackAnimation {
     @Qualifier
     public @interface ReturnToHome {}
 
+    @Qualifier
+    public @interface DialogClose {}
+
     /** Retrieve the {@link BackAnimationRunner} associated with this animation. */
     public abstract BackAnimationRunner getRunner();
 

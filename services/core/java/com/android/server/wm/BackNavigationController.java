@@ -78,8 +78,6 @@ class BackNavigationController {
     private @BackNavigationInfo.BackTargetType int mLastBackType;
     private boolean mShowWallpaper;
     private Runnable mPendingAnimation;
-
-    private boolean mBackAnimationRunning;
     private final NavigationMonitor mNavigationMonitor = new NavigationMonitor();
 
     private AnimationHandler mAnimationHandler;
@@ -248,12 +246,13 @@ class BackNavigationController {
             // - We have an application callback.
             // - We don't have any ActivityRecord or Task to animate.
             // - The IME is opened, and we just need to close it.
-            // - The home activity is the focused activity.
+            // - The home activity is the focused activity & it's not TYPE_BASE_APPLICATION
             // - The current activity will do shared element transition when exiting.
             if (backType == BackNavigationInfo.TYPE_CALLBACK
                     || currentActivity == null
                     || currentTask == null
-                    || currentActivity.isActivityTypeHome()
+                    || (currentActivity.isActivityTypeHome()
+                            && window.mAttrs.type == TYPE_BASE_APPLICATION)
                     || currentActivity.mHasSceneTransition) {
                 infoBuilder.setType(BackNavigationInfo.TYPE_CALLBACK);
                 infoBuilder.setOnBackNavigationDone(new RemoteCallback(result ->
@@ -363,14 +362,21 @@ class BackNavigationController {
             // For now, we only animate when going home, cross task or cross-activity.
             boolean prepareAnimation =
                     (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
-                            || backType == BackNavigationInfo.TYPE_CROSS_TASK
-                            || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY)
-                    && adapter != null;
+                                    || backType == BackNavigationInfo.TYPE_CROSS_TASK
+                                    || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY
+                                    || backType == BackNavigationInfo.TYPE_DIALOG_CLOSE)
+                            && adapter != null;
 
             if (prepareAnimation) {
                 final AnimationHandler.ScheduleAnimationBuilder builder =
-                        mAnimationHandler.prepareAnimation(backType, adapter,
-                                currentTask, prevTask, currentActivity, prevActivities);
+                        mAnimationHandler.prepareAnimation(
+                                backType,
+                                adapter,
+                                currentTask,
+                                prevTask,
+                                currentActivity,
+                                prevActivities,
+                                removedWindowContainer);
                 mBackAnimationInProgress = builder != null;
                 if (mBackAnimationInProgress) {
                     if (removedWindowContainer.hasCommittedReparentToAnimationLeash()
@@ -739,7 +745,6 @@ class BackNavigationController {
         mAnimationHandler.clearBackAnimateTarget();
         mNavigationMonitor.stopMonitorTransition();
         mWaitTransitionFinish = null;
-        mBackAnimationRunning = false;
     }
 
     /**
@@ -836,6 +841,7 @@ class BackNavigationController {
         private static final int UNKNOWN = 0;
         private static final int TASK_SWITCH = 1;
         private static final int ACTIVITY_SWITCH = 2;
+        private static final int DIALOG_CLOSE = 3;
 
         private static boolean isActivitySwitch(@NonNull WindowContainer close,
                 @NonNull WindowContainer[] open) {
@@ -860,12 +866,18 @@ class BackNavigationController {
             return open[0].asTask() != null && (close.asTask() != open[0].asTask());
         }
 
+        private static boolean isDialogClose(WindowContainer close) {
+            return close.asWindowState() != null;
+        }
+
         private void initiate(@NonNull WindowContainer close, @NonNull WindowContainer[] open,
                 @NonNull ActivityRecord[] openingActivities)  {
             if (isActivitySwitch(close, open)) {
                 mSwitchType = ACTIVITY_SWITCH;
             } else if (isTaskSwitch(close, open)) {
                 mSwitchType = TASK_SWITCH;
+            } else if (isDialogClose(close)) {
+                mSwitchType = DIALOG_CLOSE;
             } else {
                 mSwitchType = UNKNOWN;
                 return;
@@ -1173,6 +1185,7 @@ class BackNavigationController {
                 mIsOpen = isOpen;
                 mSwitchType = switchType;
             }
+
             @Override
             public boolean getShowWallpaper() {
                 return false;
@@ -1182,7 +1195,14 @@ class BackNavigationController {
             public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
                     int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
                 mCapturedLeash = animationLeash;
-                createRemoteAnimationTarget(mIsOpen);
+                createRemoteAnimationTarget();
+                final WindowState win = mTarget.asWindowState();
+                if (win != null && mSwitchType == DIALOG_CLOSE) {
+                    final Rect frame = win.getFrame();
+                    final Point position = new Point();
+                    win.transformFrameToSurfacePosition(frame.left, frame.top, position);
+                    t.setPosition(mCapturedLeash, position.x, position.y);
+                }
             }
 
             @Override
@@ -1216,12 +1236,14 @@ class BackNavigationController {
 
             }
 
-            RemoteAnimationTarget createRemoteAnimationTarget(boolean isOpen) {
+            RemoteAnimationTarget createRemoteAnimationTarget() {
                 if (mAnimationTarget != null) {
                     return mAnimationTarget;
                 }
-                Task t = mTarget.asTask();
-                ActivityRecord r = null;
+
+                WindowState w = mTarget.asWindowState();
+                ActivityRecord r = w != null ? w.getActivityRecord() : null;
+                Task t = r != null ? r.getTask() : mTarget.asTask();
                 if (t == null && mTarget.asTaskFragment() != null) {
                     t = mTarget.asTaskFragment().getTask();
                     r = mTarget.asTaskFragment().getTopNonFinishingActivity();
@@ -1247,7 +1269,7 @@ class BackNavigationController {
                 } else {
                     insets = new Rect();
                 }
-                final int mode = isOpen ? MODE_OPENING : MODE_CLOSING;
+                final int mode = mIsOpen ? MODE_OPENING : MODE_CLOSING;
                 mAnimationTarget = new RemoteAnimationTarget(t.mTaskId, mode, mCapturedLeash,
                         !r.fillsParent(), new Rect(),
                         insets, r.getPrefixOrderIndex(), new Point(mBounds.left, mBounds.top),
@@ -1259,6 +1281,9 @@ class BackNavigationController {
 
             void createStartingSurface(@NonNull WindowContainer closeWindow) {
                 if (!mIsOpen) {
+                    return;
+                }
+                if (mSwitchType == DIALOG_CLOSE) {
                     return;
                 }
                 final Task openTask = mSwitchType == TASK_SWITCH
@@ -1332,9 +1357,14 @@ class BackNavigationController {
             }
         }
 
-        ScheduleAnimationBuilder prepareAnimation(int backType, BackAnimationAdapter adapter,
-                Task currentTask, Task previousTask, ActivityRecord currentActivity,
-                ArrayList<ActivityRecord> previousActivity) {
+        ScheduleAnimationBuilder prepareAnimation(
+                int backType,
+                BackAnimationAdapter adapter,
+                Task currentTask,
+                Task previousTask,
+                ActivityRecord currentActivity,
+                ArrayList<ActivityRecord> previousActivity,
+                WindowContainer removedWindowContainer) {
             switch (backType) {
                 case BackNavigationInfo.TYPE_RETURN_TO_HOME:
                     return new ScheduleAnimationBuilder(backType, adapter)
@@ -1349,6 +1379,10 @@ class BackNavigationController {
                 case BackNavigationInfo.TYPE_CROSS_TASK:
                     return new ScheduleAnimationBuilder(backType, adapter)
                             .setComposeTarget(currentTask, previousTask)
+                            .setIsLaunchBehind(false);
+                case BackNavigationInfo.TYPE_DIALOG_CLOSE:
+                    return new ScheduleAnimationBuilder(backType, adapter)
+                            .setComposeTarget(removedWindowContainer, currentActivity)
                             .setIsLaunchBehind(false);
             }
             return null;
@@ -1574,7 +1608,6 @@ class BackNavigationController {
         if (mPendingAnimation != null) {
             mPendingAnimation.run();
             mPendingAnimation = null;
-            mBackAnimationRunning = true;
         }
     }
 
@@ -1629,7 +1662,9 @@ class BackNavigationController {
         } else {
             proto.write(MAIN_OPEN_ACTIVITY, "");
         }
-        proto.write(ANIMATION_RUNNING, mBackAnimationRunning);
+        // TODO (b/268563842) Only meaningful after new test added
+        proto.write(ANIMATION_RUNNING, mAnimationHandler.mComposed
+                || mAnimationHandler.mWaitTransition);
         proto.end(token);
     }
 }
