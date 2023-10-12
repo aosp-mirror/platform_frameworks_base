@@ -16,6 +16,8 @@
 
 package com.android.systemui.settings
 
+import com.android.systemui.util.annotations.WeaklyReferencedCallback
+
 import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
@@ -64,6 +66,7 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
     /**
      * Callback for notifying of changes.
      */
+    @WeaklyReferencedCallback
     interface Callback {
 
         /**

@@ -26,6 +26,7 @@ import android.util.Log;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.annotations.WeaklyReferencedCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -64,6 +65,7 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
      * An interface for listening to the connection status.
      * @param <T> The wrapper type.
      */
+    @WeaklyReferencedCallback
     public interface Callback<T> {
         /**
          * Invoked when the service has been successfully connected to.
