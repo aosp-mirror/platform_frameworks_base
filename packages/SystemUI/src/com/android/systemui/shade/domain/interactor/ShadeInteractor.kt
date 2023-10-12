@@ -261,7 +261,7 @@ constructor(
                 when (state) {
                     is ObservableTransitionState.Idle -> false
                     is ObservableTransitionState.Transition ->
-                        state.isInitiatedByUserInput &&
+                        state.isUserInputDriven &&
                             (state.toScene == sceneKey || state.fromScene == sceneKey)
                 }
             }
