@@ -31,7 +31,6 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -45,12 +44,10 @@ import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.MediaArtworkProcessor;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -61,7 +58,6 @@ import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -71,7 +67,6 @@ import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -122,13 +117,9 @@ public interface CentralSurfacesDependenciesModule {
     @Provides
     static NotificationMediaManager provideNotificationMediaManager(
             Context context,
-            Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
-            MediaArtworkProcessor mediaArtworkProcessor,
-            KeyguardBypassController keyguardBypassController,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
-            @Main DelayableExecutor mainExecutor,
             MediaDataManager mediaDataManager,
             StatusBarStateController statusBarStateController,
             SysuiColorExtractor colorExtractor,
@@ -138,13 +129,9 @@ public interface CentralSurfacesDependenciesModule {
             DisplayManager displayManager) {
         return new NotificationMediaManager(
                 context,
-                notificationShadeWindowController,
                 visibilityProvider,
-                mediaArtworkProcessor,
-                keyguardBypassController,
                 notifPipeline,
                 notifCollection,
-                mainExecutor,
                 mediaDataManager,
                 statusBarStateController,
                 colorExtractor,

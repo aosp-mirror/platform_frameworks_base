@@ -963,7 +963,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
         }
         if (isShowing) {
-            mMediaManager.updateMediaMetaData(false, animate && !isOccluded);
+            mMediaManager.updateMediaMetaData(false);
         }
         mNotificationShadeWindowController.setKeyguardOccluded(isOccluded);
 

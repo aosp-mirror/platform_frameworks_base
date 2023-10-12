@@ -48,9 +48,7 @@ class NotificationMediaManagerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        doCallRealMethod()
-            .whenever(notificationMediaManager)
-            .updateMediaMetaData(anyBoolean(), anyBoolean())
+        doCallRealMethod().whenever(notificationMediaManager).updateMediaMetaData(anyBoolean())
         doReturn(mockBackDropView).whenever(notificationMediaManager).backDropView
     }
 
@@ -62,7 +60,7 @@ class NotificationMediaManagerTest : SysuiTestCase() {
         notificationMediaManager.mIsLockscreenLiveWallpaperEnabled = true
         for (metaDataChanged in listOf(true, false)) {
             for (allowEnterAnimation in listOf(true, false)) {
-                notificationMediaManager.updateMediaMetaData(metaDataChanged, allowEnterAnimation)
+                notificationMediaManager.updateMediaMetaData(metaDataChanged)
                 verify(notificationMediaManager, never()).mediaMetadata
             }
         }
