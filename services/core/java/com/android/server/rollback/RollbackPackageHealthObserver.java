@@ -121,7 +121,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
             impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
         } else if (getAvailableRollback(failedPackage) != null) {
             // Rollback is available, we may get a callback into #execute
-            impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_60;
+            impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
         } else if (anyRollbackAvailable) {
             // If any rollbacks are available, we will commit them
             impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_70;
