@@ -113,7 +113,7 @@ class KeyboardMetricsCollectorTests {
         )
         val event = builder.addLayoutSelection(
             createImeSubtype(1, ULocale.forLanguageTag("en-US"), "qwerty"),
-            KeyboardLayout(null, "English(US)(Qwerty)", null, 0, null, 0, 0, 0),
+            "English(US)(Qwerty)",
             KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD
         ).addLayoutSelection(
             createImeSubtype(2, ULocale.forLanguageTag("en-US"), "azerty"),
@@ -121,7 +121,7 @@ class KeyboardMetricsCollectorTests {
             KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_USER
         ).addLayoutSelection(
             createImeSubtype(3, ULocale.forLanguageTag("en-US"), "qwerty"),
-            KeyboardLayout(null, "German", null, 0, null, 0, 0, 0),
+            "German",
             KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE
         ).setIsFirstTimeConfiguration(true).build()
 
@@ -184,7 +184,7 @@ class KeyboardMetricsCollectorTests {
         )
         val event = builder.addLayoutSelection(
             createImeSubtype(4, null, "qwerty"), // Default language tag
-            KeyboardLayout(null, "German", null, 0, null, 0, 0, 0),
+            "German",
             KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE
         ).build()
 
