@@ -29,10 +29,8 @@ import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Handles key events arriving when the keyguard is showing or device is dozing. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class KeyguardKeyEventInteractor
 @Inject
@@ -57,11 +55,7 @@ constructor(
         if (event.handleAction()) {
             when (event.keyCode) {
                 KeyEvent.KEYCODE_MENU -> return dispatchMenuKeyEvent()
-                KeyEvent.KEYCODE_SPACE,
-                KeyEvent.KEYCODE_ENTER ->
-                    if (isDeviceAwake()) {
-                        return collapseShadeLockedOrShowPrimaryBouncer()
-                    }
+                KeyEvent.KEYCODE_SPACE -> return dispatchSpaceEvent()
             }
         }
         return false
@@ -97,24 +91,16 @@ constructor(
                 (statusBarStateController.state != StatusBarState.SHADE) &&
                 statusBarKeyguardViewManager.shouldDismissOnMenuPressed()
         if (shouldUnlockOnMenuPressed) {
-            return collapseShadeLockedOrShowPrimaryBouncer()
+            shadeController.animateCollapseShadeForced()
+            return true
         }
         return false
     }
 
-    private fun collapseShadeLockedOrShowPrimaryBouncer(): Boolean {
-        when (statusBarStateController.state) {
-            StatusBarState.SHADE -> return false
-            StatusBarState.SHADE_LOCKED -> {
-                shadeController.animateCollapseShadeForced()
-                return true
-            }
-            StatusBarState.KEYGUARD -> {
-                if (!statusBarKeyguardViewManager.primaryBouncerIsShowing()) {
-                    statusBarKeyguardViewManager.showPrimaryBouncer(true)
-                    return true
-                }
-            }
+    private fun dispatchSpaceEvent(): Boolean {
+        if (isDeviceAwake() && statusBarStateController.state != StatusBarState.SHADE) {
+            shadeController.animateCollapseShadeForced()
+            return true
         }
         return false
     }
