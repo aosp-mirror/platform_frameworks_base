@@ -536,7 +536,16 @@ public class SpeechRecognizer {
     @MainThread
     public void setRecognitionListener(RecognitionListener listener) {
         checkIsCalledFromMainThread();
-        putMessage(Message.obtain(mHandler, MSG_CHANGE_LISTENER, listener));
+        if (mListener.mInternalListener == null) {
+            // This shortcut is needed because otherwise, if there's an error connecting, it never
+            // gets delivered. I.e., the onSuccess callback set up in connectToSystemService does
+            // not get called, MSG_CHANGE_LISTENER does not get executed, so the onError in the same
+            // place does not get forwarded anywhere.
+            // Thread-wise, this is safe as both this method and the handler are on the UI thread.
+            handleChangeListener(listener);
+        } else {
+            putMessage(Message.obtain(mHandler, MSG_CHANGE_LISTENER, listener));
+        }
     }
 
     /**

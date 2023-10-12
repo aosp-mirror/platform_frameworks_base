@@ -39,8 +39,10 @@ import android.speech.IRecognitionSupportCallback;
 import android.speech.RecognitionService;
 import android.speech.SpeechRecognizer;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.expresslog.Counter;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.util.HashMap;
@@ -63,6 +65,9 @@ final class SpeechRecognitionManagerServiceImpl extends
     @GuardedBy("mLock")
     private final Map<Integer, Set<RemoteSpeechRecognitionService>> mRemoteServicesByUid =
             new HashMap<>();
+
+    @GuardedBy("mLock")
+    private final SparseIntArray mSessionCountByUid = new SparseIntArray();
 
     SpeechRecognitionManagerServiceImpl(
             @NonNull SpeechRecognitionManagerService master,
@@ -216,6 +221,7 @@ final class SpeechRecognitionManagerServiceImpl extends
             service.shutdown(clientToken);
         }
         synchronized (mLock) {
+            decrementSessionCountForUidLocked(callingUid);
             if (!service.hasActiveSessions()) {
                 removeService(callingUid, service);
             }
@@ -239,6 +245,26 @@ final class SpeechRecognitionManagerServiceImpl extends
         return ComponentName.unflattenFromString(serviceName);
     }
 
+    @GuardedBy("mLock")
+    private int getSessionCountByUidLocked(int uid) {
+        return mSessionCountByUid.get(uid, 0);
+    }
+
+    @GuardedBy("mLock")
+    private void incrementSessionCountForUidLocked(int uid) {
+        mSessionCountByUid.put(uid, mSessionCountByUid.get(uid, 0) + 1);
+    }
+
+    @GuardedBy("mLock")
+    private void decrementSessionCountForUidLocked(int uid) {
+        int newCount = mSessionCountByUid.get(uid, 1) - 1;
+        if (newCount > 0) {
+            mSessionCountByUid.put(uid, newCount);
+        } else {
+            mSessionCountByUid.delete(uid);
+        }
+    }
+
     private RemoteSpeechRecognitionService createService(
             int callingUid, ComponentName serviceComponent) {
         synchronized (mLock) {
@@ -247,6 +273,18 @@ final class SpeechRecognitionManagerServiceImpl extends
 
             if (servicesForClient != null
                     && servicesForClient.size() >= MAX_CONCURRENT_CONNECTIONS_BY_CLIENT) {
+                Slog.w(TAG, "Number of remote services exceeded for uid: " + callingUid);
+                Counter.logIncrementWithUid(
+                        "speech_recognition.value_exceed_service_connections_count",
+                        callingUid);
+                return null;
+            }
+
+            if (getSessionCountByUidLocked(callingUid) >= MAX_CONCURRENT_CONNECTIONS_BY_CLIENT) {
+                Slog.w(TAG, "Number of sessions exceeded for uid: " + callingUid);
+                Counter.logIncrementWithUid(
+                        "speech_recognition.value_exceed_session_count",
+                        callingUid);
                 return null;
             }
 
@@ -262,6 +300,7 @@ final class SpeechRecognitionManagerServiceImpl extends
                         Slog.i(TAG, "Reused existing connection to " + serviceComponent);
                     }
 
+                    incrementSessionCountForUidLocked(callingUid);
                     return existingService.get();
                 }
             }
@@ -282,6 +321,7 @@ final class SpeechRecognitionManagerServiceImpl extends
                 Slog.i(TAG, "Creating a new connection to " + serviceComponent);
             }
 
+            incrementSessionCountForUidLocked(callingUid);
             return service;
         }
     }
