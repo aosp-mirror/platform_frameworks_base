@@ -21,6 +21,7 @@ aconfig_srcjars = [
     ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
     ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
     ":com.android.text.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.net.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -155,5 +156,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.hardware.biometrics.flags-aconfig-java",
     aconfig_declarations: "android.hardware.biometrics.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// CoreNetworking
+java_aconfig_library {
+    name: "com.android.net.flags-aconfig-java",
+    aconfig_declarations: "com.android.net.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
