@@ -2251,6 +2251,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
+                final boolean wasTrustedOverlay = win.isWindowTrustedOverlay();
                 flagChanges = win.mAttrs.flags ^ attrs.flags;
                 privateFlagChanges = win.mAttrs.privateFlags ^ attrs.privateFlags;
                 attrChanges = win.mAttrs.copyFrom(attrs);
@@ -2262,6 +2263,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (layoutChanged && win.providesDisplayDecorInsets()) {
                     configChanged = displayPolicy.updateDecorInsetsInfo();
+                }
+                if (wasTrustedOverlay != win.isWindowTrustedOverlay()) {
+                    win.updateTrustedOverlay();
                 }
                 if (win.mActivityRecord != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
                         || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {
