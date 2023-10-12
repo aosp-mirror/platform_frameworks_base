@@ -30,6 +30,11 @@ import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Content capture options for a given package.
@@ -119,7 +124,10 @@ public final class ContentCaptureOptions implements Parcelable {
                 /* enableReceiver= */ false,
                 new ContentProtectionOptions(
                         /* enableReceiver= */ false,
-                        /* bufferSize= */ 0),
+                        /* bufferSize= */ 0,
+                        /* requiredGroups= */ Collections.emptyList(),
+                        /* optionalGroups= */ Collections.emptyList(),
+                        /* optionalGroupsThreshold= */ 0),
                 /* whitelistedComponents= */ null);
     }
 
@@ -141,9 +149,7 @@ public final class ContentCaptureOptions implements Parcelable {
                 logHistorySize,
                 ContentCaptureManager.DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
                 ContentCaptureManager.DEFAULT_ENABLE_CONTENT_CAPTURE_RECEIVER,
-                new ContentProtectionOptions(
-                        ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER,
-                        ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE),
+                new ContentProtectionOptions(),
                 whitelistedComponents);
     }
 
@@ -183,9 +189,7 @@ public final class ContentCaptureOptions implements Parcelable {
                 ContentCaptureManager.DEFAULT_LOG_HISTORY_SIZE,
                 ContentCaptureManager.DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
                 ContentCaptureManager.DEFAULT_ENABLE_CONTENT_CAPTURE_RECEIVER,
-                new ContentProtectionOptions(
-                        ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER,
-                        ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE),
+                new ContentProtectionOptions(),
                 whitelistedComponents);
     }
 
@@ -386,9 +390,58 @@ public final class ContentCaptureOptions implements Parcelable {
          */
         public final int bufferSize;
 
-        public ContentProtectionOptions(boolean enableReceiver, int bufferSize) {
+        /**
+         * The list of required groups of strings to match.
+         *
+         * @hide
+         */
+        @NonNull public final List<List<String>> requiredGroups;
+
+        /**
+         * The list of optional groups of strings to match.
+         *
+         * @hide
+         */
+        @NonNull public final List<List<String>> optionalGroups;
+
+        /**
+         * The minimal number of optional groups that have to be matched. This is the threshold
+         * value and comparison is done with greater than or equals.
+         *
+         * @hide
+         */
+        public final int optionalGroupsThreshold;
+
+        /**
+         * Empty constructor with default values.
+         *
+         * @hide
+         */
+        public ContentProtectionOptions() {
+            this(
+                    ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER,
+                    ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE,
+                    ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_REQUIRED_GROUPS,
+                    ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS,
+                    ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD);
+        }
+
+        /**
+         * Full primary constructor.
+         *
+         * @hide
+         */
+        public ContentProtectionOptions(
+                boolean enableReceiver,
+                int bufferSize,
+                @NonNull List<List<String>> requiredGroups,
+                @NonNull List<List<String>> optionalGroups,
+                int optionalGroupsThreshold) {
             this.enableReceiver = enableReceiver;
             this.bufferSize = bufferSize;
+            this.requiredGroups = requiredGroups;
+            this.optionalGroups = optionalGroups;
+            this.optionalGroupsThreshold = optionalGroupsThreshold;
         }
 
         @Override
@@ -398,7 +451,14 @@ public final class ContentCaptureOptions implements Parcelable {
                     .append("enableReceiver=")
                     .append(enableReceiver)
                     .append(", bufferSize=")
-                    .append(bufferSize);
+                    .append(bufferSize)
+                    .append(", requiredGroupsSize=")
+                    .append(requiredGroups.size())
+                    .append(", optionalGroupsSize=")
+                    .append(optionalGroups.size())
+                    .append(", optionalGroupsThreshold=")
+                    .append(optionalGroupsThreshold);
+
             return stringBuilder.append(']').toString();
         }
 
@@ -407,17 +467,50 @@ public final class ContentCaptureOptions implements Parcelable {
             pw.print(enableReceiver);
             pw.print(", bufferSize=");
             pw.print(bufferSize);
+            pw.print(", requiredGroupsSize=");
+            pw.print(requiredGroups.size());
+            pw.print(", optionalGroupsSize=");
+            pw.print(optionalGroups.size());
+            pw.print(", optionalGroupsThreshold=");
+            pw.print(optionalGroupsThreshold);
         }
 
-        private void writeToParcel(Parcel parcel) {
+        private void writeToParcel(@NonNull Parcel parcel) {
             parcel.writeBoolean(enableReceiver);
             parcel.writeInt(bufferSize);
+            writeGroupsToParcel(requiredGroups, parcel);
+            writeGroupsToParcel(optionalGroups, parcel);
+            parcel.writeInt(optionalGroupsThreshold);
         }
 
-        private static ContentProtectionOptions createFromParcel(Parcel parcel) {
+        @NonNull
+        private static ContentProtectionOptions createFromParcel(@NonNull Parcel parcel) {
             boolean enableReceiver = parcel.readBoolean();
             int bufferSize = parcel.readInt();
-            return new ContentProtectionOptions(enableReceiver, bufferSize);
+            List<List<String>> requiredGroups = createGroupsFromParcel(parcel);
+            List<List<String>> optionalGroups = createGroupsFromParcel(parcel);
+            int optionalGroupsThreshold = parcel.readInt();
+            return new ContentProtectionOptions(
+                    enableReceiver,
+                    bufferSize,
+                    requiredGroups,
+                    optionalGroups,
+                    optionalGroupsThreshold);
+        }
+
+        private static void writeGroupsToParcel(
+                @NonNull List<List<String>> groups, @NonNull Parcel parcel) {
+            parcel.writeInt(groups.size());
+            groups.forEach(parcel::writeStringList);
+        }
+
+        @NonNull
+        private static List<List<String>> createGroupsFromParcel(@NonNull Parcel parcel) {
+            int size = parcel.readInt();
+            return IntStream.range(0, size)
+                    .mapToObj(i -> new ArrayList<String>())
+                    .peek(parcel::readStringList)
+                    .collect(Collectors.toUnmodifiableList());
         }
     }
 }

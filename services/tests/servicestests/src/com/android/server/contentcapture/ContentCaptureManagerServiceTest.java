@@ -436,6 +436,24 @@ public class ContentCaptureManagerServiceTest {
         verify(mMockRemoteContentProtectionService).onLoginDetected(PARCELED_EVENTS);
     }
 
+    @Test
+    public void parseContentProtectionGroupsConfig_null() {
+        ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
+        assertThat(service.parseContentProtectionGroupsConfig(null)).isEmpty();
+    }
+
+    @Test
+    public void parseContentProtectionGroupsConfig_empty() {
+        ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
+        assertThat(service.parseContentProtectionGroupsConfig("")).isEmpty();
+    }
+
+    @Test
+    public void parseContentProtectionGroupsConfig_notEmpty() {
+        ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
+        assertThat(service.parseContentProtectionGroupsConfig("a")).isEmpty();
+    }
+
     private class TestContentCaptureManagerService extends ContentCaptureManagerService {
 
         TestContentCaptureManagerService() {

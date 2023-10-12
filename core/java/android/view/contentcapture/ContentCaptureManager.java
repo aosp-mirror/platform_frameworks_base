@@ -60,7 +60,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -377,6 +379,30 @@ public final class ContentCaptureManager {
     public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE =
             "content_protection_buffer_size";
 
+    /**
+     * Sets the config for content protection required groups.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG =
+            "content_protection_required_groups_config";
+
+    /**
+     * Sets the config for content protection optional groups.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG =
+            "content_protection_optional_groups_config";
+
+    /**
+     * Sets the threshold for content protection optional groups.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD =
+            "content_protection_optional_groups_threshold";
+
     /** @hide */
     @TestApi
     public static final int LOGGING_LEVEL_OFF = 0;
@@ -417,6 +443,18 @@ public final class ContentCaptureManager {
     public static final int DEFAULT_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE = 5000;
     /** @hide */
     public static final int DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE = 150;
+    /** @hide */
+    public static final List<List<String>> DEFAULT_CONTENT_PROTECTION_REQUIRED_GROUPS =
+            Collections.emptyList();
+    /** @hide */
+    public static final String DEFAULT_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG = "";
+    /** @hide */
+    public static final List<List<String>> DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS =
+            Collections.emptyList();
+    /** @hide */
+    public static final String DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG = "";
+    /** @hide */
+    public static final int DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD = 0;
 
     private final Object mLock = new Object();
 
