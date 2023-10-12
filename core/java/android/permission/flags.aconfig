@@ -28,3 +28,10 @@ flag {
   description: "enable AttributionSource.setNextAttributionSource"
   bug: "304478648"
 }
+
+flag {
+    name: "should_register_attribution_source"
+    namespace: "permissions"
+    description: "enable the shouldRegisterAttributionSource API"
+    bug: "305057691"
+}
