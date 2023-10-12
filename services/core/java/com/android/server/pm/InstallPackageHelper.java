@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.Flags.preventSdkLibApp;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
@@ -994,10 +995,11 @@ final class InstallPackageHelper {
                         return;
                     }
                     final boolean isApex = (request.getScanFlags() & SCAN_AS_APEX) != 0;
-                    if (!isApex) {
-                        createdAppId.put(packageName, optimisticallyRegisterAppId(request));
-                    } else {
+                    final boolean isSdkLibrary = packageToScan.isSdkLibrary();
+                    if (isApex || (isSdkLibrary && preventSdkLibApp())) {
                         request.getScannedPackageSetting().setAppId(Process.INVALID_UID);
+                    } else {
+                        createdAppId.put(packageName, optimisticallyRegisterAppId(request));
                     }
                     versionInfos.put(packageName,
                             mPm.getSettingsVersionForPackage(packageToScan));
