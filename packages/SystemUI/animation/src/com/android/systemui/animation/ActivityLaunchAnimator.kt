@@ -893,7 +893,7 @@ class ActivityLaunchAnimator(
                 return
             }
 
-            Log.i(TAG, "Remote animation timed out")
+            Log.wtf(TAG, "Remote animation timed out")
             timedOut = true
 
             if (DEBUG_LAUNCH_ANIMATION) {
