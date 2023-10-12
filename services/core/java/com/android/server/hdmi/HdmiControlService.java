@@ -4951,6 +4951,11 @@ public class HdmiControlService extends SystemService {
         AudioDeviceAttributes attributes = new AudioDeviceAttributes(
                 AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_HDMI_EARC, "", "",
                 new ArrayList<AudioProfile>(), audioDescriptors);
+        // Set SAM to ON whenever CEC is disabled. Failure to do so may result in the absence
+        // of sound when CEC is disabled and eARC is enabled due to SAM being in the off state.
+        if (!isCecControlEnabled()) {
+            setSystemAudioActivated(true);
+        }
         getAudioManager().setWiredDeviceConnectionState(attributes, enabled ? 1 : 0);
     }
 
