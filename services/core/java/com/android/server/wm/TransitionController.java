@@ -1005,12 +1005,20 @@ class TransitionController {
             // legacy sync
             mSyncEngine.startSyncSet(queued.mLegacySync);
         }
-        // Post this so that the now-playing transition logic isn't interrupted.
-        mAtm.mH.post(() -> {
-            synchronized (mAtm.mGlobalLock) {
-                queued.mOnStartCollect.onCollectStarted(true /* deferred */);
-            }
-        });
+        if (queued.mTransition != null
+                && queued.mTransition.mType == WindowManager.TRANSIT_SLEEP) {
+            // SLEEP transitions are special in that they don't collect anything (in fact if they
+            // do collect things it can cause problems). So, we need to run it's onCollectStarted
+            // immediately.
+            queued.mOnStartCollect.onCollectStarted(true /* deferred */);
+        } else {
+            // Post this so that the now-playing transition logic isn't interrupted.
+            mAtm.mH.post(() -> {
+                synchronized (mAtm.mGlobalLock) {
+                    queued.mOnStartCollect.onCollectStarted(true /* deferred */);
+                }
+            });
+        }
     }
 
     void moveToPlaying(Transition transition) {
