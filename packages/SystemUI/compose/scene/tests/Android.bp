@@ -1,4 +1,4 @@
-// Copyright (C) 2022 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,25 +21,30 @@ package {
     default_applicable_licenses: ["frameworks_base_packages_SystemUI_license"],
 }
 
-android_library {
-    name: "SystemUIComposeFeatures",
-    use_resource_processor: true,
+android_test {
+    name: "PlatformComposeSceneTransitionLayoutTests",
     manifest: "AndroidManifest.xml",
+    test_suites: ["device-tests"],
+    sdk_version: "current",
+    certificate: "platform",
 
     srcs: [
         "src/**/*.kt",
     ],
 
     static_libs: [
-        "SystemUI-core",
-        "PlatformComposeCore",
         "PlatformComposeSceneTransitionLayout",
 
+        "androidx.test.runner",
+        "androidx.test.ext.junit",
+
         "androidx.compose.runtime_runtime",
-        "androidx.compose.animation_animation-graphics",
-        "androidx.compose.material3_material3",
-        "androidx.activity_activity-compose",
+        "androidx.compose.ui_ui-test-junit4",
+        "androidx.compose.ui_ui-test-manifest",
+
+        "truth",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],
+    use_resource_processor: true,
 }

@@ -32,7 +32,6 @@ import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.TestScenes
 import com.android.compose.animation.scene.inScene
 import com.android.compose.animation.scene.testTransition
-import com.android.compose.modifiers.size
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.onEach
 import org.junit.Rule
