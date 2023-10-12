@@ -1185,8 +1185,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * <p>For {@link android.view.View#getWindowVisibleDisplayFrame} and
      * {@link android.view.View}#getWindowDisplayFrame this sandboxing is happening indirectly
      * through
-     * {@link android.view.ViewRootImpl}#getWindowVisibleDisplayFrame,
-     * {@link android.view.ViewRootImpl}#getDisplayFrame respectively.
+     * {@code android.view.ViewRootImpl#getWindowVisibleDisplayFrame},
+     * {@code android.view.ViewRootImpl#getDisplayFrame} respectively.
      *
      * <p>Some applications assume that they occupy the whole screen and therefore use the display
      * coordinates in their calculations as if an activity is  positioned in the top-left corner of

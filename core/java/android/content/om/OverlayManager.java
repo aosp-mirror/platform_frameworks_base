@@ -50,7 +50,7 @@ import java.util.List;
  *   <li>register overlays
  *   <li>unregister overlays
  *   <li>execute multiple operations in one commitment by calling {@link
- *       OverlayManagerTransaction#commit()}
+ *       #commit(OverlayManagerTransaction)}
  * </ul>
  *
  * @see OverlayManagerTransaction
