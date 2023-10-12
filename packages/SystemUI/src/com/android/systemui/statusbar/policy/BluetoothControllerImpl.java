@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.settingslib.bluetooth.BluetoothCallback;
@@ -36,6 +37,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.bluetooth.BluetoothLogger;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
@@ -81,6 +83,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private int mState;
 
     private final BluetoothAdapter mAdapter;
+
+    private final Executor mBackgroundExecutor;
     /**
      */
     @Inject
@@ -90,6 +94,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             DumpManager dumpManager,
             BluetoothLogger logger,
             BluetoothRepository bluetoothRepository,
+            @Background Executor executor,
             @Main Looper mainLooper,
             @Nullable LocalBluetoothManager localBluetoothManager,
             @Nullable BluetoothAdapter bluetoothAdapter) {
@@ -98,6 +103,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         mBluetoothRepository = bluetoothRepository;
         mLocalBluetoothManager = localBluetoothManager;
         mHandler = new H(mainLooper);
+        mBackgroundExecutor = executor;
         if (mLocalBluetoothManager != null) {
             mLocalBluetoothManager.getEventManager().registerCallback(this);
             mLocalBluetoothManager.getProfileManager().addServiceListener(this);
@@ -218,6 +224,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         return mIsActive;
     }
 
+    @WorkerThread
     @Override
     public void setBluetoothEnabled(boolean enabled) {
         if (mLocalBluetoothManager != null) {
@@ -230,6 +237,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         return mLocalBluetoothManager != null;
     }
 
+    @WorkerThread
     @Override
     public String getConnectedDeviceName() {
         synchronized (mConnectedDevices) {
@@ -251,6 +259,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
                 getDevices(), this::onConnectionStatusFetched);
     }
 
+    // Careful! This may be invoked in the main thread.
     private void onConnectionStatusFetched(ConnectionStatusModel status) {
         List<CachedBluetoothDevice> newList = status.getConnectedDevices();
         int state = status.getMaxConnectionState();
@@ -282,30 +291,33 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     private void updateAudioProfile() {
-        boolean audioProfileConnected = false;
-        boolean otherProfileConnected = false;
+        // We want this in the background as calls inside `LocalBluetoothProfile` end up being
+        // binder calls
+        mBackgroundExecutor.execute(() -> {
+            boolean audioProfileConnected = false;
+            boolean otherProfileConnected = false;
 
-        for (CachedBluetoothDevice device : getDevices()) {
-            for (LocalBluetoothProfile profile : device.getProfiles()) {
-                int profileId = profile.getProfileId();
-                boolean isConnected = device.isConnectedProfile(profile);
-                if (profileId == BluetoothProfile.HEADSET
-                        || profileId == BluetoothProfile.A2DP
-                        || profileId == BluetoothProfile.HEARING_AID
-                        || profileId == BluetoothProfile.LE_AUDIO) {
-                    audioProfileConnected |= isConnected;
-                } else {
-                    otherProfileConnected |= isConnected;
+            for (CachedBluetoothDevice device : getDevices()) {
+                for (LocalBluetoothProfile profile : device.getProfiles()) {
+                    int profileId = profile.getProfileId();
+                    boolean isConnected = device.isConnectedProfile(profile);
+                    if (profileId == BluetoothProfile.HEADSET
+                            || profileId == BluetoothProfile.A2DP
+                            || profileId == BluetoothProfile.HEARING_AID
+                            || profileId == BluetoothProfile.LE_AUDIO) {
+                        audioProfileConnected |= isConnected;
+                    } else {
+                        otherProfileConnected |= isConnected;
+                    }
                 }
             }
-        }
 
-        boolean audioProfileOnly = (audioProfileConnected && !otherProfileConnected);
-        if (audioProfileOnly != mAudioProfileOnly) {
-            mAudioProfileOnly = audioProfileOnly;
-            mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
-        }
-
+            boolean audioProfileOnly = (audioProfileConnected && !otherProfileConnected);
+            if (audioProfileOnly != mAudioProfileOnly) {
+                mAudioProfileOnly = audioProfileOnly;
+                mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+            }
+        });
     }
 
     @Override
