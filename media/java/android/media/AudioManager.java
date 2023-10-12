@@ -1485,8 +1485,7 @@ public class AudioManager {
      * Returns the volume group id associated to the given {@link AudioAttributes}.
      *
      * @param attributes The {@link AudioAttributes} to consider.
-     * @return {@link android.media.audiopolicy.AudioVolumeGroup} id supporting the given
-     * {@link AudioAttributes} if found,
+     * @return audio volume group id supporting the given {@link AudioAttributes} if found,
      * {@code android.media.audiopolicy.AudioVolumeGroup.DEFAULT_VOLUME_GROUP} otherwise.
      */
     public int getVolumeGroupIdForAttributes(@NonNull AudioAttributes attributes) {
@@ -1601,7 +1600,7 @@ public class AudioManager {
      * <p> Call first in prior {@link #getVolumeGroupIdForAttributes(AudioAttributes)} to retrieve
      * the volume group id supporting the given {@link AudioAttributes}.
      *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
+     * @param groupId of the audio volume group to consider.
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
@@ -1645,8 +1644,8 @@ public class AudioManager {
      * <p> Call first in prior {@link #getVolumeGroupIdForAttributes(AudioAttributes)} to retrieve
      * the volume group id supporting the given {@link AudioAttributes}.
      *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
-     * @return The mute state for the given {@link android.media.audiopolicy.AudioVolumeGroup} id.
+     * @param groupId of the audio volume group to consider.
+     * @return The mute state for the given audio volume group id.
      * @see #adjustVolumeGroupVolume(int, int, int)
      */
     public boolean isVolumeGroupMuted(int groupId) {
