@@ -2258,7 +2258,6 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO =
             "android:receive_sandbox_trigger_audio";
 
