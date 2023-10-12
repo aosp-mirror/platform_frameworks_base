@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -50,6 +51,8 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputMonitor;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -67,6 +70,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
@@ -131,6 +135,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final DesktopModeKeyguardChangeListener mDesktopModeKeyguardChangeListener =
             new DesktopModeKeyguardChangeListener();
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
+    private final DisplayInsetsController mDisplayInsetsController;
+    private boolean mInImmersiveMode;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -141,6 +147,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             ShellController shellController,
+            DisplayInsetsController displayInsetsController,
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
@@ -156,6 +163,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 taskOrganizer,
                 displayController,
                 shellController,
+                displayInsetsController,
                 syncQueue,
                 transitions,
                 desktopTasksController,
@@ -176,6 +184,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             ShellController shellController,
+            DisplayInsetsController displayInsetsController,
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
@@ -191,6 +200,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mTaskOrganizer = taskOrganizer;
         mShellController = shellController;
         mDisplayController = displayController;
+        mDisplayInsetsController = displayInsetsController;
         mSyncQueue = syncQueue;
         mTransitions = transitions;
         mDesktopTasksController = desktopTasksController;
@@ -213,6 +223,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
         });
         mShellCommandHandler.addDumpCallback(this::dump, this);
+        mDisplayInsetsController.addInsetsChangedListener(mContext.getDisplayId(),
+                new DesktopModeOnInsetsChangedListener());
     }
 
     @Override
@@ -655,9 +667,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private void handleReceivedMotionEvent(MotionEvent ev, InputMonitor inputMonitor) {
         final DesktopModeWindowDecoration relevantDecor = getRelevantWindowDecor(ev);
         if (DesktopModeStatus.isEnabled()) {
-            if (relevantDecor == null
+            if (!mInImmersiveMode && (relevantDecor == null
                     || relevantDecor.mTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM
-                    || mTransitionDragActive) {
+                    || mTransitionDragActive)) {
                 handleCaptionThroughStatusBar(ev, relevantDecor);
             }
         }
@@ -1051,6 +1063,35 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             return mIsKeyguardVisible && mIsKeyguardOccluded;
         }
     }
+
+    @VisibleForTesting
+    class DesktopModeOnInsetsChangedListener implements
+            DisplayInsetsController.OnInsetsChangedListener {
+        @Override
+        public void insetsChanged(InsetsState insetsState) {
+            for (int i = 0; i < insetsState.sourceSize(); i++) {
+                final InsetsSource source = insetsState.sourceAt(i);
+                if (source.getType() != statusBars()) {
+                    continue;
+                }
+
+                final DesktopModeWindowDecoration decor = getFocusedDecor();
+                if (decor == null) {
+                    return;
+                }
+                // If status bar inset is visible, top task is not in immersive mode
+                final boolean inImmersiveMode = !source.isVisible();
+                // Calls WindowDecoration#relayout if decoration visibility needs to be updated
+                if (inImmersiveMode != mInImmersiveMode) {
+                    decor.relayout(decor.mTaskInfo);
+                    mInImmersiveMode = inImmersiveMode;
+                }
+
+                return;
+            }
+        }
+    }
+
 }
 
 

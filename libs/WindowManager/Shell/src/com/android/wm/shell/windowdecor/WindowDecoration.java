@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowInsets.Type.statusBars;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration.WindowingMode;
@@ -30,6 +31,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.view.Display;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -119,6 +122,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     private WindowlessWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
     private Configuration mWindowDecorConfig;
+    private boolean mIsCaptionVisible;
 
     private final Binder mOwner = new Binder();
     private final Rect mCaptionInsetsRect = new Rect();
@@ -225,6 +229,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .inflate(params.mLayoutResId, null);
         }
 
+        updateCaptionVisibility(outResult.mRootView, mTaskInfo.displayId);
+
         final Resources resources = mDecorWindowContext.getResources();
         final Configuration taskConfig = mTaskInfo.getConfiguration();
         final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
@@ -272,12 +278,20 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             // Caption insets
             mCaptionInsetsRect.set(taskBounds);
-            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
-            wct.addInsetsSource(mTaskInfo.token,
-                    mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect);
-            wct.addInsetsSource(mTaskInfo.token,
-                    mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
-                    mCaptionInsetsRect);
+            if (mIsCaptionVisible) {
+                mCaptionInsetsRect.bottom =
+                        mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
+                wct.addInsetsSource(mTaskInfo.token,
+                        mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect);
+                wct.addInsetsSource(mTaskInfo.token,
+                        mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
+                        mCaptionInsetsRect);
+            } else {
+                wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
+                        WindowInsets.Type.captionBar());
+                wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
+                        WindowInsets.Type.mandatorySystemGestures());
+            }
         } else {
             startT.hide(mCaptionContainerSurface);
         }
@@ -348,7 +362,38 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
     }
 
+    /**
+     * Checks if task has entered/exited immersive mode and requires a change in caption visibility.
+     */
+    private void updateCaptionVisibility(View rootView, int displayId) {
+        final InsetsState insetsState = mDisplayController.getInsetsState(displayId);
+        for (int i = 0; i < insetsState.sourceSize(); i++) {
+            final InsetsSource source = insetsState.sourceAt(i);
+            if (source.getType() != statusBars()) {
+                continue;
+            }
+
+            mIsCaptionVisible = source.isVisible();
+            setCaptionVisibility(rootView, mIsCaptionVisible);
+
+            return;
+        }
+    }
+
+    private void setCaptionVisibility(View rootView, boolean visible) {
+        if (rootView == null) {
+            return;
+        }
+        final int v = visible ? View.VISIBLE : View.GONE;
+        final View captionView = rootView.findViewById(getCaptionViewId());
+        captionView.setVisibility(v);
+    }
+
     int getCaptionHeightId(@WindowingMode int windowingMode) {
+        return Resources.ID_NULL;
+    }
+
+    int getCaptionViewId() {
         return Resources.ID_NULL;
     }
 
@@ -466,7 +511,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      */
     public void addCaptionInset(WindowContainerTransaction wct) {
         final int captionHeightId = getCaptionHeightId(mTaskInfo.getWindowingMode());
-        if (!ViewRootImpl.CAPTION_ON_SHELL || captionHeightId == Resources.ID_NULL) {
+        if (!ViewRootImpl.CAPTION_ON_SHELL || captionHeightId == Resources.ID_NULL
+                || !mIsCaptionVisible) {
             return;
         }
 
