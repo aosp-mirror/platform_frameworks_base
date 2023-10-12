@@ -1,0 +1,27 @@
+<!--
+Copyright (C) 2023 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="20"
+        android:viewportHeight="20">
+    <path
+        android:pathData="M15.333,5.333V4.667C15.333,4.3 15.033,4 14.667,4L13.333,4C12.967,4 12.667,4.3 12.667,4.667V5.333H12V8C12,8.367 12.3,8.667 12.667,8.667H13.333L13.333,13.333C13.333,14.067 12.733,14.667 12,14.667C11.267,14.667 10.667,14.067 10.667,13.333L10.667,11.333V6.667C10.667,5.193 9.473,4 8,4C6.527,4 5.333,5.193 5.333,6.667L5.333,11.333H4.667C4.3,11.333 4,11.633 4,12L4,14.667H4.667V15.333C4.667,15.7 4.967,16 5.333,16H6.667C7.033,16 7.333,15.7 7.333,15.333V14.667H8L8,12C8,11.633 7.7,11.333 7.333,11.333H6.667L6.667,6.667C6.667,5.933 7.267,5.333 8,5.333C8.733,5.333 9.333,5.933 9.333,6.667V11.333L9.333,13.333C9.333,14.807 10.527,16 12,16C13.473,16 14.667,14.807 14.667,13.333L14.667,8.667H15.333C15.7,8.667 16,8.367 16,8V5.333H15.333Z"
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"/>
+</vector>
+
+

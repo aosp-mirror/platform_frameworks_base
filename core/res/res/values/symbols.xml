@@ -1997,6 +1997,7 @@
   <java-symbol type="drawable" name="stat_sys_throttled" />
   <java-symbol type="drawable" name="vpn_connected" />
   <java-symbol type="drawable" name="vpn_disconnected" />
+  <java-symbol type="drawable" name="usb_cable_unknown_issue" />
   <java-symbol type="id" name="ask_checkbox" />
   <java-symbol type="id" name="compat_checkbox" />
   <java-symbol type="id" name="original_app_icon" />
@@ -3813,6 +3814,7 @@
   <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="notification_channel_accessibility_magnification" />
   <java-symbol type="string" name="notification_channel_accessibility_security_policy" />
+  <java-symbol type="string" name="notification_channel_display" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultFieldClassificationService" />
   <java-symbol type="string" name="config_defaultOnDeviceSpeechRecognitionService" />
@@ -5066,6 +5068,10 @@
   <java-symbol type="array" name="device_state_notification_thermal_contents"/>
   <java-symbol type="array" name="device_state_notification_power_save_titles"/>
   <java-symbol type="array" name="device_state_notification_power_save_contents"/>
+  <java-symbol type="string" name="connected_display_unavailable_notification_title"/>
+  <java-symbol type="string" name="connected_display_unavailable_notification_content"/>
+  <java-symbol type="string" name="connected_display_cable_dont_support_displays_notification_title"/>
+  <java-symbol type="string" name="connected_display_cable_dont_support_displays_notification_content"/>
   <java-symbol type="string" name="concurrent_display_notification_name"/>
   <java-symbol type="string" name="concurrent_display_notification_active_title"/>
   <java-symbol type="string" name="concurrent_display_notification_active_content"/>
