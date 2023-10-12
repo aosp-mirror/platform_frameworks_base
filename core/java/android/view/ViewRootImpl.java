@@ -1730,7 +1730,7 @@ public final class ViewRootImpl implements ViewParent,
                         attrs.getTitle().toString());
                 mAttachInfo.mThreadedRenderer = renderer;
                 renderer.setSurfaceControl(mSurfaceControl, mBlastBufferQueue);
-                updateColorModeIfNeeded(attrs.getColorMode());
+                updateColorModeIfNeeded(attrs.getColorMode(), attrs.getDesiredHdrHeadroom());
                 updateRenderHdrSdrRatio();
                 updateForceDarkMode();
                 mAttachInfo.mHardwareAccelerated = true;
@@ -3349,7 +3349,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 final boolean alwaysConsumeSystemBarsChanged =
                         mPendingAlwaysConsumeSystemBars != mAttachInfo.mAlwaysConsumeSystemBars;
-                updateColorModeIfNeeded(lp.getColorMode());
+                updateColorModeIfNeeded(lp.getColorMode(), lp.getDesiredHdrHeadroom());
                 surfaceCreated = !hadSurface && mSurface.isValid();
                 surfaceDestroyed = hadSurface && !mSurface.isValid();
 
@@ -5652,7 +5652,8 @@ public final class ViewRootImpl implements ViewParent,
         mUpdateHdrSdrRatioInfo = true;
     }
 
-    private void updateColorModeIfNeeded(@ActivityInfo.ColorMode int colorMode) {
+    private void updateColorModeIfNeeded(@ActivityInfo.ColorMode int colorMode,
+            float desiredRatio) {
         if (mAttachInfo.mThreadedRenderer == null) {
             return;
         }
@@ -5666,7 +5667,10 @@ public final class ViewRootImpl implements ViewParent,
                 && !getConfiguration().isScreenWideColorGamut()) {
             colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         }
-        float desiredRatio = mAttachInfo.mThreadedRenderer.setColorMode(colorMode);
+        float automaticRatio = mAttachInfo.mThreadedRenderer.setColorMode(colorMode);
+        if (desiredRatio == 0 || desiredRatio > automaticRatio) {
+            desiredRatio = automaticRatio;
+        }
         if (desiredRatio != mDesiredHdrSdrRatio) {
             mDesiredHdrSdrRatio = desiredRatio;
             updateRenderHdrSdrRatio();
