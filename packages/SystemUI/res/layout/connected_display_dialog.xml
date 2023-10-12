@@ -15,8 +15,9 @@
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/cd_bottom_sheet"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/dialog_side_padding"
@@ -26,11 +27,14 @@
 
     <ImageView
         android:id="@+id/connected_display_dialog_icon"
-        android:layout_width="@dimen/screenrecord_logo_size"
-        android:layout_height="@dimen/screenrecord_logo_size"
+        android:layout_width="@dimen/connected_display_dialog_logo_size"
+        android:layout_height="@dimen/connected_display_dialog_logo_size"
+        android:background="@drawable/circular_background"
+        android:backgroundTint="?androidprv:attr/materialColorPrimary"
         android:importantForAccessibility="no"
+        android:padding="6dp"
         android:src="@drawable/stat_sys_connected_display"
-        android:tint="?androidprv:attr/materialColorPrimary" />
+        android:tint="?androidprv:attr/materialColorOnPrimary" />
 
     <TextView
         android:id="@+id/connected_display_dialog_title"
