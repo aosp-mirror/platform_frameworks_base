@@ -142,6 +142,11 @@ final class ProcessProfileRecord {
     final AtomicLong mCurCpuTime = new AtomicLong(0);
 
     /**
+     * How long the process has spent on waiting in the runqueue since fork.
+     */
+    final AtomicLong mLastCpuDelayTime = new AtomicLong(0);
+
+    /**
      * Last selected memory trimming level.
      */
     @CompositeRWLock({"mService", "mProcLock"})
