@@ -491,6 +491,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             boolean requestsPredictiveBack = false;
 
             // Check if the context is from an activity.
+            Context originalContext = context;
             while ((context instanceof ContextWrapper) && !(context instanceof Activity)) {
                 context = ((ContextWrapper) context).getBaseContext();
             }
@@ -539,8 +540,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                     // 3. windowSwipeToDismiss=false should be respected for apps not opted in,
                     //    which disables PB & onBackPressed caused by BackAnimController's
                     //    setTrigger(true)
+                    // Use the original context to resolve the styled attribute so that they stay
+                    // true to the window.
                     TypedArray windowAttr =
-                            context.obtainStyledAttributes(
+                            originalContext.obtainStyledAttributes(
                                     new int[] {android.R.attr.windowSwipeToDismiss});
                     boolean windowSwipeToDismiss = true;
                     if (windowAttr.getIndexCount() > 0) {
