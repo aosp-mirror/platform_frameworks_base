@@ -360,7 +360,7 @@ public class StackStateAnimator {
             if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD) {
 
-                // This item is added, initialize it's properties.
+                // This item is added, initialize its properties.
                 ExpandableViewState viewState = changingView.getViewState();
                 if (viewState == null || viewState.gone) {
                     // The position for this child was never generated, let's continue.
@@ -410,18 +410,26 @@ public class StackStateAnimator {
                     translationDirection = Math.max(Math.min(translationDirection, 1.0f),-1.0f);
 
                 }
-                Runnable postAnimation = changingView::removeFromTransientContainer;
+                Runnable postAnimation = () -> {
+                    changingView.setInRemovalAnimation(false);
+                    changingView.removeFromTransientContainer();
+                };
+                Runnable startAnimation = ()-> {
+                    changingView.setInRemovalAnimation(true);
+                };
                 if (loggable) {
                     String finalKey = key;
                     if (isHeadsUp) {
                         mLogger.logHUNViewDisappearingWithRemoveEvent(key);
                         postAnimation = () -> {
+                            changingView.setInRemovalAnimation(false);
                             mLogger.disappearAnimationEnded(finalKey);
                             changingView.removeFromTransientContainer();
                         };
                     } else if (isGroupChild) {
                         mLogger.groupChildRemovalEventProcessed(key);
                         postAnimation = () -> {
+                            changingView.setInRemovalAnimation(false);
                             mLogger.groupChildRemovalAnimationEnded(finalKey);
                             changingView.removeFromTransientContainer();
                         };
@@ -429,7 +437,7 @@ public class StackStateAnimator {
                 }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,
-                        postAnimation, getGlobalAnimationFinishedListener());
+                        startAnimation, postAnimation, getGlobalAnimationFinishedListener());
                 needsCustomAnimation = true;
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
@@ -442,7 +450,7 @@ public class StackStateAnimator {
                 row.prepareExpansionChanged();
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
-                // This item is added, initialize it's properties.
+                // This item is added, initialize its properties.
                 ExpandableViewState viewState = changingView.getViewState();
                 mTmpState.copyFrom(viewState);
                 if (event.headsUpFromBottom) {
@@ -465,21 +473,24 @@ public class StackStateAnimator {
 
                 mTmpState.applyToView(changingView);
             } else if (event.animationType == NotificationStackScrollLayout
-                            .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR ||
-                    event.animationType == NotificationStackScrollLayout
+                            .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR
+                    || event.animationType == NotificationStackScrollLayout
                             .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
                 mHeadsUpDisappearChildren.add(changingView);
                 Runnable endRunnable = null;
                 if (changingView.getParent() == null) {
-                    // This notification was actually removed, so we need to add it transiently
+                    // This notification was actually removed, so we need to add it
+                    // transiently
                     mHostLayout.addTransientView(changingView, 0);
                     changingView.setTransientContainer(mHostLayout);
                     mTmpState.initFrom(changingView);
                     endRunnable = changingView::removeFromTransientContainer;
                 }
+
                 boolean needsAnimation = true;
                 if (changingView instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row = (ExpandableNotificationRow) changingView;
+                    ExpandableNotificationRow row =
+                            (ExpandableNotificationRow) changingView;
                     if (row.isDismissed()) {
                         needsAnimation = false;
                     }
@@ -488,21 +499,31 @@ public class StackStateAnimator {
                     // We need to add the global animation listener, since once no animations are
                     // running anymore, the panel will instantly hide itself. We need to wait until
                     // the animation is fully finished for this though.
-                    Runnable postAnimation = endRunnable;
+                    Runnable tmpEndRunnable = endRunnable;
+                    Runnable postAnimation = () -> {
+                        changingView.setInRemovalAnimation(false);
+                        if (tmpEndRunnable != null) {
+                            tmpEndRunnable.run();
+                        }
+                    };
+                    Runnable startAnimation = () -> {
+                        changingView.setInRemovalAnimation(true);
+                    };
                     if (loggable) {
                         mLogger.logHUNViewDisappearing(key);
 
-                        Runnable finalEndRunnable = endRunnable;
+                        Runnable tmpPostAnimation = postAnimation;
                         String finalKey1 = key;
                         postAnimation = () -> {
                             mLogger.disappearAnimationEnded(finalKey1);
-                            if (finalEndRunnable != null) finalEndRunnable.run();
+                            tmpPostAnimation.run();
                         };
                     }
                     long removeAnimationDelay = changingView.performRemoveAnimation(
                             ANIMATION_DURATION_HEADS_UP_DISAPPEAR,
                             0, 0.0f, true /* isHeadsUpAppear */,
-                            postAnimation, getGlobalAnimationFinishedListener());
+                            startAnimation, postAnimation,
+                            getGlobalAnimationFinishedListener());
                     mAnimationProperties.delay += removeAnimationDelay;
                 } else if (endRunnable != null) {
                     endRunnable.run();
