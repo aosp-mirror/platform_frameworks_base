@@ -111,7 +111,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                 (event, rawEvent, policyFlags) -> dispatchTransformedEvent(event, rawEvent,
                         policyFlags));
         mDelegatingState = new DelegatingState(mMotionEventDispatcherDelegate);
-        mDetectingState = new DetectingState(context, mDetectTripleTap);
+        mDetectingState = new DetectingState(context);
         mViewportDraggingState = new ViewportDraggingState();
         mObservePanningScalingState = new PanningScalingGestureState(
                 new PanningScalingHandler(context, MAX_SCALE, MIN_SCALE, true,
@@ -448,22 +448,14 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
         private final MagnificationGesturesObserver mGesturesObserver;
 
-        /**
-         * {@code true} if this detector should detect and respond to triple-tap
-         * gestures for engaging and disengaging magnification,
-         * {@code false} if it should ignore such gestures
-         */
-        private final boolean mDetectTripleTap;
-
-        DetectingState(@UiContext Context context, boolean detectTripleTap) {
-            mDetectTripleTap = detectTripleTap;
-            final MultiTap multiTap = new MultiTap(context, mDetectTripleTap ? 3 : 1,
-                    mDetectTripleTap
+        DetectingState(@UiContext Context context) {
+            final MultiTap multiTap = new MultiTap(context, mDetectSingleFingerTripleTap ? 3 : 1,
+                    mDetectSingleFingerTripleTap
                             ? MagnificationGestureMatcher.GESTURE_TRIPLE_TAP
                             : MagnificationGestureMatcher.GESTURE_SINGLE_TAP, null);
             final MultiTapAndHold multiTapAndHold = new MultiTapAndHold(context,
-                    mDetectTripleTap ? 3 : 1,
-                    mDetectTripleTap
+                    mDetectSingleFingerTripleTap ? 3 : 1,
+                    mDetectSingleFingerTripleTap
                             ? MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD
                             : MagnificationGestureMatcher.GESTURE_SINGLE_TAP_AND_HOLD, null);
             mGesturesObserver = new MagnificationGesturesObserver(this,
@@ -488,7 +480,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         @Override
         public boolean shouldStopDetection(MotionEvent motionEvent) {
             return !mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId)
-                    && !mDetectTripleTap;
+                    && !mDetectSingleFingerTripleTap;
         }
 
         @Override

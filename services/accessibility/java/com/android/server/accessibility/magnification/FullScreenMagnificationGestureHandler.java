@@ -873,7 +873,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
                         transitionToDelegatingStateAndClear();
 
-                    } else if (mDetectTripleTap
+                    } else if (mDetectSingleFingerTripleTap
                             // If activated, delay an ACTION_DOWN for mMultiTapMaxDelay
                             // to ensure reachability of
                             // STATE_PANNING_SCALING(triggerable with ACTION_POINTER_DOWN)
@@ -989,7 +989,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             // Shortcut acts as the 2 initial taps
             if (mShortcutTriggered) return tapCount() + 2 >= numTaps;
 
-            final boolean multitapTriggered = mDetectTripleTap
+            final boolean multitapTriggered = mDetectSingleFingerTripleTap
                     && tapCount() >= numTaps
                     && isMultiTap(mPreLastDown, mLastDown)
                     && isMultiTap(mPreLastUp, mLastUp);
@@ -1205,7 +1205,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
          * @return true if tap is out of distance slop
          */
         boolean isTapOutOfDistanceSlop() {
-            if (!mDetectTripleTap) return false;
+            if (!mDetectSingleFingerTripleTap) return false;
             if (mPreLastDown == null || mLastDown == null) {
                 return false;
             }
@@ -1282,7 +1282,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 + ", mMagnifiedInteractionState=" + mPanningScalingState
                 + ", mViewportDraggingState=" + mViewportDraggingState
                 + ", mSinglePanningState=" + mSinglePanningState
-                + ", mDetectTripleTap=" + mDetectTripleTap
+                + ", mDetectSingleFingerTripleTap=" + mDetectSingleFingerTripleTap
                 + ", mDetectShortcutTrigger=" + mDetectShortcutTrigger
                 + ", mCurrentState=" + State.nameOf(mCurrentState)
                 + ", mPreviousState=" + State.nameOf(mPreviousState)
