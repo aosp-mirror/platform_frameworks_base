@@ -16,12 +16,14 @@
 
 package android.credentials;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
+import android.credentials.flags.Flags;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -42,6 +44,7 @@ public final class CredentialProviderInfo implements Parcelable {
     @NonNull private final List<String> mCapabilities = new ArrayList<>();
     @Nullable private final CharSequence mOverrideLabel;
     @Nullable private CharSequence mSettingsSubtitle = null;
+    @Nullable private CharSequence mSettingsActivity = null;
     private final boolean mIsSystemProvider;
     private final boolean mIsEnabled;
     private final boolean mIsPrimary;
@@ -59,6 +62,7 @@ public final class CredentialProviderInfo implements Parcelable {
         mIsEnabled = builder.mIsEnabled;
         mIsPrimary = builder.mIsPrimary;
         mOverrideLabel = builder.mOverrideLabel;
+        mSettingsActivity = builder.mSettingsActivity;
     }
 
     /** Returns true if the service supports the given {@code credentialType}, false otherwise. */
@@ -104,10 +108,7 @@ public final class CredentialProviderInfo implements Parcelable {
         return mIsEnabled;
     }
 
-    /**
-     * Returns whether the provider is set as primary by the user.
-     *
-     */
+    /** Returns whether the provider is set as primary by the user. */
     public boolean isPrimary() {
         return mIsPrimary;
     }
@@ -116,6 +117,18 @@ public final class CredentialProviderInfo implements Parcelable {
     @Nullable
     public CharSequence getSettingsSubtitle() {
         return mSettingsSubtitle;
+    }
+
+    /**
+     * Returns the settings activity.
+     *
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    @FlaggedApi(Flags.FLAG_SETTINGS_ACTIVITY_ENABLED)
+    public CharSequence getSettingsActivity() {
+        return mSettingsActivity;
     }
 
     /** Returns the component name for the service. */
@@ -133,6 +146,7 @@ public final class CredentialProviderInfo implements Parcelable {
         dest.writeBoolean(mIsPrimary);
         TextUtils.writeToParcel(mOverrideLabel, dest, flags);
         TextUtils.writeToParcel(mSettingsSubtitle, dest, flags);
+        TextUtils.writeToParcel(mSettingsActivity, dest, flags);
     }
 
     @Override
@@ -161,6 +175,9 @@ public final class CredentialProviderInfo implements Parcelable {
                 + "settingsSubtitle="
                 + mSettingsSubtitle
                 + ", "
+                + "settingsActivity="
+                + mSettingsActivity
+                + ", "
                 + "capabilities="
                 + String.join(",", mCapabilities)
                 + "}";
@@ -174,6 +191,7 @@ public final class CredentialProviderInfo implements Parcelable {
         mIsPrimary = in.readBoolean();
         mOverrideLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mSettingsSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mSettingsActivity = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
     }
 
     public static final @NonNull Parcelable.Creator<CredentialProviderInfo> CREATOR =
@@ -196,6 +214,7 @@ public final class CredentialProviderInfo implements Parcelable {
         @NonNull private List<String> mCapabilities = new ArrayList<>();
         private boolean mIsSystemProvider = false;
         @Nullable private CharSequence mSettingsSubtitle = null;
+        @Nullable private CharSequence mSettingsActivity = null;
         private boolean mIsEnabled = false;
         private boolean mIsPrimary = false;
         @Nullable private CharSequence mOverrideLabel = null;
@@ -228,6 +247,16 @@ public final class CredentialProviderInfo implements Parcelable {
         /** Sets the settings subtitle. */
         public @NonNull Builder setSettingsSubtitle(@Nullable CharSequence settingsSubtitle) {
             mSettingsSubtitle = settingsSubtitle;
+            return this;
+        }
+
+        /**
+         * Sets the settings activity.
+         *
+         * @hide
+         */
+        public @NonNull Builder setSettingsActivity(@Nullable CharSequence settingsActivity) {
+            mSettingsActivity = settingsActivity;
             return this;
         }
 

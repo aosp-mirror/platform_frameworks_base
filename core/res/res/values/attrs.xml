@@ -10118,6 +10118,9 @@
              screen that can be used to provide more information about a provider. For
              longer strings it will be truncated. -->
         <attr name="settingsSubtitle" format="string" />
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
     </declare-styleable>
 
     <!-- A list of capabilities that indicates to the OS what kinds of credentials
