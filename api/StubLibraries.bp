@@ -438,6 +438,26 @@ java_api_library {
     full_api_surface_stub: "android_module_lib_stubs_current_full.from-text",
 }
 
+// This module generates a stub jar that is a union of the test and module lib
+// non-updatable api contributions. Modules should not depend on the stub jar
+// generated from this module, as this module is strictly used for hiddenapi only.
+java_api_library {
+    name: "android-non-updatable.stubs.test_module_lib",
+    api_surface: "module_lib",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+        "test-api-stubs-docs-non-updatable.api.contribution",
+        "module-lib-api-stubs-docs-non-updatable.api.contribution",
+    ],
+    defaults: ["android-non-updatable_from_text_defaults"],
+    full_api_surface_stub: "android_test_module_lib_stubs_current.from-text",
+
+    // This module is only used for hiddenapi, and other modules should not
+    // depend on this module.
+    visibility: ["//visibility:private"],
+}
+
 java_defaults {
     name: "android_stubs_dists_default",
     dist: {
@@ -754,6 +774,30 @@ java_api_library {
         "stub-annotations",
     ],
     visibility: ["//visibility:public"],
+}
+
+java_api_library {
+    name: "android_test_module_lib_stubs_current.from-text",
+    api_surface: "module-lib",
+    defaults: [
+        "android_stubs_current_contributions",
+        "android_system_stubs_current_contributions",
+        "android_test_stubs_current_contributions",
+        "android_module_lib_stubs_current_contributions",
+    ],
+    libs: [
+        "android_module_lib_stubs_current_full.from-text",
+        "stub-annotations",
+    ],
+    api_contributions: [
+        "test-api-stubs-docs-non-updatable.api.contribution",
+    ],
+
+    // This module is only used to build android-non-updatable.stubs.test_module_lib
+    // and other modules should not depend on this module.
+    visibility: [
+        "//visibility:private",
+    ],
 }
 
 java_api_library {
