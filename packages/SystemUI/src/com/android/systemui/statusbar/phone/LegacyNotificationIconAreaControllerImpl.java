@@ -205,14 +205,13 @@ public class LegacyNotificationIconAreaControllerImpl implements
     }
 
     public void setupShelf(NotificationShelfController notificationShelfController) {
-        mShelfRefactor.assertDisabled();
+        mShelfRefactor.assertInLegacyMode();
         mShelfIcons = notificationShelfController.getShelfIcons();
     }
 
     public void setShelfIcons(NotificationIconContainer icons) {
-        if (mShelfRefactor.expectEnabled()) {
-            mShelfIcons = icons;
-        }
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
+        mShelfIcons = icons;
     }
 
     public void onDensityOrFontScaleChanged(@NotNull Context context) {

@@ -22,11 +22,11 @@ import com.android.systemui.Dependency
 /**
  * This class promotes best practices for flag guarding System UI view refactors.
  * * [isEnabled] allows changing an implementation.
- * * [assertDisabled] allows authors to flag code as being "dead" when the flag gets enabled and
+ * * [assertInLegacyMode] allows authors to flag code as being "dead" when the flag gets enabled and
  *   ensure that it is not being invoked accidentally in the post-flag refactor.
- * * [expectEnabled] allows authors to guard new code with a "safe" alternative when invoked on
- *   flag-disabled builds, but with a check that should crash eng builds or tests when the
- *   expectation is violated.
+ * * [isUnexpectedlyInLegacyMode] allows authors to guard new code with a "safe" alternative when
+ *   invoked on flag-disabled builds, but with a check that should crash eng builds or tests when
+ *   the expectation is violated.
  *
  * The constructors require that you provide a [FeatureFlags] instance. If you're using this in a
  * View class, it's acceptable to ue the [forView] constructor methods, which do not require one,
@@ -60,13 +60,13 @@ private constructor(
      * Example usage:
      * ```
      * public void setController(NotificationShelfController notificationShelfController) {
-     *     mShelfRefactor.assertDisabled();
+     *     mShelfRefactor.assertInLegacyMode();
      *     mController = notificationShelfController;
      * }
      * ````
      */
-    fun assertDisabled() =
-        check(!isEnabled) { "Code path not supported when $flagName is enabled." }
+    fun assertInLegacyMode() =
+        check(!isEnabled) { "Legacy code path not supported when $flagName is enabled." }
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
@@ -76,18 +76,17 @@ private constructor(
      * Example usage:
      * ```
      * public void setShelfIcons(NotificationIconContainer icons) {
-     *     if (mShelfRefactor.expectEnabled()) {
-     *         mShelfIcons = icons;
-     *     }
+     *     if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
+     *     mShelfIcons = icons;
      * }
      * ```
      */
-    fun expectEnabled(): Boolean {
+    fun isUnexpectedlyInLegacyMode(): Boolean {
         if (!isEnabled) {
-            val message = "Code path not supported when $flagName is disabled."
+            val message = "New code path expects $flagName to be enabled."
             Log.wtf(TAG, message, Exception(message))
         }
-        return isEnabled
+        return !isEnabled
     }
 
     companion object {
