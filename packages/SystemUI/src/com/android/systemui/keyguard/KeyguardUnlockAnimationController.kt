@@ -443,7 +443,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
         if (!keyguardStateController.isKeyguardGoingAway &&
                 willUnlockWithInWindowLauncherAnimations) {
             try {
-                launcherUnlockController?.setUnlockAmount(1f, true /* forceIfAnimating */)
+                launcherUnlockController?.setUnlockAmount(1f,
+                        biometricUnlockControllerLazy.get().isWakeAndUnlock /* forceIfAnimating */)
             } catch (e: DeadObjectException) {
                 Log.e(TAG, "launcherUnlockAnimationController was dead, but non-null in " +
                         "onKeyguardGoingAwayChanged(). Catching exception as this should mean " +
