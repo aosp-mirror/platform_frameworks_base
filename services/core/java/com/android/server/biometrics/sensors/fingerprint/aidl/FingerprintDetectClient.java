@@ -43,7 +43,8 @@ import java.util.function.Supplier;
  * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
  * have the same haptic, lockout counter is not increased).
  */
-class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements DetectionConsumer {
+public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
+        implements DetectionConsumer {
 
     private static final String TAG = "FingerprintDetectClient";
 
@@ -52,7 +53,8 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
     @NonNull private final SensorOverlays mSensorOverlays;
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    FingerprintDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+    public FingerprintDetectClient(@NonNull Context context,
+            @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener,
             @NonNull FingerprintAuthenticateOptions options,

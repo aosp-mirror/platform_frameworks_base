@@ -428,8 +428,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                     mFingerprintSensors.get(sensorId).getLazySession(), token, id,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                    opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
-                    createLogger(BiometricsProtoEnums.ACTION_ENROLL,
+                    opPackageName, FingerprintUtils.getInstance(sensorId),
+                    sensorId, createLogger(BiometricsProtoEnums.ACTION_ENROLL,
                             BiometricsProtoEnums.CLIENT_UNKNOWN, mAuthenticationStatsCollector),
                     mBiometricContext,
                     mFingerprintSensors.get(sensorId).getSensorProperties(),
@@ -496,12 +496,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
                             mAuthenticationStatsCollector),
                     mBiometricContext, isStrongBiometric,
-                    mTaskStackListener, mFingerprintSensors.get(sensorId).getLockoutCache(),
+                    mTaskStackListener,
                     mUdfpsOverlayController, mSidefpsController,
                     allowBackgroundAuthentication,
                     mFingerprintSensors.get(sensorId).getSensorProperties(), mHandler,
                     Utils.getCurrentStrength(sensorId),
-                    SystemClock.elapsedRealtimeClock());
+                    SystemClock.elapsedRealtimeClock(),
+                    null /* lockoutTracker */);
             scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
 
                 @Override

@@ -493,7 +493,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
                             mAuthenticationStatsCollector),
                     mBiometricContext, isStrongBiometric,
-                    mUsageStats, mFaceSensors.get(sensorId).getLockoutCache(),
+                    mUsageStats, null /* lockoutTracker */,
                     allowBackgroundAuthentication, Utils.getCurrentStrength(sensorId));
             scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
                 @Override
@@ -619,7 +619,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext,
                     mFaceSensors.get(sensorId).getLazySession(), token, callback, userId,
                     mContext.getOpPackageName(), sensorId, BiometricLogger.ofUnknown(mContext),
-                    mBiometricContext);
+                    mBiometricContext, feature);
             scheduleForSensor(sensorId, client);
         });
     }

@@ -85,7 +85,7 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
                 }
             };
 
-    FaceEnrollClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+    public FaceEnrollClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,

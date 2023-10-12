@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.aidl;
+package com.android.server.biometrics.sensors.face.aidl;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.fingerprint.ISession;
-import android.hardware.fingerprint.Fingerprint;
+import android.hardware.biometrics.face.ISession;
+import android.hardware.face.Face;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.testing.TestableContext;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.annotation.NonNull;
-import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -51,55 +50,65 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Presubmit
 @SmallTest
-public class FingerprintInternalCleanupClientTest {
-
-    private static final int SENSOR_ID = 22;
+public class FaceInternalCleanupClientTest {
+    private static final String TAG = "FaceInternalCleanupClientTest";
+    private static final int USER_ID = 2;
+    private static final int SENSOR_ID = 4;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
-    @Rule
-    public final TestableContext mContext = new TestableContext(
-            InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
-
-    @Mock
-    ISession mSession;
     @Mock
     private AidlSession mAidlSession;
     @Mock
-    private BiometricLogger mLogger;
+    private ISession mSession;
+    @Mock
+    private ClientMonitorCallback mCallback;
+    @Mock
+    Context mContext;
+    @Mock
+    private BiometricLogger mBiometricLogger;
     @Mock
     private BiometricContext mBiometricContext;
     @Mock
-    private FingerprintUtils mFingerprintUtils;
+    private BiometricUtils<Face> mBiometricUtils;
     @Mock
-    private ClientMonitorCallback mCallback;
+    private Map<Integer, Long> mAuthenticatorIds;
 
-    private FingerprintInternalCleanupClient mClient;
+    private final List<Face> mEnrolledList = new ArrayList<>();
+    private final int mBiometricId = 1;
+    private final Face mFace = new Face("face", mBiometricId, 1 /* deviceId */);
+    private FaceInternalCleanupClient mClient;
     private List<Integer> mAddedIds;
 
     @Before
-    public void setup() {
-        mAddedIds = new ArrayList<>();
-
+    public void setUp() throws RemoteException {
         when(mAidlSession.getSession()).thenReturn(mSession);
+
+        mEnrolledList.add(mFace);
+        mAddedIds = new ArrayList<>();
+        mClient = new FaceInternalCleanupClient(mContext, () -> mAidlSession, USER_ID, TAG,
+                SENSOR_ID, mBiometricLogger, mBiometricContext, mBiometricUtils,
+                mAuthenticatorIds) {
+            @Override
+            protected void onAddUnknownTemplate(int userId,
+                    @NonNull BiometricAuthenticator.Identifier identifier) {
+                mAddedIds.add(identifier.getBiometricId());
+            }
+        };
     }
 
     @Test
     public void removesUnknownTemplate() throws Exception {
-        mClient = createClient();
-
-        final ArgumentCaptor<int[]> captor = ArgumentCaptor.forClass(int[].class);
-        final List<Fingerprint> templates = List.of(
-                new Fingerprint("one", 1, 1),
-                new Fingerprint("two", 2, 1)
+        final List<Face> templates = List.of(
+                new Face("one", 1, 1),
+                new Face("two", 2, 1)
         );
         mClient.start(mCallback);
         for (int i = templates.size() - 1; i >= 0; i--) {
@@ -109,8 +118,9 @@ public class FingerprintInternalCleanupClientTest {
             mClient.getCurrentRemoveClient().onRemoved(templates.get(i), 0);
         }
 
-        verify(mSession).enumerateEnrollments();
         assertThat(mAddedIds).isEmpty();
+        final ArgumentCaptor<int[]> captor = ArgumentCaptor.forClass(int[].class);
+
         verify(mSession, times(2)).removeEnrollments(captor.capture());
         assertThat(captor.getAllValues().stream()
                 .flatMap(x -> Arrays.stream(x).boxed())
@@ -121,63 +131,57 @@ public class FingerprintInternalCleanupClientTest {
 
     @Test
     public void addsUnknownTemplateWhenVirtualIsEnabled() throws Exception {
-        mClient = createClient();
         mClient.setFavorHalEnrollments();
-
-        final List<Fingerprint> templates = List.of(
-                new Fingerprint("one", 1, 1),
-                new Fingerprint("two", 2, 1)
+        final List<Face> templates = List.of(
+                new Face("one", 1, 1),
+                new Face("two", 2, 1)
         );
         mClient.start(mCallback);
         for (int i = templates.size() - 1; i >= 0; i--) {
             mClient.getCurrentEnumerateClient().onEnumerationResult(templates.get(i), i);
         }
 
-        verify(mSession).enumerateEnrollments();
         assertThat(mAddedIds).containsExactly(1, 2);
         verify(mSession, never()).removeEnrollments(any());
         verify(mCallback).onClientFinished(eq(mClient), eq(true));
     }
 
     @Test
-    public void cleanupUnknownHalTemplatesAfterEnumerationWhenVirtualIsDisabled()
-            throws RemoteException {
-        mClient = createClient();
-
-        final List<Fingerprint> templates = List.of(
-                new Fingerprint("one", 1, 1),
-                new Fingerprint("two", 2, 1),
-                new Fingerprint("three", 3, 1)
+    public void cleanupUnknownHalTemplatesAfterEnumerationWhenVirtualIsDisabled() {
+        final List<Face> templates = List.of(
+                new Face("one", 1, 1),
+                new Face("two", 2, 1),
+                new Face("three", 3, 1)
         );
         mClient.start(mCallback);
         for (int i = templates.size() - 1; i >= 0; i--) {
             mClient.getCurrentEnumerateClient().onEnumerationResult(templates.get(i), i);
         }
 
-        verify(mSession).enumerateEnrollments();
         // The first template is removed after enumeration
         assertThat(mClient.getUnknownHALTemplates().size()).isEqualTo(2);
 
         // Simulate finishing the removal of the first template.
-        // |remaining| is 0 because one FingerprintRemovalClient is associated with only one
+        // |remaining| is 0 because one FaceRemovalClient is associated with only one
         // biometrics ID.
         mClient.getCurrentRemoveClient().onRemoved(templates.get(0), 0);
+
         assertThat(mClient.getUnknownHALTemplates().size()).isEqualTo(1);
+
         // Simulate finishing the removal of the second template.
         mClient.getCurrentRemoveClient().onRemoved(templates.get(1), 0);
+
         assertThat(mClient.getUnknownHALTemplates()).isEmpty();
     }
 
-    protected FingerprintInternalCleanupClient createClient() {
-        final Map<Integer, Long> authenticatorIds = new HashMap<>();
-        return new FingerprintInternalCleanupClient(mContext, () -> mAidlSession, 2 /* userId */,
-                "the.test.owner", SENSOR_ID, mLogger, mBiometricContext,
-                mFingerprintUtils, authenticatorIds) {
-            @Override
-            protected void onAddUnknownTemplate(int userId,
-                    @NonNull BiometricAuthenticator.Identifier identifier) {
-                mAddedIds.add(identifier.getBiometricId());
-            }
-        };
+    @Test
+    public void noUnknownTemplates() throws RemoteException {
+        mClient.start(mCallback);
+        mClient.getCurrentEnumerateClient().onEnumerationResult(null, 0);
+
+        verify(mSession).enumerateEnrollments();
+        assertThat(mClient.getUnknownHALTemplates().size()).isEqualTo(0);
+        verify(mSession, never()).removeEnrollments(any());
+        verify(mCallback).onClientFinished(mClient, true);
     }
 }
