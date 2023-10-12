@@ -213,6 +213,7 @@ java_library_static {
         "notification_flags_lib",
         "biometrics_flags_lib",
         "am_flags_lib",
+        "com_android_wm_shell_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
