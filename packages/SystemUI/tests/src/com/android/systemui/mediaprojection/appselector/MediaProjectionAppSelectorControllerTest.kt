@@ -4,7 +4,9 @@ import android.content.ComponentName
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED as STATE_APP_SELECTOR_DISPLAYED
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnailLoader
@@ -20,6 +22,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @RunWith(AndroidTestingRunner::class)
@@ -37,10 +40,11 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
 
     private val view: MediaProjectionAppSelectorView = mock()
     private val policyResolver: ScreenCaptureDevicePolicyResolver = mock()
+    private val logger = mock<MediaProjectionMetricsLogger>()
 
     private val thumbnailLoader = FakeThumbnailLoader()
 
-    private val controller =
+    private fun createController(isFirstStart: Boolean = true) =
         MediaProjectionAppSelectorController(
             taskListProvider,
             view,
@@ -50,6 +54,8 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             appSelectorComponentName,
             callerPackageName,
             thumbnailLoader,
+            isFirstStart,
+            logger
         )
 
     @Before
@@ -61,7 +67,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     fun initNoRecentTasks_bindsEmptyList() {
         taskListProvider.tasks = emptyList()
 
-        controller.init()
+        createController().init()
 
         verify(view).bind(emptyList())
     }
@@ -70,7 +76,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     fun initOneRecentTask_bindsList() {
         taskListProvider.tasks = listOf(createRecentTask(taskId = 1))
 
-        controller.init()
+        createController().init()
 
         verify(view).bind(listOf(createRecentTask(taskId = 1)))
     }
@@ -86,7 +92,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             )
         taskListProvider.tasks = tasks
 
-        controller.init()
+        createController().init()
 
         assertThat(thumbnailLoader.capturedTaskIds).containsExactly(2, 3)
     }
@@ -101,7 +107,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             )
         taskListProvider.tasks = tasks
 
-        controller.init()
+        createController().init()
 
         verify(view)
             .bind(
@@ -124,7 +130,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             )
         taskListProvider.tasks = tasks
 
-        controller.init()
+        createController().init()
 
         verify(view)
             .bind(
@@ -147,7 +153,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             )
         taskListProvider.tasks = tasks
 
-        controller.init()
+        createController().init()
 
         verify(view)
             .bind(
@@ -172,7 +178,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             )
         taskListProvider.tasks = tasks
 
-        controller.init()
+        createController().init()
 
         verify(view)
             .bind(
@@ -199,9 +205,27 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
         taskListProvider.tasks = tasks
 
         givenCaptureAllowed(isAllow = false)
-        controller.init()
+        createController().init()
 
         verify(view).bind(emptyList())
+    }
+
+    @Test
+    fun init_firstStart_logsAppSelectorDisplayed() {
+        val controller = createController(isFirstStart = true)
+
+        controller.init()
+
+        verify(logger).notifyPermissionProgress(STATE_APP_SELECTOR_DISPLAYED)
+    }
+
+    @Test
+    fun init_notFirstStart_doesNotLogAppSelectorDisplayed() {
+        val controller = createController(isFirstStart = false)
+
+        controller.init()
+
+        verify(logger, never()).notifyPermissionProgress(STATE_APP_SELECTOR_DISPLAYED)
     }
 
     private fun givenCaptureAllowed(isAllow: Boolean) {
