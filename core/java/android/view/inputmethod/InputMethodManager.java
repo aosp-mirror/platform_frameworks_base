@@ -39,6 +39,7 @@ import android.Manifest;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1513,6 +1514,7 @@ public final class InputMethodManager {
      * Returns {@code true} if currently selected IME supports Stylus handwriting & is enabled.
      * If the method returns {@code false}, {@link #startStylusHandwriting(View)} shouldn't be
      * called and Stylus touch should continue as normal touch input.
+     *
      * @see #startStylusHandwriting(View)
      */
     public boolean isStylusHandwritingAvailable() {
@@ -1536,6 +1538,7 @@ public final class InputMethodManager {
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
+    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public boolean isStylusHandwritingAvailableAsUser(@NonNull UserHandle user) {
         final Context fallbackContext = ActivityThread.currentApplication();
@@ -1656,6 +1659,7 @@ public final class InputMethodManager {
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
+    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public List<InputMethodInfo> getEnabledInputMethodListAsUser(@NonNull UserHandle user) {
         return IInputMethodManagerGlobalInvoker.getEnabledInputMethodList(user.getIdentifier());
@@ -1691,12 +1695,13 @@ public final class InputMethodManager {
      *               {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required if this is
      *               different from the calling process user ID.
      * @return {@link List} of {@link InputMethodSubtype}.
-     * @see #getEnabledInputMethodListAsUser(int)
+     * @see #getEnabledInputMethodListAsUser(UserHandle)
      * @hide
      */
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
+    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
             @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes,
