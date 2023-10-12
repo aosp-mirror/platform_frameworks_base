@@ -27,6 +27,7 @@ import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.view.ContextThemeWrapper
 import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DisplayInfo
@@ -179,7 +180,11 @@ constructor(
 
     fun render() {
         mainHandler.post {
-            val previewContext = display?.let { context.createDisplayContext(it) } ?: context
+            val previewContext =
+                display?.let {
+                    ContextThemeWrapper(context.createDisplayContext(it), context.getTheme())
+                }
+                    ?: context
 
             val rootView = FrameLayout(previewContext)
 
