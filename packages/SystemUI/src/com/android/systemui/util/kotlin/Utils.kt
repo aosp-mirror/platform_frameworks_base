@@ -19,6 +19,7 @@ package com.android.systemui.util.kotlin
 class Utils {
     companion object {
         fun <A, B, C> toTriple(a: A, bc: Pair<B, C>) = Triple(a, bc.first, bc.second)
+        fun <A, B, C> toTriple(ab: Pair<A, B>, c: C) = Triple(ab.first, ab.second, c)
 
         fun <A, B, C, D> toQuad(a: A, b: B, c: C, d: D) = Quad(a, b, c, d)
         fun <A, B, C, D> toQuad(a: A, bcd: Triple<B, C, D>) =
