@@ -114,8 +114,8 @@ public class CryptoObject {
     }
 
     /**
-     * Get {@link PresentationSession} object.
-     * @return {@link PresentationSession} object or null if this doesn't contain one.
+     * Get {@link KeyAgreement} object.
+     * @return {@link KeyAgreement} object or null if this doesn't contain one.
      */
     @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
     public KeyAgreement getKeyAgreement() {

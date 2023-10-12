@@ -1,4 +1,6 @@
 // Signature format: 2.0
+// - add-additional-overrides=no
+// - migrating=Migration in progress see b/299366704
 package android {
 
   public static final class Manifest.permission {
@@ -10316,7 +10318,6 @@ package android.os {
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_CHARGING_POLICY = 9; // 0x9
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_FIRST_USAGE_DATE = 8; // 0x8
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_MANUFACTURING_DATE = 7; // 0x7
-    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_STATE_OF_HEALTH = 10; // 0xa
     field public static final int CHARGING_POLICY_ADAPTIVE_AC = 3; // 0x3
     field public static final int CHARGING_POLICY_ADAPTIVE_AON = 2; // 0x2
     field public static final int CHARGING_POLICY_ADAPTIVE_LONGLIFE = 4; // 0x4
@@ -10384,8 +10385,8 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanResults(@NonNull android.os.WorkSource, int);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanStarted(@NonNull android.os.WorkSource, boolean);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportBleScanStopped(@NonNull android.os.WorkSource, boolean);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void reportBluetoothOff(int, int, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void reportBluetoothOn(int, int, @NonNull String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void reportBluetoothOff(int, int, @NonNull String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public void reportBluetoothOn(int, int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockAcquiredFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportMobileRadioPowerState(boolean, int);

@@ -34,8 +34,11 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
@@ -155,10 +158,27 @@ final class PackageMetrics {
     private long getApksSize(File apkDir) {
         // TODO(b/249294752): also count apk sizes for failed installs
         final AtomicLong apksSize = new AtomicLong();
-        try (Stream<Path> walkStream = Files.walk(apkDir.toPath())) {
-            walkStream.filter(p -> p.toFile().isFile()
-                    && ApkLiteParseUtils.isApkFile(p.toFile())).forEach(
-                            f -> apksSize.addAndGet(f.toFile().length()));
+        try {
+            Files.walkFileTree(apkDir.toPath(), new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                        throws IOException {
+                    if (dir.equals(apkDir.toPath())) {
+                        return FileVisitResult.CONTINUE;
+                    } else {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                        throws IOException {
+                    if (file.toFile().isFile() && ApkLiteParseUtils.isApkFile(file.toFile())) {
+                        apksSize.addAndGet(file.toFile().length());
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         } catch (IOException e) {
             // ignore
         }
