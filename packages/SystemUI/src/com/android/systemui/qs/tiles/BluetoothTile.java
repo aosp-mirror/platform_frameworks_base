@@ -39,7 +39,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -53,6 +52,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogViewModel;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import java.util.List;
@@ -198,6 +198,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         }
 
         state.expandedAccessibilityClassName = Switch.class.getName();
+        state.forceExpandIcon = mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG);
     }
 
     /**
