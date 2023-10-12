@@ -53,6 +53,7 @@ import android.app.usage.AppStandbyInfo;
 import android.app.usage.BroadcastResponseStatsList;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventStats;
+import android.app.usage.Flags;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
@@ -2124,12 +2125,15 @@ public class UsageStatsService extends SystemService implements
         }
 
         private boolean canReportUsageStats() {
-            if (isCallingUidSystem()) {
-                return true; // System UID can always report UsageStats
+            final boolean isSystem = isCallingUidSystem();
+            if (!Flags.reportUsageStatsPermission()) {
+                // If the flag is disabled, do no check for the new permission and instead return
+                // true only if the calling uid is system since System UID can always report stats.
+                return isSystem;
             }
-
-            return getContext().checkCallingPermission(Manifest.permission.REPORT_USAGE_STATS)
-                    == PackageManager.PERMISSION_GRANTED;
+            return isSystem
+                    || getContext().checkCallingPermission(Manifest.permission.REPORT_USAGE_STATS)
+                        == PackageManager.PERMISSION_GRANTED;
         }
 
         private boolean hasObserverPermission() {
