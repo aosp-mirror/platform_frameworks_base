@@ -17,8 +17,9 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import dagger.Module
 import dagger.Provides
@@ -28,6 +29,7 @@ import javax.inject.Provider
 /** ViewModel for the list of notifications. */
 class NotificationListViewModel(
     val shelf: NotificationShelfViewModel,
+    val footer: Optional<FooterViewModel>,
 )
 
 @Module
@@ -36,12 +38,33 @@ object NotificationListViewModelModule {
     @Provides
     @SysUISingleton
     fun maybeProvideViewModel(
-        featureFlags: FeatureFlags,
+        featureFlags: FeatureFlagsClassic,
         shelfViewModel: Provider<NotificationShelfViewModel>,
-    ): Optional<NotificationListViewModel> =
-        if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
-            Optional.of(NotificationListViewModel(shelfViewModel.get()))
+        footerViewModel: Provider<FooterViewModel>,
+    ): Optional<NotificationListViewModel> {
+        return if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            if (com.android.systemui.Flags.notificationsFooterViewRefactor()) {
+                Optional.of(
+                    NotificationListViewModel(
+                        shelfViewModel.get(),
+                        Optional.of(footerViewModel.get())
+                    )
+                )
+            } else {
+                Optional.of(NotificationListViewModel(shelfViewModel.get(), Optional.empty()))
+            }
         } else {
+            if (com.android.systemui.Flags.notificationsFooterViewRefactor()) {
+                throw IllegalStateException(
+                    "The com.android.systemui.notifications_footer_view_refactor flag requires " +
+                        "the notification_shelf_refactor flag to be enabled. First disable the " +
+                        "footer flag using `adb shell device_config put systemui " +
+                        "com.android.systemui.notifications_footer_view_refactor false`, then " +
+                        "enable the notification_shelf_refactor flag in Flag Flipper. " +
+                        "Afterwards, you can try re-enabling the footer refactor flag via adb."
+                )
+            }
             Optional.empty()
         }
+    }
 }

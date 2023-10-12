@@ -107,6 +107,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -694,7 +695,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         super.onFinishInflate();
 
         inflateEmptyShadeView();
-        inflateFooterView();
+        if (!FooterViewRefactor.isEnabled()) {
+            inflateFooterView();
+        }
     }
 
     /**
@@ -729,9 +732,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void reinflateViews() {
-        inflateFooterView();
+        if (!FooterViewRefactor.isEnabled()) {
+            inflateFooterView();
+            updateFooter();
+        }
         inflateEmptyShadeView();
-        updateFooter();
         mSectionsManager.reinflateViews();
     }
 
@@ -746,7 +751,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @VisibleForTesting
     public void updateFooter() {
-        if (mFooterView == null) {
+        if (mFooterView == null || mController == null) {
             return;
         }
         // TODO: move this logic to controller, which will invoke updateFooterView directly
@@ -4546,7 +4551,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mFooterView != null && mFooterView.isHistoryShown();
     }
 
-    void setFooterView(@NonNull FooterView footerView) {
+    /** Bind the {@link FooterView} to the NSSL. */
+    public void setFooterView(@NonNull FooterView footerView) {
         int index = -1;
         if (mFooterView != null) {
             index = indexOfChild(mFooterView);
@@ -4556,6 +4562,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         addView(mFooterView, index);
         if (mManageButtonClickListener != null) {
             mFooterView.setManageButtonClickListener(mManageButtonClickListener);
+        }
+        mFooterView.setClearAllButtonClickListener(v -> {
+            if (mFooterClearAllListener != null) {
+                mFooterClearAllListener.onClearAll();
+            }
+            clearNotifications(ROWS_ALL, true /* closeShade */);
+            footerView.setSecondaryVisible(false /* visible */, true /* animate */);
+        });
+        if (FooterViewRefactor.isEnabled()) {
+            updateFooter();
         }
     }
 
@@ -4619,7 +4635,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mFooterView.setVisible(visible, animate);
         mFooterView.setSecondaryVisible(showDismissView, animate);
         mFooterView.showHistory(showHistory);
-        mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
+        if (!FooterViewRefactor.isEnabled()) {
+            mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
+        }
     }
 
     @VisibleForTesting
@@ -5370,15 +5388,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @VisibleForTesting
     protected void inflateFooterView() {
+        FooterViewRefactor.assertInLegacyMode();
         FooterView footerView = (FooterView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_footer, this, false);
-        footerView.setClearAllButtonClickListener(v -> {
-            if (mFooterClearAllListener != null) {
-                mFooterClearAllListener.onClearAll();
-            }
-            clearNotifications(ROWS_ALL, true /* closeShade */);
-            footerView.setSecondaryVisible(false /* visible */, true /* animate */);
-        });
         setFooterView(footerView);
     }
 
