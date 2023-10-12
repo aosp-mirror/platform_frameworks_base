@@ -1088,6 +1088,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      * @deprecated use {@link
      * WindowRootViewVisibilityInteractor.isLockscreenOrShadeVisible} instead.
      */    @VisibleForTesting
+    @Deprecated
     void initShadeVisibilityListener() {
         mShadeController.setVisibilityListener(new ShadeController.ShadeVisibilityListener() {
             @Override
