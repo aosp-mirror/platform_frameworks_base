@@ -29,6 +29,8 @@ import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +41,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -47,11 +51,17 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.Until;
+import android.view.View;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityManager;
 
 import androidx.lifecycle.Lifecycle;
@@ -90,6 +100,9 @@ public class AccessibilityShortcutChooserActivityTest {
     private TestAccessibilityShortcutChooserActivity mActivity;
 
     @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
+    @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Mock
     private AccessibilityServiceInfo mAccessibilityServiceInfo;
@@ -101,6 +114,8 @@ public class AccessibilityShortcutChooserActivityTest {
     private ApplicationInfo mApplicationInfo;
     @Mock
     private IAccessibilityManager mAccessibilityManagerService;
+    @Mock
+    private KeyguardManager mKeyguardManager;
 
     @Before
     public void setUp() throws Exception {
@@ -116,22 +131,19 @@ public class AccessibilityShortcutChooserActivityTest {
                         Collections.singletonList(mAccessibilityServiceInfo)));
         when(mAccessibilityManagerService.isAccessibilityTargetAllowed(
                 anyString(), anyInt(), anyInt())).thenReturn(true);
-        TestAccessibilityShortcutChooserActivity.setupForTesting(mAccessibilityManagerService);
-        mScenario = ActivityScenario.launch(TestAccessibilityShortcutChooserActivity.class);
-        mScenario.onActivity(activity -> mActivity = activity);
-        mScenario.moveToState(Lifecycle.State.CREATED);
-        mScenario.moveToState(Lifecycle.State.STARTED);
-        mScenario.moveToState(Lifecycle.State.RESUMED);
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        when(mKeyguardManager.isKeyguardLocked()).thenReturn(false);
+        TestAccessibilityShortcutChooserActivity.setupForTesting(
+                mAccessibilityManagerService, mKeyguardManager);
     }
 
     @After
     public void cleanUp() {
-        mScenario.moveToState(Lifecycle.State.DESTROYED);
+        mScenario.close();
     }
 
     @Test
     public void doubleClickTestServiceAndClickDenyButton_permissionDialogDoesNotExist() {
+        launchActivity();
         openShortcutsList();
 
         // Performing the double-click is flaky so retry if needed.
@@ -154,6 +166,7 @@ public class AccessibilityShortcutChooserActivityTest {
             throws Exception {
         when(mAccessibilityManagerService.isAccessibilityTargetAllowed(
                 eq(TEST_COMPONENT_NAME.getPackageName()), anyInt(), anyInt())).thenReturn(false);
+        launchActivity();
         openShortcutsList();
 
         onView(withText(TEST_LABEL)).perform(scrollTo(), click());
@@ -165,6 +178,7 @@ public class AccessibilityShortcutChooserActivityTest {
     @Test
     public void popEditShortcutMenuList_oneHandedModeEnabled_shouldBeInListView() {
         TestUtils.setOneHandedModeEnabled(this, /* enabled= */ true);
+        launchActivity();
         openShortcutsList();
 
         onView(allOf(withClassName(endsWith("ListView")), isDisplayed())).perform(swipeUp());
@@ -176,12 +190,37 @@ public class AccessibilityShortcutChooserActivityTest {
     @Test
     public void popEditShortcutMenuList_oneHandedModeDisabled_shouldNotBeInListView() {
         TestUtils.setOneHandedModeEnabled(this, /* enabled= */ false);
+        launchActivity();
         openShortcutsList();
 
         onView(allOf(withClassName(endsWith("ListView")), isDisplayed())).perform(swipeUp());
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
         onView(withText(ONE_HANDED_MODE)).inRoot(isDialog()).check(doesNotExist());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ALLOW_SHORTCUT_CHOOSER_ON_LOCKSCREEN)
+    public void createDialog_onLockscreen_hasExpectedContent() {
+        when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
+        launchActivity();
+
+        final AlertDialog dialog = mActivity.getMenuDialog();
+
+        assertThat(dialog.getButton(AlertDialog.BUTTON_POSITIVE).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(dialog.getWindow().getAttributes().flags
+                & WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+                .isEqualTo(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+    }
+
+    private void launchActivity() {
+        mScenario = ActivityScenario.launch(TestAccessibilityShortcutChooserActivity.class);
+        mScenario.onActivity(activity -> mActivity = activity);
+        mScenario.moveToState(Lifecycle.State.CREATED);
+        mScenario.moveToState(Lifecycle.State.STARTED);
+        mScenario.moveToState(Lifecycle.State.RESUMED);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
 
     private void openShortcutsList() {
@@ -198,9 +237,13 @@ public class AccessibilityShortcutChooserActivityTest {
     public static class TestAccessibilityShortcutChooserActivity extends
             AccessibilityShortcutChooserActivity {
         private static IAccessibilityManager sAccessibilityManagerService;
+        private static KeyguardManager sKeyguardManager;
 
-        public static void setupForTesting(IAccessibilityManager accessibilityManagerService) {
+        public static void setupForTesting(
+                IAccessibilityManager accessibilityManagerService,
+                KeyguardManager keyguardManager) {
             sAccessibilityManagerService = accessibilityManagerService;
+            sKeyguardManager = keyguardManager;
         }
 
         @Override
@@ -209,6 +252,9 @@ public class AccessibilityShortcutChooserActivityTest {
                     && sAccessibilityManagerService != null) {
                 return new AccessibilityManager(this, new Handler(getMainLooper()),
                         sAccessibilityManagerService, /* userId= */ 0, /* serviceConnect= */ true);
+            }
+            if (Context.KEYGUARD_SERVICE.equals(name)) {
+                return sKeyguardManager;
             }
 
             return super.getSystemService(name);
