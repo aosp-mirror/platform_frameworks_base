@@ -1314,7 +1314,16 @@ void AndroidRuntime::exit(int code)
         ALOGI("VM exiting with result code %d.", code);
         onExit(code);
     }
+
+#ifdef __ANDROID_CLANG_COVERAGE__
+    // When compiled with coverage, a function is registered with atexit to call
+    // `__llvm_profile_write_file` when the process exit.
+    // For Clang code coverage to work, call exit instead of _exit to run hooks
+    // registered with atexit.
+    ::exit(code);
+#else
     ::_exit(code);
+#endif
 }
 
 void AndroidRuntime::onVmCreated(JNIEnv* env)
