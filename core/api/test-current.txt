@@ -1,4 +1,6 @@
 // Signature format: 2.0
+// - add-additional-overrides=no
+// - migrating=Migration in progress see b/299366704
 package android {
 
   public static final class Manifest.permission {
@@ -28,7 +30,6 @@ package android {
     field public static final String MANAGE_APP_OPS_MODES = "android.permission.MANAGE_APP_OPS_MODES";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
     field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
-    field public static final String MANAGE_REMOTE_AUTH = "android.permission.MANAGE_REMOTE_AUTH";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final String MANAGE_TOAST_RATE_LIMITING = "android.permission.MANAGE_TOAST_RATE_LIMITING";
     field public static final String MODIFY_HDR_CONVERSION_MODE = "android.permission.MODIFY_HDR_CONVERSION_MODE";
@@ -56,7 +57,6 @@ package android {
     field public static final String TEST_INPUT_METHOD = "android.permission.TEST_INPUT_METHOD";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
-    field public static final String USE_REMOTE_AUTH = "android.permission.USE_REMOTE_AUTH";
     field public static final String WRITE_ALLOWLISTED_DEVICE_CONFIG = "android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field @Deprecated public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
@@ -840,7 +840,7 @@ package android.appwidget {
 
 package android.companion {
 
-  public static final class AssociationInfo.Builder {
+  @FlaggedApi("android.companion.new_association_builder") public static final class AssociationInfo.Builder {
     ctor public AssociationInfo.Builder(int, int, @NonNull String);
     ctor public AssociationInfo.Builder(@NonNull android.companion.AssociationInfo);
     method @NonNull public android.companion.AssociationInfo build();
@@ -1181,6 +1181,7 @@ package android.credentials {
     method @Nullable public CharSequence getLabel(@NonNull android.content.Context);
     method @Nullable public android.graphics.drawable.Drawable getServiceIcon(@NonNull android.content.Context);
     method @NonNull public android.content.pm.ServiceInfo getServiceInfo();
+    method @FlaggedApi("android.credentials.flags.settings_activity_enabled") @Nullable public CharSequence getSettingsActivity();
     method @Nullable public CharSequence getSettingsSubtitle();
     method @NonNull public boolean hasCapability(@NonNull String);
     method public boolean isEnabled();
@@ -3186,7 +3187,7 @@ package android.telephony {
     field public static final int HAL_SERVICE_MESSAGING = 2; // 0x2
     field public static final int HAL_SERVICE_MODEM = 3; // 0x3
     field public static final int HAL_SERVICE_NETWORK = 4; // 0x4
-    field public static final int HAL_SERVICE_SATELLITE = 8; // 0x8
+    field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int HAL_SERVICE_SATELLITE = 8; // 0x8
     field public static final int HAL_SERVICE_SIM = 5; // 0x5
     field public static final int HAL_SERVICE_VOICE = 6; // 0x6
     field public static final android.util.Pair HAL_VERSION_UNKNOWN;
@@ -3406,7 +3407,7 @@ package android.view {
 
   public final class Choreographer {
     method public static long getFrameDelay();
-    method public long getFrameTimeNanos();
+    method @FlaggedApi("android.view.flags.expected_presentation_time_api") public long getFrameTimeNanos();
     method public void postCallback(int, Runnable, Object);
     method public void postCallbackDelayed(int, Runnable, Object, long);
     method public void removeCallbacks(int, Runnable, Object);
@@ -3625,7 +3626,7 @@ package android.view.accessibility {
 package android.view.animation {
 
   public class AnimationUtils {
-    method public static void lockAnimationClock(long, long);
+    method @FlaggedApi("android.view.flags.expected_presentation_time_api") public static void lockAnimationClock(long, long);
     method public static void unlockAnimationClock();
   }
 

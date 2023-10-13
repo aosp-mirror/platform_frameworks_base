@@ -1250,6 +1250,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @deprecated This is being migrated to use modern architecture, this method is visible purely
      * for bridging the gap while the migration is active.
      */
+    @Deprecated
     private void handleFaceAuthFailed() {
         Assert.isMainThread();
         String reason =
@@ -1278,6 +1279,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @deprecated This is being migrated to use modern architecture, this method is visible purely
      * for bridging the gap while the migration is active.
      */
+    @Deprecated
     private void handleFaceAcquired(int acquireInfo) {
         Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1299,6 +1301,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @deprecated This is being migrated to use modern architecture, this method is visible purely
      * for bridging the gap while the migration is active.
      */
+    @Deprecated
     private void handleFaceAuthenticated(int authUserId, boolean isStrongBiometric) {
         Trace.beginSection("KeyGuardUpdateMonitor#handlerFaceAuthenticated");
         try {
@@ -1327,6 +1330,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @deprecated This is being migrated to use modern architecture, this method is visible purely
      * for bridging the gap while the migration is active.
      */
+    @Deprecated
     private void handleFaceHelp(int msgId, String helpString) {
         if (mFaceAcquiredInfoIgnoreList.contains(msgId)) {
             return;
@@ -1344,6 +1348,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @deprecated This is being migrated to use modern architecture, this method is visible purely
      * for bridging the gap while the migration is active.
      */
+    @Deprecated
     private void handleFaceError(int msgId, final String originalErrMsg) {
         Assert.isMainThread();
         String errString = originalErrMsg;

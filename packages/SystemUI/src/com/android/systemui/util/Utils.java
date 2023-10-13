@@ -42,6 +42,7 @@ public class Utils {
      *   list, then list.get(i) could throw an IndexOutOfBoundsException. This method should not be
      *   used; try using `synchronized` or making a copy of the list instead.
      */
+    @Deprecated
     public static <T> void safeForeach(List<T> list, Consumer<T> c) {
         for (int i = list.size() - 1; i >= 0; i--) {
             T item = list.get(i);

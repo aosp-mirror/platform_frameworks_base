@@ -85,6 +85,13 @@ interface SceneTransitionLayoutScope {
     )
 }
 
+/**
+ * A DSL marker to prevent people from nesting calls to Modifier.element() inside a MovableElement,
+ * which is not supported.
+ */
+@DslMarker annotation class ElementDsl
+
+@ElementDsl
 interface SceneScope {
     /**
      * Tag an element identified by [key].
@@ -95,10 +102,35 @@ interface SceneScope {
      * Additionally, this [key] will be used to detect elements that are shared between scenes to
      * automatically interpolate their size, offset and [shared values][animateSharedValueAsState].
      *
+     * Note that shared elements tagged using this function will be duplicated in each scene they
+     * are part of, so any **internal** state (e.g. state created using `remember {
+     * mutableStateOf(...) }`) will be lost. If you need to preserve internal state, you should use
+     * [MovableElement] instead.
+     *
+     * @see MovableElement
+     *
      * TODO(b/291566282): Migrate this to the new Modifier Node API and remove the @Composable
      *   constraint.
      */
     @Composable fun Modifier.element(key: ElementKey): Modifier
+
+    /**
+     * Create a *movable* element identified by [key].
+     *
+     * This creates an element that will be automatically shared when present in multiple scenes and
+     * that can be transformed during transitions, the same way that [element] does. The major
+     * difference with [element] is that elements created with [MovableElement] will be "moved" and
+     * composed only once during transitions (as opposed to [element] that duplicates shared
+     * elements) so that any internal state is preserved during and after the transition.
+     *
+     * @see element
+     */
+    @Composable
+    fun MovableElement(
+        key: ElementKey,
+        modifier: Modifier,
+        content: @Composable MovableElementScope.() -> Unit,
+    )
 
     /**
      * Animate some value of a shared element.
@@ -125,6 +157,10 @@ interface SceneScope {
         canOverflow: Boolean,
     ): State<T>
 }
+
+// TODO(b/291053742): Add animateSharedValueAsState(targetValue) without any ValueKey and ElementKey
+// arguments to allow sharing values inside a movable element.
+@ElementDsl interface MovableElementScope
 
 /** An action performed by the user. */
 sealed interface UserAction

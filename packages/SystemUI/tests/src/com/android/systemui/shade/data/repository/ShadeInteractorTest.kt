@@ -60,7 +60,6 @@ import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -595,8 +594,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Lockscreen,
                         toScene = key,
                         progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
+                        isUserInputDriven = false,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -633,8 +631,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = key,
                         toScene = SceneKey.Lockscreen,
                         progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
+                        isUserInputDriven = false,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -670,8 +667,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Lockscreen,
                         toScene = SceneKey.Shade,
                         progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
+                        isUserInputDriven = false,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -947,8 +943,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Lockscreen,
                         toScene = key,
                         progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
+                        isUserInputDriven = false,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -985,8 +980,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Lockscreen,
                         toScene = key,
                         progress = progress,
-                        isInitiatedByUserInput = true,
-                        isUserInputOngoing = flowOf(false),
+                        isUserInputDriven = true,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -1023,8 +1017,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = key,
                         toScene = SceneKey.Lockscreen,
                         progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
+                        isUserInputDriven = false,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -1061,8 +1054,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                         fromScene = key,
                         toScene = SceneKey.Lockscreen,
                         progress = progress,
-                        isInitiatedByUserInput = true,
-                        isUserInputOngoing = flowOf(false),
+                        isUserInputDriven = true,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
@@ -1097,9 +1089,8 @@ class ShadeInteractorTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = SceneKey.Lockscreen,
                         toScene = SceneKey.QuickSettings,
-                        progress = MutableStateFlow(0f),
-                        isInitiatedByUserInput = true,
-                        isUserInputOngoing = flowOf(false),
+                        progress = progress,
+                        isUserInputDriven = true,
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)

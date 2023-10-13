@@ -23,7 +23,10 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Resources.ID_NULL
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.os.Trace
 import android.service.quicksettings.Tile
@@ -44,7 +47,6 @@ import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.FontSizeUtils
-import com.android.systemui.res.R
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.plugins.qs.QSIconView
@@ -53,6 +55,7 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH
+import com.android.systemui.res.R
 import java.util.Objects
 
 private const val TAG = "QSTileViewImpl"
@@ -67,6 +70,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         private const val LABEL_NAME = "label"
         private const val SECONDARY_LABEL_NAME = "secondaryLabel"
         private const val CHEVRON_NAME = "chevron"
+        private const val OVERLAY_NAME = "overlay"
         const val UNAVAILABLE_ALPHA = 0.3f
         @VisibleForTesting
         internal const val TILE_STATE_RES_PREFIX = "tile_states_"
@@ -97,6 +101,13 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val colorInactive = Utils.getColorAttrDefaultColor(context, R.attr.shadeInactive)
     private val colorUnavailable = Utils.getColorAttrDefaultColor(context, R.attr.shadeDisabled)
 
+    private val overlayColorActive = Utils.applyAlpha(
+        /* alpha= */ 0.11f,
+        Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive))
+    private val overlayColorInactive = Utils.applyAlpha(
+        /* alpha= */ 0.08f,
+        Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactive))
+
     private val colorLabelActive = Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive)
     private val colorLabelInactive = Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactive)
     private val colorLabelUnavailable =
@@ -123,8 +134,13 @@ open class QSTileViewImpl @JvmOverloads constructor(
     protected var showRippleEffect = true
 
     private lateinit var ripple: RippleDrawable
-    private lateinit var colorBackgroundDrawable: Drawable
-    private var paintColor: Int = 0
+    private lateinit var backgroundDrawable: LayerDrawable
+    private lateinit var backgroundBaseDrawable: Drawable
+    private lateinit var backgroundOverlayDrawable: Drawable
+
+    private var backgroundColor: Int = 0
+    private var backgroundOverlayColor: Int = 0
+
     private val singleAnimator: ValueAnimator = ValueAnimator().apply {
         setDuration(QS_ANIM_LENGTH)
         addUpdateListener { animation ->
@@ -134,7 +150,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 animation.getAnimatedValue(BACKGROUND_NAME) as Int,
                 animation.getAnimatedValue(LABEL_NAME) as Int,
                 animation.getAnimatedValue(SECONDARY_LABEL_NAME) as Int,
-                animation.getAnimatedValue(CHEVRON_NAME) as Int
+                animation.getAnimatedValue(CHEVRON_NAME) as Int,
+                animation.getAnimatedValue(OVERLAY_NAME) as Int,
             )
         }
     }
@@ -263,7 +280,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     fun createTileBackground(): Drawable {
         ripple = mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
-        colorBackgroundDrawable = ripple.findDrawableByLayerId(R.id.background)
+        backgroundDrawable = ripple.findDrawableByLayerId(R.id.background) as LayerDrawable
+        backgroundBaseDrawable =
+            backgroundDrawable.findDrawableByLayerId(R.id.qs_tile_background_base)
+        backgroundOverlayDrawable =
+            backgroundDrawable.findDrawableByLayerId(R.id.qs_tile_background_overlay)
+        backgroundOverlayDrawable.mutate().setTintMode(PorterDuff.Mode.SRC)
         return ripple
     }
 
@@ -343,10 +365,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
             ripple.also {
                 // In case that the colorBackgroundDrawable was used as the background, make sure
                 // it has the correct callback instead of null
-                colorBackgroundDrawable.callback = it
+                backgroundDrawable.callback = it
             }
         } else {
-            colorBackgroundDrawable
+            backgroundDrawable
         }
     }
 
@@ -512,7 +534,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 singleAnimator.setValues(
                         colorValuesHolder(
                                 BACKGROUND_NAME,
-                                paintColor,
+                                backgroundColor,
                                 getBackgroundColorForState(state.state, state.disabledByPolicy)
                         ),
                         colorValuesHolder(
@@ -529,6 +551,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
                                 CHEVRON_NAME,
                                 chevronView.imageTintList?.defaultColor ?: 0,
                                 getChevronColorForState(state.state, state.disabledByPolicy)
+                        ),
+                        colorValuesHolder(
+                                OVERLAY_NAME,
+                                backgroundOverlayColor,
+                                getOverlayColorForState(state.state)
                         )
                     )
                 singleAnimator.start()
@@ -537,7 +564,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
                     getBackgroundColorForState(state.state, state.disabledByPolicy),
                     getLabelColorForState(state.state, state.disabledByPolicy),
                     getSecondaryLabelColorForState(state.state, state.disabledByPolicy),
-                    getChevronColorForState(state.state, state.disabledByPolicy)
+                    getChevronColorForState(state.state, state.disabledByPolicy),
+                    getOverlayColorForState(state.state)
                 )
             }
         }
@@ -555,17 +583,19 @@ open class QSTileViewImpl @JvmOverloads constructor(
         backgroundColor: Int,
         labelColor: Int,
         secondaryLabelColor: Int,
-        chevronColor: Int
+        chevronColor: Int,
+        overlayColor: Int,
     ) {
         setColor(backgroundColor)
         setLabelColor(labelColor)
         setSecondaryLabelColor(secondaryLabelColor)
         setChevronColor(chevronColor)
+        setOverlayColor(overlayColor)
     }
 
     private fun setColor(color: Int) {
-        colorBackgroundDrawable.mutate().setTint(color)
-        paintColor = color
+        backgroundBaseDrawable.mutate().setTint(color)
+        backgroundColor = color
     }
 
     private fun setLabelColor(color: Int) {
@@ -578,6 +608,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     private fun setChevronColor(color: Int) {
         chevronView.imageTintList = ColorStateList.valueOf(color)
+    }
+
+    private fun setOverlayColor(overlayColor: Int) {
+        backgroundOverlayDrawable.setTint(overlayColor)
+        backgroundOverlayColor = overlayColor
     }
 
     private fun loadSideViewDrawableIfNecessary(state: QSTile.State) {
@@ -654,9 +689,17 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private fun getChevronColorForState(state: Int, disabledByPolicy: Boolean = false): Int =
             getSecondaryLabelColorForState(state, disabledByPolicy)
 
+    private fun getOverlayColorForState(state: Int): Int {
+        return when (state) {
+            Tile.STATE_ACTIVE -> overlayColorActive
+            Tile.STATE_INACTIVE -> overlayColorInactive
+            else -> Color.TRANSPARENT
+        }
+    }
+
     @VisibleForTesting
     internal fun getCurrentColors(): List<Int> = listOf(
-            paintColor,
+            backgroundColor,
             label.currentTextColor,
             secondaryLabel.currentTextColor,
             chevronView.imageTintList?.defaultColor ?: 0

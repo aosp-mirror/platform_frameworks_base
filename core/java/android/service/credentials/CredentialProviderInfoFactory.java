@@ -45,8 +45,8 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.Xml;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -135,8 +135,8 @@ public final class CredentialProviderInfoFactory {
     }
 
     /**
-     * Constructs an information instance of the credential provider for testing purposes. Does
-     * not run any verifications and passes parameters as is.
+     * Constructs an information instance of the credential provider for testing purposes. Does not
+     * run any verifications and passes parameters as is.
      */
     @VisibleForTesting
     public static CredentialProviderInfo createForTests(
@@ -151,7 +151,6 @@ public final class CredentialProviderInfoFactory {
                 .setSystemProvider(isSystemProvider)
                 .addCapabilities(capabilities)
                 .build();
-
     }
 
     private static void verifyProviderPermission(ServiceInfo serviceInfo) throws SecurityException {
@@ -267,15 +266,21 @@ public final class CredentialProviderInfoFactory {
                                     allAttributes,
                                     com.android.internal.R.styleable.CredentialProvider);
                     builder.setSettingsSubtitle(
-                            afsAttributes.getString(
+                            getAfsAttributeSafe(
+                                    afsAttributes,
                                     R.styleable.CredentialProvider_settingsSubtitle));
+                    builder.setSettingsActivity(
+                            getAfsAttributeSafe(
+                                    afsAttributes,
+                                    R.styleable.CredentialProvider_settingsActivity));
                 } catch (Exception e) {
-                    Slog.e(TAG, "Failed to get XML attr", e);
+                    Slog.w(TAG, "Failed to get XML attr for metadata", e);
                 } finally {
                     if (afsAttributes != null) {
                         afsAttributes.recycle();
                     }
                 }
+
                 builder.addCapabilities(parseXmlProviderOuterCapabilities(parser, resources));
             } else {
                 Slog.w(TAG, "Meta-data does not start with credential-provider-service tag");
@@ -285,6 +290,21 @@ public final class CredentialProviderInfoFactory {
         }
 
         return builder;
+    }
+
+    private static @Nullable String getAfsAttributeSafe(
+            @Nullable TypedArray afsAttributes, int resId) {
+        if (afsAttributes == null) {
+            return null;
+        }
+
+        try {
+            return afsAttributes.getString(resId);
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to get XML attr from afs attributes", e);
+        }
+
+        return null;
     }
 
     private static List<String> parseXmlProviderOuterCapabilities(

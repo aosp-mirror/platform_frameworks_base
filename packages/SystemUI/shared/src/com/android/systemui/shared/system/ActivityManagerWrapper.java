@@ -155,6 +155,26 @@ public class ActivityManagerWrapper {
         }
     }
 
+
+    /**
+     * Requests for a new snapshot to be taken for the given task, stores it in the cache, and
+     * returns a {@link ThumbnailData} with the result.
+     */
+    @NonNull
+    public ThumbnailData takeTaskThumbnail(int taskId) {
+        TaskSnapshot snapshot = null;
+        try {
+            snapshot = getService().takeTaskSnapshot(taskId, /* updateCache= */ true);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to take task snapshot", e);
+        }
+        if (snapshot != null) {
+            return new ThumbnailData(snapshot);
+        } else {
+            return new ThumbnailData();
+        }
+    }
+
     /**
      * Removes the outdated snapshot of home task.
      *

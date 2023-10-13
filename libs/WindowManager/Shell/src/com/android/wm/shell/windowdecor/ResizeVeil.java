@@ -132,6 +132,13 @@ public class ResizeVeil {
                 t.setAlpha(mVeilSurface, mVeilAnimator.getAnimatedFraction());
                 t.apply();
             });
+            mVeilAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    t.setAlpha(mVeilSurface, 1);
+                    t.apply();
+                }
+            });
 
             final ValueAnimator iconAnimator = new ValueAnimator();
             iconAnimator.setFloatValues(0f, 1f);
@@ -192,8 +199,8 @@ public class ResizeVeil {
      */
     public void updateResizeVeil(SurfaceControl.Transaction t, Rect newBounds) {
         if (mVeilAnimator != null && mVeilAnimator.isStarted()) {
-            // TODO(b/300145351): Investigate why ValueAnimator#end does not work here.
-            mVeilAnimator.setCurrentPlayTime(RESIZE_ALPHA_DURATION);
+            mVeilAnimator.removeAllUpdateListeners();
+            mVeilAnimator.end();
         }
         relayout(newBounds, t);
         mViewHost.getView().getViewRootImpl().applyTransactionOnDraw(t);

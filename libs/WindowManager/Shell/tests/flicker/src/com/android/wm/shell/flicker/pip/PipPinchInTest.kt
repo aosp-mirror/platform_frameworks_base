@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
+import android.tools.common.flicker.subject.exceptions.IncorrectRegionException
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
@@ -40,14 +41,26 @@ class PipPinchInTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
         transitions { pipApp.pinchInPipWindow(wmHelper, 0.4f, 30) }
     }
 
-    /** Checks that the visible region area of [pipApp] always decreases during the animation. */
+    /**
+     * Checks that the visible region area of [pipApp] decreases
+     * and then increases during the animation.
+     */
     @Presubmit
     @Test
-    fun pipLayerAreaDecreases() {
+    fun pipLayerAreaDecreasesThenIncreases() {
+        val isAreaDecreasing = arrayOf(true)
         flicker.assertLayers {
             val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
-                current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
+                if (isAreaDecreasing[0]) {
+                    try {
+                        current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
+                    } catch (e: IncorrectRegionException) {
+                        isAreaDecreasing[0] = false
+                    }
+                } else {
+                    previous.visibleRegion.notBiggerThan(current.visibleRegion.region)
+                }
             }
         }
     }

@@ -367,9 +367,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     ),
             )
 
-        val job = launch {
-            underTest.observeDeviceMonitoringDialogRequests(quickSettingsContext = mock())
-        }
+        val job = launch { underTest.observeDeviceMonitoringDialogRequests(mock()) }
 
         advanceUntilIdle()
         assertThat(nDialogRequests).isEqualTo(3)

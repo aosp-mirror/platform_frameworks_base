@@ -199,4 +199,6 @@ internal class SceneTransitionLayoutImpl(
         return readyScenes.containsKey(transition.fromScene) &&
             readyScenes.containsKey(transition.toScene)
     }
+
+    internal fun isSceneReady(scene: SceneKey): Boolean = readyScenes.containsKey(scene)
 }

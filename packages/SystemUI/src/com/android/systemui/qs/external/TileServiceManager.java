@@ -75,13 +75,12 @@ public class TileServiceManager {
     private boolean mStarted = false;
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component,
-            BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
-            CustomTileAddedRepository customTileAddedRepository, DelayableExecutor executor) {
+            UserTracker userTracker, TileLifecycleManager.Factory tileLifecycleManagerFactory,
+            CustomTileAddedRepository customTileAddedRepository) {
         this(tileServices, handler, userTracker, customTileAddedRepository,
-                new TileLifecycleManager(handler, tileServices.getContext(), tileServices,
-                        new PackageManagerAdapter(tileServices.getContext()), broadcastDispatcher,
+                tileLifecycleManagerFactory.create(
                         new Intent(TileService.ACTION_QS_TILE).setComponent(component),
-                        userTracker.getUserHandle(), executor));
+                        userTracker.getUserHandle()));
     }
 
     @VisibleForTesting

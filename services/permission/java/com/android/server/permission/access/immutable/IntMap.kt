@@ -18,12 +18,8 @@ package com.android.server.permission.access.immutable
 
 import android.util.SparseArray
 
-/**
- * Immutable map with index-based access and [Int] keys.
- */
-sealed class IntMap<T>(
-    internal val array: SparseArray<T>
-) : Immutable<MutableIntMap<T>> {
+/** Immutable map with index-based access and [Int] keys. */
+sealed class IntMap<T>(internal val array: SparseArray<T>) : Immutable<MutableIntMap<T>> {
     val size: Int
         get() = array.size()
 
@@ -44,12 +40,8 @@ sealed class IntMap<T>(
     override fun toString(): String = array.toString()
 }
 
-/**
- * Mutable map with index-based access and [Int] keys.
- */
-class MutableIntMap<T>(
-    array: SparseArray<T> = SparseArray()
-) : IntMap<T>(array) {
+/** Mutable map with index-based access and [Int] keys. */
+class MutableIntMap<T>(array: SparseArray<T> = SparseArray()) : IntMap<T>(array) {
     constructor(intMap: IntMap<T>) : this(intMap.array.clone())
 
     fun put(key: Int, value: T): T? = array.putReturnOld(key, value)

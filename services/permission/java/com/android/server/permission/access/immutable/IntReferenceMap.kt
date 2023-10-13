@@ -33,8 +33,7 @@ sealed class IntReferenceMap<I : Immutable<M>, M : I>(
 
     operator fun contains(key: Int): Boolean = array.contains(key)
 
-    @Suppress("ReplaceGetOrSet")
-    operator fun get(key: Int): I? = array.get(key)?.get()
+    @Suppress("ReplaceGetOrSet") operator fun get(key: Int): I? = array.get(key)?.get()
 
     fun indexOfKey(key: Int): Int = array.indexOfKey(key)
 
@@ -55,7 +54,9 @@ sealed class IntReferenceMap<I : Immutable<M>, M : I>(
 class MutableIntReferenceMap<I : Immutable<M>, M : I>(
     array: SparseArray<MutableReference<I, M>> = SparseArray()
 ) : IntReferenceMap<I, M>(array) {
-    constructor(intReferenceMap: IntReferenceMap<I, M>) : this(
+    constructor(
+        intReferenceMap: IntReferenceMap<I, M>
+    ) : this(
         intReferenceMap.array.clone().apply {
             for (i in 0 until size()) {
                 setValueAt(i, valueAt(i).toImmutable())
@@ -63,8 +64,7 @@ class MutableIntReferenceMap<I : Immutable<M>, M : I>(
         }
     )
 
-    @Suppress("ReplaceGetOrSet")
-    fun mutate(key: Int): M? = array.get(key)?.mutate()
+    @Suppress("ReplaceGetOrSet") fun mutate(key: Int): M? = array.get(key)?.mutate()
 
     fun put(key: Int, value: M): I? = array.putReturnOld(key, MutableReference(value))?.get()
 

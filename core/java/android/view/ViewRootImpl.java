@@ -2232,9 +2232,7 @@ public final class ViewRootImpl implements ViewParent,
             mStopped = stopped;
             final ThreadedRenderer renderer = mAttachInfo.mThreadedRenderer;
             if (renderer != null) {
-                if (DEBUG_DRAW) {
-                    Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
-                }
+                if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
                 renderer.setStopped(mStopped);
             }
             if (!mStopped) {
@@ -3879,8 +3877,8 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
 
-            handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction,
-                    "view not visible");
+            handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mHasPendingTransactions,
+                    mPendingTransaction, "view not visible");
         } else if (cancelAndRedraw) {
             mLastPerformTraversalsSkipDrawReason = cancelDueToPreDrawListener
                 ? "predraw_" + mAttachInfo.mTreeObserver.getLastDispatchOnPreDrawCanceledReason()
@@ -3895,8 +3893,8 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
             if (!performDraw(mActiveSurfaceSyncGroup)) {
-                handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction,
-                        mLastPerformDrawSkippedReason);
+                handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mHasPendingTransactions,
+                        mPendingTransaction, mLastPerformDrawSkippedReason);
             }
         }
 
@@ -4774,8 +4772,8 @@ public final class ViewRootImpl implements ViewParent,
             if (mSurfaceHolder != null && mSurface.isValid()) {
                 usingAsyncReport = true;
                 SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() -> {
-                    handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction,
-                            "SurfaceHolder");
+                    handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction != null,
+                            pendingTransaction, "SurfaceHolder");
                 });
 
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
@@ -4789,8 +4787,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (!usingAsyncReport) {
-            handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction,
-                    "no async report");
+            handleSyncRequestWhenNoAsyncDraw(surfaceSyncGroup, pendingTransaction != null,
+                    pendingTransaction, "no async report");
         }
 
         if (mPerformContentCapture) {
@@ -4800,13 +4798,14 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void handleSyncRequestWhenNoAsyncDraw(SurfaceSyncGroup surfaceSyncGroup,
-            @Nullable Transaction pendingTransaction, String logReason) {
+            boolean hasPendingTransaction, @Nullable Transaction pendingTransaction,
+            String logReason) {
         if (surfaceSyncGroup != null) {
-            if (pendingTransaction != null) {
+            if (hasPendingTransaction && pendingTransaction != null) {
                 surfaceSyncGroup.addTransaction(pendingTransaction);
             }
             surfaceSyncGroup.markSyncReady();
-        } else if (pendingTransaction != null) {
+        } else if (hasPendingTransaction && pendingTransaction != null) {
             Trace.instant(Trace.TRACE_TAG_VIEW,
                     "Transaction not synced due to " + logReason + "-" + mTag);
             if (DEBUG_BLAST) {
@@ -8606,10 +8605,6 @@ public final class ViewRootImpl implements ViewParent,
             mLastLayoutFrame.set(frame);
         }
 
-        if (mOnBackInvokedDispatcher.isSystemGestureExclusionNeeded()) {
-            setRootSystemGestureExclusionRects(List.of(frame));
-        }
-
         final WindowConfiguration winConfig = getCompatWindowConfiguration();
         mPendingBackDropFrame.set(mPendingDragResizing && !winConfig.useWindowFrameForBackdrop()
                 ? winConfig.getMaxBounds()
@@ -9054,8 +9049,8 @@ public final class ViewRootImpl implements ViewParent,
             mAdded = false;
             AnimationHandler.removeRequestor(this);
         }
-        handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mPendingTransaction,
-                "shutting down VRI");
+        handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mHasPendingTransactions,
+                mPendingTransaction, "shutting down VRI");
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.os.Flags.stateOfHealthPublic;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import static com.android.server.health.Utils.copyV1Battery;
 
@@ -27,7 +28,6 @@ import android.app.BroadcastOptions;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.health.HealthInfo;
 import android.hardware.health.V2_1.BatteryCapacityLevel;
@@ -1333,10 +1333,14 @@ public final class BatteryService extends SystemService {
         @Override
         public int getProperty(int id, final BatteryProperty prop) throws RemoteException {
             switch (id) {
+                case BatteryManager.BATTERY_PROPERTY_STATE_OF_HEALTH:
+                    if (stateOfHealthPublic()) {
+                        break;
+                    }
+
                 case BatteryManager.BATTERY_PROPERTY_MANUFACTURING_DATE:
                 case BatteryManager.BATTERY_PROPERTY_FIRST_USAGE_DATE:
                 case BatteryManager.BATTERY_PROPERTY_CHARGING_POLICY:
-                case BatteryManager.BATTERY_PROPERTY_STATE_OF_HEALTH:
                     mContext.enforceCallingPermission(
                             android.Manifest.permission.BATTERY_STATS, null);
                     break;

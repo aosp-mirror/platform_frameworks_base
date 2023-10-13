@@ -30,6 +30,7 @@ import com.android.compose.theme.PlatformTheme
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutoutProvider
+import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -91,6 +92,12 @@ object ComposeFacade : BaseComposeFacade {
                 }
             }
         }
+    }
+
+    override fun createCommunalView(
+        context: Context,
+    ): View {
+        return ComposeView(context).apply { setContent { PlatformTheme { CommunalHub() } } }
     }
 
     // TODO(b/298525212): remove once Compose exposes window inset bounds.

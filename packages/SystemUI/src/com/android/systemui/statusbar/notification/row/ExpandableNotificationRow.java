@@ -2927,6 +2927,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             long delay,
             float translationDirection,
             boolean isHeadsUpAnimation,
+            Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
         if (mMenuRow != null && mMenuRow.isMenuVisible()) {
@@ -2934,10 +2935,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             if (anim != null) {
                 anim.addListener(new AnimatorListenerAdapter() {
                     @Override
+                    public void onAnimationStart(Animator animation) {
+                        if (onStartedRunnable != null) {
+                            onStartedRunnable.run();
+                        }
+                    }
+                    @Override
                     public void onAnimationEnd(Animator animation) {
                         ExpandableNotificationRow.super.performRemoveAnimation(
                                 duration, delay, translationDirection, isHeadsUpAnimation,
-                                onFinishedRunnable, animationListener);
+                                null, onFinishedRunnable, animationListener);
                     }
                 });
                 anim.start();
@@ -2945,7 +2952,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         }
         return super.performRemoveAnimation(duration, delay, translationDirection,
-                isHeadsUpAnimation, onFinishedRunnable, animationListener);
+                isHeadsUpAnimation, onStartedRunnable, onFinishedRunnable, animationListener);
     }
 
     @Override

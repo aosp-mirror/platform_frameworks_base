@@ -66,7 +66,7 @@ inline fun IntSet.noneIndexed(predicate: (Int, Int) -> Boolean): Boolean {
 
 operator fun IntSet.plus(element: Int): MutableIntSet = toMutable().apply { this += element }
 
-fun MutableIntSet(values: IntArray): MutableIntSet = MutableIntSet().apply{ this += values }
+fun MutableIntSet(values: IntArray): MutableIntSet = MutableIntSet().apply { this += values }
 
 operator fun MutableIntSet.plusAssign(element: Int) {
     array.put(element, true)

@@ -16,7 +16,10 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.SystemApi;
+
+import com.android.internal.telephony.flags.Flags;
 
 /**
  * A callback class for monitoring satellite provision state change events.
@@ -24,6 +27,7 @@ import android.annotation.SystemApi;
  * @hide
  */
 @SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public interface SatelliteProvisionStateCallback {
     /**
      * Called when satellite provision state changes.
@@ -33,5 +37,6 @@ public interface SatelliteProvisionStateCallback {
      *                    It is generally expected that the provisioning app retries if
      *                    provisioning fails.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatelliteProvisionStateChanged(boolean provisioned);
 }

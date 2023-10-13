@@ -25,9 +25,7 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 
-/**
- * Read from an [AtomicFile], fallback to reserve file to read the data.
- */
+/** Read from an [AtomicFile], fallback to reserve file to read the data. */
 @Throws(Exception::class)
 inline fun AtomicFile.readWithReserveCopy(block: (FileInputStream) -> Unit) {
     try {
@@ -46,9 +44,7 @@ inline fun AtomicFile.readWithReserveCopy(block: (FileInputStream) -> Unit) {
     }
 }
 
-/**
- * Write to actual file and reserve file.
- */
+/** Write to actual file and reserve file. */
 @Throws(IOException::class)
 inline fun AtomicFile.writeWithReserveCopy(block: (FileOutputStream) -> Unit) {
     val reserveFile = File(baseFile.parentFile, baseFile.name + ".reservecopy")
@@ -66,9 +62,7 @@ inline fun AtomicFile.writeWithReserveCopy(block: (FileOutputStream) -> Unit) {
     }
 }
 
-/**
- * Write to an [AtomicFile] and close everything safely when done.
- */
+/** Write to an [AtomicFile] and close everything safely when done. */
 @Throws(IOException::class)
 // Renamed to writeInlined() to avoid conflict with the hidden AtomicFile.write() that isn't inline.
 inline fun AtomicFile.writeInlined(block: (FileOutputStream) -> Unit) {

@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
 import static android.hardware.display.DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY;
 
+import static com.android.window.flags.Flags.explicitRefreshRateHints;
+
 import android.hardware.display.DisplayManager;
 import android.view.Display;
 import android.view.Display.Mode;
@@ -137,7 +139,7 @@ class RefreshRatePolicy {
         // to run in default refresh rate. But if the display size of default mode is different
         // from the using preferred mode, then still keep the preferred mode to avoid disturbing
         // the animation.
-        if (w.isAnimationRunningSelfOrParent()) {
+        if (!explicitRefreshRateHints() && w.isAnimationRunningSelfOrParent()) {
             Display.Mode preferredMode = null;
             for (Display.Mode mode : mDisplayInfo.supportedModes) {
                 if (preferredDisplayModeId == mode.getModeId()) {
@@ -251,7 +253,7 @@ class RefreshRatePolicy {
 
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
-        if (w.isAnimationRunningSelfOrParent()) {
+        if (!explicitRefreshRateHints() && w.isAnimationRunningSelfOrParent()) {
             return w.mFrameRateVote.reset();
         }
 

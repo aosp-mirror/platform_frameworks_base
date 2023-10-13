@@ -107,19 +107,22 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.SizedInputStream;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.io.DataInputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -130,6 +133,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -216,6 +221,7 @@ public class LauncherAppsService extends SystemService {
         private final ShortcutChangeHandler mShortcutChangeHandler;
 
         private final Handler mCallbackHandler;
+        private final ExecutorService mOnDumpExecutor = Executors.newSingleThreadExecutor();
 
         private PackageInstallerService mPackageInstallerService;
 
@@ -1512,7 +1518,7 @@ public class LauncherAppsService extends SystemService {
                     forEachViewCaptureWindow((fileName, is) -> {
                         try {
                             zipOs.putNextEntry(new ZipEntry("FS" + fileName));
-                            is.transferTo(zipOs);
+                            transferViewCaptureData(is, zipOs);
                             zipOs.closeEntry();
                         } catch (IOException e) {
                             getErrPrintWriter().write("Failed to output " + fileName
@@ -1553,12 +1559,22 @@ public class LauncherAppsService extends SystemService {
         private void dumpViewCaptureDataToWmTrace(@NonNull String fileName,
                 @NonNull InputStream is) {
             Path outPath = Paths.get(fileName);
-            try {
-                Files.copy(is, outPath, StandardCopyOption.REPLACE_EXISTING);
+            try (OutputStream os = Files.newOutputStream(outPath, StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING)) {
+                transferViewCaptureData(is, os);
                 Files.setPosixFilePermissions(outPath, WM_TRACE_FILE_PERMISSIONS);
             } catch (IOException e) {
                 Log.d(TAG, "failed to write data to " + fileName + " in wmtrace dir", e);
             }
+        }
+
+        /**
+         * Raw input stream reads hang on the final read when transferring data in via the pipe.
+         * The fix used below is to count and read the exact amount of bytes being sent.
+         */
+        private void transferViewCaptureData(InputStream is, OutputStream os) throws IOException {
+            DataInputStream dataInputStream = new DataInputStream(is);
+            new SizedInputStream(dataInputStream, dataInputStream.readInt()).transferTo(os);
         }
 
         /**
@@ -1569,24 +1585,37 @@ public class LauncherAppsService extends SystemService {
          */
         private void forEachViewCaptureWindow(
                 @NonNull BiConsumer<String, InputStream> outputtingConsumer) {
-            for (int i = mDumpCallbacks.beginBroadcast() - 1; i >= 0; i--) {
-                String packageName = (String) mDumpCallbacks.getBroadcastCookie(i);
-                String fileName = WM_TRACE_DIR + packageName + "_" + i + VC_FILE_SUFFIX;
+            try {
+                // This multi-threading prevents ctrl-C command line command aborting from putting
+                // the mDumpCallbacks RemoteCallbackList in a bad Broadcast state. We need to wait
+                // for it to complete even though it is on a background thread.
+                mOnDumpExecutor.submit(() -> {
+                    try {
+                        for (int i = mDumpCallbacks.beginBroadcast() - 1; i >= 0; i--) {
+                            String packageName = (String) mDumpCallbacks.getBroadcastCookie(i);
+                            String fileName = WM_TRACE_DIR + packageName + "_" + i + VC_FILE_SUFFIX;
 
-                try {
-                    // Order is important here. OnDump needs to be called before the BiConsumer
-                    // accepts & starts blocking on reading the input stream.
-                    ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
-                    mDumpCallbacks.getBroadcastItem(i).onDump(pipe[1]);
+                            try {
+                                // Order is important here. OnDump needs to be called before the
+                                // BiConsumer accepts & starts blocking on reading the input stream.
+                                ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+                                mDumpCallbacks.getBroadcastItem(i).onDump(pipe[1]);
 
-                    InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pipe[0]);
-                    outputtingConsumer.accept(fileName, is);
-                    is.close();
-                } catch (Exception e) {
-                    Log.d(TAG, "failed to pipe view capture data", e);
-                }
+                                InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(
+                                        pipe[0]);
+                                outputtingConsumer.accept(fileName, is);
+                                is.close();
+                            } catch (Exception e) {
+                                Log.d(TAG, "failed to pipe view capture data", e);
+                            }
+                        }
+                    } finally {
+                        mDumpCallbacks.finishBroadcast();
+                    }
+                }).get();
+            } catch (InterruptedException | ExecutionException e) {
+                Log.e(TAG, "background work was interrupted", e);
             }
-            mDumpCallbacks.finishBroadcast();
         }
 
         @RequiresPermission(READ_FRAME_BUFFER)

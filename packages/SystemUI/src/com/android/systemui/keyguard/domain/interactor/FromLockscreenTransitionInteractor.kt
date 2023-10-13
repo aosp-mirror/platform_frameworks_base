@@ -318,16 +318,9 @@ constructor(
     private fun listenForLockscreenToOccluded() {
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
-                .sample(
-                    combine(
-                        transitionInteractor.startedKeyguardState,
-                        keyguardInteractor.isDreaming,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect { (isOccluded, keyguardState, isDreaming) ->
-                    if (isOccluded && !isDreaming && keyguardState == KeyguardState.LOCKSCREEN) {
+                .sample(transitionInteractor.startedKeyguardState, ::Pair)
+                .collect { (isOccluded, keyguardState) ->
+                    if (isOccluded && keyguardState == KeyguardState.LOCKSCREEN) {
                         startTransitionTo(KeyguardState.OCCLUDED)
                     }
                 }

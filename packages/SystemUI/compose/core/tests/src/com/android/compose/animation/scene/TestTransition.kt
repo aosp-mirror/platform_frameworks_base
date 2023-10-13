@@ -22,13 +22,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithTag
 
 @DslMarker annotation class TransitionTestDsl
 
@@ -63,6 +63,8 @@ interface TransitionTestBuilder {
 
 @TransitionTestDsl
 interface TransitionTestAssertionScope {
+    fun isElement(element: ElementKey, scene: SceneKey? = null): SemanticsMatcher
+
     /**
      * Assert on [element].
      *
@@ -130,15 +132,19 @@ fun ComposeContentTestRule.testTransition(
     val test = transitionTest(builder)
     val assertionScope =
         object : TransitionTestAssertionScope {
+            override fun isElement(element: ElementKey, scene: SceneKey?): SemanticsMatcher {
+                return if (scene == null) {
+                    hasTestTag(element.testTag)
+                } else {
+                    hasTestTag(element.testTag) and hasParent(hasTestTag(scene.testTag))
+                }
+            }
+
             override fun onElement(
                 element: ElementKey,
                 scene: SceneKey?
             ): SemanticsNodeInteraction {
-                return if (scene == null) {
-                    onNodeWithTag(element.testTag)
-                } else {
-                    onNode(hasTestTag(element.testTag) and hasParent(hasTestTag(scene.testTag)))
-                }
+                return onNode(isElement(element, scene))
             }
 
             override fun onSharedElement(element: ElementKey): SemanticsNodeInteractionCollection {

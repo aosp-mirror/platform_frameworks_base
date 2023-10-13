@@ -75,6 +75,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     private BluetoothAdapter mMockAdapter;
     private List<CachedBluetoothDevice> mDevices;
 
+    private FakeExecutor mBackgroundExecutor;
+
     @Before
     public void setup() throws Exception {
         mTestableLooper = TestableLooper.get(this);
@@ -91,6 +93,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         when(mMockBluetoothManager.getProfileManager())
                 .thenReturn(mock(LocalBluetoothProfileManager.class));
         mMockDumpManager = mock(DumpManager.class);
+        mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
 
         BluetoothRepository bluetoothRepository =
                 new FakeBluetoothRepository(mMockBluetoothManager);
@@ -101,6 +104,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 mMockDumpManager,
                 mock(BluetoothLogger.class),
                 bluetoothRepository,
+                mBackgroundExecutor,
                 mTestableLooper.getLooper(),
                 mMockBluetoothManager,
                 mMockAdapter);
@@ -205,6 +209,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mBluetoothControllerImpl.onAclConnectionStateChanged(device,
                 BluetoothProfile.STATE_CONNECTED);
         mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.HEADSET);
+        mBackgroundExecutor.runAllReady();
 
         assertTrue(mBluetoothControllerImpl.isBluetoothAudioActive());
         assertTrue(mBluetoothControllerImpl.isBluetoothAudioProfileOnly());
@@ -290,6 +295,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 BluetoothProfile.LE_AUDIO, /* isConnected= */ true, /* isActive= */ false);
 
         mBluetoothControllerImpl.onDeviceAdded(device);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
@@ -300,6 +306,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 BluetoothProfile.HEADSET, /* isConnected= */ true, /* isActive= */ false);
 
         mBluetoothControllerImpl.onDeviceAdded(device);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
@@ -310,6 +317,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 BluetoothProfile.A2DP, /* isConnected= */ true, /* isActive= */ false);
 
         mBluetoothControllerImpl.onDeviceAdded(device);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
@@ -320,6 +328,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 BluetoothProfile.HEARING_AID, /* isConnected= */ true, /* isActive= */ false);
 
         mBluetoothControllerImpl.onDeviceAdded(device);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
@@ -337,6 +346,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mBluetoothControllerImpl.onDeviceAdded(device2);
         mBluetoothControllerImpl.onDeviceAdded(device3);
 
+        mBackgroundExecutor.runAllReady();
+
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
 
@@ -349,6 +360,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
         mBluetoothControllerImpl.onDeviceAdded(device1);
         mBluetoothControllerImpl.onDeviceAdded(device2);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isFalse();
     }

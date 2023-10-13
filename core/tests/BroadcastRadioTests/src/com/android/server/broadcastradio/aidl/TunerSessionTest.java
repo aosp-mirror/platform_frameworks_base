@@ -610,8 +610,6 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void cancel() throws Exception {
         openAidlClients(/* numClients= */ 1);
-        ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
-        mTunerSessions[0].tune(initialSel);
 
         mTunerSessions[0].cancel();
 
@@ -621,9 +619,6 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void cancel_forNonCurrentUser_doesNotCancel() throws Exception {
         openAidlClients(/* numClients= */ 1);
-        ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
-        mTunerSessions[0].tune(initialSel);
-        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(any());
         doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
 
         mTunerSessions[0].cancel();

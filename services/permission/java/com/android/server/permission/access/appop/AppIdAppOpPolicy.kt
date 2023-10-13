@@ -46,7 +46,9 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
         newState.userStates.forEachIndexed { userStateIndex, _, userState ->
             val appIdIndex = userState.appIdAppOpModes.indexOfKey(appId)
             if (appIdIndex >= 0) {
-                newState.mutateUserStateAt(userStateIndex).mutateAppIdAppOpModes()
+                newState
+                    .mutateUserStateAt(userStateIndex)
+                    .mutateAppIdAppOpModes()
                     .removeAt(appIdIndex)
                 // Skip notifying the change listeners since the app ID no longer exists.
             }
@@ -61,8 +63,8 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
         if (userStateIndex < 0) {
             return false
         }
-        val appIdIndex = newState.userStates.valueAt(userStateIndex).appIdAppOpModes
-            .indexOfKey(appId)
+        val appIdIndex =
+            newState.userStates.valueAt(userStateIndex).appIdAppOpModes.indexOfKey(appId)
         if (appIdIndex < 0) {
             return false
         }
@@ -71,7 +73,9 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
     }
 
     fun GetStateScope.getAppOpMode(appId: Int, userId: Int, appOpName: String): Int =
-        state.userStates[userId]?.appIdAppOpModes?.get(appId)
+        state.userStates[userId]
+            ?.appIdAppOpModes
+            ?.get(appId)
             .getWithDefault(appOpName, AppOpsManager.opToDefaultMode(appOpName))
 
     fun MutateStateScope.setAppOpMode(
@@ -81,8 +85,10 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
         mode: Int
     ): Boolean {
         val defaultMode = AppOpsManager.opToDefaultMode(appOpName)
-        val oldMode = newState.userStates[userId]!!.appIdAppOpModes[appId]
-            .getWithDefault(appOpName, defaultMode)
+        val oldMode =
+            newState.userStates[userId]!!
+                .appIdAppOpModes[appId]
+                .getWithDefault(appOpName, defaultMode)
         if (oldMode == mode) {
             return false
         }
@@ -122,9 +128,7 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
         with(upgrade) { upgradePackageState(packageState, userId, version) }
     }
 
-    /**
-     * Listener for app op mode changes.
-     */
+    /** Listener for app op mode changes. */
     abstract class OnAppOpModeChangedListener {
         /**
          * Called when an app op mode change has been made to the upcoming new state.

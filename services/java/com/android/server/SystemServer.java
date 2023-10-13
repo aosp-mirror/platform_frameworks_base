@@ -51,6 +51,7 @@ import android.credentials.CredentialManager;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.graphics.GraphicsStatsService;
+import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
@@ -915,6 +916,14 @@ public final class SystemServer implements Dumpable {
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool tp = SystemServerInitThreadPool.start();
             mDumper.addDumpable(tp);
+
+            // Lazily load the pre-installed system font map in SystemServer only if we're not doing
+            // the optimized font loading in the FontManagerService.
+            if (!com.android.text.flags.Flags.useOptimizedBoottimeFontLoading()
+                    && Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+                Slog.i(TAG, "Loading pre-installed system font map.");
+                Typeface.loadPreinstalledSystemFontMap();
+            }
 
             // Attach JVMTI agent if this is a debuggable build and the system property is set.
             if (Build.IS_DEBUGGABLE) {

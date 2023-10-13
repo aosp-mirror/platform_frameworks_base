@@ -160,6 +160,7 @@ import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.mode.DisplayModeDirector;
+import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.utils.FoldSettingProvider;
@@ -522,6 +523,8 @@ public final class DisplayManagerService extends SystemService {
 
     private final DisplayManagerFlags mFlags;
 
+    private final DisplayNotificationManager mDisplayNotificationManager;
+
     /**
      * Applications use {@link android.view.Display#getRefreshRate} and
      * {@link android.view.Display.Mode#getRefreshRate} to know what is the display refresh rate.
@@ -555,6 +558,7 @@ public final class DisplayManagerService extends SystemService {
         mInjector = injector;
         mContext = context;
         mFlags = injector.getFlags();
+        mDisplayNotificationManager = new DisplayNotificationManager(mFlags, mContext);
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
@@ -650,6 +654,7 @@ public final class DisplayManagerService extends SystemService {
             }
             mDisplayModeDirector.onBootCompleted();
             mLogicalDisplayMapper.onBootCompleted();
+            mDisplayNotificationManager.onBootCompleted();
         }
     }
 
@@ -782,6 +787,10 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             mMinimalPostProcessingAllowed = allowed;
         }
+    }
+
+    DisplayNotificationManager getDisplayNotificationManager() {
+        return mDisplayNotificationManager;
     }
 
     private void loadStableDisplayValuesLocked() {
@@ -1776,7 +1785,8 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             // main display adapter
             registerDisplayAdapterLocked(mInjector.getLocalDisplayAdapter(mSyncRoot, mContext,
-                    mHandler, mDisplayDeviceRepo, mFlags));
+                    mHandler, mDisplayDeviceRepo, mFlags,
+                    mDisplayNotificationManager));
 
             // Standalone VR devices rely on a virtual display as their primary display for
             // 2D UI. We register virtual display adapter along side the main display adapter
@@ -3191,9 +3201,10 @@ public final class DisplayManagerService extends SystemService {
 
         LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,
                 Handler handler, DisplayAdapter.Listener displayAdapterListener,
-                DisplayManagerFlags flags) {
+                DisplayManagerFlags flags,
+                DisplayNotificationManager displayNotificationManager) {
             return new LocalDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
-                    flags);
+                    flags, displayNotificationManager);
         }
 
         long getDefaultDisplayDelayTimeout() {

@@ -1065,7 +1065,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                     mMgh.clearAndTransitionToStateDetecting();
                     break;
                 case STATE_ACTIVATED:
-                    if (mMgh.mDetectTripleTap) {
+                    if (mMgh.mDetectSingleFingerTripleTap) {
                         goFromStateIdleTo(STATE_2TAPS);
                         tap();
                     } else {
@@ -1147,7 +1147,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 break;
             case STATE_ACTIVATED:
             case STATE_ZOOMED_OUT_FROM_SERVICE:
-                if (mMgh.mDetectTripleTap) {
+                if (mMgh.mDetectSingleFingerTripleTap) {
                     tap();
                     tap();
                     returnToNormalFrom(STATE_ACTIVATED_2TAPS);

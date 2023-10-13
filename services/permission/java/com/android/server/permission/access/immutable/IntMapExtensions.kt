@@ -36,7 +36,9 @@ inline fun <T> IntMap<T>.anyIndexed(predicate: (Int, Int, T) -> Boolean): Boolea
 
 inline fun <T, R> IntMap<T>.firstNotNullOfOrNullIndexed(transform: (Int, Int, T) -> R): R? {
     forEachIndexed { index, key, value ->
-        transform(index, key, value)?.let { return it }
+        transform(index, key, value)?.let {
+            return it
+        }
     }
     return null
 }
@@ -72,7 +74,9 @@ inline fun <T> IntMap<T>.noneIndexed(predicate: (Int, Int, T) -> Boolean): Boole
 }
 
 inline fun <T> MutableIntMap<T>.getOrPut(key: Int, defaultValue: () -> T): T {
-    get(key)?.let { return it }
+    get(key)?.let {
+        return it
+    }
     return defaultValue().also { put(key, it) }
 }
 

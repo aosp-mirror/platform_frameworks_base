@@ -22,9 +22,8 @@ import static android.view.Display.Mode.INVALID_MODE_ID;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.Resources;
-import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
 import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
 import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
@@ -52,6 +51,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
+import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 
@@ -86,18 +86,25 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final DisplayManagerFlags mFlags;
 
+    private final DisplayNotificationManager mDisplayNotificationManager;
+
     private Context mOverlayContext;
 
     // Called with SyncRoot lock held.
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
-            Handler handler, Listener listener, DisplayManagerFlags flags) {
-        this(syncRoot, context, handler, listener, flags, new Injector());
+            Handler handler, Listener listener, DisplayManagerFlags flags,
+            DisplayNotificationManager displayNotificationManager) {
+        this(syncRoot, context, handler, listener, flags, displayNotificationManager,
+                new Injector());
     }
 
     @VisibleForTesting
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context, Handler handler,
-            Listener listener, DisplayManagerFlags flags, Injector injector) {
+            Listener listener, DisplayManagerFlags flags,
+            DisplayNotificationManager displayNotificationManager,
+            Injector injector) {
         super(syncRoot, context, handler, listener, TAG);
+        mDisplayNotificationManager = displayNotificationManager;
         mInjector = injector;
         mSurfaceControlProxy = mInjector.getSurfaceControlProxy();
         mIsBootDisplayModeSupported = mSurfaceControlProxy.getBootDisplayModeSupport();
@@ -1454,6 +1461,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         + "timestampNanos=" + timestampNanos
                         + ", connectionError=" + connectionError + ")");
             }
+
+            mDisplayNotificationManager.onHotplugConnectionError();
         }
 
         @Override

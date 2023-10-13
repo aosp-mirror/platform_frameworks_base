@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothLeBroadcastMetadata
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.media.MediaRouter2Manager
+import android.media.RoutingSessionInfo
 import android.media.session.MediaController
 import android.text.TextUtils
 import android.util.Log
@@ -31,17 +32,20 @@ import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
+import com.android.settingslib.media.PhoneMediaDevice
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -64,7 +68,8 @@ constructor(
     private val localBluetoothManager: LocalBluetoothManager?,
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    private val featureFlags: FeatureFlagsClassic,
 ) : MediaDataManager.Listener, Dumpable {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
@@ -215,6 +220,7 @@ constructor(
                 println("    volumeControlId=$volumeControlId cached= $playbackVolumeControlId")
                 println("    routingSession=$routingSession")
                 println("    selectedRoutes=$selectedRoutes")
+                println("    currentConnectedDevice=${localMediaManager.currentConnectedDevice}")
             }
         }
 
@@ -348,16 +354,16 @@ constructor(
                 }
                 val device =
                     aboutToConnect?.fullMediaDevice ?: localMediaManager.currentConnectedDevice
-                val route = controller?.let { mr2manager.getRoutingSessionForMediaController(it) }
+                val routingSession =
+                    controller?.let { mr2manager.getRoutingSessionForMediaController(it) }
 
                 // If we have a controller but get a null route, then don't trust the device
-                val enabled = device != null && (controller == null || route != null)
-                val name =
-                    if (controller == null || route != null) {
-                        route?.name?.toString() ?: device?.name
-                    } else {
-                        null
-                    }
+                val enabled = device != null && (controller == null || routingSession != null)
+
+                val name = getDeviceName(device, routingSession)
+                if (DEBUG) {
+                    Log.d(TAG, "new device name $name")
+                }
                 current =
                     MediaDeviceData(
                         enabled,
@@ -367,6 +373,57 @@ constructor(
                         showBroadcastButton = false
                     )
             }
+        }
+
+        /** Return a display name for the current device / route, or null if not possible */
+        private fun getDeviceName(
+            device: MediaDevice?,
+            routingSession: RoutingSessionInfo?,
+        ): String? {
+            val selectedRoutes = routingSession?.let { mr2manager.getSelectedRoutes(it) }
+
+            if (DEBUG) {
+                Log.d(
+                    TAG,
+                    "device is $device, controller $controller," +
+                        " routingSession ${routingSession?.name}" +
+                        " or ${selectedRoutes?.firstOrNull()?.name}"
+                )
+            }
+
+            if (!featureFlags.isEnabled(Flags.MEDIA_DEVICE_NAME_FIX)) {
+                if (controller == null || routingSession != null) {
+                    return routingSession?.name?.toString() ?: device?.name
+                }
+                return null
+            }
+
+            if (controller == null) {
+                // In resume state, we don't have a controller - just use the device name
+                return device?.name
+            }
+
+            if (routingSession == null) {
+                // This happens when casting from apps that do not support MediaRouter2
+                // The output switcher can't show anything useful here, so set to null
+                return null
+            }
+
+            // If this is a user route (app / cast provided), use the provided name
+            if (!routingSession.isSystemSession) {
+                return routingSession.name?.toString() ?: device?.name
+            }
+
+            selectedRoutes?.firstOrNull()?.let {
+                if (device is PhoneMediaDevice) {
+                    // Get the (localized) name for this phone device
+                    return PhoneMediaDevice.getSystemRouteNameFromType(context, it)
+                } else {
+                    // If it's another type of device (in practice, Bluetooth), use the route name
+                    return it.name.toString()
+                }
+            }
+            return null
         }
 
         private fun isLeAudioBroadcastEnabled(): Boolean {

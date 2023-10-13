@@ -16,12 +16,8 @@
 
 package com.android.server.permission.access.immutable
 
-/**
- * Immutable list with index-based access.
- */
-sealed class IndexedList<T>(
-    internal val list: ArrayList<T>
-) : Immutable<MutableIndexedList<T>> {
+/** Immutable list with index-based access. */
+sealed class IndexedList<T>(internal val list: ArrayList<T>) : Immutable<MutableIndexedList<T>> {
     val size: Int
         get() = list.size
 
@@ -29,20 +25,15 @@ sealed class IndexedList<T>(
 
     operator fun contains(element: T): Boolean = list.contains(element)
 
-    @Suppress("ReplaceGetOrSet")
-    operator fun get(index: Int): T = list.get(index)
+    @Suppress("ReplaceGetOrSet") operator fun get(index: Int): T = list.get(index)
 
     override fun toMutable(): MutableIndexedList<T> = MutableIndexedList(this)
 
     override fun toString(): String = list.toString()
 }
 
-/**
- * Mutable list with index-based access.
- */
-class MutableIndexedList<T>(
-    list: ArrayList<T> = ArrayList()
-) : IndexedList<T>(list) {
+/** Mutable list with index-based access. */
+class MutableIndexedList<T>(list: ArrayList<T> = ArrayList()) : IndexedList<T>(list) {
     constructor(indexedList: IndexedList<T>) : this(ArrayList(indexedList.list))
 
     @Suppress("ReplaceGetOrSet")

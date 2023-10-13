@@ -11,3 +11,16 @@ java_aconfig_library {
     name: "com_android_systemui_flags_lib",
     aconfig_declarations: "com_android_systemui_flags",
 }
+
+aconfig_declarations {
+    name: "com_android_systemui_communal_flags",
+    package: "com.android.systemui.communal",
+    srcs: [
+        "communal.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "com_android_systemui_communal_flags_lib",
+    aconfig_declarations: "com_android_systemui_communal_flags",
+}

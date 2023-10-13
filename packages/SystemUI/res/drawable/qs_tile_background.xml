@@ -15,9 +15,25 @@
   ~ limitations under the License.
   -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?android:attr/colorControlHighlight">
+    android:color="@color/qs_tile_ripple_color">
     <item android:id="@android:id/mask"
-        android:drawable="@drawable/qs_tile_background_shape" />
-    <item android:id="@id/background"
-        android:drawable="@drawable/qs_tile_background_shape"/>
+        android:drawable="@drawable/qs_tile_background_shape"
+        />
+    <item android:id="@id/background">
+        <layer-list>
+            <item
+                android:id="@+id/qs_tile_background_base"
+                android:drawable="@drawable/qs_tile_background_shape" />
+            <item android:id="@+id/qs_tile_background_overlay">
+                <selector>
+                    <item
+                        android:state_hovered="true"
+                        android:drawable="@drawable/qs_tile_background_shape" />
+                    <item
+                        android:state_focused="true"
+                        android:drawable="@drawable/qs_tile_background_shape" />
+                </selector>
+            </item>
+        </layer-list>
+    </item>
 </ripple>

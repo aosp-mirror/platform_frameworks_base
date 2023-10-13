@@ -90,6 +90,7 @@ import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.ThreadFactory
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.traceSection
 import java.io.IOException
@@ -245,7 +246,7 @@ class MediaDataManager(
     @Inject
     constructor(
         context: Context,
-        @Background backgroundExecutor: Executor,
+        threadFactory: ThreadFactory,
         @Main uiExecutor: Executor,
         @Main foregroundExecutor: DelayableExecutor,
         mediaControllerFactory: MediaControllerFactory,
@@ -267,7 +268,9 @@ class MediaDataManager(
         keyguardUpdateMonitor: KeyguardUpdateMonitor,
     ) : this(
         context,
-        backgroundExecutor,
+        // Loading bitmap for UMO background can take longer time, so it cannot run on the default
+        // background thread. Use a custom thread for media.
+        threadFactory.buildExecutorOnNewThread(TAG),
         uiExecutor,
         foregroundExecutor,
         mediaControllerFactory,

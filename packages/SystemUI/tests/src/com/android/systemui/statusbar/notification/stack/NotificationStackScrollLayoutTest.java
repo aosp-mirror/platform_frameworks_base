@@ -164,6 +164,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mFeatureFlags.setDefault(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
         mFeatureFlags.setDefault(Flags.NOTIFICATION_SHELF_REFACTOR);
         mFeatureFlags.setDefault(Flags.NEW_AOD_TRANSITION);
+        mFeatureFlags.setDefault(Flags.UNCLEARED_TRANSIENT_HUN_FIX);
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);

@@ -69,6 +69,9 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     private boolean mClipToActualHeight = true;
     private boolean mChangingPosition = false;
     private ViewGroup mTransientContainer;
+
+    // Needs to be added as transient view when removed from parent, because it's in animation
+    private boolean mInRemovalAnimation;
     private boolean mInShelf;
     private boolean mTransformingInShelf;
     protected float mContentTransformationAmount;
@@ -381,6 +384,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
      */
     public abstract long performRemoveAnimation(long duration,
             long delay, float translationDirection, boolean isHeadsUpAnimation,
+            Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener);
 
@@ -601,6 +605,25 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     public ViewGroup getTransientContainer() {
         return mTransientContainer;
+    }
+
+    /**
+     * Add the view to a transient container.
+     */
+    public void addToTransientContainer(ViewGroup container, int index) {
+        container.addTransientView(this, index);
+        setTransientContainer(container);
+    }
+
+    /**
+     * @return If the view is in a process of removal animation.
+     */
+    public boolean inRemovalAnimation() {
+        return mInRemovalAnimation;
+    }
+
+    public void setInRemovalAnimation(boolean inRemovalAnimation) {
+        mInRemovalAnimation = inRemovalAnimation;
     }
 
     /**
@@ -837,6 +860,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
                 pw.println();
             }
             if (DUMP_VERBOSE) {
+                pw.println("mInRemovalAnimation: " + mInRemovalAnimation);
                 pw.println("mClipTopAmount: " + mClipTopAmount);
                 pw.println("mClipBottomAmount " + mClipBottomAmount);
                 pw.println("mClipToActualHeight: " + mClipToActualHeight);
