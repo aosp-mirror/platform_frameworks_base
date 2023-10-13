@@ -279,6 +279,11 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     }
 
     @Override
+    public void onNullBinding(ComponentName name) {
+        executeSetBindService(false);
+    }
+
+    @Override
     public void onServiceDisconnected(ComponentName name) {
         if (DEBUG) Log.d(TAG, "onServiceDisconnected " + name);
         handleDeath();
