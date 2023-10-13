@@ -157,6 +157,7 @@ import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -328,6 +329,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private CastController mCastController;
     @Mock private KeyguardRootView mKeyguardRootView;
     @Mock private SharedNotificationContainerInteractor mSharedNotificationContainerInteractor;
+    @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -667,7 +669,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardViewConfigurator,
                 mKeyguardFaceAuthInteractor,
                 new ResourcesSplitShadeStateController(),
-                mPowerInteractor);
+                mPowerInteractor,
+                mKeyguardClockPositionAlgorithm);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 null,
