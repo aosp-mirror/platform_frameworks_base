@@ -174,8 +174,6 @@ public final class SensorPrivacyService extends SystemService {
     private CallStateHelper mCallStateHelper;
     private KeyguardManager mKeyguardManager;
 
-    private SafetyCenterManager mSafetyCenterManager;
-
     private int mCurrentUser = USER_NULL;
 
     public SensorPrivacyService(Context context) {
@@ -191,7 +189,6 @@ public final class SensorPrivacyService extends SystemService {
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
-        mSafetyCenterManager = mContext.getSystemService(SafetyCenterManager.class);
     }
 
     @Override
@@ -656,7 +653,9 @@ public final class SensorPrivacyService extends SystemService {
             String contentTitle = getUiContext().getString(messageRes);
             Spanned contentText = Html.fromHtml(getUiContext().getString(
                     R.string.sensor_privacy_start_use_notification_content_text, packageLabel), 0);
-            String action = mSafetyCenterManager.isSafetyCenterEnabled()
+            SafetyCenterManager safetyCenterManager =
+                    mContext.getSystemService(SafetyCenterManager.class);
+            String action = safetyCenterManager.isSafetyCenterEnabled()
                     ? Settings.ACTION_PRIVACY_CONTROLS : Settings.ACTION_PRIVACY_SETTINGS;
 
             PendingIntent contentIntent = PendingIntent.getActivity(mContext, sensor,
