@@ -123,11 +123,44 @@ class MicrophoneToggleTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLongClickIntent() {
+    fun testLongClickIntent_safetyCenterEnabled() {
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(true)
-        assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_CONTROLS)
+        val micTile = MicrophoneToggleTile(
+                host,
+                uiEventLogger,
+                testableLooper.looper,
+                Handler(testableLooper.looper),
+                metricsLogger,
+                FalsingManagerFake(),
+                statusBarStateController,
+                activityStarter,
+                qsLogger,
+                privacyController,
+                keyguardStateController,
+                safetyCenterManager)
+        assertThat(micTile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_CONTROLS)
+        micTile.destroy()
+        testableLooper.processAllMessages()
+    }
 
+    @Test
+    fun testLongClickIntent_safetyCenterDisabled() {
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(false)
-        assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_SETTINGS)
+        val micTile = MicrophoneToggleTile(
+                host,
+                uiEventLogger,
+                testableLooper.looper,
+                Handler(testableLooper.looper),
+                metricsLogger,
+                FalsingManagerFake(),
+                statusBarStateController,
+                activityStarter,
+                qsLogger,
+                privacyController,
+                keyguardStateController,
+                safetyCenterManager)
+        assertThat(micTile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_SETTINGS)
+        micTile.destroy()
+        testableLooper.processAllMessages()
     }
 }
