@@ -31,7 +31,6 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
-import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DismissAction
@@ -41,9 +40,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.phone.BiometricUnlockController
-import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnlockMode
-import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -111,6 +107,8 @@ interface KeyguardRepository {
     /** Is the always-on display available to be used? */
     val isAodAvailable: Flow<Boolean>
 
+    fun setAodAvailable(value: Boolean)
+
     /**
      * Observable for whether we are in doze state.
      *
@@ -159,6 +157,8 @@ interface KeyguardRepository {
 
     /** Observable for biometric unlock modes */
     val biometricUnlockState: Flow<BiometricUnlockModel>
+
+    fun setBiometricUnlockState(value: BiometricUnlockModel)
 
     /** Approximate location on the screen of the fingerprint sensor. */
     val fingerprintSensorLocation: Flow<Point?>
@@ -240,12 +240,9 @@ class KeyguardRepositoryImpl
 @Inject
 constructor(
     statusBarStateController: StatusBarStateController,
-    screenLifecycle: ScreenLifecycle,
-    biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dozeTransitionListener: DozeTransitionListener,
-    private val dozeParameters: DozeParameters,
     private val authController: AuthController,
     private val dreamOverlayCallbackController: DreamOverlayCallbackController,
     @Main private val mainDispatcher: CoroutineDispatcher,
@@ -303,24 +300,12 @@ constructor(
             }
             .distinctUntilChanged()
 
-    override val isAodAvailable: Flow<Boolean> =
-        conflatedCallbackFlow {
-                val callback =
-                    DozeParameters.Callback {
-                        trySendWithFailureLogging(
-                            dozeParameters.alwaysOn,
-                            TAG,
-                            "updated isAodAvailable"
-                        )
-                    }
+    private val _isAodAvailable = MutableStateFlow(false)
+    override val isAodAvailable: Flow<Boolean> = _isAodAvailable.asStateFlow()
 
-                dozeParameters.addCallback(callback)
-                // Adding the callback does not send an initial update.
-                trySendWithFailureLogging(dozeParameters.alwaysOn, TAG, "initial isAodAvailable")
-
-                awaitClose { dozeParameters.removeCallback(callback) }
-            }
-            .distinctUntilChanged()
+    override fun setAodAvailable(value: Boolean) {
+        _isAodAvailable.value = value
+    }
 
     override val isKeyguardOccluded: Flow<Boolean> =
         conflatedCallbackFlow {
@@ -506,30 +491,11 @@ constructor(
                 statusBarStateIntToObject(statusBarStateController.state)
             )
 
-    override val biometricUnlockState: Flow<BiometricUnlockModel> = conflatedCallbackFlow {
-        fun dispatchUpdate() {
-            trySendWithFailureLogging(
-                biometricModeIntToObject(biometricUnlockController.mode),
-                TAG,
-                "biometric mode"
-            )
-        }
+    private val _biometricUnlockState = MutableStateFlow(BiometricUnlockModel.NONE)
+    override val biometricUnlockState = _biometricUnlockState.asStateFlow()
 
-        val callback =
-            object : BiometricUnlockController.BiometricUnlockEventsListener {
-                override fun onModeChanged(@WakeAndUnlockMode mode: Int) {
-                    dispatchUpdate()
-                }
-
-                override fun onResetMode() {
-                    dispatchUpdate()
-                }
-            }
-
-        biometricUnlockController.addListener(callback)
-        dispatchUpdate()
-
-        awaitClose { biometricUnlockController.removeListener(callback) }
+    override fun setBiometricUnlockState(value: BiometricUnlockModel) {
+        _biometricUnlockState.value = value
     }
 
     override val fingerprintSensorLocation: Flow<Point?> = conflatedCallbackFlow {
@@ -659,20 +625,6 @@ constructor(
             1 -> StatusBarState.KEYGUARD
             2 -> StatusBarState.SHADE_LOCKED
             else -> throw IllegalArgumentException("Invalid StatusBarState value: $value")
-        }
-    }
-
-    private fun biometricModeIntToObject(@WakeAndUnlockMode value: Int): BiometricUnlockModel {
-        return when (value) {
-            0 -> BiometricUnlockModel.NONE
-            1 -> BiometricUnlockModel.WAKE_AND_UNLOCK
-            2 -> BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING
-            3 -> BiometricUnlockModel.SHOW_BOUNCER
-            4 -> BiometricUnlockModel.ONLY_WAKE
-            5 -> BiometricUnlockModel.UNLOCK_COLLAPSING
-            6 -> BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
-            7 -> BiometricUnlockModel.DISMISS_BOUNCER
-            else -> throw IllegalArgumentException("Invalid BiometricUnlockModel value: $value")
         }
     }
 

@@ -53,6 +53,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.BiometricUnlockInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -126,6 +127,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private DeviceEntryHapticsInteractor mDeviceEntryHapticsInteractor;
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
+    private BiometricUnlockInteractor mBiometricUnlockInteractor;
     private final FakeSystemClock mSystemClock = new FakeSystemClock();
     private FakeFeatureFlags mFeatureFlags;
     private BiometricUnlockController mBiometricUnlockController;
@@ -164,7 +167,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mSystemClock,
                 mFeatureFlags,
                 mDeviceEntryHapticsInteractor,
-                () -> mSelectedUserInteractor
+                () -> mSelectedUserInteractor,
+                mBiometricUnlockInteractor
         );
         biometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         biometricUnlockController.addListener(mBiometricUnlockEventsListener);

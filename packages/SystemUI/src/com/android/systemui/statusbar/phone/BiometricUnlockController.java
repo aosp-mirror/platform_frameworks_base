@@ -52,6 +52,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.BiometricUnlockInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
@@ -175,6 +176,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final LatencyTracker mLatencyTracker;
     private final VibratorHelper mVibratorHelper;
+    private final BiometricUnlockInteractor mBiometricUnlockInteractor;
     private final BiometricUnlockLogger mLogger;
     private final SystemClock mSystemClock;
     private final boolean mOrderUnlockAndWake;
@@ -291,7 +293,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             SystemClock systemClock,
             FeatureFlags featureFlags,
             DeviceEntryHapticsInteractor hapticsInteractor,
-            Lazy<SelectedUserInteractor> selectedUserInteractor
+            Lazy<SelectedUserInteractor> selectedUserInteractor,
+            BiometricUnlockInteractor biometricUnlockInteractor
     ) {
         mPowerManager = powerManager;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -300,6 +303,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mLatencyTracker = latencyTracker;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
+        mBiometricUnlockInteractor = biometricUnlockInteractor;
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mDozeScrimController = dozeScrimController;
@@ -531,6 +535,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         for (BiometricUnlockEventsListener listener : mBiometricUnlockEventsListeners) {
             listener.onModeChanged(mode);
         }
+        mBiometricUnlockInteractor.setBiometricUnlockState(mode);
     }
 
     private void onBiometricUnlockedWithKeyguardDismissal(BiometricSourceType biometricSourceType) {
@@ -788,6 +793,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         for (BiometricUnlockEventsListener listener : mBiometricUnlockEventsListeners) {
             listener.onResetMode();
         }
+        mBiometricUnlockInteractor.setBiometricUnlockState(MODE_NONE);
         mNumConsecutiveFpFailures = 0;
         mLastFpFailureUptimeMillis = 0;
     }
