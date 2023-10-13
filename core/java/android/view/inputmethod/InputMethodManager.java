@@ -100,7 +100,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
-import android.widget.Editor;
 import android.window.ImeOnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -2374,16 +2373,16 @@ public final class InputMethodManager {
      * Prepares delegation of starting stylus handwriting session to a different editor in same
      * or different window than the view on which initial handwriting stroke was detected.
      *
-     * Delegation can be used to start stylus handwriting session before the {@link Editor} view or
+     * Delegation can be used to start stylus handwriting session before the {@code Editor} view or
      * its {@link InputConnection} is started. Calling this method starts buffering of stylus
      * motion events until {@link #acceptStylusHandwritingDelegation(View)} is called, at which
      * point the handwriting session can be started and the buffered stylus motion events will be
      * delivered to the IME.
      * e.g. Delegation can be used when initial handwriting stroke is
-     * on a pseudo {@link Editor} like widget (with no {@link InputConnection}) but actual
-     * {@link Editor} is on a different window.
+     * on a pseudo {@code Editor} like widget (with no {@link InputConnection}) but actual
+     * {@code Editor} is on a different window.
      *
-     * <p> Note: If an actual {@link Editor} capable of {@link InputConnection} is being scribbled
+     * <p> Note: If an actual {@code Editor} capable of {@link InputConnection} is being scribbled
      * upon using stylus, use {@link #startStylusHandwriting(View)} instead.</p>
      *
      * @param delegatorView the view that receives initial stylus stroke and delegates it to the
@@ -2402,21 +2401,21 @@ public final class InputMethodManager {
      * different window in a different package than the view on which initial handwriting stroke
      * was detected.
      *
-     * Delegation can be used to start stylus handwriting session before the {@link Editor} view or
+     * Delegation can be used to start stylus handwriting session before the {@code Editor} view or
      * its {@link InputConnection} is started. Calling this method starts buffering of stylus
      * motion events until {@link #acceptStylusHandwritingDelegation(View, String)} is called, at
      * which point the handwriting session can be started and the buffered stylus motion events will
      * be delivered to the IME.
      * e.g. Delegation can be used when initial handwriting stroke is
-     * on a pseudo {@link Editor} like widget (with no {@link InputConnection}) but actual
-     * {@link Editor} is on a different window in the given package.
+     * on a pseudo {@code Editor} like widget (with no {@link InputConnection}) but actual
+     * {@code Editor} is on a different window in the given package.
      *
      * <p>Note: If delegator and delegate are in same package use
      * {@link #prepareStylusHandwritingDelegation(View)} instead.</p>
      *
      * @param delegatorView  the view that receives initial stylus stroke and delegates it to the
      * actual editor. Its window must {@link View#hasWindowFocus have focus}.
-     * @param delegatePackageName package name that contains actual {@link Editor} which should
+     * @param delegatePackageName package name that contains actual {@code Editor} which should
      *  start stylus handwriting session by calling {@link #acceptStylusHandwritingDelegation}.
      * @see #prepareStylusHandwritingDelegation(View)
      * @see #acceptStylusHandwritingDelegation(View, String)

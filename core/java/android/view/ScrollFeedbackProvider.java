@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.FlaggedApi;
-import android.annotation.NonNull;
 import android.view.flags.Flags;
 
 /**
@@ -43,7 +42,8 @@ import android.view.flags.Flags;
  * the scroll event. If calling this method in response to a {@link MotionEvent}, use the device ID
  * that is reported by the event, which can be obtained using {@link MotionEvent#getDeviceId()}.
  * Otherwise, use a valid ID that is obtained from {@link InputDevice#getId()}, or from an
- * {@link InputManager} instance ({@link InputManager#getInputDeviceIds()} gives all the valid input
+ * {@link android.hardware.input.InputManager} instance
+ * ({@link android.hardware.input.InputManager#getInputDeviceIds()} gives all the valid input
  * device IDs).
  *
  * <li><p><b>source</b>: should always be the {@link InputDevice} source that generated the scroll

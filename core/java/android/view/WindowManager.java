@@ -1685,7 +1685,7 @@ public interface WindowManager extends ViewManager {
      * orientation (e.g. with {@link android.app.Activity#setRequestedOrientation(int)}). This
      * listener gives application an opportunity to selectively react to device orientation changes.
      * The newly added listener will be called with current proposed rotation. Note that the context
-     * of this window manager instance must be a {@link android.annotation.UiContext}.
+     * of this window manager instance must be a {@code UiContext}.
      *
      * @param executor The executor on which callback method will be invoked.
      * @param listener Called when the proposed rotation for the context is being delivered.
@@ -1693,7 +1693,7 @@ public interface WindowManager extends ViewManager {
      *                 {@link Surface#ROTATION_90}, {@link Surface#ROTATION_180} and
      *                 {@link Surface#ROTATION_270}.
      * @throws UnsupportedOperationException if this method is called on an instance that is not
-     *         associated with a {@link android.annotation.UiContext}.
+     *         associated with a {@code UiContext}.
      */
     default void addProposedRotationListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull IntConsumer listener) {
@@ -3115,7 +3115,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Never animate position changes of the window.
          *
-         * @see android.R.attr#Window_windowNoMoveAnimation
+         * @see android.R.styleable#Window_windowNoMoveAnimation
          * {@hide}
          */
         @UnsupportedAppUsage
@@ -4531,7 +4531,7 @@ public interface WindowManager extends ViewManager {
          * Set whether animations can be played for position changes on this window. If disabled,
          * the window will move to its new position instantly without animating.
          *
-         * @attr ref android.R.attr#Window_windowNoMoveAnimation
+         * @attr ref android.R.styleable#Window_windowNoMoveAnimation
          */
         public void setCanPlayMoveAnimation(boolean enable) {
             if (enable) {
@@ -4546,7 +4546,7 @@ public interface WindowManager extends ViewManager {
          * This does not guarantee that an animation will be played in all such situations. For
          * example, drag-resizing may move the window but not play an animation.
          *
-         * @attr ref android.R.attr#Window_windowNoMoveAnimation
+         * @attr ref android.R.styleable#Window_windowNoMoveAnimation
          */
         public boolean canPlayMoveAnimation() {
             return (privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0;

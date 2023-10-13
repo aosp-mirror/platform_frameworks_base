@@ -56,7 +56,7 @@ public class AnimationUtils {
     private static final int SEQUENTIALLY = 1;
 
      /**
-     * For apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above,
+     * For apps targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and above,
      * this change ID enables to use expectedPresentationTime instead of the frameTime
      * for the frame start time .
      *

@@ -124,7 +124,7 @@ public interface PropertyReader {
     void readObject(int id, @Nullable Object value);
 
     /**
-     * Read a color packed into a {@link ColorInt} as a property.
+     * Read a color packed into an int as a property.
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
      * @param value Value of the property
