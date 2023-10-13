@@ -1335,18 +1335,6 @@ public class UserManagerService extends IUserManager.Stub {
                 && user.profileGroupId == profile.profileGroupId);
     }
 
-    private Intent buildProfileAvailabilityIntent(UserInfo profile, boolean enableQuietMode,
-            boolean useManagedActions) {
-        Intent intent = new Intent();
-        intent.setAction(getAvailabilityIntentAction(enableQuietMode, useManagedActions));
-        intent.putExtra(Intent.EXTRA_QUIET_MODE, enableQuietMode);
-        intent.putExtra(Intent.EXTRA_USER, profile.getUserHandle());
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, profile.getUserHandle().getIdentifier());
-        intent.addFlags(
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        return intent;
-    }
-
     private String getAvailabilityIntentAction(boolean enableQuietMode, boolean useManagedActions) {
         return useManagedActions ?
                 enableQuietMode ?
@@ -1359,12 +1347,20 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void broadcastProfileAvailabilityChanges(UserInfo profileInfo,
             UserHandle parentHandle, boolean enableQuietMode, boolean useManagedActions) {
-        Intent availabilityIntent = buildProfileAvailabilityIntent(profileInfo, enableQuietMode,
-                useManagedActions);
+        Intent availabilityIntent = new Intent();
+        availabilityIntent.setAction(
+                getAvailabilityIntentAction(enableQuietMode, useManagedActions));
+        availabilityIntent.putExtra(Intent.EXTRA_QUIET_MODE, enableQuietMode);
+        availabilityIntent.putExtra(Intent.EXTRA_USER, profileInfo.getUserHandle());
+        availabilityIntent.putExtra(Intent.EXTRA_USER_HANDLE,
+                profileInfo.getUserHandle().getIdentifier());
         if (profileInfo.isManagedProfile()) {
             getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
                     availabilityIntent, parentHandle, /* requiresPermission= */ true);
         }
+        availabilityIntent.addFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+
         // TODO(b/302708423): Restrict the apps that can receive these intents in case of a private
         //  profile.
         final Bundle options = new BroadcastOptions()
