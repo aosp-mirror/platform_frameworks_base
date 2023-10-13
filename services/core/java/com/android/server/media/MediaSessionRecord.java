@@ -97,20 +97,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionRecordImpl {
 
     /**
-     * {@link MediaSession#setMediaButtonBroadcastReceiver(ComponentName)} throws an {@link
-     * IllegalArgumentException} if the provided {@link ComponentName} does not resolve to a valid
-     * {@link android.content.BroadcastReceiver broadcast receiver} for apps targeting Android U and
-     * above. For apps targeting Android T and below, the request will be ignored.
+     * {@link android.media.session.MediaSession#setMediaButtonBroadcastReceiver(
+     * android.content.ComponentName)} throws an {@link
+     * java.lang.IllegalArgumentException} if the provided {@link android.content.ComponentName}
+     * does not resolve to a valid {@link android.content.BroadcastReceiver broadcast receiver}
+     * for apps targeting Android U and above. For apps targeting Android T and below, the request
+     * will be ignored.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long THROW_FOR_INVALID_BROADCAST_RECEIVER = 270049379L;
 
     /**
-     * {@link MediaSession#setMediaButtonReceiver(PendingIntent)} throws an {@link
-     * IllegalArgumentException} if the provided {@link PendingIntent} targets an {@link
-     * android.app.Activity activity} for apps targeting Android V and above. For apps targeting
-     * Android U and below, the request will be ignored.
+     * {@link android.media.session.MediaSession#setMediaButtonReceiver(android.app.PendingIntent)}
+     * throws an {@link java.lang.IllegalArgumentException} if the provided
+     * {@link android.app.PendingIntent} targets an {@link android.app.Activity activity} for
+     * apps targeting Android V and above. For apps targeting Android U and below, the request will
+     * be ignored.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)

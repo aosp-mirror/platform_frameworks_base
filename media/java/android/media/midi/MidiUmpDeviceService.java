@@ -38,7 +38,7 @@ import java.util.List;
  * of {@link MidiReceiver}s for sending data out the output ports.
  *
  * Unlike traditional MIDI byte streams, only complete UMPs should be sent.
- * Unlike with {@link #MidiDeviceService}, the number of input and output ports must be equal.
+ * Unlike with {@link MidiDeviceService}, the number of input and output ports must be equal.
  *
  * <p>To extend this class, you must declare the service in your manifest file with
  * an intent filter with the {@link #SERVICE_INTERFACE} action
