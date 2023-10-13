@@ -38,7 +38,7 @@ import org.junit.runners.JUnit4;
 public class DeviceRouteControllerTest {
 
     private final DeviceRouteController.OnDeviceRouteChangedListener mOnDeviceRouteChangedListener =
-            deviceRoute -> {
+            () -> {
                 // Empty on purpose.
             };
 

@@ -345,7 +345,7 @@ import java.util.Set;
     }
 
     private void notifyBluetoothRoutesUpdated() {
-        mListener.onBluetoothRoutesUpdated(getAllBluetoothRoutes());
+        mListener.onBluetoothRoutesUpdated();
     }
 
     private BluetoothRouteInfo createBluetoothRoute(BluetoothDevice device) {

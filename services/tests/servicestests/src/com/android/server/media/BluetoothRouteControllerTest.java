@@ -38,9 +38,10 @@ import org.junit.runners.JUnit4;
 public class BluetoothRouteControllerTest {
 
     private final BluetoothRouteController.BluetoothRoutesUpdatedListener
-            mBluetoothRoutesUpdatedListener = routes -> {
-                // Empty on purpose.
-            };
+            mBluetoothRoutesUpdatedListener =
+                    () -> {
+                        // Empty on purpose.
+                    };
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
