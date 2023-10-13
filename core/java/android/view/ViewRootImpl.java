@@ -10547,6 +10547,8 @@ public final class ViewRootImpl implements ViewParent,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
                 boolean dragResizing) {
+            // Although this is a AIDL method, it will only be triggered in local process through
+            // either WindowStateResizeItem or WindowlessWindowManager.
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, insetsState,
