@@ -83,35 +83,14 @@ public class DisplayNotificationManagerTest {
     }
 
     @Test
-    public void testNotificationOnDisplayPortLinkTrainingFailure() {
-        var dnm = createDisplayNotificationManager(/*isNotificationManagerAvailable=*/ true,
-                /*isErrorHandlingEnabled=*/ true);
-        dnm.onDisplayPortLinkTrainingFailure();
-        assertExpectedNotification();
-    }
-
-    @Test
-    public void testNotificationOnCableNotCapableDisplayPort() {
-        var dnm = createDisplayNotificationManager(/*isNotificationManagerAvailable=*/ true,
-                /*isErrorHandlingEnabled=*/ true);
-        dnm.onCableNotCapableDisplayPort();
-        assertExpectedNotification();
-    }
-
-    @Test
     public void testNoErrorNotification(
             @TestParameter final boolean isNotificationManagerAvailable,
             @TestParameter final boolean isErrorHandlingEnabled) {
-        /* This case is tested by #testNotificationOnHotplugConnectionError,
-            #testNotificationOnDisplayPortLinkTrainingFailure,
-            #testNotificationOnCableNotCapableDisplayPort */
+        /* This case is tested by #testNotificationOnHotplugConnectionError */
         assumeFalse(isNotificationManagerAvailable && isErrorHandlingEnabled);
         var dnm = createDisplayNotificationManager(isNotificationManagerAvailable,
                 isErrorHandlingEnabled);
-        // None of these methods should trigger a notification now.
         dnm.onHotplugConnectionError();
-        dnm.onDisplayPortLinkTrainingFailure();
-        dnm.onCableNotCapableDisplayPort();
         verify(mMockedNotificationManager, never()).notify(anyString(), anyInt(), any());
     }
 
@@ -122,8 +101,6 @@ public class DisplayNotificationManagerTest {
                 isErrorHandlingEnabled);
         when(mMockedInjector.getNotificationManager()).thenReturn(
                 (isNotificationManagerAvailable) ? mMockedNotificationManager : null);
-        // Usb errors detector is tested in ConnectedDisplayUsbErrorsDetectorTest
-        when(mMockedInjector.getUsbErrorsDetector()).thenReturn(/* usbErrorsDetector= */ null);
         final var displayNotificationManager = new DisplayNotificationManager(mMockedFlags,
                 ApplicationProvider.getApplicationContext(), mMockedInjector);
         displayNotificationManager.onBootCompleted();
