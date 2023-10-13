@@ -130,12 +130,22 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         // verify if back animation would start.
         assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
 
-        // reset drawing status
+        // reset drawing status to test translucent activity
         backNavigationInfo.onBackNavigationFinished(false);
         mBackNavigationController.clearBackAnimations();
-        topTask.forAllWindows(w -> {
-            makeWindowVisibleAndDrawn(w);
-        }, true);
+        final ActivityRecord topActivity = topTask.getTopMostActivity();
+        makeWindowVisibleAndDrawn(topActivity.findMainWindow());
+        // simulate translucent
+        topActivity.setOccludesParent(false);
+        backNavigationInfo = startBackNavigation();
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
+
+        // reset drawing status to test keyguard occludes
+        topActivity.setOccludesParent(true);
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
+        makeWindowVisibleAndDrawn(topActivity.findMainWindow());
         setupKeyguardOccluded();
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -201,9 +211,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         // reset drawing status
         backNavigationInfo.onBackNavigationFinished(false);
         mBackNavigationController.clearBackAnimations();
-        testCase.recordFront.forAllWindows(w -> {
-            makeWindowVisibleAndDrawn(w);
-        }, true);
+        makeWindowVisibleAndDrawn(testCase.recordFront.findMainWindow());
         setupKeyguardOccluded();
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
