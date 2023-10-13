@@ -45,6 +45,7 @@ aconfig_srcjars = [
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.net.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -469,5 +470,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.companion.flags-aconfig-java",
     aconfig_declarations: "android.companion.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// CoreNetworking
+java_aconfig_library {
+    name: "com.android.net.flags-aconfig-java",
+    aconfig_declarations: "com.android.net.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
