@@ -947,6 +947,9 @@
     <!-- Flag controlling whether visual query attention detection has been enabled. -->
     <bool name="config_enableVisualQueryAttentionDetection">false</bool>
 
+    <!-- Whether to show bottom sheets edge to edge -->
+    <bool name="config_edgeToEdgeBottomSheetDialog">true</bool>
+
     <!--
     Whether the scene container framework is enabled.
 
