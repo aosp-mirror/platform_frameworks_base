@@ -27,6 +27,7 @@ android_test {
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
+        "flag-junit",
         "frameworks-base-testutils",
         "frameworks-services-vibrator-testutils",
         "junit",
