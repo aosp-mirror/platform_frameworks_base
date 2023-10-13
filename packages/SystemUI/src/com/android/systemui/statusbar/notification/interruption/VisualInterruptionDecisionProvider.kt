@@ -60,13 +60,6 @@ interface VisualInterruptionDecisionProvider {
     fun addLegacySuppressor(suppressor: NotificationInterruptSuppressor)
 
     /**
-     * Removes a [component][suppressor] that can suppress visual interruptions.
-     *
-     * @param[suppressor] the suppressor to remove
-     */
-    fun removeLegacySuppressor(suppressor: NotificationInterruptSuppressor)
-
-    /**
      * Decides whether a [notification][entry] should display as heads-up or not, but does not log
      * that decision.
      *
