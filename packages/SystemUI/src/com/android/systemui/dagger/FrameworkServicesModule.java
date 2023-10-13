@@ -67,6 +67,7 @@ import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.MediaRouter2Manager;
+import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
@@ -411,6 +412,13 @@ public class FrameworkServicesModule {
     @Provides
     static MediaProjectionManager provideMediaProjectionManager(Context context) {
         return context.getSystemService(MediaProjectionManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static IMediaProjectionManager provideIMediaProjectionManager() {
+        return IMediaProjectionManager.Stub.asInterface(
+                ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE));
     }
 
     @Provides
