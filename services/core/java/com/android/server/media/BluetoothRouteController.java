@@ -44,19 +44,11 @@ import java.util.Objects;
     @NonNull
     static BluetoothRouteController createInstance(@NonNull Context context,
             @NonNull BluetoothRouteController.BluetoothRoutesUpdatedListener listener) {
-        Objects.requireNonNull(context);
         Objects.requireNonNull(listener);
+        BluetoothAdapter btAdapter = context.getSystemService(BluetoothManager.class).getAdapter();
 
-        BluetoothManager bluetoothManager = (BluetoothManager)
-                context.getSystemService(Context.BLUETOOTH_SERVICE);
-        BluetoothAdapter btAdapter = bluetoothManager.getAdapter();
-
-        if (btAdapter == null) {
+        if (btAdapter == null || Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
             return new NoOpBluetoothRouteController();
-        }
-
-        if (Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
-            return new AudioPoliciesBluetoothRouteController(context, btAdapter, listener);
         } else {
             return new LegacyBluetoothRouteController(context, btAdapter, listener);
         }
@@ -73,17 +65,6 @@ import java.util.Objects;
      * Stops the controller from listening to any Bluetooth events.
      */
     void stop();
-
-
-    /**
-     * Selects the route with the given {@code deviceAddress}.
-     *
-     * @param deviceAddress The physical address of the device to select. May be null to unselect
-     *                      the currently selected device.
-     * @return Whether the selection succeeds. If the selection fails, the state of the instance
-     * remains unaltered.
-     */
-    boolean selectRoute(@Nullable String deviceAddress);
 
     /**
      * Transfers Bluetooth output to the given route.
@@ -155,12 +136,6 @@ import java.util.Objects;
         @Override
         public void stop() {
             // no op
-        }
-
-        @Override
-        public boolean selectRoute(String deviceAddress) {
-            // no op
-            return false;
         }
 
         @Override
