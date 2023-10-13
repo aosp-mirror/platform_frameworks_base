@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -70,6 +71,7 @@ import java.util.Objects;
  *
  * @see <a href="http://sqlite.org/c3ref/stmt.html">sqlite3_stmt</a>
  */
+@FlaggedApi(Flags.FLAG_SQLITE_APIS_15)
 public final class SQLiteRawStatement implements Closeable {
 
     private static final String TAG = "SQLiteRawStatement";

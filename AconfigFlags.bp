@@ -36,6 +36,7 @@ aconfig_srcjars = [
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
     ":sdk_sandbox_flags_lib{.generated_srcjars}",
     ":android.permission.flags-aconfig-java{.generated_srcjars}",
+    ":android.database.sqlite-aconfig-java{.generated_srcjars}",
     ":hwui_flags_java_lib{.generated_srcjars}",
     ":display_flags_lib{.generated_srcjars}",
     ":com.android.internal.foldables.flags-aconfig-java{.generated_srcjars}",
@@ -330,6 +331,19 @@ java_aconfig_library {
         "com.android.permission",
     ],
 
+}
+
+// SQLite
+aconfig_declarations {
+    name: "android.database.sqlite-aconfig",
+    package: "android.database.sqlite",
+    srcs: ["core/java/android/database/sqlite/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.database.sqlite-aconfig-java",
+    aconfig_declarations: "android.database.sqlite-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
 // Biometrics
