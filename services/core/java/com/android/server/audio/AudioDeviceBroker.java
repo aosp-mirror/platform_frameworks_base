@@ -757,8 +757,8 @@ public class AudioDeviceBroker {
     }
 
     /*package*/ void registerStrategyPreferredDevicesDispatcher(
-            @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
-        mDeviceInventory.registerStrategyPreferredDevicesDispatcher(dispatcher);
+            @NonNull IStrategyPreferredDevicesDispatcher dispatcher, boolean isPrivileged) {
+        mDeviceInventory.registerStrategyPreferredDevicesDispatcher(dispatcher, isPrivileged);
     }
 
     /*package*/ void unregisterStrategyPreferredDevicesDispatcher(
@@ -776,13 +776,18 @@ public class AudioDeviceBroker {
     }
 
     /*package*/ void registerCapturePresetDevicesRoleDispatcher(
-            @NonNull ICapturePresetDevicesRoleDispatcher dispatcher) {
-        mDeviceInventory.registerCapturePresetDevicesRoleDispatcher(dispatcher);
+            @NonNull ICapturePresetDevicesRoleDispatcher dispatcher, boolean isPrivileged) {
+        mDeviceInventory.registerCapturePresetDevicesRoleDispatcher(dispatcher, isPrivileged);
     }
 
     /*package*/ void unregisterCapturePresetDevicesRoleDispatcher(
             @NonNull ICapturePresetDevicesRoleDispatcher dispatcher) {
         mDeviceInventory.unregisterCapturePresetDevicesRoleDispatcher(dispatcher);
+    }
+
+    /* package */ List<AudioDeviceAttributes> anonymizeAudioDeviceAttributesListUnchecked(
+            List<AudioDeviceAttributes> devices) {
+        return mAudioService.anonymizeAudioDeviceAttributesListUnchecked(devices);
     }
 
     /*package*/ void registerCommunicationDeviceDispatcher(
