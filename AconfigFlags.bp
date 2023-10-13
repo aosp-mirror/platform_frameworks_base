@@ -37,6 +37,7 @@ aconfig_srcjars = [
     ":sdk_sandbox_flags_lib{.generated_srcjars}",
     ":android.permission.flags-aconfig-java{.generated_srcjars}",
     ":hwui_flags_java_lib{.generated_srcjars}",
+    ":framework_graphics_flags_java_lib{.generated_srcjars}",
     ":display_flags_lib{.generated_srcjars}",
     ":com.android.internal.foldables.flags-aconfig-java{.generated_srcjars}",
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
@@ -350,6 +351,12 @@ java_aconfig_library {
 java_aconfig_library {
     name: "hwui_flags_java_lib",
     aconfig_declarations: "hwui_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "framework_graphics_flags_java_lib",
+    aconfig_declarations: "framework_graphics_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
