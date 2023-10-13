@@ -1,0 +1,3 @@
+# Bug component: 345036
+
+include /services/core/java/com/android/server/vibrator/OWNERS
