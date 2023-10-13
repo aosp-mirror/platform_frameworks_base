@@ -33,9 +33,6 @@ import android.os.RemoteException;
  *
  * <p>Read-only device representation exposing the properties of an existing virtual device.
  *
- * <p class="note">Not to be confused with {@link VirtualDeviceManager.VirtualDevice}, which is used
- * by the virtual device creator and allows them to manage the device.
- *
  * @see VirtualDeviceManager#registerVirtualDeviceListener
  */
 public final class VirtualDevice implements Parcelable {
@@ -120,8 +117,6 @@ public final class VirtualDevice implements Parcelable {
 
     /**
      * Returns the name of the virtual device (optionally) provided during its creation.
-     *
-     * @see VirtualDeviceParams.Builder#setName(String)
      */
     public @Nullable String getName() {
         return mName;
