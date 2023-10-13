@@ -174,6 +174,13 @@ class CarrierMergedConnectionRepository(
      */
     override val isAllowedDuringAirplaneMode = MutableStateFlow(true).asStateFlow()
 
+    /**
+     * It's not currently considered possible that a carrier merged network can have these
+     * prioritized capabilities. If we need to track them, we can add the same check as is in
+     * [MobileConnectionRepositoryImpl].
+     */
+    override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false).asStateFlow()
+
     override val dataEnabled: StateFlow<Boolean> = wifiRepository.isWifiEnabled
 
     companion object {

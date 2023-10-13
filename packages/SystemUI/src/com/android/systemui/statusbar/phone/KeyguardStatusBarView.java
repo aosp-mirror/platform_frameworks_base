@@ -436,10 +436,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private void updateIconsAndTextColors(StatusBarIconController.TintedIconManager iconManager) {
         @ColorInt int textColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColor);
+        float luminance = Color.luminance(textColor);
         @ColorInt int iconColor = Utils.getColorStateListDefaultColor(mContext,
-                Color.luminance(textColor) < 0.5
+                    luminance < 0.5
                         ? com.android.settingslib.R.color.dark_mode_icon_color_single_tone
                         : com.android.settingslib.R.color.light_mode_icon_color_single_tone);
+        @ColorInt int contrastColor = luminance < 0.5
+                ? DarkIconDispatcherImpl.DEFAULT_ICON_TINT
+                : DarkIconDispatcherImpl.DEFAULT_INVERSE_ICON_TINT;
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);
 
@@ -451,7 +455,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         }
 
         if (iconManager != null) {
-            iconManager.setTint(iconColor);
+            iconManager.setTint(iconColor, contrastColor);
         }
 
         mDarkChange.setValue(new DarkChange(mEmptyTintRect, intensity, iconColor));

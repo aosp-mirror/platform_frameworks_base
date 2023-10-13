@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
@@ -85,7 +87,9 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -107,6 +111,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
     private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
+    @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var tableLogger: TableLogBuffer
@@ -144,6 +149,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 subscriptionModel,
                 DEFAULT_NAME_MODEL,
                 SEP,
+                connectivityManager,
                 telephonyManager,
                 systemUiCarrierConfig,
                 fakeBroadcastDispatcher,
@@ -900,6 +906,45 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     fun isAllowedDuringAirplaneMode_alwaysFalse() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isAllowedDuringAirplaneMode)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun hasPrioritizedCaps_defaultFalse() {
+        assertThat(underTest.hasPrioritizedNetworkCapabilities.value).isFalse()
+    }
+
+    @Test
+    fun hasPrioritizedCaps_trueWhenAvailable() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.hasPrioritizedNetworkCapabilities)
+
+            val callback: NetworkCallback =
+                withArgCaptor<NetworkCallback> {
+                    verify(connectivityManager).registerNetworkCallback(any(), capture())
+                }
+
+            callback.onAvailable(mock())
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun hasPrioritizedCaps_becomesFalseWhenNetworkLost() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.hasPrioritizedNetworkCapabilities)
+
+            val callback: NetworkCallback =
+                withArgCaptor<NetworkCallback> {
+                    verify(connectivityManager).registerNetworkCallback(any(), capture())
+                }
+
+            callback.onAvailable(mock())
+
+            assertThat(latest).isTrue()
+
+            callback.onLost(mock())
 
             assertThat(latest).isFalse()
         }

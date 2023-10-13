@@ -31,11 +31,11 @@ import android.widget.LinearLayout.LayoutParams;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
@@ -248,7 +248,10 @@ public interface StatusBarIconController {
      *
      */
     class TintedIconManager extends IconManager {
+        // The main tint, used as the foreground in non layer drawables
         private int mColor;
+        // To be used as the main tint in drawables that wish to have a layer
+        private int mForegroundColor;
 
         public TintedIconManager(
                 ViewGroup group,
@@ -268,26 +271,41 @@ public interface StatusBarIconController {
         protected void onIconAdded(int index, String slot, boolean blocked,
                 StatusBarIconHolder holder) {
             StatusIconDisplayable view = addHolder(index, slot, blocked, holder);
-            view.setStaticDrawableColor(mColor);
+            view.setStaticDrawableColor(mColor, mForegroundColor);
             view.setDecorColor(mColor);
         }
 
-        public void setTint(int color) {
-            mColor = color;
+        /**
+         * Most icons are a single layer, and tintColor will be used as the tint in those cases.
+         * For icons that have a background, foregroundColor becomes the contrasting tint used
+         * for the foreground.
+         *
+         * @param tintColor the main tint to use for the icons in the group
+         * @param foregroundColor used as the main tint for layer-ish drawables where tintColor is
+         *                        being used as the background
+         */
+        public void setTint(int tintColor, int foregroundColor) {
+            mColor = tintColor;
+            mForegroundColor = foregroundColor;
+
             for (int i = 0; i < mGroup.getChildCount(); i++) {
                 View child = mGroup.getChildAt(i);
                 if (child instanceof StatusIconDisplayable) {
                     StatusIconDisplayable icon = (StatusIconDisplayable) child;
-                    icon.setStaticDrawableColor(mColor);
+                    icon.setStaticDrawableColor(mColor, mForegroundColor);
                     icon.setDecorColor(mColor);
                 }
+            }
+
+            if (mDemoStatusIcons != null) {
+                mDemoStatusIcons.setColor(tintColor, foregroundColor);
             }
         }
 
         @Override
         protected DemoStatusIcons createDemoStatusIcons() {
             DemoStatusIcons icons = super.createDemoStatusIcons();
-            icons.setColor(mColor);
+            icons.setColor(mColor, mForegroundColor);
             return icons;
         }
 

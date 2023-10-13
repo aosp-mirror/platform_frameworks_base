@@ -131,6 +131,12 @@ interface MobileConnectionRepository {
      */
     val isAllowedDuringAirplaneMode: StateFlow<Boolean>
 
+    /**
+     * True if this network has NET_CAPABILITIY_PRIORITIZE_LATENCY, and can be considered to be a
+     * network slice
+     */
+    val hasPrioritizedNetworkCapabilities: StateFlow<Boolean>
+
     companion object {
         /** The default number of levels to use for [numberOfLevels]. */
         const val DEFAULT_NUM_LEVELS = 4
