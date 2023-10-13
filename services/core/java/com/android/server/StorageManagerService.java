@@ -2341,6 +2341,8 @@ class StorageManagerService extends IStorageManager.Stub
         try {
             // TODO(b/135341433): Remove cautious logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
+            Watchdog.getInstance().setOneOffTimeoutForMonitors(
+                    SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#mount might be slow");
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
                 @Override
                 public boolean onVolumeChecking(FileDescriptor fd, String path,
