@@ -32,6 +32,7 @@ import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.assertEquals
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -108,6 +109,15 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
         dialog.show()
 
         assertThat(dialog.isShowing).isTrue()
+    }
+
+    @Test
+    fun showDialog_singleAppIsDefault() {
+        dialog.show()
+
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
+        val singleApp = context.getString(R.string.screen_share_permission_dialog_option_single_app)
+        assertEquals(spinner.adapter.getItem(0), singleApp)
     }
 
     @Test
