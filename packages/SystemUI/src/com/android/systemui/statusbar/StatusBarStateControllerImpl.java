@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -43,14 +44,16 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.util.Compile;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -95,6 +98,7 @@ public class StatusBarStateControllerImpl implements
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
     private final UiEventLogger mUiEventLogger;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private int mState;
     private int mLastState;
     private int mUpcomingState;
@@ -158,15 +162,13 @@ public class StatusBarStateControllerImpl implements
             UiEventLogger uiEventLogger,
             DumpManager dumpManager,
             InteractionJankMonitor interactionJankMonitor,
-            ShadeExpansionStateManager shadeExpansionStateManager
-    ) {
+            Lazy<ShadeInteractor> shadeInteractorLazy) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitor = interactionJankMonitor;
+        mShadeInteractorLazy = shadeInteractorLazy;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
-        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
-
         dumpManager.registerDumpable(this);
     }
 
@@ -336,6 +338,8 @@ public class StatusBarStateControllerImpl implements
                 && (view != null && view.isAttachedToWindow())) {
             mView = view;
             mClockSwitchView = view.findViewById(R.id.keyguard_clock_container);
+            collectFlow(mView, mShadeInteractorLazy.get().isAnyExpanded(),
+                    this::onShadeOrQsExpanded);
         }
         mDozeAmountTarget = dozeAmount;
         if (animated) {
@@ -345,7 +349,7 @@ public class StatusBarStateControllerImpl implements
         }
     }
 
-    private void onShadeExpansionFullyChanged(Boolean isExpanded) {
+    private void onShadeOrQsExpanded(Boolean isExpanded) {
         if (mIsExpanded != isExpanded) {
             mIsExpanded = isExpanded;
             String tag = getClass().getSimpleName() + "#setIsExpanded";
