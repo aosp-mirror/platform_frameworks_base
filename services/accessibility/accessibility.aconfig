@@ -55,3 +55,10 @@ flag {
     description: "Scans packages for accessibility service/activity info without holding the A11yMS lock"
     bug: "295969873"
 }
+
+flag {
+    name: "reduce_touch_exploration_sensitivity"
+    namespace: "accessibility"
+    description: "Reduces touch exploration sensitivity by only sending a hover event when the ifnger has moved the amount of pixels defined by the system's touch slop."
+    bug: "303677860"
+}
