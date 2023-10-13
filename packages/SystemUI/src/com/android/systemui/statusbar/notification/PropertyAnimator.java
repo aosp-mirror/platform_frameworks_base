@@ -114,18 +114,21 @@ public class PropertyAnimator {
                 || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(properties.delay);
         }
-        if (listener != null) {
-            animator.addListener(listener);
-        }
         // remove the tag when the animation is finished
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                view.setTag(animatorTag, null);
-                view.setTag(animationStartTag, null);
-                view.setTag(animationEndTag, null);
+                Animator existing = (Animator) view.getTag(animatorTag);
+                if (existing == animation) {
+                    view.setTag(animatorTag, null);
+                    view.setTag(animationStartTag, null);
+                    view.setTag(animationEndTag, null);
+                }
             }
         });
+        if (listener != null) {
+            animator.addListener(listener);
+        }
         ViewState.startAnimator(animator, listener);
         view.setTag(animatorTag, animator);
         view.setTag(animationStartTag, currentValue);
