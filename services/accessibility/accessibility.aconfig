@@ -48,3 +48,10 @@ flag {
     description: "Stops using the deprecated PackageListObserver."
     bug: "304561459"
 }
+
+flag {
+    name: "scan_packages_without_lock"
+    namespace: "accessibility"
+    description: "Scans packages for accessibility service/activity info without holding the A11yMS lock"
+    bug: "295969873"
+}
