@@ -155,7 +155,7 @@ public abstract class WindowProviderService extends Service implements WindowPro
     }
 
     /**
-     * Override {@link Service}'s empty implementation and listen to {@link ActivityThread} for
+     * Override {@link Service}'s empty implementation and listen to {@code ActivityThread} for
      * low memory and trim memory events.
      */
     @Override

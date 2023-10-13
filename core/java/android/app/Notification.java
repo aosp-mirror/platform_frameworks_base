@@ -1514,13 +1514,13 @@ public class Notification implements Parcelable
 
     /**
      * {@link #extras} key: the color used as a hint for the Answer action button of a
-     * {@link android.app.Notification.CallStyle} notification. This extra is a {@link ColorInt}.
+     * {@link android.app.Notification.CallStyle} notification. This extra is a {@code ColorInt}.
      */
     public static final String EXTRA_ANSWER_COLOR = "android.answerColor";
 
     /**
      * {@link #extras} key: the color used as a hint for the Decline or Hang Up action button of a
-     * {@link android.app.Notification.CallStyle} notification. This extra is a {@link ColorInt}.
+     * {@link android.app.Notification.CallStyle} notification. This extra is a {@code ColorInt}.
      */
     public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
 
@@ -1704,7 +1704,7 @@ public class Notification implements Parcelable
         private static final String EXTRA_DATA_ONLY_INPUTS = "android.extra.DATA_ONLY_INPUTS";
 
         /**
-         * {@link }: No semantic action defined.
+         * No semantic action defined.
          */
         public static final int SEMANTIC_ACTION_NONE = 0;
 
@@ -7923,7 +7923,7 @@ public class Notification implements Parcelable
      * (via {@link Notification.Builder#setShortcutId(String)}) are displayed in a dedicated
      * conversation section in the shade above non-conversation alerting and silence notifications.
      * To be a valid conversation shortcut, the shortcut must be a
-     * {@link ShortcutInfo#setLongLived()} dynamic or cached sharing shortcut.
+     * {@link ShortcutInfo.Builder#setLongLived(boolean)} dynamic or cached sharing shortcut.
      *
      * <p>
      * This class is a "rebuilder": It attaches to a Builder object and modifies its behavior.

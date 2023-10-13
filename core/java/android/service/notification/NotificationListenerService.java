@@ -896,8 +896,7 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will throw a security exception if you don't have access to notifications
      * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
-     * device} or be the {@link NotificationAssistantService notification assistant} in order to
-     * use this method.
+     * device} or be the notification assistant in order to use this method.
      *
      * @param pkg The package to retrieve channels for.
      */
@@ -920,8 +919,7 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will throw a security exception if you don't have access to notifications
      * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
-     * device} or be the {@link NotificationAssistantService notification assistant} in order to
-     * use this method.
+     * device} or be the notification assistant in order to use this method.
      *
      * @param pkg The package to retrieve channel groups for.
      */
@@ -2001,7 +1999,7 @@ public abstract class NotificationListenerService extends Service {
 
         /**
          * Returns a list of smart {@link Notification.Action} that can be added by the
-         * {@link NotificationAssistantService}
+         * notification assistant.
          */
         public @NonNull List<Notification.Action> getSmartActions() {
             return mSmartActions == null ? Collections.emptyList() : mSmartActions;
@@ -2022,8 +2020,7 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * Returns a list of smart replies that can be added by the
-         * {@link NotificationAssistantService}
+         * Returns a list of smart replies that can be added by the notification assistant.
          */
         public @NonNull List<CharSequence> getSmartReplies() {
             return mSmartReplies == null ? Collections.emptyList() : mSmartReplies;

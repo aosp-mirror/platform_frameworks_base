@@ -249,7 +249,7 @@ public class LineBreaker {
          * @param useBoundsForWidth True for using bounding box, false for advances.
          * @return this builder instance
          * @see Layout#getUseBoundsForWidth()
-         * @see StaticLayout.Builder#setUseBoundsForWidth(boolean)
+         * @see android.text.StaticLayout.Builder#setUseBoundsForWidth(boolean)
          */
         @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
         public @NonNull Builder setUseBoundsForWidth(boolean useBoundsForWidth) {

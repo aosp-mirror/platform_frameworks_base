@@ -439,7 +439,7 @@ public class JobParameters implements Parcelable {
      * provides an easy way to tell whether the job is being executed due to the deadline
      * expiring. Note: If the job is running because its deadline expired, it implies that its
      * constraints will not be met. However,
-     * {@link android.app.job.JobInfo.Builder#setPeriodic(boolean) periodic jobs} will only ever
+     * {@link android.app.job.JobInfo.Builder#setPeriodic(long) periodic jobs} will only ever
      * run when their constraints are satisfied, therefore, the constraints will still be satisfied
      * for a periodic job even if the deadline has expired.
      */

@@ -2073,9 +2073,7 @@ public class ActivityOptions extends ComponentOptions {
      * Allow a {@link PendingIntent} to use the privilege of its creator to start background
      * activities.
      *
-     * @param mode the {@link android.app.ComponentOptions.BackgroundActivityStartMode} being set
-     * @throws IllegalArgumentException is the value is not a valid
-     * {@link android.app.ComponentOptions.BackgroundActivityStartMode}
+     * @param mode the mode being set
      */
     @NonNull
     public ActivityOptions setPendingIntentCreatorBackgroundActivityStartMode(
@@ -2088,7 +2086,7 @@ public class ActivityOptions extends ComponentOptions {
      * Returns the mode to start background activities granted by the creator of the
      * {@link PendingIntent}.
      *
-     * @return the {@link android.app.ComponentOptions.BackgroundActivityStartMode} currently set
+     * @return the mode currently set
      */
     public @BackgroundActivityStartMode int getPendingIntentCreatorBackgroundActivityStartMode() {
         return mPendingIntentCreatorBackgroundActivityStartMode;

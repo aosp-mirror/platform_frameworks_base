@@ -322,7 +322,7 @@ public final class PixelCopy {
         }
 
         /**
-         * Returns the {@link CopyResultStatus} of the copy request.
+         * Returns the status of the copy request.
          */
         public @CopyResultStatus int getStatus() {
             return mStatus;

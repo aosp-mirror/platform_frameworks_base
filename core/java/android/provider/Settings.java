@@ -1800,7 +1800,6 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
-     * @see android.service.notification.NotificationAssistantService
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_ASSISTANT_SETTINGS =
@@ -2507,8 +2506,8 @@ public final class Settings {
      * to the caller package.
      * <p>
      * <b>NOTE: </b> Applications should call
-     * {@link android.credentials.CredentialManager#isEnabledCredentialProviderService()}
-     * and only use this action to start an activity if they return {@code false}.
+     * {@link android.credentials.CredentialManager#isEnabledCredentialProviderService(
+     * ComponentName)} and only use this action to start an activity if they return {@code false}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREDENTIAL_PROVIDER =
@@ -12375,7 +12374,7 @@ public final class Settings {
          * Value to specify if the device's UTC system clock should be set automatically, e.g. using
          * telephony signals like NITZ, or other sources like GNSS or NTP.
          *
-         * <p>Prefer {@link android.app.time.TimeManager} API calls to determine the state of
+         * <p>Prefer {@code android.app.time.TimeManager} API calls to determine the state of
          * automatic time detection instead of directly observing this setting as it may be ignored
          * by the time_detector service under various conditions.
          *
@@ -12388,7 +12387,7 @@ public final class Settings {
          * Value to specify if the device's time zone system property should be set automatically,
          * e.g. using telephony signals like MCC and NITZ, or other mechanisms like the location.
          *
-         * <p>Prefer {@link android.app.time.TimeManager} API calls to determine the state of
+         * <p>Prefer {@code android.app.time.TimeManager} API calls to determine the state of
          * automatic time zone detection instead of directly observing this setting as it may be
          * ignored by the time_zone_detector service under various conditions.
          *

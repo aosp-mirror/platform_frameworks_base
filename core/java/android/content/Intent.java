@@ -4180,7 +4180,7 @@ public class Intent implements Parcelable, Cloneable {
      * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
      *
      * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_AVAILABLE} but functions as a
-     * generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     * generic broadcast for all profile users.
      */
     @FlaggedApi(FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String ACTION_PROFILE_AVAILABLE =
@@ -4194,7 +4194,7 @@ public class Intent implements Parcelable, Cloneable {
      * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
      *
      * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_UNAVAILABLE} but functions as
-     * a generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     * a generic broadcast for all profile users.
      */
     @FlaggedApi(FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String ACTION_PROFILE_UNAVAILABLE =
@@ -4222,7 +4222,7 @@ public class Intent implements Parcelable, Cloneable {
      * that was removed.
      *
      * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_REMOVED} but functions as a
-     * generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     * generic broadcast for all profile users.
      * It is sent in addition to the {@link #ACTION_MANAGED_PROFILE_REMOVED} broadcast when a
      * managed user is removed.
      *
@@ -4242,7 +4242,7 @@ public class Intent implements Parcelable, Cloneable {
      * that was added.
      *
      * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_ADDED} but functions as a
-     * generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     * generic broadcast for all profile users.
      * It is sent in addition to the {@link #ACTION_MANAGED_PROFILE_ADDED} broadcast when a
      * managed user is added.
      *
