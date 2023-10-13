@@ -511,8 +511,8 @@ class ProcessRecord implements WindowProcessListener {
         pw.print(prefix); pw.print("pid="); pw.println(mPid);
         pw.print(prefix); pw.print("lastActivityTime=");
         TimeUtils.formatDuration(mLastActivityTime, nowUptime, pw);
-        pw.print(prefix); pw.print("startUptimeTime=");
-        TimeUtils.formatDuration(mStartElapsedTime, nowUptime, pw);
+        pw.print(prefix); pw.print("startUpTime=");
+        TimeUtils.formatDuration(mStartUptime, nowUptime, pw);
         pw.print(prefix); pw.print("startElapsedTime=");
         TimeUtils.formatDuration(mStartElapsedTime, nowElapsedTime, pw);
         pw.println();
