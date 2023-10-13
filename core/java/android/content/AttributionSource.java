@@ -744,6 +744,7 @@ public final class AttributionSource implements Parcelable {
         /**
          * The next app to receive the permission protected data.
          */
+        @FlaggedApi(Flags.FLAG_SET_NEXT_ATTRIBUTION_SOURCE)
         public @NonNull Builder setNextAttributionSource(@NonNull AttributionSource value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x20;

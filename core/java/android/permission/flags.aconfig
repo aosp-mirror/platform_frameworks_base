@@ -21,3 +21,10 @@ flag {
     description: "enable role controller in system server"
     bug: "302562590"
 }
+
+flag {
+  name: "set_next_attribution_source"
+  namespace: "permissions"
+  description: "enable AttributionSource.setNextAttributionSource"
+  bug: "304478648"
+}
