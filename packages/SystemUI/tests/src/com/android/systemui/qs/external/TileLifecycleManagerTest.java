@@ -290,6 +290,27 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         verify(falseContext).unbindService(captor.getValue());
     }
 
+    @Test
+    public void testNullBindingCallsUnbind() {
+        Context mockContext = mock(Context.class);
+        // Binding has to succeed
+        when(mockContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(true);
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mockContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser);
+
+        manager.setBindService(true);
+
+        ArgumentCaptor<ServiceConnection> captor = ArgumentCaptor.forClass(ServiceConnection.class);
+        verify(mockContext).bindServiceAsUser(any(), captor.capture(), anyInt(), any());
+
+        captor.getValue().onNullBinding(mTileServiceComponentName);
+        verify(mockContext).unbindService(captor.getValue());
+    }
+
     private static class TestContextWrapper extends ContextWrapper {
         private IntentFilter mLastIntentFilter;
         private int mLastFlag;
