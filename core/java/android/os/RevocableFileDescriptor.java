@@ -73,11 +73,26 @@ public class RevocableFileDescriptor {
         init(context, fd);
     }
 
+    public RevocableFileDescriptor(Context context, FileDescriptor fd, Handler handler)
+            throws IOException {
+        init(context, fd, handler);
+    }
+
     /** {@hide} */
     public void init(Context context, FileDescriptor fd) throws IOException {
+        init(context, fd, null);
+    }
+
+    /** {@hide} */
+    public void init(Context context, FileDescriptor fd, Handler handler) throws IOException {
         mInner = fd;
-        mOuter = context.getSystemService(StorageManager.class)
-                .openProxyFileDescriptor(ParcelFileDescriptor.MODE_READ_WRITE, mCallback);
+        StorageManager sm = context.getSystemService(StorageManager.class);
+        if (handler != null) {
+            mOuter = sm.openProxyFileDescriptor(ParcelFileDescriptor.MODE_READ_WRITE, mCallback,
+                    handler);
+        } else {
+            mOuter = sm.openProxyFileDescriptor(ParcelFileDescriptor.MODE_READ_WRITE, mCallback);
+        }
     }
 
     /**
