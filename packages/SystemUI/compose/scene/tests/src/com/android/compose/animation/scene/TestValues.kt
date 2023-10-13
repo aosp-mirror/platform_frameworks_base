@@ -37,6 +37,9 @@ object TestElements {
 /** Value keys that can be reused by tests. */
 object TestValues {
     val Value1 = ValueKey("Value1")
+    val Value2 = ValueKey("Value2")
+    val Value3 = ValueKey("Value3")
+    val Value4 = ValueKey("Value4")
 }
 
 // We use a transition duration of 480ms here because it is a multiple of 16, the time of a frame in

@@ -17,12 +17,10 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.DisposableEffectResult
-import androidx.compose.runtime.DisposableEffectScope
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
@@ -45,6 +43,20 @@ fun SceneScope.animateSharedIntAsState(
 }
 
 /**
+ * Animate a shared Int value.
+ *
+ * @see MovableElementScope.animateSharedValueAsState
+ */
+@Composable
+fun MovableElementScope.animateSharedIntAsState(
+    value: Int,
+    debugName: String,
+    canOverflow: Boolean = true,
+): State<Int> {
+    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
+}
+
+/**
  * Animate a shared Float value.
  *
  * @see SceneScope.animateSharedValueAsState
@@ -57,6 +69,20 @@ fun SceneScope.animateSharedFloatAsState(
     canOverflow: Boolean = true,
 ): State<Float> {
     return animateSharedValueAsState(value, key, element, ::lerp, canOverflow)
+}
+
+/**
+ * Animate a shared Float value.
+ *
+ * @see MovableElementScope.animateSharedValueAsState
+ */
+@Composable
+fun MovableElementScope.animateSharedFloatAsState(
+    value: Float,
+    debugName: String,
+    canOverflow: Boolean = true,
+): State<Float> {
+    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
 }
 
 /**
@@ -75,6 +101,20 @@ fun SceneScope.animateSharedDpAsState(
 }
 
 /**
+ * Animate a shared Dp value.
+ *
+ * @see MovableElementScope.animateSharedValueAsState
+ */
+@Composable
+fun MovableElementScope.animateSharedDpAsState(
+    value: Dp,
+    debugName: String,
+    canOverflow: Boolean = true,
+): State<Dp> {
+    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
+}
+
+/**
  * Animate a shared Color value.
  *
  * @see SceneScope.animateSharedValueAsState
@@ -88,6 +128,19 @@ fun SceneScope.animateSharedColorAsState(
     return animateSharedValueAsState(value, key, element, ::lerp, canOverflow = false)
 }
 
+/**
+ * Animate a shared Color value.
+ *
+ * @see MovableElementScope.animateSharedValueAsState
+ */
+@Composable
+fun MovableElementScope.animateSharedColorAsState(
+    value: Color,
+    debugName: String,
+): State<Color> {
+    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow = false)
+}
+
 @Composable
 internal fun <T> animateSharedValueAsState(
     layoutImpl: SceneTransitionLayoutImpl,
@@ -98,31 +151,20 @@ internal fun <T> animateSharedValueAsState(
     lerp: (T, T, Float) -> T,
     canOverflow: Boolean,
 ): State<T> {
-    val sharedValue = remember(key) { Element.SharedValue(key, value) }
+    val sharedValue =
+        Snapshot.withoutReadObservation {
+            element.sceneValues.getValue(scene.key).sharedValues.getOrPut(key) {
+                Element.SharedValue(key, value)
+            } as Element.SharedValue<T>
+        }
+
     if (value != sharedValue.value) {
         sharedValue.value = value
-    }
-
-    DisposableEffect(element, scene, sharedValue) {
-        addSharedValueToElement(element, scene, sharedValue)
     }
 
     return remember(layoutImpl, element, sharedValue, lerp, canOverflow) {
         derivedStateOf { computeValue(layoutImpl, element, sharedValue, lerp, canOverflow) }
     }
-}
-
-private fun <T> DisposableEffectScope.addSharedValueToElement(
-    element: Element,
-    scene: Scene,
-    sharedValue: Element.SharedValue<T>,
-): DisposableEffectResult {
-    val sceneValues =
-        element.sceneValues[scene.key] ?: error("Element $element is not present in $scene")
-    val sharedValues = sceneValues.sharedValues
-
-    sharedValues[sharedValue.key] = sharedValue
-    return onDispose { sharedValues.remove(sharedValue.key) }
 }
 
 private fun <T> computeValue(

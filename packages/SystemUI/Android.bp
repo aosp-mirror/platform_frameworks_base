@@ -62,6 +62,7 @@ systemui_compose_java_defaults {
             static_libs: [
                 "CommunalLayoutLib",
                 "PlatformComposeCore",
+                "PlatformComposeSceneTransitionLayout",
 
                 "androidx.compose.runtime_runtime",
                 "androidx.compose.material3_material3",
