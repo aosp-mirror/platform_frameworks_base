@@ -94,6 +94,16 @@ public class SafeActivityOptionsTest {
     }
 
     @Test
+    public void test_selectiveCloneLunchRemoteTransition() {
+        final RemoteTransition transition = mock(RemoteTransition.class);
+        final SafeActivityOptions clone = new SafeActivityOptions(
+                ActivityOptions.makeRemoteTransition(transition))
+                .selectiveCloneLaunchOptions();
+
+        assertSame(clone.getOriginalOptions().getRemoteTransition(), transition);
+    }
+
+    @Test
     public void test_getOptions() {
         // Mock everything necessary
         MockitoSession mockingSession = mockitoSession()
