@@ -23,6 +23,7 @@ import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVIT
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -390,6 +391,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     public boolean isSplitActive() {
         return mMainStage.isActive();
+    }
+
+    /** @return whether this transition-request has the launch-adjacent flag. */
+    public boolean requestHasLaunchAdjacentFlag(TransitionRequestInfo request) {
+        final ActivityManager.RunningTaskInfo triggerTask = request.getTriggerTask();
+        return triggerTask != null && triggerTask.baseIntent != null
+                && (triggerTask.baseIntent.getFlags() & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0;
     }
 
     /** @return whether the transition-request implies entering pip from split. */
@@ -2434,10 +2442,20 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
             }
 
-            // When split in the background, it should be only opening/dismissing transition and
-            // would keep out not empty. Prevent intercepting all transitions for split screen when
-            // it is in the background and not identify to handle it.
-            return (!out.isEmpty() || isSplitScreenVisible()) ? out : null;
+            if (!out.isEmpty()) {
+                // One of the cases above handled it
+                return out;
+            } else if (isSplitScreenVisible()) {
+                // If split is visible, only defer handling this transition if it's launching
+                // adjacent while there is already a split pair -- this may trigger PIP and
+                // that should be handled by the mixed handler.
+                final boolean deferTransition = requestHasLaunchAdjacentFlag(request)
+                    && mMainStage.getChildCount() != 0 && mSideStage.getChildCount() != 0;
+                return !deferTransition ? out : null;
+            }
+            // Don't intercept the transition if we are not handling it as a part of one of the
+            // cases above and it is not already visible
+            return null;
         } else {
             if (isOpening && getStageOfTask(triggerTask) != null) {
                 // One task is appearing into split, prepare to enter split screen.
