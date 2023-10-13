@@ -277,7 +277,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull ShellExecutor animExecutor) {
         this(context, shellInit, shellController, organizer, pool, displayController, mainExecutor,
                 mainHandler, animExecutor, null,
-                new RootTaskDisplayAreaOrganizer(mainExecutor, context));
+                new RootTaskDisplayAreaOrganizer(mainExecutor, context, shellInit));
     }
 
     public Transitions(@NonNull Context context,

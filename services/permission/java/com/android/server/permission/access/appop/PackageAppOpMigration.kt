@@ -44,9 +44,7 @@ class PackageAppOpMigration {
 
             val appOpModes = MutableIndexedMap<String, Int>()
             packageAppOpModes[packageName] = appOpModes
-            legacyAppOpModes.forEach { (appOpName, appOpMode) ->
-                appOpModes[appOpName] = appOpMode
-            }
+            legacyAppOpModes.forEach { (appOpName, appOpMode) -> appOpModes[appOpName] = appOpMode }
 
             userState.mutatePackageVersions()[packageName] = version
         }

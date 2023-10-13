@@ -21,6 +21,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,6 +59,17 @@ internal class Element(val key: ElementKey) {
 
     /** The mapping between a scene and the values/state this element has in that scene, if any. */
     val sceneValues = SnapshotStateMap<SceneKey, TargetValues>()
+
+    /**
+     * The movable content of this element, if this element is composed using
+     * [SceneScope.MovableElement].
+     */
+    val movableContent by
+        // This is only accessed from the composition (main) thread, so no need to use the default
+        // lock of lazy {} to synchronize.
+        lazy(mode = LazyThreadSafetyMode.NONE) {
+            movableContentOf { content: @Composable () -> Unit -> content() }
+        }
 
     override fun toString(): String {
         return "Element(key=$key)"

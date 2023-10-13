@@ -223,9 +223,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /**
-     * Update merged override configuration based on corresponding parent's config and notify all
-     * its children. If there is no parent, merged override configuration will set equal to current
-     * override config.
+     * Update merged override configuration based on corresponding parent's config. If there is no
+     * parent, merged override configuration will set equal to current override config. This
+     * doesn't cascade on its own since it's called by {@link #onConfigurationChanged}.
      * @see #mMergedOverrideConfiguration
      */
     void onMergedOverrideConfigurationChanged() {
@@ -239,10 +239,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             mMergedOverrideConfiguration.updateFrom(mResolvedOverrideConfiguration);
         } else {
             mMergedOverrideConfiguration.setTo(mResolvedOverrideConfiguration);
-        }
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final ConfigurationContainer child = getChildAt(i);
-            child.onMergedOverrideConfigurationChanged();
         }
     }
 
@@ -688,8 +684,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         if (newParent != null) {
             // Update full configuration of this container and all its children.
             onConfigurationChanged(newParent.mFullConfiguration);
-            // Update merged override configuration of this container and all its children.
-            onMergedOverrideConfigurationChanged();
         }
     }
 

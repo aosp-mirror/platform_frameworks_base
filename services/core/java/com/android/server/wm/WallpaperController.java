@@ -85,13 +85,8 @@ class WallpaperController {
     // to another, and this is the previous wallpaper target.
     private WindowState mPrevWallpaperTarget = null;
 
-    private float mLastWallpaperX = -1;
-    private float mLastWallpaperY = -1;
-    private float mLastWallpaperXStep = -1;
-    private float mLastWallpaperYStep = -1;
     private float mLastWallpaperZoomOut = 0;
-    private int mLastWallpaperDisplayOffsetX = Integer.MIN_VALUE;
-    private int mLastWallpaperDisplayOffsetY = Integer.MIN_VALUE;
+
     // Whether COMMAND_FREEZE was dispatched.
     private boolean mLastFrozen = false;
 
@@ -115,8 +110,6 @@ class WallpaperController {
     private static final int WALLPAPER_DRAW_PENDING = 1;
     private static final int WALLPAPER_DRAW_TIMEOUT = 2;
     private int mWallpaperDrawState = WALLPAPER_DRAW_NORMAL;
-
-    private boolean mShouldUpdateZoom;
 
     @Nullable private Point mLargestDisplaySize = null;
 
@@ -370,6 +363,7 @@ class WallpaperController {
         // Full size of the wallpaper (usually larger than bounds above to parallax scroll when
         // swiping through Launcher pages).
         final Rect wallpaperFrame = wallpaperWin.getFrame();
+        WallpaperWindowToken token = wallpaperWin.mToken.asWallpaperToken();
 
         final int diffWidth = wallpaperFrame.width() - lastWallpaperBounds.width();
         final int diffHeight = wallpaperFrame.height() - lastWallpaperBounds.height();
@@ -394,10 +388,10 @@ class WallpaperController {
         // The 0 to 1 scale is because the "length" varies depending on how many home screens you
         // have, so 0 is the left of the first home screen, and 1 is the right of the last one (for
         // LTR, and the opposite for RTL).
-        float wpx = mLastWallpaperX >= 0 ? mLastWallpaperX : defaultWallpaperX;
+        float wpx = token.mWallpaperX >= 0 ? token.mWallpaperX : defaultWallpaperX;
         // "Wallpaper X step size" is how much of that 0-1 is one "page" of the home screen
         // when scrolling.
-        float wpxs = mLastWallpaperXStep >= 0 ? mLastWallpaperXStep : -1.0f;
+        float wpxs = token.mWallpaperXStep >= 0 ? token.mWallpaperXStep : -1.0f;
         // Difference between width of wallpaper image, and the last size of the wallpaper.
         // This is the horizontal surplus from the prior configuration.
         int availw = diffWidth;
@@ -406,10 +400,10 @@ class WallpaperController {
                 wallpaperWin.isRtl());
         availw -= displayOffset;
         int offset = availw > 0 ? -(int)(availw * wpx + .5f) : 0;
-        if (mLastWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
+        if (token.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
             // if device is LTR, then offset wallpaper to the left (the wallpaper is drawn
             // always starting from the left of the screen).
-            offset += mLastWallpaperDisplayOffsetX;
+            offset += token.mWallpaperDisplayOffsetX;
         } else if (!wallpaperWin.isRtl()) {
             // In RTL the offset is calculated so that the wallpaper ends up right aligned (see
             // offset above).
@@ -423,11 +417,11 @@ class WallpaperController {
             rawChanged = true;
         }
 
-        float wpy = mLastWallpaperY >= 0 ? mLastWallpaperY : 0.5f;
-        float wpys = mLastWallpaperYStep >= 0 ? mLastWallpaperYStep : -1.0f;
+        float wpy = token.mWallpaperY >= 0 ? token.mWallpaperY : 0.5f;
+        float wpys = token.mWallpaperYStep >= 0 ? token.mWallpaperYStep : -1.0f;
         offset = diffHeight > 0 ? -(int) (diffHeight * wpy + .5f) : 0;
-        if (mLastWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
-            offset += mLastWallpaperDisplayOffsetY;
+        if (token.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+            offset += token.mWallpaperDisplayOffsetY;
         }
         newYOffset = offset;
 
@@ -549,8 +543,10 @@ class WallpaperController {
     void setWallpaperZoomOut(WindowState window, float zoom) {
         if (Float.compare(window.mWallpaperZoomOut, zoom) != 0) {
             window.mWallpaperZoomOut = zoom;
-            mShouldUpdateZoom = true;
-            updateWallpaperOffsetLocked(window, false);
+            computeLastWallpaperZoomOut();
+            for (WallpaperWindowToken token : mWallpaperTokens) {
+                token.updateWallpaperOffset(false);
+            }
         }
     }
 
@@ -598,43 +594,48 @@ class WallpaperController {
             // zoom effect from home.
             target = changingTarget;
         }
-        if (target != null) {
-            if (target.mWallpaperX >= 0) {
-                mLastWallpaperX = target.mWallpaperX;
-            } else if (changingTarget.mWallpaperX >= 0) {
-                mLastWallpaperX = changingTarget.mWallpaperX;
-            }
-            if (target.mWallpaperY >= 0) {
-                mLastWallpaperY = target.mWallpaperY;
-            } else if (changingTarget.mWallpaperY >= 0) {
-                mLastWallpaperY = changingTarget.mWallpaperY;
-            }
-            computeLastWallpaperZoomOut();
-            if (target.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
-                mLastWallpaperDisplayOffsetX = target.mWallpaperDisplayOffsetX;
-            } else if (changingTarget.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
-                mLastWallpaperDisplayOffsetX = changingTarget.mWallpaperDisplayOffsetX;
-            }
-            if (target.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
-                mLastWallpaperDisplayOffsetY = target.mWallpaperDisplayOffsetY;
-            } else if (changingTarget.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
-                mLastWallpaperDisplayOffsetY = changingTarget.mWallpaperDisplayOffsetY;
-            }
-            if (target.mWallpaperXStep >= 0) {
-                mLastWallpaperXStep = target.mWallpaperXStep;
-            } else if (changingTarget.mWallpaperXStep >= 0) {
-                mLastWallpaperXStep = changingTarget.mWallpaperXStep;
-            }
-            if (target.mWallpaperYStep >= 0) {
-                mLastWallpaperYStep = target.mWallpaperYStep;
-            } else if (changingTarget.mWallpaperYStep >= 0) {
-                mLastWallpaperYStep = changingTarget.mWallpaperYStep;
-            }
-        }
 
-        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            mWallpaperTokens.get(curTokenNdx).updateWallpaperOffset(sync);
+        WallpaperWindowToken token = getTokenForTarget(target);
+        if (token == null) return;
+
+        if (target.mWallpaperX >= 0) {
+            token.mWallpaperX = target.mWallpaperX;
+        } else if (changingTarget.mWallpaperX >= 0) {
+            token.mWallpaperX = changingTarget.mWallpaperX;
         }
+        if (target.mWallpaperY >= 0) {
+            token.mWallpaperY = target.mWallpaperY;
+        } else if (changingTarget.mWallpaperY >= 0) {
+            token.mWallpaperY = changingTarget.mWallpaperY;
+        }
+        if (target.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
+            token.mWallpaperDisplayOffsetX = target.mWallpaperDisplayOffsetX;
+        } else if (changingTarget.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
+            token.mWallpaperDisplayOffsetX = changingTarget.mWallpaperDisplayOffsetX;
+        }
+        if (target.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+            token.mWallpaperDisplayOffsetY = target.mWallpaperDisplayOffsetY;
+        } else if (changingTarget.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+            token.mWallpaperDisplayOffsetY = changingTarget.mWallpaperDisplayOffsetY;
+        }
+        if (target.mWallpaperXStep >= 0) {
+            token.mWallpaperXStep = target.mWallpaperXStep;
+        } else if (changingTarget.mWallpaperXStep >= 0) {
+            token.mWallpaperXStep = changingTarget.mWallpaperXStep;
+        }
+        if (target.mWallpaperYStep >= 0) {
+            token.mWallpaperYStep = target.mWallpaperYStep;
+        } else if (changingTarget.mWallpaperYStep >= 0) {
+            token.mWallpaperYStep = changingTarget.mWallpaperYStep;
+        }
+        token.updateWallpaperOffset(sync);
+    }
+
+    private WallpaperWindowToken getTokenForTarget(WindowState target) {
+        if (target == null) return null;
+        WindowState window = mFindResults.getTopWallpaper(
+                target.canShowWhenLocked() && mService.isKeyguardLocked());
+        return window == null ? null : window.mToken.asWallpaperToken();
     }
 
     void clearLastWallpaperTimeoutTime() {
@@ -805,10 +806,11 @@ class WallpaperController {
         // all wallpapers go behind it.
         findWallpaperTarget();
         updateWallpaperWindowsTarget(mFindResults);
+        WallpaperWindowToken token = getTokenForTarget(mWallpaperTarget);
 
         // The window is visible to the compositor...but is it visible to the user?
         // That is what the wallpaper cares about.
-        final boolean visible = mWallpaperTarget != null;
+        final boolean visible = token != null;
         if (DEBUG_WALLPAPER) {
             Slog.v(TAG, "Wallpaper visibility: " + visible + " at display "
                     + mDisplayContent.getDisplayId());
@@ -816,19 +818,18 @@ class WallpaperController {
 
         if (visible) {
             if (mWallpaperTarget.mWallpaperX >= 0) {
-                mLastWallpaperX = mWallpaperTarget.mWallpaperX;
-                mLastWallpaperXStep = mWallpaperTarget.mWallpaperXStep;
+                token.mWallpaperX = mWallpaperTarget.mWallpaperX;
+                token.mWallpaperXStep = mWallpaperTarget.mWallpaperXStep;
             }
-            computeLastWallpaperZoomOut();
             if (mWallpaperTarget.mWallpaperY >= 0) {
-                mLastWallpaperY = mWallpaperTarget.mWallpaperY;
-                mLastWallpaperYStep = mWallpaperTarget.mWallpaperYStep;
+                token.mWallpaperY = mWallpaperTarget.mWallpaperY;
+                token.mWallpaperYStep = mWallpaperTarget.mWallpaperYStep;
             }
             if (mWallpaperTarget.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
-                mLastWallpaperDisplayOffsetX = mWallpaperTarget.mWallpaperDisplayOffsetX;
+                token.mWallpaperDisplayOffsetX = mWallpaperTarget.mWallpaperDisplayOffsetX;
             }
             if (mWallpaperTarget.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
-                mLastWallpaperDisplayOffsetY = mWallpaperTarget.mWallpaperDisplayOffsetY;
+                token.mWallpaperDisplayOffsetY = mWallpaperTarget.mWallpaperDisplayOffsetY;
             }
         }
 
@@ -1020,12 +1021,10 @@ class WallpaperController {
      * we'll have conflicts and break the "depth system" mental model.
      */
     private void computeLastWallpaperZoomOut() {
-        if (mShouldUpdateZoom) {
-            mLastWallpaperZoomOut = 0;
-            mDisplayContent.forAllWindows(mComputeMaxZoomOutFunction, true);
-            mShouldUpdateZoom = false;
-        }
+        mLastWallpaperZoomOut = 0;
+        mDisplayContent.forAllWindows(mComputeMaxZoomOutFunction, true);
     }
+
 
     private float zoomOutToScale(float zoomOut) {
         return MathUtils.lerp(mMinWallpaperScale, mMaxWallpaperScale, 1 - zoomOut);
@@ -1034,17 +1033,26 @@ class WallpaperController {
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("displayId="); pw.println(mDisplayContent.getDisplayId());
         pw.print(prefix); pw.print("mWallpaperTarget="); pw.println(mWallpaperTarget);
+        pw.print(prefix); pw.print("mLastWallpaperZoomOut="); pw.println(mLastWallpaperZoomOut);
         if (mPrevWallpaperTarget != null) {
             pw.print(prefix); pw.print("mPrevWallpaperTarget="); pw.println(mPrevWallpaperTarget);
         }
-        pw.print(prefix); pw.print("mLastWallpaperX="); pw.print(mLastWallpaperX);
-        pw.print(" mLastWallpaperY="); pw.println(mLastWallpaperY);
-        if (mLastWallpaperDisplayOffsetX != Integer.MIN_VALUE
-                || mLastWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
-            pw.print(prefix);
-            pw.print("mLastWallpaperDisplayOffsetX="); pw.print(mLastWallpaperDisplayOffsetX);
-            pw.print(" mLastWallpaperDisplayOffsetY="); pw.println(mLastWallpaperDisplayOffsetY);
+
+        for (WallpaperWindowToken t : mWallpaperTokens) {
+            pw.print(prefix); pw.println("token " + t + ":");
+            pw.print(prefix); pw.print("  canShowWhenLocked="); pw.println(t.canShowWhenLocked());
+            dumpValue(pw, prefix, "mWallpaperX", t.mWallpaperX);
+            dumpValue(pw, prefix, "mWallpaperY", t.mWallpaperY);
+            dumpValue(pw, prefix, "mWallpaperXStep", t.mWallpaperXStep);
+            dumpValue(pw, prefix, "mWallpaperYStep", t.mWallpaperYStep);
+            dumpValue(pw, prefix, "mWallpaperDisplayOffsetX", t.mWallpaperDisplayOffsetX);
+            dumpValue(pw, prefix, "mWallpaperDisplayOffsetY", t.mWallpaperDisplayOffsetY);
         }
+    }
+
+    private void dumpValue(PrintWriter pw, String prefix, String valueName, float value) {
+        pw.print(prefix); pw.print("  " + valueName + "=");
+        pw.println(value >= 0 ? value : "NA");
     }
 
     /** Helper class for storing the results of a wallpaper target find operation. */

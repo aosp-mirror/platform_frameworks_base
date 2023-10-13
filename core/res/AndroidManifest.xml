@@ -2108,12 +2108,12 @@
         android:protectionLevel="signature" />
 
     <!-- Allows direct access to the <RemoteAuth>Service interfaces.
-         @hide @TestApi @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES) -->
+         @hide -->
     <permission android:name="android.permission.MANAGE_REMOTE_AUTH"
                 android:protectionLevel="signature" />
 
     <!-- Allows direct access to the <RemoteAuth>Service authentication methods.
-         @hide @TestApi @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES) -->
+         @hide -->
     <permission android:name="android.permission.USE_REMOTE_AUTH"
                 android:protectionLevel="signature" />
 

@@ -231,4 +231,9 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     int getCaptionHeightId(@WindowingMode int windowingMode) {
         return R.dimen.freeform_decor_caption_height;
     }
+
+    @Override
+    int getCaptionViewId() {
+        return R.id.caption;
+    }
 }

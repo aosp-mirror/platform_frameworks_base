@@ -114,16 +114,17 @@ import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayManagerService.DeviceStateListener;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.lights.LightsManager;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
+import com.google.common.truth.Expect;
+
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
-
-import com.google.common.truth.Expect;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -201,9 +202,12 @@ public class DisplayManagerServiceTest {
                 @Override
                 LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,
                         Handler handler, DisplayAdapter.Listener displayAdapterListener,
-                        DisplayManagerFlags flags) {
+                        DisplayManagerFlags flags,
+                        DisplayNotificationManager displayNotificationManager) {
                     return new LocalDisplayAdapter(syncRoot, context, handler,
-                            displayAdapterListener, flags, new LocalDisplayAdapter.Injector() {
+                            displayAdapterListener, flags,
+                            mMockedDisplayNotificationManager,
+                            new LocalDisplayAdapter.Injector() {
                         @Override
                         public LocalDisplayAdapter.SurfaceControlProxy getSurfaceControlProxy() {
                             return mSurfaceControlProxy;
@@ -248,13 +252,15 @@ public class DisplayManagerServiceTest {
         @Override
         LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,
                 Handler handler, DisplayAdapter.Listener displayAdapterListener,
-                DisplayManagerFlags flags) {
+                DisplayManagerFlags flags,
+                DisplayNotificationManager displayNotificationManager) {
             return new LocalDisplayAdapter(
                     syncRoot,
                     context,
                     handler,
                     displayAdapterListener,
                     flags,
+                    mMockedDisplayNotificationManager,
                     new LocalDisplayAdapter.Injector() {
                         @Override
                         public LocalDisplayAdapter.SurfaceControlProxy getSurfaceControlProxy() {
@@ -288,6 +294,7 @@ public class DisplayManagerServiceTest {
 
     private final DisplayManagerService.Injector mBasicInjector = new BasicInjector();
 
+    @Mock DisplayNotificationManager mMockedDisplayNotificationManager;
     @Mock IMediaProjectionManager mMockProjectionService;
     @Mock IVirtualDeviceManager mIVirtualDeviceManager;
     @Mock InputManagerInternal mMockInputManagerInternal;

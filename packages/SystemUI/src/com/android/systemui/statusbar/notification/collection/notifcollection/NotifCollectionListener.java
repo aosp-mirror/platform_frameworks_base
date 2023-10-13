@@ -115,6 +115,7 @@ public interface NotifCollectionListener {
      *
      * @deprecated Use {@link #onRankingApplied()} instead.
      */
+    @Deprecated
     default void onRankingUpdate(NotificationListenerService.RankingMap rankingMap) {
     }
 

@@ -9,3 +9,11 @@ flag {
     is_fixed_read_only: true
     bug: "292032926"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "explicit_refresh_rate_hints"
+    description: "Performance related hints during transitions"
+    is_fixed_read_only: true
+    bug: "300019131"
+}

@@ -29,9 +29,7 @@ import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -64,29 +62,14 @@ constructor(
 
     private fun listenForDreamingToOccluded() {
         scope.launch {
-            keyguardInteractor.isDreaming
-                // Add a slight delay, as dreaming and occluded events will arrive with a small gap
-                // in time. This prevents a transition to OCCLUSION happening prematurely.
-                .onEach { delay(50) }
-                .sample(
-                    combine(
-                        keyguardInteractor.isKeyguardOccluded,
-                        transitionInteractor.startedKeyguardTransitionStep,
-                        ::Pair,
-                    ),
-                    ::toTriple
-                )
-                .collect { (isDreaming, isOccluded, lastStartedTransition) ->
+            combine(keyguardInteractor.isKeyguardOccluded, keyguardInteractor.isDreaming, ::Pair)
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::toTriple)
+                .collect { (isOccluded, isDreaming, lastStartedTransition) ->
                     if (
                         isOccluded &&
                             !isDreaming &&
-                            (lastStartedTransition.to == KeyguardState.DREAMING ||
-                                lastStartedTransition.to == KeyguardState.LOCKSCREEN)
+                            lastStartedTransition.to == KeyguardState.DREAMING
                     ) {
-                        // At the moment, checking for LOCKSCREEN state above provides a corrective
-                        // action. There's no great signal to determine when the dream is ending
-                        // and a transition to OCCLUDED is beginning directly. For now, the solution
-                        // is DREAMING->LOCKSCREEN->OCCLUDED
                         startTransitionTo(KeyguardState.OCCLUDED)
                     }
                 }

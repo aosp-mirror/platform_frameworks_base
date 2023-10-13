@@ -68,13 +68,26 @@ public final class AnimatorTestRule implements TestRule {
 
     private final Object mLock = new Object();
     private final TestHandler mTestHandler = new TestHandler();
+    private final long mStartTime;
+    private long mTotalTimeDelta = 0;
+
     /**
-     * initializing the start time with {@link SystemClock#uptimeMillis()} reduces the discrepancies
-     * with various internals of classes like ValueAnimator which can sometimes read that clock via
+     * Construct an AnimatorTestRule with a custom start time.
+     * @see #AnimatorTestRule()
+     */
+    public AnimatorTestRule(long startTime) {
+        mStartTime = startTime;
+    }
+
+    /**
+     * Construct an AnimatorTestRule with a start time of {@link SystemClock#uptimeMillis()}.
+     * Initializing the start time with this clock reduces the discrepancies with various internals
+     * of classes like ValueAnimator which can sometimes read that clock via
      * {@link android.view.animation.AnimationUtils#currentAnimationTimeMillis()}.
      */
-    private final long mStartTime = SystemClock.uptimeMillis();
-    private long mTotalTimeDelta = 0;
+    public AnimatorTestRule() {
+        this(SystemClock.uptimeMillis());
+    }
 
     @NonNull
     @Override

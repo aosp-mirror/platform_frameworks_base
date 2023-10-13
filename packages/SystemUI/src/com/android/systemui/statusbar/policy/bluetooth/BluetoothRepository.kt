@@ -38,7 +38,8 @@ interface BluetoothRepository {
     /**
      * Fetches the connection statuses for the given [currentDevices] and invokes [callback] once
      * those statuses have been fetched. The fetching occurs on a background thread because IPCs may
-     * be required to fetch the statuses (see b/271058380).
+     * be required to fetch the statuses (see b/271058380). However, the callback will be invoked in
+     * the main thread.
      */
     fun fetchConnectionStatusInBackground(
         currentDevices: Collection<CachedBluetoothDevice>,

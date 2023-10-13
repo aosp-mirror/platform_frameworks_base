@@ -1246,11 +1246,17 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                         isFirstConfiguration);
         for (int i = 0; i < imeInfoList.size(); i++) {
             KeyboardLayoutInfo layoutInfo = layoutInfoList.get(i);
-            boolean noLayoutFound = layoutInfo == null || layoutInfo.mDescriptor == null;
-            configurationEventBuilder.addLayoutSelection(imeInfoList.get(i).mImeSubtype,
-                    noLayoutFound ? null : getKeyboardLayout(layoutInfo.mDescriptor),
-                    noLayoutFound ? LAYOUT_SELECTION_CRITERIA_DEFAULT
-                            : layoutInfo.mSelectionCriteria);
+            String layoutName = null;
+            int layoutSelectionCriteria = LAYOUT_SELECTION_CRITERIA_DEFAULT;
+            if (layoutInfo != null && layoutInfo.mDescriptor != null) {
+                layoutSelectionCriteria = layoutInfo.mSelectionCriteria;
+                KeyboardLayoutDescriptor d = KeyboardLayoutDescriptor.parse(layoutInfo.mDescriptor);
+                if (d != null) {
+                    layoutName = d.keyboardLayoutName;
+                }
+            }
+            configurationEventBuilder.addLayoutSelection(imeInfoList.get(i).mImeSubtype, layoutName,
+                    layoutSelectionCriteria);
         }
         KeyboardMetricsCollector.logKeyboardConfiguredAtom(configurationEventBuilder.build());
     }

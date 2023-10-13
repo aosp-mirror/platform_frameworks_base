@@ -72,7 +72,9 @@ inline fun <I : Immutable<M>, M : I> MutableIntReferenceMap<I, M>.mutateOrPut(
     key: Int,
     defaultValue: () -> M
 ): M {
-    mutate(key)?.let { return it }
+    mutate(key)?.let {
+        return it
+    }
     return defaultValue().also { put(key, it) }
 }
 

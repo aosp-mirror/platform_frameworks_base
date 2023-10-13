@@ -43,8 +43,7 @@ import kotlin.contracts.contract
 
 @Keep
 class AccessCheckingService(context: Context) : SystemService(context) {
-    @Volatile
-    private lateinit var state: AccessState
+    @Volatile private lateinit var state: AccessState
     private val stateLock = Any()
 
     private val policy = AccessPolicy()
@@ -86,17 +85,22 @@ class AccessCheckingService(context: Context) : SystemService(context) {
 
         val state = MutableAccessState()
         policy.initialize(
-            state, userIds, packageStates, disabledSystemPackageStates, knownPackages, isLeanback,
-            configPermissions, privilegedPermissionAllowlistPackages, permissionAllowlist,
+            state,
+            userIds,
+            packageStates,
+            disabledSystemPackageStates,
+            knownPackages,
+            isLeanback,
+            configPermissions,
+            privilegedPermissionAllowlistPackages,
+            permissionAllowlist,
             implicitToSourcePermissions
         )
         persistence.initialize()
         persistence.read(state)
         this.state = state
 
-        mutateState {
-            with(policy) { onInitialized() }
-        }
+        mutateState { with(policy) { onInitialized() } }
 
         appOpService.initialize()
         permissionService.initialize()
@@ -106,40 +110,40 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         get() = PackageManager.FEATURE_LEANBACK in availableFeatures
 
     private val SystemConfig.privilegedPermissionAllowlistPackages: IndexedListSet<String>
-        get() = MutableIndexedListSet<String>().apply {
-            this += "android"
-            if (PackageManager.FEATURE_AUTOMOTIVE in availableFeatures) {
-                // Note that SystemProperties.get(String, String) forces returning an empty string
-                // even if we pass null for the def parameter.
-                val carServicePackage = SystemProperties.get("ro.android.car.carservice.package")
-                if (carServicePackage.isNotEmpty()) {
-                    this += carServicePackage
+        get() =
+            MutableIndexedListSet<String>().apply {
+                this += "android"
+                if (PackageManager.FEATURE_AUTOMOTIVE in availableFeatures) {
+                    // Note that SystemProperties.get(String, String) forces returning an empty
+                    // string
+                    // even if we pass null for the def parameter.
+                    val carServicePackage =
+                        SystemProperties.get("ro.android.car.carservice.package")
+                    if (carServicePackage.isNotEmpty()) {
+                        this += carServicePackage
+                    }
                 }
             }
-        }
 
     private val SystemConfig.implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>
         @Suppress("UNCHECKED_CAST")
-        get() = MutableIndexedMap<String, MutableIndexedListSet<String>>().apply {
-            splitPermissions.forEach { splitPermissionInfo ->
-                val sourcePermissionName = splitPermissionInfo.splitPermission
-                splitPermissionInfo.newPermissions.forEach { implicitPermissionName ->
-                    getOrPut(implicitPermissionName) { MutableIndexedListSet() } +=
-                        sourcePermissionName
+        get() =
+            MutableIndexedMap<String, MutableIndexedListSet<String>>().apply {
+                splitPermissions.forEach { splitPermissionInfo ->
+                    val sourcePermissionName = splitPermissionInfo.splitPermission
+                    splitPermissionInfo.newPermissions.forEach { implicitPermissionName ->
+                        getOrPut(implicitPermissionName) { MutableIndexedListSet() } +=
+                            sourcePermissionName
+                    }
                 }
-            }
-        } as IndexedMap<String, IndexedListSet<String>>
+            } as IndexedMap<String, IndexedListSet<String>>
 
     internal fun onUserAdded(userId: Int) {
-        mutateState {
-            with(policy) { onUserAdded(userId) }
-        }
+        mutateState { with(policy) { onUserAdded(userId) } }
     }
 
     internal fun onUserRemoved(userId: Int) {
-        mutateState {
-            with(policy) { onUserRemoved(userId) }
-        }
+        mutateState { with(policy) { onUserRemoved(userId) } }
     }
 
     internal fun onStorageVolumeMounted(
@@ -152,8 +156,12 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         mutateState {
             with(policy) {
                 onStorageVolumeMounted(
-                    packageStates, disabledSystemPackageStates, knownPackages, volumeUuid,
-                    packageNames, isSystemUpdated
+                    packageStates,
+                    disabledSystemPackageStates,
+                    knownPackages,
+                    volumeUuid,
+                    packageNames,
+                    isSystemUpdated
                 )
             }
         }
@@ -165,7 +173,10 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         mutateState {
             with(policy) {
                 onPackageAdded(
-                    packageStates, disabledSystemPackageStates, knownPackages, packageName
+                    packageStates,
+                    disabledSystemPackageStates,
+                    knownPackages,
+                    packageName
                 )
             }
         }
@@ -177,7 +188,11 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         mutateState {
             with(policy) {
                 onPackageRemoved(
-                    packageStates, disabledSystemPackageStates, knownPackages, packageName, appId
+                    packageStates,
+                    disabledSystemPackageStates,
+                    knownPackages,
+                    packageName,
+                    appId
                 )
             }
         }
@@ -189,7 +204,11 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         mutateState {
             with(policy) {
                 onPackageInstalled(
-                    packageStates, disabledSystemPackageStates, knownPackages, packageName, userId
+                    packageStates,
+                    disabledSystemPackageStates,
+                    knownPackages,
+                    packageName,
+                    userId
                 )
             }
         }
@@ -201,7 +220,11 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         mutateState {
             with(policy) {
                 onPackageUninstalled(
-                    packageStates, disabledSystemPackageStates, knownPackages, packageName, appId,
+                    packageStates,
+                    disabledSystemPackageStates,
+                    knownPackages,
+                    packageName,
+                    appId,
                     userId
                 )
             }
@@ -224,34 +247,42 @@ class AccessCheckingService(context: Context) : SystemService(context) {
 
     private fun PackageManagerInternal.getKnownPackages(
         packageStates: Map<String, PackageState>
-    ): IntMap<Array<String>> = MutableIntMap<Array<String>>().apply {
-        this[KnownPackages.PACKAGE_INSTALLER] =
-            getKnownPackageNames(KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM)
-        this[KnownPackages.PACKAGE_PERMISSION_CONTROLLER] = getKnownPackageNames(
-            KnownPackages.PACKAGE_PERMISSION_CONTROLLER, UserHandle.USER_SYSTEM
-        )
-        this[KnownPackages.PACKAGE_VERIFIER] =
-            getKnownPackageNames(KnownPackages.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM)
-        this[KnownPackages.PACKAGE_SETUP_WIZARD] =
-            getKnownPackageNames(KnownPackages.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM)
-        this[KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER] = getKnownPackageNames(
-            KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER, UserHandle.USER_SYSTEM
-        )
-        this[KnownPackages.PACKAGE_CONFIGURATOR] =
-            getKnownPackageNames(KnownPackages.PACKAGE_CONFIGURATOR, UserHandle.USER_SYSTEM)
-        this[KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER] = getKnownPackageNames(
-            KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER, UserHandle.USER_SYSTEM
-        )
-        this[KnownPackages.PACKAGE_APP_PREDICTOR] =
-            getKnownPackageNames(KnownPackages.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM)
-        this[KnownPackages.PACKAGE_COMPANION] =
-            getKnownPackageNames(KnownPackages.PACKAGE_COMPANION, UserHandle.USER_SYSTEM)
-        this[KnownPackages.PACKAGE_RETAIL_DEMO] =
-            getKnownPackageNames(KnownPackages.PACKAGE_RETAIL_DEMO, UserHandle.USER_SYSTEM)
-                .filter { isProfileOwner(it, packageStates) }.toTypedArray()
-        this[KnownPackages.PACKAGE_RECENTS] =
-            getKnownPackageNames(KnownPackages.PACKAGE_RECENTS, UserHandle.USER_SYSTEM)
-    }
+    ): IntMap<Array<String>> =
+        MutableIntMap<Array<String>>().apply {
+            this[KnownPackages.PACKAGE_INSTALLER] =
+                getKnownPackageNames(KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM)
+            this[KnownPackages.PACKAGE_PERMISSION_CONTROLLER] =
+                getKnownPackageNames(
+                    KnownPackages.PACKAGE_PERMISSION_CONTROLLER,
+                    UserHandle.USER_SYSTEM
+                )
+            this[KnownPackages.PACKAGE_VERIFIER] =
+                getKnownPackageNames(KnownPackages.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM)
+            this[KnownPackages.PACKAGE_SETUP_WIZARD] =
+                getKnownPackageNames(KnownPackages.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM)
+            this[KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER] =
+                getKnownPackageNames(
+                    KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER,
+                    UserHandle.USER_SYSTEM
+                )
+            this[KnownPackages.PACKAGE_CONFIGURATOR] =
+                getKnownPackageNames(KnownPackages.PACKAGE_CONFIGURATOR, UserHandle.USER_SYSTEM)
+            this[KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER] =
+                getKnownPackageNames(
+                    KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER,
+                    UserHandle.USER_SYSTEM
+                )
+            this[KnownPackages.PACKAGE_APP_PREDICTOR] =
+                getKnownPackageNames(KnownPackages.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM)
+            this[KnownPackages.PACKAGE_COMPANION] =
+                getKnownPackageNames(KnownPackages.PACKAGE_COMPANION, UserHandle.USER_SYSTEM)
+            this[KnownPackages.PACKAGE_RETAIL_DEMO] =
+                getKnownPackageNames(KnownPackages.PACKAGE_RETAIL_DEMO, UserHandle.USER_SYSTEM)
+                    .filter { isProfileOwner(it, packageStates) }
+                    .toTypedArray()
+            this[KnownPackages.PACKAGE_RECENTS] =
+                getKnownPackageNames(KnownPackages.PACKAGE_RECENTS, UserHandle.USER_SYSTEM)
+        }
 
     private fun isProfileOwner(
         packageName: String,

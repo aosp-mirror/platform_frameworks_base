@@ -229,6 +229,7 @@
     <item type="id" name="privacy_dialog_manage_app_button" />
 
     <!-- Communal mode -->
+    <item type="id" name="communal_hub" />
     <item type="id" name="communal_widget_wrapper" />
 
     <!-- Values assigned to the views in Biometrics Prompt -->

@@ -60,6 +60,7 @@ import com.android.server.LocalServices;
 import com.android.server.display.LocalDisplayAdapter.BacklightAdapter;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
+import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 
@@ -113,6 +114,8 @@ public class LocalDisplayAdapterTest {
     @Mock
     private LogicalLight mMockedBacklight;
     @Mock
+    private DisplayNotificationManager mMockedDisplayNotificationManager;
+    @Mock
     private DisplayManagerFlags mFlags;
 
     private Handler mHandler;
@@ -148,7 +151,7 @@ public class LocalDisplayAdapterTest {
         mInjector = new Injector();
         when(mSurfaceControlProxy.getBootDisplayModeSupport()).thenReturn(true);
         mAdapter = new LocalDisplayAdapter(mMockedSyncRoot, mMockedContext, mHandler,
-                mListener, mFlags, mInjector);
+                mListener, mFlags, mMockedDisplayNotificationManager, mInjector);
         spyOn(mAdapter);
         doReturn(mMockedContext).when(mAdapter).getOverlayContext();
 

@@ -18,12 +18,8 @@ package com.android.server.permission.access.immutable
 
 import android.util.ArraySet
 
-/**
- * Immutable set with index-based access.
- */
-sealed class IndexedSet<T>(
-    internal val set: ArraySet<T>
-) : Immutable<MutableIndexedSet<T>> {
+/** Immutable set with index-based access. */
+sealed class IndexedSet<T>(internal val set: ArraySet<T>) : Immutable<MutableIndexedSet<T>> {
     val size: Int
         get() = set.size
 
@@ -40,12 +36,8 @@ sealed class IndexedSet<T>(
     override fun toString(): String = set.toString()
 }
 
-/**
- * Mutable set with index-based access.
- */
-class MutableIndexedSet<T>(
-    set: ArraySet<T> = ArraySet()
-) : IndexedSet<T>(set) {
+/** Mutable set with index-based access. */
+class MutableIndexedSet<T>(set: ArraySet<T> = ArraySet()) : IndexedSet<T>(set) {
     constructor(indexedSet: IndexedSet<T>) : this(ArraySet(indexedSet.set))
 
     fun add(element: T): Boolean = set.add(element)

@@ -108,11 +108,14 @@ public class AnimationUtils {
      * @hide
      */
     @TestApi
+    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_API)
     public static void lockAnimationClock(long vsyncMillis, long expectedPresentationTimeNanos) {
         AnimationState state = sAnimationState.get();
         state.animationClockLocked = true;
         state.currentVsyncTimeMillis = vsyncMillis;
-        state.mExpectedPresentationTimeNanos = expectedPresentationTimeNanos;
+        if (!expectedPresentationTimeApi()) {
+            state.mExpectedPresentationTimeNanos = expectedPresentationTimeNanos;
+        }
     }
 
     /**

@@ -25,6 +25,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.Manifest;
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -128,6 +129,7 @@ import com.android.internal.telephony.IccLogicalChannelRequest;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.io.IOException;
@@ -1195,6 +1197,7 @@ public class TelephonyManager {
      * The dialer app receives this event via
      * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final String EVENT_DISPLAY_SOS_MESSAGE =
             "android.telephony.event.DISPLAY_SOS_MESSAGE";
 
@@ -15036,6 +15039,7 @@ public class TelephonyManager {
      * @hide
      */
     @TestApi
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int HAL_SERVICE_SATELLITE = 8;
 
     /** @hide */

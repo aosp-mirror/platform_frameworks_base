@@ -351,12 +351,21 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public long performRemoveAnimation(long duration, long delay, float translationDirection,
-            boolean isHeadsUpAnimation, Runnable onFinishedRunnable,
+            boolean isHeadsUpAnimation, Runnable onStartedRunnable, Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAnimation;
-        startAppearAnimation(false /* isAppearing */, translationDirection,
-                delay, duration, onFinishedRunnable, animationListener);
+        if (mDrawingAppearAnimation) {
+            startAppearAnimation(false /* isAppearing */, translationDirection,
+                    delay, duration, onStartedRunnable, onFinishedRunnable, animationListener);
+        } else {
+            if (onStartedRunnable != null) {
+                onStartedRunnable.run();
+            }
+            if (onFinishedRunnable != null) {
+                onFinishedRunnable.run();
+            }
+        }
         return 0;
     }
 
@@ -365,12 +374,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             Runnable onFinishRunnable) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAppear;
-        startAppearAnimation(true /* isAppearing */, isHeadsUpAppear ? 0.0f : -1.0f, delay,
-                duration, null, null);
+        if (mDrawingAppearAnimation) {
+            startAppearAnimation(true /* isAppearing */, isHeadsUpAppear ? 0.0f : -1.0f, delay,
+                    duration, null, null, null);
+        }
     }
 
     private void startAppearAnimation(boolean isAppearing, float translationDirection, long delay,
-            long duration, final Runnable onFinishedRunnable,
+            long duration, final Runnable onStartedRunnable, final Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
         mAnimationTranslationY = translationDirection * getActualHeight();
         cancelAppearAnimation();
@@ -434,6 +445,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
             @Override
             public void onAnimationStart(Animator animation) {
+                if (onStartedRunnable != null) {
+                    onStartedRunnable.run();
+                }
                 mRunWithoutInterruptions = true;
                 Configuration.Builder builder = Configuration.Builder
                         .withView(getCujType(isAppearing), ActivatableNotificationView.this);

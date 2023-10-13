@@ -1439,7 +1439,7 @@ public final class ProcessList {
     }
 
     public static long computeNextPssTime(int procState, ProcStateMemTracker tracker, boolean test,
-            boolean sleeping, long now) {
+            boolean sleeping, long now, long earliest) {
         boolean first;
         float scalingFactor;
         final int memState = sProcStateToProcMem[procState];
@@ -1470,7 +1470,7 @@ public final class ProcessList {
         if (delay > PSS_MAX_INTERVAL) {
             delay = PSS_MAX_INTERVAL;
         }
-        return now + delay;
+        return Math.max(now + delay, earliest);
     }
 
     long getMemLevel(int adjustment) {

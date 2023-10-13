@@ -2,45 +2,17 @@
 
 # Needed to ensure callback field references are kept in their respective
 # owning classes when the downstream callback registrars only store weak refs.
-# TODO(b/264686688): Handle these cases with more targeted annotations.
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  private com.android.keyguard.KeyguardUpdateMonitorCallback *;
-  private com.android.systemui.privacy.PrivacyConfig$Callback *;
-  private com.android.systemui.privacy.PrivacyItemController$Callback *;
-  private com.android.systemui.settings.UserTracker$Callback *;
-  private com.android.systemui.statusbar.phone.StatusBarWindowCallback *;
-  private com.android.systemui.util.service.Observer$Callback *;
-  private com.android.systemui.util.service.ObservableServiceConnection$Callback *;
-}
-# Note that these rules are temporary companions to the above rules, required
-# for cases like Kotlin where fields with anonymous types use the anonymous type
-# rather than the supertype.
--if class * extends com.android.keyguard.KeyguardUpdateMonitorCallback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
+# Note that we restrict this to SysUISingleton classes, as other registering
+# classes should either *always* unregister or *never* register from their
+# constructor. We also keep callback class names for easier debugging.
+-keepnames @com.android.systemui.util.annotations.WeaklyReferencedCallback class *
+-keepnames class * extends @com.android.systemui.util.annotations.WeaklyReferencedCallback **
+-if @com.android.systemui.util.annotations.WeaklyReferencedCallback class *
+-keepclassmembers,allowaccessmodification @com.android.systemui.dagger.SysUISingleton class * {
   <1> *;
 }
--if class * extends com.android.systemui.privacy.PrivacyConfig$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.privacy.PrivacyItemController$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.settings.UserTracker$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.statusbar.phone.StatusBarWindowCallback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.util.service.Observer$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.util.service.ObservableServiceConnection$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
+-if class * extends @com.android.systemui.util.annotations.WeaklyReferencedCallback **
+-keepclassmembers,allowaccessmodification @com.android.systemui.dagger.SysUISingleton class * {
   <1> *;
 }
 

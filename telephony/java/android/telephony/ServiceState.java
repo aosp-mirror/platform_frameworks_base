@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,6 +36,7 @@ import android.telephony.NetworkRegistrationInfo.Domain;
 import android.telephony.NetworkRegistrationInfo.NRState;
 import android.text.TextUtils;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -2256,6 +2258,7 @@ public class ServiceState implements Parcelable {
      *
      * @return {@code true} if device is connected to a non-terrestrial network else {@code false}.
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public boolean isUsingNonTerrestrialNetwork() {
         synchronized (mNetworkRegistrationInfos) {
             for (NetworkRegistrationInfo nri : mNetworkRegistrationInfos) {

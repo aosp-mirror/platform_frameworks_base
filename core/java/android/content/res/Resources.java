@@ -2210,8 +2210,7 @@ public class Resources {
      *
      * <p>The best practices is to obtain metrics from
      * {@link WindowManager#getCurrentWindowMetrics()} for window bounds. The value obtained from
-     * this API may be wrong if {@link Context#getResources()} is from
-     * non-{@link android.annotation.UiContext}.
+     * this API may be wrong if {@link Context#getResources()} is not from a {@code UiContext}.
      * For example, use the {@link DisplayMetrics} obtained from {@link Application#getResources()}
      * to build {@link android.app.Activity} UI elements especially when the
      * {@link android.app.Activity} is in the multi-window mode or on the secondary {@link Display}.

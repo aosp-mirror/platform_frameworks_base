@@ -26,6 +26,7 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
@@ -51,6 +52,34 @@ public class PhoneMediaDevice extends MediaDevice {
 
     private final DeviceIconUtil mDeviceIconUtil;
 
+    /** Returns the device name for the given {@code routeInfo}. */
+    public static String getSystemRouteNameFromType(
+            @NonNull Context context, @NonNull MediaRoute2Info routeInfo) {
+        CharSequence name;
+        switch (routeInfo.getType()) {
+            case TYPE_WIRED_HEADSET:
+            case TYPE_WIRED_HEADPHONES:
+            case TYPE_USB_DEVICE:
+            case TYPE_USB_HEADSET:
+            case TYPE_USB_ACCESSORY:
+                name = context.getString(R.string.media_transfer_wired_usb_device_name);
+                break;
+            case TYPE_DOCK:
+                name = context.getString(R.string.media_transfer_dock_speaker_device_name);
+                break;
+            case TYPE_BUILTIN_SPEAKER:
+                name = context.getString(R.string.media_transfer_this_device_name);
+                break;
+            case TYPE_HDMI:
+                name = context.getString(R.string.media_transfer_external_device_name);
+                break;
+            default:
+                name = context.getString(R.string.media_transfer_default_device_name);
+                break;
+        }
+        return name.toString();
+    }
+
     PhoneMediaDevice(Context context, MediaRoute2Info info, String packageName) {
         this(context, info, packageName, null);
     }
@@ -69,29 +98,7 @@ public class PhoneMediaDevice extends MediaDevice {
     @SuppressWarnings("NewApi")
     @Override
     public String getName() {
-        CharSequence name;
-        switch (mRouteInfo.getType()) {
-            case TYPE_WIRED_HEADSET:
-            case TYPE_WIRED_HEADPHONES:
-            case TYPE_USB_DEVICE:
-            case TYPE_USB_HEADSET:
-            case TYPE_USB_ACCESSORY:
-                name = mContext.getString(R.string.media_transfer_wired_usb_device_name);
-                break;
-            case TYPE_DOCK:
-                name = mContext.getString(R.string.media_transfer_dock_speaker_device_name);
-                break;
-            case TYPE_BUILTIN_SPEAKER:
-                name = mContext.getString(R.string.media_transfer_this_device_name);
-                break;
-            case TYPE_HDMI:
-                name = mContext.getString(R.string.media_transfer_external_device_name);
-                break;
-            default:
-                name = mContext.getString(R.string.media_transfer_default_device_name);
-                break;
-        }
-        return name.toString();
+        return getSystemRouteNameFromType(mContext, mRouteInfo);
     }
 
     @Override

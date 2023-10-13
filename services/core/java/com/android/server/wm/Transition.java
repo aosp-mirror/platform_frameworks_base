@@ -703,6 +703,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (dc == null || mTargetDisplays.contains(dc)) return;
         mTargetDisplays.add(dc);
         addOnTopTasks(dc, mOnTopTasksStart);
+        mController.startPerfHintForDisplay(dc.mDisplayId);
     }
 
     /**

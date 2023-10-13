@@ -451,7 +451,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
     }
 
     fun logSubInfo(subInfo: SubscriptionInfo?) {
-        logBuffer.log(TAG, VERBOSE, { str1 = "$subInfo" }, { "SubInfo:$str1" })
+        logBuffer.log(TAG, DEBUG, { str1 = "$subInfo" }, { "SubInfo:$str1" })
     }
 
     fun logTimeFormatChanged(newTimeFormat: String?) {

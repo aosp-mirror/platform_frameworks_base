@@ -6,3 +6,17 @@ flag {
     description: "An Example Flag"
     bug: "300136750"
 }
+
+flag {
+    name: "enable_app_pairs"
+    namespace: "multitasking"
+    description: "Enables the ability to create and save app pairs to the Home screen"
+    bug: "274835596"
+}
+
+flag {
+    name: "desktop_windowing"
+    namespace: "multitasking"
+    description: "Enables desktop windowing"
+    bug: "304778354"
+}

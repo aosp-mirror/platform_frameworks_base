@@ -28,15 +28,19 @@ import static com.android.internal.accessibility.util.AccessibilityUtils.isUserS
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.accessibility.Flags;
 import android.widget.AdapterView;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -207,6 +211,11 @@ public class AccessibilityShortcutChooserActivity extends Activity {
                 isEditMenuMode ? this::onTargetChecked : this::onTargetSelected);
     }
 
+    @VisibleForTesting
+    public AlertDialog getMenuDialog() {
+        return mMenuDialog;
+    }
+
     private AlertDialog createMenuDialog() {
         final String dialogTitle =
                 getString(R.string.accessibility_select_shortcut_menu_title);
@@ -216,12 +225,25 @@ public class AccessibilityShortcutChooserActivity extends Activity {
                 .setAdapter(mTargetAdapter, /* listener= */ null)
                 .setOnDismissListener(dialog -> finish());
 
-        if (isUserSetupCompleted(this)) {
+        boolean allowEditing = isUserSetupCompleted(this);
+        boolean showWhenLocked = false;
+        if (Flags.allowShortcutChooserOnLockscreen()) {
+            final KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
+            if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
+                allowEditing = false;
+                showWhenLocked = true;
+            }
+        }
+        if (allowEditing) {
             final String positiveButtonText =
                     getString(R.string.edit_accessibility_shortcut_menu_button);
             builder.setPositiveButton(positiveButtonText, /* listener= */ null);
         }
 
-        return builder.create();
+        final AlertDialog dialog = builder.create();
+        if (showWhenLocked) {
+            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        }
+        return dialog;
     }
 }

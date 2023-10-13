@@ -22,13 +22,13 @@ import com.android.server.pm.permission.PermissionMigrationHelper
 
 object PackageVersionMigration {
     /**
-     * Maps existing permission and app-op version to a unified version during OTA upgrade. The
-     * new unified version is used in determining the upgrade steps for a package (for both
-     * permission and app-ops).
+     * Maps existing permission and app-op version to a unified version during OTA upgrade. The new
+     * unified version is used in determining the upgrade steps for a package (for both permission
+     * and app-ops).
      *
      * @return unified permission/app-op version
      * @throws IllegalStateException if the method is called when there is nothing to migrate i.e.
-     * permission and app-op file does not exist.
+     *   permission and app-op file does not exist.
      */
     internal fun getVersion(userId: Int): Int {
         val permissionMigrationHelper =

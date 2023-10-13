@@ -28,11 +28,16 @@ class PackageAppOpUpgrade(private val policy: PackageAppOpPolicy) {
     ) {
         if (version <= 2) {
             with(policy) {
-                val appOpMode = getAppOpMode(
-                    packageState.packageName, userId, AppOpsManager.OPSTR_RUN_IN_BACKGROUND
-                )
+                val appOpMode =
+                    getAppOpMode(
+                        packageState.packageName,
+                        userId,
+                        AppOpsManager.OPSTR_RUN_IN_BACKGROUND
+                    )
                 setAppOpMode(
-                    packageState.packageName, userId, AppOpsManager.OPSTR_RUN_ANY_IN_BACKGROUND,
+                    packageState.packageName,
+                    userId,
+                    AppOpsManager.OPSTR_RUN_ANY_IN_BACKGROUND,
                     appOpMode
                 )
             }

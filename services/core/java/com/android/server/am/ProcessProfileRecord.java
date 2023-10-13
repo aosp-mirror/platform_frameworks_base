@@ -142,6 +142,11 @@ final class ProcessProfileRecord {
     final AtomicLong mCurCpuTime = new AtomicLong(0);
 
     /**
+     * How long the process has spent on waiting in the runqueue since fork.
+     */
+    final AtomicLong mLastCpuDelayTime = new AtomicLong(0);
+
+    /**
      * Last selected memory trimming level.
      */
     @CompositeRWLock({"mService", "mProcLock"})
@@ -570,7 +575,11 @@ final class ProcessProfileRecord {
 
     @GuardedBy("mProfilerLock")
     long computeNextPssTime(int procState, boolean test, boolean sleeping, long now) {
-        return ProcessList.computeNextPssTime(procState, mProcStateMemTracker, test, sleeping, now);
+        return ProcessList.computeNextPssTime(procState, mProcStateMemTracker, test, sleeping, now,
+                // Cap the Pss time to make sure no Pss is collected during the very few
+                // minutes after the system is boot, given the system is already busy.
+                Math.max(mService.mBootCompletedTimestamp, mService.mLastIdleTime)
+                + mService.mConstants.FULL_PSS_MIN_INTERVAL);
     }
 
     private static void commitNextPssTime(ProcStateMemTracker tracker) {

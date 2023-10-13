@@ -16,9 +16,11 @@
 
 package android.view;
 
+import static android.view.flags.Flags.FLAG_EXPECTED_PRESENTATION_TIME_API;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_APP;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -695,6 +697,7 @@ public final class Choreographer {
      */
     @TestApi
     @UnsupportedAppUsage
+    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_API)
     public long getFrameTimeNanos() {
         synchronized (mLock) {
             if (!mCallbacksRunning) {

@@ -16,12 +16,9 @@
 
 package com.android.server.permission.access.immutable
 
-/**
- * Immutable set with index-based access, implemented using a list.
- */
-sealed class IndexedListSet<T>(
-    internal val list: ArrayList<T>
-) : Immutable<MutableIndexedListSet<T>> {
+/** Immutable set with index-based access, implemented using a list. */
+sealed class IndexedListSet<T>(internal val list: ArrayList<T>) :
+    Immutable<MutableIndexedListSet<T>> {
     val size: Int
         get() = list.size
 
@@ -31,20 +28,15 @@ sealed class IndexedListSet<T>(
 
     fun indexOf(element: T): Int = list.indexOf(element)
 
-    @Suppress("ReplaceGetOrSet")
-    fun elementAt(index: Int): T = list.get(index)
+    @Suppress("ReplaceGetOrSet") fun elementAt(index: Int): T = list.get(index)
 
     override fun toMutable(): MutableIndexedListSet<T> = MutableIndexedListSet(this)
 
     override fun toString(): String = list.toString()
 }
 
-/**
- * Mutable set with index-based access, implemented using a list.
- */
-class MutableIndexedListSet<T>(
-    list: ArrayList<T> = ArrayList()
-) : IndexedListSet<T>(list) {
+/** Mutable set with index-based access, implemented using a list. */
+class MutableIndexedListSet<T>(list: ArrayList<T> = ArrayList()) : IndexedListSet<T>(list) {
     constructor(indexedListSet: IndexedListSet<T>) : this(ArrayList(indexedListSet.list))
 
     fun add(element: T): Boolean =

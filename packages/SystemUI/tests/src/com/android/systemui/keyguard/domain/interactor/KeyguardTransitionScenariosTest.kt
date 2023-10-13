@@ -433,7 +433,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
             runTransitionAndSetWakefulness(
-                    KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                KeyguardState.GONE,
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+            )
 
             // WHEN the lockscreen hosted dream stops
             keyguardRepository.setIsActiveDreamLockscreenHosted(false)
@@ -457,7 +459,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
             runTransitionAndSetWakefulness(
-                    KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                KeyguardState.GONE,
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+            )
 
             // WHEN biometrics succeeds with wake and unlock from dream mode
             keyguardRepository.setBiometricUnlockState(
@@ -487,7 +491,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
             runTransitionAndSetWakefulness(
-                    KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                KeyguardState.GONE,
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+            )
 
             // WHEN the primary bouncer is set to show
             bouncerRepository.setPrimaryShow(true)
@@ -515,7 +521,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
             runTransitionAndSetWakefulness(
-                    KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                KeyguardState.GONE,
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+            )
 
             // WHEN the device begins to sleep
             keyguardRepository.setIsActiveDreamLockscreenHosted(false)
@@ -547,7 +555,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
             runTransitionAndSetWakefulness(
-                    KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                KeyguardState.GONE,
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+            )
 
             // WHEN the keyguard is occluded and the lockscreen hosted dream stops
             keyguardRepository.setIsActiveDreamLockscreenHosted(false)
@@ -783,7 +793,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             runTransitionAndSetWakefulness(
-                    KeyguardState.LOCKSCREEN, KeyguardState.ALTERNATE_BOUNCER)
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.ALTERNATE_BOUNCER
+            )
 
             // WHEN the alternateBouncer stops showing and then the primary bouncer shows
             bouncerRepository.setPrimaryShow(true)
@@ -808,7 +820,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             bouncerRepository.setAlternateVisible(true)
             runTransitionAndSetWakefulness(
-                    KeyguardState.LOCKSCREEN, KeyguardState.ALTERNATE_BOUNCER)
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.ALTERNATE_BOUNCER
+            )
 
             // GIVEN the primary bouncer isn't showing, aod available and starting to sleep
             bouncerRepository.setPrimaryShow(false)
@@ -838,7 +852,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             bouncerRepository.setAlternateVisible(true)
             runTransitionAndSetWakefulness(
-                    KeyguardState.LOCKSCREEN, KeyguardState.ALTERNATE_BOUNCER)
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.ALTERNATE_BOUNCER
+            )
 
             // GIVEN the primary bouncer isn't showing, aod not available and starting to sleep
             // to sleep
@@ -869,7 +885,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             bouncerRepository.setAlternateVisible(true)
             runTransitionAndSetWakefulness(
-                    KeyguardState.LOCKSCREEN, KeyguardState.ALTERNATE_BOUNCER)
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.ALTERNATE_BOUNCER
+            )
 
             // GIVEN the primary bouncer isn't showing and device not sleeping
             bouncerRepository.setPrimaryShow(false)
@@ -980,7 +998,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
             bouncerRepository.setPrimaryShow(true)
             runTransitionAndSetWakefulness(
-                    KeyguardState.DREAMING_LOCKSCREEN_HOSTED, KeyguardState.PRIMARY_BOUNCER)
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
+                KeyguardState.PRIMARY_BOUNCER
+            )
 
             // WHEN the primary bouncer stops showing and lockscreen hosted dream still active
             bouncerRepository.setPrimaryShow(false)
@@ -1161,6 +1181,57 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    fun dreamingToOccluded() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DREAMING
+            keyguardRepository.setDreaming(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
+            runCurrent()
+
+            // WHEN the keyguard is occluded and device wakes up and is no longer dreaming
+            keyguardRepository.setDreaming(false)
+            keyguardRepository.setKeyguardOccluded(true)
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to OCCLUDED should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun lockscreenToOccluded() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to LOCKSCREEN
+            runTransitionAndSetWakefulness(KeyguardState.GONE, KeyguardState.LOCKSCREEN)
+            runCurrent()
+
+            // WHEN the keyguard is occluded
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to OCCLUDED should occur
+            assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     fun aodToOccluded() =
         testScope.runTest {
             // GIVEN a prior transition has run to AOD
@@ -1286,8 +1357,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     }
 
     private suspend fun TestScope.runTransitionAndSetWakefulness(
-            from: KeyguardState,
-            to: KeyguardState
+        from: KeyguardState,
+        to: KeyguardState
     ) {
         transitionRepository.sendTransitionStep(
             TransitionStep(

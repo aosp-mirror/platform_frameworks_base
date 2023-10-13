@@ -25,5 +25,6 @@ data class RecentTask(
     @UserIdInt val userId: Int,
     val topActivityComponent: ComponentName?,
     val baseIntentComponent: ComponentName?,
-    @ColorInt val colorBackground: Int?
+    @ColorInt val colorBackground: Int?,
+    val isForegroundTask: Boolean,
 )

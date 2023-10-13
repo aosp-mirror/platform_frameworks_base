@@ -63,6 +63,7 @@ import java.util.stream.Collectors;
  */
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SATELLITE)
 @SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public final class SatelliteManager {
     private static final String TAG = "SatelliteManager";
 
@@ -108,6 +109,7 @@ public final class SatelliteManager {
     /**
      * Exception from the satellite service containing the {@link SatelliteResult} error code.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static class SatelliteException extends Exception {
         @SatelliteResult private final int mErrorCode;
 
@@ -116,6 +118,7 @@ public final class SatelliteManager {
          *
          * @param errorCode The {@link SatelliteResult}.
          */
+        @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
         public SatelliteException(@SatelliteResult int errorCode) {
             mErrorCode = errorCode;
         }
@@ -125,6 +128,7 @@ public final class SatelliteManager {
          *
          * @return The {@link SatelliteResult}.
          */
+        @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
         @SatelliteResult public int getErrorCode() {
             return mErrorCode;
         }
@@ -190,104 +194,127 @@ public final class SatelliteManager {
     /**
      * The request was successfully processed.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_SUCCESS = 0;
     /**
      * A generic error which should be used only when other specific errors cannot be used.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_ERROR = 1;
     /**
      * Error received from the satellite server.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_SERVER_ERROR = 2;
     /**
      * Error received from the vendor service. This generic error code should be used
      * only when the error cannot be mapped to other specific service error codes.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_SERVICE_ERROR = 3;
     /**
      * Error received from satellite modem. This generic error code should be used only when
      * the error cannot be mapped to other specific modem error codes.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_MODEM_ERROR = 4;
     /**
      * Error received from the satellite network. This generic error code should be used only when
      * the error cannot be mapped to other specific network error codes.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_NETWORK_ERROR = 5;
     /**
      * Telephony is not in a valid state to receive requests from clients.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_INVALID_TELEPHONY_STATE = 6;
     /**
      * Satellite modem is not in a valid state to receive requests from clients.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_INVALID_MODEM_STATE = 7;
     /**
      * Either vendor service, or modem, or Telephony framework has received a request with
      * invalid arguments from its clients.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_INVALID_ARGUMENTS = 8;
     /**
      * Telephony framework failed to send a request or receive a response from the vendor service
      * or satellite modem due to internal error.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_REQUEST_FAILED = 9;
     /**
      * Radio did not start or is resetting.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_RADIO_NOT_AVAILABLE = 10;
     /**
      * The request is not supported by either the satellite modem or the network.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_REQUEST_NOT_SUPPORTED = 11;
     /**
      * Satellite modem or network has no resources available to handle requests from clients.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_NO_RESOURCES = 12;
     /**
      * Satellite service is not provisioned yet.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_SERVICE_NOT_PROVISIONED = 13;
     /**
      * Satellite service provision is already in progress.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_SERVICE_PROVISION_IN_PROGRESS = 14;
     /**
      * The ongoing request was aborted by either the satellite modem or the network.
      * This error is also returned when framework decides to abort current send request as one
      * of the previous send request failed.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_REQUEST_ABORTED = 15;
     /**
      * The device/subscriber is barred from accessing the satellite service.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_ACCESS_BARRED = 16;
     /**
      * Satellite modem timeout to receive ACK or response from the satellite network after
      * sending a request to the network.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_NETWORK_TIMEOUT = 17;
     /**
      * Satellite network is not reachable from the modem.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_NOT_REACHABLE = 18;
     /**
      * The device/subscriber is not authorized to register with the satellite service provider.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_NOT_AUTHORIZED = 19;
     /**
      * The device does not support satellite.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_NOT_SUPPORTED = 20;
 
     /**
      * The current request is already in-progress.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_REQUEST_IN_PROGRESS = 21;
 
     /**
      * Satellite modem is currently busy due to which current request cannot be processed.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_MODEM_BUSY = 22;
 
     /** @hide */
@@ -323,22 +350,27 @@ public final class SatelliteManager {
      * Unknown Non-Terrestrial radio technology. This generic radio technology should be used
      * only when the radio technology cannot be mapped to other specific radio technologies.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int NT_RADIO_TECHNOLOGY_UNKNOWN = 0;
     /**
      * 3GPP NB-IoT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int NT_RADIO_TECHNOLOGY_NB_IOT_NTN = 1;
     /**
      * 3GPP 5G NR over Non-Terrestrial-Networks technology.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int NT_RADIO_TECHNOLOGY_NR_NTN = 2;
     /**
      * 3GPP eMTC (enhanced Machine-Type Communication) over Non-Terrestrial-Networks technology.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int NT_RADIO_TECHNOLOGY_EMTC_NTN = 3;
     /**
      * Proprietary technology.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int NT_RADIO_TECHNOLOGY_PROPRIETARY = 4;
 
     /** @hide */
@@ -353,12 +385,16 @@ public final class SatelliteManager {
     public @interface NTRadioTechnology {}
 
     /** Suggested device hold position is unknown. */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DEVICE_HOLD_POSITION_UNKNOWN = 0;
     /** User is suggested to hold the device in portrait mode. */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DEVICE_HOLD_POSITION_PORTRAIT = 1;
     /** User is suggested to hold the device in landscape mode with left hand. */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DEVICE_HOLD_POSITION_LANDSCAPE_LEFT = 2;
     /** User is suggested to hold the device in landscape mode with right hand. */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DEVICE_HOLD_POSITION_LANDSCAPE_RIGHT = 3;
 
     /** @hide */
@@ -372,14 +408,18 @@ public final class SatelliteManager {
     public @interface DeviceHoldPosition {}
 
     /** Display mode is unknown. */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DISPLAY_MODE_UNKNOWN = 0;
     /** Display mode of the device used for satellite communication for non-foldable phones. */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DISPLAY_MODE_FIXED = 1;
     /** Display mode of the device used for satellite communication for foldabale phones when the
      * device is opened. */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DISPLAY_MODE_OPENED = 2;
     /** Display mode of the device used for satellite communication for foldabable phones when the
      * device is closed. */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DISPLAY_MODE_CLOSED = 3;
 
     /** @hide */
@@ -414,7 +454,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener) {
@@ -457,7 +497,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestIsSatelliteEnabled(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -512,7 +552,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestIsDemoModeEnabled(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -565,7 +605,7 @@ public final class SatelliteManager {
      *
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestIsSatelliteSupported(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -619,7 +659,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestSatelliteCapabilities(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<SatelliteCapabilities, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -664,16 +704,19 @@ public final class SatelliteManager {
      * The default state indicating that datagram transfer is idle.
      * This should be sent if there are no message transfer activity happening.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE = 0;
     /**
      * A transition state indicating that a datagram is being sent.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SENDING = 1;
     /**
      * An end state indicating that datagram sending completed successfully.
      * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
      * will be sent if no more messages are pending.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_SUCCESS = 2;
     /**
      * An end state indicating that datagram sending completed with a failure.
@@ -681,16 +724,19 @@ public final class SatelliteManager {
      * must be sent before reporting any additional datagram transfer state changes. All pending
      * messages will be reported as failed, to the corresponding applications.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_FAILED = 3;
     /**
      * A transition state indicating that a datagram is being received.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVING = 4;
     /**
      * An end state indicating that datagram receiving completed successfully.
      * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
      * will be sent if no more messages are pending.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_SUCCESS = 5;
     /**
      * An end state indicating that datagram receive operation found that there are no
@@ -698,12 +744,14 @@ public final class SatelliteManager {
      * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
      * will be sent if no more messages are pending.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_NONE = 6;
     /**
      * An end state indicating that datagram receive completed with a failure.
      * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
      * will be sent if no more messages are pending.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED = 7;
     /**
      * A transition state indicating that Telephony is waiting for satellite modem to connect to a
@@ -721,6 +769,7 @@ public final class SatelliteManager {
      * only when the datagram transfer state cannot be mapped to other specific datagram transfer
      * states.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN = -1;
 
     /** @hide */
@@ -743,26 +792,32 @@ public final class SatelliteManager {
     /**
      * Satellite modem is in idle state.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_MODEM_STATE_IDLE = 0;
     /**
      * Satellite modem is listening for incoming datagrams.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_MODEM_STATE_LISTENING = 1;
     /**
      * Satellite modem is sending and/or receiving datagrams.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING = 2;
     /**
      * Satellite modem is retrying to send and/or receive datagrams.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_MODEM_STATE_DATAGRAM_RETRYING = 3;
     /**
      * Satellite modem is powered off.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_MODEM_STATE_OFF = 4;
     /**
      * Satellite modem is unavailable.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_MODEM_STATE_UNAVAILABLE = 5;
     /**
      * The satellite modem is powered on but the device is not registered to a satellite cell.
@@ -778,6 +833,7 @@ public final class SatelliteManager {
      * Satellite modem state is unknown. This generic modem state should be used only when the
      * modem state cannot be mapped to other specific modem states.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_MODEM_STATE_UNKNOWN = -1;
 
     /** @hide */
@@ -799,15 +855,18 @@ public final class SatelliteManager {
      * Datagram type is unknown. This generic datagram type should be used only when the
      * datagram type cannot be mapped to other specific datagram types.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DATAGRAM_TYPE_UNKNOWN = 0;
     /**
      * Datagram type indicating that the datagram to be sent or received is of type SOS message.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DATAGRAM_TYPE_SOS_MESSAGE = 1;
     /**
      * Datagram type indicating that the datagram to be sent or received is of type
      * location sharing.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int DATAGRAM_TYPE_LOCATION_SHARING = 2;
 
     /** @hide */
@@ -857,7 +916,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void startSatelliteTransmissionUpdates(@NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener,
             @NonNull SatelliteTransmissionUpdateCallback callback) {
@@ -927,7 +986,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void stopSatelliteTransmissionUpdates(
             @NonNull SatelliteTransmissionUpdateCallback callback,
             @NonNull @CallbackExecutor Executor executor,
@@ -983,7 +1042,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void provisionSatelliteService(@NonNull String token, @NonNull byte[] provisionData,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor,
@@ -1036,7 +1095,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void deprovisionSatelliteService(@NonNull String token,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener) {
@@ -1076,7 +1135,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     @SatelliteResult public int registerForSatelliteProvisionStateChanged(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatelliteProvisionStateCallback callback) {
@@ -1119,7 +1178,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void unregisterForSatelliteProvisionStateChanged(
             @NonNull SatelliteProvisionStateCallback callback) {
         Objects.requireNonNull(callback);
@@ -1158,7 +1217,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestIsSatelliteProvisioned(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -1210,7 +1269,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     @SatelliteResult public int registerForSatelliteModemStateChanged(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatelliteStateCallback callback) {
@@ -1250,7 +1309,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void unregisterForSatelliteModemStateChanged(@NonNull SatelliteStateCallback callback) {
         Objects.requireNonNull(callback);
         ISatelliteStateCallback internalCallback = sSatelliteStateCallbackMap.remove(callback);
@@ -1288,7 +1347,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     @SatelliteResult public int registerForSatelliteDatagram(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatelliteDatagramCallback callback) {
@@ -1344,7 +1403,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void unregisterForSatelliteDatagram(@NonNull SatelliteDatagramCallback callback) {
         Objects.requireNonNull(callback);
         ISatelliteDatagramCallback internalCallback =
@@ -1383,7 +1442,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void pollPendingSatelliteDatagrams(@NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener) {
         Objects.requireNonNull(executor);
@@ -1436,7 +1495,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void sendSatelliteDatagram(@DatagramType int datagramType,
             @NonNull SatelliteDatagram datagram, boolean needFullScreenPointingUI,
             @NonNull @CallbackExecutor Executor executor,
@@ -1482,7 +1541,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestIsSatelliteCommunicationAllowedForCurrentLocation(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
@@ -1540,7 +1599,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestTimeForNextSatelliteVisibility(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Duration, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -1594,7 +1653,7 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void setDeviceAlignedWithSatellite(boolean isAligned) {
         try {
             ITelephony telephony = getITelephony();

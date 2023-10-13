@@ -20,6 +20,7 @@ import static android.os.Trace.TRACE_TAG_APP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
+import static com.android.systemui.flags.Flags.UNCLEARED_TRANSIENT_HUN_FIX;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.util.DumpUtilsKt.println;
@@ -576,6 +577,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSplitShadeStateController = splitShadeStateController;
         updateSplitNotificationShade();
     }
+    private FeatureFlags mFeatureFlags;
 
     private final ExpandableView.OnHeightChangedListener mOnChildHeightChangedListener =
             new ExpandableView.OnHeightChangedListener() {
@@ -628,16 +630,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public NotificationStackScrollLayout(Context context, AttributeSet attrs) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
-        FeatureFlags featureFlags = Dependency.get(FeatureFlags.class);
-        mIsSmallLandscapeLockscreenEnabled = featureFlags.isEnabled(
+        mFeatureFlags = Dependency.get(FeatureFlags.class);
+        mIsSmallLandscapeLockscreenEnabled = mFeatureFlags.isEnabled(
                 Flags.LOCKSCREEN_ENABLE_LANDSCAPE);
-        mDebugLines = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
-        mNewAodTransition = featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION);
-        mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
-        mSensitiveRevealAnimEndabled = featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
+        mDebugLines = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
+        mNewAodTransition = mFeatureFlags.isEnabled(Flags.NEW_AOD_TRANSITION);
+        mDebugRemoveAnimation = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
+        mSensitiveRevealAnimEndabled = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         mAnimatedInsets =
-                new RefactorFlag(featureFlags, Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
-        mShelfRefactor = new RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
+                new RefactorFlag(mFeatureFlags, Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
+        mShelfRefactor = new RefactorFlag(mFeatureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
         mScreenOffAnimationController =
                 Dependency.get(ScreenOffAnimationController.class);
@@ -2779,8 +2781,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (animationGenerated) {
             if (!mSwipedOutViews.contains(child) || !isFullySwipedOut(child)) {
                 logAddTransientChild(child, container);
-                container.addTransientView(child, 0);
-                child.setTransientContainer(container);
+                child.addToTransientContainer(container, 0);
             }
         } else {
             mSwipedOutViews.remove(child);
@@ -2870,7 +2871,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Generate a remove animation for a child view.
      *
      * @param child The view to generate the remove animation for.
-     * @return Whether an animation was generated.
+     * @return Whether a new animation was generated or an existing animation was detected by this
+     * method. We need this to determine if a transient view is needed.
      */
     boolean generateRemoveAnimation(ExpandableView child) {
         String key = "";
@@ -2887,10 +2889,23 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAddedHeadsUpChildren.remove(child);
             return false;
         }
-        if (isClickedHeadsUp(child)) {
-            // An animation is already running, add it transiently
-            mClearTransientViewsWhenFinished.add(child);
-            return true;
+        if (mFeatureFlags.isEnabled(UNCLEARED_TRANSIENT_HUN_FIX)) {
+            // Skip adding animation for clicked heads up notifications when the
+            // Shade is closed, because the animation event is generated in
+            // generateHeadsUpAnimationEvents. Only report that an animation was
+            // actually generated (thus requesting the transient view be added)
+            // if a removal animation is in progress.
+            if (!isExpanded() && isClickedHeadsUp(child)) {
+                // An animation is already running, add it transiently
+                mClearTransientViewsWhenFinished.add(child);
+                return child.inRemovalAnimation();
+            }
+        } else {
+            if (isClickedHeadsUp(child)) {
+                // An animation is already running, add it transiently
+                mClearTransientViewsWhenFinished.add(child);
+                return true;
+            }
         }
         if (mDebugRemoveAnimation) {
             Log.d(TAG, "generateRemove " + key

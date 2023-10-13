@@ -135,9 +135,7 @@ class DevicePermissionPersistence {
     ) {
         tag(TAG_DEVICE) {
             attributeInterned(ATTR_ID, deviceId)
-            permissionFlags.forEachIndexed { _, name, flags ->
-                serializePermission(name, flags)
-            }
+            permissionFlags.forEachIndexed { _, name, flags -> serializePermission(name, flags) }
         }
     }
 
@@ -145,11 +143,12 @@ class DevicePermissionPersistence {
         tag(TAG_PERMISSION) {
             attributeInterned(ATTR_NAME, name)
             // Never serialize one-time permissions as granted.
-            val serializedFlags = if (flags.hasBits(PermissionFlags.ONE_TIME)) {
-                flags andInv PermissionFlags.RUNTIME_GRANTED
-            } else {
-                flags
-            }
+            val serializedFlags =
+                if (flags.hasBits(PermissionFlags.ONE_TIME)) {
+                    flags andInv PermissionFlags.RUNTIME_GRANTED
+                } else {
+                    flags
+                }
             attributeInt(ATTR_FLAGS, serializedFlags)
         }
     }

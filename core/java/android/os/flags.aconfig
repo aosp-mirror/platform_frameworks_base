@@ -1,6 +1,13 @@
 package: "android.os"
 
 flag {
+    name: "state_of_health_public"
+    namespace: "system_sw_battery"
+    description: "Feature flag for making state_of_health a public api."
+    bug: "288842045"
+}
+
+flag {
     name: "disallow_cellular_null_ciphers_restriction"
     namespace: "cellular_security"
     description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."
