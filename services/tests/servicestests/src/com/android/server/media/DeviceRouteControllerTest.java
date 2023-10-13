@@ -19,6 +19,7 @@ package com.android.server.media;
 import static com.android.media.flags.Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER;
 
 import android.content.Context;
+import android.os.Looper;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -56,7 +57,8 @@ public class DeviceRouteControllerTest {
     @RequiresFlagsDisabled(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
     public void createInstance_audioPoliciesFlagIsDisabled_createsLegacyController() {
         DeviceRouteController deviceRouteController =
-                DeviceRouteController.createInstance(mContext, mOnDeviceRouteChangedListener);
+                DeviceRouteController.createInstance(
+                        mContext, Looper.getMainLooper(), mOnDeviceRouteChangedListener);
 
         Truth.assertThat(deviceRouteController).isInstanceOf(LegacyDeviceRouteController.class);
     }
@@ -65,7 +67,8 @@ public class DeviceRouteControllerTest {
     @RequiresFlagsEnabled(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
     public void createInstance_audioPoliciesFlagIsEnabled_createsAudioPoliciesController() {
         DeviceRouteController deviceRouteController =
-                DeviceRouteController.createInstance(mContext, mOnDeviceRouteChangedListener);
+                DeviceRouteController.createInstance(
+                        mContext, Looper.getMainLooper(), mOnDeviceRouteChangedListener);
 
         Truth.assertThat(deviceRouteController)
                 .isInstanceOf(AudioPoliciesDeviceRouteController.class);
