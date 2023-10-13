@@ -63,6 +63,7 @@ class BigPictureIconManager
 constructor(
     private val context: Context,
     private val imageLoader: ImageLoader,
+    private val statsManager: BigPictureStatsManager,
     @Application private val scope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val bgDispatcher: CoroutineDispatcher
@@ -182,12 +183,15 @@ constructor(
         displayedState = drawableAndState?.second ?: Empty
     }
 
-    private fun startLoadingJob(icon: Icon): Job =
-        scope.launch {
-            val drawableAndState = withContext(bgDispatcher) { loadImageSync(icon) }
-            withContext(mainDispatcher) { applyDrawableAndState(drawableAndState) }
-            log("full image loaded")
-        }
+    private fun startLoadingJob(icon: Icon): Job = scope.launch {
+        statsManager.measure { loadImage(icon) }
+    }
+
+    private suspend fun loadImage(icon: Icon) {
+        val drawableAndState = withContext(bgDispatcher) { loadImageSync(icon) }
+        withContext(mainDispatcher) { applyDrawableAndState(drawableAndState) }
+        log("full image loaded")
+    }
 
     private fun startFreeImageJob(icon: Icon, drawableSize: Size): Job =
         scope.launch {
