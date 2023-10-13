@@ -16,10 +16,13 @@
 
 package android.graphics;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.graphics.hwui.flags.Flags;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -125,6 +128,7 @@ public final class Gainmap implements Parcelable {
      * Creates a new gainmap using the provided gainmap as the metadata source and the provided
      * bitmap as the replacement for the gainmapContents
      */
+    @FlaggedApi(Flags.FLAG_GAINMAP_CONSTRUCTOR_WITH_METADATA)
     public Gainmap(@NonNull Gainmap gainmap, @NonNull Bitmap gainmapContents) {
         this(gainmapContents, nCreateCopy(gainmap.mNativePtr));
     }
