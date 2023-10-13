@@ -37,11 +37,12 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.res.R;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import dagger.Lazy;
 
@@ -64,6 +65,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private final Context mContext;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
+    private final Lazy<SelectedUserInteractor> mUserInteractor;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new UpdateMonitorCallback();
     private final Lazy<KeyguardUnlockAnimationController> mUnlockAnimationControllerLazy;
@@ -120,11 +122,13 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
             KeyguardUpdateMonitorLogger logger,
             DumpManager dumpManager,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            Lazy<SelectedUserInteractor> userInteractor) {
         mContext = context;
         mLogger = logger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
+        mUserInteractor = userInteractor;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mUnlockAnimationControllerLazy = keyguardUnlockAnimationController;
         mFeatureFlags = featureFlags;

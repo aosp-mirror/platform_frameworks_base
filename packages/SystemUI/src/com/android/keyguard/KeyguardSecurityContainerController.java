@@ -157,23 +157,25 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private int mCurrentUser = UserHandle.USER_NULL;
     private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
             new UserSwitcherController.UserSwitchCallback() {
-        @Override
-        public void onUserSwitched() {
-            if (mCurrentUser == KeyguardUpdateMonitor.getCurrentUser()) {
-                return;
-            }
-            mCurrentUser = KeyguardUpdateMonitor.getCurrentUser();
-            showPrimarySecurityScreen(false);
-            if (mCurrentSecurityMode != SecurityMode.SimPin
-                    && mCurrentSecurityMode != SecurityMode.SimPuk) {
-                reinflateViewFlipper((l) -> {});
-            }
-        }
-    };
+                @Override
+                public void onUserSwitched() {
+                    if (mCurrentUser == mSelectedUserInteractor.getSelectedUserId()) {
+                        return;
+                    }
+                    mCurrentUser = mSelectedUserInteractor.getSelectedUserId();
+                    showPrimarySecurityScreen(false);
+                    if (mCurrentSecurityMode != SecurityMode.SimPin
+                            && mCurrentSecurityMode != SecurityMode.SimPuk) {
+                        reinflateViewFlipper((l) -> {
+                        });
+                    }
+                }
+            };
 
     @VisibleForTesting
     final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
         private MotionEvent mTouchDown;
+
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
             return false;
@@ -267,7 +269,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 ThreadUtils.postOnBackgroundThread(() -> {
                     try {
                         Thread.sleep(5000);
-                    } catch (InterruptedException ignored) { }
+                    } catch (InterruptedException ignored) {
+                    }
                     System.gc();
                     System.runFinalization();
                     System.gc();
@@ -281,7 +284,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
                     .setType(success ? MetricsEvent.TYPE_SUCCESS : MetricsEvent.TYPE_FAILURE));
             mUiEventLogger.log(success ? BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS
-                            : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE, getSessionId());
+                    : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE, getSessionId());
         }
 
         @Override
@@ -404,7 +407,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                         }
                         mKeyguardSecurityCallback.dismiss(
                                 false /* authenticated */,
-                                KeyguardUpdateMonitor.getCurrentUser(),
+                                mSelectedUserInteractor.getSelectedUserId(),
                                 /* bypassSecondaryLockScreen */ false,
                                 SecurityMode.Invalid
                         );
@@ -425,7 +428,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final Provider<JavaAdapter> mJavaAdapter;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final Lazy<PrimaryBouncerInteractor> mPrimaryBouncerInteractor;
-    @Nullable private Job mSceneTransitionCollectionJob;
+    @Nullable
+    private Job mSceneTransitionCollectionJob;
 
     @Inject
     public KeyguardSecurityContainerController(KeyguardSecurityContainer view,
@@ -520,7 +524,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             // When the scene framework says that the lockscreen has been dismissed, dismiss the
             // keyguard here, revealing the underlying app or launcher:
             mSceneTransitionCollectionJob = mJavaAdapter.get().alwaysCollectFlow(
-                mDeviceEntryInteractor.get().isDeviceEntered(),
+                    mDeviceEntryInteractor.get().isDeviceEntered(),
                     isDeviceEntered -> {
                     if (isDeviceEntered) {
                         final int selectedUserId = mSelectedUserInteractor.getSelectedUserId();
@@ -548,7 +552,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
     }
 
-    /** */
+    /**  */
     public void onPause() {
         if (DEBUG) {
             Log.d(TAG, String.format("screen off, instance %s at %s",
@@ -586,12 +590,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     /**
      * Shows the primary security screen for the user. This will be either the multi-selector
      * or the user's security method.
+     *
      * @param turningOff true if the device is being turned off
      */
     public void showPrimarySecurityScreen(boolean turningOff) {
         if (DEBUG) Log.d(TAG, "show()");
         SecurityMode securityMode = whitelistIpcs(() -> mSecurityModel.getSecurityMode(
-                KeyguardUpdateMonitor.getCurrentUser()));
+                mSelectedUserInteractor.getSelectedUserId()));
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
         showSecurityScreen(securityMode);
     }
@@ -671,6 +676,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     /**
      * Dismisses the keyguard by going to the next screen or making it gone.
+     *
      * @param targetUserId a user that needs to be the foreground user at the dismissal completion.
      * @return True if the keyguard is done.
      */
@@ -716,7 +722,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     /**
-     *  Resets the state of the views.
+     * Resets the state of the views.
      */
     public void reset() {
         mView.reset();
@@ -748,7 +754,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             getCurrentSecurityController(controller -> controller.onResume(reason));
         }
         mView.onResume(
-                mSecurityModel.getSecurityMode(KeyguardUpdateMonitor.getCurrentUser()),
+                mSecurityModel.getSecurityMode(mSelectedUserInteractor.getSelectedUserId()),
                 mKeyguardStateController.isFaceAuthEnabled());
     }
 
@@ -764,7 +770,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     /**
      * Show the bouncer and start appear animations.
-     *
      */
     public void appear() {
         // We might still be collapsed and the view didn't have time to layout yet or still
@@ -823,13 +828,16 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     /**
      * Shows the next security screen if there is one.
-     * @param authenticated true if the user entered the correct authentication
-     * @param targetUserId a user that needs to be the foreground user at the finish (if called)
-     *     completion.
+     *
+     * @param authenticated             true if the user entered the correct authentication
+     * @param targetUserId              a user that needs to be the foreground user at the finish
+     *                                  (if called)
+     *                                  completion.
      * @param bypassSecondaryLockScreen true if the user is allowed to bypass the secondary
-     *     secondary lock screen requirement, if any.
-     * @param expectedSecurityMode SecurityMode that is invoking this request. SecurityMode.Invalid
-     *      indicates that no check should be done
+     *                                  secondary lock screen requirement, if any.
+     * @param expectedSecurityMode      SecurityMode that is invoking this request.
+     *                                  SecurityMode.Invalid
+     *                                  indicates that no check should be done
      * @return true if keyguard is done
      */
     public boolean showNextSecurityScreenOrFinish(boolean authenticated, int targetUserId,
@@ -879,7 +887,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     // Shortcut for SIM PIN/PUK to go to directly to user's security screen or home
                     SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
                     boolean isLockscreenDisabled = mLockPatternUtils.isLockScreenDisabled(
-                            KeyguardUpdateMonitor.getCurrentUser())
+                            mSelectedUserInteractor.getSelectedUserId())
                             || !mDeviceProvisionedController.isUserSetup(targetUserId);
 
                     if (securityMode == SecurityMode.None && isLockscreenDisabled) {
@@ -955,6 +963,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      * Allows the media keys to work when the keyguard is showing.
      * The media keys should be of no interest to the actual keyguard view(s),
      * so intercepting them here should not be of any harm.
+     *
      * @param event The key event
      * @return whether the event was consumed as a media key.
      */
@@ -1050,8 +1059,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     /**
      * Switches to the given security view unless it's already being shown, in which case
      * this is a no-op.
-     *
-     * @param securityMode
      */
     @VisibleForTesting
     void showSecurityScreen(SecurityMode securityMode) {
@@ -1230,6 +1237,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      * Fades and translates in/out the security screen.
      * Fades in as expansion approaches 0.
      * Animation duration is between 0.33f and 0.67f of panel expansion fraction.
+     *
      * @param fraction amount of the screen that should show.
      */
     public void setExpansion(float fraction) {

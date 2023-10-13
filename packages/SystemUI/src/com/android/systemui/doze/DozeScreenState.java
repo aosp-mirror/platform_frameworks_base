@@ -31,13 +31,13 @@ import android.view.Display;
 
 import androidx.annotation.Nullable;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -81,6 +81,7 @@ public class DozeScreenState implements DozeMachine.Part {
     @Nullable private UdfpsController mUdfpsController;
     private final DozeLog mDozeLog;
     private final DozeScreenBrightness mDozeScreenBrightness;
+    private final SelectedUserInteractor mSelectedUserInteractor;
 
     private int mPendingScreenState = Display.STATE_UNKNOWN;
     private SettableWakeLock mWakeLock;
@@ -95,7 +96,8 @@ public class DozeScreenState implements DozeMachine.Part {
             AuthController authController,
             Provider<UdfpsController> udfpsControllerProvider,
             DozeLog dozeLog,
-            DozeScreenBrightness dozeScreenBrightness) {
+            DozeScreenBrightness dozeScreenBrightness,
+            SelectedUserInteractor selectedUserInteractor) {
         mDozeService = service;
         mHandler = handler;
         mParameters = parameters;
@@ -105,6 +107,7 @@ public class DozeScreenState implements DozeMachine.Part {
         mUdfpsControllerProvider = udfpsControllerProvider;
         mDozeLog = dozeLog;
         mDozeScreenBrightness = dozeScreenBrightness;
+        mSelectedUserInteractor = selectedUserInteractor;
 
         updateUdfpsController();
         if (mUdfpsController == null) {
@@ -113,7 +116,7 @@ public class DozeScreenState implements DozeMachine.Part {
     }
 
     private void updateUdfpsController() {
-        if (mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
+        if (mAuthController.isUdfpsEnrolled(mSelectedUserInteractor.getSelectedUserId())) {
             mUdfpsController = mUdfpsControllerProvider.get();
         } else {
             mUdfpsController = null;

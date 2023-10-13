@@ -52,7 +52,6 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInte
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -60,6 +59,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -109,8 +109,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
-    private ScreenLifecycle mScreenLifecycle;
-    @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private SessionTracker mSessionTracker;
@@ -126,6 +124,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private ViewRootImpl mViewRootImpl;
     @Mock
     private DeviceEntryHapticsInteractor mDeviceEntryHapticsInteractor;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
     private final FakeSystemClock mSystemClock = new FakeSystemClock();
     private FakeFeatureFlags mFeatureFlags;
     private BiometricUnlockController mBiometricUnlockController;
@@ -163,7 +163,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper,
                 mSystemClock,
                 mFeatureFlags,
-                mDeviceEntryHapticsInteractor
+                mDeviceEntryHapticsInteractor,
+                () -> mSelectedUserInteractor
         );
         biometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         biometricUnlockController.addListener(mBiometricUnlockEventsListener);

@@ -36,6 +36,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupR
 import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.util.kotlin.pairwise
+import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
@@ -51,8 +53,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
-import javax.inject.Inject
-import javax.inject.Provider
 
 /** Business logic for shade interactions. */
 @OptIn(ExperimentalCoroutinesApi::class)

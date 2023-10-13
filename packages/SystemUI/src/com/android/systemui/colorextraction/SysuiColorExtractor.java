@@ -26,11 +26,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.types.ExtractionType;
 import com.android.internal.colorextraction.types.Tonal;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -48,19 +50,22 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
     private boolean mHasMediaArtwork;
     private final GradientColors mNeutralColorsLock;
     private final GradientColors mBackdropColors;
+    private Lazy<SelectedUserInteractor> mUserInteractor;
 
     @Inject
     public SysuiColorExtractor(
             Context context,
             ConfigurationController configurationController,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            Lazy<SelectedUserInteractor> userInteractor) {
         this(
                 context,
                 new Tonal(context),
                 configurationController,
                 context.getSystemService(WallpaperManager.class),
                 dumpManager,
-                false /* immediately */);
+                false /* immediately */,
+                userInteractor);
     }
 
     @VisibleForTesting
@@ -70,7 +75,8 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
             ConfigurationController configurationController,
             WallpaperManager wallpaperManager,
             DumpManager dumpManager,
-            boolean immediately) {
+            boolean immediately,
+            Lazy<SelectedUserInteractor> userInteractor) {
         super(context, type, immediately, wallpaperManager);
         mTonal = type instanceof Tonal ? (Tonal) type : new Tonal(context);
         mNeutralColorsLock = new GradientColors();
@@ -79,6 +85,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
 
         mBackdropColors = new GradientColors();
         mBackdropColors.setMainColor(Color.BLACK);
+        mUserInteractor = userInteractor;
 
         // Listen to all users instead of only the current one.
         if (wallpaperManager.isWallpaperSupported()) {
@@ -100,7 +107,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
 
     @Override
     public void onColorsChanged(WallpaperColors colors, int which, int userId) {
-        if (userId != KeyguardUpdateMonitor.getCurrentUser()) {
+        if (userId != mUserInteractor.get().getSelectedUserId()) {
             // Colors do not belong to current user, ignoring.
             return;
         }

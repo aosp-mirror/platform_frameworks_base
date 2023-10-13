@@ -117,6 +117,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -187,6 +188,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
     private @Mock ShadeInteractor mShadeInteractor;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
+    private @Mock SelectedUserInteractor mSelectedUserInteractor;
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallback;
     private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
@@ -251,7 +253,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mAuthController,
                 mShadeExpansionStateManager,
                 () -> mShadeInteractor,
-                mShadeWindowLogger);
+                mShadeWindowLogger,
+                () -> mSelectedUserInteractor);
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
 

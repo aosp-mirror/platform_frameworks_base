@@ -25,15 +25,16 @@ import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -84,6 +85,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Mock private val mEmergencyButtonController: EmergencyButtonController? = null
     private val falsingCollector: FalsingCollector = FalsingCollectorFake()
     @Mock lateinit var postureController: DevicePostureController
+    @Mock lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     @Mock lateinit var featureFlags: FeatureFlags
     @Mock lateinit var passwordTextView: PasswordTextView
@@ -133,7 +135,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
             mEmergencyButtonController,
             falsingCollector,
             postureController,
-            featureFlags
+            featureFlags,
+            mSelectedUserInteractor,
         )
     }
 

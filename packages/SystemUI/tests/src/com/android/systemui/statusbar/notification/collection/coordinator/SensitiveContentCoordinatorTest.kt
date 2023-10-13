@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -53,6 +54,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     val keyguardUpdateMonitor: KeyguardUpdateMonitor = mock()
     val statusBarStateController: StatusBarStateController = mock()
     val keyguardStateController: KeyguardStateController = mock()
+    val mSelectedUserInteractor: SelectedUserInteractor = mock()
 
     val coordinator: SensitiveContentCoordinator =
         DaggerTestSensitiveContentCoordinatorComponent
@@ -62,7 +64,8 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
                         lockscreenUserManager,
                         keyguardUpdateMonitor,
                         statusBarStateController,
-                        keyguardStateController)
+                        keyguardStateController,
+                        mSelectedUserInteractor)
                 .coordinator
 
     @Test
@@ -263,7 +266,8 @@ interface TestSensitiveContentCoordinatorComponent {
             @BindsInstance lockscreenUserManager: NotificationLockscreenUserManager,
             @BindsInstance keyguardUpdateMonitor: KeyguardUpdateMonitor,
             @BindsInstance statusBarStateController: StatusBarStateController,
-            @BindsInstance keyguardStateController: KeyguardStateController
+            @BindsInstance keyguardStateController: KeyguardStateController,
+            @BindsInstance selectedUserInteractor: SelectedUserInteractor,
         ): TestSensitiveContentCoordinatorComponent
     }
 }

@@ -59,7 +59,10 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.time.SystemClock;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -175,6 +178,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final BiometricUnlockLogger mLogger;
     private final SystemClock mSystemClock;
     private final boolean mOrderUnlockAndWake;
+    private final Lazy<SelectedUserInteractor> mSelectedUserInteractor;
     private final DeviceEntryHapticsInteractor mHapticsInteractor;
 
     private long mLastFpFailureUptimeMillis;
@@ -286,7 +290,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             VibratorHelper vibrator,
             SystemClock systemClock,
             FeatureFlags featureFlags,
-            DeviceEntryHapticsInteractor hapticsInteractor
+            DeviceEntryHapticsInteractor hapticsInteractor,
+            Lazy<SelectedUserInteractor> selectedUserInteractor
     ) {
         mPowerManager = powerManager;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -317,6 +322,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mOrderUnlockAndWake = resources.getBoolean(
                 com.android.internal.R.bool.config_orderUnlockAndWake);
         mHapticsInteractor = hapticsInteractor;
+        mSelectedUserInteractor = selectedUserInteractor;
 
         dumpManager.registerDumpable(this);
     }
@@ -537,7 +543,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         return mPendingAuthenticated != null
                 && mUpdateMonitor
                     .isUnlockingWithBiometricAllowed(mPendingAuthenticated.isStrongBiometric)
-                && mPendingAuthenticated.userId == KeyguardUpdateMonitor.getCurrentUser();
+                && mPendingAuthenticated.userId
+                    == mSelectedUserInteractor.get().getSelectedUserId();
     }
 
     public @WakeAndUnlockMode int getMode() {
@@ -601,11 +608,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             // if unlocking isn't allowed, log more information about why unlocking may not
             // have been allowed
             final int strongAuthFlags = mUpdateMonitor.getStrongAuthTracker().getStrongAuthForUser(
-                    KeyguardUpdateMonitor.getCurrentUser());
+                    mSelectedUserInteractor.get().getSelectedUserId());
             final boolean nonStrongBiometricAllowed =
                     mUpdateMonitor.getStrongAuthTracker()
                             .isNonStrongBiometricAllowedAfterIdleTimeout(
-                                    KeyguardUpdateMonitor.getCurrentUser());
+                                    mSelectedUserInteractor.get().getSelectedUserId());
 
             mLogger.logCalculateModeForFingerprintUnlockingNotAllowed(strongBiometric,
                     strongAuthFlags, nonStrongBiometricAllowed, deviceInteractive, keyguardShowing);
@@ -671,11 +678,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             // if unlocking isn't allowed, log more information about why unlocking may not
             // have been allowed
             final int strongAuthFlags = mUpdateMonitor.getStrongAuthTracker().getStrongAuthForUser(
-                    KeyguardUpdateMonitor.getCurrentUser());
+                    mSelectedUserInteractor.get().getSelectedUserId());
             final boolean nonStrongBiometricAllowed =
                     mUpdateMonitor.getStrongAuthTracker()
                             .isNonStrongBiometricAllowedAfterIdleTimeout(
-                                    KeyguardUpdateMonitor.getCurrentUser());
+                                    mSelectedUserInteractor.get().getSelectedUserId());
 
             mLogger.logCalculateModeForPassiveAuthUnlockingNotAllowed(
                     strongBiometric, strongAuthFlags, nonStrongBiometricAllowed,
@@ -723,7 +730,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         // Suppress all face auth errors if fingerprint can be used to authenticate
         if ((biometricSourceType == BiometricSourceType.FACE
                 && !mUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                KeyguardUpdateMonitor.getCurrentUser()))
+                mSelectedUserInteractor.get().getSelectedUserId()))
                 || (biometricSourceType == BiometricSourceType.FINGERPRINT)) {
             mHapticsInteractor.vibrateError();
         }

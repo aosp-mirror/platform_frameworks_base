@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
@@ -75,6 +76,8 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock
     private BatteryController mBatteryController;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
     private final DockManagerFake mDockManager = new DockManagerFake();
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
@@ -90,7 +93,7 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor, mHistoryTracker, mProximitySensor,
                 mStatusBarStateController, mKeyguardStateController, mShadeExpansionStateManager,
                 mBatteryController,
-                mDockManager, mFakeExecutor, mFakeSystemClock);
+                mDockManager, mFakeExecutor, mFakeSystemClock, () -> mSelectedUserInteractor);
     }
 
     @Test

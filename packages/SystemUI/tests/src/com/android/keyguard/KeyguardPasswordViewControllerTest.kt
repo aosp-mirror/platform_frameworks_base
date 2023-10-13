@@ -24,12 +24,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.whenever
 import org.junit.Before
@@ -62,6 +63,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     @Mock lateinit var mainExecutor: DelayableExecutor
     @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var keyguardViewController: KeyguardViewController
+    @Mock lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var mKeyguardMessageArea: BouncerKeyguardMessageArea
     @Mock
     private lateinit var mKeyguardMessageAreaController:
@@ -106,7 +108,8 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
                 falsingCollector,
                 keyguardViewController,
                 postureController,
-                fakeFeatureFlags
+                fakeFeatureFlags,
+                mSelectedUserInteractor,
             )
     }
 

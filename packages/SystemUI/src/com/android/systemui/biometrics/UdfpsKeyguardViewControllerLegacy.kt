@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -68,6 +69,7 @@ open class UdfpsKeyguardViewControllerLegacy(
     primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
@@ -384,7 +386,7 @@ open class UdfpsKeyguardViewControllerLegacy(
         }
         if (
             keyguardUpdateMonitor.getUserUnlockedWithBiometric(
-                KeyguardUpdateMonitor.getCurrentUser()
+                selectedUserInteractor.getSelectedUserId()
             )
         ) {
             // If the device was unlocked by a biometric, immediately hide the UDFPS icon to avoid

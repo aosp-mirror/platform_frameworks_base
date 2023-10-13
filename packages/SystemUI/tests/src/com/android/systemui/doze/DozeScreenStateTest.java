@@ -51,6 +51,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.wakelock.WakeLockFake;
 import com.android.systemui.utils.os.FakeHandler;
 
@@ -85,6 +86,8 @@ public class DozeScreenStateTest extends SysuiTestCase {
     private DozeLog mDozeLog;
     @Mock
     private DozeScreenBrightness mDozeScreenBrightness;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
 
     @Before
     public void setUp() throws Exception {
@@ -100,7 +103,7 @@ public class DozeScreenStateTest extends SysuiTestCase {
         mWakeLock = new WakeLockFake();
         mScreen = new DozeScreenState(mServiceFake, mHandlerFake, mDozeHost, mDozeParameters,
                 mWakeLock, mAuthController, mUdfpsControllerProvider, mDozeLog,
-                mDozeScreenBrightness);
+                mDozeScreenBrightness, mSelectedUserInteractor);
     }
 
     @Test

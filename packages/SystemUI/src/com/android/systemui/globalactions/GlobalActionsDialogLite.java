@@ -134,6 +134,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -195,6 +196,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final IDreamManager mDreamManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final LockPatternUtils mLockPatternUtils;
+    private final SelectedUserInteractor mSelectedUserInteractor;
     private final TelephonyListenerManager mTelephonyListenerManager;
     private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -364,7 +366,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             PackageManager packageManager,
             ShadeController shadeController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            DialogLaunchAnimator dialogLaunchAnimator,
+            SelectedUserInteractor selectedUserInteractor) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -399,6 +402,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mShadeController = shadeController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mSelectedUserInteractor = selectedUserInteractor;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -713,7 +717,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mUiEventLogger,
                 mShadeController,
                 mKeyguardUpdateMonitor,
-                mLockPatternUtils);
+                mLockPatternUtils,
+                mSelectedUserInteractor);
 
         dialog.setOnDismissListener(this);
         dialog.setOnShowListener(this);
@@ -2222,6 +2227,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         private GestureDetector mGestureDetector;
         private final ShadeController mShadeController;
         private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+        private SelectedUserInteractor mSelectedUserInteractor;
         private LockPatternUtils mLockPatternUtils;
         private float mWindowDimAmount;
 
@@ -2300,7 +2306,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 UiEventLogger uiEventLogger,
                 ShadeController shadeController,
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
-                LockPatternUtils lockPatternUtils) {
+                LockPatternUtils lockPatternUtils,
+                SelectedUserInteractor selectedUserInteractor) {
             // We set dismissOnDeviceLock to false because we have a custom broadcast receiver to
             // dismiss this dialog when the device is locked.
             super(context, themeRes, false /* dismissOnDeviceLock */);
@@ -2321,6 +2328,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mGestureDetector = new GestureDetector(mContext, mGestureListener);
+            mSelectedUserInteractor = selectedUserInteractor;
         }
 
         @Override
@@ -2453,10 +2461,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             }
 
             // If user entered from the lock screen and smart lock was enabled, disable it
-            int user = KeyguardUpdateMonitor.getCurrentUser();
+            int user = mSelectedUserInteractor.getSelectedUserId();
             boolean userHasTrust = mKeyguardUpdateMonitor.getUserHasTrust(user);
             if (mKeyguardShowing && userHasTrust) {
-                mLockPatternUtils.requireCredentialEntry(KeyguardUpdateMonitor.getCurrentUser());
+                mLockPatternUtils.requireCredentialEntry(user);
                 showSmartLockDisabledMessage();
             }
         }

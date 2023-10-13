@@ -31,6 +31,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.Assert
 import com.android.systemui.util.sensors.AsyncSensorManager
 import java.io.PrintWriter
@@ -48,7 +49,8 @@ class KeyguardLiftController @Inject constructor(
     private val asyncSensorManager: AsyncSensorManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor,
-    private val dumpManager: DumpManager
+    private val dumpManager: DumpManager,
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) : Dumpable, CoreStartable {
 
     private val pickupSensor = asyncSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE)
@@ -115,7 +117,7 @@ class KeyguardLiftController @Inject constructor(
         val onKeyguard = keyguardUpdateMonitor.isKeyguardVisible &&
                 !statusBarStateController.isDozing
 
-        val userId = KeyguardUpdateMonitor.getCurrentUser()
+        val userId = selectedUserInteractor.getSelectedUserId()
         val isFaceEnabled = keyguardUpdateMonitor.isFaceAuthEnabledForUser(userId)
         val shouldListen = (onKeyguard || bouncerVisible) && isFaceEnabled
         if (shouldListen != isListening) {

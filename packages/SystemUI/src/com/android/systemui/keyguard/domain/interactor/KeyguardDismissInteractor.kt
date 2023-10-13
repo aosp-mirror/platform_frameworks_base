@@ -27,12 +27,12 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import javax.inject.Inject
 
 /** Encapsulates business logic for requesting the keyguard to dismiss/finish/done. */
 @SysUISingleton

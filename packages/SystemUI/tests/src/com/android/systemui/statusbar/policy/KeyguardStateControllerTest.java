@@ -38,6 +38,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import dagger.Lazy;
 
@@ -67,6 +68,8 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Mock
     private Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
     @Mock
+    private Lazy<SelectedUserInteractor> mUserInteractorLazy;
+    @Mock
     private KeyguardUpdateMonitorLogger mLogger;
     @Mock
     private FeatureFlags mFeatureFlags;
@@ -84,7 +87,8 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationControllerLazy,
                 mLogger,
                 mDumpManager,
-                mFeatureFlags);
+                mFeatureFlags,
+                mUserInteractorLazy);
     }
 
     @Test

@@ -96,6 +96,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 mKeyguardUpdateMonitor,
                 FakeTrustRepository(),
                 testScope.backgroundScope,
+                mSelectedUserInteractor,
             )
         mAlternateBouncerInteractor =
             AlternateBouncerInteractor(

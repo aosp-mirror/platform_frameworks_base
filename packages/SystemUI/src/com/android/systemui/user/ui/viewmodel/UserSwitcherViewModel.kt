@@ -25,12 +25,12 @@ import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
+import javax.inject.Inject
+import kotlin.math.ceil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
-import kotlin.math.ceil
 
 /** Models UI state for the user switcher feature. */
 @SysUISingleton

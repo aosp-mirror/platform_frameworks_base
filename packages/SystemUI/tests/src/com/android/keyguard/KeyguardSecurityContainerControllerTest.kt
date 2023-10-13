@@ -74,6 +74,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.GlobalSettings
 import com.google.common.truth.Truth
 import dagger.Lazy
+import java.util.Optional
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -96,7 +97,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -215,7 +215,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 null,
                 keyguardViewController,
                 postureController,
-                featureFlags
+                featureFlags,
+                mSelectedUserInteractor,
             )
 
         sceneTestUtils = SceneTestUtils(this)

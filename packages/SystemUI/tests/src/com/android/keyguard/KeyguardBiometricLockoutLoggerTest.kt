@@ -25,6 +25,7 @@ import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUT
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.SessionTracker
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,8 +35,8 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -50,6 +51,8 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
     lateinit var sessionTracker: SessionTracker
     @Mock
     lateinit var sessionId: InstanceId
+    @Mock
+    lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     @Captor
     lateinit var updateMonitorCallbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
@@ -65,7 +68,8 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
         keyguardBiometricLockoutLogger = KeyguardBiometricLockoutLogger(
                 uiEventLogger,
                 keyguardUpdateMonitor,
-                sessionTracker)
+                sessionTracker,
+                mSelectedUserInteractor)
     }
 
     @Test

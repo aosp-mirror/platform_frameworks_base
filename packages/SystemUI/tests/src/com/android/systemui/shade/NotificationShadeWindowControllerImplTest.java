@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
 
 import com.google.common.util.concurrent.MoreExecutors;
@@ -131,6 +132,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private AuthController mAuthController;
     @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private ShadeWindowLogger mShadeWindowLogger;
+    @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
     private final Executor mBackgroundExecutor = MoreExecutors.directExecutor();
@@ -216,6 +218,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 keyguardInteractor,
                 featureFlags,
                 mKeyguardSecurityModel,
+                mSelectedUserInteractor,
                 powerInteractor);
 
         mShadeInteractor =
@@ -255,7 +258,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mAuthController,
                 mShadeExpansionStateManager,
                 () -> mShadeInteractor,
-                mShadeWindowLogger) {
+                mShadeWindowLogger,
+                () -> mSelectedUserInteractor) {
                     @Override
                     protected boolean isDebuggable() {
                         return false;

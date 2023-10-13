@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.settings.FakeGlobalSettings;
@@ -134,6 +135,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
 
@@ -186,12 +188,14 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mPackageManager,
                 mShadeController,
                 mKeyguardUpdateMonitor,
-                mDialogLaunchAnimator);
+                mDialogLaunchAnimator,
+                mSelectedUserInteractor);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 
         ColorExtractor.GradientColors backdropColors = new ColorExtractor.GradientColors();
         backdropColors.setMainColor(Color.BLACK);
         when(mColorExtractor.getNeutralColors()).thenReturn(backdropColors);
+        when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(0);
     }
 
     @Test
@@ -568,7 +572,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Test
     public void testOnLockScreen_disableSmartLock() {
         mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
-        int user = KeyguardUpdateMonitor.getCurrentUser();
+        int expectedUser = 100;
+        doReturn(expectedUser).when(mSelectedUserInteractor).getSelectedUserId();
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
@@ -586,7 +591,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         mGlobalActionsDialogLite.showOrHideDialog(true, true, null /* view */);
 
         // Then smart lock will be disabled
-        verify(mLockPatternUtils).requireCredentialEntry(eq(user));
+        verify(mLockPatternUtils).requireCredentialEntry(eq(expectedUser));
 
         // hide dialog again
         mGlobalActionsDialogLite.showOrHideDialog(true, true, null /* view */);

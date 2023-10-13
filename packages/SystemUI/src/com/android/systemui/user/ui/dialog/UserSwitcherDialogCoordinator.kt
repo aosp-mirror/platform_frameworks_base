@@ -37,11 +37,11 @@ import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.Lazy
+import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Provider
 
 /** Coordinates dialogs for user switcher logic. */
 @SysUISingleton

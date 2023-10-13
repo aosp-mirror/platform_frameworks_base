@@ -21,7 +21,6 @@ import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.UserManager
 import android.provider.Settings.Global.USER_SWITCHER_ENABLED
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -30,7 +29,6 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.SettingObserver
 import com.android.systemui.qs.footer.data.model.UserSwitcherStatusModel
 import com.android.systemui.res.R
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.util.settings.GlobalSettings
@@ -61,10 +59,10 @@ constructor(
     @Background private val bgHandler: Handler,
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val userManager: UserManager,
-    private val userTracker: UserTracker,
     private val userSwitcherController: UserSwitcherController,
     private val userInfoController: UserInfoController,
     private val globalSetting: GlobalSettings,
+    private val userRepository: UserRepository,
 ) : UserSwitcherRepository {
     private val showUserSwitcherForSingleUser =
         context.resources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)
@@ -80,7 +78,7 @@ constructor(
                     globalSetting,
                     bgHandler,
                     USER_SWITCHER_ENABLED,
-                    userTracker.userId,
+                    userRepository.getSelectedUserInfo().id,
                 ) {
                 override fun handleValueChanged(value: Int, observedChange: Boolean) {
                     if (observedChange) {
@@ -147,7 +145,7 @@ constructor(
 
     private suspend fun isGuestUser(): Boolean {
         return withContext(bgDispatcher) {
-            userManager.isGuestUser(KeyguardUpdateMonitor.getCurrentUser())
+            userManager.isGuestUser(userRepository.getSelectedUserInfo().id)
         }
     }
 
