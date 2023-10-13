@@ -68,7 +68,7 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Mock
     private Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
     @Mock
-    private Lazy<SelectedUserInteractor> mUserInteractorLazy;
+    private SelectedUserInteractor mSelectedUserInteractor;
     @Mock
     private KeyguardUpdateMonitorLogger mLogger;
     @Mock
@@ -88,7 +88,7 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
                 mLogger,
                 mDumpManager,
                 mFeatureFlags,
-                mUserInteractorLazy);
+                mSelectedUserInteractor);
     }
 
     @Test

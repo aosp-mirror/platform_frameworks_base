@@ -65,7 +65,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private final Context mContext;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
-    private final Lazy<SelectedUserInteractor> mUserInteractor;
+    private final SelectedUserInteractor mUserInteractor;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new UpdateMonitorCallback();
     private final Lazy<KeyguardUnlockAnimationController> mUnlockAnimationControllerLazy;
@@ -123,7 +123,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
             KeyguardUpdateMonitorLogger logger,
             DumpManager dumpManager,
             FeatureFlags featureFlags,
-            Lazy<SelectedUserInteractor> userInteractor) {
+            SelectedUserInteractor userInteractor) {
         mContext = context;
         mLogger = logger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -254,7 +254,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     @VisibleForTesting
     void update(boolean updateAlways) {
         Trace.beginSection("KeyguardStateController#update");
-        int user = KeyguardUpdateMonitor.getCurrentUser();
+        int user = mUserInteractor.getSelectedUserId();
         boolean secure = mLockPatternUtils.isSecure(user);
         boolean canDismissLockScreen = !secure || mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)
                 || (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB && mDebugUnlocked);
