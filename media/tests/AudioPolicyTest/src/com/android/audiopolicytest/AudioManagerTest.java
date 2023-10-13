@@ -229,7 +229,7 @@ public class AudioManagerTest {
 
     @Test
     public void testSetGetVolumePerAttributes() {
-        for (int usage : AudioAttributes.SDK_USAGES) {
+        for (int usage : AudioAttributes.getSdkUsages()) {
             if (usage == AudioAttributes.USAGE_UNKNOWN) {
                 continue;
             }

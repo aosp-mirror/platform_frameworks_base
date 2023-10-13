@@ -1519,7 +1519,7 @@ public class ZenModeHelper {
         final boolean muteEverything = zenSilence || (zenPriorityOnly
                 && ZenModeConfig.areAllZenBehaviorSoundsMuted(mConsolidatedPolicy));
 
-        for (int usage : AudioAttributes.SDK_USAGES) {
+        for (int usage : AudioAttributes.SDK_USAGES.toArray()) {
             final int suppressionBehavior = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage);
             if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_NEVER) {
                 applyRestrictions(zenPriorityOnly, false /*mute*/, usage);

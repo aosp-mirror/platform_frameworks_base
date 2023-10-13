@@ -43,7 +43,7 @@ public class AudioRestrictionManager {
     static {
         SparseBooleanArray audioMutedUsages = new SparseBooleanArray();
         SparseBooleanArray vibrationMutedUsages = new SparseBooleanArray();
-        for (int usage : AudioAttributes.SDK_USAGES) {
+        for (int usage : AudioAttributes.SDK_USAGES.toArray()) {
             final int suppressionBehavior = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage);
             if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_NOTIFICATION ||
                     suppressionBehavior == AudioAttributes.SUPPRESSIBLE_CALL ||

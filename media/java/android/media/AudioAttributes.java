@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
@@ -330,7 +331,7 @@ public final class AudioAttributes implements Parcelable {
      * @hide
      * Array of all usage types exposed in the SDK that applications can use.
      */
-    public final static int[] SDK_USAGES = {
+    public static final IntArray SDK_USAGES = IntArray.wrap(new int[] {
             USAGE_UNKNOWN,
             USAGE_MEDIA,
             USAGE_VOICE_COMMUNICATION,
@@ -347,14 +348,14 @@ public final class AudioAttributes implements Parcelable {
             USAGE_ASSISTANCE_SONIFICATION,
             USAGE_GAME,
             USAGE_ASSISTANT,
-    };
+    });
 
     /**
      * @hide
      */
     @TestApi
     public static int[] getSdkUsages() {
-        return SDK_USAGES;
+        return SDK_USAGES.toArray();
     }
 
     /**
@@ -566,6 +567,15 @@ public final class AudioAttributes implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String mFormattedTags;
     private Bundle mBundle; // lazy-initialized, may be null
+
+    /** Array of all content types exposed in the SDK that applications can use */
+    private static final IntArray CONTENT_TYPES = IntArray.wrap(new int[]{
+            CONTENT_TYPE_UNKNOWN,
+            CONTENT_TYPE_SPEECH,
+            CONTENT_TYPE_MUSIC,
+            CONTENT_TYPE_MOVIE,
+            CONTENT_TYPE_SONIFICATION,
+    });
 
     private AudioAttributes() {
     }
@@ -1666,6 +1676,27 @@ public final class AudioAttributes implements Parcelable {
                 || usage == USAGE_SAFETY
                 || usage == USAGE_VEHICLE_STATUS
                 || usage == USAGE_ANNOUNCEMENT);
+    }
+
+    /**
+     * Query if the usage is a valid sdk usage
+     *
+     * @param usage one of {@link AttributeSdkUsage}
+     * @return {@code true} if the usage is valid for sdk or {@code false} otherwise
+     * @hide
+     */
+    public static boolean isSdkUsage(@AttributeSdkUsage int usage) {
+        return SDK_USAGES.contains(usage);
+    }
+
+    /**
+     * Query if the content type is a valid sdk content type
+     * @param contentType one of {@link AttributeContentType}
+     * @return {@code true} if the content type is valid for sdk or {@code false} otherwise
+     * @hide
+     */
+    public static boolean isSdkContentType(@AttributeContentType int contentType) {
+        return CONTENT_TYPES.contains(contentType);
     }
 
     /**
