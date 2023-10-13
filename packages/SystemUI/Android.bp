@@ -243,9 +243,6 @@ filegroup {
         "tests/src/com/android/systemui/statusbar/pipeline/shared/data/repository/FakeConnectivityRepository.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/FakeWifiRepository.kt",
 
-        /* Log fakes */
-        "tests/src/com/android/systemui/log/core/FakeLogBuffer.kt",
-
         /* QS fakes */
         "tests/src/com/android/systemui/qs/pipeline/domain/interactor/FakeQSTile.kt",
     ],
