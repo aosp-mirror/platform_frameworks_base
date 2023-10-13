@@ -5161,10 +5161,12 @@ package android.hardware.display {
   }
 
   public final class VirtualDisplayConfig implements android.os.Parcelable {
+    method @FlaggedApi("android.companion.virtualdevice.flags.virtual_display_insets") @Nullable public android.view.DisplayCutout getDisplayCutout();
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") public boolean isHomeSupported();
   }
 
   public static final class VirtualDisplayConfig.Builder {
+    method @FlaggedApi("android.companion.virtualdevice.flags.virtual_display_insets") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setDisplayCutout(@Nullable android.view.DisplayCutout);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setHomeSupported(boolean);
   }
 

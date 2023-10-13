@@ -56,6 +56,7 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayShape;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -271,6 +272,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private boolean mIsDisplayOn;
         private int mDisplayIdToMirror;
         private boolean mIsWindowManagerMirroring;
+        private DisplayCutout mDisplayCutout;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
@@ -286,6 +288,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mHeight = virtualDisplayConfig.getHeight();
             mDensityDpi = virtualDisplayConfig.getDensityDpi();
             mRequestedRefreshRate = virtualDisplayConfig.getRequestedRefreshRate();
+            mDisplayCutout = virtualDisplayConfig.getDisplayCutout();
             mMode = createMode(mWidth, mHeight, getRefreshRate());
             mSurface = surface;
             mFlags = flags;
@@ -567,6 +570,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
                 mInfo.displayShape =
                         DisplayShape.createDefaultDisplayShape(mInfo.width, mInfo.height, false);
+                mInfo.displayCutout = mDisplayCutout;
             }
             return mInfo;
         }
