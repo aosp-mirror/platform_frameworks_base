@@ -247,7 +247,7 @@ public class GraphicsActivity extends Activity {
 
             int rc = 0;
             try (SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
-                transaction.setFrameRateCategory(mSurfaceControl, category);
+                transaction.setFrameRateCategory(mSurfaceControl, category, false);
                 transaction.apply();
             }
             return rc;
