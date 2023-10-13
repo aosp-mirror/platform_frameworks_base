@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 public class FaceGenerateChallengeClient extends GenerateChallengeClient<AidlSession> {
     private static final String TAG = "FaceGenerateChallengeClient";
 
-    FaceGenerateChallengeClient(@NonNull Context context,
+    public FaceGenerateChallengeClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
             int sensorId, @NonNull BiometricLogger logger,

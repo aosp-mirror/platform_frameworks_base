@@ -6,3 +6,10 @@ flag {
   description: "This flag controls tunscany virtual HAL feature"
   bug: "294254230"
 }
+
+flag {
+    name: "de_hidl"
+    namespace: "biometrics_framework"
+    description: "feature flag for biometrics de-hidl"
+    bug: "287332354"
+}

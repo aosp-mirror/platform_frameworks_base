@@ -35,4 +35,7 @@ public interface LockoutTracker {
     @interface LockoutMode {}
 
     @LockoutMode int getLockoutModeForUser(int userId);
+    void setLockoutModeForUser(int userId, @LockoutMode int mode);
+    default void resetFailedAttemptsForUser(boolean clearAttemptCounter, int userId) {}
+    default void addFailedAttemptForUser(int userId) {}
 }

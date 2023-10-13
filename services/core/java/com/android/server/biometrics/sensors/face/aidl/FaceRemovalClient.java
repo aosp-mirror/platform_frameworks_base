@@ -36,12 +36,12 @@ import java.util.function.Supplier;
 /**
  * Face-specific removal client for the {@link IFace} AIDL HAL interface.
  */
-class FaceRemovalClient extends RemovalClient<Face, AidlSession> {
+public class FaceRemovalClient extends RemovalClient<Face, AidlSession> {
     private static final String TAG = "FaceRemovalClient";
 
     final int[] mBiometricIds;
 
-    FaceRemovalClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+    public FaceRemovalClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int[] biometricIds, int userId, @NonNull String owner,
             @NonNull BiometricUtils<Face> utils, int sensorId,

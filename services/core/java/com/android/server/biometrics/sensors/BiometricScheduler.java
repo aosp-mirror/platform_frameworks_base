@@ -586,4 +586,13 @@ public class BiometricScheduler {
             }
         }, 10000);
     }
+
+    /**
+     * Handle stop user client when user switching occurs.
+     */
+    public void onUserStopped() {}
+
+    public Handler getHandler() {
+        return mHandler;
+    }
 }

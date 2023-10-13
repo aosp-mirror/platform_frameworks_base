@@ -102,7 +102,7 @@ public class FingerprintEnrollClientTest {
     @Mock
     private ClientMonitorCallback mCallback;
     @Mock
-    private Sensor.HalSessionCallback mHalSessionCallback;
+    private AidlResponseHandler mAidlResponseHandler;
     @Mock
     private Probe mLuxProbe;
     @Captor
@@ -291,7 +291,7 @@ public class FingerprintEnrollClientTest {
     private FingerprintEnrollClient createClient(int version) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
-        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mAidlResponseHandler);
         return new FingerprintEnrollClient(mContext, () -> aidl, mToken, REQUEST_ID,
         mClientMonitorCallbackConverter, 0 /* userId */,
         HAT, "owner", mBiometricUtils, 8 /* sensorId */,
