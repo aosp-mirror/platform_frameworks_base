@@ -42,6 +42,7 @@ aconfig_srcjars = [
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
+    ":aconfig_midi_flags_java_lib{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
 ]
 

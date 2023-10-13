@@ -16,6 +16,8 @@
 
 package com.android.server.midi;
 
+import static com.android.media.midi.flags.Flags.virtualUmp;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -1548,6 +1550,12 @@ public class MidiService extends IMidiManager.Stub {
                 Log.w(TAG, "Skipping MIDI device service " + serviceInfo.packageName
                         + ": it does not require the permission "
                         + android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE);
+                return;
+            }
+
+            if (!virtualUmp()) {
+                Log.w(TAG, "Skipping MIDI device service " + serviceInfo.packageName
+                        + ": virtual UMP flag not enabled");
                 return;
             }
 
