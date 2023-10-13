@@ -16,14 +16,8 @@
 
 source "${0%/*}"/../../common.sh
 
-#**********************************************************************************************
-#This script is broken because it relies on soong intermediate files, which seem to have moved.
-#**********************************************************************************************
-
 # This scripts run the "tiny-framework" test, but does most stuff from the command line, using
 # the native java and javac commands.
-# This is useful to
-
 
 debug=0
 while getopts "d" opt; do
@@ -61,7 +55,7 @@ framework_compile_classpaths=(
 
 test_compile_classpaths=(
   $SOONG_INT/external/junit/junit/android_common/combined/junit.jar
-  $ANDROID_BUILD_TOP/out/target/common/obj/JAVA_LIBRARIES/truth-prebuilt_intermediates/classes.jar
+  $ANDROID_HOST_OUT/framework/truth-prebuilt.jar
 )
 
 test_runtime_classpaths=(
