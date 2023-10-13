@@ -19,7 +19,11 @@ import android.media.projection.IMediaProjectionManager
 import android.os.Process
 import android.os.RemoteException
 import android.util.Log
-import com.android.internal.util.FrameworkStatsLog
+import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_APP as METRICS_CREATION_SOURCE_APP
+import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_CAST as METRICS_CREATION_SOURCE_CAST
+import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_SYSTEM_UI_SCREEN_RECORDER as METRICS_CREATION_SOURCE_SYSTEM_UI_SCREEN_RECORDER
+import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN as METRICS_CREATION_SOURCE_UNKNOWN
+import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
@@ -36,21 +40,23 @@ constructor(private val service: IMediaProjectionManager) {
      *
      * @param sessionCreationSource The entry point requesting permission to capture.
      */
-    fun notifyPermissionProgress(state: Int, sessionCreationSource: Int) {
-        // TODO check that state & SessionCreationSource matches expected values
-        notifyToServer(state, sessionCreationSource)
+    fun notifyProjectionInitiated(sessionCreationSource: SessionCreationSource) {
+        notifyToServer(
+            MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED,
+            sessionCreationSource
+        )
     }
 
     /**
      * Request to log that the permission request moved to the given state.
      *
-     * Should not be used for the initialization state, since that
+     * Should not be used for the initialization state, since that should use {@link
+     * MediaProjectionMetricsLogger#notifyProjectionInitiated(Int)} and pass the
+     * sessionCreationSource.
      */
     fun notifyPermissionProgress(state: Int) {
         // TODO validate state is valid
-        notifyToServer(
-            state,
-            FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN)
+        notifyToServer(state, SessionCreationSource.UNKNOWN)
     }
 
     /**
@@ -64,20 +70,40 @@ constructor(private val service: IMediaProjectionManager) {
      *   Indicates the entry point for requesting the permission. Must be a valid state defined in
      *   the SessionCreationSource enum.
      */
-    private fun notifyToServer(state: Int, sessionCreationSource: Int) {
+    private fun notifyToServer(state: Int, sessionCreationSource: SessionCreationSource) {
         Log.v(TAG, "FOO notifyToServer of state $state and source $sessionCreationSource")
         try {
             service.notifyPermissionRequestStateChange(
-                Process.myUid(), state, sessionCreationSource)
+                Process.myUid(),
+                state,
+                sessionCreationSource.toMetricsConstant()
+            )
         } catch (e: RemoteException) {
             Log.e(
                 TAG,
-                "Error notifying server of permission flow state $state from source $sessionCreationSource",
-                e)
+                "Error notifying server of permission flow state $state from source " +
+                    "$sessionCreationSource",
+                e
+            )
         }
     }
 
     companion object {
         const val TAG = "MediaProjectionMetricsLogger"
     }
+}
+
+enum class SessionCreationSource {
+    APP,
+    CAST,
+    SYSTEM_UI_SCREEN_RECORDER,
+    UNKNOWN;
+
+    fun toMetricsConstant(): Int =
+        when (this) {
+            APP -> METRICS_CREATION_SOURCE_APP
+            CAST -> METRICS_CREATION_SOURCE_CAST
+            SYSTEM_UI_SCREEN_RECORDER -> METRICS_CREATION_SOURCE_SYSTEM_UI_SCREEN_RECORDER
+            UNKNOWN -> METRICS_CREATION_SOURCE_UNKNOWN
+        }
 }
