@@ -26,6 +26,7 @@
 #include <gui/TraceUtils.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <include/gpu/ganesh/vk/GrVkBackendSurface.h>
+#include <include/gpu/ganesh/vk/GrVkDirectContext.h>
 #include <ui/FatVector.h>
 #include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
@@ -435,7 +436,7 @@ sk_sp<GrDirectContext> VulkanManager::createContext(GrContextOptions& options,
     options.fContextDeleteContext = this;
     options.fContextDeleteProc = onGrContextReleased;
 
-    return GrDirectContext::MakeVulkan(backendContext, options);
+    return GrDirectContexts::MakeVulkan(backendContext, options);
 }
 
 VkFunctorInitParams VulkanManager::getVkFunctorInitParams() const {
