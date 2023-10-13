@@ -22,6 +22,7 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.test.suitebuilder.annotation.SmallTest
+import com.android.systemui.FakeFeatureFlagsImpl
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -65,6 +66,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var clearCacheAction: Consumer<String>
     private val serverFlagReader = ServerFlagReaderFake()
+    private val fakeGantryFlags = FakeFeatureFlagsImpl()
 
     private val teamfoodableFlagA = UnreleasedFlag(name = "a", namespace = "test", teamfood = true)
     private val teamfoodableFlagB = ReleasedFlag(name = "b", namespace = "test", teamfood = true)
@@ -72,7 +74,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        flagMap.put(Flags.TEAMFOOD.name, Flags.TEAMFOOD)
+        fakeGantryFlags.setFlag("com.android.systemui.sysui_teamfood", false)
         flagMap.put(teamfoodableFlagA.name, teamfoodableFlagA)
         flagMap.put(teamfoodableFlagB.name, teamfoodableFlagB)
         mFeatureFlagsClassicDebug =
@@ -84,6 +86,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
                 resources,
                 serverFlagReader,
                 flagMap,
+                fakeGantryFlags,
                 restarter
             )
         mFeatureFlagsClassicDebug.init()
@@ -121,8 +124,6 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
 
     @Test
     fun teamFoodFlag_False() {
-        whenever(flagManager.readFlagValue<Boolean>(eq(Flags.TEAMFOOD.name), any()))
-            .thenReturn(false)
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)).isFalse()
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagB)).isTrue()
 
@@ -133,8 +134,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
 
     @Test
     fun teamFoodFlag_True() {
-        whenever(flagManager.readFlagValue<Boolean>(eq(Flags.TEAMFOOD.name), any()))
-            .thenReturn(true)
+        fakeGantryFlags.setFlag("com.android.systemui.sysui_teamfood", true)
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)).isTrue()
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagB)).isTrue()
 
@@ -149,8 +149,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
             .thenReturn(true)
         whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagB.name), any()))
             .thenReturn(false)
-        whenever(flagManager.readFlagValue<Boolean>(eq(Flags.TEAMFOOD.name), any()))
-            .thenReturn(true)
+        fakeGantryFlags.setFlag("com.android.systemui.sysui_teamfood", true)
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)).isTrue()
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagB)).isFalse()
 
