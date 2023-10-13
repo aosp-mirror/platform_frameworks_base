@@ -255,7 +255,8 @@ class RemoteInputViewControllerImpl @Inject constructor(
         entry.lastRemoteInputSent = SystemClock.elapsedRealtime()
         entry.mRemoteEditImeAnimatingAway = true
         remoteInputController.addSpinning(entry.key, view.mToken)
-        remoteInputController.removeRemoteInput(entry, view.mToken)
+        remoteInputController.removeRemoteInput(entry, view.mToken,
+               /* reason= */ "RemoteInputViewController#sendRemoteInput")
         remoteInputController.remoteInputSent(entry)
         entry.setHasSentReply()
 
