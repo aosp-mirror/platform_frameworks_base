@@ -71,7 +71,8 @@ public class RemoteInputController {
      * @param entry the entry for which a remote input is now active.
      * @param token a token identifying the view that is managing the remote input
      */
-    public void addRemoteInput(NotificationEntry entry, Object token) {
+    public void addRemoteInput(NotificationEntry entry, Object token,
+            @CompileTimeConstant String reason) {
         Objects.requireNonNull(entry);
         Objects.requireNonNull(token);
         boolean isActive = isRemoteInputActive(entry);
@@ -79,7 +80,9 @@ public class RemoteInputController {
                 entry /* contains */, null /* remove */, token /* removeToken */);
         mLogger.logAddRemoteInput(entry.getKey()/* entryKey */,
                 isActive /* isRemoteInputAlreadyActive */,
-                found /* isRemoteInputFound */);
+                found /* isRemoteInputFound */,
+                reason /* reason */,
+                entry.getNotificationStyle()/* notificationStyle */);
         if (!found) {
             mOpen.add(new Pair<>(new WeakReference<>(entry), token));
         }

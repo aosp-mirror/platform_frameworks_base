@@ -657,7 +657,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setText(mEntry.remoteInputText);
         mEditText.setSelection(mEditText.length());
         mEditText.requestFocus();
-        mController.addRemoteInput(mEntry, mToken);
+        mController.addRemoteInput(mEntry, mToken, "RemoteInputView#focus");
         setAttachment(mEntry.remoteInputAttachment);
 
         updateSendButton();
