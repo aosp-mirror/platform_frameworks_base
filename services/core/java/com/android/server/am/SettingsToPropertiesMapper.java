@@ -163,8 +163,11 @@ public class SettingsToPropertiesMapper {
         "wear_system_health",
         "wear_systems",
         "window_surfaces",
-        "windowing_frontend"
+        "windowing_frontend",
     };
+
+    public static final String NAMESPACE_REBOOT_STAGING = "staged";
+    public static final String NAMESPACE_REBOOT_STAGING_DELIMITER = "*";
 
     private final String[] mGlobalSettings;
 
@@ -261,6 +264,22 @@ public class SettingsToPropertiesMapper {
                         }
                     });
         }
+
+        // add sys prop sync callback for staged flag values
+        DeviceConfig.addOnPropertiesChangedListener(
+            NAMESPACE_REBOOT_STAGING,
+            AsyncTask.THREAD_POOL_EXECUTOR,
+            (DeviceConfig.Properties properties) -> {
+              String scope = properties.getNamespace();
+              for (String key : properties.getKeyset()) {
+                String aconfigPropertyName = makeAconfigFlagStagedPropertyName(key);
+                if (aconfigPropertyName == null) {
+                    log("unable to construct system property for " + scope + "/" + key);
+                    return;
+                }
+                setProperty(aconfigPropertyName, properties.getString(key, null));
+              }
+            });
     }
 
     public static SettingsToPropertiesMapper start(ContentResolver contentResolver) {
@@ -322,6 +341,35 @@ public class SettingsToPropertiesMapper {
     @VisibleForTesting
     static String makePropertyName(String categoryName, String flagName) {
         String propertyName = SYSTEM_PROPERTY_PREFIX + categoryName + "." + flagName;
+
+        if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
+                || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
+            return null;
+        }
+
+        return propertyName;
+    }
+
+    /**
+     * system property name constructing rule for staged aconfig flags, the flag name
+     * is in the form of [namespace]*[actual flag name], we should push the following
+     * to system properties
+     * "next_boot.[actual sys prop name]".
+     * If the name contains invalid characters or substrings for system property name,
+     * will return null.
+     * @param flagName
+     * @return
+     */
+    @VisibleForTesting
+    static String makeAconfigFlagStagedPropertyName(String flagName) {
+        int idx = flagName.indexOf(NAMESPACE_REBOOT_STAGING_DELIMITER);
+        if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
+            log("invalid staged flag: " + flagName);
+            return null;
+        }
+
+        String propertyName = "next_boot." + makeAconfigFlagPropertyName(
+                flagName.substring(0, idx), flagName.substring(idx+1));
 
         if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
                 || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
