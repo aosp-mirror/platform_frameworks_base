@@ -16,6 +16,7 @@
 
 package android.os.health;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
@@ -24,7 +25,6 @@ import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.IPowerStatsService;
 import android.os.PowerMonitor;
@@ -157,39 +157,15 @@ public class SystemHealthManager {
     }
 
     /**
-     * Returns a list of supported power monitors, which include raw ODPM rails and
-     * modeled energy consumers.  If ODPM is unsupported by PowerStats HAL, this method returns
-     * an empty array.
+     * Asynchronously retrieves a list of supported  {@link PowerMonitor}'s, which include raw ODPM
+     * (on-device power rail monitor) rails and modeled energy consumers.  If ODPM is unsupported
+     * on this device this method delivers an empty list.
      *
-     * @hide
-     */
-    @NonNull
-    public List<PowerMonitor> getSupportedPowerMonitors() {
-        synchronized (mPowerMonitorsLock) {
-            if (mPowerMonitorsInfo != null) {
-                return mPowerMonitorsInfo;
-            }
-        }
-        ConditionVariable lock = new ConditionVariable();
-        // Populate mPowerMonitorsInfo by side-effect
-        getSupportedPowerMonitors(null, unused -> lock.open());
-        lock.block();
-
-        synchronized (mPowerMonitorsLock) {
-            return mPowerMonitorsInfo;
-        }
-    }
-
-    /**
-     * Asynchronously retrieves a list of supported power monitors, see
-     * {@link #getSupportedPowerMonitors()}
-     *
-     * @param handler optional Handler to deliver the callback. If not supplied, the callback
-     *                may be invoked on an arbitrary thread.
+     * @param handler  optional Handler to deliver the callback. If not supplied, the callback
+     *                 may be invoked on an arbitrary thread.
      * @param onResult callback for the result
-     *
-     * @hide
      */
+    @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
     public void getSupportedPowerMonitors(@Nullable Handler handler,
             @NonNull Consumer<List<PowerMonitor>> onResult) {
         final List<PowerMonitor> result;
@@ -229,35 +205,6 @@ public class SystemHealthManager {
         }
     }
 
-    /**
-     * Retrieves the accumulated power consumption reported by the specified power monitors.
-     *
-     * @param powerMonitors power monitors to be returned.
-     *
-     * @hide
-     */
-    @NonNull
-    public PowerMonitorReadings getPowerMonitorReadings(@NonNull List<PowerMonitor> powerMonitors) {
-        PowerMonitorReadings[] outReadings = new PowerMonitorReadings[1];
-        RuntimeException[] outException = new RuntimeException[1];
-        ConditionVariable lock = new ConditionVariable();
-        getPowerMonitorReadings(powerMonitors, null,
-                pms -> {
-                    outReadings[0] = pms;
-                    lock.open();
-                },
-                error -> {
-                    outException[0] = error;
-                    lock.open();
-                }
-        );
-        lock.block();
-        if (outException[0] != null) {
-            throw outException[0];
-        }
-        return outReadings[0];
-    }
-
     private static final Comparator<PowerMonitor> POWER_MONITOR_COMPARATOR =
             Comparator.comparingInt(pm -> pm.index);
 
@@ -270,9 +217,8 @@ public class SystemHealthManager {
      *                      may be invoked on an arbitrary thread.
      * @param onSuccess     callback for the result
      * @param onError       callback invoked in case of an error
-     *
-     * @hide
      */
+    @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
     public void getPowerMonitorReadings(@NonNull List<PowerMonitor> powerMonitors,
             @Nullable Handler handler, @NonNull Consumer<PowerMonitorReadings> onSuccess,
             @NonNull Consumer<RuntimeException> onError) {

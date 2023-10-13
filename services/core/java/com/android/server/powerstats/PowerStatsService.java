@@ -694,7 +694,7 @@ public class PowerStatsService extends SystemService {
                     Log.d(TAG, String.format(Locale.ENGLISH,
                             "Monitor=%s timestamp=%d energy=%d"
                                     + " uid=%d noise=%.1f%% returned=%d",
-                            state.powerMonitor.name,
+                            state.powerMonitor.getName(),
                             state.timestampMs,
                             state.energyUws,
                             callingUid,
@@ -728,7 +728,7 @@ public class PowerStatsService extends SystemService {
         }
 
         for (PowerMonitorState powerMonitorState : powerMonitorStates) {
-            if (powerMonitorState.powerMonitor.type
+            if (powerMonitorState.powerMonitor.getType()
                     == PowerMonitor.POWER_MONITOR_TYPE_CONSUMER) {
                 for (EnergyConsumerResult energyConsumerResult : energyConsumerResults) {
                     if (energyConsumerResult.id == powerMonitorState.id) {
@@ -754,7 +754,7 @@ public class PowerStatsService extends SystemService {
         }
 
         for (PowerMonitorState powerMonitorState : powerMonitorStates) {
-            if (powerMonitorState.powerMonitor.type
+            if (powerMonitorState.powerMonitor.getType()
                     == PowerMonitor.POWER_MONITOR_TYPE_MEASUREMENT) {
                 for (EnergyMeasurement energyMeasurement : energyMeasurements) {
                     if (energyMeasurement.id == powerMonitorState.id) {
@@ -773,7 +773,7 @@ public class PowerStatsService extends SystemService {
             @PowerMonitor.PowerMonitorType int type) {
         int count = 0;
         for (PowerMonitorState monitorState : powerMonitorStates) {
-            if (monitorState.powerMonitor.type == type) {
+            if (monitorState.powerMonitor.getType() == type) {
                 count++;
             }
         }
@@ -785,7 +785,7 @@ public class PowerStatsService extends SystemService {
         int[] ids = new int[count];
         int index = 0;
         for (PowerMonitorState monitorState : powerMonitorStates) {
-            if (monitorState.powerMonitor.type == type) {
+            if (monitorState.powerMonitor.getType() == type) {
                 ids[index++] = monitorState.id;
             }
         }
