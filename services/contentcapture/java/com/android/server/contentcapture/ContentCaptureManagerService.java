@@ -1437,6 +1437,10 @@ public class ContentCaptureManagerService extends
                 if (!mDevCfgEnableContentProtectionReceiver) {
                     return false;
                 }
+                if (mDevCfgContentProtectionRequiredGroups.isEmpty()
+                        && mDevCfgContentProtectionOptionalGroups.isEmpty()) {
+                    return false;
+                }
             }
             return mContentProtectionConsentManager.isConsentGranted(userId)
                     && mContentProtectionBlocklistManager.isAllowed(packageName);
