@@ -748,7 +748,11 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.getGuts() != null && row.getGuts().isExposed();
     }
 
-    public boolean isChildInGroup() {
+    /**
+     * @return Whether the notification row is a child of a group notification view; false if the
+     * row is null
+     */
+    public boolean rowIsChildInGroup() {
         return row != null && row.isChildInGroup();
     }
 
