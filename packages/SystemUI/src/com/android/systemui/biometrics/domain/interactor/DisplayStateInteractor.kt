@@ -54,6 +54,9 @@ interface DisplayStateInteractor {
     /** Current rotation of the display */
     val currentRotation: StateFlow<DisplayRotation>
 
+    /** Display change event indicating a change to the given displayId has occurred. */
+    val displayChanges: Flow<Int>
+
     /** Called on configuration changes, used to keep the display state in sync */
     fun onConfigurationChanged(newConfig: Configuration)
 }
@@ -73,6 +76,8 @@ constructor(
     fun setScreenSizeFoldProvider(foldProvider: ScreenSizeFoldProvider) {
         screenSizeFoldProvider = foldProvider
     }
+
+    override val displayChanges = displayRepository.displayChangeEvent
 
     override val isFolded: Flow<Boolean> =
         conflatedCallbackFlow {

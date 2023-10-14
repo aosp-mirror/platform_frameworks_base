@@ -83,6 +83,7 @@ import static android.view.WindowLayoutParamsProto.Y;
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -1684,7 +1685,7 @@ public interface WindowManager extends ViewManager {
      * orientation (e.g. with {@link android.app.Activity#setRequestedOrientation(int)}). This
      * listener gives application an opportunity to selectively react to device orientation changes.
      * The newly added listener will be called with current proposed rotation. Note that the context
-     * of this window manager instance must be a {@link android.annotation.UiContext}.
+     * of this window manager instance must be a {@code UiContext}.
      *
      * @param executor The executor on which callback method will be invoked.
      * @param listener Called when the proposed rotation for the context is being delivered.
@@ -1692,7 +1693,7 @@ public interface WindowManager extends ViewManager {
      *                 {@link Surface#ROTATION_90}, {@link Surface#ROTATION_180} and
      *                 {@link Surface#ROTATION_270}.
      * @throws UnsupportedOperationException if this method is called on an instance that is not
-     *         associated with a {@link android.annotation.UiContext}.
+     *         associated with a {@code UiContext}.
      */
     default void addProposedRotationListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull IntConsumer listener) {
@@ -3114,7 +3115,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Never animate position changes of the window.
          *
-         * @see android.R.attr#Window_windowNoMoveAnimation
+         * @see android.R.styleable#Window_windowNoMoveAnimation
          * {@hide}
          */
         @UnsupportedAppUsage
@@ -4315,6 +4316,9 @@ public interface WindowManager extends ViewManager {
         @ActivityInfo.ColorMode
         private int mColorMode = COLOR_MODE_DEFAULT;
 
+        /** @hide */
+        private float mDesiredHdrHeadroom = 0;
+
         /**
          * Carries the requests about {@link WindowInsetsController.Appearance} and
          * {@link WindowInsetsController.Behavior} to the system windows which can produce insets.
@@ -4527,7 +4531,7 @@ public interface WindowManager extends ViewManager {
          * Set whether animations can be played for position changes on this window. If disabled,
          * the window will move to its new position instantly without animating.
          *
-         * @attr ref android.R.attr#Window_windowNoMoveAnimation
+         * @attr ref android.R.styleable#Window_windowNoMoveAnimation
          */
         public void setCanPlayMoveAnimation(boolean enable) {
             if (enable) {
@@ -4542,7 +4546,7 @@ public interface WindowManager extends ViewManager {
          * This does not guarantee that an animation will be played in all such situations. For
          * example, drag-resizing may move the window but not play an animation.
          *
-         * @attr ref android.R.attr#Window_windowNoMoveAnimation
+         * @attr ref android.R.styleable#Window_windowNoMoveAnimation
          */
         public boolean canPlayMoveAnimation() {
             return (privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0;
@@ -4717,6 +4721,39 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
+         * <p>Sets the desired about of HDR headroom to be used when rendering as a ratio of
+         * targetHdrPeakBrightnessInNits / targetSdrWhitePointInNits. Only applies when
+         * {@link #setColorMode(int)} is {@link ActivityInfo#COLOR_MODE_HDR}</p>
+         *
+         * @see Window#setDesiredHdrHeadroom(float)
+         * @param desiredHeadroom Desired amount of HDR headroom. Must be in the range of 1.0 (SDR)
+         *                        to 10,000.0, or 0.0 to reset to default.
+         */
+        @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+        public void setDesiredHdrHeadroom(
+                @FloatRange(from = 0.0f, to = 10000.0f) float desiredHeadroom) {
+            if (!Float.isFinite(desiredHeadroom)) {
+                throw new IllegalArgumentException("desiredHeadroom must be finite: "
+                        + desiredHeadroom);
+            }
+            if (desiredHeadroom != 0 && (desiredHeadroom < 1.0f || desiredHeadroom > 10000.0f)) {
+                throw new IllegalArgumentException(
+                        "desiredHeadroom must be 0.0 or in the range [1.0, 10000.0f], received: "
+                                + desiredHeadroom);
+            }
+            mDesiredHdrHeadroom = desiredHeadroom;
+        }
+
+        /**
+         * Get the desired amount of HDR headroom as set by {@link #setDesiredHdrHeadroom(float)}
+         * @return The amount of HDR headroom set, or 0 for automatic/default behavior.
+         */
+        @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+        public float getDesiredHdrHeadroom() {
+            return mDesiredHdrHeadroom;
+        }
+
+        /**
          * <p>
          * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
          * but instead of dimmed, the content behind the window will be blurred (or combined with
@@ -4866,6 +4903,7 @@ public interface WindowManager extends ViewManager {
             checkNonRecursiveParams();
             out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
             out.writeInt(mDisplayFlags);
+            out.writeFloat(mDesiredHdrHeadroom);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -4937,6 +4975,7 @@ public interface WindowManager extends ViewManager {
             forciblyShownTypes = in.readInt();
             paramsForRotation = in.createTypedArray(LayoutParams.CREATOR);
             mDisplayFlags = in.readInt();
+            mDesiredHdrHeadroom = in.readFloat();
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -5197,6 +5236,11 @@ public interface WindowManager extends ViewManager {
                 changes |= COLOR_MODE_CHANGED;
             }
 
+            if (mDesiredHdrHeadroom != o.mDesiredHdrHeadroom) {
+                mDesiredHdrHeadroom = o.mDesiredHdrHeadroom;
+                changes |= COLOR_MODE_CHANGED;
+            }
+
             if (preferMinimalPostProcessing != o.preferMinimalPostProcessing) {
                 preferMinimalPostProcessing = o.preferMinimalPostProcessing;
                 changes |= MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED;
@@ -5423,6 +5467,9 @@ public interface WindowManager extends ViewManager {
             }
             if (mColorMode != COLOR_MODE_DEFAULT) {
                 sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
+            }
+            if (mDesiredHdrHeadroom != 0) {
+                sb.append(" desiredHdrHeadroom=").append(mDesiredHdrHeadroom);
             }
             if (preferMinimalPostProcessing) {
                 sb.append(" preferMinimalPostProcessing=");

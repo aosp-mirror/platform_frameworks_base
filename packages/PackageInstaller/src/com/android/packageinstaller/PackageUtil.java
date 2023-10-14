@@ -172,7 +172,7 @@ public class PackageUtil {
 
         private Bitmap getBitmapFromDrawable(Drawable drawable) {
             // Create an empty bitmap with the dimensions of our drawable
-            Bitmap bmp = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+            final Bitmap bmp = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                     drawable.getIntrinsicHeight(),
                     Bitmap.Config.ARGB_8888);
             // Associate it with a canvas. This canvas will draw the icon on the bitmap
@@ -183,7 +183,11 @@ public class PackageUtil {
 
             // Scale it down if the icon is too large
             if ((bmp.getWidth() > iconSize * 2) || (bmp.getHeight() > iconSize * 2)) {
-                bmp = Bitmap.createScaledBitmap(bmp, iconSize, iconSize, true);
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bmp, iconSize, iconSize, true);
+                if (scaledBitmap != bmp) {
+                    bmp.recycle();
+                }
+                return scaledBitmap;
             }
             return bmp;
         }

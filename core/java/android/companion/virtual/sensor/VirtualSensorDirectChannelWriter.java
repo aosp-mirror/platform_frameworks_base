@@ -46,15 +46,15 @@ import java.util.concurrent.atomic.AtomicLong;
  * <pre>
  * VirtualSensorDirectChannelWriter writer = new VirtualSensorDirectChannelWriter();
  * VirtualSensorDirectChannelCallback callback = new VirtualSensorDirectChannelCallback() {
- *     @Override
+ *     {@literal @}Override
  *     public void onDirectChannelCreated(int channelHandle, SharedMemory sharedMemory) {
  *         writer.addChannel(channelHandle, sharedMemory);
  *     }
- *     @Override
+ *     {@literal @}Override
  *     public void onDirectChannelDestroyed(int channelHandle);
  *         writer.removeChannel(channelHandle);
  *     }
- *     @Override
+ *     {@literal @}Override
  *     public void onDirectChannelConfigured(int channelHandle, VirtualSensor sensor, int rateLevel,
  *             int reportToken)
  *         if (!writer.configureChannel(channelHandle, sensor, rateLevel, reportToken)) {

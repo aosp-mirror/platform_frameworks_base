@@ -1047,6 +1047,16 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                     // in use frontends when no available frontend has been found.
                     int priority = getFrontendHighestClientPriority(fr.getOwnerClientId());
                     if (currentLowestPriority > priority) {
+                        // we need to check the max used num if the target frontend type is not
+                        // currently in primary use (and simply blocked due to exclusive group)
+                        ClientProfile targetOwnerProfile = getClientProfile(fr.getOwnerClientId());
+                        int primaryFeId = targetOwnerProfile.getPrimaryFrontend();
+                        FrontendResource primaryFe = getFrontendResource(primaryFeId);
+                        if (fr.getType() != primaryFe.getType()
+                                && isFrontendMaxNumUseReached(fr.getType())) {
+                            continue;
+                        }
+                        // update the target frontend
                         inUseLowestPriorityFrHandle = fr.getHandle();
                         currentLowestPriority = priority;
                         isRequestFromSameProcess = (requestClient.getProcessId()

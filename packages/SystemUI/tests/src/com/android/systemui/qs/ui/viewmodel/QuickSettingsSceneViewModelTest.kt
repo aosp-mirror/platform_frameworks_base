@@ -21,6 +21,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -49,6 +51,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
+    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
     private var mobileIconsViewModel: MobileIconsViewModel =
         MobileIconsViewModel(
@@ -61,6 +64,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                     FakeConnectivityRepository(),
                 ),
             constants = mock(),
+            flags,
             scope = testScope.backgroundScope,
         )
 

@@ -220,7 +220,6 @@ private:
     void onTvMessage(int deviceId, int streamId, AidlTvMessageEventType type,
                      AidlTvMessage& message, signed char data[], int dataLength);
 
-    Mutex mLock;
     Mutex mStreamLock;
     jweak mThiz;
     sp<Looper> mLooper;

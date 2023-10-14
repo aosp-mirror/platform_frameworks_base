@@ -76,6 +76,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -134,6 +135,7 @@ public final class MediaProjectionManagerService extends SystemService
 
     private final MediaRouter mMediaRouter;
     private final MediaRouterCallback mMediaRouterCallback;
+    private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
     private MediaRouter.RouteInfo mMediaRouteInfo;
 
     @GuardedBy("mLock")
@@ -160,6 +162,7 @@ public final class MediaProjectionManagerService extends SystemService
         mWmInternal = LocalServices.getService(WindowManagerInternal.class);
         mMediaRouter = (MediaRouter) mContext.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mMediaRouterCallback = new MediaRouterCallback();
+        mMediaProjectionMetricsLogger = injector.mediaProjectionMetricsLogger();
         Watchdog.getInstance().addMonitor(this);
     }
 
@@ -192,6 +195,10 @@ public final class MediaProjectionManagerService extends SystemService
         /** Creates the {@link Looper} to be used when notifying callbacks. */
         Looper createCallbackLooper() {
             return Looper.getMainLooper();
+        }
+
+        MediaProjectionMetricsLogger mediaProjectionMetricsLogger() {
+            return MediaProjectionMetricsLogger.getInstance();
         }
     }
 
@@ -372,6 +379,10 @@ public final class MediaProjectionManagerService extends SystemService
             if (mProjectionGrant != null) {
                 // Cache the session details.
                 mProjectionGrant.mSession = incomingSession;
+                mMediaProjectionMetricsLogger.notifyProjectionStateChange(
+                        mProjectionGrant.uid,
+                        FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS,
+                        FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
                 dispatchSessionSet(mProjectionGrant.getProjectionInfo(), incomingSession);
             }
             return true;
@@ -812,6 +823,19 @@ public final class MediaProjectionManagerService extends SystemService
             try {
                 MediaProjectionManagerService.this.setUserReviewGrantedConsentResult(consentResult,
                         projection);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyPermissionRequestStateChange(int hostUid, int state,
+                int sessionCreationSource) {
+            notifyPermissionRequestStateChange_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mMediaProjectionMetricsLogger.notifyProjectionStateChange(hostUid, state, sessionCreationSource);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

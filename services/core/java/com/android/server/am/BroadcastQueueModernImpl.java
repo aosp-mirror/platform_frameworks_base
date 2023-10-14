@@ -258,7 +258,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MSG_PROCESS_FREEZABLE_CHANGED = 6;
     private static final int MSG_UID_STATE_CHANGED = 7;
 
-    // Required when Flags.anrTimerServiceEnabled is false.
+    // Required when Flags.anrTimerServiceEnabled is false.  This constant should be deleted if and
+    // when the flag is fused on.
     private static final int MSG_DELIVERY_TIMEOUT_SOFT = 8;
 
     private void enqueueUpdateRunningList() {
@@ -274,7 +275,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 updateRunningList();
                 return true;
             }
-            // Required when Flags.anrTimerServiceEnabled is false.
+            // Required when Flags.anrTimerServiceEnabled is false.  This case should be deleted if
+            // and when the flag is fused on.
             case MSG_DELIVERY_TIMEOUT_SOFT: {
                 synchronized (mService) {
                     deliveryTimeoutSoftLocked((BroadcastProcessQueue) msg.obj, msg.arg1);
@@ -1169,7 +1171,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultTo = null;
     }
 
-    // Required when Flags.anrTimerServiceEnabled is false.
+    // Required when Flags.anrTimerServiceEnabled is false.  This function can be replaced with a
+    // single call to {@code mAnrTimer.start()} if and when the flag is fused on.
     private void startDeliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue,
             int softTimeoutMillis) {
         if (mAnrTimer.serviceEnabled()) {
@@ -1181,7 +1184,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
-    // Required when Flags.anrTimerServiceEnabled is false.
+    // Required when Flags.anrTimerServiceEnabled is false. This function can be replaced with a
+    // single call to {@code mAnrTimer.cancel()} if and when the flag is fused on.
     private void cancelDeliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue) {
         mAnrTimer.cancel(queue);
         if (!mAnrTimer.serviceEnabled()) {
@@ -1189,7 +1193,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
-    // Required when Flags.anrTimerServiceEnabled is false.
+    // Required when Flags.anrTimerServiceEnabled is false.  This function can be deleted entirely
+    // if and when the flag is fused on.
     private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue,
             int softTimeoutMillis) {
         if (queue.app != null) {

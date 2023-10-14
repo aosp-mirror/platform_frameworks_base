@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 
 import java.util.Arrays;
@@ -24,10 +25,10 @@ import java.util.Comparator;
 
 /**
  * A collection of energy measurements from Power Monitors.
- *
- * @hide
  */
+@FlaggedApi("com.android.server.power.optimization.power_monitor_api")
 public final class PowerMonitorReadings {
+    @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
     public static final int ENERGY_UNAVAILABLE = -1;
 
     @NonNull
@@ -41,7 +42,7 @@ public final class PowerMonitorReadings {
             Comparator.comparingInt(pm -> pm.index);
 
     /**
-     * @param powerMonitors array of power monitor (ODPM) rails, sorted by PowerMonitor.index
+     * @param powerMonitors array of power monitor, sorted by PowerMonitor.index
      * @hide
      */
     public PowerMonitorReadings(@NonNull PowerMonitor[] powerMonitors,
@@ -56,7 +57,8 @@ public final class PowerMonitorReadings {
      * Does not persist across reboots.
      * Represents total energy: both on-battery and plugged-in.
      */
-    public long getConsumedEnergyUws(@NonNull PowerMonitor powerMonitor) {
+    @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
+    public long getConsumedEnergy(@NonNull PowerMonitor powerMonitor) {
         int offset = Arrays.binarySearch(mPowerMonitors, powerMonitor, POWER_MONITOR_COMPARATOR);
         if (offset >= 0) {
             return mEnergyUws[offset];
@@ -67,6 +69,7 @@ public final class PowerMonitorReadings {
     /**
      * Elapsed realtime, in milliseconds, when the snapshot was taken.
      */
+    @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
     @ElapsedRealtimeLong
     public long getTimestamp(@NonNull PowerMonitor powerMonitor) {
         int offset = Arrays.binarySearch(mPowerMonitors, powerMonitor, POWER_MONITOR_COMPARATOR);
@@ -84,7 +87,7 @@ public final class PowerMonitorReadings {
             if (i != 0) {
                 sb.append(", ");
             }
-            sb.append(mPowerMonitors[i].name)
+            sb.append(mPowerMonitors[i].getName())
                     .append(" = ").append(mEnergyUws[i])
                     .append(" (").append(mTimestampsMs[i]).append(')');
         }

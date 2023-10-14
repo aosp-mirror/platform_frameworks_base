@@ -83,7 +83,7 @@ public class FaceEnrollClientTest {
     @Mock
     private ClientMonitorCallback mCallback;
     @Mock
-    private Sensor.HalSessionCallback mHalSessionCallback;
+    private AidlResponseHandler mAidlResponseHandler;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
@@ -150,7 +150,7 @@ public class FaceEnrollClientTest {
     private FaceEnrollClient createClient(int version) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
-        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mAidlResponseHandler);
         return new FaceEnrollClient(mContext, () -> aidl, mToken, mClientMonitorCallbackConverter,
                 USER_ID, HAT, "com.foo.bar", 44 /* requestId */,
                 mUtils, new int[0] /* disabledFeatures */, 6 /* timeoutSec */,

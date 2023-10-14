@@ -238,7 +238,7 @@ public class AnrTimerTest {
         }
 
         @Override
-        Handler getHandler(Handler.Callback callback) {
+        Handler newHandler(Handler.Callback callback) {
             if (mTestHandler == null) {
                 mTestHandler = new TestHandler(mHandler.getLooper(), callback, mImmediate);
             }
@@ -250,14 +250,18 @@ public class AnrTimerTest {
             return mTestHandler;
         }
 
+        /**
+         * This override returns the tracker supplied in the constructor.  It does not create a
+         * new one.
+         */
         @Override
-        AnrTimer.CpuTracker getTracker() {
+        AnrTimer.CpuTracker newTracker() {
             return mTracker;
         }
 
         /** For test purposes, always enable the feature. */
         @Override
-        boolean getFeatureEnabled() {
+        boolean isFeatureEnabled() {
             return true;
         }
     }

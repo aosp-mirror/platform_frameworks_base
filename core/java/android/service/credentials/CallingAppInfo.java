@@ -103,7 +103,7 @@ public final class CallingAppInfo implements Parcelable {
      * of other applications.
      *
      * Android system makes sure that only applications that poses the permission
-     * {@link android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN} can set the origin on
+     * {@link android.Manifest.permission#CREDENTIAL_MANAGER_SET_ORIGIN} can set the origin on
      * the incoming {@link android.credentials.GetCredentialRequest} or
      * {@link android.credentials.CreateCredentialRequest}.
      */

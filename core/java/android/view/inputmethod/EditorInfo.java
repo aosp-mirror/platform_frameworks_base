@@ -47,7 +47,6 @@ import android.view.MotionEvent;
 import android.view.MotionEvent.ToolType;
 import android.view.View;
 import android.view.autofill.AutofillId;
-import android.widget.Editor;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -722,9 +721,9 @@ public class EditorInfo implements InputType, Parcelable {
     private boolean mIsStylusHandwritingEnabled;
 
     /**
-     * Set {@code true} if the {@link Editor} has
+     * Set {@code true} if the {@code Editor} has
      * {@link InputMethodManager#startStylusHandwriting stylus handwriting} enabled.
-     * {@code false} by default, {@link Editor} must set it {@code true} to indicate that
+     * {@code false} by default, {@code Editor} must set it {@code true} to indicate that
      * it supports stylus handwriting.
      *
      * @param enabled {@code true} if stylus handwriting is enabled.
@@ -736,7 +735,7 @@ public class EditorInfo implements InputType, Parcelable {
     }
 
     /**
-     * Returns {@code true} when an {@link Editor} has stylus handwriting enabled.
+     * Returns {@code true} when an {@code Editor} has stylus handwriting enabled.
      * {@code false} by default.
      * @see #setStylusHandwritingEnabled(boolean)
      * @see InputMethodManager#isStylusHandwritingAvailable()

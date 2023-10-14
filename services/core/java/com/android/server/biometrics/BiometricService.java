@@ -41,6 +41,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
+import android.hardware.biometrics.IBiometricPromptStatusListener;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -88,6 +89,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
@@ -105,6 +107,8 @@ public class BiometricService extends SystemService {
     @VisibleForTesting
     final SettingObserver mSettingObserver;
     private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
+    private final ConcurrentLinkedQueue<BiometricPromptStatusListener>
+            mBiometricPromptStatusListeners;
     private final Random mRandom = new Random();
     @NonNull private final Supplier<Long> mRequestCounter;
     @NonNull private final BiometricContext mBiometricContext;
@@ -425,6 +429,42 @@ public class BiometricService extends SystemService {
         }
     }
 
+    final class BiometricPromptStatusListener implements IBinder.DeathRecipient {
+        private final IBiometricPromptStatusListener mBiometricPromptStatusListener;
+
+        BiometricPromptStatusListener(IBiometricPromptStatusListener callback) {
+            mBiometricPromptStatusListener = callback;
+        }
+
+        void notifyBiometricPromptShowing() {
+            try {
+                mBiometricPromptStatusListener.onBiometricPromptShowing();
+            } catch (DeadObjectException e) {
+                Slog.w(TAG, "Death while invoking notifyHandleAuthenticate", e);
+                mBiometricPromptStatusListeners.remove(this);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke notifyHandleAuthenticate", e);
+            }
+        }
+
+        void notifyBiometricPromptIdle() {
+            try {
+                mBiometricPromptStatusListener.onBiometricPromptIdle();
+            } catch (DeadObjectException e) {
+                Slog.w(TAG, "Death while invoking notifyDialogDismissed", e);
+                mBiometricPromptStatusListeners.remove(this);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke notifyDialogDismissed", e);
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            Slog.e(TAG, "Biometric prompt callback binder died");
+            mBiometricPromptStatusListeners.remove(this);
+        }
+    }
+
     // Receives events from individual biometric sensors.
     private IBiometricSensorReceiver createBiometricSensorReceiver(final long requestId) {
         return new IBiometricSensorReceiver.Stub() {
@@ -700,6 +740,22 @@ public class BiometricService extends SystemService {
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
+            }
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override // Binder call
+        public void registerBiometricPromptStatusListener(IBiometricPromptStatusListener callback) {
+            super.registerBiometricPromptStatusListener_enforcePermission();
+
+            BiometricPromptStatusListener biometricPromptStatusListener =
+                    new BiometricPromptStatusListener(callback);
+            mBiometricPromptStatusListeners.add(biometricPromptStatusListener);
+
+            if (mAuthSession != null) {
+                biometricPromptStatusListener.notifyBiometricPromptShowing();
+            } else {
+                biometricPromptStatusListener.notifyBiometricPromptIdle();
             }
         }
 
@@ -1044,6 +1100,7 @@ public class BiometricService extends SystemService {
         mDevicePolicyManager = mInjector.getDevicePolicyManager(context);
         mImpl = new BiometricServiceWrapper();
         mEnabledOnKeyguardCallbacks = new ArrayList<>();
+        mBiometricPromptStatusListeners = new ConcurrentLinkedQueue<>();
         mSettingObserver = mInjector.getSettingObserver(context, mHandler,
                 mEnabledOnKeyguardCallbacks);
         mRequestCounter = mInjector.getRequestGenerator();
@@ -1158,6 +1215,7 @@ public class BiometricService extends SystemService {
             if (finished) {
                 Slog.d(TAG, "handleOnError: AuthSession finished");
                 mAuthSession = null;
+                notifyAuthSessionChanged();
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException", e);
@@ -1186,6 +1244,7 @@ public class BiometricService extends SystemService {
 
         session.onDialogDismissed(reason, credentialAttestation);
         mAuthSession = null;
+        notifyAuthSessionChanged();
     }
 
     private void handleOnTryAgainPressed(long requestId) {
@@ -1235,6 +1294,7 @@ public class BiometricService extends SystemService {
         final boolean finished = session.onClientDied();
         if (finished) {
             mAuthSession = null;
+            notifyAuthSessionChanged();
         }
     }
 
@@ -1349,6 +1409,16 @@ public class BiometricService extends SystemService {
         });
     }
 
+    private void notifyAuthSessionChanged() {
+        for (BiometricPromptStatusListener listener : mBiometricPromptStatusListeners) {
+            if (mAuthSession == null) {
+                listener.notifyBiometricPromptIdle();
+            } else {
+                listener.notifyBiometricPromptShowing();
+            }
+        }
+    }
+
     /**
      * handleAuthenticate() (above) which is called from BiometricPrompt determines which
      * modality/modalities to start authenticating with. authenticateInternal() should only be
@@ -1386,6 +1456,7 @@ public class BiometricService extends SystemService {
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException", e);
         }
+        notifyAuthSessionChanged();
     }
 
     private void handleCancelAuthentication(long requestId) {
@@ -1400,6 +1471,7 @@ public class BiometricService extends SystemService {
         if (finished) {
             Slog.d(TAG, "handleCancelAuthentication: AuthSession finished");
             mAuthSession = null;
+            notifyAuthSessionChanged();
         }
     }
 

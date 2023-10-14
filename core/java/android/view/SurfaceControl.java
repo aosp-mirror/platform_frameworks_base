@@ -263,7 +263,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetDefaultFrameRateCompatibility(long transactionObj,
             long nativeObject, int compatibility);
     private static native void nativeSetFrameRateCategory(
-            long transactionObj, long nativeObject, int category);
+            long transactionObj, long nativeObject, int category, boolean smoothSwitchOnly);
     private static native void nativeSetFrameRateSelectionStrategy(
             long transactionObj, long nativeObject, int strategy);
     private static native long nativeGetHandle(long nativeObject);
@@ -3709,6 +3709,10 @@ public final class SurfaceControl implements Parcelable {
          * @param sc The SurfaceControl to specify the frame rate category of.
          * @param category The frame rate category of this surface. The category value may influence
          * the system's choice of display frame rate.
+         * @param smoothSwitchOnly Set to {@code true} to indicate the display frame rate should not
+         * change if changing it would cause jank. Else {@code false}.
+         * This parameter is ignored when {@code category} is
+         * {@link Surface#FRAME_RATE_CATEGORY_DEFAULT}.
          *
          * @return This transaction object.
          *
@@ -3717,10 +3721,10 @@ public final class SurfaceControl implements Parcelable {
          * @hide
          */
         @NonNull
-        public Transaction setFrameRateCategory(
-                @NonNull SurfaceControl sc, @Surface.FrameRateCategory int category) {
+        public Transaction setFrameRateCategory(@NonNull SurfaceControl sc,
+                @Surface.FrameRateCategory int category, boolean smoothSwitchOnly) {
             checkPreconditions(sc);
-            nativeSetFrameRateCategory(mNativeObject, sc.mNativeObject, category);
+            nativeSetFrameRateCategory(mNativeObject, sc.mNativeObject, category, smoothSwitchOnly);
             return this;
         }
 
@@ -4266,8 +4270,7 @@ public final class SurfaceControl implements Parcelable {
          * be somewhat arbitrary, and so there are some somewhat arbitrary decisions in
          * this API as well.
          * <p>
-         * @param sc         The {@link SurfaceControl} to set the
-         *                   {@link TrustedPresentationCallback} on
+         * @param sc         The {@link SurfaceControl} to set the callback on
          * @param thresholds The {@link TrustedPresentationThresholds} that will specify when the to
          *                   invoke the callback.
          * @param executor   The {@link Executor} where the callback will be invoked on.
@@ -4300,10 +4303,9 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Clears the {@link TrustedPresentationCallback} for a specific {@link SurfaceControl}
+         * Clears the callback for a specific {@link SurfaceControl}
          *
-         * @param sc The SurfaceControl that the {@link TrustedPresentationCallback} should be
-         *           cleared from
+         * @param sc The SurfaceControl that the callback should be cleared from
          * @return This transaction
          */
         @NonNull

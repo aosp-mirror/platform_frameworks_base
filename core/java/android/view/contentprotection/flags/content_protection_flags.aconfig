@@ -6,3 +6,10 @@ flag {
     description: "If true, content protection blocklist is mutable and can be updated."
     bug: "301658008"
 }
+
+flag {
+    name: "parse_groups_config_enabled"
+    namespace: "content_protection"
+    description: "If true, content protection groups config will be parsed."
+    bug: "302187922"
+}

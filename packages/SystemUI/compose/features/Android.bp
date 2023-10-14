@@ -33,6 +33,7 @@ android_library {
     static_libs: [
         "SystemUI-core",
         "PlatformComposeCore",
+        "PlatformComposeSceneTransitionLayout",
 
         "androidx.compose.runtime_runtime",
         "androidx.compose.animation_animation-graphics",

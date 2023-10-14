@@ -414,9 +414,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private int mDisplayLeftInset = 0; // in pixels
 
     @VisibleForTesting
-    KeyguardClockPositionAlgorithm
-            mClockPositionAlgorithm =
-            new KeyguardClockPositionAlgorithm();
+    KeyguardClockPositionAlgorithm mClockPositionAlgorithm;
     private final KeyguardClockPositionAlgorithm.Result
             mClockPositionResult =
             new KeyguardClockPositionAlgorithm.Result();
@@ -779,7 +777,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             KeyguardViewConfigurator keyguardViewConfigurator,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             SplitShadeStateController splitShadeStateController,
-            PowerInteractor powerInteractor) {
+            PowerInteractor powerInteractor,
+            KeyguardClockPositionAlgorithm keyguardClockPositionAlgorithm) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -807,6 +806,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardInteractor = keyguardInteractor;
         mPowerInteractor = powerInteractor;
         mKeyguardViewConfigurator = keyguardViewConfigurator;
+        mClockPositionAlgorithm = keyguardClockPositionAlgorithm;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {

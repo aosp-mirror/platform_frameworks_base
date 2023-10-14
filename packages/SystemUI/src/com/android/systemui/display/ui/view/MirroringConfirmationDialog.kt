@@ -15,14 +15,12 @@
  */
 package com.android.systemui.display.ui.view
 
-import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
-import android.view.WindowManager
 import android.widget.TextView
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.SystemUIBottomSheetDialog
 
 /**
  * Dialog used to decide what to do with a connected display.
@@ -35,7 +33,7 @@ class MirroringConfirmationDialog(
     private val onStartMirroringClickListener: View.OnClickListener,
     private val onCancelMirroring: View.OnClickListener,
     theme: Int = R.style.Theme_SystemUI_Dialog,
-) : Dialog(context, theme) {
+) : SystemUIBottomSheetDialog(context, theme) {
 
     private lateinit var mirrorButton: TextView
     private lateinit var dismissButton: TextView
@@ -43,13 +41,8 @@ class MirroringConfirmationDialog(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window?.apply {
-            setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
-            addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
-            setGravity(Gravity.BOTTOM)
-        }
         setContentView(R.layout.connected_display_dialog)
-        setCanceledOnTouchOutside(true)
+
         mirrorButton =
             requireViewById<TextView>(R.id.enable_display).apply {
                 setOnClickListener(onStartMirroringClickListener)

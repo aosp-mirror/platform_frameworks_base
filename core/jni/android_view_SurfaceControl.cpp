@@ -963,10 +963,11 @@ static void nativeSetDefaultFrameRateCompatibility(JNIEnv* env, jclass clazz, jl
 }
 
 static void nativeSetFrameRateCategory(JNIEnv* env, jclass clazz, jlong transactionObj,
-                                       jlong nativeObject, jint category) {
+                                       jlong nativeObject, jint category,
+                                       jboolean smoothSwitchOnly) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     const auto ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    transaction->setFrameRateCategory(ctrl, static_cast<int8_t>(category));
+    transaction->setFrameRateCategory(ctrl, static_cast<int8_t>(category), smoothSwitchOnly);
 }
 
 static void nativeSetFrameRateSelectionStrategy(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2181,7 +2182,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFrameRate },
     {"nativeSetDefaultFrameRateCompatibility", "(JJI)V",
             (void*)nativeSetDefaultFrameRateCompatibility},
-    {"nativeSetFrameRateCategory", "(JJI)V",
+    {"nativeSetFrameRateCategory", "(JJIZ)V",
             (void*)nativeSetFrameRateCategory},
     {"nativeSetFrameRateSelectionStrategy", "(JJI)V",
             (void*)nativeSetFrameRateSelectionStrategy},

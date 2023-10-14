@@ -49,14 +49,13 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.SensorOverlays;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.PowerPressHandler;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
 import java.util.function.Supplier;
 
-class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps,
+public class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps,
         PowerPressHandler {
 
     private static final String TAG = "FingerprintEnrollClient";
@@ -72,12 +71,16 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
 
     private static boolean shouldVibrateFor(Context context,
             FingerprintSensorPropertiesInternal sensorProps) {
-        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
-        final boolean isAccessbilityEnabled = am.isTouchExplorationEnabled();
-        return !sensorProps.isAnyUdfpsType() || isAccessbilityEnabled;
+        if (sensorProps != null) {
+            final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+            final boolean isAccessbilityEnabled = am.isTouchExplorationEnabled();
+            return !sensorProps.isAnyUdfpsType() || isAccessbilityEnabled;
+        } else {
+            return true;
+        }
     }
 
-    FingerprintEnrollClient(@NonNull Context context,
+    public FingerprintEnrollClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
@@ -89,8 +92,8 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
         // UDFPS haptics occur when an image is acquired (instead of when the result is known)
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
-                0 /* timeoutSec */, sensorId, shouldVibrateFor(context, sensorProps), logger,
-                biometricContext);
+                0 /* timeoutSec */, sensorId, shouldVibrateFor(context, sensorProps),
+                logger, biometricContext);
         setRequestId(requestId);
         mSensorProps = sensorProps;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
@@ -136,7 +139,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
         // For UDFPS, notify SysUI that the illumination can be turned off.
         // See AcquiredInfo#GOOD and AcquiredInfo#RETRYING_CAPTURE
-        if (mSensorProps.isAnyUdfpsType()) {
+        if (mSensorProps != null && mSensorProps.isAnyUdfpsType()) {
             if (acquiredGood && mShouldVibrate) {
                 vibrateSuccess();
             }
@@ -162,8 +165,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
 
     @Override
     protected boolean hasReachedEnrollmentLimit() {
-        return FingerprintUtils.getInstance(getSensorId())
-                .getBiometricsForUser(getContext(), getTargetUserId()).size()
+        return mBiometricUtils.getBiometricsForUser(getContext(), getTargetUserId()).size()
                 >= mMaxTemplatesPerUser;
     }
 

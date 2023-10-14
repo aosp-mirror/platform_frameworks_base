@@ -122,9 +122,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private static final String TAG = "VirtualDeviceImpl";
 
     /**
-     * Virtual displays created by a {@link VirtualDeviceManager.VirtualDevice} are more consistent
-     * with virtual displays created via {@link DisplayManager} and allow for the creation of
-     * private, auto-mirror, and fixed orientation displays since
+     * Virtual displays created by a {@code VirtualDeviceManager.VirtualDevice} are more consistent
+     * with virtual displays created via {@link android.hardware.display.DisplayManager} and allow
+     * for the creation of private, auto-mirror, and fixed orientation displays since
      * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}.
      *
      * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC

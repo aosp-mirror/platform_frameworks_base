@@ -29,6 +29,7 @@ import android.telephony.PinResult;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -36,9 +37,9 @@ import android.widget.ImageView;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.res.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 
 public class KeyguardSimPukViewController
         extends KeyguardPinBasedInputViewController<KeyguardSimPukView> {
@@ -206,7 +207,11 @@ public class KeyguardSimPukViewController
         } else {
             SubscriptionInfo info = mKeyguardUpdateMonitor.getSubscriptionInfoForSubId(mSubId);
             CharSequence displayName = info != null ? info.getDisplayName() : "";
-            msg = rez.getString(R.string.kg_puk_enter_puk_hint_multi, displayName);
+            if (!TextUtils.isEmpty(displayName)) {
+                msg = rez.getString(R.string.kg_puk_enter_puk_hint_multi, displayName);
+            } else {
+                msg = rez.getString(R.string.kg_puk_enter_puk_hint);
+            }
             if (info != null) {
                 color = info.getIconTint();
             }

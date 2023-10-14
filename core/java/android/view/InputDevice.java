@@ -778,7 +778,8 @@ public final class InputDevice implements Parcelable {
      * Each gamepad or joystick is given a unique, positive controller number when initially
      * configured by the system. This number may change due to events such as device disconnects /
      * reconnects or user initiated reassignment. Any change in number will trigger an event that
-     * can be observed by registering an {@link InputManagerGlobal.InputDeviceListener}.
+     * can be observed by registering an
+     * {@link android.hardware.input.InputManager.InputDeviceListener}.
      * </p>
      * <p>
      * All input devices which are not gamepads or joysticks will be assigned a controller number

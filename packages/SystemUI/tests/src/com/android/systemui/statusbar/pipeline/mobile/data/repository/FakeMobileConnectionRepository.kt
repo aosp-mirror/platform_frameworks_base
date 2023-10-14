@@ -60,6 +60,8 @@ class FakeMobileConnectionRepository(
 
     override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
 
+    override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false)
+
     fun setDataEnabled(enabled: Boolean) {
         _dataEnabled.value = enabled
     }
