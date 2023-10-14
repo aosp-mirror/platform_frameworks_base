@@ -22,6 +22,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/app_info_pill"
         android:layout_width="match_parent"
         android:layout_height="@dimen/desktop_mode_handle_menu_app_info_pill_height"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_margin_top"
@@ -66,6 +67,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/windowing_pill"
         android:layout_width="match_parent"
         android:layout_height="@dimen/desktop_mode_handle_menu_windowing_pill_height"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
@@ -116,6 +118,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/more_actions_pill"
         android:layout_width="match_parent"
         android:layout_height="@dimen/desktop_mode_handle_menu_more_actions_pill_height"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
