@@ -75,7 +75,7 @@ public class SensorTest {
     @Mock
     private UserAwareBiometricScheduler.UserSwitchCallback mUserSwitchCallback;
     @Mock
-    private Sensor.HalSessionCallback.Callback mHalSessionCallback;
+    private AidlResponseHandler.HardwareUnavailableCallback mHardwareUnavailableCallback;
     @Mock
     private LockoutResetDispatcher mLockoutResetDispatcher;
     @Mock
@@ -97,7 +97,7 @@ public class SensorTest {
     private final LockoutCache mLockoutCache = new LockoutCache();
 
     private UserAwareBiometricScheduler mScheduler;
-    private Sensor.HalSessionCallback mHalCallback;
+    private AidlResponseHandler mHalCallback;
 
     @Before
     public void setUp() {
@@ -113,10 +113,9 @@ public class SensorTest {
                 mBiometricService,
                 () -> USER_ID,
                 mUserSwitchCallback);
-        mHalCallback = new Sensor.HalSessionCallback(mContext, new Handler(mLooper.getLooper()),
-                TAG, mScheduler, SENSOR_ID,
-                USER_ID, mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
-                mHalSessionCallback);
+        mHalCallback = new AidlResponseHandler(mContext, mScheduler, SENSOR_ID, USER_ID,
+                mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
+                mHardwareUnavailableCallback);
     }
 
     @Test

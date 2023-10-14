@@ -1391,7 +1391,6 @@ public class MidiService extends IMidiManager.Stub {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private void addLegacyPackageDeviceServer(ServiceInfo serviceInfo, int userId) {
-        Log.d(TAG, "addLegacyPackageDeviceServer()" + userId);
         XmlResourceParser parser = null;
 
         try {
@@ -1529,7 +1528,6 @@ public class MidiService extends IMidiManager.Stub {
 
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     private void addUmpPackageDeviceServer(ServiceInfo serviceInfo, int userId) {
-        Log.d(TAG, "addUmpPackageDeviceServer()" + userId);
         XmlResourceParser parser = null;
 
         try {

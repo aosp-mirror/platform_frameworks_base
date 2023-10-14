@@ -180,6 +180,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             MobileConnectionRepositoryImpl.Factory(
                 context,
                 fakeBroadcastDispatcher,
+                connectivityManager,
                 telephonyManager = telephonyManager,
                 bgDispatcher = dispatcher,
                 logger = logger,

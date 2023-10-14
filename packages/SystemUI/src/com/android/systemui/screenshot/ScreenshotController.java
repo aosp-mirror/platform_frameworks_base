@@ -303,6 +303,13 @@ public class ScreenshotController {
     private String mPackageName = "";
     private BroadcastReceiver mCopyBroadcastReceiver;
 
+    // When false, the screenshot is taken without showing the ui. Note that this only applies to
+    // external displays, as on the default one the UI should **always** be shown.
+    // This is needed in case of screenshot during display mirroring, as adding another window to
+    // the external display makes mirroring stop.
+    // When there is a way to distinguish between displays that are mirroring or extending, this
+    // can be removed and we can directly show the ui only in the extended case.
+    private final Boolean mShowUIOnExternalDisplay;
     /** Tracks config changes that require re-creating UI */
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_ORIENTATION
@@ -335,7 +342,8 @@ public class ScreenshotController {
             AssistContentRequester assistContentRequester,
             MessageContainerController messageContainerController,
             Provider<ScreenshotSoundController> screenshotSoundController,
-            @Assisted int displayId
+            @Assisted int displayId,
+            @Assisted boolean showUIOnExternalDisplay
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
@@ -401,6 +409,7 @@ public class ScreenshotController {
         mContext.registerReceiver(mCopyBroadcastReceiver, new IntentFilter(
                         ClipboardOverlayController.COPY_OVERLAY_ACTION),
                 ClipboardOverlayController.SELF_PERMISSION, null, Context.RECEIVER_NOT_EXPORTED);
+        mShowUIOnExternalDisplay = showUIOnExternalDisplay;
     }
 
     void handleScreenshot(ScreenshotData screenshot, Consumer<Uri> finisher,
@@ -448,6 +457,23 @@ public class ScreenshotController {
 
         prepareViewForNewScreenshot(screenshot, oldPackageName);
 
+        if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && screenshot.getTaskId() >= 0) {
+            mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
+                    new AssistContentRequester.Callback() {
+                        @Override
+                        public void onAssistContentAvailable(AssistContent assistContent) {
+                            screenshot.setContextUrl(assistContent.getWebUri());
+                        }
+                    });
+        }
+
+        if (!shouldShowUi()) {
+            saveScreenshotInWorkerThread(
+                screenshot.getUserHandle(), finisher, this::logSuccessOnActionsReady,
+                (ignored) -> {});
+            return;
+        }
+
         saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
                 this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);
 
@@ -482,20 +508,14 @@ public class ScreenshotController {
                 screenshot.getUserHandle()));
         mScreenshotView.setScreenshot(screenshot);
 
-        if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && screenshot.getTaskId() >= 0) {
-            mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
-                    new AssistContentRequester.Callback() {
-                        @Override
-                        public void onAssistContentAvailable(AssistContent assistContent) {
-                            screenshot.setContextUrl(assistContent.getWebUri());
-                        }
-                    });
-        }
-
         // ignore system bar insets for the purpose of window layout
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);
         mScreenshotHandler.cancelTimeout(); // restarted after animation
+    }
+
+    private boolean shouldShowUi() {
+        return mDisplayId == Display.DEFAULT_DISPLAY || mShowUIOnExternalDisplay;
     }
 
     void prepareViewForNewScreenshot(ScreenshotData screenshot, String oldPackageName) {
@@ -1199,7 +1219,13 @@ public class ScreenshotController {
     /** Injectable factory to create screenshot controller instances for a specific display. */
     @AssistedFactory
     public interface Factory {
-        /** Creates an instance of the controller for that specific displayId. */
-        ScreenshotController create(int displayId);
+        /**
+         * Creates an instance of the controller for that specific displayId.
+         *
+         * @param displayId:               display to capture
+         * @param showUIOnExternalDisplay: Whether the UI should be shown if this is an external
+         *                                 display.
+         */
+        ScreenshotController create(int displayId, boolean showUIOnExternalDisplay);
     }
 }

@@ -36,7 +36,9 @@ aconfig_srcjars = [
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
     ":sdk_sandbox_flags_lib{.generated_srcjars}",
     ":android.permission.flags-aconfig-java{.generated_srcjars}",
+    ":android.database.sqlite-aconfig-java{.generated_srcjars}",
     ":hwui_flags_java_lib{.generated_srcjars}",
+    ":framework_graphics_flags_java_lib{.generated_srcjars}",
     ":display_flags_lib{.generated_srcjars}",
     ":com.android.internal.foldables.flags-aconfig-java{.generated_srcjars}",
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
@@ -45,6 +47,7 @@ aconfig_srcjars = [
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.net.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -332,6 +335,19 @@ java_aconfig_library {
 
 }
 
+// SQLite
+aconfig_declarations {
+    name: "android.database.sqlite-aconfig",
+    package: "android.database.sqlite",
+    srcs: ["core/java/android/database/sqlite/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.database.sqlite-aconfig-java",
+    aconfig_declarations: "android.database.sqlite-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Biometrics
 aconfig_declarations {
     name: "android.hardware.biometrics.flags-aconfig",
@@ -349,6 +365,12 @@ java_aconfig_library {
 java_aconfig_library {
     name: "hwui_flags_java_lib",
     aconfig_declarations: "hwui_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "framework_graphics_flags_java_lib",
+    aconfig_declarations: "framework_graphics_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -469,5 +491,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.companion.flags-aconfig-java",
     aconfig_declarations: "android.companion.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// CoreNetworking
+java_aconfig_library {
+    name: "com.android.net.flags-aconfig-java",
+    aconfig_declarations: "com.android.net.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

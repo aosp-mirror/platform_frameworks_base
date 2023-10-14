@@ -161,16 +161,16 @@ public abstract class CompanionDeviceService extends Service {
     public static final int DEVICE_EVENT_BT_DISCONNECTED = 3;
 
     /**
-     * A companion app for a {@link AssociationInfo#isSelfManaged() self-managed} device will
-     * receive the callback {@link #onDeviceEvent(AssociationInfo, int)} if it reports that a
-     * device has appeared on its own.
+     * A companion app for a self-managed device will receive the callback
+     * {@link #onDeviceEvent(AssociationInfo, int)} if it reports that a device has appeared on its
+     * own.
      */
     public static final int DEVICE_EVENT_SELF_MANAGED_APPEARED = 4;
 
     /**
-     * A companion app for a {@link AssociationInfo#isSelfManaged() self-managed} device will
-     * receive the callback {@link #onDeviceEvent(AssociationInfo, int)} if it reports that a
-     * device has disappeared on its own.
+     * A companion app for a self-managed device will receive the callback
+     * {@link #onDeviceEvent(AssociationInfo, int)} if it reports that a device has disappeared on
+     * its own.
      */
     public static final int DEVICE_EVENT_SELF_MANAGED_DISAPPEARED = 5;
 

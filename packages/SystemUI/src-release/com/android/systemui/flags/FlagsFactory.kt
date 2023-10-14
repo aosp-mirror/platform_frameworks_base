@@ -24,7 +24,7 @@ object FlagsFactory {
     val knownFlags: Map<String, Flag<*>>
         get() {
             // We need to access Flags in order to initialize our map.
-            assert(flagMap.contains(Flags.TEAMFOOD.name)) { "Where is teamfood?" }
+            assert(flagMap.contains(Flags.NULL_FLAG.name)) { "Where is the null flag?" }
             return flagMap
         }
 

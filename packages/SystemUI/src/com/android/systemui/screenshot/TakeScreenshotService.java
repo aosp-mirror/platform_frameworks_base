@@ -132,7 +132,8 @@ public class TakeScreenshotService extends Service {
         if (mFeatureFlags.isEnabled(MULTI_DISPLAY_SCREENSHOT)) {
             mScreenshot = null;
         } else {
-            mScreenshot = screenshotControllerFactory.create(Display.DEFAULT_DISPLAY);
+            mScreenshot = screenshotControllerFactory.create(
+                    Display.DEFAULT_DISPLAY, /* showUIOnExternalDisplay= */ false);
         }
     }
 

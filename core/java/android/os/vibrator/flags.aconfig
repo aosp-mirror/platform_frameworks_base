@@ -27,3 +27,13 @@ flag {
     description: "Enables the APIs for vibration serialization/deserialization."
     bug: "245129509"
 }
+
+flag {
+    namespace: "haptics"
+    name: "haptic_feedback_vibration_oem_customization_enabled"
+    description: "Enables OEMs/devices to customize vibrations for haptic feedback"
+    # Make read only. This is because the flag is used only once, and this could happen before
+    # the read-write flag values propagate to the device.
+    is_fixed_read_only: true
+    bug: "291128479"
+}

@@ -24,6 +24,8 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
@@ -1327,6 +1329,47 @@ public abstract class Window {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.setColorMode(colorMode);
         dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * <p>Sets the desired about of HDR headroom to be used when rendering as a ratio of
+     * targetHdrPeakBrightnessInNits / targetSdrWhitePointInNits. Only applies when
+     * {@link #setColorMode(int)} is {@link ActivityInfo#COLOR_MODE_HDR}</p>
+     *
+     * <p>By default the system will choose an amount of HDR headroom that is appropriate
+     * for the underlying device capabilities & bit-depth of the panel. However, for some types
+     * of content this can end up being more headroom than necessary or desired. An example
+     * would be a messaging app or gallery thumbnail view where some amount of HDR pop is desired
+     * without overly influencing the perceived brightness of the majority SDR content. This can
+     * also be used to animate in/out of an HDR range for smoother transitions.</p>
+     *
+     * <p>Note: The actual amount of HDR headroom that will be given is subject to a variety
+     * of factors such as ambient conditions, display capabilities, or bit-depth limitations.
+     * See {@link Display#getHdrSdrRatio()} for more information as well as how to query the
+     * current value.</p>
+     *
+     * @param desiredHeadroom The amount of HDR headroom that is desired. Must be >= 1.0 (no HDR)
+     *                        and <= 10,000.0. Passing 0.0 will reset to the default, automatically
+     *                        chosen value.
+     * @see #getDesiredHdrHeadroom()
+     * @see Display#getHdrSdrRatio()
+     */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+    public void setDesiredHdrHeadroom(
+            @FloatRange(from = 0.0f, to = 10000.0) float desiredHeadroom) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.setDesiredHdrHeadroom(desiredHeadroom);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * Get the desired amount of HDR headroom as set by {@link #setDesiredHdrHeadroom(float)}
+     * @return The amount of HDR headroom set, or 0 for automatic/default behavior.
+     * @see #setDesiredHdrHeadroom(float)
+     */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+    public float getDesiredHdrHeadroom() {
+        return getAttributes().getDesiredHdrHeadroom();
     }
 
     /**

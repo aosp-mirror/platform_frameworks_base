@@ -25,6 +25,8 @@ import com.android.systemui.authentication.data.repository.FakeAuthenticationRep
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.model.SysUiState
@@ -137,6 +139,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         )
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
+    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
     private var mobileIconsViewModel: MobileIconsViewModel =
         MobileIconsViewModel(
@@ -149,6 +152,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                     FakeConnectivityRepository(),
                 ),
             constants = mock(),
+            flags,
             scope = testScope.backgroundScope,
         )
 

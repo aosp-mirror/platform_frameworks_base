@@ -7,6 +7,12 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+aconfig_declarations {
+    name: "framework_graphics_flags",
+    package: "com.android.graphics.flags",
+    srcs: ["android/framework_graphics.aconfig"],
+}
+
 filegroup {
     name: "framework-graphics-nonupdatable-sources",
     srcs: [

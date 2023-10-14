@@ -28,6 +28,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.text.TextUtils;
+import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -44,7 +45,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -150,7 +150,7 @@ class AnrTimer<V> {
         /** A partial stack that localizes the caller of the operation. */
         final StackTraceElement[] stack;
         /** The date, in local time, the error was created. */
-        final String date;
+        final long timestamp;
 
         Error(@NonNull String issue, @NonNull String operation, @NonNull String tag,
                 @NonNull StackTraceElement[] stack, @NonNull String arg) {
@@ -159,7 +159,7 @@ class AnrTimer<V> {
             this.tag = tag;
             this.stack = stack;
             this.arg = arg;
-            this.date = new Date().toString();
+            this.timestamp = SystemClock.elapsedRealtime();
         }
     }
 
@@ -347,20 +347,23 @@ class AnrTimer<V> {
          * main Looper.
          */
         @NonNull
-        Handler getHandler(@NonNull Handler.Callback callback) {
+        Handler newHandler(@NonNull Handler.Callback callback) {
             Looper looper = mReferenceHandler.getLooper();
             if (looper == null) looper = Looper.getMainLooper();
             return new Handler(looper, callback);
-        };
+        }
 
-        /** Return a CpuTracker. */
+        /**
+         * Return a CpuTracker. The default behavior is to create a new CpuTracker but this changes
+         * for unit tests.
+         **/
         @NonNull
-        CpuTracker getTracker() {
+        CpuTracker newTracker() {
             return new CpuTracker();
         }
 
         /** Return true if the feature is enabled. */
-        boolean getFeatureEnabled() {
+        boolean isFeatureEnabled() {
             return anrTimerServiceEnabled();
         }
     }
@@ -401,8 +404,8 @@ class AnrTimer<V> {
         /** Create a HandlerTimerService that directly uses the supplied handler and tracker. */
         @VisibleForTesting
         HandlerTimerService(@NonNull Injector injector) {
-            mHandler = injector.getHandler(this::expires);
-            mCpu = injector.getTracker();
+            mHandler = injector.newHandler(this::expires);
+            mCpu = injector.newTracker();
         }
 
         /** Post a message with the specified timeout.  The timer is not modified. */
@@ -513,7 +516,26 @@ class AnrTimer<V> {
     private final FeatureSwitch mFeature;
 
     /**
-     * The common constructor.  A null injector results in a normal, production timer.
+     * Create one AnrTimer instance.  The instance is given a handler and a "what".  Individual
+     * timers are started with {@link #start}.  If a timer expires, then a {@link Message} is sent
+     * immediately to the handler with {@link Message.what} set to what and {@link Message.obj} set
+     * to the timer key.
+     *
+     * AnrTimer instances have a label, which must be unique.  The label is used for reporting and
+     * debug.
+     *
+     * If an individual timer expires internally, and the "extend" parameter is true, then the
+     * AnrTimer may extend the individual timer rather than immediately delivering the timeout to
+     * the client.  The extension policy is not part of the instance.
+     *
+     * This method accepts an {@link #Injector} to tune behavior for testing.  This method should
+     * not be called directly by regular clients.
+     *
+     * @param handler The handler to which the expiration message will be delivered.
+     * @param what The "what" parameter for the expiration message.
+     * @param label A name for this instance.
+     * @param extend A flag to indicate if expired timers can be granted extensions.
+     * @param injector An {@link #Injector} to tune behavior for testing.
      */
     @VisibleForTesting
     AnrTimer(@NonNull Handler handler, int what, @NonNull String label, boolean extend,
@@ -522,7 +544,7 @@ class AnrTimer<V> {
         mWhat = what;
         mLabel = label;
         mExtend = extend;
-        boolean enabled = injector.getFeatureEnabled();
+        boolean enabled = injector.isFeatureEnabled();
         if (!enabled) {
             mFeature = new FeatureDisabled();
             mTimerService = null;
@@ -538,14 +560,25 @@ class AnrTimer<V> {
     }
 
     /**
-     * Create one timer instance for production.  The client can ask for extensible timeouts.
+     * Create an AnrTimer instance with the default {@link #Injector}.  See {@link AnrTimer(Handler,
+     * int, String, boolean, Injector} for a functional description.
+     *
+     * @param handler The handler to which the expiration message will be delivered.
+     * @param what The "what" parameter for the expiration message.
+     * @param label A name for this instance.
+     * @param extend A flag to indicate if expired timers can be granted extensions.
      */
     AnrTimer(@NonNull Handler handler, int what, @NonNull String label, boolean extend) {
         this(handler, what, label, extend, new Injector(handler));
     }
 
     /**
-     * Create one timer instance for production.  There are no extensible timeouts.
+     * Create an AnrTimer instance with the default {@link #Injector} and with extensions disabled.
+     * See {@link AnrTimer(Handler, int, String, boolean, Injector} for a functional description.
+     *
+     * @param handler The handler to which the expiration message will be delivered.
+     * @param what The "what" parameter for the expiration message.
+     * @param label A name for this instance.
      */
     AnrTimer(@NonNull Handler handler, int what, @NonNull String label) {
         this(handler, what, label, false);
@@ -555,6 +588,8 @@ class AnrTimer<V> {
      * Return true if the service is enabled on this instance.  Clients should use this method to
      * decide if the feature is enabled, and not read the flags directly.  This method should be
      * deleted if and when the feature is enabled permanently.
+     *
+     * @return true if the service is flag-enabled.
      */
     boolean serviceEnabled() {
         return mFeature.enabled();
@@ -642,7 +677,7 @@ class AnrTimer<V> {
     }
 
     /**
-     * Report something about a timer.
+     * Generate a log message for a timer.
      */
     private void report(@NonNull Timer timer, @NonNull String msg) {
         Log.i(TAG, msg + " " + timer + " " + Objects.toString(timer.arg));
@@ -654,9 +689,13 @@ class AnrTimer<V> {
      */
     private abstract class FeatureSwitch {
         abstract boolean start(@NonNull V arg, int pid, int uid, long timeoutMs);
+
         abstract boolean cancel(@NonNull V arg);
+
         abstract boolean accept(@NonNull V arg);
+
         abstract boolean discard(@NonNull V arg);
+
         abstract boolean enabled();
     }
 
@@ -666,6 +705,7 @@ class AnrTimer<V> {
      */
     private class FeatureDisabled extends FeatureSwitch {
         /** Start a timer by sending a message to the client's handler. */
+        @Override
         boolean start(@NonNull V arg, int pid, int uid, long timeoutMs) {
             final Message msg = mHandler.obtainMessage(mWhat, arg);
             mHandler.sendMessageDelayed(msg, timeoutMs);
@@ -673,22 +713,26 @@ class AnrTimer<V> {
         }
 
         /** Cancel a timer by removing the message from the client's handler. */
+        @Override
         boolean cancel(@NonNull V arg) {
             mHandler.removeMessages(mWhat, arg);
             return true;
         }
 
         /** accept() is a no-op when the feature is disabled. */
+        @Override
         boolean accept(@NonNull V arg) {
             return true;
         }
 
         /** discard() is a no-op when the feature is disabled. */
+        @Override
         boolean discard(@NonNull V arg) {
             return true;
         }
 
         /** The feature is not enabled. */
+        @Override
         boolean enabled() {
             return false;
         }
@@ -703,16 +747,17 @@ class AnrTimer<V> {
         /**
          * Start a timer.
          */
+        @Override
         boolean start(@NonNull V arg, int pid, int uid, long timeoutMs) {
             final Timer timer = Timer.obtain(pid, uid, arg, timeoutMs, AnrTimer.this);
             synchronized (mLock) {
                 Timer old = mTimerMap.get(arg);
+                // There is an existing timer.  If the timer was running, then cancel the running
+                // timer and restart it.  If the timer was expired record a protocol error and
+                // discard the expired timer.
                 if (old != null) {
-                    // There is an existing timer.  This is a protocol error in the client.
-                    // Record the error and then clean up by canceling running timers and
-                    // discarding expired timers.
-                    restartedLocked(old.status, arg);
                     if (old.status == TIMER_EXPIRED) {
+                      restartedLocked(old.status, arg);
                         discard(arg);
                     } else {
                         cancel(arg);
@@ -735,6 +780,7 @@ class AnrTimer<V> {
         /**
          * Cancel a timer.  Return false if the timer was not found.
          */
+        @Override
         boolean cancel(@NonNull V arg) {
             synchronized (mLock) {
                 Timer timer = removeLocked(arg);
@@ -755,6 +801,7 @@ class AnrTimer<V> {
          * Accept a timer in the framework-level handler.  The timeout has been accepted and the
          * timeout handler is executing.  Return false if the timer was not found.
          */
+        @Override
         boolean accept(@NonNull V arg) {
             synchronized (mLock) {
                 Timer timer = removeLocked(arg);
@@ -775,6 +822,7 @@ class AnrTimer<V> {
          * longer interesting.  No statistics are collected.  Return false if the time was not
          * found.
          */
+        @Override
         boolean discard(@NonNull V arg) {
             synchronized (mLock) {
                 Timer timer = removeLocked(arg);
@@ -791,40 +839,58 @@ class AnrTimer<V> {
         }
 
         /** The feature is enabled. */
+        @Override
         boolean enabled() {
             return true;
         }
     }
 
     /**
-     * Start a timer associated with arg.  If a timer already exists with the same arg, then that
-     * timer is canceled and a new timer is created.  This returns false if the timer cannot be
-     * created.
+     * Start a timer associated with arg.  The same object must be used to cancel, accept, or
+     * discard a timer later.  If a timer already exists with the same arg, then the existing timer
+     * is canceled and a new timer is created.
+     *
+     * @param arg The key by which the timer is known.  This is never examined or modified.
+     * @param pid The Linux process ID of the target being timed.
+     * @param uid The Linux user ID of the target being timed.
+     * @param timeoutMs The timer timeout, in milliseconds.
+     * @return true if the timer was successfully created.
      */
     boolean start(@NonNull V arg, int pid, int uid, long timeoutMs) {
         return mFeature.start(arg, pid, uid, timeoutMs);
     }
 
     /**
-     * Cancel a running timer and remove it from any list.  This returns true if the timer was
-     * found and false otherwise.  It is not an error to cancel a non-existent timer.  It is also
-     * not an error to cancel an expired timer.
+     * Cancel the running timer associated with arg.  The timer is forgotten.  If the timer has
+     * expired, the call is treated as a discard.  No errors are reported if the timer does not
+     * exist or if the timer has expired.
+     *
+     * @return true if the timer was found and was running.
      */
     boolean cancel(@NonNull V arg) {
         return mFeature.cancel(arg);
     }
 
     /**
-     * Accept an expired timer.  This returns false if the timer was not found or if the timer was
-     * not expired.
+     * Accept the expired timer associated with arg.  This indicates that the caller considers the
+     * timer expiration to be a true ANR.  (See {@link #discard} for an alternate response.)  It is
+     * an error to accept a running timer, however the running timer will be canceled.
+     *
+     * @return true if the timer was found and was expired.
      */
     boolean accept(@NonNull V arg) {
         return mFeature.accept(arg);
     }
 
     /**
-     * Discard an expired timer.  This returns false if the timer was not found or if the timer was
-     * not expired.
+     * Discard the expired timer associated with arg.  This indicates that the caller considers the
+     * timer expiration to be a false ANR.  ((See {@link #accept} for an alternate response.)  One
+     * reason to discard an expired timer is if the process being timed was also being debugged:
+     * such a process could be stopped at a breakpoint and its failure to respond would not be an
+     * error.  It is an error to discard a running timer, however the running timer will be
+     * canceled.
+     *
+     * @return true if the timer was found and was expired.
      */
     boolean discard(@NonNull V arg) {
         return mFeature.discard(arg);
@@ -913,7 +979,10 @@ class AnrTimer<V> {
     private static void dump(IndentingPrintWriter ipw, int seq, Error err) {
         ipw.format("%2d: op:%s tag:%s issue:%s arg:%s\n", seq, err.operation, err.tag,
                 err.issue, err.arg);
-        ipw.format("    date:%s\n", err.date);
+
+        final long offset = System.currentTimeMillis() - SystemClock.elapsedRealtime();
+        final long etime = offset + err.timestamp;
+        ipw.println("    date:" + TimeMigrationUtils.formatMillisWithFixedFormat(etime));
         ipw.increaseIndent();
         for (int i = 0; i < err.stack.length; i++) {
             ipw.println("    " + err.stack[i].toString());

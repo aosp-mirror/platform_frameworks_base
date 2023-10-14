@@ -28,6 +28,7 @@ import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_OK;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_SECURITY_EXCEPTION;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_TRUE;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
+import static android.view.contentprotection.flags.Flags.parseGroupsConfigEnabled;
 
 import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ACCEPT_DATA_SHARE_REQUEST;
 import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL;
@@ -115,6 +116,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -141,6 +143,9 @@ public class ContentCaptureManagerService extends
     private static final int MAX_DATA_SHARE_FILE_DESCRIPTORS_TTL_MS =  1_000 * 60 * 5; // 5 minutes
     private static final int MAX_CONCURRENT_FILE_SHARING_REQUESTS = 10;
     private static final int DATA_SHARE_BYTE_BUFFER_LENGTH = 1_024;
+
+    private static final String CONTENT_PROTECTION_GROUP_CONFIG_SEPARATOR_GROUP = ";";
+    private static final String CONTENT_PROTECTION_GROUP_CONFIG_SEPARATOR_VALUE = ",";
 
     // Needed to pass checkstyle_hook as names are too long for one line.
     private static final int EVENT__DATA_SHARE_ERROR_CONCURRENT_REQUEST =
@@ -957,14 +962,40 @@ public class ContentCaptureManagerService extends
         return mContentCaptureManagerServiceStub;
     }
 
-    /** @hide */
+    /**
+     * Parses a simple config in format "group;group" where each "group" is itself in the format of
+     * "string1,string2", eg:
+     *
+     * <p>"a" -> [["a"]]
+     *
+     * <p>"a,b" -> [["a", "b"]]
+     *
+     * <p>"a,b;c;d,e" -> [["a", "b"], ["c"], ["d", "e"]]
+     *
+     * @hide
+     */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @NonNull
     protected List<List<String>> parseContentProtectionGroupsConfig(@Nullable String config) {
         if (verbose) {
             Slog.v(TAG, "parseContentProtectionGroupsConfig: " + config);
         }
-        return Collections.emptyList();
+        if (!parseGroupsConfigEnabled()) {
+            return Collections.emptyList();
+        }
+        if (config == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(config.split(CONTENT_PROTECTION_GROUP_CONFIG_SEPARATOR_GROUP))
+                .map(this::parseContentProtectionGroupConfigValues)
+                .filter(group -> !group.isEmpty())
+                .toList();
+    }
+
+    private List<String> parseContentProtectionGroupConfigValues(@NonNull String group) {
+        return Arrays.stream(group.split(CONTENT_PROTECTION_GROUP_CONFIG_SEPARATOR_VALUE))
+                .filter(value -> !value.isEmpty())
+                .toList();
     }
 
     final class ContentCaptureManagerServiceStub extends IContentCaptureManager.Stub {

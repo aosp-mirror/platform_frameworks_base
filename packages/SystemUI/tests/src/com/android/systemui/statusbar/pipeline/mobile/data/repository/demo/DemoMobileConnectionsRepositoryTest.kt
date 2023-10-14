@@ -549,6 +549,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             launch { conn.carrierName.collect {} }
             launch { conn.isEmergencyOnly.collect {} }
             launch { conn.dataConnectionState.collect {} }
+            launch { conn.hasPrioritizedNetworkCapabilities.collect {} }
         }
         return job
     }
@@ -574,6 +575,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                     .isEqualTo(NetworkNameModel.IntentDerived(model.name))
                 assertThat(conn.carrierName.value)
                     .isEqualTo(NetworkNameModel.SubscriptionDerived("${model.name} ${model.subId}"))
+                assertThat(conn.hasPrioritizedNetworkCapabilities.value).isEqualTo(model.slice)
 
                 // TODO(b/261029387) check these once we start handling them
                 assertThat(conn.isEmergencyOnly.value).isFalse()
@@ -599,6 +601,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         assertThat(conn.isEmergencyOnly.value).isFalse()
         assertThat(conn.isGsm.value).isFalse()
         assertThat(conn.dataConnectionState.value).isEqualTo(DataConnectionState.Connected)
+        assertThat(conn.hasPrioritizedNetworkCapabilities.value).isFalse()
         job.cancel()
     }
 }

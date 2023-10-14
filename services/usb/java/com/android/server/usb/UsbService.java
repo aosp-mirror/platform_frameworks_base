@@ -37,8 +37,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.hardware.usb.IUsbManager;
 import android.hardware.usb.IDisplayPortAltModeInfoListener;
+import android.hardware.usb.IUsbManager;
 import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbAccessory;
@@ -46,7 +46,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
-import android.hardware.usb.DisplayPortAltModeInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -1215,6 +1214,20 @@ public class UsbService extends IUsbManager.Stub {
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             "", 0);
                 }
+            } else if ("enable-usb-data".equals(args[0]) && args.length == 3) {
+                final String portId = args[1];
+                final boolean enable = Boolean.parseBoolean(args[2]);
+
+                if (mPortManager != null) {
+                    for (UsbPort p : mPortManager.getPorts()) {
+                        if (p.getId().equals(portId)) {
+                            int res = p.enableUsbData(enable);
+                            Slog.i(TAG, "enableUsbData " + portId + " status " + res);
+                            break;
+                        }
+                    }
+                }
+
             } else if ("ports".equals(args[0]) && args.length == 1) {
                 if (mPortManager != null) {
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
@@ -1292,6 +1305,11 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("  dumpsys usb reset-displayport-status \"matrix\"");
                 pw.println("reset-displayport-status can also be used in order to set");
                 pw.println("the DisplayPortInfo to default values.");
+                pw.println();
+                pw.println("Example enableUsbData");
+                pw.println("This dumpsys command functions for both simulated and real ports.");
+                pw.println("  dumpsys usb enable-usb-data \"matrix\" true");
+                pw.println("  dumpsys usb enable-usb-data \"matrix\" false");
                 pw.println();
                 pw.println("Example USB device descriptors:");
                 pw.println("  dumpsys usb dump-descriptors -dump-short");

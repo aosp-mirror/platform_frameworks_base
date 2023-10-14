@@ -1079,7 +1079,7 @@ public class PowerStatsServiceTest {
         GetSupportedPowerMonitorsResult result = new GetSupportedPowerMonitorsResult();
         mService.getSupportedPowerMonitorsImpl(result);
         assertThat(result.powerMonitors).isNotNull();
-        assertThat(Arrays.stream(result.powerMonitors).map(pm -> pm.name).toList())
+        assertThat(Arrays.stream(result.powerMonitors).map(PowerMonitor::getName).toList())
                 .containsAtLeast(
                         "energyconsumer0",
                         "BLUETOOTH/1",
@@ -1130,7 +1130,7 @@ public class PowerStatsServiceTest {
         mService.getSupportedPowerMonitorsImpl(supportedPowerMonitorsResult);
         Map<String, PowerMonitor> map =
                 Arrays.stream(supportedPowerMonitorsResult.powerMonitors)
-                        .collect(Collectors.toMap(pm -> pm.name, pm -> pm));
+                        .collect(Collectors.toMap(PowerMonitor::getName, pm -> pm));
         PowerMonitor consumer1 = map.get("energyconsumer0");
         PowerMonitor consumer2 = map.get("BLUETOOTH/1");
         PowerMonitor measurement1 = map.get("[channelname0]:channelsubsystem0");
@@ -1196,6 +1196,6 @@ public class PowerStatsServiceTest {
         supportedPowerMonitorsResult = new GetSupportedPowerMonitorsResult();
         mService.getSupportedPowerMonitorsImpl(supportedPowerMonitorsResult);
         assertThat(Arrays.stream(supportedPowerMonitorsResult.powerMonitors)
-                .map(pm -> pm.name).toList()).contains("energyconsumer0");
+                .map(PowerMonitor::getName).toList()).contains("energyconsumer0");
     }
 }

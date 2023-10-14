@@ -86,7 +86,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             )
             .thenReturn(false)
         whenever(userManager.isUserUnlocked).thenReturn(true)
-        whenever(controllerFactory.create(any())).thenReturn(controller)
+        whenever(controllerFactory.create(any(), any())).thenReturn(controller)
 
         // Stub request processor as a synchronous no-op for tests with the flag enabled
         doAnswer {

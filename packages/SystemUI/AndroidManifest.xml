@@ -83,6 +83,7 @@
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
+    <uses-permission android:name="android.permission.NETWORK_FACTORY" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -1062,5 +1063,9 @@
             <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
         </provider>
+
+        <!-- Allow SystemUI to listen for the capabilities defined in the linked xml -->
+        <property android:name="android.net.PROPERTY_SELF_CERTIFIED_CAPABILITIES"
+                  android:value="@xml/self_certified_network_capabilities_both" />
     </application>
 </manifest>

@@ -463,7 +463,7 @@ public final class MediaRouter2 {
     /**
      * Returns the current {@link RouteListingPreference} of the target router.
      *
-     * <p>If this instance was created using {@link #getInstance(Context, String)}, then it returns
+     * <p>If this instance was created using {@code #getInstance(Context, String)}, then it returns
      * the last {@link RouteListingPreference} set by the process this router was created for.
      *
      * @see #setRouteListingPreference(RouteListingPreference)

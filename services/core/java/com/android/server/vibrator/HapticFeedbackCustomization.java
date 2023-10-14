@@ -19,6 +19,7 @@ package com.android.server.vibrator;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.os.VibratorInfo;
 import android.os.vibrator.persistence.ParsedVibration;
 import android.os.vibrator.persistence.VibrationXmlParser;
@@ -127,6 +128,10 @@ final class HapticFeedbackCustomization {
                     VibrationXmlParser.VibrationXmlParserException,
                     XmlParserException,
                     XmlPullParserException {
+        if (!Flags.hapticFeedbackVibrationOemCustomizationEnabled()) {
+            Slog.d(TAG, "Haptic feedback customization feature is not enabled.");
+            return null;
+        }
         String customizationFile =
                 res.getString(
                         com.android.internal.R.string.config_hapticFeedbackCustomizationFile);

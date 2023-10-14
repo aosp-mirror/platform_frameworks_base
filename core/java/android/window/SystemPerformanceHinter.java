@@ -211,7 +211,11 @@ public class SystemPerformanceHinter {
                     session.displayId);
             mTransaction.setFrameRateSelectionStrategy(displaySurfaceControl,
                     FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-            mTransaction.setFrameRateCategory(displaySurfaceControl, FRAME_RATE_CATEGORY_HIGH);
+            // smoothSwitchOnly is false to request a higher framerate, even if it means switching
+            // the display mode will cause would jank on non-VRR devices because keeping a lower
+            // refresh rate would mean a poorer user experience.
+            mTransaction.setFrameRateCategory(
+                    displaySurfaceControl, FRAME_RATE_CATEGORY_HIGH, /* smoothSwitchOnly= */ false);
             transactionChanged = true;
             Trace.beginAsyncSection("PerfHint-framerate-" + session.displayId + "-"
                     + session.reason, session.traceCookie);
@@ -251,7 +255,11 @@ public class SystemPerformanceHinter {
                     session.displayId);
             mTransaction.setFrameRateSelectionStrategy(displaySurfaceControl,
                     FRAME_RATE_SELECTION_STRATEGY_SELF);
-            mTransaction.setFrameRateCategory(displaySurfaceControl, FRAME_RATE_CATEGORY_DEFAULT);
+            // smoothSwitchOnly is false to request a higher framerate, even if it means switching
+            // the display mode will cause would jank on non-VRR devices because keeping a lower
+            // refresh rate would mean a poorer user experience.
+            mTransaction.setFrameRateCategory(displaySurfaceControl, FRAME_RATE_CATEGORY_DEFAULT,
+                    /* smoothSwitchOnly= */ false);
             transactionChanged = true;
             Trace.endAsyncSection("PerfHint-framerate-" + session.displayId + "-" + session.reason,
                     session.traceCookie);

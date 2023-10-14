@@ -54,6 +54,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
 import com.android.launcher3.icons.BaseIconFactory.IconOptions;
 import com.android.launcher3.icons.IconFactory;
+import com.android.launcher3.util.UserIconInfo;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.settingslib.utils.BuildCompatUtils;
@@ -597,15 +598,25 @@ public class Utils {
 
     /** Get the corresponding adaptive icon drawable. */
     public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
-        UserManager um = context.getSystemService(UserManager.class);
-        boolean isClone = um.getProfiles(user.getIdentifier()).stream()
-                .anyMatch(profile ->
-                        profile.isCloneProfile() && profile.id == user.getIdentifier());
+        int userType = UserIconInfo.TYPE_MAIN;
+        try {
+            UserInfo ui = context.getSystemService(UserManager.class).getUserInfo(
+                    user.getIdentifier());
+            if (ui != null) {
+                if (ui.isCloneProfile()) {
+                    userType = UserIconInfo.TYPE_CLONED;
+                } else if (ui.isManagedProfile()) {
+                    userType = UserIconInfo.TYPE_WORK;
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
             return iconFactory
                     .createBadgedIconBitmap(
                             icon,
-                            new IconOptions().setUser(user).setIsCloneProfile(isClone))
+                            new IconOptions().setUser(new UserIconInfo(user, userType)))
                     .newIcon(context);
         }
     }

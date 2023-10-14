@@ -16,8 +16,11 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.connectivity.MobileIconCarrierIdOverridesFake
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
@@ -47,12 +50,14 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var commonImpl: MobileIconViewModelCommon
     private lateinit var homeIcon: HomeMobileIconViewModel
@@ -65,6 +70,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
 
     private val connectivityRepository = FakeConnectivityRepository()
+    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var constants: ConnectivityConstants
@@ -133,6 +139,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
                 interactor,
                 airplaneModeInteractor,
                 constants,
+                flags,
                 testScope.backgroundScope,
             )
 

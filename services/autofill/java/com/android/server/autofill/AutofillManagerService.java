@@ -363,6 +363,7 @@ public final class AutofillManagerService
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS:
                 case AutofillFeatureFlags.DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC:
                 case AutofillFeatureFlags.DEVICE_CONFIG_PCC_USE_FALLBACK:
+                case Flags.FLAG_AUTOFILL_CREDMAN_INTEGRATION:
                     setDeviceConfigProperties();
                     break;
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:

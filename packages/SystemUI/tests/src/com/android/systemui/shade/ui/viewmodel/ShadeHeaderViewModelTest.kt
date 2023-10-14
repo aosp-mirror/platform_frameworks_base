@@ -4,6 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -31,6 +33,7 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
     private val sceneInteractor = utils.sceneInteractor()
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
+    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
     private var mobileIconsViewModel: MobileIconsViewModel =
         MobileIconsViewModel(
@@ -43,6 +46,7 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                     FakeConnectivityRepository(),
                 ),
             constants = mock(),
+            flags,
             scope = testScope.backgroundScope,
         )
 

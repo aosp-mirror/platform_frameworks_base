@@ -156,4 +156,24 @@ interface IMediaProjectionManager {
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void setUserReviewGrantedConsentResult(ReviewGrantedConsentResult consentResult,
             in @nullable IMediaProjection projection);
+
+    /**
+     * Notifies system server that we are handling a particular state during the consent flow.
+     *
+     * <p>Only used for emitting atoms.
+     *
+     * @param hostUid               The uid of the process requesting consent to capture, may be an app or
+     *                              SystemUI.
+     * @param state                 The state that SystemUI is handling during the consent flow.
+     *                              Must be a valid
+     *                              state defined in the MediaProjectionState enum.
+     * @param sessionCreationSource Only set if the state is MEDIA_PROJECTION_STATE_INITIATED.
+     *                              Indicates the entry point for requesting the permission. Must be
+     *                              a valid state defined
+     *                              in the SessionCreationSource enum.
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void notifyPermissionRequestStateChange(int hostUid, int state, int sessionCreationSource);
 }

@@ -89,7 +89,8 @@ public class LockoutFrameworkImpl implements LockoutTracker {
     // Attempt counter should only be cleared when Keyguard goes away or when
     // a biometric is successfully authenticated. Lockout should eventually be done below the HAL.
     // See AuthenticationClient#shouldFrameworkHandleLockout().
-    void resetFailedAttemptsForUser(boolean clearAttemptCounter, int userId) {
+    @Override
+    public void resetFailedAttemptsForUser(boolean clearAttemptCounter, int userId) {
         if (getLockoutModeForUser(userId) != LOCKOUT_NONE) {
             Slog.v(TAG, "Reset biometric lockout for user: " + userId
                     + ", clearAttemptCounter: " + clearAttemptCounter);
@@ -104,7 +105,8 @@ public class LockoutFrameworkImpl implements LockoutTracker {
         mLockoutResetCallback.onLockoutReset(userId);
     }
 
-    void addFailedAttemptForUser(int userId) {
+    @Override
+    public void addFailedAttemptForUser(int userId) {
         mFailedAttempts.put(userId, mFailedAttempts.get(userId, 0) + 1);
         mTimedLockoutCleared.put(userId, false);
 
@@ -114,7 +116,8 @@ public class LockoutFrameworkImpl implements LockoutTracker {
     }
 
     @Override
-    public @LockoutMode int getLockoutModeForUser(int userId) {
+    @LockoutMode
+    public int getLockoutModeForUser(int userId) {
         final int failedAttempts = mFailedAttempts.get(userId, 0);
         if (failedAttempts >= MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT) {
             return LOCKOUT_PERMANENT;
@@ -124,6 +127,19 @@ public class LockoutFrameworkImpl implements LockoutTracker {
             return LOCKOUT_TIMED;
         }
         return LOCKOUT_NONE;
+    }
+
+    /**
+     * Clears lockout for Fingerprint HIDL HAL
+     */
+    @Override
+    public void setLockoutModeForUser(int userId, int mode) {
+        mFailedAttempts.put(userId, 0);
+        mTimedLockoutCleared.put(userId, true);
+        // If we're asked to reset failed attempts externally (i.e. from Keyguard),
+        // the alarm might still be pending; remove it.
+        cancelLockoutResetForUser(userId);
+        mLockoutResetCallback.onLockoutReset(userId);
     }
 
     private void cancelLockoutResetForUser(int userId) {

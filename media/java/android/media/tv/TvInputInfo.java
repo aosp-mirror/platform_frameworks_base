@@ -940,9 +940,7 @@ public final class TvInputInfo implements Parcelable {
                 isHardwareInput = true;
                 hdmiConnectionRelativePosition = getRelativePosition(mContext, mHdmiDeviceInfo);
                 isConnectedToHdmiSwitch = hdmiConnectionRelativePosition
-                                != HdmiUtils.HDMI_RELATIVE_POSITION_DIRECTLY_BELOW
-                        && hdmiConnectionRelativePosition
-                                != HdmiUtils.HDMI_RELATIVE_POSITION_UNKNOWN;
+                                == HdmiUtils.HDMI_RELATIVE_POSITION_BELOW;
             } else if (mTvInputHardwareInfo != null) {
                 id = generateInputId(componentName, mTvInputHardwareInfo);
                 type = sHardwareTypeToTvInputType.get(mTvInputHardwareInfo.getType(), TYPE_TUNER);
