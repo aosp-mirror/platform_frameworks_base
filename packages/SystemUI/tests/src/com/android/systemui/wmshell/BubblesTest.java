@@ -156,7 +156,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
-import com.android.systemui.user.data.repository.FakeUserRepository;
+import com.android.systemui.user.domain.interactor.UserInteractor;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
@@ -450,7 +450,7 @@ public class BubblesTest extends SysuiTestCase {
                         keyguardTransitionInteractor,
                         powerInteractor,
                         new FakeUserSetupRepository(),
-                        new FakeUserRepository(),
+                        mock(UserInteractor.class),
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
