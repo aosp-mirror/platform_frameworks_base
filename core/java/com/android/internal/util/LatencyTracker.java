@@ -27,6 +27,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPOR
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN;
@@ -215,6 +216,12 @@ public class LatencyTracker {
      */
     public static final int ACTION_SMARTSPACE_DOORBELL = 22;
 
+    /**
+     * Time it takes to lazy-load the image of a {@link android.app.Notification.BigPictureStyle}
+     * notification.
+     */
+    public static final int ACTION_NOTIFICATION_BIG_PICTURE_LOADED = 23;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -239,6 +246,7 @@ public class LatencyTracker {
         ACTION_REQUEST_IME_SHOWN,
         ACTION_REQUEST_IME_HIDDEN,
         ACTION_SMARTSPACE_DOORBELL,
+        ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
     };
 
     /** @hide */
@@ -266,6 +274,7 @@ public class LatencyTracker {
         ACTION_REQUEST_IME_SHOWN,
         ACTION_REQUEST_IME_HIDDEN,
         ACTION_SMARTSPACE_DOORBELL,
+        ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -296,6 +305,7 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
     };
 
     private final Object mLock = new Object();
@@ -480,6 +490,8 @@ public class LatencyTracker {
                 return "ACTION_REQUEST_IME_HIDDEN";
             case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL:
                 return "ACTION_SMARTSPACE_DOORBELL";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED:
+                return "ACTION_NOTIFICATION_BIG_PICTURE_LOADED";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }
