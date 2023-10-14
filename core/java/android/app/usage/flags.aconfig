@@ -7,3 +7,9 @@ flag {
     bug: "296061232"
 }
 
+flag {
+    name: "report_usage_stats_permission"
+    namespace: "backstage_power"
+    description: "Feature flag for the new REPORT_USAGE_STATS permission."
+    bug: "296056771"
+}

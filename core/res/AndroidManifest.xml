@@ -6122,7 +6122,9 @@
         android:protectionLevel="signature|privileged|development|appop|retailDemo" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
-    <!-- @SystemApi @hide Allows trusted system components to report events to UsageStatsManager -->
+    <!-- @SystemApi @hide
+         @FlaggedApi("backstage_power.report_usage_stats_permission")
+         Allows trusted system components to report events to UsageStatsManager -->
     <permission android:name="android.permission.REPORT_USAGE_STATS"
                 android:protectionLevel="signature|module" />
 
