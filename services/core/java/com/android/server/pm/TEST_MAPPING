@@ -18,7 +18,12 @@
       "name": "CtsCompilationTestCases"
     },
     {
-      "name": "CtsAppEnumerationTestCases"
+      "name": "CtsAppEnumerationTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        }
+      ]
     },
     {
       "name": "CtsMatchFlagTestCases"
@@ -118,6 +123,9 @@
     },
     {
       "name": "PackageManagerServiceHostTests"
+    },
+    {
+      "name": "CtsAppEnumerationTestCases"
     }
   ],
   "imports": [
