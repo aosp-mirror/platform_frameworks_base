@@ -77,8 +77,10 @@ import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_BTOP;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
@@ -4840,6 +4842,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
             }
+            maybeSendBootCompletedLocked(app);
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
             Slog.wtf(TAG, "Exception thrown during bind of " + app, e);
@@ -5064,6 +5067,45 @@ public class ActivityManagerService extends IActivityManager.Stub
             // If we are taking more than 50ms, log about it.
             Slog.w(TAG, "Slow operation: " + (now - startTime) + "ms so far, now at " + where);
         }
+    }
+
+    /**
+     * Send LOCKED_BOOT_COMPLETED and BOOT_COMPLETED to the package explicitly when unstopped
+     */
+    private void maybeSendBootCompletedLocked(ProcessRecord app) {
+        // Nothing to do if it wasn't previously stopped
+        if (!android.content.pm.Flags.stayStopped() || !app.wasForceStopped()) return;
+
+        // Send LOCKED_BOOT_COMPLETED, if necessary
+        if (app.getApplicationInfo().isEncryptionAware()) {
+            sendBootBroadcastToAppLocked(app, new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED),
+                    REASON_LOCKED_BOOT_COMPLETED);
+        }
+        // Send BOOT_COMPLETED if the user is unlocked
+        if (StorageManager.isUserKeyUnlocked(app.userId)) {
+            sendBootBroadcastToAppLocked(app, new Intent(Intent.ACTION_BOOT_COMPLETED),
+                    REASON_BOOT_COMPLETED);
+        }
+        app.setWasForceStopped(false);
+    }
+
+    /** Send a boot_completed broadcast to app */
+    private void sendBootBroadcastToAppLocked(ProcessRecord app, Intent intent,
+            @PowerExemptionManager.ReasonCode int reason) {
+        intent.setPackage(app.info.packageName);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, app.userId);
+        intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
+                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                | Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        final BroadcastOptions bOptions = mUserController.getTemporaryAppAllowlistBroadcastOptions(
+                reason);
+
+        broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null,
+                new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
+                null, null, AppOpsManager.OP_NONE,
+                bOptions.toBundle(), true,
+                false, MY_PID, SYSTEM_UID,
+                SYSTEM_UID, MY_PID, app.userId);
     }
 
     @Override

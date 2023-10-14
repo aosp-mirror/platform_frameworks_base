@@ -3255,6 +3255,17 @@ public final class ProcessList {
                 hostingRecord.getDefiningUid(), hostingRecord.getDefiningProcessName());
         final ProcessStateRecord state = r.mState;
 
+        // Check if we should mark the processrecord for first launch after force-stopping
+        if ((r.getApplicationInfo().flags & ApplicationInfo.FLAG_STOPPED) != 0) {
+            final boolean wasPackageEverLaunched = mService.getPackageManagerInternal()
+                    .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
+            // If the package was launched in the past but is currently stopped, only then it
+            // should be considered as stopped after use. Do not mark it if it's the first launch.
+            if (wasPackageEverLaunched) {
+                r.setWasForceStopped(true);
+            }
+        }
+
         if (!isolated && !isSdkSandbox
                 && userId == UserHandle.USER_SYSTEM
                 && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK

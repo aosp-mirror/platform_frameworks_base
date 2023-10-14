@@ -3387,7 +3387,7 @@ class UserController implements Handler.Callback {
 
     }
 
-    private BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
+    BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
             @PowerWhitelistManager.ReasonCode int reasonCode) {
         long duration = 10_000;
         final ActivityManagerInternal amInternal =
