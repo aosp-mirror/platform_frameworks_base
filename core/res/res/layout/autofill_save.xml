@@ -60,10 +60,11 @@
                     android:gravity="center"
                     android:textAppearance="@style/AutofillSaveUiTitle">
                 </TextView>
-                <LinearLayout
+                <FrameLayout
                     android:id="@+id/autofill_save_custom_subtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="0dp"
                     android:visibility="gone"/>
 
             </LinearLayout>
