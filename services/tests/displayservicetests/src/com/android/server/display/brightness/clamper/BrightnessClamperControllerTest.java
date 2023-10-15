@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.testutils.TestHandler;
 
 import org.junit.Before;
@@ -63,12 +64,13 @@ public class BrightnessClamperControllerTest {
     @Mock
     private BrightnessClamper<BrightnessClamperController.DisplayDeviceData> mMockClamper;
     @Mock
+    private DisplayManagerFlags mFlags;
+    @Mock
     private BrightnessModifier mMockModifier;
     @Mock
     private DisplayManagerInternal.DisplayPowerRequest mMockRequest;
     @Mock
     private DeviceConfig.Properties mMockProperties;
-
     private BrightnessClamperController mClamperController;
     private TestInjector mTestInjector;
 
@@ -219,7 +221,7 @@ public class BrightnessClamperControllerTest {
 
     private BrightnessClamperController createBrightnessClamperController() {
         return new BrightnessClamperController(mTestInjector, mTestHandler, mMockExternalListener,
-                mMockDisplayDeviceData, mMockContext);
+                mMockDisplayDeviceData, mMockContext, mFlags);
     }
 
     private class TestInjector extends BrightnessClamperController.Injector {
@@ -247,7 +249,8 @@ public class BrightnessClamperControllerTest {
         List<BrightnessClamper<? super BrightnessClamperController.DisplayDeviceData>> getClampers(
                 Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
-                BrightnessClamperController.DisplayDeviceData data) {
+                BrightnessClamperController.DisplayDeviceData data,
+                DisplayManagerFlags flags) {
             mCapturedChangeListener = clamperChangeListener;
             return mClampers;
         }

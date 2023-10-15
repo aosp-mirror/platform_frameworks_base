@@ -44,6 +44,7 @@ import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
 private const val TAG = "KeyguardUpdateMonitorLog"
+private const val FP_LOG_TAG = "KeyguardFingerprintLog"
 
 /** Helper class for logging for [com.android.keyguard.KeyguardUpdateMonitor] */
 class KeyguardUpdateMonitorLogger
@@ -157,7 +158,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintAuthForWrongUser(authUserId: Int) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             { int1 = authUserId },
             { "Fingerprint authenticated for wrong user: $int1" }
@@ -166,7 +167,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintDisabledForUser(userId: Int) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             { int1 = userId },
             { "Fingerprint disabled by DPM for userId: $int1" }
@@ -174,12 +175,17 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
     }
 
     fun logFingerprintLockoutReset(@LockoutMode mode: Int) {
-        logBuffer.log(TAG, DEBUG, { int1 = mode }, { "handleFingerprintLockoutReset: $int1" })
+        logBuffer.log(
+            FP_LOG_TAG,
+            DEBUG,
+            { int1 = mode },
+            { "handleFingerprintLockoutReset: $int1" }
+        )
     }
 
     fun logFingerprintRunningState(fingerprintRunningState: Int) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             { int1 = fingerprintRunningState },
             { "fingerprintRunningState: $int1" }
@@ -188,7 +194,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintSuccess(userId: Int, isStrongBiometric: Boolean) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             {
                 int1 = userId
@@ -212,7 +218,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintDetected(userId: Int, isStrongBiometric: Boolean) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             {
                 int1 = userId
@@ -224,7 +230,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintError(msgId: Int, originalErrMsg: String) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             {
                 str1 = originalErrMsg
@@ -749,6 +755,27 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
                 str1 = context
             },
             { "userSwitchComplete: $str1, userId: $int1" }
+        )
+    }
+
+    fun logFingerprintHelp(helpMsgId: Int, helpString: CharSequence) {
+        logBuffer.log(
+            FP_LOG_TAG,
+            DEBUG,
+            {
+                int1 = helpMsgId
+                str1 = "$helpString"
+            },
+            { "fingerprint help message: $int1, $str1" }
+        )
+    }
+
+    fun logFingerprintAcquired(acquireInfo: Int) {
+        logBuffer.log(
+            FP_LOG_TAG,
+            DEBUG,
+            { int1 = acquireInfo },
+            { "fingerprint acquire message: $int1" }
         )
     }
 }

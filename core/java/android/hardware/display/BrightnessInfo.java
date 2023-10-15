@@ -59,7 +59,8 @@ public final class BrightnessInfo implements Parcelable {
 
     @IntDef(prefix = {"BRIGHTNESS_MAX_REASON_"}, value = {
             BRIGHTNESS_MAX_REASON_NONE,
-            BRIGHTNESS_MAX_REASON_THERMAL
+            BRIGHTNESS_MAX_REASON_THERMAL,
+            BRIGHTNESS_MAX_REASON_POWER_IC
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BrightnessMaxReason {}
@@ -73,6 +74,11 @@ public final class BrightnessInfo implements Parcelable {
      * Maximum brightness is restricted due to thermal throttling.
      */
     public static final int BRIGHTNESS_MAX_REASON_THERMAL = 1;
+
+    /**
+     * Maximum brightness is restricted due to power throttling.
+     */
+    public static final int BRIGHTNESS_MAX_REASON_POWER_IC = 2;
 
     /** Brightness */
     public final float brightness;
@@ -144,6 +150,8 @@ public final class BrightnessInfo implements Parcelable {
                 return "none";
             case BRIGHTNESS_MAX_REASON_THERMAL:
                 return "thermal";
+            case BRIGHTNESS_MAX_REASON_POWER_IC:
+                return "power IC";
         }
         return "invalid";
     }
