@@ -5309,7 +5309,7 @@ public class AccountManagerService
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "performing bindService to " + authenticatorInfo.componentName);
             }
-            long flags = Context.BIND_FILTER_OUT_QUARANTINED_COMPONENTS | Context.BIND_AUTO_CREATE;
+            long flags = Context.BIND_AUTO_CREATE;
             if (mAuthenticatorCache.getBindInstantServiceAllowed(mAccounts.userId)) {
                 flags |= Context.BIND_ALLOW_INSTANT;
             }

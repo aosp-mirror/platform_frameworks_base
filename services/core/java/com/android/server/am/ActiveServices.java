@@ -3662,8 +3662,8 @@ public final class ActiveServices {
                 || (flags & Context.BIND_EXTERNAL_SERVICE_LONG) != 0;
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
         final boolean inSharedIsolatedProcess = (flags & Context.BIND_SHARED_ISOLATED_PROCESS) != 0;
-        final boolean filterOutQuarantined =
-                (flags & Context.BIND_FILTER_OUT_QUARANTINED_COMPONENTS) != 0;
+        final boolean matchQuarantined =
+                (flags & Context.BIND_MATCH_QUARANTINED_COMPONENTS) != 0;
 
         ProcessRecord attributedApp = null;
         if (sdkSandboxClientAppUid > 0) {
@@ -3673,7 +3673,7 @@ public final class ActiveServices {
                 isSdkSandboxService, sdkSandboxClientAppUid, sdkSandboxClientAppPackage,
                 resolvedType, callingPackage, callingPid, callingUid, userId, true, callerFg,
                 isBindExternal, allowInstant, null /* fgsDelegateOptions */,
-                inSharedIsolatedProcess, filterOutQuarantined);
+                inSharedIsolatedProcess, matchQuarantined);
         if (res == null) {
             return 0;
         }
@@ -4186,7 +4186,7 @@ public final class ActiveServices {
                 sdkSandboxClientAppUid, sdkSandboxClientAppPackage, resolvedType, callingPackage,
                 callingPid, callingUid, userId, createIfNeeded, callingFromFg, isBindExternal,
                 allowInstant, fgsDelegateOptions, inSharedIsolatedProcess,
-                false /* filterOutQuarantined */);
+                false /* matchQuarantined */);
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
@@ -4195,7 +4195,7 @@ public final class ActiveServices {
             String callingPackage, int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant, ForegroundServiceDelegationOptions fgsDelegateOptions,
-            boolean inSharedIsolatedProcess, boolean filterOutQuarantined) {
+            boolean inSharedIsolatedProcess, boolean matchQuarantined) {
         if (isSdkSandboxService && instanceName == null) {
             throw new IllegalArgumentException("No instanceName provided for sdk sandbox process");
         }
@@ -4317,8 +4317,8 @@ public final class ActiveServices {
                 if (allowInstant) {
                     flags |= PackageManager.MATCH_INSTANT;
                 }
-                if (filterOutQuarantined) {
-                    flags |= PackageManager.FILTER_OUT_QUARANTINED_COMPONENTS;
+                if (matchQuarantined) {
+                    flags |= PackageManager.MATCH_QUARANTINED_COMPONENTS;
                 }
                 // TODO: come back and remove this assumption to triage all services
                 ResolveInfo rInfo = mAm.getPackageManagerInternal().resolveService(service,

@@ -58,7 +58,6 @@ import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_INSTRUMENTAT
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_PERSISTENT;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_SYSTEM;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
-import static android.content.pm.PackageManager.FILTER_OUT_QUARANTINED_COMPONENTS;
 import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
@@ -14295,8 +14294,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
             int callingUid, int[] users, int[] broadcastAllowList) {
         // TODO: come back and remove this assumption to triage all broadcasts
-        long pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING
-                | FILTER_OUT_QUARANTINED_COMPONENTS;
+        long pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING;
 
         List<ResolveInfo> receivers = null;
         HashSet<ComponentName> singleUserReceivers = null;
