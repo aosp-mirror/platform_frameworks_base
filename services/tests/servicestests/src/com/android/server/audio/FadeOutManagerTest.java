@@ -23,6 +23,8 @@ import static android.media.AudioPlaybackConfiguration.PLAYER_TYPE_AAUDIO;
 import static android.media.AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK;
 import static android.media.AudioPlaybackConfiguration.PLAYER_TYPE_UNKNOWN;
 
+import static org.junit.Assert.assertThrows;
+
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -73,8 +75,17 @@ public final class FadeOutManagerTest {
 
     @Before
     public void setUp() {
-        mFadeOutManager = new FadeOutManager();
+        mFadeOutManager = new FadeOutManager(new FadeConfigurations());
         mContext = ApplicationProvider.getApplicationContext();
+    }
+
+    @Test
+    public void constructor_nullFadeConfigurations_fails() {
+        Throwable thrown = assertThrows(NullPointerException.class, () -> new FadeOutManager(
+                /* FadeConfigurations= */ null));
+
+        expect.withMessage("Constructor exception")
+                .that(thrown).hasMessageThat().contains("Fade configurations can not be null");
     }
 
     @Test
