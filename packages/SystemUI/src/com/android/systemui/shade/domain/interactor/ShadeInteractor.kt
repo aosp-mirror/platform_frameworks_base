@@ -34,7 +34,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.Share
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
-import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import javax.inject.Provider
@@ -71,7 +71,7 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
     userSetupRepository: UserSetupRepository,
-    userRepository: UserRepository,
+    userInteractor: UserInteractor,
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) {
@@ -156,13 +156,12 @@ constructor(
      *
      * TODO(b/300258424) remove all but the first sentence of this comment
      */
-    val isAnyExpanded: StateFlow<Boolean> =
+    val isAnyExpanded: Flow<Boolean> =
         if (sceneContainerFlags.isEnabled()) {
-                anyExpansion.map { it > 0f }.distinctUntilChanged()
-            } else {
-                repository.legacyExpandedOrAwaitingInputTransfer
-            }
-            .stateIn(scope, SharingStarted.Eagerly, false)
+            anyExpansion.map { it > 0f }.distinctUntilChanged()
+        } else {
+            repository.legacyExpandedOrAwaitingInputTransfer
+        }
 
     /**
      * Whether the user is expanding or collapsing the shade with user input. This will be true even
@@ -228,7 +227,7 @@ constructor(
             isDeviceProvisioned &&
                 // Disallow QS during setup if it's a simple user switcher. (The user intends to
                 // use the lock screen user switcher, QS is not needed.)
-                (isUserSetup || !userRepository.isSimpleUserSwitcher()) &&
+                (isUserSetup || !userInteractor.isSimpleUserSwitcher) &&
                 isShadeEnabled &&
                 disableFlags.isQuickSettingsEnabled() &&
                 !isDozing
