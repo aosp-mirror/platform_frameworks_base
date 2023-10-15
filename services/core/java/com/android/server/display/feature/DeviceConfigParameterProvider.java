@@ -77,6 +77,12 @@ public class DeviceConfigParameterProvider {
     // Test parameters
     // usage e.g.: adb shell device_config put display_manager refresh_rate_in_hbm_sunlight 90
 
+    // allows to customize power throttling data
+    public String getPowerThrottlingData() {
+        return mDeviceConfig.getString(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                DisplayManager.DeviceConfig.KEY_POWER_THROTTLING_DATA, null);
+    }
+
     // allows to customize brightness throttling data
     public String getBrightnessThrottlingData() {
         return mDeviceConfig.getString(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,

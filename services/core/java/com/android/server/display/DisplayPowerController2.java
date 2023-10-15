@@ -506,7 +506,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mTag = "DisplayPowerController2[" + mDisplayId + "]";
         mThermalBrightnessThrottlingDataId =
                 logicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
-
         mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         mUniqueDisplayId = logicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
         mDisplayStatsId = mUniqueDisplayId.hashCode();
@@ -566,8 +565,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 modeChangeCallback::run, new BrightnessClamperController.DisplayDeviceData(
                 mUniqueDisplayId,
                 mThermalBrightnessThrottlingDataId,
-                mDisplayDeviceConfig
-        ), mContext);
+                logicalDisplay.getPowerThrottlingDataIdLocked(),
+                mDisplayDeviceConfig), mContext, flags);
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
         mAutomaticBrightnessStrategy =
@@ -821,10 +820,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL;
         final String thermalBrightnessThrottlingDataId =
                 mLogicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
-
-        mBrightnessClamperController.onDisplayChanged(
-                new BrightnessClamperController.DisplayDeviceData(mUniqueDisplayId,
-                        mThermalBrightnessThrottlingDataId, config));
+        final String powerThrottlingDataId =
+                mLogicalDisplay.getPowerThrottlingDataIdLocked();
 
         mHandler.postAtTime(() -> {
             boolean changed = false;
@@ -858,6 +855,14 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             }
 
             mIsDisplayInternal = isDisplayInternal;
+            // using local variables here, when mBrightnessThrottler is removed,
+            // mThermalBrightnessThrottlingDataId could be removed as well
+            // changed = true will be not needed - clampers are maintaining their state and
+            // will call updatePowerState if needed.
+            mBrightnessClamperController.onDisplayChanged(
+                    new BrightnessClamperController.DisplayDeviceData(uniqueId,
+                        thermalBrightnessThrottlingDataId, powerThrottlingDataId, config));
+
             if (changed) {
                 updatePowerState();
             }

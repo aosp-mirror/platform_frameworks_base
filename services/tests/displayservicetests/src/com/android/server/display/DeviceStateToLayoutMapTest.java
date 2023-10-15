@@ -100,6 +100,14 @@ public class DeviceStateToLayoutMapTest {
     }
 
     @Test
+    public void testPowerThrottlingMapId() {
+        Layout configLayout = mDeviceStateToLayoutMap.get(5);
+
+        assertEquals("concurrent1", configLayout.getAt(0).getPowerThrottlingMapId());
+        assertEquals("concurrent2", configLayout.getAt(1).getPowerThrottlingMapId());
+    }
+
+    @Test
     public void testRearDisplayLayout() {
         Layout configLayout = mDeviceStateToLayoutMap.get(2);
 
@@ -133,13 +141,15 @@ public class DeviceStateToLayoutMapTest {
                 mDisplayIdProducerMock,  Layout.Display.POSITION_FRONT,
                 /* leadDisplayAddress= */ null, /* brightnessThrottlingMapId= */ "brightness1",
                 /* refreshRateZoneId= */ "zone1",
-                /* refreshRateThermalThrottlingMapId= */ "rr1");
+                /* refreshRateThermalThrottlingMapId= */ "rr1",
+                /* powerThrottlingMapId= */ "power1");
         testLayout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(678L),
                 /* isDefault= */ false, /* isEnabled= */ false, /* displayGroupName= */ "group1",
                 mDisplayIdProducerMock, Layout.Display.POSITION_REAR,
                 /* leadDisplayAddress= */ null, /* brightnessThrottlingMapId= */ "brightness2",
                 /* refreshRateZoneId= */ "zone2",
-                /* refreshRateThermalThrottlingMapId= */ "rr2");
+                /* refreshRateThermalThrottlingMapId= */ "rr2",
+                /* powerThrottlingMapId= */ "power2");
         testLayout.postProcessLocked();
 
         assertEquals(testLayout, configLayout);
@@ -200,7 +210,8 @@ public class DeviceStateToLayoutMapTest {
                     mDisplayIdProducerMock,  Layout.Display.POSITION_FRONT,
                     DisplayAddress.fromPhysicalDisplayId(123L),
                     /* brightnessThrottlingMapId= */ null, /* refreshRateZoneId= */ null,
-                    /* refreshRateThermalThrottlingMapId= */ null));
+                    /* refreshRateThermalThrottlingMapId= */ null,
+                    /* powerThrottlingMapId= */ null));
     }
 
     @Test
@@ -215,7 +226,8 @@ public class DeviceStateToLayoutMapTest {
                     mDisplayIdProducerMock,  Layout.Display.POSITION_FRONT,
                     DisplayAddress.fromPhysicalDisplayId(987L),
                     /* brightnessThrottlingMapId= */ null, /* refreshRateZoneId= */ null,
-                    /* refreshRateThermalThrottlingMapId= */ null));
+                    /* refreshRateThermalThrottlingMapId= */ null,
+                    /* powerThrottlingMapId= */ null));
     }
 
     @Test
@@ -271,7 +283,8 @@ public class DeviceStateToLayoutMapTest {
                 enabled, group, mDisplayIdProducerMock, Layout.Display.POSITION_UNKNOWN,
                 leadDisplayAddress, /* brightnessThrottlingMapId= */ null,
                 /* refreshRateZoneId= */ null,
-                /* refreshRateThermalThrottlingMapId= */ null);
+                /* refreshRateThermalThrottlingMapId= */ null,
+                /* powerThrottlingMapId= */ null);
     }
 
     private void setupDeviceStateToLayoutMap() throws IOException {
@@ -327,7 +340,6 @@ public class DeviceStateToLayoutMapTest {
                 +        "<brightnessThrottlingMapId>concurrent2</brightnessThrottlingMapId>\n"
                 +      "</display>\n"
                 +    "</layout>\n"
-
                 +    "<layout>\n"
                 +      "<state>3</state> \n"
                 +      "<display enabled=\"true\" defaultDisplay=\"true\" "
@@ -338,7 +350,6 @@ public class DeviceStateToLayoutMapTest {
                 +        "<address>678</address>\n"
                 +      "</display>\n"
                 +    "</layout>\n"
-
                 +    "<layout>\n"
                 +      "<state>4</state> \n"
                 +      "<display enabled=\"true\" defaultDisplay=\"true\" >\n"
@@ -352,6 +363,20 @@ public class DeviceStateToLayoutMapTest {
                 +      "</display>\n"
                 +    "</layout>\n"
                 +    "<layout>\n"
+                +      "<state>5</state> \n"
+                +      "<display enabled=\"true\" defaultDisplay=\"true\">\n"
+                +        "<address>345</address>\n"
+                +        "<position>front</position>\n"
+                +        "<powerThrottlingMapId>concurrent1</powerThrottlingMapId>\n"
+                +      "</display>\n"
+                +      "<display enabled=\"true\">\n"
+                +        "<address>678</address>\n"
+                +        "<position>rear</position>\n"
+                +        "<powerThrottlingMapId>concurrent2</powerThrottlingMapId>\n"
+                +      "</display>\n"
+                +    "</layout>\n"
+
+                +    "<layout>\n"
                 +      "<state>99</state> \n"
                 +      "<display enabled=\"true\" defaultDisplay=\"true\" "
                 +                                          "refreshRateZoneId=\"zone1\">\n"
@@ -361,6 +386,7 @@ public class DeviceStateToLayoutMapTest {
                 +         "<refreshRateThermalThrottlingMapId>"
                 +           "rr1"
                 +         "</refreshRateThermalThrottlingMapId>"
+                +         "<powerThrottlingMapId>power1</powerThrottlingMapId>\n"
                 +       "</display>\n"
                 +       "<display enabled=\"false\" displayGroup=\"group1\" "
                 +                                           "refreshRateZoneId=\"zone2\">\n"
@@ -370,6 +396,7 @@ public class DeviceStateToLayoutMapTest {
                 +         "<refreshRateThermalThrottlingMapId>"
                 +           "rr2"
                 +         "</refreshRateThermalThrottlingMapId>"
+                +         "<powerThrottlingMapId>power2</powerThrottlingMapId>\n"
                 +       "</display>\n"
                 +     "</layout>\n"
                 +   "</layouts>\n";

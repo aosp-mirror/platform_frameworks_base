@@ -67,19 +67,30 @@ public class DisplayManagerFlags {
             Flags.FLAG_BACK_UP_SMOOTH_DISPLAY_AND_FORCE_PEAK_REFRESH_RATE,
             Flags::backUpSmoothDisplayAndForcePeakRefreshRate);
 
+    private final FlagState mPowerThrottlingClamperFlagState = new FlagState(
+            Flags.FLAG_ENABLE_POWER_THROTTLING_CLAMPER,
+            Flags::enablePowerThrottlingClamper);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
     }
 
-    /** Returns whether hdr clamper is enabled on not*/
+    /** Returns whether NBM Controller is enabled or not. */
     public boolean isNbmControllerEnabled() {
         return mNbmControllerFlagState.isEnabled();
     }
 
+    /** Returns whether hdr clamper is enabled on not. */
     public boolean isHdrClamperEnabled() {
         return mHdrClamperFlagState.isEnabled();
     }
+
+    /** Returns whether power throttling clamper is enabled on not. */
+    public boolean isPowerThrottlingClamperEnabled() {
+        return mPowerThrottlingClamperFlagState.isEnabled();
+    }
+
 
     /**
      * Returns whether adaptive tone improvements are enabled
