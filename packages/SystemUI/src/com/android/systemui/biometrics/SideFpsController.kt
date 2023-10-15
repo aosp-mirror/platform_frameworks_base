@@ -41,6 +41,8 @@ import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.View.AccessibilityDelegate
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewPropertyAnimator
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
@@ -54,13 +56,13 @@ import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.keyguard.KeyguardPINView
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.res.R
 import com.android.systemui.util.boundsOnScreen
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.traceSection
@@ -229,6 +231,20 @@ constructor(
         }
     }
 
+    /** Hide the arrow indicator. */
+    fun hideIndicator() {
+        val lottieAnimationView =
+            overlayView?.findViewById(R.id.sidefps_animation) as LottieAnimationView?
+        lottieAnimationView?.visibility = INVISIBLE
+    }
+
+    /** Show the arrow indicator. */
+    fun showIndicator() {
+        val lottieAnimationView =
+            overlayView?.findViewById(R.id.sidefps_animation) as LottieAnimationView?
+        lottieAnimationView?.visibility = VISIBLE
+    }
+
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("requests:")
         for (requestSource in requests) {
@@ -247,6 +263,10 @@ constructor(
         pw.println("     displayId=${displayInfo.uniqueId}")
         pw.println("     sensorType=${sensorProps?.sensorType}")
         pw.println("     location=${sensorProps?.getLocation(displayInfo.uniqueId)}")
+        pw.println("lottieAnimationView:")
+        pw.println(
+            "     visibility=${overlayView?.findViewById<View>(R.id.sidefps_animation)?.visibility}"
+        )
 
         pw.println("overlayOffsets=$overlayOffsets")
         pw.println("isReverseDefaultRotation=$isReverseDefaultRotation")
@@ -498,5 +518,5 @@ enum class SideFpsUiRequestSource {
     AUTO_SHOW,
     /** Pin, pattern or password bouncer */
     PRIMARY_BOUNCER,
-    ALTERNATE_BOUNCER
+    ALTERNATE_BOUNCER,
 }
