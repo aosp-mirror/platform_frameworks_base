@@ -52,7 +52,8 @@ abstract class BrightnessClamper<T> {
 
     abstract void stop();
 
-    enum Type {
-        THERMAL
+    protected enum Type {
+        THERMAL,
+        POWER
     }
 }

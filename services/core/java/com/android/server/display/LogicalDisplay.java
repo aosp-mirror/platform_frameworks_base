@@ -190,6 +190,11 @@ final class LogicalDisplay {
     private SurfaceControl.RefreshRateRange mLayoutLimitedRefreshRate;
 
     /**
+     * The ID of the power throttling data that should be used.
+     */
+    private String mPowerThrottlingDataId;
+
+    /**
      * RefreshRateRange limitation for @Temperature.ThrottlingStatus
      */
     @NonNull
@@ -205,6 +210,7 @@ final class LogicalDisplay {
         mIsEnabled = true;
         mIsInTransition = false;
         mThermalBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
+        mPowerThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
         mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
     }
 
@@ -911,6 +917,25 @@ final class LogicalDisplay {
     }
 
     /**
+     * @param powerThrottlingDataId The ID of the brightness throttling data that this
+     *                                  display should use.
+     */
+    public void setPowerThrottlingDataIdLocked(String powerThrottlingDataId) {
+        if (!Objects.equals(powerThrottlingDataId, mPowerThrottlingDataId)) {
+            mPowerThrottlingDataId = powerThrottlingDataId;
+            mDirty = true;
+        }
+    }
+
+    /**
+     * Returns powerThrottlingDataId which is the ID of the brightness
+     * throttling data that this display should use.
+     */
+    public String getPowerThrottlingDataIdLocked() {
+        return mPowerThrottlingDataId;
+    }
+
+    /**
      * Sets the display of which this display is a follower, regarding brightness or other
      * properties. If set to {@link Layout#NO_LEAD_DISPLAY}, this display does not follow any
      * others, and has the potential to be a lead display to others.
@@ -976,6 +1001,7 @@ final class LogicalDisplay {
         pw.println("mLeadDisplayId=" + mLeadDisplayId);
         pw.println("mLayoutLimitedRefreshRate=" + mLayoutLimitedRefreshRate);
         pw.println("mThermalRefreshRateThrottling=" + mThermalRefreshRateThrottling);
+        pw.println("mPowerThrottlingDataId=" + mPowerThrottlingDataId);
     }
 
     @Override

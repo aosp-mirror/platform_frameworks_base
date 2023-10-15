@@ -201,6 +201,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_ON_START = 7;
     static final int MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK = 8;
     static final int MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED = 9;
+    static final int MSG_UID_REMOVED = 10;
 
     private final Object mLock = new Object();
     private Handler mHandler;
@@ -379,11 +380,10 @@ public class UsageStatsService extends SystemService implements
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
-        getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
-                null, mHandler);
-
+        getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL,
+                filter, null, /* Handler scheduler */ null);
         getContext().registerReceiverAsUser(new UidRemovedReceiver(), UserHandle.ALL,
-                new IntentFilter(ACTION_UID_REMOVED), null, mHandler);
+                new IntentFilter(ACTION_UID_REMOVED), null, /* Handler scheduler */ null);
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
@@ -615,7 +615,6 @@ public class UsageStatsService extends SystemService implements
             if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 if (userId >= 0) {
                     mHandler.obtainMessage(MSG_REMOVE_USER, userId, 0).sendToTarget();
-                    mResponseStatsTracker.onUserRemoved(userId);
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 if (userId >= 0) {
@@ -633,9 +632,7 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            synchronized (mLock) {
-                mResponseStatsTracker.onUidRemoved(uid);
-            }
+            mHandler.obtainMessage(MSG_UID_REMOVED, uid, 0).sendToTarget();
         }
     }
 
@@ -1302,6 +1299,8 @@ public class UsageStatsService extends SystemService implements
             mPendingLaunchTimeChangePackages.remove(userId);
         }
         mAppStandby.onUserRemoved(userId);
+        mResponseStatsTracker.onUserRemoved(userId);
+
         // Cancel any scheduled jobs for this user since the user is being removed.
         UsageStatsIdleService.cancelPruneJob(getContext(), userId);
         UsageStatsIdleService.cancelUpdateMappingsJob(getContext(), userId);
@@ -2037,6 +2036,9 @@ public class UsageStatsService extends SystemService implements
                 }
                 case MSG_REMOVE_USER:
                     onUserRemoved(msg.arg1);
+                    break;
+                case MSG_UID_REMOVED:
+                    mResponseStatsTracker.onUidRemoved(msg.arg1);
                     break;
                 case MSG_PACKAGE_REMOVED:
                     onPackageRemoved(msg.arg1, (String) msg.obj);

@@ -720,13 +720,15 @@ public class LogicalDisplayMapperTest {
                 mIdProducer, POSITION_UNKNOWN,
                 /* leadDisplayAddress= */ null,
                 /* brightnessThrottlingMapId= */ "concurrent",
-                /* refreshRateZoneId= */ null, /* refreshRateThermalThrottlingMapId= */ null);
+                /* refreshRateZoneId= */ null, /* refreshRateThermalThrottlingMapId= */ null,
+                /* powerThrottlingMapId= */ "concurrent");
         layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address,
                 /* isDefault= */ false, /* isEnabled= */ true, /* displayGroup= */ null,
                 mIdProducer, POSITION_UNKNOWN,
                 /* leadDisplayAddress= */ null,
                 /* brightnessThrottlingMapId= */ "concurrent",
-                /* refreshRateZoneId= */ null, /* refreshRateThermalThrottlingMapId= */ null);
+                /* refreshRateZoneId= */ null, /* refreshRateThermalThrottlingMapId= */ null,
+                /* powerThrottlingMapId= */ "concurrent");
         when(mDeviceStateToLayoutMapSpy.get(0)).thenReturn(layout);
 
         layout = new Layout();
@@ -927,7 +929,7 @@ public class LogicalDisplayMapperTest {
                 /* isDefault= */ false, /* isEnabled= */ true, /* displayGroupName= */ null,
                 mIdProducer, POSITION_REAR, /* leadDisplayAddress= */ null,
                 /* brightnessThrottlingMapId= */ null, /* refreshRateZoneId= */ null,
-                /* refreshRateThermalThrottlingMapId= */null);
+                /* refreshRateThermalThrottlingMapId= */null, /* powerThrottlingMapId= */null);
         when(mDeviceStateToLayoutMapSpy.get(0)).thenReturn(layout);
 
         when(mDeviceStateToLayoutMapSpy.size()).thenReturn(1);
@@ -986,7 +988,7 @@ public class LogicalDisplayMapperTest {
         layout.createDisplayLocked(address, /* isDefault= */ false, enabled, group, mIdProducer,
                 Layout.Display.POSITION_UNKNOWN, /* leadDisplayAddress= */ null,
                 /* brightnessThrottlingMapId= */ null, /* refreshRateZoneId= */ null,
-                /* refreshRateThermalThrottlingMapId= */ null);
+                /* refreshRateThermalThrottlingMapId= */ null, /* powerThrottlingMapId= */ null);
     }
 
     private void advanceTime(long timeMs) {
