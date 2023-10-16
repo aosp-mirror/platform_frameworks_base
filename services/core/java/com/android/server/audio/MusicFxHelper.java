@@ -157,7 +157,8 @@ public class MusicFxHelper {
             Log.w(TAG, " inside handle MSG_EFFECT_CLIENT_GONE");
             // Once the uid is no longer running, close all remain audio session(s) for this UID
             if (mClientUidSessionMap.get(Integer.valueOf(uid)) != null) {
-                final List<Integer> sessions = mClientUidSessionMap.get(Integer.valueOf(uid));
+                final List<Integer> sessions =
+                        new ArrayList(mClientUidSessionMap.get(Integer.valueOf(uid)));
                 Log.i(TAG, "UID " + uid + " gone, closing " + sessions.size() + " sessions");
                 for (Integer session : sessions) {
                     Intent intent = new Intent(
