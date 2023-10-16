@@ -18,8 +18,8 @@ package com.android.settingslib.spa.gallery.button
 
 import android.os.Bundle
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Launch
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Launch
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,7 +47,7 @@ object ActionButtonPageProvider : SettingsPageProvider {
     override fun Page(arguments: Bundle?) {
         RegularScaffold(title = TITLE) {
             val actionButtons = listOf(
-                ActionButton(text = "Open", imageVector = Icons.Outlined.Launch) {},
+                ActionButton(text = "Open", imageVector = Icons.AutoMirrored.Outlined.Launch) {},
                 ActionButton(text = "Uninstall", imageVector = Icons.Outlined.Delete) {},
                 ActionButton(text = "Force stop", imageVector = Icons.Outlined.WarningAmber) {},
             )

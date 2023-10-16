@@ -41,7 +41,7 @@ dependencies {
     api("androidx.arch.core:core-testing:2.2.0-alpha01")
     api("androidx.compose.ui:ui-test-junit4:$jetpackComposeVersion")
     api("androidx.lifecycle:lifecycle-runtime-testing")
-    api("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    api("org.mockito.kotlin:mockito-kotlin:2.2.11")
     api("org.mockito:mockito-core") {
         version {
             strictly("2.28.2")
