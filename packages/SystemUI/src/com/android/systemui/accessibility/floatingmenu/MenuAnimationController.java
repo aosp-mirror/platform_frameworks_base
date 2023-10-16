@@ -69,6 +69,7 @@ class MenuAnimationController {
     private static final int FADE_EFFECT_DURATION_MS = 3000;
 
     private final MenuView mMenuView;
+    private final MenuViewAppearance mMenuViewAppearance;
     private final ValueAnimator mFadeOutAnimator;
     private final Handler mHandler;
     private boolean mIsFadeEffectEnabled;
@@ -81,14 +82,19 @@ class MenuAnimationController {
     final HashMap<DynamicAnimation.ViewProperty, DynamicAnimation> mPositionAnimations =
             new HashMap<>();
 
-    MenuAnimationController(MenuView menuView) {
+    @VisibleForTesting
+    final RadiiAnimator mRadiiAnimator;
+
+    MenuAnimationController(MenuView menuView, MenuViewAppearance menuViewAppearance) {
         mMenuView = menuView;
+        mMenuViewAppearance = menuViewAppearance;
 
         mHandler = createUiHandler();
         mFadeOutAnimator = new ValueAnimator();
         mFadeOutAnimator.setDuration(FADE_OUT_DURATION_MS);
         mFadeOutAnimator.addUpdateListener(
                 (animation) -> menuView.setAlpha((float) animation.getAnimatedValue()));
+        mRadiiAnimator = new RadiiAnimator(mMenuViewAppearance.getMenuRadii(), mMenuView::setRadii);
     }
 
     void moveToPosition(PointF position) {
@@ -425,6 +431,10 @@ class MenuAnimationController {
                 .alpha(COMPLETELY_OPAQUE)
                 .translationY(mMenuView.getTranslationY())
                 .start();
+    }
+
+    void startRadiiAnimation(float[] endRadii) {
+        mRadiiAnimator.startAnimation(endRadii);
     }
 
     private void onSpringAnimationsEnd(PointF position, boolean writeToPosition) {
