@@ -70,16 +70,16 @@ class JavaClassGenerator {
   // All symbols technically belong to a single package, but linked libraries will
   // have their names mangled, denoting that they came from a different package.
   // We need to generate these symbols in a separate file. Returns true on success.
-  bool Generate(const android::StringPiece& package_name_to_generate, io::OutputStream* out,
+  bool Generate(android::StringPiece package_name_to_generate, io::OutputStream* out,
                 io::OutputStream* out_r_txt = nullptr);
 
-  bool Generate(const android::StringPiece& package_name_to_generate,
-                const android::StringPiece& output_package_name, io::OutputStream* out,
+  bool Generate(android::StringPiece package_name_to_generate,
+                android::StringPiece output_package_name, io::OutputStream* out,
                 io::OutputStream* out_r_txt = nullptr);
 
   const std::string& GetError() const;
 
-  static std::string TransformToFieldName(const android::StringPiece& symbol);
+  static std::string TransformToFieldName(android::StringPiece symbol);
 
  private:
   bool SkipSymbol(Visibility::Level state);
@@ -87,11 +87,11 @@ class JavaClassGenerator {
 
   // Returns the unmangled resource entry name if the unmangled package is the same as
   // package_name_to_generate. Returns nothing if the resource should be skipped.
-  std::optional<std::string> UnmangleResource(const android::StringPiece& package_name,
-                                              const android::StringPiece& package_name_to_generate,
+  std::optional<std::string> UnmangleResource(android::StringPiece package_name,
+                                              android::StringPiece package_name_to_generate,
                                               const ResourceEntry& entry);
 
-  bool ProcessType(const android::StringPiece& package_name_to_generate,
+  bool ProcessType(android::StringPiece package_name_to_generate,
                    const ResourceTablePackage& package, const ResourceTableType& type,
                    ClassDefinition* out_type_class_def, MethodDefinition* out_rewrite_method_def,
                    text::Printer* r_txt_printer);
@@ -106,8 +106,7 @@ class JavaClassGenerator {
   // its package ID if `out_rewrite_method` is not nullptr.
   // `package_name_to_generate` is the package
   bool ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
-                        const Styleable& styleable,
-                        const android::StringPiece& package_name_to_generate,
+                        const Styleable& styleable, android::StringPiece package_name_to_generate,
                         ClassDefinition* out_class_def, MethodDefinition* out_rewrite_method,
                         text::Printer* r_txt_printer);
 

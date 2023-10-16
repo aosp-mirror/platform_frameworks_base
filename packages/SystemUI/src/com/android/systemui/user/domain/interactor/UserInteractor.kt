@@ -26,11 +26,13 @@ import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.os.RemoteException
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import android.util.Log
+import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.UserIcons
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
@@ -48,6 +50,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.CreateUserActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -55,6 +58,8 @@ import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
+import com.android.systemui.user.utils.MultiUserActionsEvent
+import com.android.systemui.user.utils.MultiUserActionsEventHelper
 import com.android.systemui.util.kotlin.pairwise
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -96,6 +101,7 @@ constructor(
     private val activityManager: ActivityManager,
     private val refreshUsersScheduler: RefreshUsersScheduler,
     private val guestUserInteractor: GuestUserInteractor,
+    private val uiEventLogger: UiEventLogger,
 ) {
     /**
      * Defines interface for classes that can be notified when the state of users on the device is
@@ -288,6 +294,10 @@ constructor(
 
     val isSimpleUserSwitcher: Boolean
         get() = repository.isSimpleUserSwitcher()
+
+    val isUserSwitcherEnabled: Boolean
+        get() = repository.isUserSwitcherEnabled()
+
     val keyguardUpdateMonitorCallback =
         object : KeyguardUpdateMonitorCallback() {
             override fun onKeyguardGoingAway() {
@@ -364,6 +374,7 @@ constructor(
         }
 
         pw.println("isSimpleUserSwitcher=$isSimpleUserSwitcher")
+        pw.println("isUserSwitcherEnabled=$isUserSwitcherEnabled")
         pw.println("isGuestUserAutoCreated=$isGuestUserAutoCreated")
     }
 
@@ -379,6 +390,9 @@ constructor(
         if (LegacyUserDataHelper.isUser(record)) {
             // It's safe to use checkNotNull around record.info because isUser only returns true
             // if record.info is not null.
+            uiEventLogger.log(
+                MultiUserActionsEventHelper.userSwitchMetric(checkNotNull(record.info))
+            )
             selectUser(checkNotNull(record.info).id, dialogShower)
         } else {
             executeAction(LegacyUserDataHelper.toUserActionModel(record), dialogShower)
@@ -435,25 +449,32 @@ constructor(
         dialogShower: UserSwitchDialogController.DialogShower? = null,
     ) {
         when (action) {
-            UserActionModel.ENTER_GUEST_MODE ->
+            UserActionModel.ENTER_GUEST_MODE -> {
+                uiEventLogger.log(MultiUserActionsEvent.CREATE_GUEST_FROM_USER_SWITCHER)
                 guestUserInteractor.createAndSwitchTo(
                     this::showDialog,
                     this::dismissDialog,
                 ) { userId ->
                     selectUser(userId, dialogShower)
                 }
+            }
             UserActionModel.ADD_USER -> {
+                uiEventLogger.log(MultiUserActionsEvent.CREATE_USER_FROM_USER_SWITCHER)
                 val currentUser = repository.getSelectedUserInfo()
-                showDialog(
-                    ShowDialogRequestModel.ShowAddUserDialog(
-                        userHandle = currentUser.userHandle,
-                        isKeyguardShowing = keyguardInteractor.isKeyguardShowing(),
-                        showEphemeralMessage = currentUser.isGuest && currentUser.isEphemeral,
-                        dialogShower = dialogShower,
-                    )
+                dismissDialog()
+                activityStarter.startActivity(
+                    CreateUserActivity.createIntentForStart(
+                        applicationContext,
+                        keyguardInteractor.isKeyguardShowing()
+                    ),
+                    /* dismissShade= */ true,
+                    /* animationController */ null,
+                    /* showOverLockscreenWhenLocked */ true,
+                    /* userHandle */ currentUser.getUserHandle(),
                 )
             }
             UserActionModel.ADD_SUPERVISED_USER -> {
+                uiEventLogger.log(MultiUserActionsEvent.CREATE_RESTRICTED_USER_FROM_USER_SWITCHER)
                 dismissDialog()
                 activityStarter.startActivity(
                     Intent()
@@ -753,8 +774,18 @@ constructor(
         }
 
         // TODO(b/246631653): cache the bitmaps to avoid the background work to fetch them.
-        // TODO(b/246631653): downscale the bitmaps to R.dimen.max_avatar_size if requested.
-        val userIcon = withContext(backgroundDispatcher) { manager.getUserIcon(userId) }
+        val userIcon = withContext(backgroundDispatcher) {
+            manager.getUserIcon(userId)
+                ?.let { bitmap ->
+                    val iconSize =
+                        applicationContext
+                            .resources
+                            .getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size)
+                    Icon.scaleDownIfNecessary(bitmap, iconSize, iconSize)
+                }
+        }
+
+
         if (userIcon != null) {
             return BitmapDrawable(userIcon)
         }

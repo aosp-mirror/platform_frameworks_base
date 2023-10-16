@@ -87,7 +87,8 @@ class BatteryEvent(@IntRange(from = 0, to = 100) val batteryLevel: Int) : Status
     }
 }
 
-class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
+/** open only for testing purposes. (See [FakeStatusEvent.kt]) */
+open class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
     override var contentDescription: String? = null
     override val priority = 100
     override var forceVisible = true
@@ -107,9 +108,9 @@ class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
     }
 
     override fun shouldUpdateFromEvent(other: StatusEvent?): Boolean {
-        return other is PrivacyEvent &&
-                (other.privacyItems != privacyItems ||
-                other.contentDescription != contentDescription)
+        return other is PrivacyEvent && (other.privacyItems != privacyItems ||
+                other.contentDescription != contentDescription ||
+                (other.forceVisible && !forceVisible))
     }
 
     override fun updateFromEvent(other: StatusEvent?) {
@@ -122,5 +123,7 @@ class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
 
         privacyChip?.contentDescription = other.contentDescription
         privacyChip?.privacyList = other.privacyItems
+
+        if (other.forceVisible) forceVisible = true
     }
 }

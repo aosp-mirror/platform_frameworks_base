@@ -47,7 +47,6 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.screenshot.ScrollCaptureController.LongScreenshot;
 import com.android.systemui.settings.UserTracker;
 
@@ -335,8 +334,7 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void doEdit(Uri uri) {
-        if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY) && mScreenshotUserHandle
-                != Process.myUserHandle()) {
+        if (mScreenshotUserHandle != Process.myUserHandle()) {
             // TODO: Fix transition for work profile. Omitting it in the meantime.
             mActionExecutor.launchIntentAsync(
                     ActionIntentCreator.INSTANCE.createEditIntent(uri, this),
@@ -345,41 +343,31 @@ public class LongScreenshotActivity extends Activity {
         } else {
             String editorPackage = getString(R.string.config_screenshotEditor);
             Intent intent = new Intent(Intent.ACTION_EDIT);
-            if (!TextUtils.isEmpty(editorPackage)) {
-                intent.setComponent(ComponentName.unflattenFromString(editorPackage));
-            }
             intent.setDataAndType(uri, "image/png");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            Bundle options = null;
 
-            mTransitionView.setImageBitmap(mOutputBitmap);
-            mTransitionView.setVisibility(View.VISIBLE);
-            mTransitionView.setTransitionName(
-                    ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
-            // TODO: listen for transition completing instead of finishing onStop
-            mTransitionStarted = true;
-            startActivity(intent,
-                    ActivityOptions.makeSceneTransitionAnimation(this, mTransitionView,
-                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle());
+            // Skip shared element transition for implicit edit intents
+            if (!TextUtils.isEmpty(editorPackage)) {
+                intent.setComponent(ComponentName.unflattenFromString(editorPackage));
+                mTransitionView.setImageBitmap(mOutputBitmap);
+                mTransitionView.setVisibility(View.VISIBLE);
+                mTransitionView.setTransitionName(
+                        ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
+                options = ActivityOptions.makeSceneTransitionAnimation(this, mTransitionView,
+                        ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle();
+                // TODO: listen for transition completing instead of finishing onStop
+                mTransitionStarted = true;
+            }
+            startActivity(intent, options);
         }
     }
 
     private void doShare(Uri uri) {
-        if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-            Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri);
-            mActionExecutor.launchIntentAsync(shareIntent, null,
-                    mScreenshotUserHandle.getIdentifier(), false);
-        } else {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("image/png");
-            intent.putExtra(Intent.EXTRA_STREAM, uri);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Intent sharingChooserIntent = Intent.createChooser(intent, null)
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            startActivityAsUser(sharingChooserIntent, mUserTracker.getUserHandle());
-        }
+        Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri);
+        mActionExecutor.launchIntentAsync(shareIntent, null,
+                mScreenshotUserHandle.getIdentifier(), false);
     }
 
     private void onClicked(View v) {
@@ -421,8 +409,7 @@ public class LongScreenshotActivity extends Activity {
         mOutputBitmap = renderBitmap(drawable, bounds);
         ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
                 mBackgroundExecutor, UUID.randomUUID(), mOutputBitmap, ZonedDateTime.now(),
-                mFeatureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)
-                        ? mScreenshotUserHandle : Process.myUserHandle());
+                mScreenshotUserHandle);
         exportFuture.addListener(() -> onExportCompleted(action, exportFuture), mUiExecutor);
     }
 

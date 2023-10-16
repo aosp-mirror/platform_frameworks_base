@@ -80,15 +80,21 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public String getType(Uri url) throws RemoteException {
+        public String getType(@NonNull AttributionSource attributionSource,
+                Uri url) throws RemoteException {
             return MockContentProvider.this.getType(url);
         }
 
         @Override
-        public void getTypeAsync(Uri uri, RemoteCallback callback) throws RemoteException {
+        public void getTypeAsync(@NonNull AttributionSource attributionSource,
+                Uri uri, RemoteCallback callback) throws RemoteException {
             MockContentProvider.this.getTypeAsync(uri, callback);
         }
 
+        @Override
+        public void getTypeAnonymousAsync(Uri uri, RemoteCallback callback) throws RemoteException {
+            MockContentProvider.this.getTypeAnonymousAsync(uri, callback);
+        }
         @Override
         public Uri insert(@NonNull AttributionSource attributionSource, Uri url,
                 ContentValues initialValues, Bundle extras) throws RemoteException {
@@ -134,7 +140,8 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
+        public String[] getStreamTypes(AttributionSource attributionSource,
+                Uri url, String mimeTypeFilter) throws RemoteException {
             return MockContentProvider.this.getStreamTypes(url, mimeTypeFilter);
         }
 
@@ -242,6 +249,23 @@ public class MockContentProvider extends ContentProvider {
         AsyncTask.SERIAL_EXECUTOR.execute(() -> {
             final Bundle bundle = new Bundle();
             bundle.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(uri));
+            remoteCallback.sendResult(bundle);
+        });
+    }
+
+    @Override
+    public String getTypeAnonymous(Uri uri) {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    /**
+     * @hide
+     */
+    @SuppressWarnings("deprecation")
+    public void getTypeAnonymousAsync(Uri uri, RemoteCallback remoteCallback) {
+        AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+            final Bundle bundle = new Bundle();
+            bundle.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getTypeAnonymous(uri));
             remoteCallback.sendResult(bundle);
         });
     }

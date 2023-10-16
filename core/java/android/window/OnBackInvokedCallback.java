@@ -16,9 +16,9 @@
 
 package android.window;
 
-import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.Dialog;
+import android.view.View;
 import android.view.Window;
 
 /**
@@ -26,7 +26,8 @@ import android.view.Window;
  * <p>
  * Callback instances can be added to and removed from {@link OnBackInvokedDispatcher}, which
  * is held at window level and accessible through {@link Activity#getOnBackInvokedDispatcher()},
- * {@link Dialog#getOnBackInvokedDispatcher()} and {@link Window#getOnBackInvokedDispatcher()}.
+ * {@link Dialog#getOnBackInvokedDispatcher()}, {@link Window#getOnBackInvokedDispatcher()}
+ * and {@link View#findOnBackInvokedDispatcher()}.
  * <p>
  * When back is triggered, callbacks on the in-focus window are invoked in reverse order in which
  * they are added within the same priority. Between different priorities, callbacks with higher
@@ -35,6 +36,9 @@ import android.view.Window;
  * This replaces {@link Activity#onBackPressed()}, {@link Dialog#onBackPressed()} and
  * {@link android.view.KeyEvent#KEYCODE_BACK}
  * <p>
+ * If you want to customize back animation behaviors, in addition to handling back invocations,
+ * register its subclass instances {@link OnBackAnimationCallback} instead.
+ * <p>
  * @see OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)
  * registerOnBackInvokedCallback(priority, OnBackInvokedCallback)
  * to specify callback priority.
@@ -42,35 +46,8 @@ import android.view.Window;
 @SuppressWarnings("deprecation")
 public interface OnBackInvokedCallback {
     /**
-     * Called when a back gesture has been started, or back button has been pressed down.
-     *
-     * @param backEvent The {@link BackEvent} containing information about the touch or
-     *                  button press.
-     *
-     * @hide
-     */
-    default void onBackStarted(@NonNull BackEvent backEvent) {}
-
-    /**
-     * Called when a back gesture has been progressed.
-     *
-     * @param backEvent The {@link BackEvent} containing information about the latest touch point
-     *                  and the progress that the back animation should seek to.
-     *
-     * @hide
-     */
-    default void onBackProgressed(@NonNull BackEvent backEvent) {}
-
-    /**
      * Called when a back gesture has been completed and committed, or back button pressed
      * has been released and committed.
      */
     void onBackInvoked();
-
-    /**
-     * Called when a back gesture or button press has been cancelled.
-     *
-     * @hide
-     */
-    default void onBackCancelled() {}
 }

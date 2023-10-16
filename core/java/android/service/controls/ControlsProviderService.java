@@ -61,11 +61,9 @@ public abstract class ControlsProviderService extends Service {
      * the same package that will be launched embedded in the device controls space.
      *
      * The activity must be exported, enabled and protected by
-     * {@link Manifest.permission.BIND_CONTROLS}.
+     * {@link Manifest.permission#BIND_CONTROLS}.
      *
      * It is recommended that the activity is declared {@code android:resizeableActivity="true"}.
-     *
-     * @hide
      */
     public static final String META_DATA_PANEL_ACTIVITY =
             "android.service.controls.META_DATA_PANEL_ACTIVITY";
@@ -79,8 +77,6 @@ public abstract class ControlsProviderService extends Service {
      *
      * This is passed with the intent when the panel specified by {@link #META_DATA_PANEL_ACTIVITY}
      * is launched.
-     *
-     * @hide
      */
     public static final String EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS =
             "android.service.controls.extra.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS";
@@ -158,7 +154,7 @@ public abstract class ControlsProviderService extends Service {
      * The user has interacted with a Control. The action is dictated by the type of
      * {@link ControlAction} that was sent. A response can be sent via
      * {@link Consumer#accept}, with the Integer argument being one of the provided
-     * {@link ControlAction.ResponseResult}. The Integer should indicate whether the action
+     * {@link ControlAction} response results. The Integer should indicate whether the action
      * was received successfully, or if additional prompts should be presented to
      * the user. Any visual control updates should be sent via the Publisher.
 

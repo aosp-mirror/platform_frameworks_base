@@ -16,8 +16,7 @@
 
 package com.android.systemui.wallet.controller
 
-import android.Manifest
-import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.service.quickaccesswallet.GetWalletCardsError
 import android.service.quickaccesswallet.GetWalletCardsResponse
@@ -32,13 +31,22 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class WalletContextualSuggestionsController
 @Inject
@@ -48,68 +56,101 @@ constructor(
     broadcastDispatcher: BroadcastDispatcher,
     featureFlags: FeatureFlags
 ) {
-    private val allWalletCards: Flow<List<WalletCard>> =
-        if (featureFlags.isEnabled(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS)) {
-            conflatedCallbackFlow {
-                val callback =
-                    object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
-                        override fun onWalletCardsRetrieved(response: GetWalletCardsResponse) {
-                            trySendWithFailureLogging(response.walletCards, TAG)
-                        }
+    private val cardsReceivedCallbacks: MutableSet<(List<WalletCard>) -> Unit> = mutableSetOf()
 
-                        override fun onWalletCardRetrievalError(error: GetWalletCardsError) {
-                            trySendWithFailureLogging(emptyList<WalletCard>(), TAG)
+    /** All potential cards. */
+    val allWalletCards: StateFlow<List<WalletCard>> =
+        if (featureFlags.isEnabled(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS)) {
+            // TODO(b/237409756) determine if we should debounce this so we don't call the service
+            // too frequently. Also check if the list actually changed before calling callbacks.
+            broadcastDispatcher
+                .broadcastFlow(IntentFilter(Intent.ACTION_SCREEN_ON))
+                .flatMapLatest {
+                    conflatedCallbackFlow {
+                        val callback =
+                            object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
+                                override fun onWalletCardsRetrieved(
+                                    response: GetWalletCardsResponse
+                                ) {
+                                    trySendWithFailureLogging(response.walletCards, TAG)
+                                }
+
+                                override fun onWalletCardRetrievalError(
+                                    error: GetWalletCardsError
+                                ) {
+                                    trySendWithFailureLogging(emptyList<WalletCard>(), TAG)
+                                }
+                            }
+
+                        walletController.setupWalletChangeObservers(
+                            callback,
+                            QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
+                            QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
+                        )
+                        walletController.updateWalletPreference()
+                        walletController.queryWalletCards(callback)
+
+                        awaitClose {
+                            walletController.unregisterWalletChangeObservers(
+                                QuickAccessWalletController.WalletChangeEvent
+                                    .WALLET_PREFERENCE_CHANGE,
+                                QuickAccessWalletController.WalletChangeEvent
+                                    .DEFAULT_PAYMENT_APP_CHANGE
+                            )
                         }
                     }
-
-                walletController.setupWalletChangeObservers(
-                    callback,
-                    QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
-                    QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
+                }
+                .onEach { notifyCallbacks(it) }
+                .stateIn(
+                    applicationCoroutineScope,
+                    // Needs to be done eagerly since we need to notify callbacks even if there are
+                    // no subscribers
+                    SharingStarted.Eagerly,
+                    emptyList()
                 )
-                walletController.updateWalletPreference()
-                walletController.queryWalletCards(callback)
-
-                awaitClose {
-                    walletController.unregisterWalletChangeObservers(
-                        QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
-                        QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
-                    )
-                }
-            }
         } else {
-            emptyFlow()
+            MutableStateFlow<List<WalletCard>>(emptyList()).asStateFlow()
         }
 
-    private val contextualSuggestionsCardIds: Flow<Set<String>> =
-        if (featureFlags.isEnabled(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS)) {
-            broadcastDispatcher.broadcastFlow(
-                filter = IntentFilter(ACTION_UPDATE_WALLET_CONTEXTUAL_SUGGESTIONS),
-                permission = Manifest.permission.BIND_QUICK_ACCESS_WALLET_SERVICE,
-                flags = Context.RECEIVER_EXPORTED
-            ) { intent, _ ->
-                if (intent.hasExtra(UPDATE_CARD_IDS_EXTRA)) {
-                    intent.getStringArrayListExtra(UPDATE_CARD_IDS_EXTRA).toSet()
-                } else {
-                    emptySet()
-                }
-            }
-        } else {
-            emptyFlow()
-        }
+    private val _suggestionCardIds: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+    private val contextualSuggestionsCardIds: Flow<Set<String>> = _suggestionCardIds.asStateFlow()
 
+    /** Contextually-relevant cards. */
     val contextualSuggestionCards: Flow<List<WalletCard>> =
         combine(allWalletCards, contextualSuggestionsCardIds) { cards, ids ->
-                cards.filter { card -> ids.contains(card.cardId) }
+                val ret =
+                    cards.filter { card ->
+                        card.cardType == WalletCard.CARD_TYPE_NON_PAYMENT &&
+                            ids.contains(card.cardId)
+                    }
+                ret
             }
-            .shareIn(applicationCoroutineScope, replay = 1, started = SharingStarted.Eagerly)
+            .stateIn(applicationCoroutineScope, SharingStarted.WhileSubscribed(), emptyList())
+
+    /** When called, {@link contextualSuggestionCards} will be updated to be for these IDs. */
+    fun setSuggestionCardIds(cardIds: Set<String>) {
+        _suggestionCardIds.update { _ -> cardIds }
+    }
+
+    /** Register callback to be called when a new list of cards is fetched. */
+    fun registerWalletCardsReceivedCallback(callback: (List<WalletCard>) -> Unit) {
+        cardsReceivedCallbacks.add(callback)
+    }
+
+    /** Unregister callback to be called when a new list of cards is fetched. */
+    fun unregisterWalletCardsReceivedCallback(callback: (List<WalletCard>) -> Unit) {
+        cardsReceivedCallbacks.remove(callback)
+    }
+
+    private fun notifyCallbacks(cards: List<WalletCard>) {
+        applicationCoroutineScope.launch {
+            cardsReceivedCallbacks.onEach { callback ->
+                callback(cards.filter { card -> card.cardType == WalletCard.CARD_TYPE_NON_PAYMENT })
+            }
+        }
+    }
 
     companion object {
-        private const val ACTION_UPDATE_WALLET_CONTEXTUAL_SUGGESTIONS =
-            "com.android.systemui.wallet.UPDATE_CONTEXTUAL_SUGGESTIONS"
-
-        private const val UPDATE_CARD_IDS_EXTRA = "cardIds"
-
         private const val TAG = "WalletSuggestions"
     }
 }

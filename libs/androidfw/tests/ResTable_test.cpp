@@ -15,6 +15,7 @@
  */
 
 #include "androidfw/ResourceTypes.h"
+#include "android-base/file.h"
 
 #include <codecvt>
 #include <locale>
@@ -41,34 +42,6 @@ TEST(ResTableTest, ShouldLoadSuccessfully) {
   ASSERT_EQ(NO_ERROR, table.add(contents.data(), contents.size()));
 }
 
-TEST(ResTableTest, ShouldLoadSparseEntriesSuccessfully) {
-  std::string contents;
-  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/sparse/sparse.apk", "resources.arsc",
-                                      &contents));
-
-  ResTable table;
-  ASSERT_EQ(NO_ERROR, table.add(contents.data(), contents.size()));
-
-  ResTable_config config;
-  memset(&config, 0, sizeof(config));
-  config.sdkVersion = 26;
-  table.setParameters(&config);
-
-  String16 name(u"com.android.sparse:integer/foo_9");
-  uint32_t flags;
-  uint32_t resid =
-      table.identifierForName(name.string(), name.size(), nullptr, 0, nullptr, 0, &flags);
-  ASSERT_NE(0u, resid);
-
-  Res_value val;
-  ResTable_config selected_config;
-  ASSERT_GE(
-      table.getResource(resid, &val, false /*mayBeBag*/, 0u /*density*/, &flags, &selected_config),
-      0);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
-  EXPECT_EQ(900u, val.data);
-}
-
 TEST(ResTableTest, SimpleTypeIsRetrievedCorrectly) {
   std::string contents;
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk",
@@ -91,8 +64,8 @@ TEST(ResTableTest, ResourceNameIsResolved) {
   String16 defPackage("com.android.basic");
   String16 testName("@string/test1");
   uint32_t resID =
-      table.identifierForName(testName.string(), testName.size(), 0, 0,
-                              defPackage.string(), defPackage.size());
+      table.identifierForName(testName.c_str(), testName.size(), 0, 0,
+                              defPackage.c_str(), defPackage.size());
   ASSERT_NE(uint32_t(0x00000000), resID);
   ASSERT_EQ(basic::R::string::test1, resID);
 }
@@ -475,5 +448,44 @@ TEST(ResTableTest, TruncatedEncodeLength) {
   ASSERT_FALSE(invalid_pool->string8At(invalid_val.data).has_value());
   ASSERT_FALSE(invalid_pool->stringAt(invalid_val.data).has_value());
 }
+
+class ResTableParameterizedTest :
+    public testing::TestWithParam<std::string> {
+};
+
+TEST_P(ResTableParameterizedTest, ShouldLoadSparseEntriesSuccessfully) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetParam(), "resources.arsc", &contents));
+
+  ResTable table;
+  ASSERT_EQ(NO_ERROR, table.add(contents.data(), contents.size()));
+
+  ResTable_config config;
+  memset(&config, 0, sizeof(config));
+  config.orientation = ResTable_config::ORIENTATION_LAND;
+  table.setParameters(&config);
+
+  String16 name(u"com.android.sparse:integer/foo_9");
+  uint32_t flags;
+  uint32_t resid =
+      table.identifierForName(name.c_str(), name.size(), nullptr, 0, nullptr, 0, &flags);
+  ASSERT_NE(0u, resid);
+
+  Res_value val;
+  ResTable_config selected_config;
+  ASSERT_GE(
+      table.getResource(resid, &val, false /*mayBeBag*/, 0u /*density*/, &flags, &selected_config),
+      0);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+  EXPECT_EQ(900u, val.data);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        FrameWorkResourcesResTableTests,
+        ResTableParameterizedTest,
+        ::testing::Values(
+           base::GetExecutableDirectory() + "/tests/data/sparse/sparse.apk",
+           base::GetExecutableDirectory() + "/FrameworkResourcesSparseTestApp.apk"
+        ));
 
 }  // namespace android

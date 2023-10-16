@@ -36,7 +36,7 @@
     </style>
 
     <style name="DescriptionTitle"
-           parent="@*android:style/TextAppearance.Widget.Toolbar.Title">
+           parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
@@ -46,7 +46,8 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="DescriptionSummary">
+    <style name="DescriptionSummary"
+           parent="@android:style/TextAppearance.DeviceDefault.Medium">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">18dp</item>
@@ -61,6 +62,7 @@
         <item name="android:layout_width">70dp</item>
         <item name="android:layout_height">48dp</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:background">@drawable/helper_back_button</item>
     </style>
@@ -73,6 +75,7 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/system_neutral1_900</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
         <item name="android:background">@drawable/btn_positive_bottom</item>
     </style>
 
@@ -85,21 +88,26 @@
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
         <item name="android:background">@drawable/btn_negative_top</item>
     </style>
 
     <style name="NegativeButtonMultipleDevices"
            parent="@android:style/Widget.Material.Button.Colored">
-        <item name="android:layout_width">100dp</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">36dp</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:background">@drawable/btn_negative_multiple_devices</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
     </style>
 
     <style name="DeviceListBorder">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
-        <item name="android:background">@android:color/system_accent1_300</item>
+        <item name="android:layout_marginStart">32dp</item>
+        <item name="android:layout_marginEnd">32dp</item>
+        <item name="android:background">@android:color/system_neutral1_200</item>
     </style>
 
     <style name="Spinner"
@@ -115,4 +123,9 @@
         <item name="android:fillViewport">true</item>
         <item name="android:clipChildren">false</item>
     </style>
+
+    <style name="TextAppearance">
+        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
+    </style>
+
 </resources>

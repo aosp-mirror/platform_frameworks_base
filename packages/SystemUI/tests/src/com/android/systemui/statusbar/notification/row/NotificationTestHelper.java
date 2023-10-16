@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
@@ -66,6 +67,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
@@ -74,6 +76,7 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
@@ -121,8 +124,10 @@ public class NotificationTestHelper {
     private final RowContentBindStage mBindStage;
     private final IconManager mIconManager;
     private final StatusBarStateController mStatusBarStateController;
+    private final KeyguardBypassController mKeyguardBypassController;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    public final OnUserInteractionCallback mOnUserInteractionCallback;
+    private final OnUserInteractionCallback mOnUserInteractionCallback;
+    private final NotificationDismissibilityProvider mDismissibilityProvider;
     public final Runnable mFutureDismissalRunnable;
     private @InflationFlag int mDefaultInflationFlags;
     private FeatureFlags mFeatureFlags;
@@ -138,6 +143,7 @@ public class NotificationTestHelper {
         dependency.injectMockDependency(MediaOutputDialogFactory.class);
         mMockLogger = mock(ExpandableNotificationRowLogger.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
+        mKeyguardBypassController = mock(KeyguardBypassController.class);
         mGroupMembershipManager = mock(GroupMembershipManager.class);
         mGroupExpansionManager = mock(GroupExpansionManager.class);
         mHeadsUpManager = mock(HeadsUpManagerPhone.class);
@@ -172,6 +178,7 @@ public class NotificationTestHelper {
         mBindPipelineEntryListener = collectionListenerCaptor.getValue();
         mPeopleNotificationIdentifier = mock(PeopleNotificationIdentifier.class);
         mOnUserInteractionCallback = mock(OnUserInteractionCallback.class);
+        mDismissibilityProvider = mock(NotificationDismissibilityProvider.class);
         mFutureDismissalRunnable = mock(Runnable.class);
         when(mOnUserInteractionCallback.registerFutureDismissal(any(), anyInt()))
                 .thenReturn(mFutureDismissalRunnable);
@@ -188,6 +195,14 @@ public class NotificationTestHelper {
 
     public ExpandableNotificationRowLogger getMockLogger() {
         return mMockLogger;
+    }
+
+    public OnUserInteractionCallback getOnUserInteractionCallback() {
+        return mOnUserInteractionCallback;
+    }
+
+    public NotificationDismissibilityProvider getDismissibilityProvider() {
+        return mDismissibilityProvider;
     }
 
     /**
@@ -297,6 +312,21 @@ public class NotificationTestHelper {
                 .build();
         return row;
     }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that shows as a sticky FSI HUN.
+     */
+    public ExpandableNotificationRow createStickyRow()
+            throws Exception {
+        Notification n = createNotification(false /* isGroupSummary */,
+                null /* groupKey */,
+                makeBubbleMetadata(null /* deleteIntent */, false /* autoExpand */));
+        n.flags |= FLAG_FSI_REQUESTED_BUT_DENIED;
+        ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
+                mDefaultInflationFlags, IMPORTANCE_HIGH);
+        return row;
+    }
+
 
     /**
      * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
@@ -473,6 +503,10 @@ public class NotificationTestHelper {
         return mStatusBarStateController;
     }
 
+    public KeyguardBypassController getKeyguardBypassController() {
+        return mKeyguardBypassController;
+    }
+
     private ExpandableNotificationRow generateRow(
             Notification notification,
             String pkg,
@@ -531,13 +565,12 @@ public class NotificationTestHelper {
                 APP_NAME,
                 entry.getKey(),
                 mMockLogger,
-                mock(KeyguardBypassController.class),
+                mKeyguardBypassController,
                 mGroupMembershipManager,
                 mGroupExpansionManager,
                 mHeadsUpManager,
                 mBindStage,
                 mock(OnExpandClickListener.class),
-                mock(NotificationMediaManager.class),
                 mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
                 new FalsingManagerFake(),
                 new FalsingCollectorFake(),
@@ -546,6 +579,7 @@ public class NotificationTestHelper {
                 mOnUserInteractionCallback,
                 Optional.of(mock(BubblesManager.class)),
                 mock(NotificationGutsManager.class),
+                mDismissibilityProvider,
                 mock(MetricsLogger.class),
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),

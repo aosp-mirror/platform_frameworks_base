@@ -31,11 +31,11 @@ import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.utils.CoordinateTransforms.computeRotationMatrix;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -52,12 +52,14 @@ import android.view.SurfaceControl;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
+import android.window.ScreenCapture;
 
 import com.android.internal.R;
+import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.display.DisplayControl;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
-import com.android.server.wm.utils.RotationAnimationUtils;
 
 import java.io.PrintWriter;
 
@@ -167,7 +169,7 @@ class ScreenRotationAnimation {
         final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
 
         try {
-            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer;
+            final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
             if (isSizeChanged) {
                 final DisplayAddress address = displayInfo.address;
                 if (!(address instanceof DisplayAddress.Physical)) {
@@ -176,7 +178,7 @@ class ScreenRotationAnimation {
                 }
                 final DisplayAddress.Physical physicalAddress =
                         (DisplayAddress.Physical) address;
-                final IBinder displayToken = SurfaceControl.getPhysicalDisplayToken(
+                final IBinder displayToken = DisplayControl.getPhysicalDisplayToken(
                         physicalAddress.getPhysicalDisplayId());
                 if (displayToken == null) {
                     Slog.e(TAG, "Display token is null.");
@@ -186,22 +188,24 @@ class ScreenRotationAnimation {
                 // the whole display to include the rounded corner overlays.
                 setSkipScreenshotForRoundedCornerOverlays(false, t);
                 mRoundedCornerOverlay = displayContent.findRoundedCornerOverlays();
-                final SurfaceControl.DisplayCaptureArgs captureArgs =
-                        new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+                final ScreenCapture.DisplayCaptureArgs captureArgs =
+                        new ScreenCapture.DisplayCaptureArgs.Builder(displayToken)
                                 .setSourceCrop(new Rect(0, 0, width, height))
                                 .setAllowProtected(true)
                                 .setCaptureSecureLayers(true)
+                                .setHintForSeamlessTransition(true)
                                 .build();
-                screenshotBuffer = SurfaceControl.captureDisplay(captureArgs);
+                screenshotBuffer = ScreenCapture.captureDisplay(captureArgs);
             } else {
-                SurfaceControl.LayerCaptureArgs captureArgs =
-                        new SurfaceControl.LayerCaptureArgs.Builder(
+                ScreenCapture.LayerCaptureArgs captureArgs =
+                        new ScreenCapture.LayerCaptureArgs.Builder(
                                 displayContent.getSurfaceControl())
                                 .setCaptureSecureLayers(true)
                                 .setAllowProtected(true)
                                 .setSourceCrop(new Rect(0, 0, width, height))
+                                .setHintForSeamlessTransition(true)
                                 .build();
-                screenshotBuffer = SurfaceControl.captureLayers(captureArgs);
+                screenshotBuffer = ScreenCapture.captureLayers(captureArgs);
             }
 
             if (screenshotBuffer == null) {
@@ -244,12 +248,9 @@ class ScreenRotationAnimation {
             HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "ScreenRotationAnimation#getMedianBorderLuma");
-            mStartLuma = RotationAnimationUtils.getMedianBorderLuma(hardwareBuffer,
+            mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer,
                     screenshotBuffer.getColorSpace());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-
-            GraphicBuffer buffer = GraphicBuffer.createFromHardwareBuffer(
-                    screenshotBuffer.getHardwareBuffer());
 
             t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
             t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
@@ -260,10 +261,11 @@ class ScreenRotationAnimation {
             t.setLayer(mBackColorSurface, -1);
             t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
             t.setAlpha(mBackColorSurface, 1);
-            t.setBuffer(mScreenshotLayer, buffer);
+            t.setBuffer(mScreenshotLayer, hardwareBuffer);
             t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
             t.show(mScreenshotLayer);
             t.show(mBackColorSurface);
+            hardwareBuffer.close();
 
             if (mRoundedCornerOverlay != null) {
                 for (SurfaceControl sc : mRoundedCornerOverlay) {
@@ -375,8 +377,7 @@ class ScreenRotationAnimation {
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
         int delta = deltaRotation(rotation, mOriginalRotation);
-        RotationAnimationUtils.createRotationMatrix(delta, mOriginalWidth, mOriginalHeight,
-                mSnapshotInitialMatrix);
+        computeRotationMatrix(delta, mOriginalWidth, mOriginalHeight, mSnapshotInitialMatrix);
         setRotationTransform(t, mSnapshotInitialMatrix);
     }
 
@@ -487,8 +488,8 @@ class ScreenRotationAnimation {
             return false;
         }
         if (!mStarted) {
-            mEndLuma = RotationAnimationUtils.getLumaOfSurfaceControl(mDisplayContent.getDisplay(),
-                    mDisplayContent.getWindowingLayer());
+            mEndLuma = TransitionAnimation.getBorderLuma(mDisplayContent.getWindowingLayer(),
+                    finalWidth, finalHeight);
             startAnimation(t, maxAnimationDuration, animationScale, finalWidth, finalHeight,
                     exitAnim, enterAnim);
         }

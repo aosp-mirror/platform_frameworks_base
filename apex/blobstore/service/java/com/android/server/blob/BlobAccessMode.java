@@ -24,12 +24,16 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
+import android.os.Binder;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -100,20 +104,21 @@ class BlobAccessMode {
     }
 
     boolean isAccessAllowedForCaller(Context context,
-            @NonNull String callingPackage, @NonNull String committerPackage) {
+            @NonNull String callingPackage, int callingUid, int committerUid) {
         if ((mAccessType & ACCESS_TYPE_PUBLIC) != 0) {
             return true;
         }
 
-        final PackageManager pm = context.getPackageManager();
         if ((mAccessType & ACCESS_TYPE_SAME_SIGNATURE) != 0) {
-            if (pm.checkSignatures(committerPackage, callingPackage)
-                    == PackageManager.SIGNATURE_MATCH) {
+            if (checkSignatures(callingUid, committerUid)) {
                 return true;
             }
         }
 
         if ((mAccessType & ACCESS_TYPE_ALLOWLIST) != 0) {
+            final UserHandle callingUser = UserHandle.of(UserHandle.getUserId(callingUid));
+            final PackageManager pm =
+                    context.createContextAsUser(callingUser, 0 /* flags */).getPackageManager();
             for (int i = 0; i < mAllowedPackages.size(); ++i) {
                 final PackageIdentifier packageIdentifier = mAllowedPackages.valueAt(i);
                 if (packageIdentifier.packageName.equals(callingPackage)
@@ -125,6 +130,19 @@ class BlobAccessMode {
         }
 
         return false;
+    }
+
+    /**
+     * Compare signatures for two packages of different users.
+     */
+    private boolean checkSignatures(int uid1, int uid2) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return LocalServices.getService(PackageManagerInternal.class)
+                    .checkUidSignaturesForAllUsers(uid1, uid2) == PackageManager.SIGNATURE_MATCH;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     int getAccessType() {

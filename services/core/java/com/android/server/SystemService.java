@@ -146,14 +146,16 @@ public abstract class SystemService {
         // moment it's started until after it's shutdown).
         private final @UserIdInt int mUserId;
         private final boolean mFull;
-        private final boolean mManagedProfile;
+        private final boolean mProfile;
+        private final String mUserType;
         private final boolean mPreCreated;
 
         /** @hide */
         public TargetUser(@NonNull UserInfo userInfo) {
             mUserId = userInfo.id;
             mFull = userInfo.isFull();
-            mManagedProfile = userInfo.isManagedProfile();
+            mProfile = userInfo.isProfile();
+            mUserType = userInfo.userType;
             mPreCreated = userInfo.preCreated;
         }
 
@@ -167,12 +169,24 @@ public abstract class SystemService {
         }
 
         /**
-         * Checks if the target user is a managed profile.
+         * Checks if the target user is a {@link UserInfo#isProfile() profile]}.
+         *
+         * @hide
+         */
+        public boolean isProfile() {
+            return mProfile;
+        }
+
+        /**
+         * Checks if the target user is a {@link UserInfo#isManagedProfile() managed profile]}.
+         *
+         * This is only specifically for managed profiles; for profiles more generally,
+         * use {@link #isProfile()}.
          *
          * @hide
          */
         public boolean isManagedProfile() {
-            return mManagedProfile;
+            return UserManager.isUserTypeManagedProfile(mUserType);
         }
 
         /**
@@ -212,16 +226,16 @@ public abstract class SystemService {
         public void dump(@NonNull PrintWriter pw) {
             pw.print(getUserIdentifier());
 
-            if (!isFull() && !isManagedProfile()) return;
+            if (!isFull() && !isProfile()) return;
 
             pw.print('(');
             boolean addComma = false;
             if (isFull()) {
                 pw.print("full");
             }
-            if (isManagedProfile()) {
+            if (isProfile()) {
                 if (addComma) pw.print(',');
-                pw.print("mp");
+                pw.print("profile");
             }
             pw.print(')');
         }

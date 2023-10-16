@@ -39,7 +39,7 @@ bool parse(const String8& str, ConfigDescription* out) {
     ssize_t index = 0;
     ssize_t localeIndex = 0;
     const ssize_t N = parts.size();
-    const char* part = parts[index].string();
+    const char* part = parts[index].c_str();
 
     if (str.length() == 0) {
         goto success;
@@ -50,7 +50,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseMnc(part, &config)) {
@@ -58,7 +58,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     // Locale spans a few '-' separators, so we let it
@@ -72,7 +72,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index >= N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseLayoutDirection(part, &config)) {
@@ -80,7 +80,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseSmallestScreenWidthDp(part, &config)) {
@@ -88,7 +88,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseScreenWidthDp(part, &config)) {
@@ -96,7 +96,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseScreenHeightDp(part, &config)) {
@@ -104,7 +104,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseScreenLayoutSize(part, &config)) {
@@ -112,7 +112,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseScreenLayoutLong(part, &config)) {
@@ -120,7 +120,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseScreenRound(part, &config)) {
@@ -128,7 +128,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseWideColorGamut(part, &config)) {
@@ -136,7 +136,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseHdr(part, &config)) {
@@ -144,7 +144,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseOrientation(part, &config)) {
@@ -152,7 +152,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseUiModeType(part, &config)) {
@@ -160,7 +160,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseUiModeNight(part, &config)) {
@@ -168,7 +168,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseDensity(part, &config)) {
@@ -176,7 +176,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseTouchscreen(part, &config)) {
@@ -184,7 +184,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseKeysHidden(part, &config)) {
@@ -192,7 +192,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseKeyboard(part, &config)) {
@@ -200,7 +200,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseNavHidden(part, &config)) {
@@ -208,7 +208,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseNavigation(part, &config)) {
@@ -216,7 +216,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseScreenSize(part, &config)) {
@@ -224,7 +224,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     if (parseVersion(part, &config)) {
@@ -232,7 +232,7 @@ bool parse(const String8& str, ConfigDescription* out) {
         if (index == N) {
             goto success;
         }
-        part = parts[index].string();
+        part = parts[index].c_str();
     }
 
     // Unrecognized.
@@ -773,8 +773,8 @@ bool parseScreenSize(const char* name, ResTable_config* out) {
     if (y == name || *y != 0) return false;
     String8 yName(x, y-x);
 
-    uint16_t w = (uint16_t)atoi(xName.string());
-    uint16_t h = (uint16_t)atoi(yName.string());
+    uint16_t w = (uint16_t)atoi(xName.c_str());
+    uint16_t h = (uint16_t)atoi(yName.c_str());
     if (w < h) {
         return false;
     }
@@ -805,7 +805,7 @@ bool parseSmallestScreenWidthDp(const char* name, ResTable_config* out) {
     String8 xName(name, x-name);
 
     if (out) {
-        out->smallestScreenWidthDp = (uint16_t)atoi(xName.string());
+        out->smallestScreenWidthDp = (uint16_t)atoi(xName.c_str());
     }
 
     return true;
@@ -827,7 +827,7 @@ bool parseScreenWidthDp(const char* name, ResTable_config* out) {
     String8 xName(name, x-name);
 
     if (out) {
-        out->screenWidthDp = (uint16_t)atoi(xName.string());
+        out->screenWidthDp = (uint16_t)atoi(xName.c_str());
     }
 
     return true;
@@ -849,7 +849,7 @@ bool parseScreenHeightDp(const char* name, ResTable_config* out) {
     String8 xName(name, x-name);
 
     if (out) {
-        out->screenHeightDp = (uint16_t)atoi(xName.string());
+        out->screenHeightDp = (uint16_t)atoi(xName.c_str());
     }
 
     return true;
@@ -875,7 +875,7 @@ bool parseVersion(const char* name, ResTable_config* out) {
     String8 sdkName(name, s-name);
 
     if (out) {
-        out->sdkVersion = (uint16_t)atoi(sdkName.string());
+        out->sdkVersion = (uint16_t)atoi(sdkName.c_str());
         out->minorVersion = 0;
     }
 

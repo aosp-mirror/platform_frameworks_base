@@ -19,6 +19,8 @@ import static android.telephony.Annotation.DataState;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
@@ -26,8 +28,16 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
+import android.util.Log;
+
+import com.android.internal.telephony.ITelephony;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -41,6 +51,8 @@ import java.util.function.Supplier;
  * This class provides various util functions
  */
 public final class TelephonyUtils {
+    private static final String LOG_TAG = "TelephonyUtils";
+
     public static boolean IS_USER = "user".equals(android.os.Build.TYPE);
     public static boolean IS_DEBUGGABLE = SystemProperties.getInt("ro.debuggable", 0) == 1;
 
@@ -206,8 +218,105 @@ public final class TelephonyUtils {
                 return "DATA_ON_NON_DEFAULT_DURING_VOICE_CALL";
             case TelephonyManager.MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED:
                 return "MMS_ALWAYS_ALLOWED";
+            case TelephonyManager.MOBILE_DATA_POLICY_AUTO_DATA_SWITCH:
+                return "AUTO_DATA_SWITCH";
             default:
                 return "UNKNOWN(" + mobileDataPolicy + ")";
         }
+    }
+
+    /**
+     * Utility method to get user handle associated with this subscription.
+     *
+     * This method should be used internally as it returns null instead of throwing
+     * IllegalArgumentException or IllegalStateException.
+     *
+     * @param context Context object
+     * @param subId the subId of the subscription.
+     * @return userHandle associated with this subscription
+     * or {@code null} if:
+     * 1. subscription is not associated with any user
+     * 2. subId is invalid.
+     * 3. subscription service is not available.
+     *
+     * @throws SecurityException if the caller doesn't have permissions required.
+     */
+    @Nullable
+    public static UserHandle getSubscriptionUserHandle(Context context, int subId) {
+        UserHandle userHandle = null;
+        SubscriptionManager subManager =  context.getSystemService(SubscriptionManager.class);
+        if ((subManager != null) && (SubscriptionManager.isValidSubscriptionId(subId))) {
+            userHandle = subManager.getSubscriptionUserHandle(subId);
+        }
+        return userHandle;
+    }
+
+    /**
+     * Show switch to managed profile dialog if subscription is associated with managed profile.
+     *
+     * @param context Context object
+     * @param subId subscription id
+     * @param callingUid uid for the calling app
+     * @param callingPackage package name of the calling app
+     */
+    public static void showSwitchToManagedProfileDialogIfAppropriate(Context context,
+            int subId, int callingUid, String callingPackage) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            UserHandle callingUserHandle = UserHandle.getUserHandleForUid(callingUid);
+            // We only want to show this dialog, while user actually trying to send the message from
+            // a messaging app, in other cases this dialog don't make sense.
+            if (!TelephonyUtils.isUidForeground(context, callingUid)
+                    || !TelephonyUtils.isPackageSMSRoleHolderForUser(context, callingPackage,
+                    callingUserHandle)) {
+                return;
+            }
+
+            SubscriptionManager subscriptionManager = context.getSystemService(
+                    SubscriptionManager.class);
+            UserHandle associatedUserHandle = subscriptionManager.getSubscriptionUserHandle(subId);
+            UserManager um = context.getSystemService(UserManager.class);
+
+            if (associatedUserHandle != null && um.isManagedProfile(
+                    associatedUserHandle.getIdentifier())) {
+
+                ITelephony iTelephony = ITelephony.Stub.asInterface(
+                        TelephonyFrameworkInitializer
+                                .getTelephonyServiceManager()
+                                .getTelephonyServiceRegisterer()
+                                .get());
+                if (iTelephony != null) {
+                    try {
+                        iTelephony.showSwitchToManagedProfileDialog();
+                    } catch (RemoteException e) {
+                        Log.e(LOG_TAG, "Failed to launch switch to managed profile dialog.");
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private static boolean isUidForeground(Context context, int uid) {
+        ActivityManager am = context.getSystemService(ActivityManager.class);
+        boolean result = am != null && am.getUidImportance(uid)
+                == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+        return result;
+    }
+
+    private static boolean isPackageSMSRoleHolderForUser(Context context, String callingPackage,
+            UserHandle user) {
+        RoleManager roleManager = context.getSystemService(RoleManager.class);
+        final List<String> smsRoleHolder = roleManager.getRoleHoldersAsUser(
+                RoleManager.ROLE_SMS, user);
+
+        // ROLE_SMS is an exclusive role per user, so there would just be one entry in the
+        // retuned list if not empty
+        if (!smsRoleHolder.isEmpty() && callingPackage.equals(smsRoleHolder.get(0))) {
+            return true;
+        }
+        return false;
+
     }
 }

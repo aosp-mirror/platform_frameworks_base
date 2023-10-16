@@ -455,6 +455,11 @@ public class AudioMix {
                 if (mRule.getTargetMixType() != AudioMix.MIX_TYPE_PLAYERS) {
                     throw new IllegalArgumentException("Unsupported device on non-playback mix");
                 }
+            } else if (mDeviceSystemType == AudioSystem.DEVICE_OUT_REMOTE_SUBMIX) {
+                if (mRule.getTargetMixType() != AudioMix.MIX_TYPE_PLAYERS) {
+                    throw new IllegalArgumentException(
+                            "DEVICE_OUT_REMOTE_SUBMIX device is not supported on non-playback mix");
+                }
             } else {
                 if ((mRouteFlags & ROUTE_FLAG_SUPPORTED) == ROUTE_FLAG_RENDER) {
                     throw new IllegalArgumentException(

@@ -50,15 +50,16 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        underTest = NoteTaskInfoResolver(context, roleManager, packageManager)
+        underTest = NoteTaskInfoResolver(roleManager, packageManager)
     }
 
     @Test
     fun resolveInfo_shouldReturnInfo() {
         val packageName = "com.android.note.app"
         val uid = 123456
-        whenever(roleManager.getRoleHoldersAsUser(NoteTaskInfoResolver.ROLE_NOTES, context.user))
-            .then { listOf(packageName) }
+        whenever(roleManager.getRoleHoldersAsUser(RoleManager.ROLE_NOTES, context.user)).then {
+            listOf(packageName)
+        }
         whenever(
                 packageManager.getApplicationInfoAsUser(
                     eq(packageName),
@@ -68,18 +69,20 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
             )
             .thenReturn(ApplicationInfo().apply { this.uid = uid })
 
-        val actual = underTest.resolveInfo()
+        val actual = underTest.resolveInfo(user = context.user)
 
         requireNotNull(actual) { "Note task info must not be null" }
         assertThat(actual.packageName).isEqualTo(packageName)
         assertThat(actual.uid).isEqualTo(uid)
+        assertThat(actual.user).isEqualTo(context.user)
     }
 
     @Test
     fun resolveInfo_packageManagerThrowsException_shouldReturnInfoWithZeroUid() {
         val packageName = "com.android.note.app"
-        whenever(roleManager.getRoleHoldersAsUser(NoteTaskInfoResolver.ROLE_NOTES, context.user))
-            .then { listOf(packageName) }
+        whenever(roleManager.getRoleHoldersAsUser(RoleManager.ROLE_NOTES, context.user)).then {
+            listOf(packageName)
+        }
         whenever(
                 packageManager.getApplicationInfoAsUser(
                     eq(packageName),
@@ -89,19 +92,21 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
             )
             .thenThrow(PackageManager.NameNotFoundException(packageName))
 
-        val actual = underTest.resolveInfo()
+        val actual = underTest.resolveInfo(user = context.user)
 
         requireNotNull(actual) { "Note task info must not be null" }
         assertThat(actual.packageName).isEqualTo(packageName)
         assertThat(actual.uid).isEqualTo(0)
+        assertThat(actual.user).isEqualTo(context.user)
     }
 
     @Test
     fun resolveInfo_noRoleHolderIsSet_shouldReturnNull() {
-        whenever(roleManager.getRoleHoldersAsUser(eq(NoteTaskInfoResolver.ROLE_NOTES), any()))
-            .then { listOf<String>() }
+        whenever(roleManager.getRoleHoldersAsUser(eq(RoleManager.ROLE_NOTES), any())).then {
+            emptyList<String>()
+        }
 
-        val actual = underTest.resolveInfo()
+        val actual = underTest.resolveInfo(user = context.user)
 
         assertThat(actual).isNull()
     }

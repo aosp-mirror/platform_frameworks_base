@@ -17,7 +17,9 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -327,8 +329,10 @@ public class CachedBluetoothDeviceManagerTest {
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
-        cachedDevice1.setHiSyncId(HISYNCID1);
-        cachedDevice2.setHiSyncId(HISYNCID1);
+        cachedDevice1.setHearingAidInfo(
+                new HearingAidInfo.Builder().setHiSyncId(HISYNCID1).build());
+        cachedDevice2.setHearingAidInfo(
+                new HearingAidInfo.Builder().setHiSyncId(HISYNCID1).build());
         cachedDevice1.setSubDevice(cachedDevice2);
 
         // Call onDeviceUnpaired for the one in mCachedDevices.
@@ -401,7 +405,7 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void updateHearingAidDevices_directToHearingAidDeviceManager() {
-        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mLocalBluetoothManager,
+        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mContext, mLocalBluetoothManager,
                 mCachedDeviceManager.mCachedDevices));
         mCachedDeviceManager.mHearingAidDeviceManager = mHearingAidDeviceManager;
         mCachedDeviceManager.updateHearingAidsDevices();
@@ -601,5 +605,21 @@ public class CachedBluetoothDeviceManagerTest {
 
         verify(mDevice2).setPhonebookAccessPermission(BluetoothDevice.ACCESS_ALLOWED);
         verify(mDevice2).createBond(BluetoothDevice.TRANSPORT_LE);
+    }
+
+    @Test
+    public void onActiveDeviceChanged_validHiSyncId_callExpectedFunction() {
+        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mContext, mLocalBluetoothManager,
+                mCachedDeviceManager.mCachedDevices));
+        doNothing().when(mHearingAidDeviceManager).onActiveDeviceChanged(any());
+        mCachedDeviceManager.mHearingAidDeviceManager = mHearingAidDeviceManager;
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        cachedDevice1.setHearingAidInfo(
+                new HearingAidInfo.Builder().setHiSyncId(HISYNCID1).build());
+
+        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice1);
+
+        verify(mHearingAidDeviceManager).onActiveDeviceChanged(cachedDevice1);
     }
 }

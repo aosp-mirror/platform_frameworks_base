@@ -32,6 +32,8 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -229,6 +231,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     // suppressor.
     //
     // If the entry was not suppressed by DND, just returns the given decision.
+    @NonNull
     private FullScreenIntentDecision getDecisionGivenSuppression(FullScreenIntentDecision decision,
             boolean suppressedByDND) {
         if (suppressedByDND) {
@@ -240,11 +243,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     }
 
     @Override
-    public FullScreenIntentDecision getFullScreenIntentDecision(NotificationEntry entry) {
-        if (mFlags.disableFsi()) {
-            return FullScreenIntentDecision.NO_FSI_DISABLED;
-        }
+    public FullScreenIntentDecision getFullScreenIntentDecision(@NonNull NotificationEntry entry) {
         if (entry.getSbn().getNotification().fullScreenIntent == null) {
+            if (entry.isStickyAndNotDemoted()) {
+                return FullScreenIntentDecision.NO_FSI_SHOW_STICKY_HUN;
+            }
             return FullScreenIntentDecision.NO_FULL_SCREEN_INTENT;
         }
 
@@ -284,6 +287,12 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                     suppressedByDND);
         }
 
+        // Notification is coming from a suspended package, block FSI
+        if (entry.getRanking().isSuspended()) {
+            return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_SUSPENDED,
+                    suppressedByDND);
+        }
+
         // If the screen is off, then launch the FullScreenIntent
         if (!mPowerManager.isInteractive()) {
             return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE,
@@ -312,30 +321,22 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                     suppressedByDND);
         }
 
-        // Check whether FSI requires the keyguard to be showing.
-        if (mFlags.fullScreenIntentRequiresKeyguard()) {
-
-            // If notification won't HUN and keyguard is showing, launch the FSI.
-            if (mKeyguardStateController.isShowing()) {
-                if (mKeyguardStateController.isOccluded()) {
-                    return getDecisionGivenSuppression(
-                            FullScreenIntentDecision.FSI_KEYGUARD_OCCLUDED,
-                            suppressedByDND);
-                } else {
-                    // Likely LOCKED_SHADE, but launch FSI anyway
-                    return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_LOCKED_SHADE,
-                            suppressedByDND);
-                }
+        // If notification won't HUN and keyguard is showing, launch the FSI.
+        if (mKeyguardStateController.isShowing()) {
+            if (mKeyguardStateController.isOccluded()) {
+                return getDecisionGivenSuppression(
+                        FullScreenIntentDecision.FSI_KEYGUARD_OCCLUDED,
+                        suppressedByDND);
+            } else {
+                // Likely LOCKED_SHADE, but launch FSI anyway
+                return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_LOCKED_SHADE,
+                        suppressedByDND);
             }
-
-            // Detect the case determined by b/231322873 to launch FSI while device is in use,
-            // as blocked by the correct implementation, and report the event.
-            return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD,
-                    suppressedByDND);
         }
 
-        // If the notification won't HUN for some other reason (DND/snooze/etc), launch FSI.
-        return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_EXPECTED_NOT_TO_HUN,
+        // Detect the case determined by b/231322873 to launch FSI while device is in use,
+        // as blocked by the correct implementation, and report the event.
+        return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD,
                 suppressedByDND);
     }
 
@@ -345,57 +346,38 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         final int uid = entry.getSbn().getUid();
         final String packageName = entry.getSbn().getPackageName();
         switch (decision) {
-            case NO_FSI_DISABLED:
-                mLogger.logNoFullscreen(entry, "Disabled");
-                return;
             case NO_FULL_SCREEN_INTENT:
-                return;
-            case NO_FSI_SUPPRESSED_BY_DND:
-            case NO_FSI_SUPPRESSED_ONLY_BY_DND:
-                mLogger.logNoFullscreen(entry, "Suppressed by DND");
-                return;
-            case NO_FSI_NOT_IMPORTANT_ENOUGH:
-                mLogger.logNoFullscreen(entry, "Not important enough");
+                // explicitly prevent logging for this (frequent) case
                 return;
             case NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR:
                 android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
                         "groupAlertBehavior");
                 mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR, uid,
                         packageName);
-                mLogger.logNoFullscreenWarning(entry, "GroupAlertBehavior will prevent HUN");
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": GroupAlertBehavior will prevent HUN");
                 return;
             case NO_FSI_SUPPRESSIVE_BUBBLE_METADATA:
-                android.util.EventLog.writeEvent(0x534e4554, "274759612", uid, "bubbleMetadata");
-                mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA, uid, packageName);
-                mLogger.logNoFullscreenWarning(entry, "BubbleMetadata may prevent HUN");
-                return;
-            case FSI_DEVICE_NOT_INTERACTIVE:
-                mLogger.logFullscreen(entry, "Device is not interactive");
-                return;
-            case FSI_DEVICE_IS_DREAMING:
-                mLogger.logFullscreen(entry, "Device is dreaming");
-                return;
-            case FSI_KEYGUARD_SHOWING:
-                mLogger.logFullscreen(entry, "Keyguard is showing");
-                return;
-            case NO_FSI_EXPECTED_TO_HUN:
-                mLogger.logNoFullscreen(entry, "Expected to HUN");
-                return;
-            case FSI_KEYGUARD_OCCLUDED:
-                mLogger.logFullscreen(entry,
-                        "Expected not to HUN while keyguard occluded");
-                return;
-            case FSI_LOCKED_SHADE:
-                mLogger.logFullscreen(entry, "Keyguard is showing and not occluded");
+                android.util.EventLog.writeEvent(0x534e4554, "274759612", uid,
+                        "bubbleMetadata");
+                mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA, uid,
+                        packageName);
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": BubbleMetadata may prevent HUN");
                 return;
             case NO_FSI_NO_HUN_OR_KEYGUARD:
                 android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
                         "no hun or keyguard");
                 mUiEventLogger.log(FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD, uid, packageName);
-                mLogger.logNoFullscreenWarning(entry, "Expected not to HUN while not on keyguard");
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": Expected not to HUN while not on keyguard");
                 return;
-            case FSI_EXPECTED_NOT_TO_HUN:
-                mLogger.logFullscreen(entry, "Expected not to HUN");
+            default:
+                if (decision.shouldLaunch) {
+                    mLogger.logFullscreen(entry, decision.name());
+                } else {
+                    mLogger.logNoFullscreen(entry, decision.name());
+                }
         }
     }
     private boolean shouldHeadsUpWhenAwake(NotificationEntry entry, boolean log) {
@@ -419,14 +401,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         final boolean isSnoozedPackage = isSnoozedPackage(sbn);
-        final boolean fsiRequiresKeyguard = mFlags.fullScreenIntentRequiresKeyguard();
         final boolean hasFsi = sbn.getNotification().fullScreenIntent != null;
 
         // Assume any notification with an FSI is time-sensitive (like an alarm or incoming call)
         // and ignore whether HUNs have been snoozed for the package.
-        final boolean shouldBypassSnooze = fsiRequiresKeyguard && hasFsi;
-
-        if (isSnoozedPackage && !shouldBypassSnooze) {
+        if (isSnoozedPackage && !hasFsi) {
             if (log) mLogger.logNoHeadsUpPackageSnoozed(entry);
             return false;
         }
@@ -511,6 +490,12 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
         if (entry.shouldSuppressAmbient()) {
             if (log) mLogger.logNoPulsingNoAmbientEffect(entry);
+            return false;
+        }
+
+        if (entry.getRanking().getLockscreenVisibilityOverride()
+                == Notification.VISIBILITY_PRIVATE) {
+            if (log) mLogger.logNoPulsingNotificationHidden(entry);
             return false;
         }
 
@@ -631,6 +616,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
         if (notification.isForegroundService()) {
             if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "foreground service");
+            return false;
+        }
+
+        if (notification.isUserInitiatedJob()) {
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "user initiated job");
             return false;
         }
 

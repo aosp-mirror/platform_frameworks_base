@@ -20,6 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -39,6 +42,16 @@ import java.util.stream.Collectors;
  * Description of a mobile network registration info
  */
 public final class NetworkRegistrationInfo implements Parcelable {
+
+    /**
+     * A new registration state, REGISTRATION_STATE_EMERGENCY, is added to
+     * {@link NetworkRegistrationInfo}. This change will affect the result of getRegistration().
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long RETURN_REGISTRATION_STATE_EMERGENCY = 255938466L;
+
     /**
      * Network domain
      * @hide
@@ -64,7 +77,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
     @IntDef(prefix = "REGISTRATION_STATE_",
             value = {REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING, REGISTRATION_STATE_HOME,
                     REGISTRATION_STATE_NOT_REGISTERED_SEARCHING, REGISTRATION_STATE_DENIED,
-                    REGISTRATION_STATE_UNKNOWN, REGISTRATION_STATE_ROAMING})
+                    REGISTRATION_STATE_UNKNOWN, REGISTRATION_STATE_ROAMING,
+                    REGISTRATION_STATE_EMERGENCY})
     public @interface RegistrationState {}
 
     /**
@@ -103,6 +117,18 @@ public final class NetworkRegistrationInfo implements Parcelable {
      */
     @SystemApi
     public static final int REGISTRATION_STATE_ROAMING = 5;
+    /**
+     * Emergency attached in EPS or in 5GS.
+     * IMS service will skip emergency registration if the device is in
+     * emergency attached state. {@link #mEmergencyOnly} can be true
+     * even in case it's not in emergency attached state.
+     *
+     * Reference: 3GPP TS 24.301 9.9.3.11 EPS attach type.
+     * Reference: 3GPP TS 24.501 9.11.3.6 5GS registration result.
+     * @hide
+     */
+    @SystemApi
+    public static final int REGISTRATION_STATE_EMERGENCY = 6;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -313,8 +339,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
                                    @Nullable VopsSupportInfo vopsSupportInfo) {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
                 emergencyOnly, availableServices, cellIdentity, rplmn, null,
-                new DataSpecificRegistrationInfo(maxDataCalls, isDcNrRestricted, isNrAvailable,
-                        isEndcAvailable, vopsSupportInfo));
+                new DataSpecificRegistrationInfo.Builder(maxDataCalls)
+                        .setDcNrRestricted(isDcNrRestricted)
+                        .setNrAvailable(isNrAvailable)
+                        .setEnDcAvailable(isEndcAvailable)
+                        .setVopsSupportInfo(vopsSupportInfo)
+                        .build());
     }
 
     private NetworkRegistrationInfo(Parcel source) {
@@ -411,6 +441,15 @@ public final class NetworkRegistrationInfo implements Parcelable {
     @Deprecated
     @SystemApi
     public @RegistrationState int getRegistrationState() {
+        if (mRegistrationState == REGISTRATION_STATE_EMERGENCY) {
+            if (!CompatChanges.isChangeEnabled(RETURN_REGISTRATION_STATE_EMERGENCY)) {
+                if (mAccessNetworkTechnology == TelephonyManager.NETWORK_TYPE_LTE) {
+                    return REGISTRATION_STATE_DENIED;
+                } else if (mAccessNetworkTechnology == TelephonyManager.NETWORK_TYPE_NR) {
+                    return REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+                }
+            }
+        }
         return mRegistrationState;
     }
 
@@ -676,6 +715,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
             case REGISTRATION_STATE_DENIED: return "DENIED";
             case REGISTRATION_STATE_UNKNOWN: return "UNKNOWN";
             case REGISTRATION_STATE_ROAMING: return "ROAMING";
+            case REGISTRATION_STATE_EMERGENCY: return "EMERGENCY";
         }
         return "Unknown reg state " + registrationState;
     }

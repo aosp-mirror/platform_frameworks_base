@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.PowerManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -36,16 +37,24 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
+import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
+import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
+import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -58,12 +67,15 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
-
-import java.util.concurrent.Executor;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.concurrent.Executor;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * Dagger Module providing keyguard.
@@ -78,7 +90,9 @@ import dagger.Provides;
             KeyguardDataQuickAffordanceModule.class,
             KeyguardQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
+            KeyguardFaceAuthModule.class,
             StartKeyguardTransitionModule.class,
+            ResourceTrimmerModule.class,
         })
 public class KeyguardModule {
     /**
@@ -88,6 +102,8 @@ public class KeyguardModule {
     @SysUISingleton
     public static KeyguardViewMediator newKeyguardViewMediator(
             Context context,
+            UiEventLogger uiEventLogger,
+            SessionTracker sessionTracker,
             UserTracker userTracker,
             FalsingCollector falsingCollector,
             LockPatternUtils lockPatternUtils,
@@ -110,14 +126,21 @@ public class KeyguardModule {
             ScreenOffAnimationController screenOffAnimationController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             ScreenOnCoordinator screenOnCoordinator,
+            KeyguardTransitions keyguardTransitions,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
             Lazy<ShadeController> shadeController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
-            Lazy<ScrimController> scrimControllerLazy) {
+            Lazy<ScrimController> scrimControllerLazy,
+            FeatureFlags featureFlags,
+            @Main CoroutineDispatcher mainDispatcher,
+            Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
+            SystemPropertiesHelper systemPropertiesHelper) {
         return new KeyguardViewMediator(
                 context,
+                uiEventLogger,
+                sessionTracker,
                 userTracker,
                 falsingCollector,
                 lockPatternUtils,
@@ -140,17 +163,28 @@ public class KeyguardModule {
                 screenOffAnimationController,
                 notificationShadeDepthController,
                 screenOnCoordinator,
+                keyguardTransitions,
                 interactionJankMonitor,
                 dreamOverlayStateController,
                 shadeController,
                 notificationShadeWindowController,
                 activityLaunchAnimator,
-                scrimControllerLazy);
+                scrimControllerLazy,
+                featureFlags,
+                mainDispatcher,
+                dreamingToLockscreenTransitionViewModel,
+                systemPropertiesHelper);
     }
 
     /** */
     @Provides
     public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
+    }
+
+    /** */
+    @Provides
+    public KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
+        return new KeyguardQuickAffordancesMetricsLoggerImpl();
     }
 }

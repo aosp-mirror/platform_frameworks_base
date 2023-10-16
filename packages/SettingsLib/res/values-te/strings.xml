@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"డిస్‌కనెక్ట్ అయ్యింది"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"డిజేబుల్ చేయబడింది"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP కాన్ఫిగరేషన్ వైఫల్యం"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"తక్కువ క్వాలిటీ నెట్‌వర్క్ కారణంగా కనెక్ట్ చేయబడలేదు"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi కనెక్షన్ వైఫల్యం"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"ప్రామాణీకరణ సమస్య"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"కనెక్ట్ చేయడం సాధ్యపడదు"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'కు కనెక్ట్ చేయడం సాధ్యపడదు"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ఆటోమేటిక్‌గా కనెక్ట్ కాదు"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> ద్వారా సేవ్ చేయబడింది"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"డేటా నియంత్రణ నెట్‌వర్క్‌కు కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s ద్వారా ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"నెట్‌వర్క్ రేటింగ్ ప్రదాత ద్వారా ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> ద్వారా కనెక్ట్ చేయబడింది"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"సైన్ అప్ చేయడానికి నొక్కండి"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"ఇంటర్నెట్ లేదు"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"ప్రైవేట్ DNS సర్వర్‌ను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"ఇంటర్నెట్ లేదు"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"సైన్ ఇన్ చేయాలి"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"యాక్సెస్ పాయింట్ తాత్కాలికంగా నిండుకుంది"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> తెరవబడుతోంది"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"కనెక్ట్ చేయడం సాధ్యపడలేదు"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"సైన్ అప్ పూర్తివుతోంది…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"సైన్ అప్‌ను పూర్తి చేయడం సాధ్య పడలేదు. మళ్లీ ప్రయత్నించడానికి నొక్కండి."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"సైన్ అప్ పూర్తయింది. కనెక్ట్ చేయబడుతోంది…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"చాలా నెమ్మది"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"నెమ్మది"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"సరే"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"మధ్యస్థం"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"వేగవంతం"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"చాలా వేగవంతం"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"గడువు ముగిసింది"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"పెయిరింగ్..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"కనెక్ట్ చేయబడింది (ఫోన్ కాదు)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"కనెక్ట్ చేయబడింది (మీడియా కాదు)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"కనెక్ట్ చేయబడింది (సందేశ యాక్సెస్ లేదు)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"కనెక్ట్ చేయబడింది (ఫోన్ లేదా మీడియా కాదు)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"కనెక్ట్ చేయబడింది, బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"కనెక్ట్ చేయబడింది (ఫోన్ కాదు), బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -125,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ఆడియో: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ఆడియో"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"వినికిడి మద్దతు ఉపకరణాలు"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Le ఆడియో"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ఆడియో"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"వినికిడి మద్దతు ఉపకరణాలకు కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ఆడియోకు కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"మీడియా ఆడియోకు కనెక్ట్ చేయబడింది"</string>
@@ -212,19 +202,20 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ప్రసంగ స్వర స్థాయిని రీసెట్ చేయండి"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"టెక్స్ట్‌ను చదివి వినిపించే స్వర స్థాయిని ఆటోమేటిక్‌కు రీసెట్ చేస్తుంది."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"చాలా నెమ్మది"</item>
-    <item msgid="1815382991399815061">"నెమ్మది"</item>
-    <item msgid="3075292553049300105">"సాధారణం"</item>
-    <item msgid="1158955023692670059">"వేగవంతం"</item>
-    <item msgid="5664310435707146591">"అధిక వేగవంతం"</item>
-    <item msgid="5491266922147715962">"చాలా వేగవంతం"</item>
-    <item msgid="7659240015901486196">"అధిక వేగం"</item>
-    <item msgid="7147051179282410945">"అత్యంత వేగం"</item>
-    <item msgid="581904787661470707">"అత్యంత వేగవంతం"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ప్రొఫైల్‌ను ఎంచుకోండి"</string>
     <string name="category_personal" msgid="6236798763159385225">"వ్యక్తిగతం"</string>
     <string name="category_work" msgid="4014193632325996115">"వర్క్"</string>
+    <string name="category_clone" msgid="1554511758987195974">"క్లోన్ చేయండి"</string>
     <string name="development_settings_title" msgid="140296922921597393">"డెవలపర్ ఆప్షన్‌లు"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"డెవలపర్ ఎంపికలను ప్రారంభించండి"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"యాప్‌ అభివృద్ధి కోసం ఎంపికలను సెట్ చేయండి"</string>
@@ -381,9 +372,11 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"క్లిప్ సరిహద్దులు, అంచులు మొ. చూపు"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL లేఅవుట్ దిశను నిర్దేశించండి"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"అన్ని భాషల్లో స్క్రీన్ లేఅవుట్ దిశ RTL ఉండేలా నిర్దేశించండి"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"పారదర్శక నావిగేషన్ బార్"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"నావిగేషన్ బార్ బ్యాక్‌గ్రౌండ్ రంగును ఆటోమేటిక్‌గా పారదర్శకంగా చేయండి"</string>
     <string name="window_blurs" msgid="6831008984828425106">"విండో-స్థాయి బ్లర్ అనుమతించండి"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA అమలు తప్పనిసరి"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 యాప్‌లలో 4x MSAAను ప్రారంభించండి"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 యాప్‌లలో 4x MSAAను ఎనేబుల్ చేయండి"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"దీర్ఘ చతురస్రం కాని క్లిప్ ఆపరేషన్స్‌ను డీబగ్ చేయండి"</string>
     <string name="track_frame_time" msgid="522674651937771106">"ప్రొఫైల్ HWUI రెండరింగ్"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU డీబగ్ లేయర్‌లను ప్రారంభించండి"</string>
@@ -527,6 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ఎక్కువ సమయం."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"తక్కువ సమయం."</string>
     <string name="cancel" msgid="5665114069455378395">"రద్దు చేయండి"</string>
+    <string name="next" msgid="2699398661093607009">"తర్వాత"</string>
+    <string name="back" msgid="5554327870352703710">"వెనుకకు"</string>
+    <string name="save" msgid="3745809743277153149">"సేవ్ చేయండి"</string>
     <string name="okay" msgid="949938843324579502">"సరే"</string>
     <string name="done" msgid="381184316122520313">"పూర్తయింది"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"అలారాలు, రిమైండర్‌లు"</string>
@@ -549,7 +545,17 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ఇప్పుడే"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ఈ ఫోన్"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ఈ టాబ్లెట్"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"డాక్ స్పీకర్"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ఎక్స్‌టర్నల్ పరికరం"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"కనెక్ట్ చేసిన పరికరం"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ఈ ఫోన్"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ఈ పరికరంలో ప్లే చేయడం సాధ్యపడదు"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"మారడానికి ఖాతాను అప్‌గ్రేడ్ చేయండి"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ఇక్కడ డౌన్‌లోడ్‌లను ప్లే చేయడం సాధ్యపడదు"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"యాడ్ తర్వాత మళ్లీ ట్రై చేయండి"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ఇక్కడ ప్లే చేయడానికి పరికరాన్ని మేల్కొలపండి"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ప్లే చేయడానికి పరికరానికి అనుమతి లేదు"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ఈ మీడియాను ఇక్కడ ప్లే చేయడం సాధ్యపడదు."</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"కనెక్ట్ చేయడంలో సమస్య ఉంది. పరికరాన్ని ఆఫ్ చేసి, ఆపై తిరిగి ఆన్ చేయండి"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"వైర్ గల ఆడియో పరికరం"</string>
     <string name="help_label" msgid="3528360748637781274">"సహాయం &amp; ఫీడ్‌బ్యాక్"</string>
@@ -574,6 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"కొత్త యూజర్‌ను జోడించాలా?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"అదనపు యూజర్‌లను క్రియేట్ చేయడం ద్వారా మీరు ఈ పరికరాన్ని ఇతరులతో షేర్ చేయవచ్చు. ప్రతి యూజర్‌కు‌ వారికంటూ ప్రత్యేక స్పేస్ ఉంటుంది, వారు ఆ స్పేస్‌ను యాప్‌లు, వాల్‌పేపర్ మొదలైనవాటితో అనుకూలంగా మార్చుకోవచ్చు. యూజర్‌లు ప్రతి ఒక్కరిపై ప్రభావం చూపే Wi‑Fi వంటి పరికర సెట్టింగ్‌లను కూడా సర్దుబాటు చేయవచ్చు.\n\nమీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి వారికంటూ స్వంత స్పేస్‌ను సెట్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగిలిన యూజర్‌లందరి కోసం యాప్‌లను అప్‌డేట్ చేయవచ్చు. యాక్సెసిబిలిటీ సెట్టింగ్‌లు, సర్వీస్‌లు కొత్త యూజర్‌కి బదిలీ కాకపోవచ్చు."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"మీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా యూజర్ల కోసం యాప్‌లను అప్‌డేట్‌ చేయగలరు."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ఈ యూజర్‌ను అడ్మిన్ చేయాలా?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"యూజర్‌లకు లేని ప్రత్యేక హక్కులు అడ్మిన్‌లకు ఉంటాయి. అడ్మిన్, యూజర్‌లందరినీ మేనేజ్ చేయగలరు, ఈ పరికరాన్ని అప్‌డేట్ లేదా రీసెట్ చేయగలరు, సెట్టింగ్‌లను మార్చగలరు, ఇన్‌స్టాల్ అయ్యి ఉండే యాప్‌లన్నింటినీ చూడగలరు, ఇతరులకు అడ్మిన్ హక్కులను ఇవ్వగలరు, లేదా ఉపసంహరించగలరు."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"అడ్మిన్‌గా చేయండి"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"యూజర్‌ను ఇప్పుడే సెటప్ చేయాలా?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి స్టోరేజ్‌ స్థలాన్ని సెటప్ చేయండి"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ఇప్పుడు ప్రొఫైల్‌ను సెటప్ చేయాలా?"</string>
@@ -605,6 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ఇది కొత్త గెస్ట్ సెషన్‌ను ప్రారంభిస్తుంది, ప్రస్తుత సెషన్ నుండి అన్ని యాప్‌లు, డేటాను తొలగిస్తుంది."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"గెస్ట్ మోడ్ నుండి వైదొలగాలా?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ఇది ప్రస్తుత గెస్ట్ సెషన్ నుండి యాప్‌లను వాటితో పాటు డేటాను తొలగిస్తుంది"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"అవును, వారిని అడ్మిన్ చేయాలి"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"వద్దు, వారిని అడ్మిన్ చేయవద్దు"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"వైదొలగండి"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"గెస్ట్ యాక్టివిటీని సేవ్ చేయాలా?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"మీరు సెషన్ నుండి యాక్టివిటీని సేవ్ చేయవచ్చు, అన్ని యాప్‌లు, డేటాను తొలగించవచ్చు"</string>
@@ -672,4 +683,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ప్రివ్యూ గల బ్యాక్ యానిమేషన్‌లు"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ప్రివ్యూ గల బ్యాక్ యానిమేషన్‌ల కోసం సిస్టమ్ యానిమేషన్‌లను ఎనేబుల్ చేయండి."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ఊహించదగిన సంజ్ఞ యానిమేషన్ కోసం ఈ సెట్టింగ్ సిస్టమ్ యానిమేషన్‌లను ఎనేబుల్ చేస్తుంది. దీనికి మ్యానిఫెస్ట్ ఫైల్‌లో ఒక్కో యాప్‌లో enableOnBackInvokedCallback సెట్టింగ్‌ను ఒప్పునకు సెట్ చేయవలసి ఉంటుంది."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"ఎడమ వైపుగా జరపండి"</item>
+    <item msgid="5425394847942513942">"కిందికి జరపండి"</item>
+    <item msgid="7728484337962740316">"కుడి వైపుగా జరపండి"</item>
+    <item msgid="324200556467459329">"పైకి జరపండి"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

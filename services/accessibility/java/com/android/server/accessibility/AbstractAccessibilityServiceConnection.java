@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_STATUS;
@@ -41,6 +42,7 @@ import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.MagnificationConfig;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -73,17 +75,20 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
-import android.view.SurfaceControl.ScreenshotHardwareBuffer;
+import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.View;
-import android.view.WindowInfo;
 import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.inputmethod.EditorInfo;
+import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
@@ -97,11 +102,12 @@ import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.inputmethod.InputMethodManagerInternal;
-import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -124,12 +130,17 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     private static final String TRACE_WM = "WindowManagerInternal";
     private static final int WAIT_WINDOWS_TIMEOUT_MILLIS = 5000;
 
+    /** Display type for displays associated with the default user of the device. */
+    public static final int DISPLAY_TYPE_DEFAULT = 1 << 0;
+    /** Display type for displays associated with an AccessibilityDisplayProxy user. */
+    public static final int DISPLAY_TYPE_PROXY = 1 << 1;
+
     protected static final String TAKE_SCREENSHOT = "takeScreenshot";
     protected final Context mContext;
     protected final SystemSupport mSystemSupport;
     protected final WindowManagerInternal mWindowManagerService;
     private final SystemActionPerformer mSystemActionPerformer;
-    private final AccessibilityWindowManager mA11yWindowManager;
+    final AccessibilityWindowManager mA11yWindowManager;
     private final DisplayManager mDisplayManager;
     private final PowerManager mPowerManager;
     private final IPlatformCompat mIPlatformCompat;
@@ -151,6 +162,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     // The attribution tag set by the service that is bound to this instance
     protected String mAttributionTag;
+
+    protected int mDisplayTypes = DISPLAY_TYPE_DEFAULT;
 
     // The service that's bound to this instance. Whenever this value is non-null, this
     // object is registered as a death recipient
@@ -197,6 +210,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     final ComponentName mComponentName;
 
+    int mGenericMotionEventSources;
+
     // the events pending events to be dispatched to this service
     final SparseArray<AccessibilityEvent> mPendingEvents = new SparseArray<>();
 
@@ -211,6 +226,19 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     /** The timestamp of requesting to take screenshot in milliseconds */
     private long mRequestTakeScreenshotTimestampMs;
+    /**
+     * The timestamps of requesting to take a window screenshot in milliseconds,
+     * mapping from accessibility window id -> timestamp.
+     */
+    private SparseArray<Long> mRequestTakeScreenshotOfWindowTimestampMs = new SparseArray<>();
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "DISPLAY_TYPE_" }, value = {
+            DISPLAY_TYPE_DEFAULT,
+            DISPLAY_TYPE_PROXY
+    })
+    public @interface DisplayTypes {}
 
     public interface SystemSupport {
         /**
@@ -240,6 +268,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
          * @param serviceInfoChanged True if the service's AccessibilityServiceInfo changed.
          */
         void onClientChangeLocked(boolean serviceInfoChanged);
+
+        /**
+         * Called back to notify the system the proxy client for a device has changed.
+         *
+         * Changes include if the proxy is unregistered, if its service info list has changed, or if
+         * its focus appearance has changed.
+         */
+        void onProxyChanged(int deviceId);
 
         int getCurrentUserIdLocked();
 
@@ -282,6 +318,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         void requestImeLocked(AbstractAccessibilityServiceConnection connection);
 
         void unbindImeLocked(AbstractAccessibilityServiceConnection connection);
+
+        void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc);
+
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
@@ -352,19 +391,28 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         mNotificationTimeout = info.notificationTimeout;
         mIsDefault = (info.flags & DEFAULT) != 0;
+        mGenericMotionEventSources = info.getMotionEventSources();
 
         if (supportsFlagForNotImportantViews(info)) {
             if ((info.flags & AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0) {
-                mFetchFlags |= AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+                mFetchFlags |=
+                        AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS;
             } else {
-                mFetchFlags &= ~AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+                mFetchFlags &=
+                        ~AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS;
             }
         }
 
         if ((info.flags & AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS) != 0) {
-            mFetchFlags |= AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
+            mFetchFlags |= AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS;
         } else {
-            mFetchFlags &= ~AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
+            mFetchFlags &= ~AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS;
+        }
+
+        if (mAccessibilityServiceInfo.isAccessibilityTool()) {
+            mFetchFlags |= AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL;
+        } else {
+            mFetchFlags &= ~AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL;
         }
 
         mRequestTouchExplorationMode = (info.flags
@@ -457,6 +505,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
+    public void setInstalledAndEnabledServices(List<AccessibilityServiceInfo> infos) {
+        return;
+    }
+
+    @Override
+    public List<AccessibilityServiceInfo> getInstalledAndEnabledServices() {
+        return null;
+    }
+
+    @Override
     public void setAttributionTag(String attributionTag) {
         mAttributionTag = attributionTag;
     }
@@ -487,7 +545,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             final AccessibilityWindowInfo.WindowListSparseArray allWindows =
                     new AccessibilityWindowInfo.WindowListSparseArray();
-            final ArrayList<Integer> displayList = mA11yWindowManager.getDisplayListLocked();
+            final ArrayList<Integer> displayList = mA11yWindowManager.getDisplayListLocked(
+                    mDisplayTypes);
             final int displayListCounts = displayList.size();
             if (displayListCounts > 0) {
                 for (int i = 0; i < displayListCounts; i++) {
@@ -503,6 +562,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             return allWindows;
         }
+    }
+
+    protected void setDisplayTypes(@DisplayTypes int displayTypes) {
+        mDisplayTypes = displayTypes;
     }
 
     @Override
@@ -1234,6 +1297,51 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
+    public void takeScreenshotOfWindow(int accessibilityWindowId, int interactionId,
+            ScreenCapture.ScreenCaptureListener listener,
+            IAccessibilityInteractionConnectionCallback callback) throws RemoteException {
+        final long currentTimestamp = SystemClock.uptimeMillis();
+        if ((currentTimestamp
+                - mRequestTakeScreenshotOfWindowTimestampMs.get(accessibilityWindowId, 0L))
+                <= ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS) {
+            callback.sendTakeScreenshotOfWindowError(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT, interactionId);
+            return;
+        }
+        mRequestTakeScreenshotOfWindowTimestampMs.put(accessibilityWindowId, currentTimestamp);
+
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                callback.sendTakeScreenshotOfWindowError(
+                        AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR, interactionId);
+                return;
+            }
+            if (!mSecurityPolicy.canTakeScreenshotLocked(this)) {
+                callback.sendTakeScreenshotOfWindowError(
+                        AccessibilityService.ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS,
+                        interactionId);
+                return;
+            }
+        }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            callback.sendTakeScreenshotOfWindowError(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS,
+                    interactionId);
+            return;
+        }
+
+        RemoteAccessibilityConnection connection = mA11yWindowManager.getConnectionLocked(
+                mSystemSupport.getCurrentUserIdLocked(),
+                resolveAccessibilityWindowIdLocked(accessibilityWindowId));
+        if (connection == null) {
+            callback.sendTakeScreenshotOfWindowError(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_WINDOW, interactionId);
+            return;
+        }
+        connection.getRemote().takeScreenshotOfWindow(interactionId, listener, callback);
+    }
+
+    @Override
     public void takeScreenshot(int displayId, RemoteCallback callback) {
         if (svcConnTracingEnabled()) {
             logTraceSvcConn("takeScreenshot", "displayId=" + displayId + ";callback=" + callback);
@@ -1523,9 +1631,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return false;
         }
 
+        final boolean includeNotImportantViews = (mFetchFlags
+                & AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
         if ((event.getWindowId() != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
                 && !event.isImportantForAccessibility()
-                && (mFetchFlags & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
+                && !includeNotImportantViews) {
+            return false;
+        }
+
+        if (event.isAccessibilityDataSensitive()
+                && (mFetchFlags & AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL) == 0) {
             return false;
         }
 
@@ -1669,6 +1784,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     private Pair<float[], MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
             int resolvedWindowId) {
         return mSystemSupport.getWindowTransformationMatrixAndMagnificationSpec(resolvedWindowId);
+    }
+
+    public boolean wantsGenericMotionEvent(MotionEvent event) {
+        final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+        return (mGenericMotionEventSources & eventSourceWithoutClass) != 0;
     }
 
     /**
@@ -1880,17 +2000,28 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     private int resolveAccessibilityWindowIdLocked(int accessibilityWindowId) {
         if (accessibilityWindowId == AccessibilityWindowInfo.ACTIVE_WINDOW_ID) {
-            return mA11yWindowManager.getActiveWindowId(mSystemSupport.getCurrentUserIdLocked());
+            final int focusedWindowId =
+                    mA11yWindowManager.getActiveWindowId(mSystemSupport.getCurrentUserIdLocked());
+            if (!mA11yWindowManager.windowIdBelongsToDisplayType(focusedWindowId, mDisplayTypes)) {
+                return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+            }
+            return focusedWindowId;
         }
         return accessibilityWindowId;
     }
 
-    private int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
-        if (windowId == AccessibilityWindowInfo.ACTIVE_WINDOW_ID) {
-            return mA11yWindowManager.getActiveWindowId(mSystemSupport.getCurrentUserIdLocked());
-        }
+    int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
         if (windowId == AccessibilityWindowInfo.ANY_WINDOW_ID) {
-            return mA11yWindowManager.getFocusedWindowId(focusType);
+            final int focusedWindowId = mA11yWindowManager.getFocusedWindowId(focusType);
+            // If the caller is a proxy and the found window doesn't belong to a proxy display
+            // (or vice versa), then return null. This doesn't work if there are multiple active
+            // proxys, but in the future this code shouldn't be needed if input focus are
+            // properly split. (so we will deal with the issues if we see them).
+            //TODO(254545943): Remove this when there is user and proxy separation of input focus
+            if (!mA11yWindowManager.windowIdBelongsToDisplayType(focusedWindowId, mDisplayTypes)) {
+                return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+            }
+            return focusedWindowId;
         }
         return windowId;
     }
@@ -1948,7 +2079,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             IAccessibilityInteractionConnectionCallback callback, int fetchFlags,
             long interrogatingTid) {
         RemoteAccessibilityConnection connection;
-        IBinder activityToken = null;
+        IBinder windowToken = null;
         synchronized (mLock) {
             connection = mA11yWindowManager.getConnectionLocked(userId, resolvedWindowId);
             if (connection == null)  {
@@ -1957,9 +2088,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final boolean isA11yFocusAction = (action == ACTION_ACCESSIBILITY_FOCUS)
                     || (action == ACTION_CLEAR_ACCESSIBILITY_FOCUS);
             if (!isA11yFocusAction) {
-                final WindowInfo windowInfo =
-                        mA11yWindowManager.findWindowInfoByIdLocked(resolvedWindowId);
-                if (windowInfo != null) activityToken = windowInfo.activityToken;
+                windowToken = mA11yWindowManager.getWindowTokenForUserAndWindowIdLocked(
+                        userId, resolvedWindowId);
             }
             final AccessibilityWindowInfo a11yWindowInfo =
                     mA11yWindowManager.findA11yWindowInfoByIdLocked(resolvedWindowId);
@@ -1980,9 +2110,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (action == ACTION_CLICK || action == ACTION_LONG_CLICK) {
                 mA11yWindowManager.notifyOutsideTouch(userId, resolvedWindowId);
             }
-            if (activityToken != null) {
-                LocalServices.getService(ActivityTaskManagerInternal.class)
-                        .setFocusedActivity(activityToken);
+            if (windowToken != null) {
+                mWindowManagerService.requestWindowFocus(windowToken);
             }
             if (intConnTracingEnabled()) {
                 logTraceIntConn("performAccessibilityAction",
@@ -2301,9 +2430,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             int processId, long threadId, int callingUid, Bundle callingStack) {
         if (mTrace.isA11yTracingEnabledForTypes(loggingTypes)) {
             ArrayList<StackTraceElement> list =
-                    (ArrayList<StackTraceElement>) callingStack.getSerializable(CALL_STACK);
+                    (ArrayList<StackTraceElement>) callingStack.getSerializable(CALL_STACK, java.util.ArrayList.class);
             HashSet<String> ignoreList =
-                    (HashSet<String>) callingStack.getSerializable(IGNORE_CALL_STACK);
+                    (HashSet<String>) callingStack.getSerializable(IGNORE_CALL_STACK, java.util.HashSet.class);
             mTrace.logTrace(timestamp, where, loggingTypes, callingParams, processId, threadId,
                     callingUid, list.toArray(new StackTraceElement[list.size()]), ignoreList);
         }
@@ -2407,6 +2536,30 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 Binder.restoreCallingIdentity(ident);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    @Override
+    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {
+        mSystemSupport.attachAccessibilityOverlayToDisplay(displayId, sc);
+    }
+
+    @Override
+    public void attachAccessibilityOverlayToWindow(int accessibilityWindowId, SurfaceControl sc)
+            throws RemoteException {
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.setTrustedOverlay(sc, true).apply();
+        t.close();
+        synchronized (mLock) {
+            RemoteAccessibilityConnection connection =
+                    mA11yWindowManager.getConnectionLocked(
+                            mSystemSupport.getCurrentUserIdLocked(),
+                            resolveAccessibilityWindowIdLocked(accessibilityWindowId));
+            if (connection == null) {
+                Slog.e(LOG_TAG, "unable to get remote accessibility connection.");
+                return;
+            }
+            connection.getRemote().attachAccessibilityOverlayToWindow(sc);
         }
     }
 }

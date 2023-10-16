@@ -74,7 +74,7 @@ class AnrTest {
         val contentResolver = instrumentation.targetContext.contentResolver
         hideErrorDialogs = Settings.Global.getInt(contentResolver, HIDE_ERROR_DIALOGS, 0)
         Settings.Global.putInt(contentResolver, HIDE_ERROR_DIALOGS, 0)
-        PACKAGE_NAME = UnresponsiveGestureMonitorActivity::class.java.getPackage().getName()
+        PACKAGE_NAME = UnresponsiveGestureMonitorActivity::class.java.getPackage()!!.getName()
     }
 
     @After

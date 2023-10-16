@@ -30,11 +30,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.shared.recents.utilities.Utilities;
-import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig;
 import com.android.systemui.surfaceeffects.ripple.RippleShader;
 import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
 import com.android.systemui.surfaceeffects.ripple.RippleView;
@@ -129,7 +128,8 @@ final class WirelessChargingLayout extends FrameLayout {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator);
 
-        // For large screens docking animation, we don't play the background scrim.
+        // For tablet docking animation, we don't play the background scrim.
+        // TODO(b/270524780): use utility to check for tablet instead. 
         if (!Utilities.isLargeScreen(context)) {
             ValueAnimator scrimFadeInAnimator = ObjectAnimator.ofArgb(this,
                     "backgroundColor", Color.TRANSPARENT, SCRIM_COLOR);
@@ -176,7 +176,7 @@ final class WirelessChargingLayout extends FrameLayout {
             mRippleView.setBlur(6.5f, 2.5f);
         } else {
             mRippleView.setDuration(CIRCLE_RIPPLE_ANIMATION_DURATION);
-            mRippleView.setColor(color, RippleAnimationConfig.RIPPLE_DEFAULT_ALPHA);
+            mRippleView.setColor(color, RippleShader.RIPPLE_DEFAULT_ALPHA);
         }
 
         OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {

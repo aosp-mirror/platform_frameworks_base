@@ -35,9 +35,9 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.MathUtils.lerp
 import androidx.annotation.Keep
+import com.android.app.animation.Interpolators
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
 import org.xmlpull.v1.XmlPullParser
 
 private const val RIPPLE_ANIM_DURATION = 800L
@@ -98,11 +98,11 @@ class LightSourceDrawable : Drawable() {
                         addListener(
                             object : AnimatorListenerAdapter() {
                                 var cancelled = false
-                                override fun onAnimationCancel(animation: Animator?) {
+                                override fun onAnimationCancel(animation: Animator) {
                                     cancelled = true
                                 }
 
-                                override fun onAnimationEnd(animation: Animator?) {
+                                override fun onAnimationEnd(animation: Animator) {
                                     if (cancelled) {
                                         return
                                     }
@@ -226,7 +226,7 @@ class LightSourceDrawable : Drawable() {
                 )
                 addListener(
                     object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
+                        override fun onAnimationEnd(animation: Animator) {
                             rippleData.progress = 0f
                             rippleAnimation = null
                             invalidateSelf()
@@ -270,11 +270,8 @@ class LightSourceDrawable : Drawable() {
         return bounds
     }
 
-    override fun onStateChange(stateSet: IntArray?): Boolean {
+    override fun onStateChange(stateSet: IntArray): Boolean {
         val changed = super.onStateChange(stateSet)
-        if (stateSet == null) {
-            return changed
-        }
 
         val wasPressed = pressed
         var enabled = false

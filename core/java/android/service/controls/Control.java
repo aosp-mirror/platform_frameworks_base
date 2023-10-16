@@ -50,7 +50,7 @@ import java.lang.annotation.RetentionPolicy;
  * and zone. Some of these values are defined by the user and/or the {@link ControlsProviderService}
  * and will be used to display the control as well as group them for management.
  * <p>
- * Each object will have an associated {@link DeviceTypes.DeviceType}. This will determine the icons and colors
+ * Each object will have an associated {@link DeviceTypes}. This will determine the icons and colors
  * used to display it.
  * <p>
  * An {@link Intent} linking to the provider Activity that expands on this {@link Control} and
@@ -420,7 +420,7 @@ public final class Control implements Parcelable {
      * This fixes the values relating to state of the {@link Control} as required by
      * {@link ControlsProviderService#createPublisherForAllAvailable}:
      * <ul>
-     *     <li> Status: {@link Status#STATUS_UNKNOWN}
+     *     <li> Status: {@link #STATUS_UNKNOWN}
      *     <li> Control template: {@link ControlTemplate#getNoTemplateObject}
      *     <li> Status text: {@code ""}
      *     <li> Auth Required: {@code true}
@@ -620,7 +620,7 @@ public final class Control implements Parcelable {
      *     <li> Device type: {@link DeviceTypes#TYPE_UNKNOWN}
      *     <li> Title: {@code ""}
      *     <li> Subtitle: {@code ""}
-     *     <li> Status: {@link Status#STATUS_UNKNOWN}
+     *     <li> Status: {@link #STATUS_UNKNOWN}
      *     <li> Control template: {@link ControlTemplate#getNoTemplateObject}
      *     <li> Status text: {@code ""}
      *     <li> Auth Required: {@code true}

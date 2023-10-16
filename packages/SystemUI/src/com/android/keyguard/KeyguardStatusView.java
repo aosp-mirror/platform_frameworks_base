@@ -19,10 +19,13 @@ package com.android.keyguard;
 import static java.util.Collections.emptySet;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.os.Build;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.widget.GridLayout;
 
 import com.android.systemui.R;
@@ -45,6 +48,7 @@ public class KeyguardStatusView extends GridLayout {
     private KeyguardSliceView mKeyguardSlice;
     private View mMediaHostContainer;
 
+    private int mDrawAlpha = 255;
     private float mDarkAmount = 0;
 
     public KeyguardStatusView(Context context) {
@@ -118,9 +122,35 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     @Override
+    public ViewPropertyAnimator animate() {
+        if (Build.IS_DEBUGGABLE) {
+            throw new IllegalArgumentException(
+                    "KeyguardStatusView does not support ViewPropertyAnimator. "
+                            + "Use PropertyAnimator instead.");
+        }
+        return super.animate();
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Trace.beginSection("KeyguardStatusView#onMeasure");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         Trace.endSection();
+    }
+
+    @Override
+    protected boolean onSetAlpha(int alpha) {
+        mDrawAlpha = alpha;
+        return true;
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        KeyguardClockFrame.saveCanvasAlpha(
+                this, canvas, mDrawAlpha,
+                c -> {
+                    super.dispatchDraw(c);
+                    return kotlin.Unit.INSTANCE;
+                });
     }
 }

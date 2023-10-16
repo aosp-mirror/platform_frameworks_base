@@ -20,10 +20,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
@@ -95,7 +91,6 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionFlags;
 import android.view.WindowManager.TransitionOldType;
 import android.view.WindowManager.TransitionType;
-import android.view.animation.Animation;
 import android.window.ITaskFragmentOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -103,8 +98,8 @@ import com.android.internal.protolog.common.ProtoLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -256,9 +251,20 @@ public class AppTransitionController {
         mWallpaperControllerLocked.adjustWallpaperWindowsForAppTransitionIfNeeded(
                 mDisplayContent.mOpeningApps);
 
+        ArraySet<ActivityRecord> tmpOpenApps = mDisplayContent.mOpeningApps;
+        ArraySet<ActivityRecord> tmpCloseApps = mDisplayContent.mClosingApps;
+        if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringTransition()) {
+            tmpOpenApps = new ArraySet<>(mDisplayContent.mOpeningApps);
+            tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
+            if (mDisplayContent.mAtmService.mBackNavigationController
+                    .removeIfContainsBackAnimationTargets(tmpOpenApps, tmpCloseApps)) {
+                mDisplayContent.mAtmService.mBackNavigationController.clearBackAnimations();
+            }
+        }
+
         @TransitionOldType final int transit = getTransitCompatType(
-                mDisplayContent.mAppTransition, mDisplayContent.mOpeningApps,
-                mDisplayContent.mClosingApps, mDisplayContent.mChangingContainers,
+                mDisplayContent.mAppTransition, tmpOpenApps,
+                tmpCloseApps, mDisplayContent.mChangingContainers,
                 mWallpaperControllerLocked.getWallpaperTarget(), getOldWallpaper(),
                 mDisplayContent.mSkipAppTransitionAnimation);
         mDisplayContent.mSkipAppTransitionAnimation = false;
@@ -266,22 +272,21 @@ public class AppTransitionController {
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "handleAppTransitionReady: displayId=%d appTransition={%s}"
                 + " openingApps=[%s] closingApps=[%s] transit=%s",
-                mDisplayContent.mDisplayId, appTransition.toString(), mDisplayContent.mOpeningApps,
-                mDisplayContent.mClosingApps, AppTransition.appTransitionOldToString(transit));
+                mDisplayContent.mDisplayId, appTransition.toString(), tmpOpenApps,
+                tmpCloseApps, AppTransition.appTransitionOldToString(transit));
 
         // Find the layout params of the top-most application window in the tokens, which is
         // what will control the animation theme. If all closing windows are obscured, then there is
         // no need to do an animation. This is the case, for example, when this transition is being
         // done behind a dream window.
-        final ArraySet<Integer> activityTypes = collectActivityTypes(mDisplayContent.mOpeningApps,
-                mDisplayContent.mClosingApps, mDisplayContent.mChangingContainers);
+        final ArraySet<Integer> activityTypes = collectActivityTypes(tmpOpenApps,
+                tmpCloseApps, mDisplayContent.mChangingContainers);
         final ActivityRecord animLpActivity = findAnimLayoutParamsToken(transit, activityTypes,
-                mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                mDisplayContent.mChangingContainers);
+                tmpOpenApps, tmpCloseApps, mDisplayContent.mChangingContainers);
         final ActivityRecord topOpeningApp =
-                getTopApp(mDisplayContent.mOpeningApps, false /* ignoreHidden */);
+                getTopApp(tmpOpenApps, false /* ignoreHidden */);
         final ActivityRecord topClosingApp =
-                getTopApp(mDisplayContent.mClosingApps, false /* ignoreHidden */);
+                getTopApp(tmpCloseApps, false /* ignoreHidden */);
         final ActivityRecord topChangingApp =
                 getTopApp(mDisplayContent.mChangingContainers, false /* ignoreHidden */);
         final WindowManager.LayoutParams animLp = getAnimLp(animLpActivity);
@@ -299,8 +304,7 @@ public class AppTransitionController {
         final int layoutRedo;
         mService.mSurfaceAnimationRunner.deferStartingAnimations();
         try {
-            applyAnimations(mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps, transit,
-                    animLp, voiceInteraction);
+            applyAnimations(tmpOpenApps, tmpCloseApps, transit, animLp, voiceInteraction);
             handleClosingApps();
             handleOpeningApps();
             handleChangingApps(transit);
@@ -311,14 +315,13 @@ public class AppTransitionController {
 
             final int flags = appTransition.getTransitFlags();
             layoutRedo = appTransition.goodToGo(transit, topOpeningApp);
-            handleNonAppWindowsInTransition(transit, flags);
             appTransition.postAnimationCallback();
         } finally {
             appTransition.clear();
             mService.mSurfaceAnimationRunner.continueStartingAnimations();
         }
 
-        mService.mTaskSnapshotController.onTransitionStarting(mDisplayContent);
+        mService.mSnapshotController.onTransitionStarting(mDisplayContent);
 
         mDisplayContent.mOpeningApps.clear();
         mDisplayContent.mClosingApps.clear();
@@ -498,6 +501,11 @@ public class AppTransitionController {
         @TransitContainerType int openingType = getTransitContainerType(openingContainer);
         @TransitContainerType int closingType = getTransitContainerType(closingContainer);
         if (appTransition.containsTransitRequest(TRANSIT_TO_FRONT) && openingType == TYPE_TASK) {
+            if (topOpeningApp != null && topOpeningApp.isActivityTypeHome()) {
+                // If we are opening the home task, we want to play an animation as if
+                // the task on top is being brought to back.
+                return TRANSIT_OLD_TASK_TO_BACK;
+            }
             return TRANSIT_OLD_TASK_TO_FRONT;
         }
         if (appTransition.containsTransitRequest(TRANSIT_TO_BACK) && closingType == TYPE_TASK) {
@@ -921,7 +929,7 @@ public class AppTransitionController {
 
     /**
      * Returns {@code true} if a given {@link WindowContainer} is an embedded Task in
-     * {@link com.android.wm.shell.TaskView}.
+     * {@link TaskView}.
      *
      * Note that this is a short term workaround to support Android Auto until it migrate to
      * ShellTransition. This should only be used by {@link #getAnimationTargets}.
@@ -929,9 +937,18 @@ public class AppTransitionController {
      * TODO(b/213312721): Remove this predicate and its callers once ShellTransition is enabled.
      */
     static boolean isTaskViewTask(WindowContainer wc) {
-        // We use Task#mRemoveWithTaskOrganizer to identify an embedded Task, but this is a hack and
+        // Use Task#mRemoveWithTaskOrganizer to identify an embedded Task, but this is a hack and
         // it is not guaranteed to work this logic in the future version.
-        return wc instanceof Task && ((Task) wc).mRemoveWithTaskOrganizer;
+        boolean isTaskViewTask =  wc instanceof Task && ((Task) wc).mRemoveWithTaskOrganizer;
+        if (isTaskViewTask) {
+            return true;
+        }
+
+        WindowContainer parent = wc.getParent();
+        boolean isParentATaskViewTask = parent != null
+                && parent instanceof Task
+                && ((Task) parent).mRemoveWithTaskOrganizer;
+        return isParentATaskViewTask;
     }
 
     /**
@@ -948,7 +965,7 @@ public class AppTransitionController {
             boolean visible) {
 
         // The candidates of animation targets, which might be able to promote to higher level.
-        final LinkedList<WindowContainer> candidates = new LinkedList<>();
+        final ArrayDeque<WindowContainer> candidates = new ArrayDeque<>();
         final ArraySet<ActivityRecord> apps = visible ? openingApps : closingApps;
         for (int i = 0; i < apps.size(); ++i) {
             final ActivityRecord app = apps.valueAt(i);
@@ -987,7 +1004,6 @@ public class AppTransitionController {
                 // TODO(b/213312721): Remove this once ShellTransition is enabled.
                 continue;
             } else if (parent == null || !parent.canCreateRemoteAnimationTarget()
-                    || !parent.canBeAnimationTarget()
                     // We cannot promote the animation on Task's parent when the task is in
                     // clearing task in case the animating get stuck when performing the opening
                     // task that behind it.
@@ -1014,12 +1030,11 @@ public class AppTransitionController {
                     canPromote = false;
                 }
 
-                // If the current window container is task and it have adjacent task, it means
-                // both tasks will open or close app toghther but we want get their opening or
-                // closing animation target independently so do not promote.
+                // If the current window container is a task with adjacent task set, the both
+                // adjacent tasks will be opened or closed together. To get their opening or
+                // closing animation target independently, skip promoting their animation targets.
                 if (current.asTask() != null
-                        && current.asTask().getAdjacentTaskFragment() != null
-                        && current.asTask().getAdjacentTaskFragment().asTask() != null) {
+                        && current.asTask().getAdjacentTask() != null) {
                     canPromote = false;
                 }
 
@@ -1234,30 +1249,6 @@ public class AppTransitionController {
             WindowContainer wc = apps.valueAt(i);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now changing app %s", wc);
             wc.applyAnimation(null, transit, true, false, null /* sources */);
-        }
-    }
-
-    private void handleNonAppWindowsInTransition(@TransitionOldType int transit, int flags) {
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
-            if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
-                    && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
-                    && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) == 0) {
-                Animation anim = mService.mPolicy.createKeyguardWallpaperExit(
-                        (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0);
-                if (anim != null) {
-                    anim.scaleCurrentDuration(mService.getTransitionAnimationScaleLocked());
-                    mDisplayContent.mWallpaperController.startWallpaperAnimation(anim);
-                }
-            }
-        }
-        if ((transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER)
-                && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
-            mDisplayContent.startKeyguardExitOnNonAppWindows(
-                    transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
-                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
-                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
         }
     }
 

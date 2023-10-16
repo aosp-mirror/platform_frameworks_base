@@ -32,6 +32,7 @@ import static com.android.internal.protolog.ProtoLogMessage.STR_PARAMS;
 import android.annotation.Nullable;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -44,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.IllegalFormatConversionException;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -110,10 +110,14 @@ public class BaseProtoLogImpl {
             messageString = mViewerConfig.getViewerString(messageHash);
         }
         if (messageString != null) {
-            try {
-                message = String.format(messageString, args);
-            } catch (IllegalFormatConversionException ex) {
-                Slog.w(TAG, "Invalid ProtoLog format string.", ex);
+            if (args != null) {
+                try {
+                    message = TextUtils.formatSimple(messageString, args);
+                } catch (Exception ex) {
+                    Slog.w(TAG, "Invalid ProtoLog format string.", ex);
+                }
+            } else {
+                message = messageString;
             }
         }
         if (message == null) {

@@ -16,13 +16,18 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
+import static android.content.PermissionChecker.PERMISSION_GRANTED;
+import static android.content.PermissionChecker.checkCallingOrSelfPermissionForPreflight;
 import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
@@ -30,6 +35,7 @@ import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -37,6 +43,7 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -83,9 +90,11 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.window.IDumpCallback;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -97,15 +106,26 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -113,6 +133,15 @@ import java.util.concurrent.ExecutionException;
  * managed profiles.
  */
 public class LauncherAppsService extends SystemService {
+    private static final String WM_TRACE_DIR = "/data/misc/wmtrace/";
+    private static final String VC_FILE_SUFFIX = ".vc";
+
+    private static final Set<PosixFilePermission> WM_TRACE_FILE_PERMISSIONS = Set.of(
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.OTHERS_READ,
+            PosixFilePermission.OWNER_READ
+    );
 
     private final LauncherAppsImpl mLauncherAppsImpl;
 
@@ -185,6 +214,8 @@ public class LauncherAppsService extends SystemService {
         private PackageInstallerService mPackageInstallerService;
 
         final LauncherAppsServiceInternal mInternal;
+
+        private RemoteCallbackList<IDumpCallback> mDumpCallbacks = new RemoteCallbackList<>();
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
@@ -621,7 +652,7 @@ public class LauncherAppsService extends SystemService {
                     // package does not exist; should not happen
                     return null;
                 }
-                return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo);
+                return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -674,7 +705,7 @@ public class LauncherAppsService extends SystemService {
                     continue;
                 }
                 results.add(new LauncherActivityInfoInternal(ri.activityInfo,
-                        incrementalStatesInfo));
+                        incrementalStatesInfo, user));
             }
             return results;
         }
@@ -1076,6 +1107,56 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        @NonNull
+        public Map<String, LauncherActivityInfoInternal> getActivityOverrides(String callingPackage,
+                int userId) {
+            ensureShortcutPermission(callingPackage);
+            int callingUid = Binder.getCallingUid();
+            final long callerIdentity = Binder.clearCallingIdentity();
+            try {
+                Map<String, LauncherActivityInfoInternal> shortcutOverridesInfo = new ArrayMap<>();
+                UserHandle managedUserHandle = getManagedProfile(userId);
+                if (managedUserHandle == null) {
+                    return shortcutOverridesInfo;
+                }
+
+                Map<String, String> packagesToOverride =
+                        DevicePolicyCache.getInstance().getLauncherShortcutOverrides();
+                for (Map.Entry<String, String> packageNames : packagesToOverride.entrySet()) {
+                    Intent intent = new Intent(Intent.ACTION_MAIN)
+                            .addCategory(Intent.CATEGORY_LAUNCHER)
+                            .setPackage(packageNames.getValue());
+
+                    List<LauncherActivityInfoInternal> possibleShortcutOverrides =
+                            queryIntentLauncherActivities(
+                                    intent,
+                                    callingUid,
+                                    managedUserHandle
+                            );
+
+                    if (!possibleShortcutOverrides.isEmpty()) {
+                        shortcutOverridesInfo.put(packageNames.getKey(),
+                                possibleShortcutOverrides.get(0));
+                    }
+                }
+                return shortcutOverridesInfo;
+            } finally {
+                Binder.restoreCallingIdentity(callerIdentity);
+            }
+        }
+
+
+        @Nullable
+        private UserHandle getManagedProfile(int userId) {
+            for (UserInfo profile : mUm.getProfiles(userId)) {
+                if (profile.isManagedProfile()) {
+                    return profile.getUserHandle();
+                }
+            }
+            return null;
+        }
+
+        @Override
         public boolean startShortcut(String callingPackage, String packageName, String featureId,
                 String shortcutId, Rect sourceBounds, Bundle startActivityOptions,
                 int targetUserId) {
@@ -1151,7 +1232,8 @@ public class LauncherAppsService extends SystemService {
             final int code;
             try {
                 code = mActivityTaskManagerInternal.startActivitiesAsPackage(publisherPackage,
-                        publishedFeatureId, userId, intents, startActivityOptions);
+                        publishedFeatureId, userId, intents,
+                        getActivityOptionsForLauncher(startActivityOptions));
                 if (ActivityManager.isStartResultSuccessful(code)) {
                     return true; // Success
                 } else {
@@ -1164,6 +1246,23 @@ public class LauncherAppsService extends SystemService {
                 }
                 return false;
             }
+        }
+
+        private Bundle getActivityOptionsForLauncher(Bundle startActivityOptions) {
+            // starting a shortcut implies the user's consent, so grant the launchers/senders BAL
+            // privileges (unless the caller explicitly defined the behavior)
+            if (startActivityOptions == null) {
+                return ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
+                                MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            }
+            ActivityOptions activityOptions = ActivityOptions.fromBundle(startActivityOptions);
+            if (activityOptions.getPendingIntentBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+                // only override if the property was not explicitly set
+                return activityOptions.setPendingIntentBackgroundActivityStartMode(
+                        MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            }
+            return startActivityOptions;
         }
 
         @Override
@@ -1224,14 +1323,18 @@ public class LauncherAppsService extends SystemService {
             i.setSourceBounds(sourceBounds);
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK, opts,
-                    userId);
+                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
+                    getActivityOptionsForLauncher(opts), userId);
         }
 
         @Override
         public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
                 UserHandle user) {
-            ensureShortcutPermission(callingPackage);
+            if (mContext.checkPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS,
+                    injectBinderCallingPid(), injectBinderCallingUid())
+                            != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Permission START_TASKS_FROM_RECENTS required");
+            }
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
                 throw new ActivityNotFoundException("Activity could not be found");
             }
@@ -1272,7 +1375,8 @@ public class LauncherAppsService extends SystemService {
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, launchIntent, /* resultTo= */ null,
-                    Intent.FLAG_ACTIVITY_NEW_TASK, opts, user.getIdentifier());
+                    Intent.FLAG_ACTIVITY_NEW_TASK, getActivityOptionsForLauncher(opts),
+                    user.getIdentifier());
         }
 
         /**
@@ -1355,7 +1459,67 @@ public class LauncherAppsService extends SystemService {
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, intent, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
-                    opts, user.getIdentifier());
+                    getActivityOptionsForLauncher(opts), user.getIdentifier());
+        }
+
+
+        /**
+         * Using a pipe, outputs view capture data to the wmtrace dir
+         */
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            super.dump(fd, pw, args);
+
+            // Before the wmtrace directory is picked up by dumpstate service, some processes need
+            // to write their data to that location. They can do that via these dumpCallbacks.
+            int i = mDumpCallbacks.beginBroadcast();
+            while (i > 0) {
+                i--;
+                dumpDataToWmTrace((String) mDumpCallbacks.getBroadcastCookie(i) + "_" + i,
+                        mDumpCallbacks.getBroadcastItem(i));
+            }
+            mDumpCallbacks.finishBroadcast();
+        }
+
+        private void dumpDataToWmTrace(String name, IDumpCallback cb) {
+            ParcelFileDescriptor[] pipe;
+            try {
+                pipe = ParcelFileDescriptor.createPipe();
+                cb.onDump(pipe[1]);
+            } catch (IOException | RemoteException e) {
+                Log.d(TAG, "failed to pipe view capture data", e);
+                return;
+            }
+
+            Path path = Paths.get(WM_TRACE_DIR + Paths.get(name + VC_FILE_SUFFIX).getFileName());
+            try (InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pipe[0])) {
+                Files.copy(is, path, StandardCopyOption.REPLACE_EXISTING);
+                Files.setPosixFilePermissions(path, WM_TRACE_FILE_PERMISSIONS);
+            } catch (IOException e) {
+                Log.d(TAG, "failed to write data to file in wmtrace dir", e);
+            }
+        }
+
+        @RequiresPermission(READ_FRAME_BUFFER)
+        @Override
+        public void registerDumpCallback(IDumpCallback cb) {
+            int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
+            if (PERMISSION_GRANTED == status) {
+                String name = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
+                mDumpCallbacks.register(cb, name);
+            } else {
+                Log.w(TAG, "caller lacks permissions to registerDumpCallback");
+            }
+        }
+
+        @RequiresPermission(READ_FRAME_BUFFER)
+        @Override
+        public void unRegisterDumpCallback(IDumpCallback cb) {
+            int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
+            if (PERMISSION_GRANTED == status) {
+                mDumpCallbacks.unregister(cb);
+            } else {
+                Log.w(TAG, "caller lacks permissions to unRegisterDumpCallback");
+            }
         }
 
         /** Checks if user is a profile of or same as listeningUser.
@@ -1366,10 +1530,19 @@ public class LauncherAppsService extends SystemService {
                     user.getIdentifier(), debugMsg, false);
         }
 
-        /** Returns whether or not the result to the listener should be filtered. */
-        private boolean isPackageVisibleToListener(String packageName, BroadcastCookie cookie) {
+        /**
+         * Returns whether or not the result to the listener should be filtered.
+         *
+         * @param packageName The package to be accessed by the listener.
+         * @param cookie      The listener
+         * @param user        The user where the package resides.
+         */
+        private boolean isPackageVisibleToListener(String packageName, BroadcastCookie cookie,
+                UserHandle user) {
+            // Do not filter the uninstalled package access since it might break callbacks such as
+            // shortcut changes and unavailable packages events.
             return !mPackageManagerInternal.filterAppAccess(packageName, cookie.callingUid,
-                    cookie.user.getIdentifier());
+                    user.getIdentifier(), false /* filterUninstalled */);
         }
 
         /** Returns whether or not the given appId is in allow list */
@@ -1380,10 +1553,11 @@ public class LauncherAppsService extends SystemService {
             return Arrays.binarySearch(appIdAllowList, appId) > -1;
         }
 
-        private String[] getFilteredPackageNames(String[] packageNames, BroadcastCookie cookie) {
+        private String[] getFilteredPackageNames(String[] packageNames, BroadcastCookie cookie,
+                UserHandle user) {
             final List<String> filteredPackageNames = new ArrayList<>();
             for (String packageName : packageNames) {
-                if (!isPackageVisibleToListener(packageName, cookie)) {
+                if (!isPackageVisibleToListener(packageName, cookie, user)) {
                     continue;
                 }
                 filteredPackageNames.add(packageName);
@@ -1627,7 +1801,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackageAdded")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         try {
@@ -1661,7 +1835,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackageModified")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         try {
@@ -1686,7 +1860,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesAvailable")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1715,7 +1890,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesUnavailable")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1759,7 +1935,7 @@ public class LauncherAppsService extends SystemService {
                             continue;
                         }
                         final String[] filteredPackagesWithoutExtras =
-                                getFilteredPackageNames(packagesNullExtras, cookie);
+                                getFilteredPackageNames(packagesNullExtras, cookie, user);
                         try {
                             if (!ArrayUtils.isEmpty(filteredPackagesWithoutExtras)) {
                                 listener.onPackagesSuspended(user, filteredPackagesWithoutExtras,
@@ -1767,7 +1943,8 @@ public class LauncherAppsService extends SystemService {
                             }
                             for (int idx = 0; idx < packagesWithExtras.size(); idx++) {
                                 Pair<String, Bundle> packageExtraPair = packagesWithExtras.get(idx);
-                                if (!isPackageVisibleToListener(packageExtraPair.first, cookie)) {
+                                if (!isPackageVisibleToListener(
+                                        packageExtraPair.first, cookie, user)) {
                                     continue;
                                 }
                                 listener.onPackagesSuspended(user,
@@ -1794,7 +1971,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesUnsuspended")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1830,7 +2008,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onShortcutChanged")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         final int launcherUserId = cookie.user.getIdentifier();
@@ -1843,7 +2021,7 @@ public class LauncherAppsService extends SystemService {
                         }
                         // Each launcher has a different set of pinned shortcuts, so we need to do a
                         // query in here.
-                        // (As of now, only one launcher has the permission at a time, so it's bit
+                        // (As of now, only one launcher has the permission at a time, so it's a bit
                         // moot, but we may change the permission model eventually.)
                         final List<ShortcutInfo> list =
                                 mShortcutServiceInternal.getShortcuts(launcherUserId,
@@ -1904,7 +2082,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, mUser, "onLoadingProgressChanged")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(mPackageName, cookie)) {
+                        if (!isPackageVisibleToListener(mPackageName, cookie, mUser)) {
                             continue;
                         }
                         try {

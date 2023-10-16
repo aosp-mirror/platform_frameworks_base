@@ -23,6 +23,7 @@ import static com.android.server.usb.UsbDeviceManager.logAndPrintException;
 import android.annotation.Nullable;
 import android.hardware.usb.gadget.IUsbGadget;
 import android.hardware.usb.gadget.IUsbGadgetCallback;
+import android.hardware.usb.Status;
 import android.hardware.usb.UsbManager.UsbGadgetHalVersion;
 import android.os.ServiceManager;
 import android.os.IBinder;
@@ -135,14 +136,15 @@ public final class UsbGadgetAidl implements UsbGadgetHal {
     }
 
     @Override
-    public void reset() {
+    public void reset(long operationId) {
         try {
             synchronized (mGadgetProxyLock) {
-                mGadgetProxy.reset();
+                mGadgetProxy.reset(new UsbGadgetCallback(), operationId);
             }
         } catch (RemoteException e) {
             logAndPrintException(mPw,
-                    "RemoteException while calling getUsbSpeed", e);
+                    "RemoteException while calling getUsbSpeed"
+                    + ", opID:" + operationId, e);
             return;
         }
     }
@@ -151,7 +153,7 @@ public final class UsbGadgetAidl implements UsbGadgetHal {
     public void setCurrentUsbFunctions(int mRequest, long mFunctions,
             boolean mChargingFunctions, int timeout, long operationId) {
         try {
-            mUsbGadgetCallback = new UsbGadgetCallback(mRequest,
+            mUsbGadgetCallback = new UsbGadgetCallback(null, mRequest,
                                       mFunctions, mChargingFunctions);
             synchronized (mGadgetProxyLock) {
                 mGadgetProxy.setCurrentUsbFunctions(mFunctions, mUsbGadgetCallback,
@@ -170,6 +172,7 @@ public final class UsbGadgetAidl implements UsbGadgetHal {
     }
 
     private class UsbGadgetCallback extends IUsbGadgetCallback.Stub {
+        public IndentingPrintWriter mPw;
         public int mRequest;
         public long mFunctions;
         public boolean mChargingFunctions;
@@ -177,8 +180,9 @@ public final class UsbGadgetAidl implements UsbGadgetHal {
         UsbGadgetCallback() {
         }
 
-        UsbGadgetCallback(int request, long functions,
+        UsbGadgetCallback(IndentingPrintWriter pw, int request, long functions,
                 boolean chargingFunctions) {
+            mPw = pw;
             mRequest = request;
             mFunctions = functions;
             mChargingFunctions = chargingFunctions;
@@ -187,6 +191,15 @@ public final class UsbGadgetAidl implements UsbGadgetHal {
         @Override
         public void setCurrentUsbFunctionsCb(long functions,
                 int status, long transactionId) {
+            if (status == Status.SUCCESS) {
+                logAndPrint(Log.INFO, mPw, "Usb setCurrentUsbFunctionsCb"
+                + " ,functions:" + functions + " ,status:" + status
+                + " ,transactionId:" + transactionId);
+            } else {
+                logAndPrint(Log.ERROR, mPw, "Usb setCurrentUsbFunctionsCb failed"
+                + " ,functions:" + functions + " ,status:" + status
+                + " ,transactionId:" + transactionId);
+            }
             mDeviceManager.setCurrentUsbFunctionsCb(functions, status,
                     mRequest, mFunctions, mChargingFunctions);
         }
@@ -194,12 +207,35 @@ public final class UsbGadgetAidl implements UsbGadgetHal {
         @Override
         public void getCurrentUsbFunctionsCb(long functions,
                 int status, long transactionId) {
+            if (status == Status.SUCCESS) {
+                logAndPrint(Log.INFO, mPw, "Usb getCurrentUsbFunctionsCb"
+                + " ,functions:" + functions + " ,status:" + status
+                + " ,transactionId:" + transactionId);
+            } else {
+                logAndPrint(Log.ERROR, mPw, "Usb getCurrentUsbFunctionsCb failed"
+                + " ,functions:" + functions + " ,status:" + status
+                + " ,transactionId:" + transactionId);
+            }
             mDeviceManager.getCurrentUsbFunctionsCb(functions, status);
         }
 
         @Override
         public void getUsbSpeedCb(int speed, long transactionId) {
+            logAndPrint(Log.INFO, mPw, "getUsbSpeedCb speed:"
+                + speed + " ,transactionId:" + transactionId);
             mDeviceManager.getUsbSpeedCb(speed);
+        }
+
+        @Override
+        public void resetCb(int status, long transactionId) {
+            if (status == Status.SUCCESS) {
+                logAndPrint(Log.INFO, mPw, "Usb resetCb status:"
+                + status + " ,transactionId:" + transactionId);
+            } else {
+                logAndPrint(Log.ERROR, mPw, "Usb resetCb status"
+                + status + " ,transactionId:" + transactionId);
+            }
+            mDeviceManager.resetCb(status);
         }
 
         @Override

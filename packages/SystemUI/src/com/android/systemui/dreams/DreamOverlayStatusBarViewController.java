@@ -113,6 +113,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                     mEntryAnimationsFinished =
                             mDreamOverlayStateController.areEntryAnimationsFinished();
                     updateVisibility();
+                    updateAssistantAttentionIcon();
                 }
             };
 
@@ -212,6 +213,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                 provider -> provider.removeCallback(mNotificationCountCallback));
         mStatusBarItemsProvider.removeCallback(mStatusBarItemsProviderCallback);
         mView.removeAllExtraStatusBarItemViews();
+        mDreamOverlayStateController.setDreamOverlayStatusBarVisible(false);
         mDreamOverlayStateController.removeCallback(mDreamOverlayStateCallback);
         mTouchInsetSession.clear();
 
@@ -269,12 +271,21 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                 hasAlarm ? buildAlarmContentDescription(alarm) : null);
     }
 
+    private void updateAssistantAttentionIcon() {
+        showIcon(DreamOverlayStatusBarView.STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE,
+                mDreamOverlayStateController.hasAssistantAttention(),
+                R.string.assistant_attention_content_description);
+    }
+
     private void updateVisibility() {
-        if (shouldShowStatusBar()) {
-            mView.setVisibility(View.VISIBLE);
-        } else {
-            mView.setVisibility(View.INVISIBLE);
+        final int currentVisibility = mView.getVisibility();
+        final int newVisibility = shouldShowStatusBar() ? View.VISIBLE : View.INVISIBLE;
+        if (currentVisibility == newVisibility) {
+            return;
         }
+
+        mView.setVisibility(newVisibility);
+        mDreamOverlayStateController.setDreamOverlayStatusBarVisible(newVisibility == View.VISIBLE);
     }
 
     private String buildAlarmContentDescription(AlarmManager.AlarmClockInfo alarm) {

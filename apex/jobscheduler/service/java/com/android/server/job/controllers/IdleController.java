@@ -48,10 +48,13 @@ public final class IdleController extends RestrictingController implements Idlen
     // screen off or dreaming or wireless charging dock idle for at least this long
     final ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     IdlenessTracker mIdleTracker;
+    private final FlexibilityController mFlexibilityController;
 
-    public IdleController(JobSchedulerService service) {
+    public IdleController(JobSchedulerService service,
+            FlexibilityController flexibilityController) {
         super(service);
         initIdleStateTracking(mContext);
+        mFlexibilityController = flexibilityController;
     }
 
     /**
@@ -73,8 +76,7 @@ public final class IdleController extends RestrictingController implements Idlen
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob) {
         if (taskStatus.clearTrackingController(JobStatus.TRACKING_IDLE)) {
             mTrackedTasks.remove(taskStatus);
         }
@@ -83,7 +85,7 @@ public final class IdleController extends RestrictingController implements Idlen
     @Override
     public void stopTrackingRestrictedJobLocked(JobStatus jobStatus) {
         if (!jobStatus.hasIdleConstraint()) {
-            maybeStopTrackingJobLocked(jobStatus, null, false);
+            maybeStopTrackingJobLocked(jobStatus, null);
         }
     }
 
@@ -96,6 +98,8 @@ public final class IdleController extends RestrictingController implements Idlen
             logDeviceWideConstraintStateToStatsd(JobStatus.CONSTRAINT_IDLE, isIdle);
 
             final long nowElapsed = sElapsedRealtimeClock.millis();
+            mFlexibilityController.setConstraintSatisfied(
+                    JobStatus.CONSTRAINT_IDLE, isIdle, nowElapsed);
             for (int i = mTrackedTasks.size()-1; i >= 0; i--) {
                 mTrackedTasks.valueAt(i).setIdleConstraintSatisfied(nowElapsed, isIdle);
             }

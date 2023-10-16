@@ -109,4 +109,9 @@ public class URLSpan extends ClickableSpan implements ParcelableSpan {
             Log.w("URLSpan", "Activity was not found for intent, " + intent.toString());
         }
     }
+
+    @Override
+    public String toString() {
+        return "URLSpan{" + "URL='" + getURL() + '\'' + '}';
+    }
 }

@@ -37,7 +37,8 @@ import android.util.ArraySet
 import android.util.SparseArray
 import android.util.Xml
 import com.android.server.pm.Computer
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.pkg.component.ParsedActivityImpl
@@ -1046,7 +1047,7 @@ class DomainVerificationPackageTest {
         otherDomains: List<String> = listOf(),
         isSystemApp: Boolean = false
     ) = mockThrowOnUnmocked<PackageStateInternal> {
-        val pkg = mockThrowOnUnmocked<AndroidPackage> {
+        val pkg = mockThrowOnUnmocked<AndroidPackageInternal> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
             whenever(isEnabled) { true }
@@ -1083,12 +1084,12 @@ class DomainVerificationPackageTest {
         whenever(this.domainSetId) { domainSetId }
         whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
         whenever(getUserStateOrDefault(10)) { PackageUserStateInternal.DEFAULT }
-        whenever(userStates) {
+        doReturn(
             SparseArray<PackageUserStateInternal>().apply {
                 this[0] = PackageUserStateInternal.DEFAULT
                 this[1] = PackageUserStateInternal.DEFAULT
             }
-        }
+        ).whenever(this).userStates
         whenever(isSystem) { isSystemApp }
 
         val mockSigningDetails = SigningDetails(arrayOf(spy(Signature(signature)) {

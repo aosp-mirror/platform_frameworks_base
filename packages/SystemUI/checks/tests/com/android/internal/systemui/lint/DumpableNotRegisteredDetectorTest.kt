@@ -37,8 +37,7 @@ class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
 
                     class SomeClass() {
                     }
-                """
-                        .trimIndent()
+                """.trimIndent()
                 ),
                 *stubs,
             )
@@ -68,8 +67,7 @@ class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
                             pw.println("testDump");
                         }
                     }
-                """
-                        .trimIndent()
+                """.trimIndent()
                 ),
                 *stubs,
             )
@@ -99,8 +97,7 @@ class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
                             pw.println("testDump");
                         }
                     }
-                """
-                        .trimIndent()
+                """.trimIndent()
                 ),
                 *stubs,
             )
@@ -130,8 +127,7 @@ class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
                             pw.println("testDump");
                         }
                     }
-                """
-                        .trimIndent()
+                """.trimIndent()
                 ),
                 *stubs,
             )

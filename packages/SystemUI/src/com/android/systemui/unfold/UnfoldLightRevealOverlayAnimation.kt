@@ -22,7 +22,7 @@ import android.graphics.PixelFormat
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
 import android.hardware.display.DisplayManager
-import android.hardware.input.InputManager
+import android.hardware.input.InputManagerGlobal
 import android.os.Handler
 import android.os.Looper
 import android.os.Trace
@@ -167,7 +167,8 @@ constructor(
 
         overlayAddReason = reason
 
-        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm)
+        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm,
+                "UnfoldLightRevealOverlayAnimation")
         val params = getLayoutParams()
         val newView =
             LightRevealScrim(
@@ -331,7 +332,7 @@ constructor(
                 executeInBackground { addOverlay(reason = FOLD) }
             }
             // Disable input dispatching during transition.
-            InputManager.getInstance().cancelCurrentTouch()
+            InputManagerGlobal.getInstance().cancelCurrentTouch()
         }
     }
 

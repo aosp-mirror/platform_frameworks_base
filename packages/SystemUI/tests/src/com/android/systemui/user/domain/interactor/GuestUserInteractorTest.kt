@@ -97,13 +97,13 @@ class GuestUserInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun `registers broadcast receivers`() {
+    fun registersBroadcastReceivers() {
         verify(resumeSessionReceiver).register()
         verify(resetOrExitSessionReceiver).register()
     }
 
     @Test
-    fun `onDeviceBootCompleted - allowed to add - create guest`() =
+    fun onDeviceBootCompleted_allowedToAdd_createGuest() =
         runBlocking(IMMEDIATE) {
             setAllowedToAdd()
 
@@ -114,7 +114,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `onDeviceBootCompleted - await provisioning - and create guest`() =
+    fun onDeviceBootCompleted_awaitProvisioning_andCreateGuest() =
         runBlocking(IMMEDIATE) {
             setAllowedToAdd(isAllowed = false)
             underTest.onDeviceBootCompleted()
@@ -145,7 +145,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `createAndSwitchTo - fails to create - does not switch to`() =
+    fun createAndSwitchTo_failsToCreate_doesNotSwitchTo() =
         runBlocking(IMMEDIATE) {
             whenever(manager.createGuest(any())).thenReturn(null)
 
@@ -162,7 +162,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `exit - returns to target user`() =
+    fun exit_returnsToTargetUser() =
         runBlocking(IMMEDIATE) {
             repository.setSelectedUserInfo(GUEST_USER_INFO)
 
@@ -182,7 +182,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `exit - returns to last non-guest`() =
+    fun exit_returnsToLastNonGuest() =
         runBlocking(IMMEDIATE) {
             val expectedUserId = NON_GUEST_USER_INFO.id
             whenever(manager.getUserInfo(expectedUserId)).thenReturn(NON_GUEST_USER_INFO)
@@ -204,10 +204,12 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `exit - last non-guest was removed - returns to system`() =
+    fun exit_lastNonGuestWasRemoved_returnsToMainUser() =
         runBlocking(IMMEDIATE) {
             val removedUserId = 310
+            val mainUserId = 10
             repository.lastSelectedNonGuestUserId = removedUserId
+            repository.mainUserId = mainUserId
             repository.setSelectedUserInfo(GUEST_USER_INFO)
 
             underTest.exit(
@@ -221,16 +223,17 @@ class GuestUserInteractorTest : SysuiTestCase() {
 
             verify(manager, never()).markGuestForDeletion(anyInt())
             verify(manager, never()).removeUser(anyInt())
-            verify(switchUser).invoke(UserHandle.USER_SYSTEM)
+            verify(switchUser).invoke(mainUserId)
         }
 
     @Test
-    fun `exit - guest was ephemeral - it is removed`() =
+    fun exit_guestWasEphemeral_itIsRemoved() =
         runBlocking(IMMEDIATE) {
             whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
             repository.setUserInfos(listOf(NON_GUEST_USER_INFO, EPHEMERAL_GUEST_USER_INFO))
             repository.setSelectedUserInfo(EPHEMERAL_GUEST_USER_INFO)
             val targetUserId = NON_GUEST_USER_INFO.id
+            val ephemeralGuestUserHandle = UserHandle.of(EPHEMERAL_GUEST_USER_INFO.id)
 
             underTest.exit(
                 guestUserId = GUEST_USER_INFO.id,
@@ -242,16 +245,17 @@ class GuestUserInteractorTest : SysuiTestCase() {
             )
 
             verify(manager).markGuestForDeletion(EPHEMERAL_GUEST_USER_INFO.id)
-            verify(manager).removeUser(EPHEMERAL_GUEST_USER_INFO.id)
+            verify(manager).removeUserWhenPossible(ephemeralGuestUserHandle, false)
             verify(switchUser).invoke(targetUserId)
         }
 
     @Test
-    fun `exit - force remove guest - it is removed`() =
+    fun exit_forceRemoveGuest_itIsRemoved() =
         runBlocking(IMMEDIATE) {
             whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
             repository.setSelectedUserInfo(GUEST_USER_INFO)
             val targetUserId = NON_GUEST_USER_INFO.id
+            val guestUserHandle = UserHandle.of(GUEST_USER_INFO.id)
 
             underTest.exit(
                 guestUserId = GUEST_USER_INFO.id,
@@ -263,12 +267,12 @@ class GuestUserInteractorTest : SysuiTestCase() {
             )
 
             verify(manager).markGuestForDeletion(GUEST_USER_INFO.id)
-            verify(manager).removeUser(GUEST_USER_INFO.id)
+            verify(manager).removeUserWhenPossible(guestUserHandle, false)
             verify(switchUser).invoke(targetUserId)
         }
 
     @Test
-    fun `exit - selected different from guest user - do nothing`() =
+    fun exit_selectedDifferentFromGuestUser_doNothing() =
         runBlocking(IMMEDIATE) {
             repository.setSelectedUserInfo(NON_GUEST_USER_INFO)
 
@@ -285,7 +289,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `exit - selected is actually not a guest user - do nothing`() =
+    fun exit_selectedIsActuallyNotAguestUser_doNothing() =
         runBlocking(IMMEDIATE) {
             repository.setSelectedUserInfo(NON_GUEST_USER_INFO)
 
@@ -302,12 +306,13 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `remove - returns to target user`() =
+    fun remove_returnsToTargetUser() =
         runBlocking(IMMEDIATE) {
             whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
             repository.setSelectedUserInfo(GUEST_USER_INFO)
 
             val targetUserId = NON_GUEST_USER_INFO.id
+            val guestUserHandle = UserHandle.of(GUEST_USER_INFO.id)
             underTest.remove(
                 guestUserId = GUEST_USER_INFO.id,
                 targetUserId = targetUserId,
@@ -317,12 +322,12 @@ class GuestUserInteractorTest : SysuiTestCase() {
             )
 
             verify(manager).markGuestForDeletion(GUEST_USER_INFO.id)
-            verify(manager).removeUser(GUEST_USER_INFO.id)
+            verify(manager).removeUserWhenPossible(guestUserHandle, false)
             verify(switchUser).invoke(targetUserId)
         }
 
     @Test
-    fun `remove - selected different from guest user - do nothing`() =
+    fun remove_selectedDifferentFromGuestUser_doNothing() =
         runBlocking(IMMEDIATE) {
             whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
             repository.setSelectedUserInfo(NON_GUEST_USER_INFO)
@@ -339,7 +344,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `remove - selected is actually not a guest user - do nothing`() =
+    fun remove_selectedIsActuallyNotAguestUser_doNothing() =
         runBlocking(IMMEDIATE) {
             whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
             repository.setSelectedUserInfo(NON_GUEST_USER_INFO)
@@ -379,14 +384,14 @@ class GuestUserInteractorTest : SysuiTestCase() {
             UserInfo(
                 /* id= */ 818,
                 /* name= */ "non_guest",
-                /* flags= */ 0,
+                /* flags= */ UserInfo.FLAG_FULL,
             )
         private val GUEST_USER_INFO =
             UserInfo(
                 /* id= */ 669,
                 /* name= */ "guest",
                 /* iconPath= */ "",
-                /* flags= */ 0,
+                /* flags= */ UserInfo.FLAG_FULL,
                 UserManager.USER_TYPE_FULL_GUEST,
             )
         private val EPHEMERAL_GUEST_USER_INFO =
@@ -394,7 +399,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
                 /* id= */ 669,
                 /* name= */ "guest",
                 /* iconPath= */ "",
-                /* flags= */ UserInfo.FLAG_EPHEMERAL,
+                /* flags= */ UserInfo.FLAG_EPHEMERAL or UserInfo.FLAG_FULL,
                 UserManager.USER_TYPE_FULL_GUEST,
             )
         private val ALL_USERS =

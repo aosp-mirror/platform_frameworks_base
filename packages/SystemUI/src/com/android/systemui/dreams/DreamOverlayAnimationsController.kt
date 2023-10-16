@@ -21,25 +21,24 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.view.View
 import android.view.animation.Interpolator
+import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.animation.Interpolators
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
-import com.android.systemui.dreams.complication.ComplicationHostViewController
-import com.android.systemui.dreams.complication.ComplicationLayoutParams
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_BOTTOM
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position
+import com.android.systemui.complication.ComplicationHostViewController
+import com.android.systemui.complication.ComplicationLayoutParams
+import com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM
+import com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP
+import com.android.systemui.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
-import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel.Companion.DREAM_ANIMATION_DURATION
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
-import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +64,11 @@ constructor(
     private val mDreamInTranslationYDistance: Int,
     @Named(DreamOverlayModule.DREAM_IN_TRANSLATION_Y_DURATION)
     private val mDreamInTranslationYDurationMs: Long,
+    private val mLogger: DreamLogger,
 ) {
+    companion object {
+        private const val TAG = "DreamOverlayAnimationsController"
+    }
 
     private var mAnimator: Animator? = null
     private lateinit var view: View
@@ -124,6 +127,12 @@ constructor(
                         )
                     }
                 }
+
+                launch {
+                    transitionViewModel.transitionEnded.collect { _ ->
+                        mOverlayStateController.setExitAnimationsRunning(false)
+                    }
+                }
             }
 
             configController.removeCallback(configCallback)
@@ -169,8 +178,11 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setEntryAnimationsFinished(true)
+                    mLogger.d(TAG, "Dream overlay entry animations finished.")
                 }
+                doOnCancel { mLogger.d(TAG, "Dream overlay entry animations canceled.") }
                 start()
+                mLogger.d(TAG, "Dream overlay entry animations started.")
             }
     }
 
@@ -232,17 +244,20 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setExitAnimationsRunning(false)
+                    mLogger.d(TAG, "Dream overlay exit animations finished.")
                 }
+                doOnCancel { mLogger.d(TAG, "Dream overlay exit animations canceled.") }
                 start()
+                mLogger.d(TAG, "Dream overlay exit animations started.")
             }
         mOverlayStateController.setExitAnimationsRunning(true)
         return mAnimator as AnimatorSet
     }
 
     /** Starts the dream content and dream overlay exit animations. */
-    fun wakeUp(doneCallback: Runnable, executor: DelayableExecutor) {
+    fun wakeUp() {
         cancelAnimations()
-        executor.executeDelayed(doneCallback, DREAM_ANIMATION_DURATION.inWholeMilliseconds)
+        mOverlayStateController.setExitAnimationsRunning(true)
     }
 
     /** Cancels the dream content and dream overlay animations, if they're currently running. */

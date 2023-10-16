@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -159,15 +161,18 @@ final class VibrationStats {
      * @return true if the status was accepted. This method will only accept given values if
      * the end timestamp was never set.
      */
-    boolean reportEnded(int endedByUid, int endedByUsage) {
+    boolean reportEnded(@Nullable Vibration.CallerInfo endedBy) {
         if (hasEnded()) {
             // Vibration already ended, keep first ending stats set and ignore this one.
             return false;
         }
-        mEndedByUid = endedByUid;
-        mEndedByUsage = endedByUsage;
+        if (endedBy != null) {
+            mEndedByUid = endedBy.uid;
+            mEndedByUsage = endedBy.attrs.getUsage();
+        }
         mEndUptimeMillis = SystemClock.uptimeMillis();
         mEndTimeDebug = System.currentTimeMillis();
+
         return true;
     }
 
@@ -177,9 +182,9 @@ final class VibrationStats {
      * <p>This method will only accept the first value as the one that was interrupted by this
      * vibration, and will ignore all successive calls.
      */
-    void reportInterruptedAnotherVibration(int interruptedUsage) {
+    void reportInterruptedAnotherVibration(@NonNull Vibration.CallerInfo callerInfo) {
         if (mInterruptedUsage < 0) {
-            mInterruptedUsage = interruptedUsage;
+            mInterruptedUsage = callerInfo.attrs.getUsage();
         }
     }
 

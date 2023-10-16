@@ -17,6 +17,7 @@
 #define LOG_NDEBUG 0
 #define LOG_TAG "BootAnimation"
 
+#include <filesystem>
 #include <vector>
 
 #include <stdint.h>
@@ -71,8 +72,6 @@ static const char PRODUCT_BOOTANIMATION_DARK_FILE[] = "/product/media/bootanimat
 static const char PRODUCT_BOOTANIMATION_FILE[] = "/product/media/bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
 static const char APEX_BOOTANIMATION_FILE[] = "/apex/com.android.bootanimation/etc/bootanimation.zip";
-static const char PRODUCT_ENCRYPTED_BOOTANIMATION_FILE[] = "/product/media/bootanimation-encrypted.zip";
-static const char SYSTEM_ENCRYPTED_BOOTANIMATION_FILE[] = "/system/media/bootanimation-encrypted.zip";
 static const char OEM_SHUTDOWNANIMATION_FILE[] = "/oem/media/shutdownanimation.zip";
 static const char PRODUCT_SHUTDOWNANIMATION_FILE[] = "/product/media/shutdownanimation.zip";
 static const char SYSTEM_SHUTDOWNANIMATION_FILE[] = "/system/media/shutdownanimation.zip";
@@ -496,28 +495,13 @@ ui::Size BootAnimation::limitSurfaceSize(int width, int height) const {
 status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
-    mDisplayToken = SurfaceComposerClient::getInternalDisplayToken();
-    if (mDisplayToken == nullptr)
+    const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (ids.empty()) {
+        SLOGE("Failed to get ID for any displays\n");
         return NAME_NOT_FOUND;
+    }
 
-    DisplayMode displayMode;
-    const status_t error =
-            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
-    if (error != NO_ERROR)
-        return error;
-
-    mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
-    mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
-    ui::Size resolution = displayMode.resolution;
-    resolution = limitSurfaceSize(resolution.width, resolution.height);
-    // create the native surface
-    sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
-            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565,
-            ISurfaceComposerClient::eOpaque);
-
-    SurfaceComposerClient::Transaction t;
-
-    // this guest property specifies multi-display IDs to show the boot animation
+    // this system property specifies multi-display IDs to show the boot animation
     // multiple ids can be set with comma (,) as separator, for example:
     // setprop persist.boot.animation.displays 19260422155234049,19261083906282754
     Vector<PhysicalDisplayId> physicalDisplayIds;
@@ -544,9 +528,44 @@ status_t BootAnimation::readyToRun() {
                 stream.ignore();
         }
 
+        // the first specified display id is used to retrieve mDisplayToken
+        for (const auto id : physicalDisplayIds) {
+            if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
+                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
+                    mDisplayToken = token;
+                    break;
+                }
+            }
+        }
+    }
+
+    // If the system property is not present or invalid, display 0 is used
+    if (mDisplayToken == nullptr) {
+        mDisplayToken = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
+        if (mDisplayToken == nullptr) {
+            return NAME_NOT_FOUND;
+        }
+    }
+
+    DisplayMode displayMode;
+    const status_t error =
+            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
+    if (error != NO_ERROR) {
+        return error;
+    }
+
+    mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
+    mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
+    ui::Size resolution = displayMode.resolution;
+    resolution = limitSurfaceSize(resolution.width, resolution.height);
+    // create the native surface
+    sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
+            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565,
+            ISurfaceComposerClient::eOpaque);
+
+    SurfaceComposerClient::Transaction t;
+    if (isValid) {
         // In the case of multi-display, boot animation shows on the specified displays
-        // in addition to the primary display
-        const auto ids = SurfaceComposerClient::getPhysicalDisplayIds();
         for (const auto id : physicalDisplayIds) {
             if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
                 if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
@@ -574,8 +593,9 @@ status_t BootAnimation::readyToRun() {
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
     eglQuerySurface(display, surface, EGL_HEIGHT, &h);
 
-    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE)
+    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
         return NO_INIT;
+    }
 
     mDisplay = display;
     mContext = context;
@@ -672,10 +692,6 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
     mWidth = limitedSize.width;
     mHeight = limitedSize.height;
 
-    SurfaceComposerClient::Transaction t;
-    t.setSize(mFlingerSurfaceControl, mWidth, mHeight);
-    t.apply();
-
     EGLConfig config = getEglConfig(mDisplay);
     EGLSurface surface = eglCreateWindowSurface(mDisplay, config, mFlingerSurface.get(), nullptr);
     if (eglMakeCurrent(mDisplay, surface, surface, mContext) == EGL_FALSE) {
@@ -690,7 +706,7 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
 
 bool BootAnimation::preloadAnimation() {
     findBootAnimationFile();
-    if (!mZipFileName.isEmpty()) {
+    if (!mZipFileName.empty()) {
         mAnimation = loadAnimation(mZipFileName);
         return (mAnimation != nullptr);
     }
@@ -709,23 +725,6 @@ bool BootAnimation::findBootAnimationFileInternal(const std::vector<std::string>
 }
 
 void BootAnimation::findBootAnimationFile() {
-    // If the device has encryption turned on or is in process
-    // of being encrypted we show the encrypted boot animation.
-    char decrypt[PROPERTY_VALUE_MAX];
-    property_get("vold.decrypt", decrypt, "");
-
-    bool encryptedAnimation = atoi(decrypt) != 0 ||
-        !strcmp("trigger_restart_min_framework", decrypt);
-
-    if (!mShuttingDown && encryptedAnimation) {
-        static const std::vector<std::string> encryptedBootFiles = {
-            PRODUCT_ENCRYPTED_BOOTANIMATION_FILE, SYSTEM_ENCRYPTED_BOOTANIMATION_FILE,
-        };
-        if (findBootAnimationFileInternal(encryptedBootFiles)) {
-            return;
-        }
-    }
-
     const bool playDarkAnim = android::base::GetIntProperty("ro.boot.theme", 0) == 1;
     static const std::vector<std::string> bootFiles = {
         APEX_BOOTANIMATION_FILE, playDarkAnim ? PRODUCT_BOOTANIMATION_DARK_FILE : PRODUCT_BOOTANIMATION_FILE,
@@ -820,7 +819,7 @@ bool BootAnimation::threadLoop() {
 
     // We have no bootanimation file, so we use the stock android logo
     // animation.
-    if (mZipFileName.isEmpty()) {
+    if (mZipFileName.empty()) {
         ALOGD("No animation file");
         result = android();
     } else {
@@ -1011,7 +1010,7 @@ static bool readFile(ZipFileRO* zip, const char* name, String8& outString) {
         return false;
     }
 
-    outString.setTo((char const*)entryMap->getDataPtr(), entryMap->getDataLength());
+    outString = String8((char const*)entryMap->getDataPtr(), entryMap->getDataLength());
     delete entryMap;
     return true;
 }
@@ -1136,7 +1135,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
     if (!readFile(animation.zip, "desc.txt", desString)) {
         return false;
     }
-    char const* s = desString.string();
+    char const* s = desString.c_str();
     std::string dynamicColoringPartName = "";
     bool postDynamicColoring = false;
 
@@ -1145,7 +1144,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
         const char* endl = strstr(s, "\n");
         if (endl == nullptr) break;
         String8 line(s, endl - s);
-        const char* l = line.string();
+        const char* l = line.c_str();
         int fps = 0;
         int width = 0;
         int height = 0;
@@ -1271,10 +1270,10 @@ bool BootAnimation::preloadZip(Animation& animation) {
             continue;
         }
 
-        const String8 entryName(name);
-        const String8 path(entryName.getPathDir());
-        const String8 leaf(entryName.getPathLeaf());
-        if (leaf.size() > 0) {
+        const std::filesystem::path entryName(name);
+        const std::filesystem::path path(entryName.parent_path());
+        const std::filesystem::path leaf(entryName.filename());
+        if (!leaf.empty()) {
             if (entryName == CLOCK_FONT_ZIP_NAME) {
                 FileMap* map = zip->createEntryFileMap(entry);
                 if (map) {
@@ -1292,7 +1291,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
             }
 
             for (size_t j = 0; j < pcount; j++) {
-                if (path == animation.parts[j].path) {
+                if (path.string() == animation.parts[j].path.c_str()) {
                     uint16_t method;
                     // supports only stored png files
                     if (zip->getEntryInfo(entry, &method, nullptr, nullptr, nullptr, nullptr, nullptr)) {
@@ -1305,11 +1304,11 @@ bool BootAnimation::preloadZip(Animation& animation) {
                                     part.audioData = (uint8_t *)map->getDataPtr();
                                     part.audioLength = map->getDataLength();
                                 } else if (leaf == "trim.txt") {
-                                    part.trimData.setTo((char const*)map->getDataPtr(),
+                                    part.trimData = String8((char const*)map->getDataPtr(),
                                                         map->getDataLength());
                                 } else {
                                     Animation::Frame frame;
-                                    frame.name = leaf;
+                                    frame.name = leaf.c_str();
                                     frame.map = map;
                                     frame.trimWidth = animation.width;
                                     frame.trimHeight = animation.height;
@@ -1329,7 +1328,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
 
     // If there is trimData present, override the positioning defaults.
     for (Animation::Part& part : animation.parts) {
-        const char* trimDataStr = part.trimData.string();
+        const char* trimDataStr = part.trimData.c_str();
         for (size_t frameIdx = 0; frameIdx < part.frames.size(); frameIdx++) {
             const char* endl = strstr(trimDataStr, "\n");
             // No more trimData for this part.
@@ -1337,7 +1336,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
                 break;
             }
             String8 line(trimDataStr, endl - trimDataStr);
-            const char* lineStr = line.string();
+            const char* lineStr = line.c_str();
             trimDataStr = ++endl;
             int width = 0, height = 0, x = 0, y = 0;
             if (sscanf(lineStr, "%dx%d+%d+%d", &width, &height, &x, &y) == 4) {
@@ -1395,7 +1394,7 @@ bool BootAnimation::movie() {
     if (!exts) {
         glGetError();
     } else {
-        gl_extensions.setTo(exts);
+        gl_extensions = exts;
         if ((gl_extensions.find("GL_ARB_texture_non_power_of_two") != -1) ||
             (gl_extensions.find("GL_OES_texture_npot") != -1)) {
             mUseNpotTextures = true;
@@ -1525,6 +1524,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         // Handle animation package
         if (part.animation != nullptr) {
@@ -1564,7 +1564,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     1.0f);
 
             ALOGD("Playing files = %s/%s, Requested repeat = %d, playUntilComplete = %s",
-                    animation.fileName.string(), part.path.string(), part.count,
+                    animation.fileName.c_str(), part.path.c_str(), part.count,
                     part.playUntilComplete ? "true" : "false");
 
             // For the last animation, if we have progress indicator from
@@ -1601,8 +1601,10 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 if (r > 0) {
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
                 } else {
-                    glGenTextures(1, &frame.tid);
-                    glBindTexture(GL_TEXTURE_2D, frame.tid);
+                    if (part.count != 1) {
+                        glGenTextures(1, &frame.tid);
+                        glBindTexture(GL_TEXTURE_2D, frame.tid);
+                    }
                     int w, h;
                     // Set decoding option to alpha unpremultiplied so that the R, G, B channels
                     // of transparent pixels are preserved.
@@ -1783,17 +1785,17 @@ void BootAnimation::releaseAnimation(Animation* animation) const {
 BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn) {
     if (mLoadedFiles.indexOf(fn) >= 0) {
         SLOGE("File \"%s\" is already loaded. Cyclic ref is not allowed",
-            fn.string());
+            fn.c_str());
         return nullptr;
     }
-    ZipFileRO *zip = ZipFileRO::open(fn);
+    ZipFileRO *zip = ZipFileRO::open(fn.c_str());
     if (zip == nullptr) {
         SLOGE("Failed to open animation zip \"%s\": %s",
-            fn.string(), strerror(errno));
+            fn.c_str(), strerror(errno));
         return nullptr;
     }
 
-    ALOGD("%s is loaded successfully", fn.string());
+    ALOGD("%s is loaded successfully", fn.c_str());
 
     Animation *animation =  new Animation;
     animation->fileName = fn;

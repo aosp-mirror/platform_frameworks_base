@@ -45,4 +45,4 @@ bool transformPaint(ColorTransform transform, SkPaint* paint, BitmapPalette pale
 SkColor transformColor(ColorTransform transform, SkColor color);
 SkColor transformColorInverse(ColorTransform transform, SkColor color);
 
-}  // namespace android::uirenderer;
+}  // namespace android::uirenderer

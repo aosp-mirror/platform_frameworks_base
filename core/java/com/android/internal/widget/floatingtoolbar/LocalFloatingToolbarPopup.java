@@ -61,10 +61,10 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -950,9 +950,9 @@ public final class LocalFloatingToolbarPopup implements FloatingToolbarPopup {
 
         int availableWidth = toolbarWidth;
 
-        final LinkedList<MenuItem> remainingMenuItems = new LinkedList<>();
+        final ArrayList<MenuItem> remainingMenuItems = new ArrayList<>();
         // add the overflow menu items to the end of the remainingMenuItems list.
-        final LinkedList<MenuItem> overflowMenuItems = new LinkedList();
+        final ArrayList<MenuItem> overflowMenuItems = new ArrayList<>();
         for (MenuItem menuItem : menuItems) {
             if (menuItem.getItemId() != android.R.id.textAssist
                     && menuItem.requiresOverflow()) {
@@ -969,7 +969,7 @@ public final class LocalFloatingToolbarPopup implements FloatingToolbarPopup {
         int lastGroupId = -1;
         boolean isFirstItem = true;
         while (!remainingMenuItems.isEmpty()) {
-            final MenuItem menuItem = remainingMenuItems.peek();
+            final MenuItem menuItem = remainingMenuItems.get(0);
 
             // if this is the first item, regardless of requiresOverflow(), it should be
             // displayed on the main panel. Otherwise all items including this one will be
@@ -1022,7 +1022,7 @@ public final class LocalFloatingToolbarPopup implements FloatingToolbarPopup {
                 params.width = menuItemButtonWidth;
                 menuItemButton.setLayoutParams(params);
                 availableWidth -= menuItemButtonWidth;
-                remainingMenuItems.pop();
+                remainingMenuItems.remove(0);
             } else {
                 break;
             }

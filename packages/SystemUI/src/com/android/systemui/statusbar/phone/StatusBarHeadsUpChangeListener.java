@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -34,7 +34,7 @@ import javax.inject.Inject;
 public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarWindowController mStatusBarWindowController;
-    private final NotificationPanelViewController mNotificationPanelViewController;
+    private final ShadeViewController mShadeViewController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
@@ -44,7 +44,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
     StatusBarHeadsUpChangeListener(
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarWindowController statusBarWindowController,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
             KeyguardBypassController keyguardBypassController,
             HeadsUpManagerPhone headsUpManager,
             StatusBarStateController statusBarStateController,
@@ -52,7 +52,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarWindowController = statusBarWindowController;
-        mNotificationPanelViewController = notificationPanelViewController;
+        mShadeViewController = shadeViewController;
         mKeyguardBypassController = keyguardBypassController;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
@@ -64,25 +64,14 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
         if (inPinnedMode) {
             mNotificationShadeWindowController.setHeadsUpShowing(true);
             mStatusBarWindowController.setForceStatusBarVisible(true);
-            if (mNotificationPanelViewController.isFullyCollapsed()) {
-                // We need to ensure that the touchable region is updated before the
-                //window will be
-                // resized, in order to not catch any touches. A layout will ensure that
-                // onComputeInternalInsets will be called and after that we can
-                //resize the layout. Let's
-                // make sure that the window stays small for one frame until the
-                //touchableRegion is set.
-                mNotificationPanelViewController.requestLayoutOnView();
-                mNotificationShadeWindowController.setForceWindowCollapsed(true);
-                mNotificationPanelViewController.postToView(() -> {
-                    mNotificationShadeWindowController.setForceWindowCollapsed(false);
-                });
+            if (mShadeViewController.isFullyCollapsed()) {
+                mShadeViewController.updateTouchableRegion();
             }
         } else {
             boolean bypassKeyguard = mKeyguardBypassController.getBypassEnabled()
                     && mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
-            if (!mNotificationPanelViewController.isFullyCollapsed()
-                    || mNotificationPanelViewController.isTracking()
+            if (!mShadeViewController.isFullyCollapsed()
+                    || mShadeViewController.isTracking()
                     || bypassKeyguard) {
                 // We are currently tracking or is open and the shade doesn't need to
                 //be kept
@@ -96,7 +85,8 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
                 //animation
                 // is finished.
                 mHeadsUpManager.setHeadsUpGoingAway(true);
-                mNotificationPanelViewController.runAfterAnimationFinished(() -> {
+                mShadeViewController.getNotificationStackScrollLayoutController()
+                        .runAfterAnimationFinished(() -> {
                     if (!mHeadsUpManager.hasPinnedHeadsUp()) {
                         mNotificationShadeWindowController.setHeadsUpShowing(false);
                         mHeadsUpManager.setHeadsUpGoingAway(false);

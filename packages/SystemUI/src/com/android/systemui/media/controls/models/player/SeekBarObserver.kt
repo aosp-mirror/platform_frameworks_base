@@ -21,9 +21,9 @@ import android.animation.ObjectAnimator
 import android.text.format.DateUtils
 import androidx.annotation.UiThread
 import androidx.lifecycle.Observer
+import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.media.controls.ui.SquigglyProgress
 
 /**
@@ -56,6 +56,7 @@ open class SeekBarObserver(private val holder: MediaViewHolder) :
             R.dimen.qs_media_session_disabled_seekbar_vertical_padding
         )
     var seekBarResetAnimator: Animator? = null
+    var animationEnabled: Boolean = true
 
     init {
         val seekBarProgressWavelength =
@@ -104,7 +105,7 @@ open class SeekBarObserver(private val holder: MediaViewHolder) :
 
         holder.seekBar.thumb.alpha = if (data.seekAvailable) 255 else 0
         holder.seekBar.isEnabled = data.seekAvailable
-        progressDrawable?.animate = data.playing && !data.scrubbing
+        progressDrawable?.animate = data.playing && !data.scrubbing && animationEnabled
         progressDrawable?.transitionEnabled = !data.seekAvailable
 
         if (holder.seekBar.maxHeight != seekBarEnabledMaxHeight) {

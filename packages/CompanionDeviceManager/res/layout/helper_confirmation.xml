@@ -46,6 +46,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="?android:attr/textColorPrimary"
+                style="@style/TextAppearance"
                 android:textSize="22sp" />
 
             <TextView
@@ -58,6 +59,7 @@
                 android:layout_marginBottom="32dp"
                 android:gravity="center"
                 android:textColor="?android:attr/textColorSecondary"
+                style="@style/TextAppearance"
                 android:textSize="14sp" />
 
             <LinearLayout
@@ -70,6 +72,7 @@
                 <Button
                     android:id="@+id/btn_back"
                     style="@style/VendorHelperBackButton"
+                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
                     android:text="@string/consent_back" />
 
             </LinearLayout>

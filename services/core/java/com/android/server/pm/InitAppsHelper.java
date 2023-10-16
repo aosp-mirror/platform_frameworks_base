@@ -24,7 +24,6 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
-import static com.android.server.pm.PackageManagerService.SCAN_DROP_CACHE;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 import static com.android.server.pm.PackageManagerService.SCAN_NO_DEX;
@@ -35,25 +34,28 @@ import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_APK_IN
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.ApkLiteParseUtils;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedArrayMap;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -79,7 +81,6 @@ final class InitAppsHelper {
     /* Track of the number of system apps */
     private int mSystemPackagesCount;
     private final boolean mIsDeviceUpgrading;
-    private final boolean mIsOnlyCoreApps;
     private final List<ScanPartition> mSystemPartitions;
 
     /**
@@ -104,7 +105,6 @@ final class InitAppsHelper {
         mSystemPartitions = systemPartitions;
         mDirsToScanAsSystem = getSystemScanPartitions();
         mIsDeviceUpgrading = mPm.isDeviceUpgrading();
-        mIsOnlyCoreApps = mPm.isOnlyCoreApps();
         // Set flag to monitor and not change apk file paths when scanning install directories.
         int scanFlags = SCAN_BOOTING | SCAN_INITIAL;
         if (mIsDeviceUpgrading || mPm.isFirstBoot()) {
@@ -115,29 +115,6 @@ final class InitAppsHelper {
         mSystemParseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         mSystemScanFlags = mScanFlags | SCAN_AS_SYSTEM;
         mExecutorService = ParallelPackageParser.makeExecutorService();
-    }
-
-    private List<File> getFrameworkResApkSplitFiles() {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanFrameworkResApkSplits");
-        try {
-            final List<File> splits = new ArrayList<>();
-            final List<ApexManager.ActiveApexInfo> activeApexInfos =
-                    mPm.mApexManager.getActiveApexInfos();
-            for (int i = 0; i < activeApexInfos.size(); i++) {
-                ApexManager.ActiveApexInfo apexInfo = activeApexInfos.get(i);
-                File splitsFolder = new File(apexInfo.apexDirectory, "etc/splits");
-                if (splitsFolder.isDirectory()) {
-                    for (File file : splitsFolder.listFiles()) {
-                        if (ApkLiteParseUtils.isApkFile(file)) {
-                            splits.add(file);
-                        }
-                    }
-                }
-            }
-            return splits;
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
     }
 
     private List<ScanPartition> getSystemScanPartitions() {
@@ -168,14 +145,22 @@ final class InitAppsHelper {
                     sp.getFolder().getAbsolutePath())
                     || apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                     sp.getFolder().getAbsolutePath() + File.separator)) {
-                int flags = SCAN_AS_APK_IN_APEX;
-                if (apexInfo.activeApexChanged) {
-                    flags |= SCAN_DROP_CACHE;
-                }
-                return new ScanPartition(apexInfo.apexDirectory, sp, flags);
+                return new ScanPartition(apexInfo.apexDirectory, sp, apexInfo);
             }
         }
         return null;
+    }
+
+    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
+    private List<ApexManager.ScanResult> scanApexPackagesTraced(PackageParser2 packageParser) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanApexPackages");
+
+        try {
+            return mInstallPackageHelper.scanApexPackages(mApexManager.getAllApexInfos(),
+                    mSystemParseFlags, mSystemScanFlags, packageParser, mExecutorService);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
     }
 
     /**
@@ -187,7 +172,8 @@ final class InitAppsHelper {
             int[] userIds, long startTime) {
         // Prepare apex package info before scanning APKs, this information is needed when
         // scanning apk in apex.
-        mApexManager.scanApexPackagesTraced(packageParser, mExecutorService);
+        final List<ApexManager.ScanResult> apexScanResults = scanApexPackagesTraced(packageParser);
+        mApexManager.notifyScanResult(apexScanResults);
 
         scanSystemDirs(packageParser, mExecutorService);
         // Parse overlay configuration files to set default enable state, mutability, and
@@ -199,16 +185,19 @@ final class InitAppsHelper {
             }
         }
         final OverlayConfig overlayConfig = OverlayConfig.initializeSystemInstance(
-                consumer -> mPm.forEachPackage(mPm.snapshotComputer(),
-                        pkg -> consumer.accept(pkg, pkg.isSystem(),
-                                apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
+                consumer -> mPm.forEachPackageState(mPm.snapshotComputer(),
+                        packageState -> {
+                            var pkg = packageState.getPkg();
+                            if (pkg != null) {
+                                consumer.accept(pkg, packageState.isSystem(),
+                                        apkInApexPreInstalledPaths.get(pkg.getPackageName()));
+                            }
+                        }));
 
-        if (!mIsOnlyCoreApps) {
-            // do this first before mucking with mPackages for the "expecting better" case
-            updateStubSystemAppsList(mStubSystemApps);
-            mInstallPackageHelper.prepareSystemPackageCleanUp(packageSettings,
-                    mPossiblyDeletedUpdatedSystemApps, mExpectingBetter, userIds);
-        }
+        // do this first before mucking with mPackages for the "expecting better" case
+        updateStubSystemAppsList(mStubSystemApps);
+        mInstallPackageHelper.prepareSystemPackageCleanUp(packageSettings,
+                mPossiblyDeletedUpdatedSystemApps, mExpectingBetter, userIds);
 
         logSystemAppsScanningTime(startTime);
         return overlayConfig;
@@ -237,28 +226,46 @@ final class InitAppsHelper {
     }
 
     /**
+     * Fix up the previously-installed app directory mode - they can't be readable by non-system
+     * users to prevent them from listing the dir to discover installed package names.
+     */
+    void fixInstalledAppDirMode() {
+        try (var files = Files.newDirectoryStream(mPm.getAppInstallDir().toPath())) {
+            files.forEach(dir -> {
+                try {
+                    Os.chmod(dir.toString(), 0771);
+                } catch (ErrnoException e) {
+                    Slog.w(TAG, "Failed to fix an installed app dir mode", e);
+                }
+            });
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to walk the app install directory to fix the modes", e);
+        }
+    }
+
+    /**
      * Install apps/updates from data dir and fix system apps that are affected.
      */
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public void initNonSystemApps(PackageParser2 packageParser, @NonNull int[] userIds,
             long startTime) {
-        if (!mIsOnlyCoreApps) {
-            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
-                    SystemClock.uptimeMillis());
-            scanDirTracedLI(mPm.getAppInstallDir(), /* frameworkSplits= */ null, 0,
-                    mScanFlags | SCAN_REQUIRE_KNOWN,
-                    packageParser, mExecutorService);
+        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
+                SystemClock.uptimeMillis());
+
+        if ((mScanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) == SCAN_FIRST_BOOT_OR_UPGRADE) {
+            fixInstalledAppDirMode();
         }
+
+        scanDirTracedLI(mPm.getAppInstallDir(), 0,
+                mScanFlags | SCAN_REQUIRE_KNOWN, packageParser, mExecutorService, null);
 
         List<Runnable> unfinishedTasks = mExecutorService.shutdownNow();
         if (!unfinishedTasks.isEmpty()) {
             throw new IllegalStateException("Not all tasks finished before calling close: "
                     + unfinishedTasks);
         }
-        if (!mIsOnlyCoreApps) {
-            fixSystemPackages(userIds);
-            logNonSystemAppScanningTime(startTime);
-        }
+        fixSystemPackages(userIds);
+        logNonSystemAppScanningTime(startTime);
         mExpectingBetter.clear();
         mPm.mSettings.pruneRenamedPackagesLPw();
     }
@@ -317,15 +324,14 @@ final class InitAppsHelper {
             if (partition.getOverlayFolder() == null) {
                 continue;
             }
-            scanDirTracedLI(partition.getOverlayFolder(), /* frameworkSplits= */ null,
+            scanDirTracedLI(partition.getOverlayFolder(),
                     mSystemParseFlags, mSystemScanFlags | partition.scanFlag,
-                    packageParser, executorService);
+                    packageParser, executorService, partition.apexInfo);
         }
 
-        scanDirTracedLI(frameworkDir, null,
-                mSystemParseFlags,
-                mSystemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED,
-                packageParser, executorService);
+        scanDirTracedLI(frameworkDir,
+                mSystemParseFlags, mSystemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED,
+                packageParser, executorService, null);
         if (!mPm.mPackages.containsKey("android")) {
             throw new IllegalStateException(
                     "Failed to load frameworks package; check log for warnings");
@@ -334,14 +340,14 @@ final class InitAppsHelper {
         for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
             final ScanPartition partition = mDirsToScanAsSystem.get(i);
             if (partition.getPrivAppFolder() != null) {
-                scanDirTracedLI(partition.getPrivAppFolder(), /* frameworkSplits= */ null,
+                scanDirTracedLI(partition.getPrivAppFolder(),
                         mSystemParseFlags,
                         mSystemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag,
-                        packageParser, executorService);
+                        packageParser, executorService, partition.apexInfo);
             }
-            scanDirTracedLI(partition.getAppFolder(), /* frameworkSplits= */ null,
+            scanDirTracedLI(partition.getAppFolder(),
                     mSystemParseFlags, mSystemScanFlags | partition.scanFlag,
-                    packageParser, executorService);
+                    packageParser, executorService, partition.apexInfo);
         }
     }
 
@@ -357,17 +363,17 @@ final class InitAppsHelper {
     }
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    private void scanDirTracedLI(File scanDir, List<File> frameworkSplits,
-            int parseFlags, int scanFlags,
-            PackageParser2 packageParser, ExecutorService executorService) {
+    private void scanDirTracedLI(File scanDir, int parseFlags, int scanFlags,
+            PackageParser2 packageParser, ExecutorService executorService,
+            @Nullable ApexManager.ActiveApexInfo apexInfo) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir [" + scanDir.getAbsolutePath() + "]");
         try {
             if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
                 // when scanning apk in apexes, we want to check the maxSdkVersion
                 parseFlags |= PARSE_APK_IN_APEX;
             }
-            mInstallPackageHelper.installPackagesFromDir(scanDir, frameworkSplits, parseFlags,
-                    scanFlags, packageParser, executorService);
+            mInstallPackageHelper.installPackagesFromDir(scanDir, parseFlags,
+                    scanFlags, packageParser, executorService, apexInfo);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -379,5 +385,10 @@ final class InitAppsHelper {
 
     public List<ScanPartition> getDirsToScanAsSystem() {
         return mDirsToScanAsSystem;
+    }
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public int getSystemScanFlags() {
+        return mSystemScanFlags;
     }
 }

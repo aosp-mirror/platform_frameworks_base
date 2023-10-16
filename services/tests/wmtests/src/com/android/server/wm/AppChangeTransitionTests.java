@@ -87,7 +87,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         }
 
         @Override
-        public void onAnimationCancelled(boolean isKeyguardOccluded) {
+        public void onAnimationCancelled() {
         }
 
         @Override
@@ -165,7 +165,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         assertTrue(mTask.isInChangeTransition());
 
         // Changing visibility should cancel the change transition and become closing
-        mActivity.setVisibility(false, false);
+        mActivity.setVisibility(false);
         assertEquals(0, mDisplayContent.mChangingContainers.size());
         assertFalse(mTask.isInChangeTransition());
 

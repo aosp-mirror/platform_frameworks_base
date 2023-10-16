@@ -101,5 +101,10 @@ public interface AlignmentSpan extends ParagraphStyle {
         public Layout.Alignment getAlignment() {
             return mAlignment;
         }
+
+        @Override
+        public String toString() {
+            return "AlignmentSpan.Standard{alignment=" + getAlignment() + '}';
+        }
     }
 }

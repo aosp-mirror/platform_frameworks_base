@@ -14,7 +14,10 @@
 
 package com.android.internal.util;
 
+import static android.Manifest.permission.READ_DEVICE_CONFIG;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_APP;
+import static android.provider.DeviceConfig.NAMESPACE_LATENCY_TRACKER;
 
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL_UNLOCKED;
@@ -45,12 +48,15 @@ import static com.android.internal.util.LatencyTracker.ActionProperties.LEGACY_T
 import static com.android.internal.util.LatencyTracker.ActionProperties.SAMPLE_INTERVAL_SUFFIX;
 import static com.android.internal.util.LatencyTracker.ActionProperties.TRACE_THRESHOLD_SUFFIX;
 
+import android.Manifest;
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Build;
-import android.os.ConditionVariable;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.provider.DeviceConfig;
@@ -74,7 +80,7 @@ import java.util.concurrent.TimeUnit;
  * Class to track various latencies in SystemUI. It then writes the latency to statsd and also
  * outputs it to logcat so these latencies can be captured by tests and then used for dashboards.
  * <p>
- * This is currently only in Keyguard so it can be shared between SystemUI and Keyguard, but
+ * This is currently only in Keyguard. It can be shared between SystemUI and Keyguard, but
  * eventually we'd want to merge these two packages together so Keyguard can use common classes
  * that are shared with SystemUI.
  */
@@ -292,8 +298,6 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL,
     };
 
-    private static LatencyTracker sLatencyTracker;
-
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final SparseArray<Session> mSessions = new SparseArray<>();
@@ -301,29 +305,37 @@ public class LatencyTracker {
     private final SparseArray<ActionProperties> mActionPropertiesMap = new SparseArray<>();
     @GuardedBy("mLock")
     private boolean mEnabled;
-    @VisibleForTesting
-    public final ConditionVariable mDeviceConfigPropertiesUpdated = new ConditionVariable();
+    private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
+            this::updateProperties;
 
-    public static LatencyTracker getInstance(Context context) {
-        if (sLatencyTracker == null) {
-            synchronized (LatencyTracker.class) {
-                if (sLatencyTracker == null) {
-                    sLatencyTracker = new LatencyTracker();
-                }
-            }
+    // Wrapping this in a holder class achieves lazy loading behavior
+    private static final class SLatencyTrackerHolder {
+        private static final LatencyTracker sLatencyTracker;
+
+        static {
+            sLatencyTracker = new LatencyTracker();
+            sLatencyTracker.startListeningForLatencyTrackerConfigChanges();
         }
-        return sLatencyTracker;
     }
 
+    public static LatencyTracker getInstance(Context context) {
+        return SLatencyTrackerHolder.sLatencyTracker;
+    }
+
+    /**
+     * Constructor for LatencyTracker
+     *
+     * <p>This constructor is only visible for test classes to inject their own consumer callbacks
+     *
+     * @param startListeningForPropertyChanges If set, constructor will register for device config
+     *                      property updates prior to returning. If not set,
+     *                      {@link #startListeningForLatencyTrackerConfigChanges} must be called
+     *                      to start listening.
+     */
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     @VisibleForTesting
     public LatencyTracker() {
         mEnabled = DEFAULT_ENABLED;
-
-        // Post initialization to the background in case we're running on the main thread.
-        BackgroundThread.getHandler().post(() -> this.updateProperties(
-                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_LATENCY_TRACKER)));
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
-                BackgroundThread.getExecutor(), this::updateProperties);
     }
 
     private void updateProperties(DeviceConfig.Properties properties) {
@@ -341,11 +353,70 @@ public class LatencyTracker {
                         properties.getInt(actionName + TRACE_THRESHOLD_SUFFIX,
                                 legacyActionTraceThreshold)));
             }
-            if (DEBUG) {
-                Log.d(TAG, "updated action properties: " + mActionPropertiesMap);
-            }
+            onDeviceConfigPropertiesUpdated(mActionPropertiesMap);
         }
-        mDeviceConfigPropertiesUpdated.open();
+    }
+
+    /**
+     * Test method to start listening to {@link DeviceConfig} properties changes.
+     *
+     * <p>During testing, a {@link LatencyTracker} it is desired to stop and start listening for
+     * config updates.
+     *
+     * <p>This is not used for production usages of this class outside of testing as we are
+     * using a single static object.
+     */
+    @VisibleForTesting
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    public void startListeningForLatencyTrackerConfigChanges() {
+        final Context context = ActivityThread.currentApplication();
+        if (context == null) {
+            if (DEBUG) {
+                Log.d(TAG, "No application for package: " + ActivityThread.currentPackageName());
+            }
+            return;
+        }
+        if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) != PERMISSION_GRANTED) {
+            if (DEBUG) {
+                synchronized (mLock) {
+                    Log.d(TAG, "Initialized the LatencyTracker."
+                            + " (No READ_DEVICE_CONFIG permission to change configs)"
+                            + " enabled=" + mEnabled + ", package=" + context.getPackageName());
+                }
+            }
+            return;
+        }
+
+        // Post initialization to the background in case we're running on the main thread.
+        BackgroundThread.getHandler().post(() -> {
+            try {
+                this.updateProperties(
+                        DeviceConfig.getProperties(NAMESPACE_LATENCY_TRACKER));
+                DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_LATENCY_TRACKER,
+                        BackgroundThread.getExecutor(), mOnPropertiesChangedListener);
+            } catch (SecurityException ex) {
+                // In case of running tests that the main thread passes the check,
+                // but the background thread doesn't have necessary permissions.
+                // Swallow it since it's ok to ignore device config changes in the tests.
+                Log.d(TAG, "Can't get properties: READ_DEVICE_CONFIG granted="
+                        + context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
+                        + ", package=" + context.getPackageName());
+            }
+        });
+    }
+
+    /**
+     * Test method to stop listening to {@link DeviceConfig} properties changes.
+     *
+     * <p>During testing, a {@link LatencyTracker} it is desired to stop and start listening for
+     * config updates.
+     *
+     * <p>This is not used for production usages of this class outside of testing as we are
+     * using a single static object.
+     */
+    @VisibleForTesting
+    public void stopListeningForLatencyTrackerConfigChanges() {
+        DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
     }
 
     /**
@@ -534,6 +605,24 @@ public class LatencyTracker {
     }
 
     /**
+     * Testing API to get the time when a given action was started.
+     *
+     * @param action Action which to retrieve start time from
+     * @return Elapsed realtime timestamp when the action started. -1 if the action is not active.
+     * @hide
+     */
+    @VisibleForTesting
+    @ElapsedRealtimeLong
+    public long getActiveActionStartTime(@Action int action) {
+        synchronized (mLock) {
+            if (mSessions.contains(action)) {
+                return mSessions.get(action).mStartRtc;
+            }
+            return -1;
+        }
+    }
+
+    /**
      * Logs an action that has started and ended. This needs to be called from the main thread.
      *
      * @param action   The action to end. One of the ACTION_* values.
@@ -543,6 +632,9 @@ public class LatencyTracker {
         boolean shouldSample;
         int traceThreshold;
         synchronized (mLock) {
+            if (!isEnabled(action)) {
+                return;
+            }
             ActionProperties actionProperties = mActionPropertiesMap.get(action);
             if (actionProperties == null) {
                 return;
@@ -553,28 +645,24 @@ public class LatencyTracker {
             traceThreshold = actionProperties.getTraceThreshold();
         }
 
-        if (traceThreshold > 0 && duration >= traceThreshold) {
-            PerfettoTrigger.trigger(getTraceTriggerNameForAction(action));
+        boolean shouldTriggerPerfettoTrace = traceThreshold > 0 && duration >= traceThreshold;
+
+        if (DEBUG) {
+            Log.i(TAG, "logAction: " + getNameOfAction(STATSD_ACTION[action])
+                    + " duration=" + duration
+                    + " shouldSample=" + shouldSample
+                    + " shouldTriggerPerfettoTrace=" + shouldTriggerPerfettoTrace);
         }
 
-        logActionDeprecated(action, duration, shouldSample);
-    }
-
-    /**
-     * Logs an action that has started and ended. This needs to be called from the main thread.
-     *
-     * @param action The action to end. One of the ACTION_* values.
-     * @param duration The duration of the action in ms.
-     * @param writeToStatsLog Whether to write the measured latency to FrameworkStatsLog.
-     */
-    public static void logActionDeprecated(
-            @Action int action, int duration, boolean writeToStatsLog) {
-        Log.i(TAG, getNameOfAction(STATSD_ACTION[action]) + " latency=" + duration);
         EventLog.writeEvent(EventLogTags.SYSUI_LATENCY, action, duration);
-
-        if (writeToStatsLog) {
-            FrameworkStatsLog.write(
-                    FrameworkStatsLog.UI_ACTION_LATENCY_REPORTED, STATSD_ACTION[action], duration);
+        if (shouldTriggerPerfettoTrace) {
+            onTriggerPerfetto(getTraceTriggerNameForAction(action));
+        }
+        if (shouldSample) {
+            onLogToFrameworkStats(
+                    new FrameworkStatsLogEvent(action, FrameworkStatsLog.UI_ACTION_LATENCY_REPORTED,
+                            STATSD_ACTION[action], duration)
+            );
         }
     }
 
@@ -618,14 +706,14 @@ public class LatencyTracker {
 
         void end() {
             mEndRtc = SystemClock.elapsedRealtime();
-            Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, traceName(), "end", 0);
+            Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, traceName(), 0);
             BackgroundThread.getHandler().removeCallbacks(mTimeoutRunnable);
             mTimeoutRunnable = null;
         }
 
         void cancel() {
             Trace.instantForTrack(TRACE_TAG_APP, traceName(), "cancel");
-            Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, traceName(), "cancel", 0);
+            Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, traceName(), 0);
             BackgroundThread.getHandler().removeCallbacks(mTimeoutRunnable);
             mTimeoutRunnable = null;
         }
@@ -636,10 +724,10 @@ public class LatencyTracker {
     }
 
     @VisibleForTesting
-    static class ActionProperties {
+    public static class ActionProperties {
         static final String ENABLE_SUFFIX = "_enable";
         static final String SAMPLE_INTERVAL_SUFFIX = "_sample_interval";
-        // TODO: migrate all usages of the legacy trace theshold property
+        // TODO: migrate all usages of the legacy trace threshold property
         static final String LEGACY_TRACE_THRESHOLD_SUFFIX = "";
         static final String TRACE_THRESHOLD_SUFFIX = "_trace_threshold";
 
@@ -649,7 +737,8 @@ public class LatencyTracker {
         private final int mSamplingInterval;
         private final int mTraceThreshold;
 
-        ActionProperties(
+        @VisibleForTesting
+        public ActionProperties(
                 @Action int action,
                 boolean enabled,
                 int samplingInterval,
@@ -662,20 +751,24 @@ public class LatencyTracker {
             this.mTraceThreshold = traceThreshold;
         }
 
+        @VisibleForTesting
         @Action
-        int getAction() {
+        public int getAction() {
             return mAction;
         }
 
-        boolean isEnabled() {
+        @VisibleForTesting
+        public boolean isEnabled() {
             return mEnabled;
         }
 
-        int getSamplingInterval() {
+        @VisibleForTesting
+        public int getSamplingInterval() {
             return mSamplingInterval;
         }
 
-        int getTraceThreshold() {
+        @VisibleForTesting
+        public int getTraceThreshold() {
             return mTraceThreshold;
         }
 
@@ -686,6 +779,104 @@ public class LatencyTracker {
                     + ", mEnabled=" + mEnabled
                     + ", mSamplingInterval=" + mSamplingInterval
                     + ", mTraceThreshold=" + mTraceThreshold
+                    + "}";
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null) {
+                return false;
+            }
+            if (!(o instanceof ActionProperties)) {
+                return false;
+            }
+            ActionProperties that = (ActionProperties) o;
+            return mAction == that.mAction
+                    && mEnabled == that.mEnabled
+                    && mSamplingInterval == that.mSamplingInterval
+                    && mTraceThreshold == that.mTraceThreshold;
+        }
+
+        @Override
+        public int hashCode() {
+            int _hash = 1;
+            _hash = 31 * _hash + mAction;
+            _hash = 31 * _hash + Boolean.hashCode(mEnabled);
+            _hash = 31 * _hash + mSamplingInterval;
+            _hash = 31 * _hash + mTraceThreshold;
+            return _hash;
+        }
+    }
+
+    /**
+     * Testing method intended to be overridden to determine when the LatencyTracker's device
+     * properties are updated.
+     */
+    @VisibleForTesting
+    public void onDeviceConfigPropertiesUpdated(SparseArray<ActionProperties> actionProperties) {
+        if (DEBUG) {
+            Log.d(TAG, "onDeviceConfigPropertiesUpdated: " + actionProperties);
+        }
+    }
+
+    /**
+     * Testing class intended to be overridden to determine when LatencyTracker triggers perfetto.
+     */
+    @VisibleForTesting
+    public void onTriggerPerfetto(String triggerName) {
+        if (DEBUG) {
+            Log.i(TAG, "onTriggerPerfetto: triggerName=" + triggerName);
+        }
+        PerfettoTrigger.trigger(triggerName);
+    }
+
+    /**
+     * Testing method intended to be overridden to determine when LatencyTracker writes to
+     * FrameworkStatsLog.
+     */
+    @VisibleForTesting
+    public void onLogToFrameworkStats(FrameworkStatsLogEvent event) {
+        if (DEBUG) {
+            Log.i(TAG, "onLogToFrameworkStats: event=" + event);
+        }
+        FrameworkStatsLog.write(event.logCode, event.statsdAction, event.durationMillis);
+    }
+
+    /**
+     * Testing class intended to reject what should be written to the {@link FrameworkStatsLog}
+     *
+     * <p>This class is used in {@link #onLogToFrameworkStats(FrameworkStatsLogEvent)} for test code
+     * to observer when and what information is being logged by {@link LatencyTracker}
+     */
+    @VisibleForTesting
+    public static class FrameworkStatsLogEvent {
+
+        @VisibleForTesting
+        public final int action;
+        @VisibleForTesting
+        public final int logCode;
+        @VisibleForTesting
+        public final int statsdAction;
+        @VisibleForTesting
+        public final int durationMillis;
+
+        private FrameworkStatsLogEvent(int action, int logCode, int statsdAction,
+                int durationMillis) {
+            this.action = action;
+            this.logCode = logCode;
+            this.statsdAction = statsdAction;
+            this.durationMillis = durationMillis;
+        }
+
+        @Override
+        public String toString() {
+            return "FrameworkStatsLogEvent{"
+                    + " logCode=" + logCode
+                    + ", statsdAction=" + statsdAction
+                    + ", durationMillis=" + durationMillis
                     + "}";
         }
     }

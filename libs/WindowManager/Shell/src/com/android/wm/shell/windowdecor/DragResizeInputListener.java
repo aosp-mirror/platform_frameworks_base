@@ -21,6 +21,11 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
+import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
+import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
+import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -64,8 +69,8 @@ class DragResizeInputListener implements AutoCloseable {
     private final TaskResizeInputEventReceiver mInputEventReceiver;
     private final DragPositioningCallback mCallback;
 
-    private int mWidth;
-    private int mHeight;
+    private int mTaskWidth;
+    private int mTaskHeight;
     private int mResizeHandleThickness;
     private int mCornerSize;
 
@@ -103,7 +108,9 @@ class DragResizeInputListener implements AutoCloseable {
                     null /* hostInputToken */,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
+                    0 /* inputFeatures */,
                     TYPE_APPLICATION,
+                    null /* windowToken */,
                     mFocusGrantToken,
                     TAG + " of " + decorationSurface.toString(),
                     mInputChannel);
@@ -126,78 +133,85 @@ class DragResizeInputListener implements AutoCloseable {
      * This is also used to update the touch regions of this handler every event dispatched here is
      * a potential resize request.
      *
-     * @param width The width of the drag resize handler in pixels, including resize handle
-     *              thickness. That is task width + 2 * resize handle thickness.
-     * @param height The height of the drag resize handler in pixels, including resize handle
-     *               thickness. That is task height + 2 * resize handle thickness.
+     * @param taskWidth The width of the task.
+     * @param taskHeight The height of the task.
      * @param resizeHandleThickness The thickness of the resize handle in pixels.
      * @param cornerSize The size of the resize handle centered in each corner.
      * @param touchSlop The distance in pixels user has to drag with touch for it to register as
      *                  a resize action.
+     * @return whether the geometry has changed or not
      */
-    void setGeometry(int width, int height, int resizeHandleThickness, int cornerSize,
+    boolean setGeometry(int taskWidth, int taskHeight, int resizeHandleThickness, int cornerSize,
             int touchSlop) {
-        if (mWidth == width && mHeight == height
+        if (mTaskWidth == taskWidth && mTaskHeight == taskHeight
                 && mResizeHandleThickness == resizeHandleThickness
                 && mCornerSize == cornerSize) {
-            return;
+            return false;
         }
 
-        mWidth = width;
-        mHeight = height;
+        mTaskWidth = taskWidth;
+        mTaskHeight = taskHeight;
         mResizeHandleThickness = resizeHandleThickness;
         mCornerSize = cornerSize;
         mDragDetector.setTouchSlop(touchSlop);
 
         Region touchRegion = new Region();
-        final Rect topInputBounds = new Rect(0, 0, mWidth, mResizeHandleThickness);
+        final Rect topInputBounds = new Rect(
+                -mResizeHandleThickness,
+                -mResizeHandleThickness,
+                mTaskWidth + mResizeHandleThickness,
+                0);
         touchRegion.union(topInputBounds);
 
-        final Rect leftInputBounds = new Rect(0, mResizeHandleThickness,
-                mResizeHandleThickness, mHeight - mResizeHandleThickness);
+        final Rect leftInputBounds = new Rect(
+                -mResizeHandleThickness,
+                0,
+                0,
+                mTaskHeight);
         touchRegion.union(leftInputBounds);
 
         final Rect rightInputBounds = new Rect(
-                mWidth - mResizeHandleThickness, mResizeHandleThickness,
-                mWidth, mHeight - mResizeHandleThickness);
+                mTaskWidth,
+                0,
+                mTaskWidth + mResizeHandleThickness,
+                mTaskHeight);
         touchRegion.union(rightInputBounds);
 
-        final Rect bottomInputBounds = new Rect(0, mHeight - mResizeHandleThickness,
-                mWidth, mHeight);
+        final Rect bottomInputBounds = new Rect(
+                -mResizeHandleThickness,
+                mTaskHeight,
+                mTaskWidth + mResizeHandleThickness,
+                mTaskHeight + mResizeHandleThickness);
         touchRegion.union(bottomInputBounds);
 
         // Set up touch areas in each corner.
         int cornerRadius = mCornerSize / 2;
         mLeftTopCornerBounds = new Rect(
-                mResizeHandleThickness - cornerRadius,
-                mResizeHandleThickness - cornerRadius,
-                mResizeHandleThickness + cornerRadius,
-                mResizeHandleThickness + cornerRadius
-        );
+                -cornerRadius,
+                -cornerRadius,
+                cornerRadius,
+                cornerRadius);
         touchRegion.union(mLeftTopCornerBounds);
 
         mRightTopCornerBounds = new Rect(
-                mWidth - mResizeHandleThickness - cornerRadius,
-                mResizeHandleThickness - cornerRadius,
-                mWidth - mResizeHandleThickness + cornerRadius,
-                mResizeHandleThickness + cornerRadius
-        );
+                mTaskWidth - cornerRadius,
+                -cornerRadius,
+                mTaskWidth + cornerRadius,
+                cornerRadius);
         touchRegion.union(mRightTopCornerBounds);
 
         mLeftBottomCornerBounds = new Rect(
-                mResizeHandleThickness - cornerRadius,
-                mHeight - mResizeHandleThickness - cornerRadius,
-                mResizeHandleThickness + cornerRadius,
-                mHeight - mResizeHandleThickness + cornerRadius
-        );
+                -cornerRadius,
+                mTaskHeight - cornerRadius,
+                cornerRadius,
+                mTaskHeight + cornerRadius);
         touchRegion.union(mLeftBottomCornerBounds);
 
         mRightBottomCornerBounds = new Rect(
-                mWidth - mResizeHandleThickness - cornerRadius,
-                mHeight - mResizeHandleThickness - cornerRadius,
-                mWidth - mResizeHandleThickness + cornerRadius,
-                mHeight - mResizeHandleThickness + cornerRadius
-        );
+                mTaskWidth - cornerRadius,
+                mTaskHeight - cornerRadius,
+                mTaskWidth + cornerRadius,
+                mTaskHeight + cornerRadius);
         touchRegion.union(mRightBottomCornerBounds);
 
         try {
@@ -207,10 +221,24 @@ class DragResizeInputListener implements AutoCloseable {
                     mDecorationSurface,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
+                    0 /* inputFeatures */,
                     touchRegion);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+        return true;
+    }
+
+    /**
+     * Generate a Region that encapsulates all 4 corner handles
+     */
+    Region getCornersRegion() {
+        Region region = new Region();
+        region.union(mLeftTopCornerBounds);
+        region.union(mLeftBottomCornerBounds);
+        region.union(mRightTopCornerBounds);
+        region.union(mRightBottomCornerBounds);
+        return region;
     }
 
     @Override
@@ -344,7 +372,7 @@ class DragResizeInputListener implements AutoCloseable {
             return calculateResizeHandlesCtrlType(x, y) != 0;
         }
 
-        @TaskPositioner.CtrlType
+        @DragPositioningCallback.CtrlType
         private int calculateCtrlType(boolean isTouch, float x, float y) {
             if (isTouch) {
                 return calculateCornersCtrlType(x, y);
@@ -352,62 +380,62 @@ class DragResizeInputListener implements AutoCloseable {
             return calculateResizeHandlesCtrlType(x, y);
         }
 
-        @TaskPositioner.CtrlType
+        @DragPositioningCallback.CtrlType
         private int calculateResizeHandlesCtrlType(float x, float y) {
             int ctrlType = 0;
-            if (x < mResizeHandleThickness) {
-                ctrlType |= TaskPositioner.CTRL_TYPE_LEFT;
+            if (x < 0) {
+                ctrlType |= CTRL_TYPE_LEFT;
             }
-            if (x > mWidth - mResizeHandleThickness) {
-                ctrlType |= TaskPositioner.CTRL_TYPE_RIGHT;
+            if (x > mTaskWidth) {
+                ctrlType |= CTRL_TYPE_RIGHT;
             }
-            if (y < mResizeHandleThickness) {
-                ctrlType |= TaskPositioner.CTRL_TYPE_TOP;
+            if (y < 0) {
+                ctrlType |= CTRL_TYPE_TOP;
             }
-            if (y > mHeight - mResizeHandleThickness) {
-                ctrlType |= TaskPositioner.CTRL_TYPE_BOTTOM;
+            if (y > mTaskHeight) {
+                ctrlType |= CTRL_TYPE_BOTTOM;
             }
             return ctrlType;
         }
 
-        @TaskPositioner.CtrlType
+        @DragPositioningCallback.CtrlType
         private int calculateCornersCtrlType(float x, float y) {
             int xi = (int) x;
             int yi = (int) y;
             if (mLeftTopCornerBounds.contains(xi, yi)) {
-                return TaskPositioner.CTRL_TYPE_LEFT | TaskPositioner.CTRL_TYPE_TOP;
+                return CTRL_TYPE_LEFT | CTRL_TYPE_TOP;
             }
             if (mLeftBottomCornerBounds.contains(xi, yi)) {
-                return TaskPositioner.CTRL_TYPE_LEFT | TaskPositioner.CTRL_TYPE_BOTTOM;
+                return CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM;
             }
             if (mRightTopCornerBounds.contains(xi, yi)) {
-                return TaskPositioner.CTRL_TYPE_RIGHT | TaskPositioner.CTRL_TYPE_TOP;
+                return CTRL_TYPE_RIGHT | CTRL_TYPE_TOP;
             }
             if (mRightBottomCornerBounds.contains(xi, yi)) {
-                return TaskPositioner.CTRL_TYPE_RIGHT | TaskPositioner.CTRL_TYPE_BOTTOM;
+                return CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM;
             }
             return 0;
         }
 
         private void updateCursorType(float x, float y) {
-            @TaskPositioner.CtrlType int ctrlType = calculateResizeHandlesCtrlType(x, y);
+            @DragPositioningCallback.CtrlType int ctrlType = calculateResizeHandlesCtrlType(x, y);
 
             int cursorType = PointerIcon.TYPE_DEFAULT;
             switch (ctrlType) {
-                case TaskPositioner.CTRL_TYPE_LEFT:
-                case TaskPositioner.CTRL_TYPE_RIGHT:
+                case CTRL_TYPE_LEFT:
+                case CTRL_TYPE_RIGHT:
                     cursorType = PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
                     break;
-                case TaskPositioner.CTRL_TYPE_TOP:
-                case TaskPositioner.CTRL_TYPE_BOTTOM:
+                case CTRL_TYPE_TOP:
+                case CTRL_TYPE_BOTTOM:
                     cursorType = PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
                     break;
-                case TaskPositioner.CTRL_TYPE_LEFT | TaskPositioner.CTRL_TYPE_TOP:
-                case TaskPositioner.CTRL_TYPE_RIGHT | TaskPositioner.CTRL_TYPE_BOTTOM:
+                case CTRL_TYPE_LEFT | CTRL_TYPE_TOP:
+                case CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM:
                     cursorType = PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
                     break;
-                case TaskPositioner.CTRL_TYPE_LEFT | TaskPositioner.CTRL_TYPE_BOTTOM:
-                case TaskPositioner.CTRL_TYPE_RIGHT | TaskPositioner.CTRL_TYPE_TOP:
+                case CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM:
+                case CTRL_TYPE_RIGHT | CTRL_TYPE_TOP:
                     cursorType = PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
                     break;
             }

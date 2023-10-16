@@ -28,11 +28,13 @@ import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.server.display.mode.DisplayModeDirector;
+
 import java.io.PrintWriter;
 
 /**
- * Represents a physical display device such as the built-in display
- * an external monitor, or a WiFi display.
+ * Represents a display device such as the built-in display, an external monitor, a WiFi display,
+ * or a {@link android.hardware.display.VirtualDisplay}.
  * <p>
  * Display devices are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
@@ -129,12 +131,13 @@ abstract class DisplayDevice {
 
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
-     * is not provided for layer mirroring by SurfaceFlinger.
-     * Only used for mirroring started from MediaProjection.
+     * is not provided for layer mirroring by SurfaceFlinger. For non virtual displays, this will
+     * be the actual display device's size.
      */
     @Nullable
     public Point getDisplaySurfaceDefaultSizeLocked() {
-        return null;
+        DisplayDeviceInfo displayDeviceInfo = getDisplayDeviceInfoLocked();
+        return new Point(displayDeviceInfo.width, displayDeviceInfo.height);
     }
 
     /**

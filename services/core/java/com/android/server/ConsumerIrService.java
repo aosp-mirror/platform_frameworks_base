@@ -16,6 +16,10 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.TRANSMIT_IR;
+
+import android.annotation.EnforcePermission;
+import android.annotation.RequiresNoPermission;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.IConsumerIrService;
@@ -60,6 +64,7 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
     }
 
     @Override
+    @RequiresNoPermission
     public boolean hasIrEmitter() {
         return mHasNativeHal;
     }
@@ -85,11 +90,9 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
 
 
     @Override
+    @EnforcePermission(TRANSMIT_IR)
     public void transmit(String packageName, int carrierFrequency, int[] pattern) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.TRANSMIT_IR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires TRANSMIT_IR permission");
-        }
+        super.transmit_enforcePermission();
 
         long totalXmitTime = 0;
 
@@ -125,11 +128,9 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
     }
 
     @Override
+    @EnforcePermission(TRANSMIT_IR)
     public int[] getCarrierFrequencies() {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.TRANSMIT_IR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires TRANSMIT_IR permission");
-        }
+        super.getCarrierFrequencies_enforcePermission();
 
         throwIfNoIrEmitter();
 

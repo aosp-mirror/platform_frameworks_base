@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
@@ -425,9 +426,10 @@ public class WindowProcessControllerTests extends WindowTestsBase {
     public void testTopActivityUiModeChangeScheduleConfigChange() {
         final ActivityRecord activity = createActivityRecord(mWpc);
         activity.setVisibleRequested(true);
-        doReturn(true).when(activity).applyAppSpecificConfig(anyInt(), any());
+        doReturn(true).when(activity).applyAppSpecificConfig(anyInt(), any(), anyInt());
         mWpc.updateAppSpecificSettingsForAllActivitiesInPackage(DEFAULT_COMPONENT_PACKAGE_NAME,
-                Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"));
+                Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"),
+                GRAMMATICAL_GENDER_NOT_SPECIFIED);
         verify(activity).ensureActivityConfiguration(anyInt(), anyBoolean());
     }
 
@@ -436,8 +438,9 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityRecord(mWpc);
         activity.setVisibleRequested(true);
         mWpc.updateAppSpecificSettingsForAllActivitiesInPackage("com.different.package",
-                Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"));
-        verify(activity, never()).applyAppSpecificConfig(anyInt(), any());
+                Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"),
+                GRAMMATICAL_GENDER_NOT_SPECIFIED);
+        verify(activity, never()).applyAppSpecificConfig(anyInt(), any(), anyInt());
         verify(activity, never()).ensureActivityConfiguration(anyInt(), anyBoolean());
     }
 

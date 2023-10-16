@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Bewegen"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Maximieren"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Minimieren"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Für Steuerelemente zweimal "<annotation icon="home_icon">"STARTBILDSCHIRMTASTE"</annotation>" drücken"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Für Steuerelemente 2× "<annotation icon="home_icon">"STARTBILDSCHIRMTASTE"</annotation>" drücken"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Menü „Bild im Bild“."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Nach links bewegen"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Nach rechts bewegen"</string>

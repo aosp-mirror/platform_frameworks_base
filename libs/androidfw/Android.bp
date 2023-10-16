@@ -33,6 +33,7 @@ license {
 
 cc_defaults {
     name: "libandroidfw_defaults",
+    cpp_std: "gnu++2b",
     cflags: [
         "-Werror",
         "-Wunreachable-code",
@@ -54,12 +55,14 @@ cc_library {
     host_supported: true,
     srcs: [
         "ApkAssets.cpp",
+        "ApkParsing.cpp",
         "Asset.cpp",
         "AssetDir.cpp",
         "AssetManager.cpp",
         "AssetManager2.cpp",
         "AssetsProvider.cpp",
         "AttributeResolution.cpp",
+        "BigBuffer.cpp",
         "ChunkIterator.cpp",
         "ConfigDescription.cpp",
         "Idmap.cpp",
@@ -69,9 +72,11 @@ cc_library {
         "misc.cpp",
         "ObbFile.cpp",
         "PosixUtils.cpp",
+        "ResourceTimer.cpp",
         "ResourceTypes.cpp",
         "ResourceUtils.cpp",
         "StreamingZipInflater.cpp",
+        "StringPool.cpp",
         "TypeWrappers.cpp",
         "Util.cpp",
         "ZipFileRO.cpp",
@@ -80,7 +85,10 @@ cc_library {
     export_include_dirs: ["include"],
     export_shared_lib_headers: ["libz"],
     static_libs: ["libincfs-utils"],
-    whole_static_libs: ["libincfs-utils"],
+    whole_static_libs: [
+        "libandroidfw_pathutils",
+        "libincfs-utils",
+    ],
     export_static_lib_headers: ["libincfs-utils"],
     target: {
         android: {
@@ -132,6 +140,28 @@ cc_library {
     },
 }
 
+cc_library_static {
+    name: "libandroidfw_pathutils",
+    defaults: ["libandroidfw_defaults"],
+    host_supported: true,
+    export_include_dirs: ["include_pathutils"],
+    srcs: [
+        "PathUtils.cpp",
+    ],
+    shared_libs: [
+        "libutils",
+    ],
+    target: {
+        windows: {
+            enabled: true,
+        },
+    },
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base/tools/aapt",
+    ],
+}
+
 common_test_libs = [
     "libandroidfw",
     "libbase",
@@ -156,11 +186,13 @@ cc_test {
 
         // Actual tests.
         "tests/ApkAssets_test.cpp",
+        "tests/ApkParsing_test.cpp",
         "tests/AppAsLib_test.cpp",
         "tests/Asset_test.cpp",
         "tests/AssetManager2_test.cpp",
         "tests/AttributeFinder_test.cpp",
         "tests/AttributeResolution_test.cpp",
+        "tests/BigBuffer_test.cpp",
         "tests/ByteBucketArray_test.cpp",
         "tests/Config_test.cpp",
         "tests/ConfigDescription_test.cpp",
@@ -169,10 +201,12 @@ cc_test {
         "tests/Idmap_test.cpp",
         "tests/LoadedArsc_test.cpp",
         "tests/Locale_test.cpp",
+        "tests/ResourceTimer_test.cpp",
         "tests/ResourceUtils_test.cpp",
         "tests/ResTable_test.cpp",
         "tests/Split_test.cpp",
         "tests/StringPiece_test.cpp",
+        "tests/StringPool_test.cpp",
         "tests/Theme_test.cpp",
         "tests/TypeWrappers_test.cpp",
         "tests/ZipUtils_test.cpp",
@@ -204,6 +238,8 @@ cc_test {
         "tests/data/**/*.apk",
         "tests/data/**/*.arsc",
         "tests/data/**/*.idmap",
+        ":FrameworkResourcesSparseTestApp",
+        ":FrameworkResourcesNotSparseTestApp",
     ],
     test_suites: ["device-tests"],
 }

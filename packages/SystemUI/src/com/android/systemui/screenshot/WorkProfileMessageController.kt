@@ -19,6 +19,7 @@ package com.android.systemui.screenshot
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ComponentInfoFlags
 import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.os.UserManager
@@ -53,12 +54,9 @@ constructor(
             var badgedIcon: Drawable? = null
             var label: CharSequence? = null
             val fileManager = fileManagerComponentName()
+                ?: return WorkProfileFirstRunData(defaultFileAppName(), null)
             try {
-                val info =
-                    packageManager.getActivityInfo(
-                        fileManager,
-                        PackageManager.ComponentInfoFlags.of(0)
-                    )
+                val info = packageManager.getActivityInfo(fileManager, ComponentInfoFlags.of(0L))
                 val icon = packageManager.getActivityIcon(fileManager)
                 badgedIcon = packageManager.getUserBadgedIcon(icon, userHandle)
                 label = info.loadLabel(packageManager)

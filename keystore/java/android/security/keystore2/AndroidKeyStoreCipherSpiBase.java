@@ -20,9 +20,11 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.security.keymint.KeyParameter;
+import android.os.StrictMode;
 import android.security.KeyStoreException;
 import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
+import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyStoreCryptoOperation;
 import android.system.keystore2.Authorization;
 
@@ -70,7 +72,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStoreCryptoOperation {
     private static final String TAG = "AndroidKeyStoreCipherSpiBase";
-    public static final String DEFAULT_MGF1_DIGEST = "SHA-1";
+    public static final String DEFAULT_MGF1_DIGEST = KeyProperties.DIGEST_SHA1;
 
     // Fields below are populated by Cipher.init and KeyStore.begin and should be preserved after
     // doFinal finishes.
@@ -137,6 +139,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         if (!(key instanceof AndroidKeyStorePrivateKey)
                 && (key instanceof PrivateKey || key instanceof PublicKey)) {
             try {
+                StrictMode.noteSlowCall("engineInit");
                 mCipher = Cipher.getInstance(getTransform());
                 String transform = getTransform();
 
@@ -203,6 +206,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         if (!(key instanceof AndroidKeyStorePrivateKey)
                 && (key instanceof PrivateKey || key instanceof PublicKey)) {
             try {
+                StrictMode.noteSlowCall("engineInit");
                 mCipher = Cipher.getInstance(getTransform());
                 mCipher.init(opmode, key, params, random);
                 return;
@@ -233,6 +237,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         if (!(key instanceof AndroidKeyStorePrivateKey)
                 && (key instanceof PrivateKey || key instanceof PublicKey)) {
             try {
+                StrictMode.noteSlowCall("engineInit");
                 mCipher = Cipher.getInstance(getTransform());
                 mCipher.init(opmode, key, params, random);
                 return;
@@ -346,6 +351,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         parameters.add(KeyStore2ParameterUtils.makeEnum(KeymasterDefs.KM_TAG_PURPOSE, purpose));
 
         try {
+            StrictMode.noteDiskRead();
             mOperation = mKey.getSecurityLevel().createOperation(
                     mKey.getKeyIdDescriptor(),
                     parameters
@@ -521,6 +527,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     @Override
     protected final void engineUpdateAAD(byte[] input, int inputOffset, int inputLen) {
         if (mCipher != null) {
+            StrictMode.noteSlowCall("engineUpdateAAD");
             mCipher.updateAAD(input, inputOffset, inputLen);
             return;
         }
@@ -562,6 +569,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     @Override
     protected final void engineUpdateAAD(ByteBuffer src) {
         if (mCipher != null) {
+            StrictMode.noteSlowCall("engineUpdateAAD");
             mCipher.updateAAD(src);
             return;
         }
@@ -715,6 +723,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             throw new NullPointerException("key == null");
         }
         byte[] encoded = null;
+        StrictMode.noteSlowCall("engineWrap");
         if (key instanceof SecretKey) {
             if ("RAW".equalsIgnoreCase(key.getFormat())) {
                 encoded = key.getEncoded();
@@ -807,6 +816,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             throw new InvalidKeyException("Failed to unwrap key", e);
         }
 
+        StrictMode.noteSlowCall("engineUnwrap");
         switch (wrappedKeyType) {
             case Cipher.SECRET_KEY:
             {

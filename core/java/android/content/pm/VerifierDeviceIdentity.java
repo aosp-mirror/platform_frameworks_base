@@ -89,8 +89,8 @@ public class VerifierDeviceIdentity implements Parcelable {
      * @return verifier device identity based on the input from the provided
      *         random number generator
      */
-    @VisibleForTesting
-    static VerifierDeviceIdentity generate(Random rng) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public static VerifierDeviceIdentity generate(Random rng) {
         long identity = rng.nextLong();
         return new VerifierDeviceIdentity(identity);
     }

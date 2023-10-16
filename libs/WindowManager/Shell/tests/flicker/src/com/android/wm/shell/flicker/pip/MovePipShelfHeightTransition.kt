@@ -17,46 +17,31 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.traces.region.RegionSubject
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
+import android.tools.common.Rotation
+import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
+import com.android.wm.shell.flicker.Direction
 import org.junit.Test
+import org.junit.runners.Parameterized
 
-/**
- * Base class for pip tests with Launcher shelf height change
- */
-abstract class MovePipShelfHeightTransition(
-    testSpec: FlickerTestParameter
-) : PipTransition(testSpec) {
-    protected val taplInstrumentation = LauncherInstrumentation()
-    protected val testApp = FixedAppHelper(instrumentation)
+/** Base class for pip tests with Launcher shelf height change */
+abstract class MovePipShelfHeightTransition(flicker: FlickerTest) : PipTransition(flicker) {
+    protected val testApp = FixedOrientationAppHelper(instrumentation)
 
-    /**
-     * Checks if the window movement direction is valid
-     */
-    protected abstract fun assertRegionMovement(previous: RegionSubject, current: RegionSubject)
-
-    /**
-     * Checks [pipApp] window remains visible throughout the animation
-     */
+    /** Checks [pipApp] window remains visible throughout the animation */
     @Presubmit
     @Test
     open fun pipWindowIsAlwaysVisible() {
-        testSpec.assertWm {
-            isAppWindowVisible(pipApp.component)
-        }
+        flicker.assertWm { isAppWindowVisible(pipApp) }
     }
 
-    /**
-     * Checks [pipApp] layer remains visible throughout the animation
-     */
+    /** Checks [pipApp] layer remains visible throughout the animation */
     @Presubmit
     @Test
     open fun pipLayerIsAlwaysVisible() {
-        testSpec.assertLayers {
-            isVisible(pipApp.component)
-        }
+        flicker.assertLayers { isVisible(pipApp) }
     }
 
     /**
@@ -66,9 +51,7 @@ abstract class MovePipShelfHeightTransition(
     @Presubmit
     @Test
     open fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp.component) {
-            coversAtMost(displayBounds)
-        }
+        flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
@@ -78,39 +61,65 @@ abstract class MovePipShelfHeightTransition(
     @Presubmit
     @Test
     open fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp.component) {
-            coversAtMost(displayBounds)
-        }
+        flicker.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
-     * Checks that the visible region of [pipApp] always moves in the correct direction
+     * Checks that the visible region of [pipApp] window always moves in the specified direction
      * during the animation.
      */
-    @Presubmit
-    @Test
-    open fun pipWindowMoves() {
-        val windowName = pipApp.component.toWindowName()
-        testSpec.assertWm {
-            val pipWindowList = this.windowStates { it.name.contains(windowName) && it.isVisible }
-            pipWindowList.zipWithNext { previous, current ->
-                assertRegionMovement(previous.frame, current.frame)
+    protected fun pipWindowMoves(direction: Direction) {
+        flicker.assertWm {
+            val pipWindowFrameList =
+                this.windowStates { pipApp.windowMatchesAnyOf(it) && it.isVisible }.map { it.frame }
+            when (direction) {
+                Direction.UP -> assertRegionMovementUp(pipWindowFrameList)
+                Direction.DOWN -> assertRegionMovementDown(pipWindowFrameList)
+                else -> error("Unhandled direction")
             }
         }
     }
 
     /**
-     * Checks that the visible region of [pipApp] always moves up during the animation
+     * Checks that the visible region of [pipApp] layer always moves in the specified direction
+     * during the animation.
      */
-    @Presubmit
-    @Test
-    open fun pipLayerMoves() {
-        val layerName = pipApp.component.toLayerName()
-        testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
-            pipLayerList.zipWithNext { previous, current ->
-                assertRegionMovement(previous.visibleRegion, current.visibleRegion)
+    protected fun pipLayerMoves(direction: Direction) {
+        flicker.assertLayers {
+            val pipLayerRegionList =
+                this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
+                    .map { it.visibleRegion }
+            when (direction) {
+                Direction.UP -> assertRegionMovementUp(pipLayerRegionList)
+                Direction.DOWN -> assertRegionMovementDown(pipLayerRegionList)
+                else -> error("Unhandled direction")
             }
+        }
+    }
+
+    private fun assertRegionMovementDown(regions: List<RegionSubject>) {
+        regions.zipWithNext { previous, current -> current.isLowerOrEqual(previous) }
+        regions.last().isLower(regions.first())
+    }
+
+    private fun assertRegionMovementUp(regions: List<RegionSubject>) {
+        regions.zipWithNext { previous, current -> current.isHigherOrEqual(previous.region) }
+        regions.last().isHigher(regions.first())
+    }
+
+    companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
+         */
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Rotation.ROTATION_0)
+            )
         }
     }
 }

@@ -558,8 +558,10 @@ public interface StatusBarIconController {
             mGroup.addView(view, index, onCreateLayoutParams());
 
             if (mIsInDemoMode) {
+                Context mobileContext = mMobileContextProvider
+                        .getMobileContextForSub(subId, mContext);
                 mDemoStatusIcons.addModernMobileView(
-                        mContext,
+                        mobileContext,
                         mMobileIconsViewModel.getLogger(),
                         subId);
             }

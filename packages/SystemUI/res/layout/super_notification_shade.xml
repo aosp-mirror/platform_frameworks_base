@@ -101,7 +101,6 @@
     </LinearLayout>
 
     <FrameLayout android:id="@+id/keyguard_bouncer_container"
-        android:paddingTop="@dimen/status_bar_height"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:layout_weight="1"
@@ -109,6 +108,13 @@
         android:visibility="invisible"
         android:clipChildren="false"
         android:clipToPadding="false" />
+
+    <ViewStub
+        android:id="@+id/multi_shade_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:inflatedId="@+id/multi_shade"
+        android:layout="@layout/multi_shade" />
 
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"

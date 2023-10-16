@@ -514,7 +514,7 @@ static void CameraMetadata_dump(JNIEnv *env, jclass thiz, jlong ptr) {
         ssize_t res;
         while ((res = TEMP_FAILURE_RETRY(read(readFd, &out[0], /*count*/1))) > 0) {
             if (out[0] == '\n') {
-                ALOGD("%s", logLine.string());
+                ALOGD("%s", logLine.c_str());
                 logLine.clear();
             } else {
                 logLine.append(out);
@@ -526,8 +526,8 @@ static void CameraMetadata_dump(JNIEnv *env, jclass thiz, jlong ptr) {
                     "Failed to read from fd (errno = %#x, message = '%s')",
                     errno, strerror(errno));
             //return;
-        } else if (!logLine.isEmpty()) {
-            ALOGD("%s", logLine.string());
+        } else if (!logLine.empty()) {
+            ALOGD("%s", logLine.c_str());
         }
 
         close(readFd);
@@ -956,8 +956,8 @@ static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jclass th
         return OK;
     } else if (!res.isOk()) {
         VendorTagDescriptor::clearGlobalVendorTagDescriptor();
-        ALOGE("%s: Failed to setup vendor tag descriptors: %s",
-                __FUNCTION__, res.toString8().string());
+        ALOGE("%s: Failed to setup vendor tag descriptors: %s", __FUNCTION__,
+              res.toString8().c_str());
         return res.serviceSpecificErrorCode();
     }
     if (0 < desc->getTagCount()) {
@@ -971,8 +971,8 @@ static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jclass th
             return OK;
         } else if (!res.isOk()) {
             VendorTagDescriptorCache::clearGlobalVendorTagCache();
-            ALOGE("%s: Failed to setup vendor tag cache: %s",
-                    __FUNCTION__, res.toString8().string());
+            ALOGE("%s: Failed to setup vendor tag cache: %s", __FUNCTION__,
+                  res.toString8().c_str());
             return res.serviceSpecificErrorCode();
         }
 

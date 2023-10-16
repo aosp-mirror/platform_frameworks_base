@@ -171,4 +171,17 @@ oneway interface IImsCallSessionListener {
      * @param extensions the RTP header extensions received.
      */
     void callSessionRtpHeaderExtensionsReceived(in List<RtpHeaderExtension> extensions);
+
+    /**
+     * Access Network Bitrate Recommendation Query (ANBRQ), see 3GPP TS 26.114.
+     * This API triggers radio to send ANBRQ message to the access network to query the desired
+     * bitrate.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE
+     *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value to the MAC bitrate
+     *        (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     */
+    void callSessionSendAnbrQuery(int mediaType, int direction, int bitsPerSecond);
 }

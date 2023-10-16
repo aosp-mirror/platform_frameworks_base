@@ -46,6 +46,7 @@ public final class NotificationRecordExtractorData {
     private final float mRankingScore;
     private final boolean mIsConversation;
     private final int mProposedImportance;
+    private final boolean mSensitiveContent;
 
     NotificationRecordExtractorData(int position, int visibility, boolean showBadge,
             boolean allowBubble, boolean isBubble, NotificationChannel channel, String groupKey,
@@ -53,7 +54,7 @@ public final class NotificationRecordExtractorData {
             Integer userSentiment, Integer suppressVisually,
             ArrayList<Notification.Action> systemSmartActions,
             ArrayList<CharSequence> smartReplies, int importance, float rankingScore,
-            boolean isConversation, int proposedImportance) {
+            boolean isConversation, int proposedImportance, boolean sensitiveContent) {
         mPosition = position;
         mVisibility = visibility;
         mShowBadge = showBadge;
@@ -71,6 +72,7 @@ public final class NotificationRecordExtractorData {
         mRankingScore = rankingScore;
         mIsConversation = isConversation;
         mProposedImportance = proposedImportance;
+        mSensitiveContent = sensitiveContent;
     }
 
     // Returns whether the provided NotificationRecord differs from the cached data in any way.
@@ -90,7 +92,8 @@ public final class NotificationRecordExtractorData {
                 || !Objects.equals(mSystemSmartActions, r.getSystemGeneratedSmartActions())
                 || !Objects.equals(mSmartReplies, r.getSmartReplies())
                 || mImportance != r.getImportance()
-                || mProposedImportance != r.getProposedImportance();
+                || mProposedImportance != r.getProposedImportance()
+                || mSensitiveContent != r.hasSensitiveContent();
     }
 
     // Returns whether the NotificationRecord has a change from this data for which we should
@@ -113,6 +116,7 @@ public final class NotificationRecordExtractorData {
                 || mImportance != r.getImportance()
                 || !r.rankingScoreMatches(mRankingScore)
                 || mIsConversation != r.isConversation()
-                || mProposedImportance != r.getProposedImportance();
+                || mProposedImportance != r.getProposedImportance()
+                || mSensitiveContent != r.hasSensitiveContent();
     }
 }

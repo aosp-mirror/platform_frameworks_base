@@ -433,8 +433,8 @@ final public class MediaMuxer {
      * @throws IllegalStateException If this method is called after {@link #start}.
      */
     public void setLocation(float latitude, float longitude) {
-        int latitudex10000  = (int) (latitude * 10000 + 0.5);
-        int longitudex10000 = (int) (longitude * 10000 + 0.5);
+        int latitudex10000  = Math.round(latitude * 10000);
+        int longitudex10000 = Math.round(longitude * 10000);
 
         if (latitudex10000 > 900000 || latitudex10000 < -900000) {
             String msg = "Latitude: " + latitude + " out of range.";

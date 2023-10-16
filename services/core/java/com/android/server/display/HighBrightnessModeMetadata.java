@@ -21,9 +21,10 @@ import java.util.ArrayDeque;
 
 /**
  * Represents High Brightness Mode metadata associated
- * with a specific display.
+ * with a specific internal physical display.
  * Required for separately storing data like time information,
- * and related events when display was in HBM mode per display.
+ * and related events when display was in HBM mode per
+ * physical internal display.
  */
 class HighBrightnessModeMetadata {
     /**

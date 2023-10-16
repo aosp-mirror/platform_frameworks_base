@@ -16,7 +16,6 @@
 
 package com.android.server.pm.dex;
 
-import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
@@ -36,7 +35,6 @@ import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.Log;
@@ -47,6 +45,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageDexOptimizer;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceUtils;
@@ -58,8 +57,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,10 +77,6 @@ import java.util.zip.ZipEntry;
 public class DexManager {
     private static final String TAG = "DexManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
-    private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB = "pm.dexopt.priv-apps-oob";
-    private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
-            "pm.dexopt.priv-apps-oob-list";
 
     // System server cannot load executable code outside system partitions.
     // However it can load verification data - thus we pick the "verify" compiler filter.
@@ -132,20 +125,21 @@ public class DexManager {
     private static int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
 
     public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
-            Object installLock) {
-        this(context, pdo, installer, installLock, null);
+            Object installLock, DynamicCodeLogger dynamicCodeLogger) {
+        this(context, pdo, installer, installLock, dynamicCodeLogger, null);
     }
 
     @VisibleForTesting
     public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
-            Object installLock, @Nullable IPackageManager packageManager) {
+            Object installLock, DynamicCodeLogger dynamicCodeLogger,
+            @Nullable IPackageManager packageManager) {
         mContext = context;
         mPackageCodeLocationsCache = new HashMap<>();
         mPackageDexUsage = new PackageDexUsage();
         mPackageDexOptimizer = pdo;
         mInstaller = installer;
         mInstallLock = installLock;
-        mDynamicCodeLogger = new DynamicCodeLogger(installer);
+        mDynamicCodeLogger = dynamicCodeLogger;
         mPackageManager = packageManager;
 
         // This is currently checked to handle tests that pass in a null context.
@@ -175,10 +169,6 @@ public class DexManager {
         return mPackageManager;
     }
 
-    public DynamicCodeLogger getDynamicCodeLogger() {
-        return mDynamicCodeLogger;
-    }
-
     /**
      * Notify about dex files loads.
      * Note that this method is invoked when apps load dex files and it should
@@ -197,7 +187,7 @@ public class DexManager {
         try {
             notifyDexLoadInternal(loadingAppInfo, classLoaderContextMap, loaderIsa,
                     loaderUserId, loaderIsIsolatedProcess);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             Slog.w(TAG, "Exception while notifying dex load for package " +
                     loadingAppInfo.packageName, e);
         }
@@ -332,9 +322,8 @@ public class DexManager {
     public void load(Map<Integer, List<PackageInfo>> existingPackages) {
         try {
             loadInternal(existingPackages);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             mPackageDexUsage.clear();
-            mDynamicCodeLogger.clear();
             Slog.w(TAG, "Exception while loading. Starting with a fresh state.", e);
         }
     }
@@ -385,12 +374,10 @@ public class DexManager {
             if (mPackageDexUsage.removePackage(packageName)) {
                 mPackageDexUsage.maybeWriteAsync();
             }
-            mDynamicCodeLogger.removePackage(packageName);
         } else {
             if (mPackageDexUsage.removeUserPackage(packageName, userId)) {
                 mPackageDexUsage.maybeWriteAsync();
             }
-            mDynamicCodeLogger.removeUserPackage(packageName, userId);
         }
     }
 
@@ -464,17 +451,9 @@ public class DexManager {
             List<String> packagesToKeepDataAbout = new ArrayList<>();
             mPackageDexUsage.syncData(
                     packageToUsersMap, packageToCodePaths, packagesToKeepDataAbout);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             mPackageDexUsage.clear();
             Slog.w(TAG, "Exception while loading package dex usage. "
-                    + "Starting with a fresh state.", e);
-        }
-
-        try {
-            mDynamicCodeLogger.readAndSync(packageToUsersMap);
-        } catch (Exception e) {
-            mDynamicCodeLogger.clear();
-            Slog.w(TAG, "Exception while loading package dynamic code usage. "
                     + "Starting with a fresh state.", e);
         }
     }
@@ -521,7 +500,7 @@ public class DexManager {
      * @return true if all secondary dex files were processed successfully (compiled or skipped
      *         because they don't need to be compiled)..
      */
-    public boolean dexoptSecondaryDex(DexoptOptions options) {
+    public boolean dexoptSecondaryDex(DexoptOptions options) throws LegacyDexoptDisabledException {
         if (isPlatformPackage(options.getPackageName())) {
             // We could easily redirect to #dexoptSystemServer in this case. But there should be
             // no-one calling this method directly for system server.
@@ -571,88 +550,6 @@ public class DexManager {
     }
 
     /**
-     * Performs dexopt on system server dex files.
-     *
-     * <p>Verfifies that the package name is {@link PackageManagerService#PLATFORM_PACKAGE_NAME}.
-     *
-     * @return
-     * <p>PackageDexOptimizer.DEX_OPT_SKIPPED if dexopt was skipped because no system server
-     * files were recorded or if no dexopt was needed.
-     * <p>PackageDexOptimizer.DEX_OPT_FAILED if any dexopt operation failed.
-     * <p>PackageDexOptimizer.DEX_OPT_PERFORMED if all dexopt operations succeeded.
-     */
-    public int dexoptSystemServer(DexoptOptions options) {
-        if (!isPlatformPackage(options.getPackageName())) {
-            Slog.wtf(TAG, "Non system server package used when trying to dexopt system server:"
-                    + options.getPackageName());
-            return PackageDexOptimizer.DEX_OPT_FAILED;
-        }
-
-        // Override compiler filter for system server to the expected one.
-        //
-        // We could let the caller do this every time the invoke PackageManagerServer#dexopt.
-        // However, there are a few places were this will need to be done which creates
-        // redundancy and the danger of overlooking the config (and thus generating code that will
-        // waste storage and time).
-        DexoptOptions overriddenOptions = options.overrideCompilerFilter(
-                SYSTEM_SERVER_COMPILER_FILTER);
-
-        PackageDexOptimizer pdo = getPackageDexOptimizer(overriddenOptions);
-        String packageName = overriddenOptions.getPackageName();
-        PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
-        if (useInfo.getDexUseInfoMap().isEmpty()) {
-            if (DEBUG) {
-                Slog.d(TAG, "No dex files recorded for system server");
-            }
-            // Nothing to compile, return true.
-            return PackageDexOptimizer.DEX_OPT_SKIPPED;
-        }
-
-        boolean usageUpdated = false;
-        int result = PackageDexOptimizer.DEX_OPT_SKIPPED;
-        for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
-            String dexPath = entry.getKey();
-            DexUseInfo dexUseInfo = entry.getValue();
-            if (!Files.exists(Paths.get(dexPath))) {
-                if (DEBUG) {
-                    Slog.w(TAG, "A dex file previously loaded by System Server does not exist "
-                            + " anymore: " + dexPath);
-                }
-                usageUpdated = mPackageDexUsage.removeDexFile(
-                            packageName, dexPath, dexUseInfo.getOwnerUserId()) || usageUpdated;
-                continue;
-            }
-
-            if (dexUseInfo.isUnsupportedClassLoaderContext()
-                    || dexUseInfo.isVariableClassLoaderContext()) {
-                String debugMsg = dexUseInfo.isUnsupportedClassLoaderContext()
-                        ? "unsupported"
-                        : "variable";
-                Slog.w(TAG, "Skipping dexopt for system server path loaded with " + debugMsg
-                        + " class loader context: " + dexPath);
-                continue;
-            }
-
-            int newResult = pdo.dexoptSystemServerPath(dexPath, dexUseInfo, overriddenOptions);
-
-            // The end result is:
-            //  - FAILED if any path failed,
-            //  - PERFORMED if at least one path needed compilation,
-            //  - SKIPPED when all paths are up to date
-            if ((result != PackageDexOptimizer.DEX_OPT_FAILED)
-                    && (newResult != PackageDexOptimizer.DEX_OPT_SKIPPED)) {
-                result = newResult;
-            }
-        }
-
-        if (usageUpdated) {
-            mPackageDexUsage.maybeWriteAsync();
-        }
-
-        return result;
-    }
-
-    /**
      * Select the dex optimizer based on the force parameter.
      * Forced compilation is done through ForcedUpdatePackageDexOptimizer which will adjust
      * the necessary dexopt flags to make sure that compilation is not skipped. This avoid
@@ -671,7 +568,8 @@ public class DexManager {
      * {@code packagName} and the actual dex files. For all dex files that were
      * deleted, update the internal records and delete any generated oat files.
      */
-    public void reconcileSecondaryDexFiles(String packageName) {
+    public void reconcileSecondaryDexFiles(String packageName)
+            throws LegacyDexoptDisabledException {
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
         if (useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
@@ -758,62 +656,6 @@ public class DexManager {
         if (updated) {
             mPackageDexUsage.maybeWriteAsync();
         }
-    }
-
-    // TODO(calin): questionable API in the presence of class loaders context. Needs amends as the
-    // compilation happening here will use a pessimistic context.
-    public RegisterDexModuleResult registerDexModule(ApplicationInfo info, String dexPath,
-            boolean isSharedModule, int userId) {
-        // Find the owning package record.
-        DexSearchResult searchResult = getDexPackage(info, dexPath, userId);
-
-        if (searchResult.mOutcome == DEX_SEARCH_NOT_FOUND) {
-            return new RegisterDexModuleResult(false, "Package not found");
-        }
-        if (!info.packageName.equals(searchResult.mOwningPackageName)) {
-            return new RegisterDexModuleResult(false, "Dex path does not belong to package");
-        }
-        if (searchResult.mOutcome == DEX_SEARCH_FOUND_PRIMARY ||
-                searchResult.mOutcome == DEX_SEARCH_FOUND_SPLIT) {
-            return new RegisterDexModuleResult(false, "Main apks cannot be registered");
-        }
-
-        // We found the package. Now record the usage for all declared ISAs.
-        boolean update = false;
-        // If this is a shared module set the loading package to an arbitrary package name
-        // so that we can mark that module as usedByOthers.
-        String loadingPackage = isSharedModule ? ".shared.module" : searchResult.mOwningPackageName;
-        for (String isa : getAppDexInstructionSets(info.primaryCpuAbi, info.secondaryCpuAbi)) {
-            boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
-                    dexPath, userId, isa, /*primaryOrSplit*/ false,
-                    loadingPackage,
-                    PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT,
-                    /*overwriteCLC=*/ false);
-            update |= newUpdate;
-        }
-        if (update) {
-            mPackageDexUsage.maybeWriteAsync();
-        }
-
-        DexUseInfo dexUseInfo = mPackageDexUsage.getPackageUseInfo(searchResult.mOwningPackageName)
-                .getDexUseInfoMap().get(dexPath);
-
-        // Try to optimize the package according to the install reason.
-        DexoptOptions options = new DexoptOptions(info.packageName,
-                PackageManagerService.REASON_INSTALL, /*flags*/0);
-
-        int result = mPackageDexOptimizer.dexOptSecondaryDexPath(info, dexPath, dexUseInfo,
-                options);
-
-        // If we fail to optimize the package log an error but don't propagate the error
-        // back to the app. The app cannot do much about it and the background job
-        // will rety again when it executes.
-        // TODO(calin): there might be some value to return the error here but it may
-        // cause red herrings since that doesn't mean the app cannot use the module.
-        if (result != PackageDexOptimizer.DEX_OPT_FAILED) {
-            Slog.e(TAG, "Failed to optimize dex module " + dexPath);
-        }
-        return new RegisterDexModuleResult(true, "Dex module registered successfully");
     }
 
     /**
@@ -906,46 +748,6 @@ public class DexManager {
      */
     public void writePackageDexUsageNow() {
         mPackageDexUsage.writeNow();
-        mDynamicCodeLogger.writeNow();
-    }
-
-    /**
-     * Returns whether the given package is in the list of privilaged apps that should run out of
-     * box. This only makes sense if the feature is enabled. Note that when the the OOB list is
-     * empty, all priv apps will run in OOB mode.
-     */
-    public static boolean isPackageSelectedToRunOob(String packageName) {
-        return isPackageSelectedToRunOob(Arrays.asList(packageName));
-    }
-
-    /**
-     * Returns whether any of the given packages are in the list of privilaged apps that should run
-     * out of box. This only makes sense if the feature is enabled. Note that when the the OOB list
-     * is empty, all priv apps will run in OOB mode.
-     */
-    public static boolean isPackageSelectedToRunOob(Collection<String> packageNamesInSameProcess) {
-        return isPackageSelectedToRunOobInternal(
-                SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false),
-                SystemProperties.get(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST, "ALL"),
-                packageNamesInSameProcess);
-    }
-
-    @VisibleForTesting
-    /* package */ static boolean isPackageSelectedToRunOobInternal(boolean isEnabled,
-            String whitelist, Collection<String> packageNamesInSameProcess) {
-        if (!isEnabled) {
-            return false;
-        }
-
-        if ("ALL".equals(whitelist)) {
-            return true;
-        }
-        for (String oobPkgName : whitelist.split(",")) {
-            if (packageNamesInSameProcess.contains(oobPkgName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -1058,7 +860,8 @@ public class DexManager {
      * @param packageInfo the package information.
      * @return the number of freed bytes or -1 if there was an error in the process.
      */
-    public long deleteOptimizedFiles(ArtPackageInfo packageInfo) {
+    public long deleteOptimizedFiles(ArtPackageInfo packageInfo)
+            throws LegacyDexoptDisabledException {
         long freedBytes = 0;
         boolean hadErrors = false;
         final String packageName = packageInfo.getPackageName();

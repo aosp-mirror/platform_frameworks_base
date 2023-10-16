@@ -42,9 +42,11 @@
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE" />
     <uses-permission android:name="android.permission.CAPTURE_BLACKOUT_CONTENT"/>
-    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION"/>
 
     <!-- TODO: Remove largeHeap hack when memory leak is fixed (b/123984854) -->
     <application android:debuggable="true"
@@ -77,10 +79,22 @@
                   android:turnScreenOn="true"
                   android:showWhenLocked="true" />
         <activity android:name="com.android.server.wm.ActivityOptionsTest$MainActivity"
+                  android:configChanges="screenLayout|screenSize|smallestScreenSize|orientation"
                   android:turnScreenOn="true"
                   android:showWhenLocked="true" />
-        <activity android:name="com.android.server.wm.ScreenshotTests$ScreenshotActivity" />
+        <activity android:name="com.android.server.wm.ScreenshotTests$ScreenshotActivity"
+                  android:theme="@style/WhiteBackgroundTheme"
+                  android:turnScreenOn="true"
+                  android:showWhenLocked="true"/>
         <activity android:name="android.view.cts.surfacevalidator.CapturedActivity"/>
+
+        <activity android:name="com.android.server.wm.SurfaceControlViewHostTests$TestActivity" />
+
+        <activity android:name="android.server.wm.scvh.SurfaceSyncGroupActivity"
+            android:screenOrientation="locked"
+            android:turnScreenOn="true"
+            android:theme="@style/WhiteBackgroundTheme"
+            android:exported="true"/>
 
         <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"
             android:foregroundServiceType="mediaProjection"

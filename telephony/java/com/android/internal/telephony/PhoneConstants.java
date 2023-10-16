@@ -226,6 +226,8 @@ public class PhoneConstants {
     // per 3GPP TS 31.102 (Section 7.1.2)
     public static final int AUTH_CONTEXT_EAP_SIM = 128;
     public static final int AUTH_CONTEXT_EAP_AKA = 129;
+    public static final int AUTH_CONTEXT_GBA_BOOTSTRAP = 132;
+    public static final int AUTHTYPE_GBA_NAF_KEY_EXTERNAL = 133;
     public static final int AUTH_CONTEXT_UNDEFINED = -1;
 
     /**
@@ -237,4 +239,20 @@ public class PhoneConstants {
     public static final int CELL_OFF_FLAG = 0;
     public static final int CELL_ON_FLAG = 1;
     public static final int CELL_OFF_DUE_TO_AIRPLANE_MODE_FLAG = 2;
+
+    /** The key to specify the selected domain for dialing calls. */
+    public static final String EXTRA_DIAL_DOMAIN = "dial_domain";
+
+    /**
+     * Indicates that this call should be routed over Wi-Fi.
+     * An internal extension of NetworkRegistrationInfo's DOMAIN_* constants
+     * to also include NON_3GPP_PS routing for the domain selection service.
+     */
+    public static final int DOMAIN_NON_3GPP_PS = 4;
+
+    /** Key to enable comparison of domain selection results from legacy and new code. */
+    public static final String EXTRA_COMPARE_DOMAIN = "compare_domain";
+
+    /** The key to specify the emergency service category */
+    public static final String EXTRA_EMERGENCY_SERVICE_CATEGORY = "emergency_service_category";
 }

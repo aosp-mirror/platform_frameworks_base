@@ -52,3 +52,6 @@ per-file res/xml/power_profile_test.xml = file:/BATTERY_STATS_OWNERS
 # Telephony
 per-file res/values/config_telephony.xml = file:/platform/frameworks/opt/telephony:/OWNERS
 per-file res/xml/sms_short_codes.xml = file:/platform/frameworks/opt/telephony:/OWNERS
+
+# TV Input Framework
+per-file res/values/config_tv_external_input_logging.xml = file:/services/core/java/com/android/server/tv/OWNERS

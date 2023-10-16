@@ -33,6 +33,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
@@ -52,13 +53,12 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
-import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.net.Uri;
@@ -79,13 +79,13 @@ import android.service.notification.NotificationStats;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.InsetsState.InternalInsetsType;
-import android.view.InsetsVisibilities;
+import android.view.KeyEvent;
+import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -179,12 +179,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final SessionMonitor mSessionMonitor;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
+    private int mLastSystemKey = -1;
 
     private final TileRequestTracker mTileRequestTracker;
 
     private final SparseArray<UiState> mDisplayUiState = new SparseArray<>();
     @GuardedBy("mLock")
-    private IUdfpsHbmListener mUdfpsHbmListener;
+    private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
     @GuardedBy("mLock")
     private IBiometricContextListener mBiometricContextListener;
 
@@ -280,7 +281,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mContext = context;
 
         LocalServices.addService(StatusBarManagerInternal.class, mInternalService);
-        LocalServices.addService(GlobalActionsProvider.class, mGlobalActionsProvider);
 
         // We always have a default display.
         final UiState state = new UiState();
@@ -295,6 +295,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         mTileRequestTracker = new TileRequestTracker(mContext);
         mSessionMonitor = new SessionMonitor(mContext);
+    }
+
+    /**
+     * Publish the {@link GlobalActionsProvider}.
+     */
+    // TODO(b/259420401): investigate if we can extract GlobalActionsProvider to its own system
+    // service.
+    public void publishGlobalActionsProvider() {
+        if (LocalServices.getService(GlobalActionsProvider.class) == null) {
+            LocalServices.addService(GlobalActionsProvider.class, mGlobalActionsProvider);
+        }
     }
 
     private IOverlayManager getOverlayManager() {
@@ -416,6 +427,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
+        public void toggleTaskbar() {
+            if (mBar != null) {
+                try {
+                    mBar.toggleTaskbar();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
         public void toggleRecentApps() {
             if (mBar != null) {
                 try {
@@ -493,6 +513,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                     mBar.toggleKeyboardShortcutsMenu(deviceId);
                 } catch (RemoteException ex) {}
             }
+        }
+
+        @Override
+        public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+                boolean showImeSwitcher) {
+            StatusBarManagerService.this.setImeWindowStatus(displayId, token, vis, backDisposition,
+                    showImeSwitcher);
+        }
+
+        @Override
+        public void setIcon(String slot, String iconPackage, int iconId, int iconLevel,
+                String contentDescription) {
+            StatusBarManagerService.this.setIcon(slot, iconPackage, iconId, iconLevel,
+                    contentDescription);
+        }
+
+        @Override
+        public void setIconVisibility(String slot, boolean visibility) {
+            StatusBarManagerService.this.setIconVisibility(slot, visibility);
         }
 
         @Override
@@ -607,22 +646,22 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                @Behavior int behavior, @InsetsType int requestedVisibleTypes,
                 String packageName, LetterboxDetails[] letterboxDetails) {
             getUiState(displayId).setBarAttributes(appearance, appearanceRegions,
-                    navbarColorManagedByIme, behavior, requestedVisibilities, packageName,
+                    navbarColorManagedByIme, behavior, requestedVisibleTypes, packageName,
                     letterboxDetails);
             if (mBar != null) {
                 try {
                     mBar.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                            navbarColorManagedByIme, behavior, requestedVisibilities, packageName,
+                            navbarColorManagedByIme, behavior, requestedVisibleTypes, packageName,
                             letterboxDetails);
                 } catch (RemoteException ex) { }
             }
         }
 
         @Override
-        public void showTransient(int displayId, @InternalInsetsType int[] types,
+        public void showTransient(int displayId, @InsetsType int types,
                 boolean isGestureOnSystemBar) {
             getUiState(displayId).showTransient(types);
             if (mBar != null) {
@@ -633,7 +672,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void abortTransient(int displayId, @InternalInsetsType int[] types) {
+        public void abortTransient(int displayId, @InsetsType int types) {
             getUiState(displayId).clearTransient(types);
             if (mBar != null) {
                 try {
@@ -684,13 +723,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
+        public void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback) {
             synchronized (mLock) {
-                mUdfpsHbmListener = listener;
+                mUdfpsRefreshRateRequestCallback = callback;
             }
             if (mBar != null) {
                 try {
-                    mBar.setUdfpsHbmListener(listener);
+                    mBar.setUdfpsRefreshRateCallback(callback);
                 } catch (RemoteException ex) { }
             }
         }
@@ -863,10 +902,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void handleSystemKey(int key) throws RemoteException {
+    public void handleSystemKey(KeyEvent key) throws RemoteException {
         if (!checkCanCollapseStatusBar("handleSystemKey")) {
             return;
         }
+
+        mLastSystemKey = key.getKeyCode();
 
         if (mBar != null) {
             try {
@@ -874,6 +915,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             } catch (RemoteException ex) {
             }
         }
+    }
+
+    @Override
+    @TestApi
+    public int getLastSystemKey() {
+        enforceStatusBar();
+
+        return mLastSystemKey;
     }
 
     @Override
@@ -899,14 +948,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
             int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, long operationId, String opPackageName, long requestId,
-            @BiometricMultiSensorMode int multiSensorConfig) {
+            int userId, long operationId, String opPackageName, long requestId) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
                 mBar.showAuthenticationDialog(promptInfo, receiver, sensorIds, credentialAllowed,
-                        requireConfirmation, userId, operationId, opPackageName, requestId,
-                        multiSensorConfig);
+                        requireConfirmation, userId, operationId, opPackageName, requestId);
             } catch (RemoteException ex) {
             }
         }
@@ -971,11 +1018,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
+    public void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback) {
         enforceStatusBarService();
         if (mBar != null) {
             try {
-                mBar.setUdfpsHbmListener(listener);
+                mBar.setUdfpsRefreshRateCallback(callback);
             } catch (RemoteException ex) {
             }
         }
@@ -1235,10 +1282,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private static class UiState {
         private @Appearance int mAppearance = 0;
         private AppearanceRegion[] mAppearanceRegions = new AppearanceRegion[0];
-        private final ArraySet<Integer> mTransientBarTypes = new ArraySet<>();
+        private @InsetsType int mTransientBarTypes;
         private boolean mNavbarColorManagedByIme = false;
         private @Behavior int mBehavior;
-        private InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
+        private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         private String mPackageName = "none";
         private int mDisabled1 = 0;
         private int mDisabled2 = 0;
@@ -1250,28 +1297,24 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         private void setBarAttributes(@Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                @Behavior int behavior, @InsetsType int requestedVisibleTypes,
                 String packageName,
                 LetterboxDetails[] letterboxDetails) {
             mAppearance = appearance;
             mAppearanceRegions = appearanceRegions;
             mNavbarColorManagedByIme = navbarColorManagedByIme;
             mBehavior = behavior;
-            mRequestedVisibilities = requestedVisibilities;
+            mRequestedVisibleTypes = requestedVisibleTypes;
             mPackageName = packageName;
             mLetterboxDetails = letterboxDetails;
         }
 
-        private void showTransient(@InternalInsetsType int[] types) {
-            for (int type : types) {
-                mTransientBarTypes.add(type);
-            }
+        private void showTransient(@InsetsType int types) {
+            mTransientBarTypes |= types;
         }
 
-        private void clearTransient(@InternalInsetsType int[] types) {
-            for (int type : types) {
-                mTransientBarTypes.remove(type);
-            }
+        private void clearTransient(@InsetsType int types) {
+            mTransientBarTypes &= ~types;
         }
 
         private int getDisabled1() {
@@ -1387,16 +1430,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             // TODO(b/118592525): Currently, status bar only works on the default display.
             // Make it aware of multi-display if needed.
             final UiState state = mDisplayUiState.get(DEFAULT_DISPLAY);
-            final int[] transientBarTypes = new int[state.mTransientBarTypes.size()];
-            for (int i = 0; i < transientBarTypes.length; i++) {
-                transientBarTypes[i] = state.mTransientBarTypes.valueAt(i);
-            }
             return new RegisterStatusBarResult(icons, gatherDisableActionsLocked(mCurrentUserId, 1),
                     state.mAppearance, state.mAppearanceRegions, state.mImeWindowVis,
                     state.mImeBackDisposition, state.mShowImeSwitcher,
                     gatherDisableActionsLocked(mCurrentUserId, 2), state.mImeToken,
-                    state.mNavbarColorManagedByIme, state.mBehavior, state.mRequestedVisibilities,
-                    state.mPackageName, transientBarTypes, state.mLetterboxDetails);
+                    state.mNavbarColorManagedByIme, state.mBehavior, state.mRequestedVisibleTypes,
+                    state.mPackageName, state.mTransientBarTypes, state.mLetterboxDetails);
         }
     }
 
@@ -1406,11 +1445,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             mGlobalActionListener.onGlobalActionsAvailableChanged(mBar != null);
         });
         // If StatusBarService dies, system_server doesn't get killed with it, so we need to make
-        // sure the UDFPS listener is refreshed as well. Deferring to the handler just so to avoid
+        // sure the UDFPS callback is refreshed as well. Deferring to the handler just so to avoid
         // making registerStatusBar re-entrant.
         mHandler.post(() -> {
             synchronized (mLock) {
-                setUdfpsHbmListener(mUdfpsHbmListener);
+                setUdfpsRefreshRateCallback(mUdfpsRefreshRateRequestCallback);
                 setBiometicContextListener(mBiometricContextListener);
             }
         });

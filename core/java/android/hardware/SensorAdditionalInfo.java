@@ -257,7 +257,7 @@ public class SensorAdditionalInfo {
     public static SensorAdditionalInfo createLocalGeomagneticField(
             float strength, float declination, float inclination) {
         if (strength < 10 || strength > 100 // much beyond extreme values on earth
-                || declination < 0 || declination > Math.PI
+                || declination < -Math.PI / 2 || declination > Math.PI / 2
                 || inclination < -Math.PI / 2 || inclination > Math.PI / 2) {
             throw new IllegalArgumentException("Geomagnetic field info out of range");
         }

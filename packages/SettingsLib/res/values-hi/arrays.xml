@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4K (सुरक्षित)"</item>
     <item msgid="7322156123728520872">"4K (बेहतर)"</item>
     <item msgid="7735692090314849188">"4K (बेहतर, सुरक्षित)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (ड्यूअल स्‍क्रीन)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (dual screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"कोई नहीं"</item>
@@ -281,13 +281,5 @@
     <item msgid="3825132913289380004">"RNDIS (USB ईथरनेट)"</item>
     <item msgid="8828567335701536560">"ऑडियो स्रोत"</item>
     <item msgid="8688681727755534982">"एमआईडीआई"</item>
-  </string-array>
-  <string-array name="avatar_image_descriptions">
-  </string-array>
-  <string-array name="entries_font_size">
-    <item msgid="9181293769180886675">"छोटा"</item>
-    <item msgid="1484561228522634915">"डिफ़ॉल्ट"</item>
-    <item msgid="4014311587094503943">"बड़ा"</item>
-    <item msgid="2904569270831156685">"सबसे बड़ा"</item>
   </string-array>
 </resources>

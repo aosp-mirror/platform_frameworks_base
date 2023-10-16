@@ -26,10 +26,21 @@ public class ImageFormat {
      @Retention(RetentionPolicy.SOURCE)
      @IntDef(value = {
              UNKNOWN,
+             /*
+              * Since some APIs accept either ImageFormat or PixelFormat (and the two
+              * enums do not overlap since they're both partial versions of the
+              * internal format enum), add PixelFormat values here so linting
+              * tools won't complain when method arguments annotated with
+              * ImageFormat are provided with PixelFormat values.
+              */
+             PixelFormat.RGBA_8888,
+             PixelFormat.RGBX_8888,
+             PixelFormat.RGB_888,
              RGB_565,
              YV12,
              Y8,
              Y16,
+             YCBCR_P010,
              NV16,
              NV21,
              YUY2,
@@ -49,7 +60,8 @@ public class ImageFormat {
              RAW_DEPTH,
              RAW_DEPTH10,
              PRIVATE,
-             HEIC
+             HEIC,
+             JPEG_R
      })
      public @interface Format {
      }
@@ -245,6 +257,15 @@ public class ImageFormat {
      * following ISO 16684-1:2011(E).</p>
      */
     public static final int DEPTH_JPEG = 0x69656963;
+
+    /**
+     * Compressed JPEG format that includes an embedded recovery map.
+     *
+     * <p>JPEG compressed main image along with embedded recovery map following the
+     * <a href="https://developer.android.com/guide/topics/media/hdr-image-format">Ultra HDR
+     * Image format specification</a>.</p>
+     */
+    public static final int JPEG_R = 0x1005;
 
     /**
      * <p>Multi-plane Android YUV 420 format</p>
@@ -875,6 +896,7 @@ public class ImageFormat {
             case Y8:
             case DEPTH_JPEG:
             case HEIC:
+            case JPEG_R:
                 return true;
         }
 

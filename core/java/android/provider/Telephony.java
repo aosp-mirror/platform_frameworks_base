@@ -931,6 +931,11 @@ public final class Telephony {
             /**
              * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate an sms
              * was received while the phone was in encrypted state.
+             * <p>
+             * This result code is only used on devices that use Full Disk Encryption.  Support for
+             * Full Disk Encryption was entirely removed in API level 33, having been replaced by
+             * File Based Encryption.  Devices that use File Based Encryption never reject incoming
+             * SMS messages due to the encryption state.
              */
             public static final int RESULT_SMS_RECEIVED_WHILE_ENCRYPTED = 9;
 
@@ -2046,6 +2051,14 @@ public final class Telephony {
          * <P>Type: TEXT</P>
          */
         public static final String ADDRESS = "address";
+
+        /**
+         * The subscription to which the message belongs to. Its value will be less than 0
+         * if the sub id cannot be determined.
+         * <p>Type: INTEGER (long) </p>
+         * @hide
+         */
+        public static final String SUBSCRIPTION_ID = "sub_id";
     }
 
     /**
@@ -2114,6 +2127,14 @@ public final class Telephony {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String ARCHIVED = "archived";
+
+        /**
+         * The subscription to which the message belongs to. Its value will be less than 0
+         * if the sub id cannot be determined.
+         * <p>Type: INTEGER (long) </p>
+         * @hide
+         */
+        public static final String SUBSCRIPTION_ID = "sub_id";
     }
 
     /**
@@ -2472,6 +2493,14 @@ public final class Telephony {
             public static final String CHARSET = "charset";
 
             /**
+             * The subscription to which the message belongs to. Its value will be less than 0
+             * if the sub id cannot be determined.
+             * <p>Type: INTEGER (long) </p>
+             * @hide
+             */
+            public static final String SUBSCRIPTION_ID = "sub_id";
+
+            /**
              * Generates a Addr {@link Uri} for message, used to perform Addr table operation
              * for mms.
              *
@@ -2592,6 +2621,14 @@ public final class Telephony {
             public static final String TEXT = "text";
 
             /**
+             * The subscription to which the message belongs to. Its value will be less than 0
+             * if the sub id cannot be determined.
+             * <p>Type: INTEGER (long) </p>
+             * @hide
+             */
+            public static final String SUBSCRIPTION_ID = "sub_id";
+
+            /**
              * Generates a Part {@link Uri} for message, used to perform Part table operation
              * for mms.
              *
@@ -2630,6 +2667,14 @@ public final class Telephony {
              * <P>Type: INTEGER (long)</P>
              */
             public static final String SENT_TIME = "sent_time";
+
+            /**
+             * The subscription to which the message belongs to. Its value will be less than 0
+             * if the sub id cannot be determined.
+             * <p>Type: INTEGER (long) </p>
+             * @hide
+             */
+            public static final String SUBSCRIPTION_ID = "sub_id";
         }
 
         /**
@@ -2863,6 +2908,14 @@ public final class Telephony {
              * <P>Type: TEXT</P>
              */
             public static final String INDEXED_TEXT = "index_text";
+
+            /**
+             * The subscription to which the message belongs to. Its value will be less than 0
+             * if the sub id cannot be determined.
+             * <p>Type: INTEGER (long) </p>
+             * @hide
+             */
+            public static final String SUBSCRIPTION_ID = "sub_id";
         }
     }
 
@@ -3391,8 +3444,10 @@ public final class Telephony {
         public static final int MATCH_ALL_APN_SET_ID = -1;
 
         /**
-         * A unique carrier id associated with this APN
-         * {@see TelephonyManager#getSimCarrierId()}
+         * A unique carrier id associated with this APN {@link TelephonyManager#getSimCarrierId()}
+         * In case of matching carrier information, this should be used by default instead of
+         * those fields of {@link #MCC}, {@link #MNC}, {@link #NUMERIC}, {@link #MVNO_TYPE},
+         * {@link #MVNO_MATCH_DATA}, etc.
          * <p>Type: STRING</p>
          */
         public static final String CARRIER_ID = "carrier_id";
@@ -4925,6 +4980,68 @@ public final class Telephony {
         /**
          * @return All columns in {@link SimInfo} table.
          *
+         * @hide
+         */
+        @NonNull
+        public static List<String> getAllColumns() {
+            return ALL_COLUMNS;
+        }
+    }
+
+    /**
+     * Stores incoming satellite datagrams.
+     * @hide
+     */
+    public static final class SatelliteDatagrams {
+        /**
+         * Not instantiable.
+         * @hide
+         */
+        private SatelliteDatagrams() {}
+
+        /**
+         * Provider name for Satellite Datagrams table.
+         */
+        public static final String PROVIDER_NAME = "satellite";
+
+        /**
+         * Table name for Satellite Datagrams table.
+         */
+        public static final String TABLE_NAME = "incoming_datagrams";
+
+        /**
+         * URL for satellite incoming datagrams table.
+         */
+        private static final String URL = "content://" + PROVIDER_NAME + "/" + TABLE_NAME;
+
+        /**
+         * The {@code content://} style URI for this provider.
+         * @hide
+         */
+        public static final Uri CONTENT_URI = Uri.parse(URL);
+
+        /**
+         * SatelliteProvider unique key column name is the datagram id.
+         * <P>Type: INTEGER (int)</P>
+         * @hide
+         */
+        public static final String COLUMN_UNIQUE_KEY_DATAGRAM_ID = "datagram_id";
+
+        /**
+         * SatelliteProvider column name for storing datagram.
+         * <p>TYPE: BLOB
+         * @hide
+         */
+        public static final String COLUMN_DATAGRAM = "datagram";
+
+        /** All columns in {@link SatelliteDatagrams} table. */
+        private static final List<String> ALL_COLUMNS = List.of(
+                COLUMN_UNIQUE_KEY_DATAGRAM_ID,
+                COLUMN_DATAGRAM
+        );
+
+        /**
+         * @return All columns in {@link SatelliteDatagrams} table.
          * @hide
          */
         @NonNull

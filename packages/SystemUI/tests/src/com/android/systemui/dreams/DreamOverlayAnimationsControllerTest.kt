@@ -7,11 +7,10 @@ import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dreams.complication.ComplicationHostViewController
+import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -23,8 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.anyLong
-import org.mockito.Mockito.eq
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -49,6 +47,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
     @Mock private lateinit var stateController: DreamOverlayStateController
     @Mock private lateinit var configController: ConfigurationController
     @Mock private lateinit var transitionViewModel: DreamingToLockscreenTransitionViewModel
+    @Mock private lateinit var logger: DreamLogger
     private lateinit var controller: DreamOverlayAnimationsController
 
     @Before
@@ -67,6 +66,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
                 DREAM_IN_COMPLICATIONS_ANIMATION_DURATION,
                 DREAM_IN_TRANSLATION_Y_DISTANCE,
                 DREAM_IN_TRANSLATION_Y_DURATION,
+                logger
             )
 
         val mockView: View = mock()
@@ -82,23 +82,17 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
         verify(stateController).setExitAnimationsRunning(true)
 
         val captor = argumentCaptor<Animator.AnimatorListener>()
-        verify(mockAnimator).addListener(captor.capture())
+        verify(mockAnimator, atLeastOnce()).addListener(captor.capture())
 
-        captor.value.onAnimationEnd(mockAnimator)
+        captor.allValues.forEach { it.onAnimationEnd(mockAnimator) }
         verify(stateController).setExitAnimationsRunning(false)
     }
 
     @Test
-    fun testWakeUpCallsExecutor() {
-        val mockExecutor: DelayableExecutor = mock()
-        val mockCallback: Runnable = mock()
+    fun testWakeUpSetsExitAnimationsRunning() {
+        controller.wakeUp()
 
-        controller.wakeUp(
-            doneCallback = mockCallback,
-            executor = mockExecutor,
-        )
-
-        verify(mockExecutor).executeDelayed(eq(mockCallback), anyLong())
+        verify(stateController).setExitAnimationsRunning(true)
     }
 
     @Test
@@ -109,10 +103,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
 
         verify(mockStartAnimator, never()).cancel()
 
-        controller.wakeUp(
-            doneCallback = mock(),
-            executor = mock(),
-        )
+        controller.wakeUp()
 
         // Verify that we cancelled the start animator in favor of the exit
         // animator.

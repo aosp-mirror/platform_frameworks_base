@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"डिस्कनेक्ट केले"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"अक्षम"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉंफिगरेशन अयशस्वी"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"कमी दर्जाच्या नेटवर्कमुळे कनेक्ट केलेले नाही"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi कनेक्शन अयशस्वी"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"प्रमाणीकरण समस्या"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"कनेक्ट करू शकत नाही"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'शी कनेक्‍ट करू शकत नाही"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"स्वयंचलितपणे कनेक्ट करणार नाही"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"इंटरनेट अ‍ॅक्सेस नाही"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> द्वारे सेव्ह केले"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"मर्यादित नेटवर्कशी कनेक्ट केले आहे"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s द्वारे स्वयंचलितपणे कनेक्ट केले"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"नेटवर्क रेटिंग प्रदात्याद्वारे स्वयंचलितपणे कनेक्ट केले"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s द्वारे कनेक्‍ट केले"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> द्वारे कनेक्ट केले"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s द्वारे उपलब्‍ध"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"साइन अप करण्यासाठी टॅप करा"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"इंटरनेट नाही"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"खाजगी DNS सर्व्हर ॲक्सेस करू शकत नाही"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"इंटरनेट नाही"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"साइन इन करणे आवश्यक आहे"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"अ‍ॅक्सेस पॉइंट तात्पुरते भरलेले"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s ने कनेक्‍ट केले"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s ने उपलब्‍ध"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> उघडत आहे"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"कनेक्ट करता आले नाही"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"साइन अप पूर्ण होत आहे…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"साइन अप पूर्ण करता आले नाही. पुन्हा प्रयत्न करण्यासाठी टॅप करा."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"साइन अप पूर्ण झाले. कनेक्ट करत आहे…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"खूप हळू"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"हळू"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"ठीक आहे"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"मध्‍यम"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"जलद"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"खूप जलद"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"मुदत संपली"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"पेअर करत आहे…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"कनेक्ट केले (फोन नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"कनेक्ट केले (मीडिया नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"कनेक्ट केले (मेसेज अ‍ॅक्सेस नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"कनेक्ट केले (फोन किंवा मीडिया नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"कनेक्ट केले, बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"कनेक्ट केले (फोन नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -125,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ऑडिओ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ऑडिओ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"श्रवणयंत्रे"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ऑडिओ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ऑडिओ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"श्रवण यंत्रांशी कनेक्ट केले आहे"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ऑडिओशी कनेक्ट केले आहे"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मीडिया ऑडिओवर कनेक्ट केले"</string>
@@ -212,19 +202,20 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"उच्चार पिच रीसेट करा"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"डीफॉल्टवर मजकूर ज्या पिचवर बोलला जातो तो रीसेट करा."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"खूप धीमे"</item>
-    <item msgid="1815382991399815061">"धीमे"</item>
-    <item msgid="3075292553049300105">"सामान्य"</item>
-    <item msgid="1158955023692670059">"थोडे जलद"</item>
-    <item msgid="5664310435707146591">"जलद"</item>
-    <item msgid="5491266922147715962">"खूप जलद"</item>
-    <item msgid="7659240015901486196">"शीघ्र"</item>
-    <item msgid="7147051179282410945">"अतिशीघ्र"</item>
-    <item msgid="581904787661470707">"जलद"</item>
+    <item msgid="4563475121751694801">"६०%"</item>
+    <item msgid="6323184326270638754">"८०%"</item>
+    <item msgid="2569200872125313769">"१००%"</item>
+    <item msgid="9010794089704942570">"१५०%"</item>
+    <item msgid="4634010129655810634">"२००%"</item>
+    <item msgid="8929490998534497543">"२५०%"</item>
+    <item msgid="8442352376763286772">"३००%"</item>
+    <item msgid="4446831566506165093">"३५०%"</item>
+    <item msgid="6946761421234586000">"४००%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"प्रोफाइल निवडा"</string>
     <string name="category_personal" msgid="6236798763159385225">"वैयक्तिक"</string>
     <string name="category_work" msgid="4014193632325996115">"कार्य"</string>
+    <string name="category_clone" msgid="1554511758987195974">"क्लोन करा"</string>
     <string name="development_settings_title" msgid="140296922921597393">"डेव्हलपर पर्याय"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"डेव्हलपर पर्याय सुरू करा"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"अ‍ॅप विकासासाठी पर्याय सेट करा"</string>
@@ -381,6 +372,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, समास इत्यादी दर्शवा."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट दिशानिर्देशाची सक्ती करा"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सर्व लोकॅलसाठी RTL स्क्रीन लेआउट दिशानिर्देशाची सक्ती करा"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"पारदर्शक नेव्हिगेशन बार"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"नेव्हिगेशन बार बॅकग्राउंडचा रंग बाय डीफॉल्ट पारदर्शक करा"</string>
     <string name="window_blurs" msgid="6831008984828425106">"विंडो पातळीवरील ब्लरना अनुमती द्या"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ची सक्ती करा"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ॲप्समध्ये 4x MSAA सुरू करा"</string>
@@ -527,6 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"जास्त वेळ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कमी वेळ."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>
+    <string name="next" msgid="2699398661093607009">"पुढील"</string>
+    <string name="back" msgid="5554327870352703710">"मागे जा"</string>
+    <string name="save" msgid="3745809743277153149">"सेव्ह करा"</string>
     <string name="okay" msgid="949938843324579502">"ठीक आहे"</string>
     <string name="done" msgid="381184316122520313">"पूर्ण झाले"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
@@ -549,7 +545,17 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"आत्ताच"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"हा फोन"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"हा टॅबलेट"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"डॉक स्पीकर"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"बाह्य डिव्हाइस"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"कनेक्ट केलेले डिव्हाइस"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"हा फोन"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"या डिव्हाइसवर प्ले करू शकत नाही"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"स्विच करण्यासाठी खाते अपग्रेड करा"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"येथे डाउनलोड प्ले केले जाऊ शकत नाहीत"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"जाहिरातीनंतर पुन्हा प्रयत्न करा"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"येथे प्ले करण्यासाठी डिव्हाइस सुरू करा"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"डिव्हाइसला प्ले करण्यासाठी मंजुरी नाही"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"हा मीडिया येथे प्ले करू शकत नाही"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्‍ट करण्‍यात समस्‍या आली. डिव्हाइस बंद करा आणि नंतर सुरू करा"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर असलेले ऑडिओ डिव्हाइस"</string>
     <string name="help_label" msgid="3528360748637781274">"मदत आणि फीडबॅक"</string>
@@ -574,6 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"नवीन वापरकर्ता जोडायचा?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"अतिरिक्त वापरकर्ते तयार करून तुम्ही इतर लोकांसोबत हे डिव्हाइस शेअर करू शकता. प्रत्येक वापरकर्त्यास त्यांची स्वतःची स्पेस असते, जी ते अ‍ॅप्स, वॉलपेपर आणि यासारख्या गोष्टींनी कस्टमाइझ करू शकतात. वापरकर्ते प्रत्येकाला प्रभावित करणाऱ्या वाय-फाय सारख्या डिव्हाइस सेटिंग्ज अ‍ॅडजस्ट देखील करू शकतात.\n\nतुम्ही एक नवीन वापरकर्ता जोडता, तेव्हा त्या व्यक्तीला त्याची स्पेस सेट अप करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो. अ‍ॅक्सेसिबिलिटी सेटिंग्ज आणि सेवा नवीन वापरकर्त्याला कदाचित ट्रान्सफर होणार नाहीत."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"तुम्ही एक नवीन वापरकर्ता जोडता, तेव्हा त्या व्यक्तीस त्यांची स्पेस सेट करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"या वापरकर्त्याला ॲडमिन करायचे का?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ॲडमिनकडे खास विशेषाधिकार आहेत जे इतर वापरकर्त्यांकडे नसतात. ॲडमिन सर्व वापरकर्ते व्यवस्थापित करू शकतो, हे डिव्हाइस अपडेट करू शकतो किंवा रीसेट करू शकतो, सेटिंग्जमध्ये सुधारणा करू शकतो, सर्व इंस्टॉल केलेली अ‍ॅप्स पाहू शकतो आणि इतरांसाठी ॲडमिनचे विशेषाधिकार मंजूर करू शकतो किंवा रद्द करू शकतो."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ॲडमिन करा"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"आता वापरकर्ता सेट करायचा?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"तो वापरकर्ता डिव्हाइसजवळ आहे आणि त्याचे स्थान सेट करण्यासाठी उपलब्ध आहे याची खात्री करा"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"आता प्रोफाईल सेट करायचा?"</string>
@@ -605,6 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"हे नवीन अतिथी सत्र सुरू करेल आणि सध्याच्या सत्रातील सर्व अ‍ॅप्स व डेटा हटवेल"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"अतिथी मोडमधून बाहेर पडायचे का?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"हे सध्याच्या अतिथी सत्रातील अ‍ॅप्स आणि डेटा हटवेल"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"होय, त्यांना ॲडमिन करा"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"नाही, त्यांना ॲडमिन करू नका"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहेर पडा"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"अतिथी अ‍ॅक्टिव्हिटी सेव्ह करायची का?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"सध्याच्या सत्रातील अ‍ॅक्टिव्हिटी सेव्ह करू किंवा सर्व अ‍ॅप्स व डेटा हटवू शकता"</string>
@@ -672,4 +683,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"पूर्वानुमानित मागे जाण्याचे अ‍ॅनिमेशन"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"पूर्वानुमानित मागे जाण्यासाठीचे सिस्टीम अ‍ॅनिमेशन सुरू करा."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"हे सेटिंग पूर्वानुमानित जेश्चर ॲनिमेशनसाठी सिस्टीम ॲनिमेशन सुरू करते. यासाठी मॅनिफेस्ट फाइलमध्ये प्रति ॲप enableOnBackInvokedCallback सत्य वर सेट करणे आवश्यक आहे."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"डावीकडे हलवा"</item>
+    <item msgid="5425394847942513942">"खाली हलवा"</item>
+    <item msgid="7728484337962740316">"उजवीकडे हलवा"</item>
+    <item msgid="324200556467459329">"वरती हलवा"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

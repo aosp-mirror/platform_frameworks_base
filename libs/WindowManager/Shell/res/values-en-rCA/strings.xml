@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Settings"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Enter split screen"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Picture-in-Picture Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> is in picture-in-picture"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"If you don\'t want <xliff:g id="NAME">%s</xliff:g> to use this feature, tap to open settings and turn it off."</string>
     <string name="pip_play" msgid="3496151081459417097">"Play"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Resize"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Stash"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"App may not work with split-screen."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"App does not support split-screen."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"App may not work with split screen"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"App does not support split screen"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"This app can only be opened in 1 window."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"App may not work on a secondary display."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"App does not support launch on secondary displays."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Split-screen divider"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Split screen divider"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Split screen divider"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Left full screen"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Left 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Left 50%"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Didn’t fix it?\nTap to revert"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"No camera issues? Tap to dismiss."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"See and do more"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Drag in another app for split-screen"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Drag in another app for split screen"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Double-tap outside an app to reposition it"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Got it"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Expand for more information."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="close_text" msgid="4986518933445178928">"Close"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Close Menu"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Open Menu"</string>
 </resources>

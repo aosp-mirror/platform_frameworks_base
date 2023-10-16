@@ -66,7 +66,15 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     private val systemClock = FakeSystemClock()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val tableLogBuffer = TableLogBuffer(maxSize = 100, name = "TestName", systemClock)
+    private val tableLogBuffer =
+        TableLogBuffer(
+            maxSize = 100,
+            name = "TestName",
+            systemClock,
+            mock(),
+            testDispatcher,
+            testScope.backgroundScope,
+        )
     private val mobileFactory = mock<MobileConnectionRepositoryImpl.Factory>()
     private val carrierMergedFactory = mock<CarrierMergedConnectionRepository.Factory>()
 
@@ -292,9 +300,16 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `factory - reuses log buffers for same connection`() =
+    fun factory_reusesLogBuffersForSameConnection() =
         testScope.runTest {
-            val realLoggerFactory = TableLogBufferFactory(mock(), FakeSystemClock())
+            val realLoggerFactory =
+                TableLogBufferFactory(
+                    mock(),
+                    FakeSystemClock(),
+                    mock(),
+                    testDispatcher,
+                    testScope.backgroundScope,
+                )
 
             val factory =
                 FullMobileConnectionRepository.Factory(
@@ -327,9 +342,16 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `factory - reuses log buffers for same sub ID even if carrier merged`() =
+    fun factory_reusesLogBuffersForSameSubIDevenIfCarrierMerged() =
         testScope.runTest {
-            val realLoggerFactory = TableLogBufferFactory(mock(), FakeSystemClock())
+            val realLoggerFactory =
+                TableLogBufferFactory(
+                    mock(),
+                    FakeSystemClock(),
+                    mock(),
+                    testDispatcher,
+                    testScope.backgroundScope,
+                )
 
             val factory =
                 FullMobileConnectionRepository.Factory(
@@ -378,24 +400,24 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             // WHEN we set up some mobile connection info
             val serviceState = ServiceState()
             serviceState.setOperatorName("longName", "OpTypical", "1")
-            serviceState.isEmergencyOnly = false
+            serviceState.isEmergencyOnly = true
             getTelephonyCallbackForType<TelephonyCallback.ServiceStateListener>(telephonyManager)
                 .onServiceStateChanged(serviceState)
 
             // THEN it's logged to the buffer
             assertThat(dumpBuffer()).contains("$COL_OPERATOR${BUFFER_SEPARATOR}OpTypical")
-            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}false")
+            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}true")
 
             // WHEN we update mobile connection info
             val serviceState2 = ServiceState()
             serviceState2.setOperatorName("longName", "OpDiff", "1")
-            serviceState2.isEmergencyOnly = true
+            serviceState2.isEmergencyOnly = false
             getTelephonyCallbackForType<TelephonyCallback.ServiceStateListener>(telephonyManager)
                 .onServiceStateChanged(serviceState2)
 
             // THEN the updates are logged
             assertThat(dumpBuffer()).contains("$COL_OPERATOR${BUFFER_SEPARATOR}OpDiff")
-            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}true")
+            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}false")
 
             emergencyJob.cancel()
             operatorJob.cancel()
@@ -593,7 +615,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
         val realRepo =
             MobileConnectionRepositoryImpl(
-                context,
                 SUB_ID,
                 defaultNetworkName = NetworkNameModel.Default("default"),
                 networkNameSeparator = SEP,

@@ -22,8 +22,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.view.InsetsState.ITYPE_BOTTOM_GENERIC_OVERLAY;
-import static android.view.InsetsState.ITYPE_TOP_GENERIC_OVERLAY;
+import static android.view.WindowInsets.Type.systemOverlays;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -55,6 +54,8 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -70,11 +71,13 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -481,7 +484,7 @@ public class WindowContainerTests extends WindowTestsBase {
                 windowState.mSurfaceAnimator).getAnimationType();
         assertTrue(parent.isAnimating(CHILDREN));
 
-        windowState.setControllableInsetProvider(mock(WindowContainerInsetsSourceProvider.class));
+        windowState.setControllableInsetProvider(mock(InsetsSourceProvider.class));
         assertFalse(parent.isAnimating(CHILDREN));
     }
 
@@ -656,6 +659,111 @@ public class WindowContainerTests extends WindowTestsBase {
         visibleUnspecifiedRootChild.setFillsParent(true);
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, visibleUnspecifiedRootChild.getOrientation());
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, root.getOrientation());
+    }
+
+    @Test
+    public void testSetVisibleRequested() {
+        final TestWindowContainer root = spy(new TestWindowContainerBuilder(mWm).setLayer(
+                0).build());
+        assertThat(root.isVisibleRequested()).isFalse();
+        final TestWindowContainerListener listener = new TestWindowContainerListener();
+        root.registerWindowContainerListener(listener);
+
+        assertThat(root.setVisibleRequested(/* isVisible= */ false)).isFalse();
+        assertThat(root.isVisibleRequested()).isFalse();
+
+        assertThat(root.setVisibleRequested(/* isVisible= */ true)).isTrue();
+        assertThat(root.isVisibleRequested()).isTrue();
+        assertThat(listener.mIsVisibleRequested).isTrue();
+    }
+
+    @Test
+    public void testSetVisibleRequested_childRequestsVisible() {
+        final TestWindowContainer root = spy(new TestWindowContainerBuilder(mWm).setLayer(
+                0).build());
+        final TestWindowContainer child1 = root.addChildWindow();
+        assertThat(child1.isVisibleRequested()).isFalse();
+        final TestWindowContainerListener listener = new TestWindowContainerListener();
+        root.registerWindowContainerListener(listener);
+
+        // Hidden root and child request hidden.
+        assertThat(root.setVisibleRequested(/* isVisible= */ false)).isFalse();
+        assertThat(listener.mIsVisibleRequested).isFalse();
+        assertThat(child1.isVisibleRequested()).isFalse();
+
+        // Child requests to be visible, so child and root request visible.
+        assertThat(child1.setVisibleRequested(/* isVisible= */ true)).isTrue();
+        assertThat(root.isVisibleRequested()).isTrue();
+        assertThat(listener.mIsVisibleRequested).isTrue();
+        assertThat(child1.isVisibleRequested()).isTrue();
+        // Visible request didn't change.
+        assertThat(child1.setVisibleRequested(/* isVisible= */ true)).isFalse();
+        verify(root, times(2)).onChildVisibleRequestedChanged(child1);
+    }
+
+    @Test
+    public void testSetVisibleRequested_childRequestsHidden() {
+        final TestWindowContainer root = spy(new TestWindowContainerBuilder(mWm).setLayer(
+                0).build());
+        final TestWindowContainer child1 = root.addChildWindow();
+        assertThat(child1.isVisibleRequested()).isFalse();
+        final TestWindowContainerListener listener = new TestWindowContainerListener();
+        root.registerWindowContainerListener(listener);
+
+        // Root and child requests visible.
+        assertThat(root.setVisibleRequested(/* isVisible= */ true)).isTrue();
+        assertThat(listener.mIsVisibleRequested).isTrue();
+        assertThat(child1.setVisibleRequested(/* isVisible= */ true)).isTrue();
+        assertThat(child1.isVisibleRequested()).isTrue();
+
+        // Child requests hidden, so child and root request hidden.
+        assertThat(child1.setVisibleRequested(/* isVisible= */ false)).isTrue();
+        assertThat(root.isVisibleRequested()).isFalse();
+        assertThat(listener.mIsVisibleRequested).isFalse();
+        assertThat(child1.isVisibleRequested()).isFalse();
+        // Visible request didn't change.
+        assertThat(child1.setVisibleRequested(/* isVisible= */ false)).isFalse();
+        verify(root, times(3)).onChildVisibleRequestedChanged(child1);
+    }
+
+    @Test
+    public void testOnChildVisibleRequestedChanged_bothVisible() {
+        final TestWindowContainer root = spy(new TestWindowContainerBuilder(mWm).setLayer(
+                0).build());
+        final TestWindowContainer child1 = root.addChildWindow();
+
+        // Child and root request visible.
+        assertThat(root.setVisibleRequested(/* isVisible= */ true)).isTrue();
+        assertThat(child1.setVisibleRequested(/* isVisible= */ true)).isTrue();
+
+        // Visible request already updated on root when child requested.
+        assertThat(root.onChildVisibleRequestedChanged(child1)).isFalse();
+    }
+
+    @Test
+    public void testOnChildVisibleRequestedChanged_childVisible() {
+        final TestWindowContainer root = spy(new TestWindowContainerBuilder(mWm).setLayer(
+                0).build());
+        final TestWindowContainer child1 = root.addChildWindow();
+
+        assertThat(root.setVisibleRequested(/* isVisible= */ false)).isFalse();
+        assertThat(child1.setVisibleRequested(/* isVisible= */ true)).isTrue();
+
+        // Visible request already updated on root when child requested.
+        assertThat(root.onChildVisibleRequestedChanged(child1)).isFalse();
+    }
+
+    @Test
+    public void testOnChildVisibleRequestedChanged_childHidden() {
+        final TestWindowContainer root = spy(new TestWindowContainerBuilder(mWm).setLayer(
+                0).build());
+        final TestWindowContainer child1 = root.addChildWindow();
+
+        assertThat(root.setVisibleRequested(/* isVisible= */ false)).isFalse();
+        assertThat(child1.setVisibleRequested(/* isVisible= */ false)).isFalse();
+
+        // Visible request did not change.
+        assertThat(root.onChildVisibleRequestedChanged(child1)).isFalse();
     }
 
     @Test
@@ -1004,7 +1112,7 @@ public class WindowContainerTests extends WindowTestsBase {
                     }
 
                     @Override
-                    public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                    public void onAnimationCancelled() {
                     }
                 }, 0, 0, false);
         adapter.setCallingPidUid(123, 456);
@@ -1175,8 +1283,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testStartChangeTransitionWhenPreviousIsNotFinished() {
-        final WindowContainer container = createTaskFragmentWithParentTask(
-                createTask(mDisplayContent), false);
+        final WindowContainer container = createTaskFragmentWithActivity(
+                createTask(mDisplayContent));
         container.mSurfaceControl = mock(SurfaceControl.class);
         final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
         final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
@@ -1239,8 +1347,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testUnfreezeWindow_removeWindowFromChanging() {
-        final WindowContainer container = createTaskFragmentWithParentTask(
-                createTask(mDisplayContent), false);
+        final WindowContainer container = createTaskFragmentWithActivity(
+                createTask(mDisplayContent));
         mockSurfaceFreezerSnapshot(container.mSurfaceFreezer);
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
 
@@ -1255,8 +1363,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testFailToTaskSnapshot_unfreezeWindow() {
-        final WindowContainer container = createTaskFragmentWithParentTask(
-                createTask(mDisplayContent), false);
+        final WindowContainer container = createTaskFragmentWithActivity(
+                createTask(mDisplayContent));
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         spyOn(container.mSurfaceFreezer);
 
@@ -1269,8 +1377,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveUnstartedFreezeSurfaceWhenFreezeAgain() {
-        final WindowContainer container = createTaskFragmentWithParentTask(
-                createTask(mDisplayContent), false);
+        final WindowContainer container = createTaskFragmentWithActivity(
+                createTask(mDisplayContent));
         container.mSurfaceControl = mock(SurfaceControl.class);
         final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
         mockSurfaceFreezerSnapshot(surfaceFreezer);
@@ -1329,40 +1437,44 @@ public class WindowContainerTests extends WindowTestsBase {
         activity2.addWindow(createWindowState(attrs2, activity2));
         Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
         Rect genericOverlayInsetsRect2 = new Rect(0, 0, 1080, 200);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect1);
+        final InsetsFrameProvider provider2 =
+                new InsetsFrameProvider(null, 2, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect2);
+        final int sourceId1 = provider1.getId();
+        final int sourceId2 = provider2.getId();
 
-        rootTask.addLocalRectInsetsSourceProvider(genericOverlayInsetsRect1,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
-        container.addLocalRectInsetsSourceProvider(genericOverlayInsetsRect2,
-                new int[]{ITYPE_BOTTOM_GENERIC_OVERLAY});
+        rootTask.addLocalInsetsFrameProvider(provider1);
+        container.addLocalInsetsFrameProvider(provider2);
 
         InsetsSource genericOverlayInsetsProvider1Source = new InsetsSource(
-                ITYPE_TOP_GENERIC_OVERLAY);
+                sourceId1, systemOverlays());
         genericOverlayInsetsProvider1Source.setFrame(genericOverlayInsetsRect1);
         genericOverlayInsetsProvider1Source.setVisible(true);
         InsetsSource genericOverlayInsetsProvider2Source = new InsetsSource(
-                ITYPE_BOTTOM_GENERIC_OVERLAY);
+                sourceId2, systemOverlays());
         genericOverlayInsetsProvider2Source.setFrame(genericOverlayInsetsRect2);
         genericOverlayInsetsProvider2Source.setVisible(true);
 
         activity0.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId1).getFrame());
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId2));
         }, true);
         activity1.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId1).getFrame());
             assertEquals(genericOverlayInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY)
-                            .getFrame());
+                    window.getInsetsState().peekSource(sourceId2).getFrame());
         }, true);
         activity2.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId1).getFrame());
             assertEquals(genericOverlayInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY)
-                            .getFrame());
+                    window.getInsetsState().peekSource(sourceId2).getFrame());
         }, true);
     }
 
@@ -1382,22 +1494,28 @@ public class WindowContainerTests extends WindowTestsBase {
         attrs.setTitle("AppWindow0");
         activity0.addWindow(createWindowState(attrs, activity0));
 
-        Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
-        Rect genericOverlayInsetsRect2 = new Rect(0, 0, 1080, 200);
+        final Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
+        final Rect genericOverlayInsetsRect2 = new Rect(0, 0, 1080, 200);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect1);
+        final InsetsFrameProvider provider2 =
+                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect2);
+        final int sourceId1 = provider1.getId();
+        final int sourceId2 = provider2.getId();
 
-        rootTask.addLocalRectInsetsSourceProvider(genericOverlayInsetsRect1,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        rootTask.addLocalInsetsFrameProvider(provider1);
         activity0.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId1).getFrame());
         }, true);
 
-        rootTask.addLocalRectInsetsSourceProvider(genericOverlayInsetsRect2,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        rootTask.addLocalInsetsFrameProvider(provider2);
 
         activity0.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId2).getFrame());
         }, true);
     }
 
@@ -1435,35 +1553,42 @@ public class WindowContainerTests extends WindowTestsBase {
         activity2.addWindow(createWindowState(attrs2, activity2));
 
         activity2.addWindow(createWindowState(attrs2, activity2));
-        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
-        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
 
-        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
-        container.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
-                new int[]{ITYPE_BOTTOM_GENERIC_OVERLAY});
+        final Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        final Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(navigationBarInsetsRect1);
+        final InsetsFrameProvider provider2 =
+                new InsetsFrameProvider(null, 2, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(navigationBarInsetsRect2);
+        final int sourceId1 = provider1.getId();
+        final int sourceId2 = provider2.getId();
+
+        rootTask.addLocalInsetsFrameProvider(provider1);
+        container.addLocalInsetsFrameProvider(provider2);
         mDisplayContent.getInsetsStateController().onPostLayout();
-        rootTask.removeLocalInsetsSourceProvider(new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        rootTask.removeLocalInsetsFrameProvider(provider1);
         mDisplayContent.getInsetsStateController().onPostLayout();
 
         activity0.forAllWindows(window -> {
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId1));
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId2));
         }, true);
         activity1.forAllWindows(window -> {
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId1));
             assertEquals(navigationBarInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY)
+                    window.getInsetsState().peekSource(sourceId2)
                                     .getFrame());
         }, true);
         activity2.forAllWindows(window -> {
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId1));
             assertEquals(navigationBarInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY)
+                    window.getInsetsState().peekSource(sourceId2)
                             .getFrame());
         }, true);
     }
@@ -1655,6 +1780,7 @@ public class WindowContainerTests extends WindowTestsBase {
     private static class TestWindowContainerListener implements WindowContainerListener {
         private Configuration mConfiguration = new Configuration();
         private DisplayContent mDisplayContent;
+        private boolean mIsVisibleRequested;
 
         @Override
         public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
@@ -1664,6 +1790,11 @@ public class WindowContainerTests extends WindowTestsBase {
         @Override
         public void onDisplayChanged(DisplayContent dc) {
             mDisplayContent = dc;
+        }
+
+        @Override
+        public void onVisibleRequestedChanged(boolean isVisibleRequested) {
+            mIsVisibleRequested = isVisibleRequested;
         }
     }
 }

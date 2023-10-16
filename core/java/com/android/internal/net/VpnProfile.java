@@ -216,7 +216,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
         excludeLocalRoutes = in.readBoolean();
         requiresInternetValidation = in.readBoolean();
         final PersistableBundle bundle =
-                in.readParcelable(PersistableBundle.class.getClassLoader());
+                in.readParcelable(PersistableBundle.class.getClassLoader(), android.os.PersistableBundle.class);
         ikeTunConnParams = (bundle == null) ? null
                 : TunnelConnectionParamsUtils.fromPersistableBundle(bundle);
         automaticNattKeepaliveTimerEnabled = in.readBoolean();

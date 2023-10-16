@@ -16,7 +16,6 @@
 #ifndef DRAWFRAMETASK_H
 #define DRAWFRAMETASK_H
 
-#include <android/performance_hint.h>
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 #include <utils/StrongPointer.h>
@@ -28,8 +27,16 @@
 #include "../Rect.h"
 #include "../TreeInfo.h"
 #include "RenderTask.h"
+#include "SkColorSpace.h"
+#include "SwapBehavior.h"
+#include "utils/TimeUtils.h"
+#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
+#include <android/hardware_buffer.h>
+#endif
+#include "HardwareBufferRenderParams.h"
 
 namespace android {
+
 namespace uirenderer {
 
 class DeferredLayerUpdater;
@@ -61,8 +68,7 @@ public:
     DrawFrameTask();
     virtual ~DrawFrameTask();
 
-    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode,
-                    int32_t uiThreadId, int32_t renderThreadId);
+    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode);
     void setContentDrawBounds(int left, int top, int right, int bottom) {
         mContentDrawBounds.set(left, top, right, bottom);
     }
@@ -90,21 +96,13 @@ public:
 
     void forceDrawNextFrame() { mForceDrawFrame = true; }
 
-    void createHintSession(pid_t uiThreadId, pid_t renderThreadId);
+    void setHardwareBufferRenderParams(const HardwareBufferRenderParams& params) {
+        mHardwareBufferParams = params;
+    }
+
+    void setRenderSdrHdrRatio(float ratio) { mRenderSdrHdrRatio = ratio; }
 
 private:
-    class HintSessionWrapper {
-    public:
-        HintSessionWrapper(int32_t uiThreadId, int32_t renderThreadId);
-        ~HintSessionWrapper();
-
-        void updateTargetWorkDuration(long targetDurationNanos);
-        void reportActualWorkDuration(long actualDurationNanos);
-
-    private:
-        APerformanceHintSession* mHintSession = nullptr;
-    };
-
     void postAndWait();
     bool syncFrameState(TreeInfo& info);
     void unblockUiThread();
@@ -115,9 +113,8 @@ private:
     RenderThread* mRenderThread;
     CanvasContext* mContext;
     RenderNode* mTargetNode = nullptr;
-    int32_t mUiThreadId = -1;
-    int32_t mRenderThreadId = -1;
     Rect mContentDrawBounds;
+    float mRenderSdrHdrRatio = 1.f;
 
     /*********************************************
      *  Single frame data
@@ -129,13 +126,10 @@ private:
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 
+    HardwareBufferRenderParams mHardwareBufferParams;
     std::function<std::function<void(bool)>(int32_t, int64_t)> mFrameCallback;
     std::function<void(bool)> mFrameCommitCallback;
     std::function<void()> mFrameCompleteCallback;
-
-    nsecs_t mLastDequeueBufferDuration = 0;
-    nsecs_t mLastTargetWorkDuration = 0;
-    std::optional<HintSessionWrapper> mHintSessionWrapper;
 
     bool mForceDrawFrame = false;
 };

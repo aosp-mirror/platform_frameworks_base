@@ -149,11 +149,12 @@ public class SecurityControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetDeviceOwnerType() {
+    public void testIsFinancedDevice() {
+        when(mDevicePolicyManager.isFinancedDevice()).thenReturn(true);
+        // TODO(b/259908270): remove
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
-        assertEquals(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT),
-                DEVICE_OWNER_TYPE_FINANCED);
+        assertEquals(mSecurityController.isFinancedDevice(), true);
     }
 
     @Test

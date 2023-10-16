@@ -19,6 +19,15 @@ package com.android.server.notification;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
+import static android.service.notification.NotificationListenerService.REASON_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
+import static android.service.notification.NotificationStats.DISMISSAL_OTHER;
+
+import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_CLICK;
+import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_GROUP_SUMMARY_CANCELED;
+import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_USER_OTHER;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -129,5 +138,44 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
         // Set foreground service
         p.r.getSbn().getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         assertTrue(NotificationRecordLogger.isForegroundService(p.r));
+    }
+
+
+    @Test
+    public void testIsNonDismissible_hasFlagNoDismiss_shouldReturnTrue() {
+        // Given: a notification pair's notification has flag FLAG_NO_DISMISS
+        NotificationRecordLogger.NotificationRecordPair p = getNotificationRecordPair(
+                0, null);
+        p.r.getNotification().flags |= Notification.FLAG_NO_DISMISS;
+
+        // When: check the value of isNonDismissible()
+        // Then: should return true
+        assertTrue(NotificationRecordLogger.isNonDismissible(p.r));
+    }
+
+    @Test
+    public void testIsNonDismissible_noFlagNoDismiss_shouldReturnFalse() {
+        // Given: a notification pair's notification doesn't have flag FLAG_NO_DISMISS
+        NotificationRecordLogger.NotificationRecordPair p = getNotificationRecordPair(
+                0, null);
+        p.r.getNotification().flags &= ~Notification.FLAG_NO_DISMISS;
+
+        // When: check the value of isNonDismissible()
+        // Then: should return false
+        assertFalse(NotificationRecordLogger.isNonDismissible(p.r));
+    }
+
+    @Test
+    public void testBubbleGroupSummaryDismissal() {
+        assertEquals(NOTIFICATION_CANCEL_GROUP_SUMMARY_CANCELED,
+                NotificationRecordLogger.NotificationCancelledEvent.fromCancelReason(
+                REASON_GROUP_SUMMARY_CANCELED, DISMISSAL_BUBBLE));
+    }
+
+    @Test
+    public void testOtherNotificationCancel() {
+        assertEquals(NOTIFICATION_CANCEL_USER_OTHER,
+                NotificationRecordLogger.NotificationCancelledEvent.fromCancelReason(
+                        REASON_CANCEL, DISMISSAL_OTHER));
     }
 }

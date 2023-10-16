@@ -79,14 +79,15 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.MediumTest;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -149,8 +150,8 @@ public class TaskTests extends WindowTestsBase {
     public void testRemoveContainer_multipleNestedTasks() {
         final Task rootTask = createTask(mDisplayContent);
         rootTask.mCreatedByOrganizer = true;
-        final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
-        final Task task2 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task1 = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
+        final Task task2 = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final ActivityRecord activity1 = createActivityRecord(task1);
         final ActivityRecord activity2 = createActivityRecord(task2);
         activity1.setVisible(false);
@@ -439,6 +440,24 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPropagateFocusedStateToRootTask() {
+        final Task rootTask = createTask(mDefaultDisplay);
+        final Task leafTask = createTaskInRootTask(rootTask, 0 /* userId */);
+
+        final ActivityRecord activity = createActivityRecord(leafTask);
+
+        leafTask.getDisplayContent().setFocusedApp(activity);
+
+        assertTrue(leafTask.getTaskInfo().isFocused);
+        assertTrue(rootTask.getTaskInfo().isFocused);
+
+        leafTask.getDisplayContent().setFocusedApp(null);
+
+        assertFalse(leafTask.getTaskInfo().isFocused);
+        assertFalse(rootTask.getTaskInfo().isFocused);
+    }
+
+    @Test
     public void testReturnsToHomeRootTask() throws Exception {
         final Task task = createTask(1);
         spyOn(task);
@@ -484,7 +503,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setBounds(parentBounds);
         parentConfig.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
@@ -514,6 +533,34 @@ public class TaskTests extends WindowTestsBase {
 
         assertEquals(reqBounds.width(), task.getBounds().width());
         assertEquals(reqBounds.height(), task.getBounds().height());
+    }
+
+    /** Tests that the task bounds adjust properly to changes between FULLSCREEN and FREEFORM */
+    @Test
+    public void testBoundsOnModeChangeFreeformToFullscreen() {
+        DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
+        Task rootTask = new TaskBuilder(mSupervisor).setDisplay(display).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        Task task = rootTask.getBottomMostTask();
+        task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+        DisplayInfo info = new DisplayInfo();
+        display.mDisplay.getDisplayInfo(info);
+        final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
+        final Rect freeformBounds = new Rect(fullScreenBounds);
+        freeformBounds.inset((int) (freeformBounds.width() * 0.2),
+                (int) (freeformBounds.height() * 0.2));
+        task.setBounds(freeformBounds);
+
+        assertEquals(freeformBounds, task.getBounds());
+
+        // FULLSCREEN inherits bounds
+        rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertEquals(fullScreenBounds, task.getBounds());
+        assertEquals(freeformBounds, task.mLastNonFullscreenBounds);
+
+        // FREEFORM restores bounds
+        rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(freeformBounds, task.getBounds());
     }
 
     /**
@@ -787,7 +834,7 @@ public class TaskTests extends WindowTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         mAtm.mContext.getDisplay().getDisplayInfo(displayInfo);
         final int displayHeight = displayInfo.logicalHeight;
-        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final Configuration inOutConfig = new Configuration();
         final Configuration parentConfig = new Configuration();
         final int longSide = 1200;
@@ -851,6 +898,7 @@ public class TaskTests extends WindowTestsBase {
                 new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME, targetClassName);
 
         final Intent intent = new Intent();
+        intent.setPackage(DEFAULT_COMPONENT_PACKAGE_NAME);
         intent.setComponent(aliasComponent);
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
@@ -1280,17 +1328,16 @@ public class TaskTests extends WindowTestsBase {
         spyOn(persister);
 
         final Task task = getTestTask();
-        task.setHasBeenVisible(false);
+        task.setHasBeenVisible(true);
         task.getDisplayContent()
                 .getDefaultTaskDisplayArea()
-                .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
-        task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                .setWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
         final DisplayContent oldDisplay = task.getDisplayContent();
 
         LaunchParamsController.LaunchParams params = new LaunchParamsController.LaunchParams();
-        params.mWindowingMode = WINDOWING_MODE_UNDEFINED;
         persister.getLaunchParams(task, null, params);
-        assertEquals(WINDOWING_MODE_UNDEFINED, params.mWindowingMode);
+        assertEquals(WINDOWING_MODE_FREEFORM, params.mWindowingMode);
 
         task.setHasBeenVisible(true);
         task.removeImmediately();
@@ -1298,7 +1345,7 @@ public class TaskTests extends WindowTestsBase {
         verify(persister).saveTask(task, oldDisplay);
 
         persister.getLaunchParams(task, null, params);
-        assertEquals(WINDOWING_MODE_FULLSCREEN, params.mWindowingMode);
+        assertEquals(WINDOWING_MODE_FREEFORM, params.mWindowingMode);
     }
 
     @Test
@@ -1442,10 +1489,8 @@ public class TaskTests extends WindowTestsBase {
     @Test
     public void testResumeTask_doNotResumeTaskFragmentBehindTranslucent() {
         final Task task = createTask(mDisplayContent);
-        final TaskFragment tfBehind = createTaskFragmentWithParentTask(
-                task, false /* createEmbeddedTask */);
-        final TaskFragment tfFront = createTaskFragmentWithParentTask(
-                task, false /* createEmbeddedTask */);
+        final TaskFragment tfBehind = createTaskFragmentWithActivity(task);
+        final TaskFragment tfFront = createTaskFragmentWithActivity(task);
         spyOn(tfFront);
         doReturn(true).when(tfFront).isTranslucent(any());
 
@@ -1465,8 +1510,8 @@ public class TaskTests extends WindowTestsBase {
     @Test
     public void testGetTaskFragment() {
         final Task parentTask = createTask(mDisplayContent);
-        final TaskFragment tf0 = createTaskFragmentWithParentTask(parentTask);
-        final TaskFragment tf1 = createTaskFragmentWithParentTask(parentTask);
+        final TaskFragment tf0 = createTaskFragmentWithActivity(parentTask);
+        final TaskFragment tf1 = createTaskFragmentWithActivity(parentTask);
 
         assertNull("Could not find it because there's no organized TaskFragment",
                 parentTask.getTaskFragment(TaskFragment::isOrganizedTaskFragment));
@@ -1481,7 +1526,6 @@ public class TaskTests extends WindowTestsBase {
     public void testReorderActivityToFront() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final Task task =  new TaskBuilder(mSupervisor).setCreateActivity(true).build();
-        doNothing().when(task).onActivityVisibleRequestedChanged();
         final ActivityRecord activity = task.getTopMostActivity();
 
         final TaskFragment fragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1508,7 +1552,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
 
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setAppBounds(parentBounds);

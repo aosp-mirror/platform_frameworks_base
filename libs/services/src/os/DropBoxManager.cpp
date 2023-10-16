@@ -196,7 +196,7 @@ DropBoxManager::addData(const String16& tag, uint8_t const* data,
     vector<uint8_t> dataArg;
     dataArg.assign(data, data + size);
     Status status = service->addData(tag, dataArg, flags);
-    ALOGD("service->add returned %s", status.toString8().string());
+    ALOGD("service->add returned %s", status.toString8().c_str());
     return status;
 }
 
@@ -230,7 +230,7 @@ DropBoxManager::addFile(const String16& tag, int fd, int flags)
     android::base::unique_fd uniqueFd(fd);
     android::os::ParcelFileDescriptor parcelFd(std::move(uniqueFd));
     Status status = service->addFile(tag, parcelFd, flags);
-    ALOGD("service->add returned %s", status.toString8().string());
+    ALOGD("service->add returned %s", status.toString8().c_str());
     return status;
 }
 

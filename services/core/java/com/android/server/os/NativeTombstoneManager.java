@@ -109,6 +109,13 @@ public final class NativeTombstoneManager {
 
     private void handleTombstone(File path) {
         final String filename = path.getName();
+
+        // Clean up temporary files if they made it this far (e.g. if system server crashes).
+        if (filename.endsWith(".tmp")) {
+            path.delete();
+            return;
+        }
+
         if (!filename.startsWith("tombstone_")) {
             return;
         }
@@ -560,7 +567,15 @@ public final class NativeTombstoneManager {
 
         @Override
         public void onEvent(int event, @Nullable String path) {
+            if (path == null) {
+                Slog.w(TAG, "path is null at TombstoneWatcher.onEvent()");
+                return;
+            }
             mHandler.post(() -> {
+                // Ignore .tmp files.
+                if (path.endsWith(".tmp")) {
+                    return;
+                }
                 handleTombstone(new File(TOMBSTONE_DIR, path));
             });
         }

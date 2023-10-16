@@ -43,9 +43,9 @@ protected:
         mFileName.append(externalStorage);
         mFileName.append(TEST_FILENAME);
 
-        int fd = ::open(mFileName.string(), O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        int fd = ::open(mFileName.c_str(), O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fd < 0) {
-            FAIL() << "Couldn't create " << mFileName.string() << " for tests";
+            FAIL() << "Couldn't create " << mFileName.c_str() << " for tests";
         }
     }
 
@@ -69,17 +69,17 @@ TEST_F(ObbFileTest, WriteThenRead) {
     EXPECT_TRUE(mObbFile->setSalt(salt, SALT_SIZE))
             << "Salt should be successfully set";
 
-    EXPECT_TRUE(mObbFile->writeTo(mFileName.string()))
+    EXPECT_TRUE(mObbFile->writeTo(mFileName.c_str()))
             << "couldn't write to fake .obb file";
 
     mObbFile = new ObbFile();
 
-    EXPECT_TRUE(mObbFile->readFrom(mFileName.string()))
+    EXPECT_TRUE(mObbFile->readFrom(mFileName.c_str()))
             << "couldn't read from fake .obb file";
 
     EXPECT_EQ(versionNum, mObbFile->getVersion())
             << "version didn't come out the same as it went in";
-    const char* currentPackageName = mObbFile->getPackageName().string();
+    const char* currentPackageName = mObbFile->getPackageName().c_str();
     EXPECT_STREQ(packageName, currentPackageName)
             << "package name didn't come out the same as it went in";
 

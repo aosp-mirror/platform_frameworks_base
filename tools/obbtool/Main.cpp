@@ -135,7 +135,7 @@ void doInfo(const char* filename) {
     }
 
     printf("OBB info for '%s':\n", filename);
-    printf("Package name: %s\n", obb->getPackageName().string());
+    printf("Package name: %s\n", obb->getPackageName().c_str());
     printf("     Version: %d\n", obb->getVersion());
     printf("       Flags: 0x%08x\n", obb->getFlags());
     printf("     Overlay: %s\n", obb->isOverlay() ? "true" : "false");

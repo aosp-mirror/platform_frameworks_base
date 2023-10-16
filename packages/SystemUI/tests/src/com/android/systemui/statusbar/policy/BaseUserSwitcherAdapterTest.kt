@@ -77,6 +77,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
             )
 
         whenever(controller.users).thenAnswer { users }
+        whenever(controller.isUserSwitcherEnabled).thenReturn(true)
 
         underTest =
             object : BaseUserSwitcherAdapter(controller) {
@@ -87,7 +88,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun `Adds self to controller in constructor`() {
+    fun addsSelfToControllerInConstructor() {
         val captor = kotlinArgumentCaptor<WeakReference<BaseUserSwitcherAdapter>>()
         verify(controller).addAdapter(captor.capture())
 
@@ -100,7 +101,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun `count - ignores restricted users when device is locked`() {
+    fun count_ignoresRestrictedUsersWhenDeviceIsLocked() {
         whenever(controller.isKeyguardShowing).thenReturn(true)
         users =
             ArrayList(
@@ -131,7 +132,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun `count - does not ignore restricted users when device is not locked`() {
+    fun count_doesNotIgnoreRestrictedUsersWhenDeviceIsNotLocked() {
         whenever(controller.isKeyguardShowing).thenReturn(false)
         users =
             ArrayList(
@@ -162,6 +163,19 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
+    fun count_onlyShowsCurrentUserWhenMultiUserDisabled() {
+        whenever(controller.isUserSwitcherEnabled).thenReturn(false)
+        assertThat(underTest.count).isEqualTo(1)
+        assertThat(underTest.getItem(0).isCurrent).isTrue()
+    }
+
+    @Test
+    fun count_doesNotIgnoreAllOtherUsersWhenMultiUserEnabled() {
+        whenever(controller.isUserSwitcherEnabled).thenReturn(true)
+        assertThat(underTest.count).isEqualTo(users.size)
+    }
+
+    @Test
     fun getItem() {
         assertThat((0 until underTest.count).map { position -> underTest.getItem(position) })
             .isEqualTo(users)
@@ -185,7 +199,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getName - non guest - returns real name`() {
+    fun getName_nonGuest_returnsRealName() {
         val userRecord =
             createUserRecord(
                 id = 1,
@@ -196,7 +210,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getName - guest and selected - returns exit guest action name`() {
+    fun getName_guestAndSelected_returnsExitGuestActionName() {
         val expected = "Exit guest"
         context.orCreateTestableResources.addOverride(
             com.android.settingslib.R.string.guest_exit_quick_settings_button,
@@ -215,7 +229,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getName - guest and not selected - returns enter guest action name`() {
+    fun getName_guestAndNotSelected_returnsEnterGuestActionName() {
         val expected = "Guest"
         context.orCreateTestableResources.addOverride(
             com.android.internal.R.string.guest_name,

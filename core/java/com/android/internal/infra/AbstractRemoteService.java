@@ -102,6 +102,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
 
     // Used just for debugging purposes (on dump)
     private long mNextUnbind;
+    // Used just for debugging purposes (on dump)
     private int mServiceExitReason;
     private int mServiceExitSubReason;
 
@@ -260,14 +261,10 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
             // do nothing. The local binder so it can not throw it.
         }
         if (plistSlice == null) {
-            mServiceExitReason = ApplicationExitInfo.REASON_UNKNOWN;
-            mServiceExitSubReason = ApplicationExitInfo.SUBREASON_UNKNOWN;
             return;
         }
         List<ApplicationExitInfo> list = plistSlice.getList();
         if (list.isEmpty()) {
-            mServiceExitReason = ApplicationExitInfo.REASON_UNKNOWN;
-            mServiceExitSubReason = ApplicationExitInfo.SUBREASON_UNKNOWN;
             return;
         }
         ApplicationExitInfo info = list.get(0);

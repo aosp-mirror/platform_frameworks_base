@@ -30,6 +30,7 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.Surface;
+
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
@@ -73,6 +74,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_REMOVE_BROADCAST_INFO = 25;
     private static final int DO_SET_IAPP_NOTIFICATION_ENABLED = 26;
     private static final int DO_REQUEST_AD = 27;
+    private static final int DO_NOTIFY_AD_BUFFER = 28;
+    private static final int DO_SELECT_AUDIO_PRESENTATION = 29;
+    private static final int DO_TIME_SHIFT_SET_MODE = 30;
+    private static final int DO_SET_TV_MESSAGE_ENABLED = 31;
+    private static final int DO_NOTIFY_TV_MESSAGE = 32;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -216,6 +222,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.timeShiftSetPlaybackParams((PlaybackParams) msg.obj);
                 break;
             }
+            case DO_TIME_SHIFT_SET_MODE: {
+                mTvInputSessionImpl.timeShiftSetMode(msg.arg1);
+                break;
+            }
             case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
                 mTvInputSessionImpl.timeShiftEnablePositionTracking((Boolean) msg.obj);
                 break;
@@ -223,6 +233,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             case DO_START_RECORDING: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputRecordingSessionImpl.startRecording((Uri) args.arg1, (Bundle) args.arg2);
+                args.recycle();
                 break;
             }
             case DO_STOP_RECORDING: {
@@ -237,6 +248,13 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputRecordingSessionImpl.resumeRecording((Bundle) msg.obj);
                 break;
             }
+            case DO_SELECT_AUDIO_PRESENTATION: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.selectAudioPresentation(
+                        (Integer) args.arg1, (Integer) args.arg2);
+                args.recycle();
+                break;
+            }
             case DO_REQUEST_BROADCAST_INFO: {
                 mTvInputSessionImpl.requestBroadcastInfo((BroadcastInfoRequest) msg.obj);
                 break;
@@ -249,8 +267,23 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.setInteractiveAppNotificationEnabled((Boolean) msg.obj);
                 break;
             }
+            case DO_SET_TV_MESSAGE_ENABLED: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.setTvMessageEnabled((Integer) args.arg1, (Boolean) args.arg2);
+                args.recycle();
+                break;
+            }
             case DO_REQUEST_AD: {
                 mTvInputSessionImpl.requestAd((AdRequest) msg.obj);
+                break;
+            }
+            case DO_NOTIFY_AD_BUFFER: {
+                mTvInputSessionImpl.notifyAdBufferReady((AdBuffer) msg.obj);
+                break;
+            }
+            case DO_NOTIFY_TV_MESSAGE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.onTvMessageReceived((Integer) args.arg1, (Bundle) args.arg2);
                 break;
             }
             default: {
@@ -268,8 +301,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                         + "Consider handling the tune request in a separate thread.");
             }
             if (durationMs > EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS) {
-                throw new RuntimeException("Too much time to handle a request. (type=" + msg.what +
-                        ", " + durationMs + "ms > " + EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS + "ms).");
+                throw new RuntimeException("Too much time to handle a request. (type=" + msg.what
+                    + ", " + durationMs + "ms > " + EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS + "ms).");
             }
         }
     }
@@ -313,6 +346,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void setCaptionEnabled(boolean enabled) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_CAPTION_ENABLED, enabled));
+    }
+
+    @Override
+    public void selectAudioPresentation(int presentationId, int programId) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_SELECT_AUDIO_PRESENTATION, presentationId, programId));
     }
 
     @Override
@@ -382,6 +421,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
+    public void timeShiftSetMode(int mode) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_TIME_SHIFT_SET_MODE, mode));
+    }
+
+    @Override
     public void timeShiftEnablePositionTracking(boolean enable) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(
                 DO_TIME_SHIFT_ENABLE_POSITION_TRACKING, enable));
@@ -423,8 +467,24 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_REQUEST_AD, request));
     }
 
+    @Override
+    public void notifyAdBufferReady(AdBuffer buffer) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_AD_BUFFER, buffer));
+    }
+
+    @Override
+    public void notifyTvMessage(int type, Bundle data) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
+    }
+
+    @Override
+    public void setTvMessageEnabled(int type, boolean enabled) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_SET_TV_MESSAGE_ENABLED, type,
+                enabled));
+    }
+
     private final class TvInputEventReceiver extends InputEventReceiver {
-        public TvInputEventReceiver(InputChannel inputChannel, Looper looper) {
+        TvInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
         }
 

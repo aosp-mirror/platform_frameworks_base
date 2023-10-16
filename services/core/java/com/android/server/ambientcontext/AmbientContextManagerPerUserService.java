@@ -16,9 +16,7 @@
 
 package com.android.server.ambientcontext;
 
-import android.Manifest;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -58,187 +56,105 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Per-user manager service for {@link AmbientContextEvent}s.
+ * Base per-user manager service for {@link AmbientContextEvent}s.
  */
-final class AmbientContextManagerPerUserService extends
+abstract class AmbientContextManagerPerUserService extends
         AbstractPerUserSystemService<AmbientContextManagerPerUserService,
                 AmbientContextManagerService> {
-    private static final String TAG = AmbientContextManagerPerUserService.class.getSimpleName();
+    private static final String TAG =
+            AmbientContextManagerPerUserService.class.getSimpleName();
 
-    @Nullable
-    @VisibleForTesting
-    RemoteAmbientContextDetectionService mRemoteService;
-
-    private ComponentName mComponentName;
+    /**
+     * The type of service.
+     */
+    enum ServiceType {
+        DEFAULT,
+        WEARABLE
+    }
 
     AmbientContextManagerPerUserService(
             @NonNull AmbientContextManagerService master, Object lock, @UserIdInt int userId) {
         super(master, lock, userId);
     }
 
-    void destroyLocked() {
-        Slog.d(TAG, "Trying to cancel the remote request. Reason: Service destroyed.");
-        if (mRemoteService != null) {
-            synchronized (mLock) {
-                mRemoteService.unbind();
-                mRemoteService = null;
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void ensureRemoteServiceInitiated() {
-        if (mRemoteService == null) {
-            mRemoteService = new RemoteAmbientContextDetectionService(
-                    getContext(), mComponentName, getUserId());
-        }
-    }
+    /**
+     * Returns the current bound AmbientContextManagerPerUserService component for this user.
+     */
+    abstract ComponentName getComponentName();
 
     /**
-     * get the currently bound component name.
+     * Sets the component name for the per user service.
      */
-    @VisibleForTesting
-    ComponentName getComponentName() {
-        return mComponentName;
-    }
-
+    abstract void setComponentName(ComponentName componentName);
 
     /**
-     * Resolves and sets up the service if it had not been done yet. Returns true if the service
-     * is available.
+     * Ensures that the remote service is initiated.
      */
-    @GuardedBy("mLock")
-    @VisibleForTesting
-    boolean setUpServiceIfNeeded() {
-        if (mComponentName == null) {
-            mComponentName = updateServiceInfoLocked();
-        }
-        if (mComponentName == null) {
-            return false;
-        }
-
-        ServiceInfo serviceInfo;
-        try {
-            serviceInfo = AppGlobals.getPackageManager().getServiceInfo(
-                    mComponentName, 0, mUserId);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException while setting up service");
-            return false;
-        }
-        return serviceInfo != null;
-    }
-
-    @Override
-    protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
-            throws PackageManager.NameNotFoundException {
-        ServiceInfo serviceInfo;
-        try {
-            serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
-                    0, mUserId);
-            if (serviceInfo != null) {
-                final String permission = serviceInfo.permission;
-                if (!Manifest.permission.BIND_AMBIENT_CONTEXT_DETECTION_SERVICE.equals(
-                        permission)) {
-                    throw new SecurityException(String.format(
-                            "Service %s requires %s permission. Found %s permission",
-                            serviceInfo.getComponentName(),
-                            Manifest.permission.BIND_AMBIENT_CONTEXT_DETECTION_SERVICE,
-                            serviceInfo.permission));
-                }
-            }
-        } catch (RemoteException e) {
-            throw new PackageManager.NameNotFoundException(
-                    "Could not get service for " + serviceComponent);
-        }
-        return serviceInfo;
-    }
-
-    @Override
-    protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
-        synchronized (super.mLock) {
-            super.dumpLocked(prefix, pw);
-        }
-        if (mRemoteService != null) {
-            mRemoteService.dump("", new IndentingPrintWriter(pw, "  "));
-        }
-    }
+    abstract void ensureRemoteServiceInitiated();
 
     /**
-     * Handles client registering as an observer. Only one registration is supported per app
-     * package. A new registration from the same package will overwrite the previous registration.
+     * Returns the AmbientContextManagerPerUserService {@link ServiceType} for this user.
      */
-    public void onRegisterObserver(AmbientContextEventRequest request,
-            String packageName, IAmbientContextObserver observer) {
+    abstract ServiceType getServiceType();
+
+    /**
+     * Returns the int config for the consent component for the
+     * specific AmbientContextManagerPerUserService type
+     */
+    abstract int getConsentComponentConfig();
+
+    /**
+     * Returns the int config for the intent extra key for the
+     * caller's package name while requesting ambient context consent.
+     */
+    abstract int getAmbientContextPackageNameExtraKeyConfig();
+
+    /**
+     * Returns the int config for the Intent extra key for the event code int array while
+     * requesting ambient context consent.
+     */
+    abstract int getAmbientContextEventArrayExtraKeyConfig();
+
+    /**
+     * Returns the permission that is required to bind to this service.
+     */
+    abstract String getProtectedBindPermission();
+
+    /**
+     * Returns the remote service implementation for this user.
+     */
+    abstract RemoteAmbientDetectionService getRemoteService();
+
+    /**
+     * Clears the remote service.
+     */
+    abstract void clearRemoteService();
+
+    /**
+     * Called when there's an application with the callingPackage name is requesting for
+     * the AmbientContextDetection's service status.
+     *
+     * @param eventTypes the event types to query for
+     * @param callingPackage the package query for information
+     * @param statusCallback the callback to deliver the status on
+     */
+    public void onQueryServiceStatus(int[] eventTypes, String callingPackage,
+            RemoteCallback statusCallback) {
+        Slog.d(TAG, "Query event status of " + Arrays.toString(eventTypes)
+                + " for " + callingPackage);
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
-                completeRegistration(observer, AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
+                sendStatusCallback(statusCallback,
+                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
-
-            // Register package and add to existing ClientRequests cache
-            startDetection(request, packageName, observer);
-            mMaster.newClientAdded(mUserId, request, packageName, observer);
-        }
-    }
-
-    /**
-     * Returns a RemoteCallback that handles the status from the detection service, and
-     * sends results to the client callback.
-     */
-    private RemoteCallback getServerStatusCallback(Consumer<Integer> statusConsumer) {
-        return new RemoteCallback(result -> {
-            AmbientContextDetectionServiceStatus serviceStatus =
-                    (AmbientContextDetectionServiceStatus) result.get(
-                            AmbientContextDetectionServiceStatus.STATUS_RESPONSE_BUNDLE_KEY);
-            final long token = Binder.clearCallingIdentity();
-            try {
-                int statusCode = serviceStatus.getStatusCode();
-                statusConsumer.accept(statusCode);
-                Slog.i(TAG, "Got detection status of " + statusCode
-                        + " for " + serviceStatus.getPackageName());
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        });
-    }
-
-    void startDetection(AmbientContextEventRequest request, String callingPackage,
-            IAmbientContextObserver observer) {
-        Slog.d(TAG, "Requested detection of " + request.getEventTypes());
-        synchronized (mLock) {
-            if (setUpServiceIfNeeded()) {
-                ensureRemoteServiceInitiated();
-                mRemoteService.startDetection(request, callingPackage,
-                        createDetectionResultRemoteCallback(),
-                        getServerStatusCallback(
-                                statusCode -> completeRegistration(observer, statusCode)));
-            } else {
-                Slog.w(TAG, "No valid component found for AmbientContextDetectionService");
-                completeRegistration(observer,
-                        AmbientContextManager.STATUS_NOT_SUPPORTED);
-            }
-        }
-    }
-
-    /**
-     * Sends the result response with the specified status to the callback.
-     */
-    static void sendStatusCallback(RemoteCallback statusCallback,
-            @AmbientContextManager.StatusCode int statusCode) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(
-                AmbientContextManager.STATUS_RESPONSE_BUNDLE_KEY,
-                statusCode);
-        statusCallback.sendResult(bundle);
-    }
-
-    static void completeRegistration(IAmbientContextObserver observer, int statusCode) {
-        try {
-            observer.onRegistrationComplete(statusCode);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to call IAmbientContextObserver.onRegistrationComplete: "
-                    + e.getMessage());
+            ensureRemoteServiceInitiated();
+            getRemoteService().queryServiceStatus(
+                    eventTypes,
+                    callingPackage,
+                    getServerStatusCallback(
+                            statusCode -> sendStatusCallback(statusCallback, statusCode)));
         }
     }
 
@@ -254,26 +170,9 @@ final class AmbientContextManagerPerUserService extends
         }
     }
 
-    public void onQueryServiceStatus(int[] eventTypes, String callingPackage,
-            RemoteCallback statusCallback) {
-        Slog.d(TAG, "Query event status of " + Arrays.toString(eventTypes)
-                + " for " + callingPackage);
-        synchronized (mLock) {
-            if (!setUpServiceIfNeeded()) {
-                Slog.w(TAG, "Detection service is not available at this moment.");
-                sendStatusCallback(statusCallback,
-                        AmbientContextManager.STATUS_NOT_SUPPORTED);
-                return;
-            }
-            ensureRemoteServiceInitiated();
-            mRemoteService.queryServiceStatus(
-                    eventTypes,
-                    callingPackage,
-                    getServerStatusCallback(
-                            statusCode -> sendStatusCallback(statusCallback, statusCode)));
-        }
-    }
-
+    /**
+     * Starts the consent activity for the calling package and event types.
+     */
     public void onStartConsentActivity(int[] eventTypes, String callingPackage) {
         Slog.d(TAG, "Opening consent activity of " + Arrays.toString(eventTypes)
                 + " for " + callingPackage);
@@ -315,9 +214,9 @@ final class AmbientContextManagerPerUserService extends
         try {
             Context context = getContext();
             String packageNameExtraKey = context.getResources().getString(
-                    com.android.internal.R.string.config_ambientContextPackageNameExtraKey);
+                    getAmbientContextPackageNameExtraKeyConfig());
             String eventArrayExtraKey = context.getResources().getString(
-                    com.android.internal.R.string.config_ambientContextEventArrayExtraKey);
+                    getAmbientContextEventArrayExtraKeyConfig());
 
             // Create consent activity intent with the calling package name and requested events
             intent.setComponent(consentComponent);
@@ -344,28 +243,154 @@ final class AmbientContextManagerPerUserService extends
     }
 
     /**
-     * Returns the consent activity component from config lookup.
+     * Handles client registering as an observer. Only one registration is supported per app
+     * package. A new registration from the same package will overwrite the previous registration.
      */
-    private ComponentName getConsentComponent() {
-        Context context = getContext();
-        String consentComponent = context.getResources().getString(
-                    com.android.internal.R.string.config_defaultAmbientContextConsentComponent);
-        if (TextUtils.isEmpty(consentComponent)) {
-            return null;
+    public void onRegisterObserver(AmbientContextEventRequest request,
+            String packageName, IAmbientContextObserver observer) {
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                completeRegistration(observer, AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+
+            // Register package and add to existing ClientRequests cache
+            startDetection(request, packageName, observer);
+            mMaster.newClientAdded(mUserId, request, packageName, observer);
         }
-        Slog.i(TAG, "Consent component name: " + consentComponent);
-        return ComponentName.unflattenFromString(consentComponent);
     }
 
+    @Override
+    protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
+            throws PackageManager.NameNotFoundException {
+        Slog.d(TAG, "newServiceInfoLocked with component name: "
+                + serviceComponent.getClassName());
+
+        if (getComponentName() == null
+                || !serviceComponent.getClassName().equals(getComponentName().getClassName())) {
+            Slog.d(TAG, "service name does not match this per user, returning...");
+            return null;
+        }
+
+        ServiceInfo serviceInfo;
+        try {
+            serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
+                    0, mUserId);
+            if (serviceInfo != null) {
+                final String permission = serviceInfo.permission;
+                if (!getProtectedBindPermission().equals(
+                        permission)) {
+                    throw new SecurityException(String.format(
+                            "Service %s requires %s permission. Found %s permission",
+                            serviceInfo.getComponentName(),
+                            getProtectedBindPermission(),
+                            serviceInfo.permission));
+                }
+            }
+        } catch (RemoteException e) {
+            throw new PackageManager.NameNotFoundException(
+                    "Could not get service for " + serviceComponent);
+        }
+        return serviceInfo;
+    }
+
+    /**
+     * Dumps the remote service.
+     */
+    protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
+        synchronized (super.mLock) {
+            super.dumpLocked(prefix, pw);
+        }
+        RemoteAmbientDetectionService remoteService = getRemoteService();
+        if (remoteService != null) {
+            remoteService.dump("", new IndentingPrintWriter(pw, "  "));
+        }
+    }
+
+    /**
+     * Send request to the remote AmbientContextDetectionService impl to stop detecting the
+     * specified events. Intended for use by shell command for testing.
+     * Requires ACCESS_AMBIENT_CONTEXT_EVENT permission.
+     */
     @VisibleForTesting
-    void stopDetection(String packageName) {
+    protected void stopDetection(String packageName) {
         Slog.d(TAG, "Stop detection for " + packageName);
         synchronized (mLock) {
-            if (mComponentName != null) {
+            if (getComponentName() != null) {
                 ensureRemoteServiceInitiated();
-                mRemoteService.stopDetection(packageName);
+                RemoteAmbientDetectionService remoteService = getRemoteService();
+                remoteService.stopDetection(packageName);
             }
         }
+    }
+
+    /**
+     * Destroys this service and unbinds from the remote service.
+     */
+    protected void destroyLocked() {
+        Slog.d(TAG, "Trying to cancel the remote request. Reason: Service destroyed.");
+        RemoteAmbientDetectionService remoteService = getRemoteService();
+        if (remoteService != null) {
+            synchronized (mLock) {
+                remoteService.unbind();
+                clearRemoteService();
+            }
+        }
+    }
+
+    /**
+     * Send request to the remote AmbientContextDetectionService impl to start detecting the
+     * specified events. Intended for use by shell command for testing.
+     * Requires ACCESS_AMBIENT_CONTEXT_EVENT permission.
+     */
+    protected void startDetection(AmbientContextEventRequest request, String callingPackage,
+            IAmbientContextObserver observer) {
+        Slog.d(TAG, "Requested detection of " + request.getEventTypes());
+        synchronized (mLock) {
+            if (setUpServiceIfNeeded()) {
+                ensureRemoteServiceInitiated();
+                RemoteAmbientDetectionService remoteService = getRemoteService();
+                remoteService.startDetection(request, callingPackage,
+                        createDetectionResultRemoteCallback(),
+                        getServerStatusCallback(
+                                statusCode -> completeRegistration(observer, statusCode)));
+            } else {
+                Slog.w(TAG, "No valid component found for AmbientContextDetectionService");
+                completeRegistration(observer,
+                        AmbientContextManager.STATUS_NOT_SUPPORTED);
+            }
+        }
+    }
+
+    /**
+     * Notifies the observer the status of the registration.
+     *
+     * @param observer the observer to notify
+     * @param statusCode the status to notify
+     */
+    protected void completeRegistration(IAmbientContextObserver observer, int statusCode) {
+        try {
+            observer.onRegistrationComplete(statusCode);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to call IAmbientContextObserver.onRegistrationComplete: "
+                    + e.getMessage());
+        }
+    }
+
+    /**
+     * Sends the status on the {@link RemoteCallback}.
+     *
+     * @param statusCallback the callback to send the status on
+     * @param statusCode the status to send
+     */
+    protected void sendStatusCallback(RemoteCallback statusCallback,
+            @AmbientContextManager.StatusCode int statusCode) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(
+                AmbientContextManager.STATUS_RESPONSE_BUNDLE_KEY,
+                statusCode);
+        statusCallback.sendResult(bundle);
     }
 
     /**
@@ -374,7 +399,7 @@ final class AmbientContextManagerPerUserService extends
      * @param pendingIntent Client's PendingIntent for callback
      * @param events detected events from the detection service
      */
-    void sendDetectionResultIntent(PendingIntent pendingIntent,
+    protected void sendDetectionResultIntent(PendingIntent pendingIntent,
             List<AmbientContextEvent> events) {
         Intent intent = new Intent();
         intent.putExtra(AmbientContextManager.EXTRA_AMBIENT_CONTEXT_EVENTS,
@@ -384,8 +409,8 @@ final class AmbientContextManagerPerUserService extends
         BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setPendingIntentBackgroundActivityLaunchAllowed(false);
         try {
-            pendingIntent.send(getContext(), 0, intent, null, null, null,
-                    options.toBundle());
+            pendingIntent.send(getContext(), 0, intent, null,
+                    null, null, options.toBundle());
             Slog.i(TAG, "Sending PendingIntent to " + pendingIntent.getCreatorPackage() + ": "
                     + events);
         } catch (PendingIntent.CanceledException e) {
@@ -394,7 +419,7 @@ final class AmbientContextManagerPerUserService extends
     }
 
     @NonNull
-    RemoteCallback createDetectionResultRemoteCallback() {
+    protected RemoteCallback createDetectionResultRemoteCallback() {
         return new RemoteCallback(result -> {
             AmbientContextDetectionResult detectionResult =
                     (AmbientContextDetectionResult) result.get(
@@ -417,5 +442,81 @@ final class AmbientContextManagerPerUserService extends
                 Binder.restoreCallingIdentity(token);
             }
         });
+    }
+
+    /**
+     * Resolves and sets up the service if it had not been done yet. Returns true if the service
+     * is available.
+     */
+    @GuardedBy("mLock")
+    @VisibleForTesting
+    private boolean setUpServiceIfNeeded() {
+        if (getComponentName() == null) {
+            ComponentName[] componentNames = updateServiceInfoListLocked();
+            if (componentNames == null || componentNames.length != 2) {
+                Slog.d(TAG, "updateServiceInfoListLocked returned incorrect componentNames");
+                return false;
+            }
+
+            switch (getServiceType()) {
+                case DEFAULT:
+                    setComponentName(componentNames[0]);
+                    break;
+                case WEARABLE:
+                    setComponentName(componentNames[1]);
+                    break;
+                default:
+                    Slog.d(TAG, "updateServiceInfoListLocked returned unknown service types.");
+                    return false;
+            }
+        }
+
+        if (getComponentName() == null) {
+            return false;
+        }
+
+        ServiceInfo serviceInfo;
+        try {
+            serviceInfo = AppGlobals.getPackageManager().getServiceInfo(
+                    getComponentName(), 0, mUserId);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException while setting up service");
+            return false;
+        }
+        return serviceInfo != null;
+    }
+
+    /**
+     * Returns a RemoteCallback that handles the status from the detection service, and
+     * sends results to the client callback.
+     */
+    private RemoteCallback getServerStatusCallback(Consumer<Integer> statusConsumer) {
+        return new RemoteCallback(result -> {
+            AmbientContextDetectionServiceStatus serviceStatus =
+                    (AmbientContextDetectionServiceStatus) result.get(
+                            AmbientContextDetectionServiceStatus.STATUS_RESPONSE_BUNDLE_KEY);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                int statusCode = serviceStatus.getStatusCode();
+                statusConsumer.accept(statusCode);
+                Slog.i(TAG, "Got detection status of " + statusCode
+                        + " for " + serviceStatus.getPackageName());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        });
+    }
+
+    /**
+     * Returns the consent activity component from config lookup.
+     */
+    private ComponentName getConsentComponent() {
+        Context context = getContext();
+        String consentComponent = context.getResources().getString(getConsentComponentConfig());
+        if (TextUtils.isEmpty(consentComponent)) {
+            return null;
+        }
+        Slog.i(TAG, "Consent component name: " + consentComponent);
+        return ComponentName.unflattenFromString(consentComponent);
     }
 }

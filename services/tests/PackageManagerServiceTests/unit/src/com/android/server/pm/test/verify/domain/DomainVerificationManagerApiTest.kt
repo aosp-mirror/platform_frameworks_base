@@ -29,7 +29,7 @@ import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.pkg.component.ParsedActivityImpl
@@ -44,6 +44,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.doReturn
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.assertFailsWith
@@ -300,7 +301,7 @@ class DomainVerificationManagerApiTest {
                 whenever(isInstalled) { true }
                 whenever(isSuspended) { false }
                 whenever(isInstantApp) { false }
-                whenever(firstInstallTime) {0L}
+                whenever(firstInstallTimeMillis) {0L}
             }
         })
         val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, listOf(DOMAIN_1, DOMAIN_2))
@@ -520,7 +521,7 @@ class DomainVerificationManagerApiTest {
         pkgUserState1: PackageStateInternal.() -> PackageUserStateInternal = {
             PackageUserStateInternal.DEFAULT }
     ) = mockThrowOnUnmocked<PackageStateInternal> {
-        val pkg = mockThrowOnUnmocked<AndroidPackage> {
+        val pkg = mockThrowOnUnmocked<AndroidPackageInternal> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
             whenever(isEnabled) { true }
@@ -555,12 +556,12 @@ class DomainVerificationManagerApiTest {
         whenever(this.domainSetId) { domainSetId }
         whenever(getUserStateOrDefault(0)) { pkgUserState0() }
         whenever(getUserStateOrDefault(1)) { pkgUserState1() }
-        whenever(userStates) {
+        doReturn(
             SparseArray<PackageUserStateInternal>().apply {
                 this[0] = pkgUserState0()
                 this[1] = pkgUserState1()
             }
-        }
+        ).whenever(this).userStates
         whenever(isSystem) { false }
     }
 

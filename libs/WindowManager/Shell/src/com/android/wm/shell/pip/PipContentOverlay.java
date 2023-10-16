@@ -206,6 +206,7 @@ public abstract class PipContentOverlay {
             tx.show(mLeash);
             tx.setLayer(mLeash, Integer.MAX_VALUE);
             tx.setBuffer(mLeash, mBitmap.getHardwareBuffer());
+            tx.setAlpha(mLeash, 0f);
             tx.reparent(mLeash, parentLeash);
             tx.apply();
         }

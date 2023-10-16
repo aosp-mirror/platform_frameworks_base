@@ -78,9 +78,8 @@ const Rule AlwaysTrue() {
     const String8 actualStr(actual != NULL ? actual->toJson() : String8());
 
     if (expectedStr != actualStr) {
-        return ::testing::AssertionFailure()
-                << "Expected: " << expectedStr.string() << "\n"
-                << "  Actual: " << actualStr.string();
+        return ::testing::AssertionFailure() << "Expected: " << expectedStr.c_str() << "\n"
+                                             << "  Actual: " << actualStr.c_str();
     }
     return ::testing::AssertionSuccess();
 }

@@ -30,10 +30,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.window.DisplayAreaOrganizer.FEATURE_RUNTIME_TASK_CONTAINER_FIRST;
 
 import static com.android.server.wm.ActivityStarter.Request;
@@ -55,7 +51,9 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 import android.view.Gravity;
+import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
@@ -1915,19 +1913,25 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         final int st = stableFrame.top;
         final int sr = stableFrame.right;
         final int sb = stableFrame.bottom;
+        final @WindowInsets.Type.InsetsType int statusBarType = WindowInsets.Type.statusBars();
+        final @WindowInsets.Type.InsetsType int navBarType = WindowInsets.Type.navigationBars();
 
         state.setDisplayFrame(displayFrame);
         if (sl > dl) {
-            state.getSource(ITYPE_CLIMATE_BAR).setFrame(dl, dt, sl, db);
+            state.getOrCreateSource(InsetsSource.createId(null, 0, statusBarType), statusBarType)
+                    .setFrame(dl, dt, sl, db);
         }
         if (st > dt) {
-            state.getSource(ITYPE_STATUS_BAR).setFrame(dl, dt, dr, st);
+            state.getOrCreateSource(InsetsSource.createId(null, 1, statusBarType), statusBarType)
+                    .setFrame(dl, dt, dr, st);
         }
         if (sr < dr) {
-            state.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setFrame(sr, dt, dr, db);
+            state.getOrCreateSource(InsetsSource.createId(null, 0, navBarType), navBarType)
+                    .setFrame(sr, dt, dr, db);
         }
         if (sb < db) {
-            state.getSource(ITYPE_NAVIGATION_BAR).setFrame(dl, sb, dr, db);
+            state.getOrCreateSource(InsetsSource.createId(null, 1, navBarType), navBarType)
+                    .setFrame(dl, sb, dr, db);
         }
         // Recompute config and push to children.
         display.onRequestedOverrideConfigurationChanged(display.getConfiguration());
@@ -1950,7 +1954,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         final Task rootTask = display.getDefaultTaskDisplayArea()
                 .createRootTask(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
         rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         // Just work around the unnecessary adjustments for bounds.
         task.getWindowConfiguration().setBounds(bounds);
     }

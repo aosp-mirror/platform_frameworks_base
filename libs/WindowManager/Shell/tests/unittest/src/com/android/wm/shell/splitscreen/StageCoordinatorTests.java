@@ -68,6 +68,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
@@ -113,6 +114,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SurfaceControl mRootLeash;
+    private SurfaceControl mDividerLeash;
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageCoordinator mStageCoordinator;
     private Transitions mTransitions;
@@ -129,11 +131,14 @@ public class StageCoordinatorTests extends ShellTestCase {
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
                 mMainExecutor, Optional.empty()));
+        mDividerLeash = new SurfaceControl.Builder(mSurfaceSession).setName("fakeDivider").build();
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
         when(mSplitLayout.getRootBounds()).thenReturn(mRootBounds);
         when(mSplitLayout.isLandscape()).thenReturn(false);
+        when(mSplitLayout.applyTaskChanges(any(), any(), any())).thenReturn(true);
+        when(mSplitLayout.getDividerLeash()).thenReturn(mDividerLeash);
 
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
@@ -141,6 +146,8 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mSideStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
         mMainStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
+        doReturn(mock(SplitDecorManager.class)).when(mMainStage).getSplitDecorManager();
+        doReturn(mock(SplitDecorManager.class)).when(mSideStage).getSplitDecorManager();
     }
 
     @Test
@@ -148,10 +155,12 @@ public class StageCoordinatorTests extends ShellTestCase {
         when(mStageCoordinator.isSplitActive()).thenReturn(true);
 
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        final WindowContainerTransaction wct = spy(new WindowContainerTransaction());
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
-        verify(mSideStage).addTask(eq(task), eq(wct));
+        verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
+        verify(mMainStage).reparentTopTask(eq(wct));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
     }
@@ -167,14 +176,10 @@ public class StageCoordinatorTests extends ShellTestCase {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
-        verify(mMainStage).addTask(eq(task), eq(wct));
+        verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
-
-        mStageCoordinator.moveToStage(task, SPLIT_POSITION_TOP_OR_LEFT, wct);
-        verify(mSideStage).addTask(eq(task), eq(wct));
-        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
-        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
     }
 
     @Test
@@ -184,7 +189,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
     }
 

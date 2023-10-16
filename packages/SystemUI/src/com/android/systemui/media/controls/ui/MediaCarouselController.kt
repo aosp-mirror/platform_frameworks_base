@@ -21,6 +21,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.database.ContentObserver
+import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
 import android.util.MathUtils
@@ -64,9 +66,11 @@ import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.traceSection
 import java.io.PrintWriter
+import java.util.Locale
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
@@ -104,12 +108,14 @@ constructor(
     private val mediaFlags: MediaFlags,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val globalSettings: GlobalSettings,
 ) : Dumpable {
     /** The current width of the carousel */
-    private var currentCarouselWidth: Int = 0
+    var currentCarouselWidth: Int = 0
+        private set
 
     /** The current height of the carousel */
-    @VisibleForTesting var currentCarouselHeight: Int = 0
+    private var currentCarouselHeight: Int = 0
 
     /** Are we currently showing only active players */
     private var currentlyShowingOnlyActive: Boolean = false
@@ -165,6 +171,16 @@ constructor(
             }
         }
 
+    private var carouselLocale: Locale? = null
+
+    private val animationScaleObserver: ContentObserver =
+        object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
+            }
+        }
+
+    /** Whether the media card currently has the "expanded" layout */
     @VisibleForTesting
     var currentlyExpanded = true
         set(value) {
@@ -216,6 +232,15 @@ constructor(
                 updatePlayers(recreateMedia = false)
                 inflateSettingsButton()
             }
+
+            override fun onLocaleListChanged() {
+                // Update players only if system primary language changes.
+                if (carouselLocale != context.resources.configuration.locales.get(0)) {
+                    carouselLocale = context.resources.configuration.locales.get(0)
+                    updatePlayers(recreateMedia = true)
+                    inflateSettingsButton()
+                }
+            }
         }
 
     private val keyguardUpdateMonitorCallback =
@@ -260,6 +285,7 @@ constructor(
                 this::logSmartspaceImpression,
                 logger
             )
+        carouselLocale = context.resources.configuration.locales.get(0)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
@@ -500,6 +526,7 @@ constructor(
         mediaHostStatesManager.addCallback(
             object : MediaHostStatesManager.Callback {
                 override fun onHostStateChanged(location: Int, mediaHostState: MediaHostState) {
+                    updateUserVisibility()
                     if (location == desiredLocation) {
                         onDesiredLocationChanged(desiredLocation, mediaHostState, animate = false)
                     }
@@ -513,6 +540,12 @@ constructor(
                 listenForAnyStateToGoneKeyguardTransition(this)
             }
         }
+
+        // Notifies all active players about animation scale changes.
+        globalSettings.registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+            animationScaleObserver
+        )
     }
 
     private fun inflateSettingsButton() {

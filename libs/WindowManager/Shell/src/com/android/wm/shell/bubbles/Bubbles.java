@@ -24,16 +24,21 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.app.NotificationChannel;
 import android.content.Intent;
 import android.content.pm.UserInfo;
+import android.graphics.drawable.Icon;
+import android.hardware.HardwareBuffer;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -75,6 +80,11 @@ public interface Bubbles {
     int DISMISS_NO_BUBBLE_UP = 14;
     int DISMISS_RELOAD_FROM_DISK = 15;
     int DISMISS_USER_REMOVED = 16;
+
+    /** Returns a binder that can be passed to an external process to manipulate Bubbles. */
+    default IBubbles createExternalInterface() {
+        return null;
+    }
 
     /**
      * @return {@code true} if there is a bubble associated with the provided key and if its
@@ -125,12 +135,28 @@ public interface Bubbles {
      * the bubble or bubble stack.
      *
      * Some notes:
-     *    - Only one app bubble is supported at a time
+     *    - Only one app bubble is supported at a time, regardless of users. Multi-users support is
+     *      tracked in b/273533235.
      *    - Calling this method with a different intent than the existing app bubble will do nothing
      *
      * @param intent the intent to display in the bubble expanded view.
+     * @param user the {@link UserHandle} of the user to start this activity for.
+     * @param icon the {@link Icon} to use for the bubble view.
      */
-    void showOrHideAppBubble(Intent intent);
+    void showOrHideAppBubble(Intent intent, UserHandle user, @Nullable Icon icon);
+
+    /** @return true if the specified {@code taskId} corresponds to app bubble's taskId. */
+    boolean isAppBubbleTaskId(int taskId);
+
+    /**
+`    * @return a {@link SynchronousScreenCaptureListener} after performing a screenshot that may
+     * exclude the bubble layer, if one is present. The underlying
+     * {@link ScreenshotHardwareBuffer} can be accessed via
+     * {@link SynchronousScreenCaptureListener#getBuffer()} asynchronously and care should be taken
+     * to {@link HardwareBuffer#close()} the associated
+     * {@link ScreenshotHardwareBuffer#getHardwareBuffer()} when no longer required.`
+     */
+    SynchronousScreenCaptureListener getScreenshotExcludingBubble(int displayId);
 
     /**
      * @return a bubble that matches the provided shortcutId, if one exists.
@@ -256,6 +282,17 @@ public interface Bubbles {
      * @param removedUserId the id of the removed user.
      */
     void onUserRemoved(int removedUserId);
+
+    /**
+     * A listener to be notified of bubble state changes, used by launcher to render bubbles in
+     * its process.
+     */
+    interface BubbleStateListener {
+        /**
+         * Called when the bubbles state changes.
+         */
+        void onBubbleStateChange(BubbleBarUpdate update);
+    }
 
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {

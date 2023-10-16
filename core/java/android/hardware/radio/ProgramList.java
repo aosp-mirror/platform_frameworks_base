@@ -24,6 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,14 +43,25 @@ import java.util.stream.Collectors;
 public final class ProgramList implements AutoCloseable {
 
     private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private final Map<ProgramSelector.Identifier, RadioManager.ProgramInfo> mPrograms =
             new ArrayMap<>();
 
+    @GuardedBy("mLock")
     private final List<ListCallback> mListCallbacks = new ArrayList<>();
+
+    @GuardedBy("mLock")
     private final List<OnCompleteListener> mOnCompleteListeners = new ArrayList<>();
+
+    @GuardedBy("mLock")
     private OnCloseListener mOnCloseListener;
-    private boolean mIsClosed = false;
-    private boolean mIsComplete = false;
+
+    @GuardedBy("mLock")
+    private boolean mIsClosed;
+
+    @GuardedBy("mLock")
+    private boolean mIsComplete;
 
     ProgramList() {}
 
@@ -227,6 +240,7 @@ public final class ProgramList implements AutoCloseable {
         }
     }
 
+    @GuardedBy("mLock")
     private void putLocked(RadioManager.ProgramInfo value,
             List<ProgramSelector.Identifier> changedIdentifierList) {
         ProgramSelector.Identifier key = value.getSelector().getPrimaryId();
@@ -235,6 +249,7 @@ public final class ProgramList implements AutoCloseable {
         changedIdentifierList.add(sel);
     }
 
+    @GuardedBy("mLock")
     private void removeLocked(ProgramSelector.Identifier key,
             List<ProgramSelector.Identifier> removedIdentifierList) {
         RadioManager.ProgramInfo removed = mPrograms.remove(Objects.requireNonNull(key));

@@ -36,6 +36,7 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -80,6 +81,24 @@ public class RadioManager {
     public static final int STATUS_INVALID_OPERATION = -38;
     /** Method return status: time out before operation completion */
     public static final int STATUS_TIMED_OUT = -110;
+
+    /**
+     *  Radio operation status types
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "STATUS_" }, value = {
+            STATUS_OK,
+            STATUS_ERROR,
+            STATUS_PERMISSION_DENIED,
+            STATUS_NO_INIT,
+            STATUS_BAD_VALUE,
+            STATUS_DEAD_OBJECT,
+            STATUS_INVALID_OPERATION,
+            STATUS_TIMED_OUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RadioStatusType{}
 
 
     // keep in sync with radio_class_t in /system/core/incluse/system/radio.h
@@ -250,7 +269,8 @@ public class RadioManager {
                     Objects.requireNonNull(entry.getValue());
                 }
             }
-            mDabFrequencyTable = dabFrequencyTable;
+            mDabFrequencyTable = (dabFrequencyTable == null || dabFrequencyTable.isEmpty())
+                    ? null : dabFrequencyTable;
             mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
         }
 
@@ -328,6 +348,7 @@ public class RadioManager {
          * program list.
          * @return the number of audio sources available.
          */
+        @RadioStatusType
         public int getNumAudioSources() {
             return mNumAudioSources;
         }
@@ -445,7 +466,8 @@ public class RadioManager {
             mIsBgScanSupported = in.readInt() == 1;
             mSupportedProgramTypes = arrayToSet(in.createIntArray());
             mSupportedIdentifierTypes = arrayToSet(in.createIntArray());
-            mDabFrequencyTable = Utils.readStringIntMap(in);
+            Map<String, Integer> dabFrequencyTableIn = Utils.readStringIntMap(in);
+            mDabFrequencyTable = (dabFrequencyTableIn.isEmpty()) ? null : dabFrequencyTableIn;
             mVendorInfo = Utils.readStringMap(in);
         }
 
@@ -918,7 +940,10 @@ public class RadioManager {
         @NonNull final BandDescriptor mDescriptor;
 
         BandConfig(BandDescriptor descriptor) {
-            mDescriptor = Objects.requireNonNull(descriptor);
+            Objects.requireNonNull(descriptor, "Descriptor cannot be null");
+            mDescriptor = new BandDescriptor(descriptor.getRegion(), descriptor.getType(),
+                    descriptor.getLowerLimit(), descriptor.getUpperLimit(),
+                    descriptor.getSpacing());
         }
 
         BandConfig(int region, int type, int lowerLimit, int upperLimit, int spacing) {
@@ -1691,7 +1716,7 @@ public class RadioManager {
             if (!(obj instanceof ProgramInfo)) return false;
             ProgramInfo other = (ProgramInfo) obj;
 
-            if (!Objects.equals(mSelector, other.mSelector)) return false;
+            if (!mSelector.strictEquals(other.mSelector)) return false;
             if (!Objects.equals(mLogicallyTunedTo, other.mLogicallyTunedTo)) return false;
             if (!Objects.equals(mPhysicallyTunedTo, other.mPhysicallyTunedTo)) return false;
             if (!Objects.equals(mRelatedContent, other.mRelatedContent)) return false;
@@ -1718,6 +1743,7 @@ public class RadioManager {
      * </ul>
      */
     @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
+    @RadioStatusType
     public int listModules(List<ModuleProperties> modules) {
         if (modules == null) {
             Log.e(TAG, "the output list must not be empty");
@@ -1851,9 +1877,17 @@ public class RadioManager {
     /**
      * @hide
      */
-    public RadioManager(@NonNull Context context) throws ServiceNotFoundException {
+    public RadioManager(Context context) throws ServiceNotFoundException {
+        this(context, IRadioService.Stub.asInterface(ServiceManager.getServiceOrThrow(
+                Context.RADIO_SERVICE)));
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public RadioManager(Context context, IRadioService service) {
         mContext = context;
-        mService = IRadioService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.RADIO_SERVICE));
+        mService = service;
     }
 }

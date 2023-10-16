@@ -29,9 +29,16 @@ android_test {
     static_libs: [
         "compatibility-device-util-axt",
         "androidx.test.runner",
-        "truth-prebuilt",
+        "truth",
+        "Harrier",
     ],
     platform_apis: true,
+    certificate: "platform",
     test_suites: ["device-tests"],
-    data: [":AppEnumerationSyncProviderTestApp"],
+    data: [
+        ":AppEnumerationCrossUserPackageVisibilityTestApp",
+        ":AppEnumerationHasAppOpPermissionTestApp",
+        ":AppEnumerationSharedUserTestApp",
+        ":AppEnumerationSyncProviderTestApp",
+    ],
 }

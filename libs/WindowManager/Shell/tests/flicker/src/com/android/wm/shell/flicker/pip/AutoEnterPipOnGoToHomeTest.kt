@@ -16,13 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import androidx.test.filters.RequiresDevice
-import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group3
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -36,69 +34,64 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:AutoEnterPipOnGoToHomeTest`
  *
  * Actions:
+ * ```
  *     Launch an app in full screen
  *     Select "Auto-enter PiP" radio button
  *     Press Home button or swipe up to go Home and put [pipApp] in pip mode
+ * ```
  *
  * Notes:
+ * ```
  *     1. All assertions are inherited from [EnterPipTest]
  *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 238367575)
-@Group3
-class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(testSpec) {
-    protected val taplInstrumentation = LauncherInstrumentation()
-    /**
-     * Defines the transition used to run the test
-     */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setupAndTeardown(this)
-            setup {
-                eachRun {
-                    pipApp.launchViaIntent(wmHelper)
-                    pipApp.enableAutoEnterForPipActivity()
-                }
-            }
-            teardown {
-                eachRun {
-                    // close gracefully so that onActivityUnpinned() can be called before force exit
-                    pipApp.closePipWindow(wmHelper)
-                    pipApp.exit(wmHelper)
-                }
-            }
-            transitions {
-                taplInstrumentation.goHome()
-            }
-        }
+open class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipViaAppUiButtonTest(flicker) {
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { tapl.goHome() }
+    }
 
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            pipApp.launchViaIntent(wmHelper)
+            pipApp.enableAutoEnterForPipActivity()
+        }
+    }
+
+    override val defaultTeardown: FlickerBuilder.() -> Unit = {
+        teardown {
+            // close gracefully so that onActivityUnpinned() can be called before force exit
+            pipApp.closePipWindow(wmHelper)
+            pipApp.exit(wmHelper)
+        }
+    }
+
+    @Presubmit
+    @Test
     override fun pipLayerReduces() {
-        val layerName = pipApp.component.toLayerName()
-        testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+        flicker.assertLayers {
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
         }
     }
 
-    /**
-     * Checks that [pipApp] window is animated towards default position in right bottom corner
-     */
+    /** Checks that [pipApp] window is animated towards default position in right bottom corner */
+    @Presubmit
     @Test
     fun pipLayerMovesTowardsRightBottomCorner() {
         // in gestural nav the swipe makes PiP first go upwards
-        Assume.assumeFalse(testSpec.isGesturalNavigation)
-        val layerName = pipApp.component.toLayerName()
-        testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        flicker.assertLayers {
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             // Pip animates towards the right bottom corner, but because it is being resized at the
             // same time, it is possible it shrinks first quickly below the default position and get
             // moved up after that in just few last frames
@@ -108,9 +101,11 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
         }
     }
 
+    @Presubmit
+    @Test
     override fun focusChanges() {
         // in gestural nav the focus goes to different activity on swipe up
-        Assume.assumeFalse(testSpec.isGesturalNavigation)
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
         super.focusChanges()
     }
 }

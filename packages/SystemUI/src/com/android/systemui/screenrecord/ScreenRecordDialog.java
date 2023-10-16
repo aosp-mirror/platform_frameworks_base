@@ -100,7 +100,7 @@ public class ScreenRecordDialog extends SystemUIDialog {
         window.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
 
         window.setGravity(Gravity.CENTER);
-        setTitle(R.string.screenrecord_name);
+        setTitle(R.string.screenrecord_title);
 
         setContentView(R.layout.screen_record_dialog);
 

@@ -586,6 +586,9 @@ public class AppWidgetManager {
      * The extras can be used to embed additional information about this widget to be accessed
      * by the associated widget's AppWidgetProvider.
      *
+     * <p>
+     * The new options are merged into existing options using {@link Bundle#putAll} semantics.
+     *
      * @see #getAppWidgetOptions(int)
      *
      * @param appWidgetId The AppWidget instances for which to set the RemoteViews.
@@ -1171,18 +1174,19 @@ public class AppWidgetManager {
      *                     {@link Context#BIND_AUTO_CREATE} and
      *                     {@link Context#BIND_FOREGROUND_SERVICE_WHILE_AWAKE} are supported.
      *
-     * @see Context#getServiceDispatcher(ServiceConnection, Handler, int)
+     * @see Context#getServiceDispatcher(ServiceConnection, Handler, long)
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean bindRemoteViewsService(Context context, int appWidgetId, Intent intent,
-            IServiceConnection connection, @Context.BindServiceFlags int flags) {
+            IServiceConnection connection, @Context.BindServiceFlagsBits int flags) {
         if (mService == null) {
             return false;
         }
         try {
             return mService.bindRemoteViewsService(context.getOpPackageName(), appWidgetId, intent,
-                    context.getIApplicationThread(), context.getActivityToken(), connection, flags);
+                    context.getIApplicationThread(), context.getActivityToken(), connection,
+                    Integer.toUnsignedLong(flags));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

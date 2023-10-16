@@ -62,6 +62,12 @@ public class ActivityTaskManager {
     public static final int INVALID_TASK_ID = -1;
 
     /**
+     * Invalid windowing mode.
+     * @hide
+     */
+    public static final int INVALID_WINDOWING_MODE = -1;
+
+    /**
      * Input parameter to {@link IActivityTaskManager#resizeTask} which indicates
      * that the resize doesn't need to preserve the window, and can be skipped if bounds
      * is unchanged. This mode is used by window manager in most cases.
@@ -491,6 +497,16 @@ public class ActivityTaskManager {
     public void detachNavigationBarFromApp(@NonNull IBinder transition) {
         try {
             getService().detachNavigationBarFromApp(transition);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Update the list of packages allowed in lock task mode. */
+    @RequiresPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES)
+    public void updateLockTaskPackages(@NonNull Context context, @NonNull String[] packages) {
+        try {
+            getService().updateLockTaskPackages(context.getUserId(), packages);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

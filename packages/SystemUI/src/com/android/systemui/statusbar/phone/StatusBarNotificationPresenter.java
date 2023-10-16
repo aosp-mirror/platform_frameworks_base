@@ -16,7 +16,6 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.CLOSE_PANEL_WHEN_EMPTIED;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
-import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEBUG;
 
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -32,15 +31,14 @@ import android.util.Slog;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -59,14 +57,12 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -85,9 +81,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private final NotifShadeEventSource mNotifShadeEventSource;
     private final NotificationMediaManager mMediaManager;
     private final NotificationGutsManager mGutsManager;
-    private final LockscreenGestureLogger mLockscreenGestureLogger;
 
-    private final NotificationPanelViewController mNotificationPanel;
+    private final ShadeViewController mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
@@ -110,7 +105,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     @Inject
     StatusBarNotificationPresenter(
             Context context,
-            NotificationPanelViewController panel,
+            ShadeViewController panel,
             QuickSettingsController quickSettingsController,
             HeadsUpManagerPhone headsUp,
             NotificationShadeWindowView statusBarWindow,
@@ -152,7 +147,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         mNotifShadeEventSource = notifShadeEventSource;
         mMediaManager = notificationMediaManager;
         mGutsManager = notificationGutsManager;
-        mLockscreenGestureLogger = lockscreenGestureLogger;
         mAboveShelfObserver = new AboveShelfObserver(stackScrollerController.getView());
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotifPipelineFlags = notifPipelineFlags;
@@ -176,7 +170,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         }
         remoteInputManager.setUpWithCallback(
                 remoteInputManagerCallback,
-                mNotificationPanel.createRemoteInputDelegate());
+                mNotificationPanel.getShadeNotificationPresenter().createRemoteInputDelegate());
 
         initController.addPostInitTask(() -> {
             mKeyguardIndicationController.init();
@@ -209,8 +203,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     private void maybeEndAmbientPulse() {
-        if (mNotificationPanel.hasPulsingNotifications() &&
-                !mHeadsUpManager.hasNotifications()) {
+        if (mNotificationPanel.getShadeNotificationPresenter().hasPulsingNotifications()
+                && !mHeadsUpManager.hasNotifications()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
             // Finish the pulse.
             mDozeScrimController.pulseOutNow();
@@ -222,7 +216,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         // Begin old BaseStatusBar.userSwitched
         mHeadsUpManager.setUser(newUserId);
         // End old BaseStatusBar.userSwitched
-        if (MULTIUSER_DEBUG) mNotificationPanel.setHeaderDebugInfo("USER " + newUserId);
         mCommandQueue.animateCollapsePanels();
         mMediaManager.clearCurrentMediaNotification();
         mCentralSurfaces.setLockscreenUser(newUserId);
@@ -241,31 +234,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     @Override
-    public void onActivated(ActivatableNotificationView view) {
-        onActivated();
-        if (view != null) mNotificationPanel.setActivatedChild(view);
-    }
-
-    public void onActivated() {
-        mLockscreenGestureLogger.write(
-                MetricsEvent.ACTION_LS_NOTE,
-                0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
-        mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_NOTIFICATION_FALSE_TOUCH);
-        ActivatableNotificationView previousView = mNotificationPanel.getActivatedChild();
-        if (previousView != null) {
-            previousView.makeInactive(true /* animate */);
-        }
-    }
-
-    @Override
-    public void onActivationReset(ActivatableNotificationView view) {
-        if (view == mNotificationPanel.getActivatedChild()) {
-            mNotificationPanel.setActivatedChild(null);
-            mKeyguardIndicationController.hideTransientIndication();
-        }
-    }
-
-    @Override
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         mMediaManager.updateMediaMetaData(metaDataChanged, allowEnterAnimation);
     }
@@ -275,7 +243,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
         mCentralSurfaces.wakeUpIfDozing(
-                SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK",
+                SystemClock.uptimeMillis(), "NOTIFICATION_CLICK",
                 PowerManager.WAKE_REASON_GESTURE);
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
@@ -363,26 +331,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
                 return true;
             }
 
-            if (sbn.getNotification().fullScreenIntent != null
-                    && !mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()) {
-                // we don't allow head-up on the lockscreen (unless there's a
-                // "showWhenLocked" activity currently showing)  if
-                // the potential HUN has a fullscreen intent
-                if (mKeyguardStateController.isShowing() && !mCentralSurfaces.isOccluded()) {
-                    if (DEBUG) {
-                        Log.d(TAG, "No heads up: entry has fullscreen intent on lockscreen "
-                                + sbn.getKey());
-                    }
-                    return true;
-                }
-
-                if (mAccessibilityManager.isTouchExplorationEnabled()) {
-                    if (DEBUG) {
-                        Log.d(TAG, "No heads up: accessible fullscreen: " + sbn.getKey());
-                    }
-                    return true;
-                }
-            }
             return false;
         }
 

@@ -23,6 +23,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.GameManagerInternal;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -42,11 +43,12 @@ import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -60,29 +62,29 @@ import java.util.Map;
 
 public final class CompatModePackages {
     /**
-     * #DOWNSCALED_INVERSE is the gatekeeper of all per-app buffer inverse
+     * {@link CompatModePackages#DOWNSCALED_INVERSE} is the gatekeeper of all per-app buffer inverse
      * downscale changes. Enabling this change will allow the following scaling factors:
-     * #DOWNSCALE_90
-     * #DOWNSCALE_85
-     * #DOWNSCALE_80
-     * #DOWNSCALE_75
-     * #DOWNSCALE_70
-     * #DOWNSCALE_65
-     * #DOWNSCALE_60
-     * #DOWNSCALE_55
-     * #DOWNSCALE_50
-     * #DOWNSCALE_45
-     * #DOWNSCALE_40
-     * #DOWNSCALE_35
-     * #DOWNSCALE_30
+     * {@link CompatModePackages#DOWNSCALE_90}
+     * {@link CompatModePackages#DOWNSCALE_85}
+     * {@link CompatModePackages#DOWNSCALE_80}
+     * {@link CompatModePackages#DOWNSCALE_75}
+     * {@link CompatModePackages#DOWNSCALE_70}
+     * {@link CompatModePackages#DOWNSCALE_65}
+     * {@link CompatModePackages#DOWNSCALE_60}
+     * {@link CompatModePackages#DOWNSCALE_55}
+     * {@link CompatModePackages#DOWNSCALE_50}
+     * {@link CompatModePackages#DOWNSCALE_45}
+     * {@link CompatModePackages#DOWNSCALE_40}
+     * {@link CompatModePackages#DOWNSCALE_35}
+     * {@link CompatModePackages#DOWNSCALE_30}
      *
-     * If #DOWNSCALED_INVERSE is enabled for an app package, then the app
+     * If {@link CompatModePackages#DOWNSCALED_INVERSE} is enabled for an app package, then the app
      * will be forcibly resized to the lowest enabled scaling factor e.g. 1/0.8 if both 1/0.8 and
      * 1/0.7 (* 100%) were enabled.
      *
-     * When both #DOWNSCALED_INVERSE
-     * and #DOWNSCALED are enabled, then
-     * #DOWNSCALED_INVERSE takes precedence.
+     * When both {@link CompatModePackages#DOWNSCALED_INVERSE}
+     * and {@link CompatModePackages#DOWNSCALED} are enabled, then
+     * {@link CompatModePackages#DOWNSCALED_INVERSE} takes precedence.
      */
     @ChangeId
     @Disabled
@@ -90,29 +92,29 @@ public final class CompatModePackages {
     public static final long DOWNSCALED_INVERSE = 273564678L; // This is a Bug ID.
 
     /**
-     * #DOWNSCALED is the gatekeeper of all per-app buffer downscaling
+     * {@link CompatModePackages#DOWNSCALED} is the gatekeeper of all per-app buffer downscaling
      * changes. Enabling this change will allow the following scaling factors:
-     * #DOWNSCALE_90
-     * #DOWNSCALE_85
-     * #DOWNSCALE_80
-     * #DOWNSCALE_75
-     * #DOWNSCALE_70
-     * #DOWNSCALE_65
-     * #DOWNSCALE_60
-     * #DOWNSCALE_55
-     * #DOWNSCALE_50
-     * #DOWNSCALE_45
-     * #DOWNSCALE_40
-     * #DOWNSCALE_35
-     * #DOWNSCALE_30
+     * {@link CompatModePackages#DOWNSCALE_90}
+     * {@link CompatModePackages#DOWNSCALE_85}
+     * {@link CompatModePackages#DOWNSCALE_80}
+     * {@link CompatModePackages#DOWNSCALE_75}
+     * {@link CompatModePackages#DOWNSCALE_70}
+     * {@link CompatModePackages#DOWNSCALE_65}
+     * {@link CompatModePackages#DOWNSCALE_60}
+     * {@link CompatModePackages#DOWNSCALE_55}
+     * {@link CompatModePackages#DOWNSCALE_50}
+     * {@link CompatModePackages#DOWNSCALE_45}
+     * {@link CompatModePackages#DOWNSCALE_40}
+     * {@link CompatModePackages#DOWNSCALE_35}
+     * {@link CompatModePackages#DOWNSCALE_30}
      *
-     * If #DOWNSCALED is enabled for an app package, then the app will be
+     * If {@link CompatModePackages#DOWNSCALED} is enabled for an app package, then the app will be
      * forcibly resized to the highest enabled scaling factor e.g. 80% if both 80% and 70% were
      * enabled.
      *
-     * When both #DOWNSCALED_INVERSE
-     * and #DOWNSCALED are enabled, then
-     * #DOWNSCALED_INVERSE takes precedence.
+     * When both {@link CompatModePackages#DOWNSCALED_INVERSE}
+     * and {@link CompatModePackages#DOWNSCALED} are enabled, then
+     * {@link CompatModePackages#DOWNSCALED_INVERSE} takes precedence.
      */
     @ChangeId
     @Disabled
@@ -120,11 +122,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALED = 168419799L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_90 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_90} for a package will force the app to assume it's
      * running on a display with 90% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 111.11% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -133,11 +135,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_90 = 182811243L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_85 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_85} for a package will force the app to assume it's
      * running on a display with 85% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 117.65% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -146,11 +148,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_85 = 189969734L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_80 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_80} for a package will force the app to assume it's
      * running on a display with 80% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 125% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -159,11 +161,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_80 = 176926753L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_75 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_75} for a package will force the app to assume it's
      * running on a display with 75% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 133.33% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -172,11 +174,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_75 = 189969779L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_70 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_70} for a package will force the app to assume it's
      * running on a display with 70% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 142.86% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -185,11 +187,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_70 = 176926829L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_65 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_65} for a package will force the app to assume it's
      * running on a display with 65% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 153.85% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -198,11 +200,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_65 = 189969744L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_60 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_60} for a package will force the app to assume it's
      * running on a display with 60% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 166.67% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -211,11 +213,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_60 = 176926771L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_55 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_55} for a package will force the app to assume it's
      * running on a display with 55% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 181.82% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -224,11 +226,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_55 = 189970036L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_50 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_50} for a package will force the app to assume it's
      * running on a display with 50% vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 200% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -237,11 +239,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_50 = 176926741L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_45 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_45} for a package will force the app to assume it's
      * running on a display with 45% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 222.22% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -250,11 +252,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_45 = 189969782L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_40 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_40} for a package will force the app to assume it's
      * running on a display with 40% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 250% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -263,11 +265,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_40 = 189970038L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_35 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_35} for a package will force the app to assume it's
      * running on a display with 35% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 285.71% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -276,11 +278,11 @@ public final class CompatModePackages {
     public static final long DOWNSCALE_35 = 189969749L;
 
     /**
-     * With #DOWNSCALED enabled, subsequently enabling change-id
-     * #DOWNSCALE_30 for a package will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED} enabled, subsequently enabling change-id
+     * {@link CompatModePackages#DOWNSCALE_30} for a package will force the app to assume it's
      * running on a display with 30% the vertical and horizontal resolution of the real display.
      *
-     * With #DOWNSCALED_INVERSE enabled will force the app to assume it's
+     * With {@link CompatModePackages#DOWNSCALED_INVERSE} enabled will force the app to assume it's
      * running on a display with 333.33% the vertical and horizontal resolution of the real display
      */
     @ChangeId
@@ -325,6 +327,7 @@ public final class CompatModePackages {
     }
 
     private final ActivityTaskManagerService mService;
+    private GameManagerInternal mGameManager;
     private final AtomicFile mFile;
     private final HashMap<String, Integer> mPackages = new HashMap<>();
     private final CompatHandler mHandler;
@@ -446,6 +449,18 @@ public final class CompatModePackages {
 
     float getCompatScale(String packageName, int uid) {
         final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+        if (mGameManager == null) {
+            mGameManager = LocalServices.getService(GameManagerInternal.class);
+        }
+        if (mGameManager != null) {
+            final int userId = userHandle.getIdentifier();
+            final float scalingFactor = mGameManager.getResolutionScalingFactor(packageName,
+                    userId);
+            if (scalingFactor > 0) {
+                return 1f / scalingFactor;
+            }
+        }
+
         final boolean isDownscaledEnabled = CompatChanges.isChangeEnabled(
                 DOWNSCALED, packageName, userHandle);
         final boolean isDownscaledInverseEnabled = CompatChanges.isChangeEnabled(
@@ -636,7 +651,7 @@ public final class CompatModePackages {
             SparseArray<WindowProcessController> pidMap = mService.mProcessMap.getPidMap();
             for (int i = pidMap.size() - 1; i >= 0; i--) {
                 final WindowProcessController app = pidMap.valueAt(i);
-                if (!app.mPkgList.contains(packageName)) {
+                if (!app.containsPackage(packageName)) {
                     continue;
                 }
                 try {

@@ -53,12 +53,16 @@ public class BubblePositioner {
     public static final float FLYOUT_MAX_WIDTH_PERCENT_LARGE_SCREEN = 0.3f;
     /** The max percent of screen width to use for the flyout on phone. */
     public static final float FLYOUT_MAX_WIDTH_PERCENT = 0.6f;
-    /** The percent of screen width that should be used for the expanded view on a large screen. **/
+    /** The percent of screen width for the expanded view on a large screen. **/
     private static final float EXPANDED_VIEW_LARGE_SCREEN_LANDSCAPE_WIDTH_PERCENT = 0.48f;
-    /** The percent of screen width that should be used for the expanded view on a large screen. **/
+    /** The percent of screen width for the expanded view on a large screen. **/
     private static final float EXPANDED_VIEW_LARGE_SCREEN_PORTRAIT_WIDTH_PERCENT = 0.70f;
-    /** The percent of screen width that should be used for the expanded view on a small tablet. **/
+    /** The percent of screen width for the expanded view on a small tablet. **/
     private static final float EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT = 0.72f;
+    /** The percent of screen width for the expanded view when shown in the bubble bar. **/
+    private static final float EXPANDED_VIEW_BUBBLE_BAR_PORTRAIT_WIDTH_PERCENT = 0.7f;
+    /** The percent of screen width for the expanded view when shown in the bubble bar. **/
+    private static final float EXPANDED_VIEW_BUBBLE_BAR_LANDSCAPE_WIDTH_PERCENT = 0.4f;
 
     private Context mContext;
     private WindowManager mWindowManager;
@@ -97,6 +101,12 @@ public class BubblePositioner {
     private PointF mRestingStackPosition;
     private int[] mPaddings = new int[4];
 
+    private boolean mShowingInBubbleBar;
+    private boolean mBubblesOnHome;
+    private int mBubbleBarSize;
+    private int mBubbleBarHomeAdjustment;
+    private final PointF mBubbleBarPosition = new PointF();
+
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
         mWindowManager = windowManager;
@@ -133,6 +143,7 @@ public class BubblePositioner {
                     + " insets: " + insets
                     + " isLargeScreen: " + mIsLargeScreen
                     + " isSmallTablet: " + mIsSmallTablet
+                    + " showingInBubbleBar: " + mShowingInBubbleBar
                     + " bounds: " + bounds);
         }
         updateInternal(mRotation, insets, bounds);
@@ -155,11 +166,17 @@ public class BubblePositioner {
         mSpacingBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
         mDefaultMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+        mBubbleBarHomeAdjustment = mExpandedViewPadding / 2;
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreenAmount = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mBubbleBarSize = res.getDimensionPixelSize(R.dimen.bubblebar_size);
 
-        if (mIsSmallTablet) {
+        if (mShowingInBubbleBar) {
+            mExpandedViewLargeScreenWidth = isLandscape()
+                    ? (int) (bounds.width() * EXPANDED_VIEW_BUBBLE_BAR_LANDSCAPE_WIDTH_PERCENT)
+                    : (int) (bounds.width() * EXPANDED_VIEW_BUBBLE_BAR_PORTRAIT_WIDTH_PERCENT);
+        } else if (mIsSmallTablet) {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
         } else {
@@ -692,5 +709,66 @@ public class BubblePositioner {
                 screen.bottom - gestureZoneHeight,
                 screen.right,
                 screen.bottom);
+    }
+
+    //
+    // Bubble bar specific sizes below.
+    //
+
+    /**
+     * Sets whether bubbles are showing in the bubble bar from launcher.
+     */
+    public void setShowingInBubbleBar(boolean showingInBubbleBar) {
+        mShowingInBubbleBar = showingInBubbleBar;
+    }
+
+    /**
+     * Sets whether bubbles are showing on launcher home, in which case positions are different.
+     */
+    public void setBubblesOnHome(boolean bubblesOnHome) {
+        mBubblesOnHome = bubblesOnHome;
+    }
+
+    /**
+     * How wide the expanded view should be when showing from the bubble bar.
+     */
+    public int getExpandedViewWidthForBubbleBar() {
+        return mExpandedViewLargeScreenWidth;
+    }
+
+    /**
+     * How tall the expanded view should be when showing from the bubble bar.
+     */
+    public int getExpandedViewHeightForBubbleBar() {
+        return getAvailableRect().height()
+                - mBubbleBarSize
+                - mExpandedViewPadding * 2
+                - getBubbleBarHomeAdjustment();
+    }
+
+    /**
+     * The amount of padding from the edge of the screen to the expanded view when in bubble bar.
+     */
+    public int getBubbleBarExpandedViewPadding() {
+        return mExpandedViewPadding;
+    }
+
+    /**
+     * Returns the on screen co-ordinates of the bubble bar.
+     */
+    public PointF getBubbleBarPosition() {
+        mBubbleBarPosition.set(getAvailableRect().width() - mBubbleBarSize,
+                getAvailableRect().height() - mBubbleBarSize
+                        - mExpandedViewPadding - getBubbleBarHomeAdjustment());
+        return mBubbleBarPosition;
+    }
+
+    /**
+     * When bubbles are shown on launcher home, there's an extra bit of padding that needs to
+     * be applied between the expanded view and the bubble bar. This returns the adjustment value
+     * if bubbles are showing on home.
+     */
+    private int getBubbleBarHomeAdjustment() {
+        return mBubblesOnHome ? mBubbleBarHomeAdjustment : 0;
     }
 }

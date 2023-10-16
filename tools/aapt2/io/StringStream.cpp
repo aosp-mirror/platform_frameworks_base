@@ -21,7 +21,7 @@ using ::android::StringPiece;
 namespace aapt {
 namespace io {
 
-StringInputStream::StringInputStream(const StringPiece& str) : str_(str), offset_(0u) {
+StringInputStream::StringInputStream(StringPiece str) : str_(str), offset_(0u) {
 }
 
 bool StringInputStream::Next(const void** data, size_t* size) {

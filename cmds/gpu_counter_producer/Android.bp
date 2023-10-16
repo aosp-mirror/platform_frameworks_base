@@ -1,0 +1,24 @@
+package {
+    // See: http://go/android-license-faq
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+cc_binary {
+    name: "gpu_counter_producer",
+
+    srcs: ["main.cpp"],
+
+    shared_libs: [
+        "libdl",
+        "liblog",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+
+    soc_specific: true,
+}

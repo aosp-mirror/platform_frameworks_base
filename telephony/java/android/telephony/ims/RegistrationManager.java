@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -36,7 +37,6 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -74,6 +74,41 @@ public interface RegistrationManager {
      * The IMS service is currently registered to the carrier network.
      */
     int REGISTRATION_STATE_REGISTERED = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"SUGGESTED_ACTION_"},
+            value = {
+            SUGGESTED_ACTION_NONE,
+            SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+            SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SuggestedAction {}
+
+    /**
+     * Default value. No action is suggested when IMS registration fails.
+     * @hide
+     */
+    @SystemApi
+    public static final int SUGGESTED_ACTION_NONE = 0;
+
+    /**
+     * Indicates that the IMS registration is failed with fatal error such as 403 or 404
+     * on all P-CSCF addresses. The radio shall block the current PLMN or disable
+     * the RAT as per the carrier requirements.
+     * @hide
+     */
+    @SystemApi
+    public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK = 1;
+
+    /**
+     * Indicates that the IMS registration on current PLMN failed multiple times.
+     * The radio shall block the current PLMN or disable the RAT during EPS or 5GS mobility
+     * management timer value as per the carrier requirements.
+     * @hide
+     */
+    @SystemApi
+    public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT = 2;
 
     /**@hide*/
     // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
@@ -167,12 +202,32 @@ public interface RegistrationManager {
             }
 
             @Override
-            public void onDeregistered(ImsReasonInfo info) {
+            public void onDeregistered(ImsReasonInfo info,
+                    @SuggestedAction int suggestedAction,
+                    @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
                 if (mLocalCallback == null) return;
 
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info));
+                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info,
+                            suggestedAction, imsRadioTech));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
+            }
+
+            @Override
+            public void onDeregisteredWithDetails(ImsReasonInfo info,
+                    @SuggestedAction int suggestedAction,
+                    @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech,
+                    @NonNull SipDetails details) {
+                if (mLocalCallback == null) return;
+
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info, suggestedAction,
+                            imsRadioTech));
+                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info, details));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -255,6 +310,37 @@ public interface RegistrationManager {
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
         public void onUnregistered(@NonNull ImsReasonInfo info) {
+        }
+
+        /**
+         * Notifies the framework when the IMS Provider is unregistered from the IMS network.
+         *
+         * Since this callback is only required for the communication between telephony framework
+         * and ImsService, it is made hidden.
+         *
+         * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+         * @param suggestedAction the expected behavior of radio protocol stack.
+         * @param imsRadioTech the network type on which IMS registration has failed.
+         * @hide
+         */
+        public void onUnregistered(@NonNull ImsReasonInfo info,
+                @SuggestedAction int suggestedAction,
+                @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
+            // Default impl to keep backwards compatibility with old implementations
+            onUnregistered(info);
+        }
+
+        /**
+         * Notifies the framework when the IMS Provider is unregistered from the IMS network.
+         *
+         * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+         * @param details the {@link SipDetails} related to disconnected Ims registration.
+         *
+         * @hide
+         */
+        @SystemApi
+        public void onUnregistered(@NonNull ImsReasonInfo info,
+                @NonNull SipDetails details) {
         }
 
         /**

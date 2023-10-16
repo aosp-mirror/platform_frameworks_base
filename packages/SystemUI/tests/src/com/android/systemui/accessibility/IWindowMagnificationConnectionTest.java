@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,6 +42,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,6 +69,8 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     @Mock
     private WindowMagnificationController mWindowMagnificationController;
     @Mock
+    private MagnificationSettingsController mMagnificationSettingsController;
+    @Mock
     private ModeSwitchesController mModeSwitchesController;
     @Mock
     private SysUiState mSysUiState;
@@ -74,6 +78,10 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     private IRemoteMagnificationAnimationCallback mAnimationCallback;
     @Mock
     private OverviewProxyService mOverviewProxyService;
+    @Mock
+    private SecureSettings mSecureSettings;
+    @Mock
+    private AccessibilityLogger mA11yLogger;
 
     private IWindowMagnificationConnection mIWindowMagnificationConnection;
     private WindowMagnification mWindowMagnification;
@@ -90,8 +98,11 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
                 any(IWindowMagnificationConnection.class));
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue,
-                mModeSwitchesController, mSysUiState, mOverviewProxyService, mDisplayTracker);
+                mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
+                mDisplayTracker, getContext().getSystemService(DisplayManager.class), mA11yLogger);
         mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
+                mContext.getSystemService(DisplayManager.class));
+        mWindowMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
                 mContext.getSystemService(DisplayManager.class));
 
         mWindowMagnification.requestWindowMagnificationConnection(true);
@@ -147,6 +158,9 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
 
     @Test
     public void showMagnificationButton() throws RemoteException {
+        // magnification settings panel should not be showing
+        assertFalse(mWindowMagnification.isMagnificationSettingsPanelShowing(TEST_DISPLAY));
+
         mIWindowMagnificationConnection.showMagnificationButton(TEST_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         waitForIdleSync();
@@ -163,6 +177,14 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         verify(mModeSwitchesController).removeButton(TEST_DISPLAY);
     }
 
+    @Test
+    public void removeMagnificationSettingsPanel() throws RemoteException {
+        mIWindowMagnificationConnection.removeMagnificationSettingsPanel(TEST_DISPLAY);
+        waitForIdleSync();
+
+        verify(mMagnificationSettingsController).closeMagnificationSettings();
+    }
+
     private class FakeControllerSupplier extends
             DisplayIdIndexSupplier<WindowMagnificationController> {
 
@@ -173,6 +195,19 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         @Override
         protected WindowMagnificationController createInstance(Display display) {
             return mWindowMagnificationController;
+        }
+    }
+
+    private class FakeSettingsSupplier extends
+            DisplayIdIndexSupplier<MagnificationSettingsController> {
+
+        FakeSettingsSupplier(DisplayManager displayManager) {
+            super(displayManager);
+        }
+
+        @Override
+        protected MagnificationSettingsController createInstance(Display display) {
+            return mMagnificationSettingsController;
         }
     }
 }

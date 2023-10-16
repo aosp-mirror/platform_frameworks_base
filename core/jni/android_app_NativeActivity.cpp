@@ -352,7 +352,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
 
     const char* dirStr = env->GetStringUTFChars(internalDataDir, NULL);
     code->internalDataPathObj = dirStr;
-    code->internalDataPath = code->internalDataPathObj.string();
+    code->internalDataPath = code->internalDataPathObj.c_str();
     env->ReleaseStringUTFChars(internalDataDir, dirStr);
 
     if (externalDataDir != NULL) {
@@ -360,7 +360,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
         code->externalDataPathObj = dirStr;
         env->ReleaseStringUTFChars(externalDataDir, dirStr);
     }
-    code->externalDataPath = code->externalDataPathObj.string();
+    code->externalDataPath = code->externalDataPathObj.c_str();
 
     code->sdkVersion = sdkVersion;
 
@@ -372,7 +372,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
         code->obbPathObj = dirStr;
         env->ReleaseStringUTFChars(obbDir, dirStr);
     }
-    code->obbPath = code->obbPathObj.string();
+    code->obbPath = code->obbPathObj.c_str();
 
     jbyte* rawSavedState = NULL;
     jsize rawSavedSize = 0;

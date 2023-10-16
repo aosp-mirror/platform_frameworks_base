@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeLightRevealScrimRepository
@@ -28,6 +29,7 @@ import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -37,13 +39,14 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimInteractorTest : SysuiTestCase() {
     private val fakeKeyguardTransitionRepository = FakeKeyguardTransitionRepository()
     private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
 
     private val keyguardTransitionInteractor =
-        KeyguardTransitionInteractor(fakeKeyguardTransitionRepository)
+        KeyguardTransitionInteractor(fakeKeyguardTransitionRepository, TestScope().backgroundScope)
 
     private lateinit var underTest: LightRevealScrimInteractor
 
@@ -69,7 +72,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun `lightRevealEffect - does not change during keyguard transition`() =
+    fun lightRevealEffect_doesNotChangeDuringKeyguardTransition() =
         runTest(UnconfinedTestDispatcher()) {
             val values = mutableListOf<LightRevealEffect>()
             val job = underTest.lightRevealEffect.onEach(values::add).launchIn(this)
@@ -103,7 +106,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `revealAmount - inverted when appropriate`() =
+    fun revealAmount_invertedWhenAppropriate() =
         runTest(UnconfinedTestDispatcher()) {
             val values = mutableListOf<Float>()
             val job = underTest.revealAmount.onEach(values::add).launchIn(this)
@@ -132,7 +135,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `revealAmount - ignores transitions that do not affect reveal amount`() =
+    fun revealAmount_ignoresTransitionsThatDoNotAffectRevealAmount() =
         runTest(UnconfinedTestDispatcher()) {
             val values = mutableListOf<Float>()
             val job = underTest.revealAmount.onEach(values::add).launchIn(this)

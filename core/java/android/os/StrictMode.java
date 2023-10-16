@@ -26,6 +26,7 @@ import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.IUnsafeIntentStrictModeCallback;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -441,7 +442,7 @@ public final class StrictMode {
      * different penalties for different detected actions.
      */
     public static final class ThreadPolicy {
-        /** The default, lax policy which doesn't catch anything. */
+        /** The lax policy which doesn't catch anything. */
         public static final ThreadPolicy LAX = new ThreadPolicy(0, null, null);
 
         @UnsupportedAppUsage
@@ -728,7 +729,7 @@ public final class StrictMode {
      * <p>The policy is enabled by {@link #setVmPolicy}.
      */
     public static final class VmPolicy {
-        /** The default, lax policy which doesn't catch anything. */
+        /** The lax policy which doesn't catch anything. */
         public static final VmPolicy LAX = new VmPolicy(0, EMPTY_CLASS_LIMIT_MAP, null, null);
 
         @UnsupportedAppUsage
@@ -1079,8 +1080,7 @@ public final class StrictMode {
             }
 
             /**
-             * Detect when your app launches an {@link Intent} which originated
-             * from outside your app.
+             * Detect when your app sends an unsafe {@link Intent}.
              * <p>
              * Violations may indicate security vulnerabilities in the design of
              * your app, where a malicious app could trick you into granting
@@ -1088,10 +1088,14 @@ public final class StrictMode {
              * are some typical design patterns that can be used to safely
              * resolve these violations:
              * <ul>
-             * <li>The ideal approach is to migrate to using a
-             * {@link android.app.PendingIntent}, which ensures that your launch is
-             * performed using the identity of the original creator, completely
-             * avoiding the security issues described above.
+             * <li> If you are sending an implicit intent to an unexported component, you should
+             * make it an explicit intent by using {@link Intent#setPackage},
+             * {@link Intent#setClassName} or {@link Intent#setComponent}.
+             * </li>
+             * <li> If you are unparceling and sending an intent from the intent delivered, The
+             * ideal approach is to migrate to using a {@link android.app.PendingIntent}, which
+             * ensures that your launch is performed using the identity of the original creator,
+             * completely avoiding the security issues described above.
              * <li>If using a {@link android.app.PendingIntent} isn't feasible, an
              * alternative approach is to create a brand new {@link Intent} and
              * carefully copy only specific values from the original
@@ -2106,7 +2110,36 @@ public final class StrictMode {
                 VMRuntime.setDedupeHiddenApiWarnings(true);
             }
 
+            if ((sVmPolicy.mask & DETECT_VM_UNSAFE_INTENT_LAUNCH) != 0) {
+                registerIntentMatchingRestrictionCallback();
+            }
+
             setBlockGuardVmPolicy(sVmPolicy.mask);
+        }
+    }
+
+    private static void registerIntentMatchingRestrictionCallback() {
+        try {
+            ActivityManager.getService().registerStrictModeCallback(
+                    new UnsafeIntentStrictModeCallback());
+        } catch (RemoteException e) {
+            /*
+            If exception is DeadObjectException it means system process is dead, so we can ignore
+             */
+            if (!(e instanceof DeadObjectException)) {
+                Log.e(TAG, "RemoteException handling StrictMode violation", e);
+            }
+        }
+    }
+
+    private static final class UnsafeIntentStrictModeCallback
+            extends IUnsafeIntentStrictModeCallback.Stub {
+        @Override
+        public void onImplicitIntentMatchedInternalComponent(Intent intent) {
+            if (StrictMode.vmUnsafeIntentLaunchEnabled()) {
+                StrictMode.onUnsafeIntentLaunch(intent,
+                        "Launch of unsafe implicit intent: " + intent);
+            }
         }
     }
 
@@ -2331,6 +2364,11 @@ public final class StrictMode {
     /** @hide */
     public static void onUnsafeIntentLaunch(Intent intent) {
         onVmPolicyViolation(new UnsafeIntentLaunchViolation(intent));
+    }
+
+    /** @hide */
+    public static void onUnsafeIntentLaunch(Intent intent, String message) {
+        onVmPolicyViolation(new UnsafeIntentLaunchViolation(intent, message));
     }
 
     /** Assume locked until we hear otherwise */

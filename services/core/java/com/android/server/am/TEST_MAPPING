@@ -3,9 +3,40 @@
     {
       "name": "CtsAppTestCases",
       "options": [
+        { "include-filter": "android.app.cts.TaskDescriptionTest" },
+        { "include-filter": "android.app.cts.ActivityManagerTest" },
+        { "include-filter": "android.app.cts.ActivityManagerProcessStateTest" },
+        { "include-filter": "android.app.cts.ServiceTest" },
+        { "include-filter": "android.app.cts.ActivityManagerFgsBgStartTest" },
         {
-          "include-filter": "android.app.cts.TaskDescriptionTest"
+          "include-annotation": "android.platform.test.annotations.Presubmit"
         },
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        { "exclude-annotation": "org.junit.Ignore" }
+      ]
+    },
+    {
+      "name": "CtsAppFgsTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsShortFgsTestCases",
+      "options": [
         {
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
@@ -58,8 +89,25 @@
       "name": "FrameworksServicesTests",
       "options": [
         { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
-        { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
-        { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
+        { "include-filter": "com.android.server.power.stats.BatteryStatsTests" }
+      ]
+    },
+    {
+      "file_patterns": ["Broadcast.*"],
+      "name": "FrameworksMockingServicesTests",
+      "options": [
+        { "include-filter": "com.android.server.am.BroadcastRecordTest" },
+        { "include-filter": "com.android.server.am.BroadcastQueueTest" },
+        { "include-filter": "com.android.server.am.BroadcastQueueModernImplTest" }
+      ]
+    },
+    {
+      "file_patterns": ["Broadcast.*"],
+      "name": "CtsBroadcastTestCases",
+      "options": [
+        { "exclude-annotation": "androidx.test.filters.LargeTest" },
+        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
+        { "exclude-annotation": "org.junit.Ignore" }
       ]
     },
     {
@@ -102,6 +150,16 @@
         {
           "include-filter": "android.appsecurity.cts.AppDataIsolationTests"
         }
+      ]
+    },
+    {
+      "name": "CtsAppTestCases",
+      "options": [
+        { "include-filter": "android.app.cts.TaskDescriptionTest" },
+        { "include-filter": "android.app.cts.ActivityManagerTest" },
+        { "include-filter": "android.app.cts.ActivityManagerProcessStateTest" },
+        { "include-filter": "android.app.cts.ServiceTest" },
+        { "include-filter": "android.app.cts.ActivityManagerFgsBgStartTest" }
       ]
     }
   ]
