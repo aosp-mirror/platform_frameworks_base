@@ -38,6 +38,7 @@ java_defaults {
     static_libs: [
         "androidx.compose.runtime_runtime",
         "SpaPrivilegedLib",
+        "android.content.pm.flags-aconfig-java",
     ],
     kotlincflags: ["-Xjvm-default=all"],
 }
