@@ -723,7 +723,9 @@ public class DisplayModeDirector {
             if (mode.getPhysicalWidth() > maxAllowedWidth
                     || mode.getPhysicalHeight() > maxAllowedHeight
                     || mode.getPhysicalWidth() < outSummary.minWidth
-                    || mode.getPhysicalHeight() < outSummary.minHeight) {
+                    || mode.getPhysicalHeight() < outSummary.minHeight
+                    || mode.getRefreshRate() < outSummary.minPhysicalRefreshRate
+                    || mode.getRefreshRate() > outSummary.maxPhysicalRefreshRate) {
                 continue;
             }
 
