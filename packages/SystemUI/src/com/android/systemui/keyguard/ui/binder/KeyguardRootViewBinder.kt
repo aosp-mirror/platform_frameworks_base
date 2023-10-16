@@ -189,7 +189,7 @@ object KeyguardRootViewBinder {
         view.setOnHierarchyChangeListener(
             object : OnHierarchyChangeListener {
                 override fun onChildViewAdded(parent: View, child: View) {
-                    childViews.put(child.id, view)
+                    childViews.put(child.id, child)
                 }
 
                 override fun onChildViewRemoved(parent: View, child: View) {
