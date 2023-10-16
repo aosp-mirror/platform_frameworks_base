@@ -32,17 +32,24 @@ constructor(@NotificationRemoteInputLog private val logBuffer: LogBuffer) {
     fun logAddRemoteInput(
         entryKey: String,
         isRemoteInputAlreadyActive: Boolean,
-        isRemoteInputFound: Boolean
+        isRemoteInputFound: Boolean,
+        reason: String,
+        notificationStyle: String
     ) =
         logBuffer.log(
             TAG,
             DEBUG,
             {
                 str1 = entryKey
+                str2 = reason
+                str3 = notificationStyle
                 bool1 = isRemoteInputAlreadyActive
                 bool2 = isRemoteInputFound
             },
-            { "addRemoteInput entry: $str1, isAlreadyActive: $bool1, isFound:$bool2" }
+            {
+                "addRemoteInput reason:$str2 entry: $str1, style:$str3" +
+                    ", isAlreadyActive: $bool1, isFound:$bool2"
+            }
         )
 
     /** logs removeRemoteInput invocation of [RemoteInputController] */
