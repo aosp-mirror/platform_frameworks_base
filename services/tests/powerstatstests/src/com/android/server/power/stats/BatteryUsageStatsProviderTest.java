@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 
 import org.junit.Rule;
@@ -64,6 +65,8 @@ public class BatteryUsageStatsProviderTest {
             new BatteryUsageStatsRule(12345, mHistoryDir)
                     .setAveragePower(PowerProfile.POWER_FLASHLIGHT, 360.0)
                     .setAveragePower(PowerProfile.POWER_AUDIO, 720.0);
+    private MockClock mMockClock = mStatsRule.getMockClock();
+
     @Test
     public void test_getBatteryUsageStats() {
         BatteryStatsImpl batteryStats = prepareBatteryStats();
@@ -369,17 +372,23 @@ public class BatteryUsageStatsProviderTest {
     public void testAggregateBatteryStats() {
         Context context = InstrumentationRegistry.getContext();
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
-        mStatsRule.setCurrentTime(5 * MINUTE_IN_MS);
+        MonotonicClock monotonicClock = new MonotonicClock(0, mStatsRule.getMockClock());
+
+        setTime(5 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
-        BatteryUsageStatsStore batteryUsageStatsStore = new BatteryUsageStatsStore(context,
-                batteryStats, new File(context.getCacheDir(), "BatteryUsageStatsProviderTest"),
-                new TestHandler(), Integer.MAX_VALUE);
-        batteryUsageStatsStore.onSystemReady();
+
+        PowerStatsStore powerStatsStore = new PowerStatsStore(
+                new File(context.getCacheDir(), "BatteryUsageStatsProviderTest"),
+                new TestHandler(), null);
 
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
-                batteryStats, batteryUsageStatsStore);
+                batteryStats, powerStatsStore);
+
+        batteryStats.setBatteryResetListener(reason ->
+                powerStatsStore.storeBatteryUsageStats(monotonicClock.monotonicTime(),
+                        provider.getBatteryUsageStats(BatteryUsageStatsQuery.DEFAULT)));
 
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
@@ -389,7 +398,7 @@ public class BatteryUsageStatsProviderTest {
             batteryStats.noteFlashlightOffLocked(APP_UID,
                     20 * MINUTE_IN_MS, 20 * MINUTE_IN_MS);
         }
-        mStatsRule.setCurrentTime(25 * MINUTE_IN_MS);
+        setTime(25 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
@@ -402,7 +411,7 @@ public class BatteryUsageStatsProviderTest {
             batteryStats.noteFlashlightOffLocked(APP_UID,
                     50 * MINUTE_IN_MS, 50 * MINUTE_IN_MS);
         }
-        mStatsRule.setCurrentTime(55 * MINUTE_IN_MS);
+        setTime(55 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
@@ -416,7 +425,7 @@ public class BatteryUsageStatsProviderTest {
             batteryStats.noteFlashlightOffLocked(APP_UID,
                     70 * MINUTE_IN_MS, 70 * MINUTE_IN_MS);
         }
-        mStatsRule.setCurrentTime(75 * MINUTE_IN_MS);
+        setTime(75 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
@@ -430,7 +439,7 @@ public class BatteryUsageStatsProviderTest {
             batteryStats.noteFlashlightOffLocked(APP_UID,
                     90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS);
         }
-        mStatsRule.setCurrentTime(95 * MINUTE_IN_MS);
+        setTime(95 * MINUTE_IN_MS);
 
         // Include the first and the second snapshot, but not the third or current
         BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
@@ -457,29 +466,41 @@ public class BatteryUsageStatsProviderTest {
                 .of(180.0);
     }
 
+    private void setTime(long timeMs) {
+        mMockClock.currentTime = timeMs;
+        mMockClock.realtime = timeMs;
+    }
+
     @Test
     public void testAggregateBatteryStats_incompatibleSnapshot() {
         Context context = InstrumentationRegistry.getContext();
         MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         batteryStats.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
 
-        BatteryUsageStatsStore batteryUsageStatsStore = mock(BatteryUsageStatsStore.class);
+        PowerStatsStore powerStatsStore = mock(PowerStatsStore.class);
 
-        when(batteryUsageStatsStore.listBatteryUsageStatsTimestamps())
-                .thenReturn(new long[]{1000, 2000});
-
-        when(batteryUsageStatsStore.loadBatteryUsageStats(1000)).thenReturn(
+        PowerStatsSpan span0 = new PowerStatsSpan(0);
+        span0.addTimeFrame(0, 1000, 1234);
+        span0.addSection(new BatteryUsageStatsSection(
                 new BatteryUsageStats.Builder(batteryStats.getCustomEnergyConsumerNames())
-                        .setStatsDuration(1234).build());
+                        .setStatsDuration(1234).build()));
 
-        // Add a snapshot, with a different set of custom power components.  It should
-        // be skipped by the aggregation.
-        when(batteryUsageStatsStore.loadBatteryUsageStats(2000)).thenReturn(
+        PowerStatsSpan span1 = new PowerStatsSpan(1);
+        span1.addTimeFrame(0, 2000, 4321);
+        span1.addSection(new BatteryUsageStatsSection(
                 new BatteryUsageStats.Builder(new String[]{"different"})
-                        .setStatsDuration(4321).build());
+                        .setStatsDuration(4321).build()));
+
+        when(powerStatsStore.getTableOfContents()).thenReturn(
+                List.of(span0.getMetadata(), span1.getMetadata()));
+
+        when(powerStatsStore.loadPowerStatsSpan(0, BatteryUsageStatsSection.TYPE))
+                .thenReturn(span0);
+        when(powerStatsStore.loadPowerStatsSpan(1, BatteryUsageStatsSection.TYPE))
+                .thenReturn(span1);
 
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
-                batteryStats, batteryUsageStatsStore);
+                batteryStats, powerStatsStore);
 
         BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
                 .aggregateSnapshots(0, 3000)
