@@ -1363,12 +1363,12 @@ public class NotificationContentView extends FrameLayout implements Notification
                         result.mController.setPendingIntent(existingPendingIntent);
                     }
                     if (result.mController.updatePendingIntentFromActions(actions)) {
-                        if (!result.mView.isActive()) {
-                            result.mView.focus();
+                        if (!result.mController.isActive()) {
+                            result.mController.focus();
                         }
                     } else {
-                        if (result.mView.isActive()) {
-                            result.mView.close();
+                        if (result.mController.isActive()) {
+                            result.mController.close();
                         }
                     }
                 }
