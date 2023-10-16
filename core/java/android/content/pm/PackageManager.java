@@ -1256,8 +1256,10 @@ public abstract class PackageManager {
     public static final long MATCH_ARCHIVED_PACKAGES = 1L << 32;
 
     /**
-     * @hide
+     * Querying flag: always match components of packages in quarantined state.
+     * @see #isPackageQuarantined
      */
+    @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
     public static final long MATCH_QUARANTINED_COMPONENTS = 0x100000000L;
 
     /**
@@ -9902,12 +9904,16 @@ public abstract class PackageManager {
 
     /**
      * Query if an app is currently quarantined.
+     * A misbehaving app can be quarantined by e.g. a system of another privileged entity.
+     * Quarantined apps are similar to disabled, but still visible in e.g. Launcher.
+     * Only activities of such apps can still be queried, but not services etc.
+     * Quarantined apps can't be bound to, and won't receive broadcasts.
+     * They can't be resolved, unless {@link #MATCH_QUARANTINED_COMPONENTS} specified.
      *
      * @return {@code true} if the given package is quarantined, {@code false} otherwise
      * @throws NameNotFoundException if the package could not be found.
-     *
-     * @hide
      */
+    @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
     public boolean isPackageQuarantined(@NonNull String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException("isPackageQuarantined not implemented");
     }
