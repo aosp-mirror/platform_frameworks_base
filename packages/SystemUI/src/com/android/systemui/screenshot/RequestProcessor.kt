@@ -20,11 +20,10 @@ import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.util.function.Consumer
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** Processes a screenshot request sent from [ScreenshotHelper]. */
 interface ScreenshotRequestProcessor {
@@ -36,16 +35,15 @@ interface ScreenshotRequestProcessor {
     suspend fun process(screenshot: ScreenshotData): ScreenshotData
 }
 
-/**
- * Implementation of [ScreenshotRequestProcessor]
- */
+/** Implementation of [ScreenshotRequestProcessor] */
 @SysUISingleton
-class RequestProcessor @Inject constructor(
-        private val capture: ImageCapture,
-        private val policy: ScreenshotPolicy,
-        private val flags: FeatureFlags,
-        /** For the Java Async version, to invoke the callback. */
-        @Application private val mainScope: CoroutineScope
+class RequestProcessor
+@Inject
+constructor(
+    private val capture: ImageCapture,
+    private val policy: ScreenshotPolicy,
+    /** For the Java Async version, to invoke the callback. */
+    @Application private val mainScope: CoroutineScope
 ) : ScreenshotRequestProcessor {
 
     override suspend fun process(screenshot: ScreenshotData): ScreenshotData {
@@ -67,8 +65,9 @@ class RequestProcessor @Inject constructor(
             result.userHandle = info.user
 
             if (policy.isManagedProfile(info.user.identifier)) {
-                val image = capture.captureTask(info.taskId)
-                    ?: error("Task snapshot returned a null Bitmap!")
+                val image =
+                    capture.captureTask(info.taskId)
+                        ?: throw RequestProcessorException("Task snapshot returned a null Bitmap!")
 
                 // Provide the task snapshot as the screenshot
                 result.type = TAKE_SCREENSHOT_PROVIDED_IMAGE
@@ -97,3 +96,6 @@ class RequestProcessor @Inject constructor(
 }
 
 private const val TAG = "RequestProcessor"
+
+/** Exception thrown by [RequestProcessor] if something goes wrong. */
+class RequestProcessorException(message: String) : IllegalStateException(message)

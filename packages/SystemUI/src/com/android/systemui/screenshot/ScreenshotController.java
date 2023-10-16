@@ -325,7 +325,7 @@ public class ScreenshotController {
             Context context,
             FeatureFlags flags,
             ScreenshotSmartActions screenshotSmartActions,
-            ScreenshotNotificationsController screenshotNotificationsController,
+            ScreenshotNotificationsController.Factory screenshotNotificationsControllerFactory,
             ScrollCaptureClient scrollCaptureClient,
             UiEventLogger uiEventLogger,
             ImageExporter imageExporter,
@@ -346,7 +346,7 @@ public class ScreenshotController {
             @Assisted boolean showUIOnExternalDisplay
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
-        mNotificationsController = screenshotNotificationsController;
+        mNotificationsController = screenshotNotificationsControllerFactory.create(displayId);
         mScrollCaptureClient = scrollCaptureClient;
         mUiEventLogger = uiEventLogger;
         mImageExporter = imageExporter;
