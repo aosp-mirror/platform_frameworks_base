@@ -26,7 +26,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.statusbar.notification.data.repository.NotificationStackRepositoryModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

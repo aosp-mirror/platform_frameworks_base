@@ -52,7 +52,7 @@ import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
-import com.android.systemui.statusbar.notification.domain.interactor.NotificationsInteractor;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationAlertsInteractor;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -80,7 +80,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     private final HeadsUpManager mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
-    private final NotificationsInteractor mNotificationsInteractor;
+    private final NotificationAlertsInteractor mNotificationAlertsInteractor;
     private final NotificationStackScrollLayoutController mNsslController;
     private final LockscreenShadeTransitionController mShadeTransitionController;
     private final PowerInteractor mPowerInteractor;
@@ -107,7 +107,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             NotificationShadeWindowController notificationShadeWindowController,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
-            NotificationsInteractor notificationsInteractor,
+            NotificationAlertsInteractor notificationAlertsInteractor,
             LockscreenShadeTransitionController shadeTransitionController,
             PowerInteractor powerInteractor,
             CommandQueue commandQueue,
@@ -127,7 +127,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         mQsController = quickSettingsController;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
-        mNotificationsInteractor = notificationsInteractor;
+        mNotificationAlertsInteractor = notificationAlertsInteractor;
         mNsslController = stackScrollerController;
         mShadeTransitionController = shadeTransitionController;
         mPowerInteractor = powerInteractor;
@@ -303,7 +303,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
 
         @Override
         public boolean suppressInterruptions(NotificationEntry entry) {
-            return !mNotificationsInteractor.areNotificationAlertsEnabled();
+            return !mNotificationAlertsInteractor.areNotificationAlertsEnabled();
         }
     };
 }

@@ -16,8 +16,10 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import com.android.systemui.statusbar.notification.collection.ListEntry
-import com.android.systemui.statusbar.notification.data.repository.MutableNotificationStackRepository
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.update
 
 /**
  * Logic for passing information from the
@@ -27,15 +29,30 @@ import javax.inject.Inject
 class RenderNotificationListInteractor
 @Inject
 constructor(
-    private val repository: MutableNotificationStackRepository,
+    private val repository: ActiveNotificationListRepository,
 ) {
     /**
      * Sets the current list of rendered notification entries as displayed in the notification
      * stack.
      *
-     * @see com.android.systemui.statusbar.notification.data.repository.NotificationStackRepository.renderedEntries
+     * @see com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository.activeNotifications
      */
     fun setRenderedList(entries: List<ListEntry>) {
-        repository.renderedEntries.value = entries.toList()
+        repository.activeNotifications.update { modelsByKey ->
+            entries.associateBy(
+                keySelector = { it.key },
+                valueTransform = { it.toModel(modelsByKey[it.key]) }
+            )
+        }
+    }
+
+    private fun ListEntry.toModel(existing: ActiveNotificationModel?): ActiveNotificationModel {
+        val isCurrent =
+            when {
+                existing == null -> false
+                key == existing.key -> true
+                else -> false
+            }
+        return if (isCurrent) existing!! else ActiveNotificationModel(key = key)
     }
 }

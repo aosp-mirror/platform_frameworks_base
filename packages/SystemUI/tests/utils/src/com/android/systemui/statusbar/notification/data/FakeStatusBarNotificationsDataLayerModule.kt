@@ -16,14 +16,7 @@
 package com.android.systemui.statusbar.notification.data
 
 import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardStateRepositoryModule
-import com.android.systemui.statusbar.notification.data.repository.NotificationStackRepositoryModule
 import dagger.Module
 
-@Module(
-    includes =
-        [
-            FakeNotificationsKeyguardStateRepositoryModule::class,
-            NotificationStackRepositoryModule::class,
-        ]
-)
+@Module(includes = [FakeNotificationsKeyguardStateRepositoryModule::class])
 object FakeStatusBarNotificationsDataLayerModule

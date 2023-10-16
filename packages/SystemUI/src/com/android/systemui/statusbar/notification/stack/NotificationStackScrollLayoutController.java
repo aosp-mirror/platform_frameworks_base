@@ -106,6 +106,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
+import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -114,7 +115,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
-import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationListInteractor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
@@ -194,7 +194,7 @@ public class NotificationStackScrollLayoutController {
 
     private final GroupExpansionManager mGroupExpansionManager;
     private final NotifPipelineFlags mNotifPipelineFlags;
-    private final NotificationListInteractor mNotificationListInteractor;
+    private final SeenNotificationsInteractor mSeenNotificationsInteractor;
     private final KeyguardTransitionRepository mKeyguardTransitionRepo;
 
     private NotificationStackScrollLayout mView;
@@ -662,7 +662,7 @@ public class NotificationStackScrollLayoutController {
             UiEventLogger uiEventLogger,
             NotificationRemoteInputManager remoteInputManager,
             VisibilityLocationProviderDelegator visibilityLocationProviderDelegator,
-            NotificationListInteractor notificationListInteractor,
+            SeenNotificationsInteractor seenNotificationsInteractor,
             ShadeController shadeController,
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
@@ -715,7 +715,7 @@ public class NotificationStackScrollLayoutController {
         mUiEventLogger = uiEventLogger;
         mRemoteInputManager = remoteInputManager;
         mVisibilityLocationProviderDelegator = visibilityLocationProviderDelegator;
-        mNotificationListInteractor = notificationListInteractor;
+        mSeenNotificationsInteractor = seenNotificationsInteractor;
         mShadeController = shadeController;
         mNotifIconAreaController = notifIconAreaController;
         mFeatureFlags = featureFlags;
@@ -2006,7 +2006,7 @@ public class NotificationStackScrollLayoutController {
         public void setNotifStats(@NonNull NotifStats notifStats) {
             mNotifStats = notifStats;
             mView.setHasFilteredOutSeenNotifications(
-                    mNotificationListInteractor.getHasFilteredOutSeenNotifications().getValue());
+                    mSeenNotificationsInteractor.getHasFilteredOutSeenNotifications().getValue());
             updateFooter();
             updateShowEmptyShadeView();
         }
