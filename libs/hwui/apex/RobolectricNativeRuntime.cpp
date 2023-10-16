@@ -65,6 +65,7 @@ int register_android_graphics_fonts_Font(JNIEnv* env);
 int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 int register_android_graphics_text_LineBreaker(JNIEnv* env);
 int register_android_graphics_text_MeasuredText(JNIEnv* env);
+int register_android_graphics_text_TextShaper(JNIEnv* env);
 int register_android_util_PathParser(JNIEnv* env);
 int register_android_view_DisplayListCanvas(JNIEnv* env);
 int register_android_view_RenderNode(JNIEnv* env);
@@ -113,6 +114,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_fonts_FontFamily),
         REG_JNI(register_android_graphics_text_LineBreaker),
         REG_JNI(register_android_graphics_text_MeasuredText),
+        REG_JNI(register_android_graphics_text_TextShaper),
         REG_JNI(register_android_util_PathParser),
         REG_JNI(register_android_view_DisplayListCanvas),
         REG_JNI(register_android_view_RenderNode),
