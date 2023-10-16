@@ -1152,7 +1152,7 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
-    public void testEmptyTransitionStillReportsKeyguardGoingAway() {
+    public void testEmptyTransition_withKeyguardGoingAway_plays() {
         Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
@@ -1168,6 +1168,65 @@ public class ShellTransitionTests extends ShellTestCase {
 
         // If keyguard-going-away flag set, then it shouldn't be aborted.
         assertEquals(1, mDefaultHandler.activeCount());
+    }
+
+    @Test
+    public void testSleepTransition_withKeyguardGoingAway_plays(){
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_SLEEP, null /* trigger */, null /* remote */));
+
+        // Make a no-op transition
+        TransitionInfo info = new TransitionInfoBuilder(
+                TRANSIT_SLEEP, TRANSIT_FLAG_KEYGUARD_GOING_AWAY, true /* noOp */).build();
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+
+        // If keyguard-going-away flag set, then it shouldn't be aborted.
+        assertEquals(1, mDefaultHandler.activeCount());
+    }
+
+    @Test
+    public void testSleepTransition_withChanges_plays(){
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_SLEEP, null /* trigger */, null /* remote */));
+
+        // Make a transition with some changes
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_SLEEP)
+                .addChange(TRANSIT_OPEN).build();
+        info.setTrack(0);
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+
+        // If there is an actual change, then it shouldn't be aborted.
+        assertEquals(1, mDefaultHandler.activeCount());
+    }
+
+
+    @Test
+    public void testSleepTransition_empty_SyncBySleepHandler() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_SLEEP, null /* trigger */, null /* remote */));
+
+        // Make a no-op transition
+        TransitionInfo info = new TransitionInfoBuilder(
+                TRANSIT_SLEEP, 0x0, true /* noOp */).build();
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+
+        // If there is nothing to actually play, it should not be offered to handlers.
+        assertEquals(0, mDefaultHandler.activeCount());
     }
 
     @Test
