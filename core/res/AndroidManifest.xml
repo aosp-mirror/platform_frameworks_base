@@ -2358,6 +2358,15 @@
     <permission android:name="android.permission.SUSPEND_APPS"
         android:protectionLevel="signature|role" />
 
+    <!-- @SystemApi
+         @hide
+         @FlaggedApi("android.content.pm.quarantined_enabled")
+         Allows an application to quarantine other apps, which will prevent
+         them from running without explicit user action.
+    -->
+    <permission android:name="android.permission.QUARANTINE_APPS"
+        android:protectionLevel="internal|verifier" />
+
     <!-- Allows applications to discover and pair bluetooth devices.
          <p>Protection level: normal
     -->
