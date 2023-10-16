@@ -4935,20 +4935,8 @@ public final class DisplayManagerService extends SystemService {
                     return null;
                 }
 
-                DisplayOffloadSession session =
-                        new DisplayOffloadSession() {
-                            @Override
-                            public void setDozeStateOverride(int displayState) {
-                                synchronized (mSyncRoot) {
-                                    displayPowerController.overrideDozeScreenState(displayState);
-                                }
-                            }
-
-                            @Override
-                            public DisplayOffloader getDisplayOffloader() {
-                                return displayOffloader;
-                            }
-                        };
+                DisplayOffloadSessionImpl session = new DisplayOffloadSessionImpl(displayOffloader,
+                        displayPowerController);
                 logicalDisplay.setDisplayOffloadSessionLocked(session);
                 displayPowerController.setDisplayOffloadSession(session);
                 return session;

@@ -2761,8 +2761,7 @@ public class DisplayManagerServiceTest {
         DisplayOffloader mockDisplayOffloader = mock(DisplayOffloader.class);
         localService.registerDisplayOffloader(displayId, mockDisplayOffloader);
 
-        assertThat(display.getDisplayOffloadSessionLocked().getDisplayOffloader()).isEqualTo(
-                mockDisplayOffloader);
+        assertThat(display.getDisplayOffloadSessionLocked()).isNotNull();
     }
 
     @Test

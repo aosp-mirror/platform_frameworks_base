@@ -124,8 +124,6 @@ public final class DisplayPowerControllerTest {
     private Handler mHandler;
     private DisplayPowerControllerHolder mHolder;
     private Sensor mProxSensor;
-    private DisplayManagerInternal.DisplayOffloader mDisplayOffloader;
-    private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
 
     @Mock
     private DisplayPowerCallbacks mDisplayPowerCallbacksMock;
@@ -145,6 +143,8 @@ public final class DisplayPowerControllerTest {
     private DisplayWhiteBalanceController mDisplayWhiteBalanceControllerMock;
     @Mock
     private DisplayManagerFlags mDisplayManagerFlagsMock;
+    @Mock
+    private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
 
     @Captor
     private ArgumentCaptor<SensorEventListener> mSensorEventListenerCaptor;
@@ -1093,19 +1093,19 @@ public final class DisplayPowerControllerTest {
                 any(AutomaticBrightnessController.Callbacks.class),
                 any(Looper.class),
                 eq(mSensorManagerMock),
-                any(),
+                /* lightSensor= */ any(),
                 eq(mHolder.brightnessMappingStrategy),
-                anyInt(),
-                anyFloat(),
-                anyFloat(),
-                anyFloat(),
-                anyInt(),
-                anyInt(),
-                anyLong(),
-                anyLong(),
-                anyLong(),
-                anyLong(),
-                anyBoolean(),
+                /* lightSensorWarmUpTime= */ anyInt(),
+                /* brightnessMin= */ anyFloat(),
+                /* brightnessMax= */ anyFloat(),
+                /* dozeScaleFactor */ anyFloat(),
+                /* lightSensorRate= */ anyInt(),
+                /* initialLightSensorRate= */ anyInt(),
+                /* brighteningLightDebounceConfig */ anyLong(),
+                /* darkeningLightDebounceConfig */ anyLong(),
+                /* brighteningLightDebounceConfigIdle= */ anyLong(),
+                /* darkeningLightDebounceConfigIdle= */ anyLong(),
+                /* resetAmbientLuxAfterWarmUpConfig= */ anyBoolean(),
                 any(HysteresisLevels.class),
                 any(HysteresisLevels.class),
                 any(HysteresisLevels.class),
@@ -1113,9 +1113,9 @@ public final class DisplayPowerControllerTest {
                 eq(mContext),
                 any(BrightnessRangeController.class),
                 any(BrightnessThrottler.class),
-                isNull(),
-                anyInt(),
-                anyInt(),
+                /* idleModeBrightnessMapper= */ isNull(),
+                /* ambientLightHorizonShort= */ anyInt(),
+                /* ambientLightHorizonLong= */ anyInt(),
                 eq(lux),
                 eq(brightness)
         );
@@ -1385,8 +1385,6 @@ public final class DisplayPowerControllerTest {
             when(mHolder.displayPowerState.getScreenState()).thenReturn(invocation.getArgument(0));
             return null;
         }).when(mHolder.displayPowerState).setScreenState(anyInt());
-        // init displayoffload session and support offloading.
-        initDisplayOffloadSession();
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
 
         // start with DOZE.
@@ -1413,8 +1411,6 @@ public final class DisplayPowerControllerTest {
             when(mHolder.displayPowerState.getScreenState()).thenReturn(invocation.getArgument(0));
             return null;
         }).when(mHolder.displayPowerState).setScreenState(anyInt());
-        // init displayoffload session and support offloading.
-        initDisplayOffloadSession();
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
 
         // start with DOZE.
@@ -1440,8 +1436,6 @@ public final class DisplayPowerControllerTest {
             when(mHolder.displayPowerState.getScreenState()).thenReturn(invocation.getArgument(0));
             return null;
         }).when(mHolder.displayPowerState).setScreenState(anyInt());
-        // init displayoffload session and support offloading.
-        initDisplayOffloadSession();
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
 
         // start with OFF.
@@ -1455,28 +1449,6 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         verify(mHolder.displayPowerState, never()).setScreenState(anyInt());
-    }
-
-    private void initDisplayOffloadSession() {
-        mDisplayOffloader = spy(new DisplayManagerInternal.DisplayOffloader() {
-            @Override
-            public boolean startOffload() {
-                return true;
-            }
-
-            @Override
-            public void stopOffload() {}
-        });
-
-        mDisplayOffloadSession = new DisplayManagerInternal.DisplayOffloadSession() {
-            @Override
-            public void setDozeStateOverride(int displayState) {}
-
-            @Override
-            public DisplayManagerInternal.DisplayOffloader getDisplayOffloader() {
-                return mDisplayOffloader;
-            }
-        };
     }
 
     private void advanceTime(long timeMs) {

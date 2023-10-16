@@ -22,6 +22,7 @@ import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.PowerManager;
 
 import java.io.PrintWriter;
 
@@ -148,6 +149,14 @@ public interface DisplayPowerControllerInterface {
      * value.
      */
     void setTemporaryAutoBrightnessAdjustment(float adjustment);
+
+    /**
+     * Sets temporary brightness from the offload chip until we get a brightness value from
+     * the light sensor.
+     * @param brightness The brightness value between {@link PowerManager.BRIGHTNESS_MIN} and
+     * {@link PowerManager.BRIGHTNESS_MAX}. Values outside of that range will be ignored.
+     */
+    void setBrightnessFromOffload(float brightness);
 
     /**
      * Gets the screen brightness setting

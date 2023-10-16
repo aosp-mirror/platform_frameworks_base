@@ -721,8 +721,19 @@ public abstract class DisplayManagerInternal {
     public interface DisplayOffloadSession {
         /** Provide the display state to use in place of state DOZE. */
         void setDozeStateOverride(int displayState);
-        /** Returns the associated DisplayOffloader. */
-        DisplayOffloader getDisplayOffloader();
+
+        /** Whether the session is active. */
+        boolean isActive();
+
+        /**
+         * Update the brightness from the offload chip.
+         * @param brightness The brightness value between {@link PowerManager.BRIGHTNESS_MIN} and
+         *                   {@link PowerManager.BRIGHTNESS_MAX}, or
+         *                   {@link PowerManager.BRIGHTNESS_INVALID_FLOAT} which removes
+         *                   the brightness from offload. Other values will be ignored.
+         */
+        void updateBrightness(float brightness);
+
         /** Returns whether displayoffload supports the given display state. */
         static boolean isSupportedOffloadState(int displayState) {
             return Display.isSuspendedState(displayState);

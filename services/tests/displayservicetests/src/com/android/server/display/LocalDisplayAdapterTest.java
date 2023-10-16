@@ -25,6 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
@@ -40,12 +41,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayManagerInternal.DisplayOffloader;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.SurfaceControl;
@@ -118,10 +119,12 @@ public class LocalDisplayAdapterTest {
     private DisplayNotificationManager mMockedDisplayNotificationManager;
     @Mock
     private DisplayManagerFlags mFlags;
+    @Mock
+    private DisplayPowerControllerInterface mMockedDisplayPowerController;
 
     private Handler mHandler;
 
-    private DisplayOffloadSession mDisplayOffloadSession;
+    private DisplayOffloadSessionImpl mDisplayOffloadSession;
 
     private DisplayOffloader mDisplayOffloader;
 
@@ -1195,6 +1198,7 @@ public class LocalDisplayAdapterTest {
         }
 
         verify(mDisplayOffloader, times(mDisplayOffloadSupportedStates.size())).startOffload();
+        assertTrue(mDisplayOffloadSession.isActive());
     }
 
     @Test
@@ -1217,6 +1221,9 @@ public class LocalDisplayAdapterTest {
         changeStateToDozeRunnable.run();
 
         verify(mDisplayOffloader).stopOffload();
+        assertFalse(mDisplayOffloadSession.isActive());
+        verify(mMockedDisplayPowerController).setBrightnessFromOffload(
+                PowerManager.BRIGHTNESS_INVALID_FLOAT);
     }
 
     private void initDisplayOffloadSession() {
@@ -1230,15 +1237,8 @@ public class LocalDisplayAdapterTest {
             public void stopOffload() {}
         });
 
-        mDisplayOffloadSession = new DisplayOffloadSession() {
-            @Override
-            public void setDozeStateOverride(int displayState) {}
-
-            @Override
-            public DisplayOffloader getDisplayOffloader() {
-                return mDisplayOffloader;
-            }
-        };
+        mDisplayOffloadSession = new DisplayOffloadSessionImpl(mDisplayOffloader,
+                mMockedDisplayPowerController);
     }
 
     private void setupCutoutAndRoundedCorners() {

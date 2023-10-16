@@ -138,7 +138,7 @@ final class LogicalDisplay {
     private final Rect mTempDisplayRect = new Rect();
 
     /** A session token that controls the offloading operations of this logical display. */
-    private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
+    private DisplayOffloadSessionImpl mDisplayOffloadSession;
 
     /**
      * Name of a display group to which the display is assigned.
@@ -969,12 +969,11 @@ final class LogicalDisplay {
         return mDisplayGroupName;
     }
 
-    public void setDisplayOffloadSessionLocked(
-            DisplayManagerInternal.DisplayOffloadSession session) {
+    public void setDisplayOffloadSessionLocked(DisplayOffloadSessionImpl session) {
         mDisplayOffloadSession = session;
     }
 
-    public DisplayManagerInternal.DisplayOffloadSession getDisplayOffloadSessionLocked() {
+    public DisplayOffloadSessionImpl getDisplayOffloadSessionLocked() {
         return mDisplayOffloadSession;
     }
 

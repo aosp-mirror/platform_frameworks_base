@@ -107,6 +107,7 @@ public class AutomaticBrightnessStrategy {
         mIsAutoBrightnessEnabled = shouldUseAutoBrightness()
                 && (targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze)
                 && brightnessReason != BrightnessReason.REASON_OVERRIDE
+                && brightnessReason != BrightnessReason.REASON_OFFLOAD
                 && mAutomaticBrightnessController != null;
         mAutoBrightnessDisabledDueToDisplayOff = shouldUseAutoBrightness()
                 && !(targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze);
