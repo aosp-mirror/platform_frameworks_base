@@ -7237,7 +7237,7 @@
 
     <!-- @SystemApi Required for the privileged assistant apps targeting
          {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
-         that receive voice trigger from a trusted hotword detection service.
+         that receive voice trigger from a sandboxed {@link HotwordDetectionService}.
          <p>Protection level: signature|privileged|appop
          @FlaggedApi("android.permission.flags.voice_activation_permission_apis")
          @hide -->
@@ -7246,8 +7246,8 @@
 
     <!-- @SystemApi Required for the privileged assistant apps targeting
          {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
-         that receive training data from the sandboxed hotword detection service or visual
-         query detection service.
+         that receive training data from a sandboxed {@link HotwordDetectionService} or
+         {@link VisualQueryDetectionService}.
          <p>Protection level: internal|appop
          @FlaggedApi("android.permission.flags.voice_activation_permission_apis")
          @hide -->
