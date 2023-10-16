@@ -12067,6 +12067,13 @@ public final class Settings {
         public static final String DND_CONFIGS_MIGRATED = "dnd_settings_migrated";
 
         /**
+         * Controls whether to hide private space entry point in All Apps
+         *
+         * @hide
+         */
+        public static final String HIDE_PRIVATESPACE_ENTRY_POINT = "hide_privatespace_entry_point";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
