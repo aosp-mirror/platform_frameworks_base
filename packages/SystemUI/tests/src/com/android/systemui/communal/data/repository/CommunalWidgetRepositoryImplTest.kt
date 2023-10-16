@@ -11,11 +11,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.communal.data.model.CommunalWidgetMetadata
+import com.android.systemui.communal.shared.CommunalContentSize
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.FakeLogBuffer
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
@@ -59,9 +62,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var stopwatchProviderInfo: AppWidgetProviderInfo
 
+    private lateinit var communalRepository: FakeCommunalRepository
+
     private lateinit var logBuffer: LogBuffer
 
     private val testDispatcher = StandardTestDispatcher()
+
     private val testScope = TestScope(testDispatcher)
 
     @Before
@@ -71,6 +77,14 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         logBuffer = FakeLogBuffer.Factory.create()
 
         featureFlagEnabled(true)
+        communalRepository = FakeCommunalRepository()
+        communalRepository.setIsCommunalEnabled(true)
+
+        overrideResource(
+            R.array.config_communalWidgetAllowlist,
+            arrayOf(componentName1, componentName2)
+        )
+
         whenever(stopwatchProviderInfo.loadLabel(any())).thenReturn("Stopwatch")
         whenever(userTracker.userHandle).thenReturn(userHandle)
     }
@@ -219,11 +233,36 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             Mockito.verify(appWidgetHost).stopListening()
         }
 
+    @Test
+    fun getCommunalWidgetAllowList_onInit() {
+        testScope.runTest {
+            val repository = initCommunalWidgetRepository()
+            val communalWidgetAllowlist = repository.communalWidgetAllowlist
+            assertThat(
+                    listOf(
+                        CommunalWidgetMetadata(
+                            componentName = componentName1,
+                            priority = 2,
+                            sizes = listOf(CommunalContentSize.HALF)
+                        ),
+                        CommunalWidgetMetadata(
+                            componentName = componentName2,
+                            priority = 1,
+                            sizes = listOf(CommunalContentSize.HALF)
+                        )
+                    )
+                )
+                .containsExactly(*communalWidgetAllowlist.toTypedArray())
+        }
+    }
+
     private fun initCommunalWidgetRepository(): CommunalWidgetRepositoryImpl {
         return CommunalWidgetRepositoryImpl(
+            context,
             appWidgetManager,
             appWidgetHost,
             broadcastDispatcher,
+            communalRepository,
             packageManager,
             userManager,
             userTracker,
@@ -281,5 +320,10 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     private fun installedProviders(providers: List<AppWidgetProviderInfo>) {
         whenever(appWidgetManager.installedProviders).thenReturn(providers)
+    }
+
+    companion object {
+        const val componentName1 = "component name 1"
+        const val componentName2 = "component name 2"
     }
 }
