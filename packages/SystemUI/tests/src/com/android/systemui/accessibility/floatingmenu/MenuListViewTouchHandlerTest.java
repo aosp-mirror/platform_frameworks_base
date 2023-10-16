@@ -18,8 +18,7 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.View.OVER_SCROLL_NEVER;
 
-import static com.android.systemui.Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG;
-import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -83,7 +82,7 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        setFlagDefault(mSetFlagsRule, FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
+        setFlagDefaults(mSetFlagsRule);
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
                 mock(SecureSettings.class));
