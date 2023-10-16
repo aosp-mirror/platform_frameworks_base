@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
 import com.android.compose.animation.scene.transformation.PropertyTransformation
+import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.util.lerp
 
@@ -196,29 +197,44 @@ private fun shouldDrawElement(
             state.fromScene == state.toScene ||
             !layoutImpl.isTransitionReady(state) ||
             state.fromScene !in element.sceneValues ||
-            state.toScene !in element.sceneValues ||
-            !isSharedElementEnabled(layoutImpl, state, element.key)
+            state.toScene !in element.sceneValues
     ) {
         return true
     }
 
-    val otherScene =
-        layoutImpl.scenes.getValue(
-            if (scene.key == state.fromScene) {
-                state.toScene
-            } else {
-                state.fromScene
-            }
-        )
-
-    // When the element is shared, draw the one in the highest scene unless it is a background, i.e.
-    // it is usually drawn below everything else.
-    val isHighestScene = scene.zIndex > otherScene.zIndex
-    return if (element.key.isBackground) {
-        !isHighestScene
-    } else {
-        isHighestScene
+    val sharedTransformation = sharedElementTransformation(layoutImpl, state, element.key)
+    if (sharedTransformation?.enabled == false) {
+        return true
     }
+
+    return shouldDrawOrComposeSharedElement(
+        layoutImpl,
+        state,
+        scene.key,
+        element.key,
+        sharedTransformation,
+    )
+}
+
+internal fun shouldDrawOrComposeSharedElement(
+    layoutImpl: SceneTransitionLayoutImpl,
+    transition: TransitionState.Transition,
+    scene: SceneKey,
+    element: ElementKey,
+    sharedTransformation: SharedElementTransformation?
+): Boolean {
+    val scenePicker = sharedTransformation?.scenePicker ?: DefaultSharedElementScenePicker
+    val fromScene = transition.fromScene
+    val toScene = transition.toScene
+
+    return scenePicker.sceneDuringTransition(
+        element = element,
+        fromScene = fromScene,
+        toScene = toScene,
+        progress = transition::progress,
+        fromSceneZIndex = layoutImpl.scenes.getValue(fromScene).zIndex,
+        toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
+    ) == scene
 }
 
 private fun isSharedElementEnabled(
@@ -226,6 +242,14 @@ private fun isSharedElementEnabled(
     transition: TransitionState.Transition,
     element: ElementKey,
 ): Boolean {
+    return sharedElementTransformation(layoutImpl, transition, element)?.enabled ?: true
+}
+
+internal fun sharedElementTransformation(
+    layoutImpl: SceneTransitionLayoutImpl,
+    transition: TransitionState.Transition,
+    element: ElementKey,
+): SharedElementTransformation? {
     val spec = layoutImpl.transitions.transitionSpec(transition.fromScene, transition.toScene)
     val sharedInFromScene = spec.transformations(element, transition.fromScene).shared
     val sharedInToScene = spec.transformations(element, transition.toScene).shared
@@ -238,7 +262,7 @@ private fun isSharedElementEnabled(
         )
     }
 
-    return sharedInFromScene?.enabled ?: true
+    return sharedInFromScene
 }
 
 /**

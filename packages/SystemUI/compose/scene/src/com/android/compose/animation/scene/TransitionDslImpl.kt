@@ -111,8 +111,12 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         range = null
     }
 
-    override fun sharedElement(matcher: ElementMatcher, enabled: Boolean) {
-        transformations.add(SharedElementTransformation(matcher, enabled))
+    override fun sharedElement(
+        matcher: ElementMatcher,
+        enabled: Boolean,
+        scenePicker: SharedElementScenePicker,
+    ) {
+        transformations.add(SharedElementTransformation(matcher, enabled, scenePicker))
     }
 
     override fun timestampRange(
