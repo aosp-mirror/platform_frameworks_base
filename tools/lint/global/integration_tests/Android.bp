@@ -12,25 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-java_library {
-    name: "AndroidGlobalLintTestNoAidl",
-    srcs: ["TestNoAidl/**/*.java"],
+// Integration tests for @EnforcePermission linters.
+// Each test defines its own java_library. The XML lint report from this
+// java_library is wrapped under a Python library with a unique pkg_path (this
+// is to avoid a name conflict for the report file). All the tests are
+// referenced and executed by AndroidGlobalLintCheckerIntegrationTest.
+
+java_defaults {
+    name: "AndroidGlobalLintIntegrationTestDefault",
     libs: [
         "framework-annotations-lib",
     ],
     lint: {
-        // It is expected that lint returns an error when processing this
+        // It is expected that lint returns an error when processing the
         // library. Silence it here, the lint output is verified in tests.py.
         suppress_exit_code: true,
     },
+}
+
+java_library {
+    name: "AndroidGlobalLintTestNoAidl",
+    srcs: ["TestNoAidl/**/*.java"],
+    defaults: ["AndroidGlobalLintIntegrationTestDefault"],
+}
+
+python_library_host {
+    name: "AndroidGlobalLintTestNoAidl_py",
+    data: [":AndroidGlobalLintTestNoAidl{.lint}"],
+    pkg_path: "no_aidl",
+}
+
+java_library {
+    name: "AndroidGlobalLintTestMissingAnnotation",
+    srcs: [
+        "TestMissingAnnotation/**/*.java",
+        "TestMissingAnnotation/**/*.aidl",
+    ],
+    defaults: ["AndroidGlobalLintIntegrationTestDefault"],
+}
+
+python_library_host {
+    name: "AndroidGlobalLintTestMissingAnnotation_py",
+    data: [":AndroidGlobalLintTestMissingAnnotation{.lint}"],
+    pkg_path: "missing_annotation",
 }
 
 python_test_host {
     name: "AndroidGlobalLintCheckerIntegrationTest",
     srcs: ["tests.py"],
     main: "tests.py",
-    data: [
-        ":AndroidGlobalLintTestNoAidl{.lint}",
+    libs: [
+        "AndroidGlobalLintTestNoAidl_py",
+        "AndroidGlobalLintTestMissingAnnotation_py",
     ],
     version: {
         py3: {
