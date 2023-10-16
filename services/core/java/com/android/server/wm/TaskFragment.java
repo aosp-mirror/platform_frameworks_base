@@ -213,6 +213,24 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     Dimmer mDimmer = Flags.dimmerRefactor()
             ? new SmoothDimmer(this) : new LegacyDimmer(this);
 
+    /** Apply the dim layer on the embedded TaskFragment. */
+    static final int EMBEDDED_DIM_AREA_TASK_FRAGMENT = 0;
+
+    /** Apply the dim layer on the parent Task for an embedded TaskFragment. */
+    static final int EMBEDDED_DIM_AREA_PARENT_TASK = 1;
+
+    /**
+     * The type of dim layer area for an embedded TaskFragment.
+     */
+    @IntDef(prefix = {"EMBEDDED_DIM_AREA_"}, value = {
+            EMBEDDED_DIM_AREA_TASK_FRAGMENT,
+            EMBEDDED_DIM_AREA_PARENT_TASK,
+    })
+    @interface EmbeddedDimArea {}
+
+    @EmbeddedDimArea
+    private int mEmbeddedDimArea = EMBEDDED_DIM_AREA_TASK_FRAGMENT;
+
     /** This task fragment will be removed when the cleanup of its children are done. */
     private boolean mIsRemovalRequested;
 
@@ -2931,12 +2949,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     Dimmer getDimmer() {
-        // If the window is in an embedded TaskFragment, we want to dim at the TaskFragment.
-        if (asTask() == null) {
+        // If this is in an embedded TaskFragment and we want the dim applies on the TaskFragment.
+        if (mIsEmbedded && mEmbeddedDimArea == EMBEDDED_DIM_AREA_TASK_FRAGMENT) {
             return mDimmer;
         }
 
         return super.getDimmer();
+    }
+
+    /** Bounds to be used for dimming, as well as touch related tests. */
+    void getDimBounds(@NonNull Rect out) {
+        if (mIsEmbedded && mEmbeddedDimArea == EMBEDDED_DIM_AREA_PARENT_TASK) {
+            out.set(getTask().getBounds());
+        } else {
+            out.set(getBounds());
+        }
+    }
+
+    void setEmbeddedDimArea(@EmbeddedDimArea int embeddedDimArea) {
+        mEmbeddedDimArea = embeddedDimArea;
     }
 
     @Override
