@@ -16,7 +16,7 @@ flag {
 
 flag {
     name: "remove_app_profiler_pss_collection"
-    namespace: "android_platform_power_optimization"
+    namespace: "power_optimization"
     description: "Replaces background PSS collection in AppProfiler with RSS"
     bug: "297542292"
 }
