@@ -2211,6 +2211,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 mService.mTaskFragmentOrganizerController.dispatchPendingInfoChangedEvent(
                         organizedTf);
             }
+
+            if (taskDisplayArea.getFocusedRootTask() == rootTask) {
+                taskDisplayArea.clearPreferredTopFocusableRootTask();
+            }
         } finally {
             mService.continueWindowLayout();
             try {
