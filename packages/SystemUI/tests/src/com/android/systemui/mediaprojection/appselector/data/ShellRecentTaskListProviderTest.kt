@@ -128,6 +128,7 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
     private fun createRecentTask(taskId: Int): RecentTask =
         RecentTask(
             taskId = taskId,
+            displayId = 0,
             userId = 0,
             topActivityComponent = null,
             baseIntentComponent = null,

@@ -216,6 +216,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     ): RecentTask {
         return RecentTask(
             taskId = taskId,
+            displayId = 0,
             topActivityComponent = topActivityComponent,
             baseIntentComponent = ComponentName("com", "Test"),
             userId = userId,
