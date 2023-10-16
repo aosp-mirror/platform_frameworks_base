@@ -76,13 +76,13 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.power.shared.model.ScreenPowerState;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
 import com.android.systemui.keyguard.ui.binder.WindowManagerLockscreenVisibilityViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSurfaceBehindViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.WindowManagerLockscreenVisibilityViewModel;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.shared.model.ScreenPowerState;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
@@ -599,11 +599,15 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.setSwitchingUser(switching);
         }
 
+        /**
+         * @deprecated This binder call is not listened to anymore. Instead the current user is
+         * tracked in SelectedUserInteractor.getSelectedUserId()
+         */
         @Override // Binder interface
+        @Deprecated
         public void setCurrentUser(int userId) {
-            trace("setCurrentUser userId=" + userId);
+            trace("Deprecated/NOT USED: setCurrentUser userId=" + userId);
             checkPermission();
-            mKeyguardViewMediator.setCurrentUser(userId);
         }
 
         @Override // Binder interface

@@ -535,21 +535,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     SparseArray<BiometricAuthenticated> mUserFaceAuthenticated = new SparseArray<>();
 
-    private static int sCurrentUser;
-
-    public synchronized static void setCurrentUser(int currentUser) {
-        sCurrentUser = currentUser;
-    }
-
-    /**
-     * @deprecated This can potentially return unexpected values in a multi user scenario
-     * as this state is managed by another component. Consider using {@link SelectedUserInteractor}.
-     */
-    @Deprecated
-    public synchronized static int getCurrentUser() {
-        return sCurrentUser;
-    }
-
     @Override
     public void onTrustChanged(boolean enabled, boolean newlyUnlocked, int userId, int flags,
             List<String> trustGrantedMessages) {
