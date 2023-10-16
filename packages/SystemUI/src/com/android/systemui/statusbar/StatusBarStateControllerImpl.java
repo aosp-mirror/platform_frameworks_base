@@ -42,15 +42,16 @@ import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.util.Compile;
+import com.android.systemui.util.kotlin.JavaAdapter;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -64,8 +65,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class StatusBarStateControllerImpl implements
         SysuiStatusBarStateController,
-        CallbackController<StateListener>,
-        Dumpable {
+        CallbackController<StateListener> {
     private static final String TAG = "SbStateController";
     private static final boolean DEBUG_IMMERSIVE_APPS =
             SystemProperties.getBoolean("persist.debug.immersive_apps", false);
@@ -95,6 +95,8 @@ public class StatusBarStateControllerImpl implements
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
     private final UiEventLogger mUiEventLogger;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    private final JavaAdapter mJavaAdapter;
+    private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private int mState;
     private int mLastState;
     private int mUpcomingState;
@@ -156,18 +158,22 @@ public class StatusBarStateControllerImpl implements
     @Inject
     public StatusBarStateControllerImpl(
             UiEventLogger uiEventLogger,
-            DumpManager dumpManager,
             InteractionJankMonitor interactionJankMonitor,
-            ShadeExpansionStateManager shadeExpansionStateManager
-    ) {
+            JavaAdapter javaAdapter,
+            Lazy<ShadeInteractor> shadeInteractorLazy) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitor = interactionJankMonitor;
+        mJavaAdapter = javaAdapter;
+        mShadeInteractorLazy = shadeInteractorLazy;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
-        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
+    }
 
-        dumpManager.registerDumpable(this);
+    @Override
+    public void start() {
+        mJavaAdapter.alwaysCollectFlow(mShadeInteractorLazy.get().isAnyExpanded(),
+                this::onShadeOrQsExpanded);
     }
 
     @Override
@@ -345,7 +351,7 @@ public class StatusBarStateControllerImpl implements
         }
     }
 
-    private void onShadeExpansionFullyChanged(Boolean isExpanded) {
+    private void onShadeOrQsExpanded(Boolean isExpanded) {
         if (mIsExpanded != isExpanded) {
             mIsExpanded = isExpanded;
             String tag = getClass().getSimpleName() + "#setIsExpanded";
