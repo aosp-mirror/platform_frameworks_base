@@ -1,4 +1,4 @@
-package: "com.android.server.devicepolicy.flags"
+package: "android.app.admin.flags"
 
 flag {
   name: "policy_engine_migration_v2_enabled"
@@ -6,9 +6,17 @@ flag {
   description: "V2 of the policy engine migrations for Android V"
   bug: "289520697"
 }
+
 flag {
   name: "device_policy_size_tracking_enabled"
   namespace: "enterprise"
   description: "Add feature to track the total policy size and have a max threshold."
   bug: "281543351"
+}
+
+flag {
+  name: "onboarding_bugreport_v2_enabled"
+  namespace: "enterprise"
+  description: "Add feature to track required changes for enabled V2 of auto-capturing of onboarding bug reports."
+  bug: "302517677"
 }

@@ -51,6 +51,7 @@ aconfig_srcjars = [
     ":aconfig_midi_flags_java_lib{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
     ":com.android.net.flags-aconfig-java{.generated_srcjars}",
+    ":device_policy_aconfig_flags_lib{.generated_srcjars}",
 ]
 
 filegroup {
@@ -522,4 +523,24 @@ java_aconfig_library {
     name: "com.android.net.flags-aconfig-java",
     aconfig_declarations: "com.android.net.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// DevicePolicy
+aconfig_declarations {
+    name: "device_policy_aconfig_flags",
+    package: "android.app.admin.flags",
+    srcs: [
+        "core/java/android/app/admin/flags/flags.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "device_policy_aconfig_flags_lib",
+    aconfig_declarations: "device_policy_aconfig_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+cc_aconfig_library {
+    name: "device_policy_aconfig_flags_c_lib",
+    aconfig_declarations: "device_policy_aconfig_flags",
 }

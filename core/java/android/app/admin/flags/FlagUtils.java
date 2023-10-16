@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.devicepolicy.flags;
+package android.app.admin.flags;
 
-import static com.android.server.devicepolicy.flags.Flags.devicePolicySizeTrackingEnabled;
-import static com.android.server.devicepolicy.flags.Flags.policyEngineMigrationV2Enabled;
+import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
+import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
+import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 
 import android.os.Binder;
 
+/**
+ *
+ * @hide
+ */
 public final class FlagUtils {
-    private FlagUtils(){}
+    private FlagUtils() {}
 
     public static boolean isPolicyEngineMigrationV2Enabled() {
         return Binder.withCleanCallingIdentity(() -> {
@@ -33,6 +38,12 @@ public final class FlagUtils {
     public static boolean isDevicePolicySizeTrackingEnabled() {
         return Binder.withCleanCallingIdentity(() -> {
             return devicePolicySizeTrackingEnabled();
+        });
+    }
+
+    public static boolean isOnboardingBugreportV2Enabled() {
+        return Binder.withCleanCallingIdentity(() -> {
+            return onboardingBugreportV2Enabled();
         });
     }
 }
