@@ -1189,7 +1189,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    public boolean isWindowTrustedOverlay() {
+    @Override
+    void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
+        super.setInitialSurfaceControlProperties(b);
+        if (surfaceTrustedOverlay() && isWindowTrustedOverlay()) {
+            getPendingTransaction().setTrustedOverlay(mSurfaceControl, true);
+        }
+    }
+
+    void updateTrustedOverlay() {
+        mInputWindowHandle.setTrustedOverlay(getPendingTransaction(), mSurfaceControl,
+                isWindowTrustedOverlay());
+    }
+
+    boolean isWindowTrustedOverlay() {
         return InputMonitor.isTrustedOverlay(mAttrs.type)
                 || ((mAttrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0
                         && mSession.mCanAddInternalSystemWindow)
@@ -5205,9 +5218,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             updateFrameRateSelectionPriorityIfNeeded();
             updateScaleIfNeeded();
             mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
-            if (surfaceTrustedOverlay()) {
-                getSyncTransaction().setTrustedOverlay(mSurfaceControl, isWindowTrustedOverlay());
-            }
         }
         super.prepareSurfaces();
     }
