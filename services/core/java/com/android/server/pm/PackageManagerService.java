@@ -4564,6 +4564,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 final Bundle extras = new Bundle();
                 extras.putInt(Intent.EXTRA_UID, pmi.getPackageUid(packageName, 0, userId));
                 extras.putInt(Intent.EXTRA_USER_HANDLE, userId);
+                extras.putLong(Intent.EXTRA_TIME, SystemClock.elapsedRealtime());
                 mHandler.post(() -> {
                     mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_UNSTOPPED,
                             packageName, extras,
@@ -6959,6 +6960,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, uid);
             extras.putInt(Intent.EXTRA_USER_HANDLE, userId);
+            extras.putLong(Intent.EXTRA_TIME, SystemClock.elapsedRealtime());
             mHandler.post(() -> {
                 mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_RESTARTED,
                         packageName, extras,
