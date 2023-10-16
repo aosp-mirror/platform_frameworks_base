@@ -54,6 +54,9 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.TransitionState;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.ScreenPowerState;
@@ -102,10 +105,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final Rect mClipBounds = new Rect();
     private final KeyguardInteractor mKeyguardInteractor;
     private final PowerInteractor mPowerInteractor;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
 
     private Boolean mSplitShadeEnabled = false;
     private Boolean mStatusViewCentered = true;
-
+    private boolean mGoneToAodTransitionRunning = false;
     private DumpManager mDumpManager;
 
     private final TransitionListenerAdapter mKeyguardStatusAlignmentTransitionListener =
@@ -135,6 +139,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
             KeyguardInteractor keyguardInteractor,
+            KeyguardTransitionInteractor keyguardTransitionInteractor,
             DumpManager dumpManager,
             PowerInteractor powerInteractor) {
         super(keyguardStatusView);
@@ -144,12 +149,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mConfigurationController = configurationController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
                 dozeParameters, screenOffAnimationController, /* animateYPos= */ true,
-                logger.getBuffer());
+                featureFlags, logger.getBuffer());
         mInteractionJankMonitor = interactionJankMonitor;
         mFeatureFlags = featureFlags;
         mDumpManager = dumpManager;
         mKeyguardInteractor = keyguardInteractor;
         mPowerInteractor = powerInteractor;
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
     }
 
     @Override
@@ -197,6 +203,15 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 (ScreenPowerState powerState) -> {
                     if (powerState == ScreenPowerState.SCREEN_TURNING_ON) {
                         dozeTimeTick();
+                    }
+                }, context);
+
+        collectFlow(mView, mKeyguardTransitionInteractor.getGoneToAodTransition(),
+                (TransitionStep step) -> {
+                    if (step.getTransitionState() == TransitionState.RUNNING) {
+                        mGoneToAodTransitionRunning = true;
+                    } else {
+                        mGoneToAodTransitionRunning = false;
                     }
                 }, context);
     }
@@ -266,7 +281,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Set keyguard status view alpha.
      */
     public void setAlpha(float alpha) {
-        if (!mKeyguardVisibilityHelper.isVisibilityAnimating()) {
+        if (!mKeyguardVisibilityHelper.isVisibilityAnimating() && !mGoneToAodTransitionRunning) {
             mView.setAlpha(alpha);
         }
     }

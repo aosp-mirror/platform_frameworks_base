@@ -33,6 +33,9 @@ import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
+import java.util.UUID
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -40,9 +43,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import java.util.UUID
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
@@ -355,6 +355,7 @@ constructor(
                 when (toState) {
                     KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
+                    KeyguardState.AOD -> TO_AOD_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -364,5 +365,6 @@ constructor(
         private val DEFAULT_DURATION = 400.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
+        val TO_AOD_DURATION = 500.milliseconds
     }
 }
