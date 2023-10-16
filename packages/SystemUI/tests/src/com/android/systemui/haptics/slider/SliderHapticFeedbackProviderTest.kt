@@ -28,6 +28,8 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
+import kotlin.math.max
+import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -149,26 +151,52 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun playHapticAtProgress_afterNextDragThreshold_playsLowTicksTwice() {
-        // GIVEN max velocity and slider progress
-        val progress = 1f
-        val expectedScale = scaleAtProgressChange(config.maxVelocityToScale.toFloat(), progress)
-        val ticks = VibrationEffect.startComposition()
-        repeat(config.numberOfLowTicks) {
-            ticks.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, expectedScale)
-        }
+    fun playHapticAtProgress_beforeNextDragThreshold_playsLowTicksOnce() {
+        // GIVEN max velocity and a slider progress at half progress
+        val firstProgress = 0.5f
+        val firstTicks = generateTicksComposition(config.maxVelocityToScale, firstProgress)
+
+        // Given a second slider progress event smaller than the progress threshold
+        val secondProgress = firstProgress + max(0f, config.deltaProgressForDragThreshold - 0.01f)
 
         // GIVEN system running for 1s
         clock.advanceTime(1000)
 
-        // WHEN two calls to play occur with the required threshold separation
-        sliderHapticFeedbackProvider.onProgress(progress)
+        // WHEN two calls to play occur with the required threshold separation (time and progress)
+        sliderHapticFeedbackProvider.onProgress(firstProgress)
         clock.advanceTime(dragTextureThresholdMillis.toLong())
-        sliderHapticFeedbackProvider.onProgress(progress)
+        sliderHapticFeedbackProvider.onProgress(secondProgress)
 
-        // THEN the correct composition plays two times
-        verify(vibratorHelper, times(2))
-            .vibrate(eq(ticks.compose()), any(VibrationAttributes::class.java))
+        // THEN Only the first compositions plays
+        verify(vibratorHelper, times(1))
+            .vibrate(eq(firstTicks), any(VibrationAttributes::class.java))
+        verify(vibratorHelper, times(1))
+            .vibrate(any(VibrationEffect::class.java), any(VibrationAttributes::class.java))
+    }
+
+    @Test
+    fun playHapticAtProgress_afterNextDragThreshold_playsLowTicksTwice() {
+        // GIVEN max velocity and a slider progress at half progress
+        val firstProgress = 0.5f
+        val firstTicks = generateTicksComposition(config.maxVelocityToScale, firstProgress)
+
+        // Given a second slider progress event beyond progress threshold
+        val secondProgress = firstProgress + config.deltaProgressForDragThreshold + 0.01f
+        val secondTicks = generateTicksComposition(config.maxVelocityToScale, secondProgress)
+
+        // GIVEN system running for 1s
+        clock.advanceTime(1000)
+
+        // WHEN two calls to play occur with the required threshold separation (time and progress)
+        sliderHapticFeedbackProvider.onProgress(firstProgress)
+        clock.advanceTime(dragTextureThresholdMillis.toLong())
+        sliderHapticFeedbackProvider.onProgress(secondProgress)
+
+        // THEN the correct compositions play
+        verify(vibratorHelper, times(1))
+            .vibrate(eq(firstTicks), any(VibrationAttributes::class.java))
+        verify(vibratorHelper, times(1))
+            .vibrate(eq(secondTicks), any(VibrationAttributes::class.java))
     }
 
     @Test
@@ -229,6 +257,38 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             .vibrate(eq(bookendVibration), any(VibrationAttributes::class.java))
     }
 
+    fun dragTextureLastProgress_afterDragTextureHaptics_keepsLastDragTextureProgress() {
+        // GIVEN max velocity and a slider progress at half progress
+        val progress = 0.5f
+
+        // GIVEN system running for 1s
+        clock.advanceTime(1000)
+
+        // WHEN a drag texture plays
+        sliderHapticFeedbackProvider.onProgress(progress)
+
+        // THEN the dragTextureLastProgress remembers the latest progress
+        assertEquals(progress, sliderHapticFeedbackProvider.dragTextureLastProgress)
+    }
+
+    @Test
+    fun dragTextureLastProgress_afterDragTextureHaptics_resetsOnHandleReleased() {
+        // GIVEN max velocity and a slider progress at half progress
+        val progress = 0.5f
+
+        // GIVEN system running for 1s
+        clock.advanceTime(1000)
+
+        // WHEN a drag texture plays
+        sliderHapticFeedbackProvider.onProgress(progress)
+
+        // WHEN the handle is released
+        sliderHapticFeedbackProvider.onHandleReleasedFromTouch()
+
+        // THEN the dragTextureLastProgress tracker is reset
+        assertEquals(-1f, sliderHapticFeedbackProvider.dragTextureLastProgress)
+    }
+
     private fun scaleAtBookends(velocity: Float): Float {
         val range = config.upperBookendScale - config.lowerBookendScale
         val interpolatedVelocity =
@@ -243,5 +303,16 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
         val interpolatedProgress = progressInterpolator.getInterpolation(progress)
         val bump = interpolatedVelocity * config.additionalVelocityMaxBump
         return interpolatedProgress * range + config.progressBasedDragMinScale + bump
+    }
+
+    private fun generateTicksComposition(velocity: Float, progress: Float): VibrationEffect {
+        val ticks = VibrationEffect.startComposition()
+        repeat(config.numberOfLowTicks) {
+            ticks.addPrimitive(
+                VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
+                scaleAtProgressChange(velocity, progress)
+            )
+        }
+        return ticks.compose()
     }
 }
