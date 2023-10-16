@@ -6470,4 +6470,9 @@
 
     <!-- Whether unlocking and waking a device are sequenced -->
     <bool name="config_orderUnlockAndWake">false</bool>
+
+    <!-- Enables or disables support for repair mode. The feature creates a secure
+         environment to protect the user's privacy when the device is being repaired.
+         Off by default, since OEMs may have had a similar feature on their devices. -->
+    <bool name="config_repairModeSupported">false</bool>
 </resources>
