@@ -23,6 +23,7 @@ import android.accessibilityservice.GestureDescription.MotionEventGenerator;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -793,6 +794,7 @@ public abstract class AccessibilityService extends Service {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
     @IntDef(
             prefix = {"OVERLAY_RESULT_"},
             value = {
@@ -803,6 +805,7 @@ public abstract class AccessibilityService extends Service {
     public @interface AttachOverlayResult {}
 
     /** Result code indicating the overlay was successfully attached. */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
     public static final int OVERLAY_RESULT_SUCCESS = 0;
 
     /**
@@ -810,6 +813,7 @@ public abstract class AccessibilityService extends Service {
      * error and not
      * because of problems with the input.
      */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
     public static final int OVERLAY_RESULT_INTERNAL_ERROR = 1;
 
     /**
@@ -817,6 +821,7 @@ public abstract class AccessibilityService extends Service {
      * specified display or
      * window id was invalid.
      */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
     public static final int OVERLAY_RESULT_INVALID = 2;
 
     private int mConnectionId = AccessibilityInteractionClient.NO_ID;
@@ -3506,11 +3511,7 @@ public abstract class AccessibilityService extends Service {
      * @param displayId the display to which the SurfaceControl should be attached.
      * @param sc the SurfaceControl containing the overlay content
      *
-     * @deprecated Use
-     * {@link #attachAccessibilityOverlayToDisplay(int, SurfaceControl, Executor, IntConsumer)}
-     * instead.
      */
-    @Deprecated
     public void attachAccessibilityOverlayToDisplay(int displayId, @NonNull SurfaceControl sc) {
         Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
         AccessibilityInteractionClient.getInstance(this)
@@ -3547,6 +3548,7 @@ public abstract class AccessibilityService extends Service {
      * @see #OVERLAY_RESULT_INVALID
      * @see #OVERLAY_RESULT_INTERNAL_ERROR
      */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
     public void attachAccessibilityOverlayToDisplay(
             int displayId,
             @NonNull SurfaceControl sc,
@@ -3581,11 +3583,7 @@ public abstract class AccessibilityService extends Service {
      * @param accessibilityWindowId The window id, from {@link AccessibilityWindowInfo#getId()}.
      * @param sc the SurfaceControl containing the overlay content
      *
-     * @deprecated Use
-     * {@link #attachAccessibilityOverlayToWindow(int, SurfaceControl, Executor,IntConsumer)}
-     * instead.
      */
-    @Deprecated
     public void attachAccessibilityOverlayToWindow(
             int accessibilityWindowId, @NonNull SurfaceControl sc) {
         Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
@@ -3623,6 +3621,7 @@ public abstract class AccessibilityService extends Service {
      * @see #OVERLAY_RESULT_INVALID
      * @see #OVERLAY_RESULT_INTERNAL_ERROR
      */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
     public void attachAccessibilityOverlayToWindow(
             int accessibilityWindowId,
             @NonNull SurfaceControl sc,
