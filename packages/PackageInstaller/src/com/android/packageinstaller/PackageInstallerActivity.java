@@ -308,7 +308,6 @@ public class PackageInstallerActivity extends Activity {
     }
 
     private void initiateInstall() {
-        bindUi();
         String pkgName = mPkgInfo.packageName;
         // Check if there is already a package on the device with this name
         // but it has been renamed to something else.
@@ -448,6 +447,7 @@ public class PackageInstallerActivity extends Activity {
         if (mAppSnippet != null) {
             // load placeholder layout with OK button disabled until we override this layout in
             // startInstallConfirm
+            bindUi();
             checkIfAllowedAndInitiateInstall();
         }
 
