@@ -626,7 +626,7 @@ object Flags {
 
     /** TODO(b/295143676): Tracking bug. When enable, captures a screenshot for each display. */
     @JvmField
-    val MULTI_DISPLAY_SCREENSHOT = unreleasedFlag("multi_display_screenshot")
+    val MULTI_DISPLAY_SCREENSHOT = unreleasedFlag("multi_display_screenshot", teamfood = true)
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
