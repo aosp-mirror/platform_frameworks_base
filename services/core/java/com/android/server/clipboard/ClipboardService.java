@@ -1006,7 +1006,7 @@ public class ClipboardService extends SystemService {
                         getContext().getString(R.string.pasted_from_clipboard, callingAppLabel);
                 Slog.i(TAG, message);
                 Toast.makeText(
-                        getContext(), UiThread.get().getLooper(), message, Toast.LENGTH_SHORT)
+                        getContext(), UiThread.get().getLooper(), message, Toast.LENGTH_LONG)
                         .show();
             } catch (PackageManager.NameNotFoundException e) {
                 // do nothing
