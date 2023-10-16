@@ -7,9 +7,38 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+// Visibility only for ravenwood prototype uses.
+genrule_defaults {
+    name: "hoststubgen-for-prototype-only-genrule",
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base/ravenwood:__subpackages__",
+    ],
+}
+
+// Visibility only for ravenwood prototype uses.
+java_defaults {
+    name: "hoststubgen-for-prototype-only-java",
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base/ravenwood:__subpackages__",
+    ],
+}
+
+// Visibility only for ravenwood prototype uses.
+filegroup_defaults {
+    name: "hoststubgen-for-prototype-only-filegroup",
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base/ravenwood:__subpackages__",
+    ],
+}
+
 // This library contains the standard hoststubgen annotations.
+// This is only for the prototype. The productionized version is "ravenwood-annotations".
 java_library {
     name: "hoststubgen-annotations",
+    defaults: ["hoststubgen-for-prototype-only-java"],
     srcs: [
         "annotations-src/**/*.java",
     ],
@@ -18,7 +47,6 @@ java_library {
     // Seems like we need it to avoid circular deps.
     // Copied it from "app-compat-annotations".
     sdk_version: "core_current",
-    visibility: ["//visibility:public"],
 }
 
 // This library contains helper classes used in the host side test environment at runtime.
@@ -55,12 +83,13 @@ java_binary_host {
 }
 
 // File that contains the standard command line argumetns to hoststubgen.
+// This is only for the prototype. The productionized version is "ravenwood-standard-options".
 filegroup {
     name: "hoststubgen-standard-options",
+    defaults: ["hoststubgen-for-prototype-only-filegroup"],
     srcs: [
         "hoststubgen-standard-options.txt",
     ],
-    visibility: ["//visibility:public"],
 }
 
 hoststubgen_common_options = "$(location hoststubgen) " +
@@ -93,7 +122,6 @@ genrule_defaults {
         "hoststubgen_keep_all.txt",
         "hoststubgen_dump.txt",
     ],
-    // visibility:  ["//visibility:public"],
 }
 
 // Generate the stub/impl from framework-all, with hidden APIs.
@@ -111,8 +139,10 @@ java_genrule_host {
 }
 
 // Extract the stub jar from "framework-all-host" for subsequent build rules.
+// This is only for the prototype. Do not use it in "productionized" build rules.
 java_genrule_host {
     name: "framework-all-hidden-api-host-stub",
+    defaults: ["hoststubgen-for-prototype-only-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [
         ":framework-all-hidden-api-host{host_stub.jar}",
@@ -120,12 +150,13 @@ java_genrule_host {
     out: [
         "host_stub.jar",
     ],
-    visibility: ["//visibility:public"],
 }
 
 // Extract the impl jar from "framework-all-host" for subsequent build rules.
+// This is only for the prototype. Do not use it in "productionized" build rules.
 java_genrule_host {
     name: "framework-all-hidden-api-host-impl",
+    defaults: ["hoststubgen-for-prototype-only-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [
         ":framework-all-hidden-api-host{host_impl.jar}",
@@ -133,11 +164,11 @@ java_genrule_host {
     out: [
         "host_impl.jar",
     ],
-    visibility: ["//visibility:public"],
 }
 
 // Generate the stub/impl from framework-all, with only public/system/test APIs, without
 // hidden APIs.
+// This is only for the prototype. Do not use it in "productionized" build rules.
 java_genrule_host {
     name: "framework-all-test-api-host",
     defaults: ["hoststubgen-command-defaults"],
@@ -154,8 +185,10 @@ java_genrule_host {
 }
 
 // Extract the stub jar from "framework-all-test-api-host" for subsequent build rules.
+// This is only for the prototype. Do not use it in "productionized" build rules.
 java_genrule_host {
     name: "framework-all-test-api-host-stub",
+    defaults: ["hoststubgen-for-prototype-only-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [
         ":framework-all-test-api-host{host_stub.jar}",
@@ -163,12 +196,13 @@ java_genrule_host {
     out: [
         "host_stub.jar",
     ],
-    visibility: ["//visibility:public"],
 }
 
 // Extract the impl jar from "framework-all-test-api-host" for subsequent build rules.
+// This is only for the prototype. Do not use it in "productionized" build rules.
 java_genrule_host {
     name: "framework-all-test-api-host-impl",
+    defaults: ["hoststubgen-for-prototype-only-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [
         ":framework-all-test-api-host{host_impl.jar}",
@@ -176,7 +210,6 @@ java_genrule_host {
     out: [
         "host_impl.jar",
     ],
-    visibility: ["//visibility:public"],
 }
 
 // This library contains helper classes to build hostside tests/targets.
@@ -186,6 +219,7 @@ java_genrule_host {
 // Ideally this library should be empty.
 java_library_host {
     name: "hoststubgen-helper-framework-buildtime",
+    defaults: ["hoststubgen-for-prototype-only-java"],
     srcs: [
         "helper-framework-buildtime-src/**/*.java",
     ],
@@ -195,13 +229,13 @@ java_library_host {
         "framework-all-hidden-api-host-impl",
         "junit",
     ],
-    visibility: ["//visibility:public"],
 }
 
 // This module contains "fake" libcore/dalvik classes, framework native substitution, etc,
 // that are needed at runtime.
 java_library_host {
     name: "hoststubgen-helper-framework-runtime",
+    defaults: ["hoststubgen-for-prototype-only-java"],
     srcs: [
         "helper-framework-runtime-src/**/*.java",
     ],
@@ -209,7 +243,6 @@ java_library_host {
         "hoststubgen-helper-runtime",
         "framework-all-hidden-api-host-impl",
     ],
-    visibility: ["//visibility:public"],
 }
 
 // Defaults for host side test modules.
