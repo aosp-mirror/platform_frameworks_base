@@ -843,8 +843,7 @@ public class BroadcastOptions extends ComponentOptions {
      * considered to be in the same delivery group as this iff it has the same {@code namespace}
      * and {@code key}.
      *
-     * <p> If neither matching key using this API nor matching filter using
-     * {@link #setDeliveryGroupMatchingFilter(IntentFilter)} is specified, then by default
+     * <p> If not matching key using this API then by default
      * {@link Intent#filterEquals(Intent)} will be used to identify the delivery group.
      */
     @NonNull

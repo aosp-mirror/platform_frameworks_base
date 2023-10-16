@@ -143,10 +143,11 @@ public final class BugreportManager {
          */
         public void onError(@BugreportErrorCode int errorCode) {}
 
-        /** Called when taking bugreport finishes successfully.
+        /**
+         * Called when taking bugreport finishes successfully.
          *
          * <p>This callback will be invoked if the
-         * {@link BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT} flag is not set.
+         * {@code BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT} flag is not set.
          */
         public void onFinished() {}
 

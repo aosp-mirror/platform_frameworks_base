@@ -1609,7 +1609,7 @@ public class Paint {
     /**
      * Returns the color of the shadow layer.
      *
-     * @return the shadow layer's color encoded as a {@link ColorLong}.
+     * @return the shadow layer's color encoded as a {@code ColorLong}.
      * @see #setShadowLayer(float,float,float,int)
      * @see #setShadowLayer(float,float,float,long)
      * @see Color

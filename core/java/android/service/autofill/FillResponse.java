@@ -406,7 +406,7 @@ public final class FillResponse implements Parcelable {
          *
          * Call this when a field has been detected with a type.
          *
-         * Altough similiarly named with {@link setFieldClassificationIds},
+         * Altough similiarly named with {@link #setFieldClassificationIds},
          * it provides a different functionality - setFieldClassificationIds should
          * be used when a field is only suspected to be Autofillable.
          * This method should be used when a field is certainly Autofillable

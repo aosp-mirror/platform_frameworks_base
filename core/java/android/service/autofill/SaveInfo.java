@@ -813,7 +813,7 @@ public final class SaveInfo implements Parcelable {
          * If no {@link #Builder(int, AutofillId[]) required ids},
          * or {@link #setOptionalIds(AutofillId[]) optional ids}, or {@link #FLAG_DELAY_SAVE}
          * were set, Save Dialog will only be triggered if platform detection is enabled, which
-         * is indicated when {@link FillRequest.getHints()} is not empty.
+         * is indicated when {@link FillRequest#getHints()} is not empty.
          */
         public SaveInfo build() {
             throwIfDestroyed();
