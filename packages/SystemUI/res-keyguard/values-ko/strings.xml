@@ -129,6 +129,6 @@
     <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"나중에 업데이트를 설치하려면 비밀번호를 입력하세요."</string>
     <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"나중에 업데이트를 설치하려면 패턴을 그리세요."</string>
     <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"기기가 업데이트되었습니다. 계속하려면 PIN을 입력하세요."</string>
-    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"기기가 업데이트되었습니다. 계속 진행하려면 비밀번호를 입력하세요."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"기기가 업데이트되었습니다. 계속하려면 비밀번호를 입력하세요."</string>
     <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"기기가 업데이트되었습니다. 계속하려면 패턴을 그리세요."</string>
 </resources>
