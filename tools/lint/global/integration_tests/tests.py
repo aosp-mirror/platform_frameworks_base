@@ -19,14 +19,26 @@ import xml.etree.ElementTree
 class TestLinterReports(unittest.TestCase):
     """Integration tests for the linters used by @EnforcePermission."""
 
-    def test_no_aidl(self):
-        report = pkgutil.get_data("lint", "lint-report.xml").decode()
+    def _read_report(self, pkg_path):
+        report = pkgutil.get_data(pkg_path, "lint/lint-report.xml").decode()
         issues = xml.etree.ElementTree.fromstring(report)
         self.assertEqual(issues.tag, "issues")
+        return issues
+
+    def test_no_aidl(self):
+        issues = self._read_report("no_aidl")
         self.assertEqual(len(issues), 1)
 
         issue = issues[0]
         self.assertEqual(issue.attrib["id"], "MisusingEnforcePermissionAnnotation")
+        self.assertEqual(issue.attrib["severity"], "Error")
+
+    def test_missing_annotation(self):
+        issues = self._read_report("missing_annotation")
+        self.assertEqual(len(issues), 1)
+
+        issue = issues[0]
+        self.assertEqual(issue.attrib["id"], "MissingEnforcePermissionAnnotation")
         self.assertEqual(issue.attrib["severity"], "Error")
 
 
