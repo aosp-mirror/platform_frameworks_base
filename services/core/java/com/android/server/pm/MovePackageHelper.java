@@ -89,6 +89,21 @@ public final class MovePackageHelper {
         if (packageState == null || packageState.getPkg() == null) {
             throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
         }
+        final int[] installedUserIds = PackageStateUtils.queryInstalledUsers(packageState,
+                mPm.mUserManager.getUserIds(), true);
+        final UserHandle userForMove;
+        if (installedUserIds.length > 0) {
+            userForMove = UserHandle.of(installedUserIds[0]);
+        } else {
+            throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST,
+                    "Package is not installed for any user");
+        }
+        for (int userId : installedUserIds) {
+            if (snapshot.shouldFilterApplicationIncludingUninstalled(packageState, callingUid,
+                    userId)) {
+                throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
+            }
+        }
         final AndroidPackage pkg = packageState.getPkg();
         if (packageState.isSystem()) {
             throw new PackageManagerException(MOVE_FAILED_SYSTEM_PACKAGE,
@@ -134,8 +149,6 @@ public final class MovePackageHelper {
         final String label = String.valueOf(pm.getApplicationLabel(
                 AndroidPackageUtils.generateAppInfoWithoutState(pkg)));
         final int targetSdkVersion = pkg.getTargetSdkVersion();
-        final int[] installedUserIds = PackageStateUtils.queryInstalledUsers(packageState,
-                mPm.mUserManager.getUserIds(), true);
         final String fromCodePath;
         if (codeFile.getParentFile().getName().startsWith(
                 PackageManagerService.RANDOM_DIR_PREFIX)) {
@@ -303,8 +316,8 @@ public final class MovePackageHelper {
         final PackageLite lite = ret.isSuccess() ? ret.getResult() : null;
         final InstallingSession installingSession = new InstallingSession(origin, move,
                 installObserver, installFlags, /* developmentInstallFlags= */ 0, installSource,
-                volumeUuid, user, packageAbiOverride,  PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED,
-                lite, mPm);
+                volumeUuid, userForMove, packageAbiOverride,
+                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, lite, mPm);
         installingSession.movePackage();
     }
 
