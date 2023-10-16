@@ -34,8 +34,7 @@ run ./hoststubgen/test-tiny-framework/diff-and-update-golden.sh
 
 run ./hoststubgen/test-framework/run-test-without-atest.sh
 
-#This script is broken because it relies on soong intermediate files, which seem to have moved.
-#run ./hoststubgen/test-tiny-framework/run-test-manually.sh
+run ./hoststubgen/test-tiny-framework/run-test-manually.sh
 run atest tiny-framework-dump-test
 run ./scripts/build-framework-hostside-jars-and-extract.sh
 
