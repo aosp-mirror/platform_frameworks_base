@@ -58,6 +58,9 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_CROSS_ACTIVITY;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_CROSS_TASK;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__RECENTS_SCROLLING;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD;
@@ -276,7 +279,11 @@ public class InteractionJankMonitor {
 
     public static final int CUJ_LAUNCHER_UNFOLD_ANIM = 83;
 
-    private static final int LAST_CUJ = CUJ_LAUNCHER_UNFOLD_ANIM;
+    public static final int CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY = 84;
+    public static final int CUJ_PREDICTIVE_BACK_CROSS_TASK = 85;
+    public static final int CUJ_PREDICTIVE_BACK_HOME = 86;
+
+    private static final int LAST_CUJ = CUJ_PREDICTIVE_BACK_HOME;
     private static final int NO_STATSD_LOGGING = -1;
 
     // Used to convert CujType to InteractionType enum value for statsd logging.
@@ -370,6 +377,12 @@ public class InteractionJankMonitor {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_IME_INSETS_HIDE_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_HIDE_ANIMATION;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_UNFOLD_ANIM] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNFOLD_ANIM;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY] =
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_CROSS_ACTIVITY;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_CROSS_TASK] =
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_CROSS_TASK;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_HOME] =
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_HOME;
     }
 
     private static class InstanceHolder {
@@ -473,6 +486,9 @@ public class InteractionJankMonitor {
             CUJ_IME_INSETS_HIDE_ANIMATION,
             CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER,
             CUJ_LAUNCHER_UNFOLD_ANIM,
+            CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY,
+            CUJ_PREDICTIVE_BACK_CROSS_TASK,
+            CUJ_PREDICTIVE_BACK_HOME,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -1108,6 +1124,12 @@ public class InteractionJankMonitor {
                 return "SPLIT_SCREEN_DOUBLE_TAP_DIVIDER";
             case CUJ_LAUNCHER_UNFOLD_ANIM:
                 return "LAUNCHER_UNFOLD_ANIM";
+            case CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY:
+                return "PREDICTIVE_BACK_CROSS_ACTIVITY";
+            case CUJ_PREDICTIVE_BACK_CROSS_TASK:
+                return "PREDICTIVE_BACK_CROSS_TASK";
+            case CUJ_PREDICTIVE_BACK_HOME:
+                return "PREDICTIVE_BACK_HOME";
         }
         return "UNKNOWN";
     }
