@@ -26,8 +26,6 @@ import android.os.vibrator.Flags;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
-import android.view.flags.FeatureFlags;
-import android.view.flags.FeatureFlagsImpl;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -57,7 +55,6 @@ public final class HapticFeedbackVibrationProvider {
     // If present and valid, a vibration here will be used for an effect.
     // Otherwise, the system's default vibration will be used.
     @Nullable private final SparseArray<VibrationEffect> mHapticCustomizations;
-    private final FeatureFlags mViewFeatureFlags;
 
     private float mKeyboardVibrationFixedAmplitude;
 
@@ -68,16 +65,14 @@ public final class HapticFeedbackVibrationProvider {
 
     /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, VibratorInfo vibratorInfo) {
-        this(res, vibratorInfo, loadHapticCustomizations(res, vibratorInfo),
-                new FeatureFlagsImpl());
+        this(res, vibratorInfo, loadHapticCustomizations(res, vibratorInfo));
     }
 
     /** @hide */
     @VisibleForTesting HapticFeedbackVibrationProvider(
             Resources res,
             VibratorInfo vibratorInfo,
-            @Nullable SparseArray<VibrationEffect> hapticCustomizations,
-            FeatureFlags viewFeatureFlags) {
+            @Nullable SparseArray<VibrationEffect> hapticCustomizations) {
         mVibratorInfo = vibratorInfo;
         mHapticTextHandleEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
@@ -86,8 +81,6 @@ public final class HapticFeedbackVibrationProvider {
             hapticCustomizations = null;
         }
         mHapticCustomizations = hapticCustomizations;
-        mViewFeatureFlags = viewFeatureFlags;
-
         mSafeModeEnabledVibrationEffect =
                 effectHasCustomization(HapticFeedbackConstants.SAFE_MODE_ENABLED)
                         ? mHapticCustomizations.get(HapticFeedbackConstants.SAFE_MODE_ENABLED)
@@ -226,7 +219,7 @@ public final class HapticFeedbackVibrationProvider {
         if (bypassVibrationIntensitySetting) {
             flags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
         }
-        if (shouldBypassInterruptionPolicy(effectId, mViewFeatureFlags)) {
+        if (shouldBypassInterruptionPolicy(effectId)) {
             flags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
         }
         if (shouldBypassIntensityScale(effectId)) {
@@ -381,8 +374,7 @@ public final class HapticFeedbackVibrationProvider {
         }
     }
 
-    private static boolean shouldBypassInterruptionPolicy(
-            int effectId, FeatureFlags viewFeatureFlags) {
+    private static boolean shouldBypassInterruptionPolicy(int effectId) {
         switch (effectId) {
             case HapticFeedbackConstants.SCROLL_TICK:
             case HapticFeedbackConstants.SCROLL_ITEM_FOCUS:
@@ -390,7 +382,7 @@ public final class HapticFeedbackVibrationProvider {
                 // The SCROLL_* constants should bypass interruption filter, so that scroll haptics
                 // can play regardless of focus modes like DND. Guard this behavior by the feature
                 // flag controlling the general scroll feedback APIs.
-                return viewFeatureFlags.scrollFeedbackApi();
+                return android.view.flags.Flags.scrollFeedbackApi();
             default:
                 return false;
         }
