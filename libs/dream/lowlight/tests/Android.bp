@@ -20,6 +20,7 @@ android_test {
     name: "LowLightDreamTests",
     srcs: [
         "**/*.java",
+        "**/*.kt",
     ],
     static_libs: [
         "LowLightDreamLib",
@@ -28,10 +29,11 @@ android_test {
         "androidx.test.ext.junit",
         "frameworks-base-testutils",
         "junit",
+        "kotlinx_coroutines_test",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "testables",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: [
         "android.test.mock",

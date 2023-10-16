@@ -21,6 +21,8 @@ import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_ENABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertTrue;
@@ -30,16 +32,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -49,9 +54,13 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 
+import com.android.keyguard.logging.CarrierTextManagerLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.LogBufferHelperKt;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository;
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -88,8 +97,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     private static final SubscriptionInfo TEST_SUBSCRIPTION_ROAMING = new SubscriptionInfo(0, "", 0,
             TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_ENABLE, null, null, null, null, false, null, "");
-    @Mock
-    private WifiManager mWifiManager;
+    private FakeWifiRepository mWifiRepository = new FakeWifiRepository();
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
@@ -111,6 +119,10 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
     private CarrierTextManager mCarrierTextManager;
 
+    private CarrierTextManagerLogger mLogger =
+            new CarrierTextManagerLogger(
+                    LogBufferHelperKt.logcatLogBuffer("CarrierTextManagerLog"));
+
     private Void checkMainThread(InvocationOnMock inv) {
         assertThat(mMainExecutor.isExecuting()).isTrue();
         assertThat(mBgExecutor.isExecuting()).isFalse();
@@ -121,7 +133,6 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mContext.addMockSystemService(WifiManager.class, mWifiManager);
         mContext.addMockSystemService(PackageManager.class, mPackageManager);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(true);
         mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
@@ -144,9 +155,9 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mTelephonyManager.getActiveModemCount()).thenReturn(3);
 
         mCarrierTextManager = new CarrierTextManager.Builder(
-                mContext, mContext.getResources(), mWifiManager,
+                mContext, mContext.getResources(), mWifiRepository,
                 mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle, mMainExecutor,
-                mBgExecutor, mKeyguardUpdateMonitor)
+                mBgExecutor, mKeyguardUpdateMonitor, mLogger)
                 .setShowAirplaneMode(true)
                 .setShowMissingSim(true)
                 .build();
@@ -183,6 +194,47 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
         assertEquals(AIRPLANE_MODE_TEXT, captor.getValue().carrierText);
+    }
+
+    /** regression test for b/281706473, caused by sending NULL plmn / spn to the logger */
+    @Test
+    public void testAirplaneMode_noSim_nullPlmn_nullSpn_doesNotCrash() {
+        // GIVEN - sticy broadcast that returns a null PLMN and null SPN
+        Intent stickyIntent = new Intent(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED);
+        stickyIntent.putExtra(TelephonyManager.EXTRA_SHOW_PLMN, true);
+        stickyIntent.removeExtra(TelephonyManager.EXTRA_PLMN);
+        stickyIntent.putExtra(TelephonyManager.EXTRA_SHOW_SPN, true);
+        stickyIntent.removeExtra(TelephonyManager.EXTRA_SPN);
+
+        mCarrierTextManager = new CarrierTextManager.Builder(
+                getContextSpyForStickyBroadcast(stickyIntent),
+                mContext.getResources(),
+                mWifiRepository,
+                mTelephonyManager,
+                mTelephonyListenerManager,
+                mWakefulnessLifecycle,
+                mMainExecutor,
+                mBgExecutor,
+                mKeyguardUpdateMonitor,
+                mLogger
+        )
+                .setShowAirplaneMode(true)
+                .setShowMissingSim(true)
+                .build();
+
+        // GIVEN - airplane mode is off (causing CTM to fetch the sticky broadcast)
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 1);
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
+        when(mKeyguardUpdateMonitor.getSimState(0))
+                .thenReturn(TelephonyManager.SIM_STATE_NOT_READY);
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
+        // WHEN CTM fetches the broadcast and attempts to log the result, no crash results
+        mCarrierTextManager.updateCarrierText();
+
+        // No assert, this test should not crash
     }
 
     @Test
@@ -364,7 +416,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
                 TelephonyManager.SIM_STATE_READY);
         when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
-        mockWifi();
+
+        assertFalse(mWifiRepository.isWifiConnectedWithValidSsid());
+        mWifiRepository.setWifiNetwork(
+                new WifiNetworkModel.Active(0, false, 0, "", false, false, null));
+        assertTrue(mWifiRepository.isWifiConnectedWithValidSsid());
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
         ServiceState ss = mock(ServiceState.class);
@@ -383,13 +439,6 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         // There's no airplane mode if at least one SIM is State.READY and there's wifi
         assertFalse("Device should not be in airplane mode", captor.getValue().airplaneMode);
         assertNotEquals(AIRPLANE_MODE_TEXT, captor.getValue().carrierText);
-    }
-
-    private void mockWifi() {
-        when(mWifiManager.isWifiEnabled()).thenReturn(true);
-        WifiInfo wifiInfo = mock(WifiInfo.class);
-        when(wifiInfo.getBSSID()).thenReturn("");
-        when(mWifiManager.getConnectionInfo()).thenReturn(wifiInfo);
     }
 
     @Test
@@ -510,5 +559,71 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         assertEquals(TEST_CARRIER + SEPARATOR + TEST_CARRIER,
                 captor.getValue().carrierText);
+    }
+
+    @Test
+    public void testGetStatusForIccState() {
+        when(mKeyguardUpdateMonitor.isDeviceProvisioned()).thenReturn(false);
+        assertEquals(CarrierTextManager.StatusMode.SimMissingLocked,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_ABSENT));
+        assertEquals(CarrierTextManager.StatusMode.NetworkLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_NETWORK_LOCKED));
+        assertEquals(CarrierTextManager.StatusMode.SimNotReady,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_NOT_READY));
+        assertEquals(CarrierTextManager.StatusMode.SimLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PIN_REQUIRED));
+        assertEquals(CarrierTextManager.StatusMode.SimPukLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PUK_REQUIRED));
+        assertEquals(CarrierTextManager.StatusMode.Normal,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_READY));
+        assertEquals(CarrierTextManager.StatusMode.SimMissingLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PERM_DISABLED));
+        assertEquals(CarrierTextManager.StatusMode.SimUnknown,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_UNKNOWN));
+        assertEquals(CarrierTextManager.StatusMode.SimIoError,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_CARD_IO_ERROR));
+        assertEquals(CarrierTextManager.StatusMode.SimRestricted,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_CARD_RESTRICTED));
+
+        when(mKeyguardUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
+        assertEquals(CarrierTextManager.StatusMode.SimMissing,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_ABSENT));
+        assertEquals(CarrierTextManager.StatusMode.NetworkLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_NETWORK_LOCKED));
+        assertEquals(CarrierTextManager.StatusMode.SimNotReady,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_NOT_READY));
+        assertEquals(CarrierTextManager.StatusMode.SimLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PIN_REQUIRED));
+        assertEquals(CarrierTextManager.StatusMode.SimPukLocked,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PUK_REQUIRED));
+        assertEquals(CarrierTextManager.StatusMode.Normal,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_READY));
+        assertEquals(CarrierTextManager.StatusMode.SimPermDisabled,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_PERM_DISABLED));
+        assertEquals(CarrierTextManager.StatusMode.SimUnknown,
+                mCarrierTextManager.getStatusForIccState(TelephonyManager.SIM_STATE_UNKNOWN));
+        assertEquals(CarrierTextManager.StatusMode.SimIoError,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_CARD_IO_ERROR));
+        assertEquals(CarrierTextManager.StatusMode.SimRestricted,
+                mCarrierTextManager.getStatusForIccState(
+                        TelephonyManager.SIM_STATE_CARD_RESTRICTED));
+    }
+
+    private Context getContextSpyForStickyBroadcast(Intent returnVal) {
+        Context contextSpy = spy(mContext);
+        doReturn(returnVal).when(contextSpy).registerReceiver(eq(null), any(IntentFilter.class));
+        return contextSpy;
     }
 }

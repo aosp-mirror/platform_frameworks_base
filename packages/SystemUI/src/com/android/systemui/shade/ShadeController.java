@@ -64,6 +64,11 @@ public interface ShadeController {
     boolean closeShadeIfOpen();
 
     /**
+     * Returns whether the shade state is the keyguard or not.
+     */
+    boolean isKeyguard();
+
+    /**
      * Returns whether the shade is currently open.
      * Even though in the current implementation shade is in expanded state on keyguard, this
      * method makes distinction between shade being truly open and plain keyguard state:
@@ -71,6 +76,11 @@ public interface ShadeController {
      * - for any other state, including keyguard, return false
      */
     boolean isShadeFullyOpen();
+
+    /**
+     * Returns whether shade or QS are currently opening or collapsing.
+     */
+    boolean isExpandingOrCollapsing();
 
     /**
      * Add a runnable for NotificationPanelView to post when the panel is expanded.

@@ -15,6 +15,8 @@
  */
 package com.android.server.broadcastradio.hal2;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -34,15 +36,14 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.os.RemoteException;
-import android.test.suitebuilder.annotation.MediumTest;
 
-import androidx.test.runner.AndroidJUnit4;
+import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
+import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
+import com.android.server.broadcastradio.RadioServiceUserController;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.mockito.verification.VerificationWithTimeout;
 
@@ -53,19 +54,16 @@ import java.util.List;
 /**
  * Tests for v2 HAL RadioModule.
  */
-@RunWith(AndroidJUnit4.class)
-@MediumTest
-public class StartProgramListUpdatesFanoutTest {
+public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestCase {
     private static final String TAG = "BroadcastRadioTests.hal2.StartProgramListUpdatesFanout";
 
-    private static final VerificationWithTimeout CB_TIMEOUT = timeout(100);
+    private static final VerificationWithTimeout CB_TIMEOUT = timeout(500);
 
     // Mocks
     @Mock IBroadcastRadio mBroadcastRadioMock;
     @Mock ITunerSession mHalTunerSessionMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
 
-    private final Object mLock = new Object();
     // RadioModule under test
     private RadioModule mRadioModule;
 
@@ -91,13 +89,17 @@ public class StartProgramListUpdatesFanoutTest {
     private final RadioManager.ProgramInfo mDabEnsembleInfo = TestUtils.makeProgramInfo(
             ProgramSelector.PROGRAM_TYPE_DAB, mDabEnsembleIdentifier, 0);
 
+    @Override
+    protected void initializeSession(StaticMockitoSessionBuilder builder) {
+        builder.spyStatic(RadioServiceUserController.class);
+    }
+
     @Before
     public void setup() throws RemoteException {
-        MockitoAnnotations.initMocks(this);
+        doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
 
-        mRadioModule = new RadioModule(mBroadcastRadioMock, new RadioManager.ModuleProperties(0, "",
-                  0, "", "", "", "", 0, 0, false, false, null, false, new int[] {}, new int[] {},
-                  null, null), mLock);
+        mRadioModule = new RadioModule(mBroadcastRadioMock,
+                TestUtils.makeDefaultModuleProperties());
 
         doAnswer((Answer) invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];

@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"הגדרות"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"כניסה למסך המפוצל"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"תפריט"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"תפריט \'תמונה בתוך תמונה\'"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> במצב תמונה בתוך תמונה"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולהשבית את התכונה."</string>
     <string name="pip_play" msgid="3496151081459417097">"הפעלה"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"שינוי גודל"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"הסתרה זמנית"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ביטול ההסתרה הזמנית"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"ייתכן שהאפליקציה לא תפעל במסך מפוצל."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"האפליקציה אינה תומכת במסך מפוצל."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"יכול להיות שהאפליקציה לא תפעל עם מסך מפוצל"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"האפליקציה לא תומכת במסך מפוצל"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ניתן לפתוח את האפליקציה הזו רק בחלון אחד."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ייתכן שהאפליקציה לא תפעל במסך משני."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"האפליקציה אינה תומכת בהפעלה במסכים משניים."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"מחלק מסך מפוצל"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"מחלק מסך מפוצל"</string>
+    <string name="divider_title" msgid="1963391955593749442">"מחלק מסך מפוצל"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"מסך שמאלי מלא"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"שמאלה 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"שמאלה 50%"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"הבעיה לא נפתרה?\nאפשר להקיש כדי לחזור לגרסה הקודמת"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"אין בעיות במצלמה? אפשר להקיש כדי לסגור."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"רוצה לראות ולעשות יותר?"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"צריך לגרור אפליקציה אחרת כדי להשתמש במסך מפוצל"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"צריך לגרור אפליקציה אחרת כדי להשתמש במסך המפוצל"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"צריך להקיש הקשה כפולה מחוץ לאפליקציה כדי למקם אותה מחדש"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"הבנתי"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"מרחיבים כדי לקבל מידע נוסף."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"צילום מסך"</string>
     <string name="close_text" msgid="4986518933445178928">"סגירה"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"סגירת התפריט"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"פתיחת התפריט"</string>
 </resources>

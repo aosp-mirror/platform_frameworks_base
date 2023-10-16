@@ -32,11 +32,7 @@ import com.android.server.location.injector.Injector;
 import java.util.Collection;
 
 /**
- * An base implementation for GPS navigation messages provider.
- * It abstracts out the responsibility of handling listeners, while still allowing technology
- * specific implementations to be built.
- *
- * @hide
+ * GNSS navigation message HAL module and listener multiplexer.
  */
 public class GnssNavigationMessageProvider extends
         GnssListenerMultiplexer<Void, IGnssNavigationMessageListener, Void> implements
@@ -51,7 +47,9 @@ public class GnssNavigationMessageProvider extends
         }
 
         @Override
-        protected void onGnssListenerRegister() {
+        protected void onRegister() {
+            super.onRegister();
+
             executeOperation(listener -> listener.onStatusChanged(
                     GnssNavigationMessage.Callback.STATUS_READY));
         }

@@ -21,24 +21,31 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardBouncerRepository
@@ -69,7 +76,9 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
                 dismissCallbackRegistry,
                 context,
                 keyguardUpdateMonitor,
-                keyguardBypassController,
+                Mockito.mock(TrustRepository::class.java),
+                FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) },
+                TestScope().backgroundScope,
             )
     }
 

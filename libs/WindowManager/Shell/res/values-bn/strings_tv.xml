@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"সরান"</string>
     <string name="pip_expand" msgid="1051966011679297308">"বড় করুন"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"আড়াল করুন"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" কন্ট্রোলের জন্য "<annotation icon="home_icon">" হোম "</annotation>" বোতামে ডবল প্রেস করুন"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"কন্ট্রোলের জন্য "<annotation icon="home_icon">" হোম "</annotation>" বোতামে ডবল প্রেস করুন"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"ছবির-মধ্যে-ছবি মেনু।"</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"বাঁদিকে সরান"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"ডানদিকে সরান"</string>

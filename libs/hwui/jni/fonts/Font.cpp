@@ -22,7 +22,10 @@
 #include "SkFont.h"
 #include "SkFontMetrics.h"
 #include "SkFontMgr.h"
+#include "SkRect.h"
 #include "SkRefCnt.h"
+#include "SkScalar.h"
+#include "SkStream.h"
 #include "SkTypeface.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedUtfChars.h>
@@ -226,7 +229,7 @@ static jlong Font_getReleaseNativeFontFunc(CRITICAL_JNI_PARAMS) {
 static jstring Font_getFontPath(JNIEnv* env, jobject, jlong fontPtr) {
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontPtr);
     minikin::BufferReader reader = font->font->typefaceMetadataReader();
-    if (reader.data() != nullptr) {
+    if (reader.current() != nullptr) {
         std::string path = std::string(reader.readString());
         if (path.empty()) {
             return nullptr;
@@ -268,7 +271,7 @@ static jint Font_getPackedStyle(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr) {
 static jint Font_getIndex(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr) {
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontPtr);
     minikin::BufferReader reader = font->font->typefaceMetadataReader();
-    if (reader.data() != nullptr) {
+    if (reader.current() != nullptr) {
         reader.skipString();  // fontPath
         return reader.read<int>();
     } else {
@@ -281,7 +284,7 @@ static jint Font_getIndex(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr) {
 static jint Font_getAxisCount(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr) {
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontPtr);
     minikin::BufferReader reader = font->font->typefaceMetadataReader();
-    if (reader.data() != nullptr) {
+    if (reader.current() != nullptr) {
         reader.skipString();  // fontPath
         reader.skip<int>();   // fontIndex
         return reader.readArray<minikin::FontVariation>().second;
@@ -296,7 +299,7 @@ static jlong Font_getAxisInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr, jint inde
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontPtr);
     minikin::BufferReader reader = font->font->typefaceMetadataReader();
     minikin::FontVariation var;
-    if (reader.data() != nullptr) {
+    if (reader.current() != nullptr) {
         reader.skipString();  // fontPath
         reader.skip<int>();   // fontIndex
         var = reader.readArray<minikin::FontVariation>().first[index];

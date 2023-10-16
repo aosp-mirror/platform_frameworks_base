@@ -16,10 +16,13 @@
 
 package com.android.server.am;
 
+import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 
@@ -53,6 +56,17 @@ final class BroadcastFilter extends IntentFilter {
         exported = _exported;
     }
 
+    public @Nullable String getReceiverClassName() {
+        if (receiverId != null) {
+            final int index = receiverId.lastIndexOf('@');
+            if (index > 0) {
+                return receiverId.substring(0, index);
+            }
+        }
+        return null;
+    }
+
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         super.dumpDebug(proto, BroadcastFilterProto.INTENT_FILTER);
@@ -64,20 +78,24 @@ final class BroadcastFilter extends IntentFilter {
         proto.end(token);
     }
 
+    @NeverCompile
     public void dump(PrintWriter pw, String prefix) {
         dumpInReceiverList(pw, new PrintWriterPrinter(pw), prefix);
         receiverList.dumpLocal(pw, prefix);
     }
 
+    @NeverCompile
     public void dumpBrief(PrintWriter pw, String prefix) {
         dumpBroadcastFilterState(pw, prefix);
     }
 
+    @NeverCompile
     public void dumpInReceiverList(PrintWriter pw, Printer pr, String prefix) {
         super.dump(pr, prefix);
         dumpBroadcastFilterState(pw, prefix);
     }
 
+    @NeverCompile
     void dumpBroadcastFilterState(PrintWriter pw, String prefix) {
         if (requiredPermission != null) {
             pw.print(prefix); pw.print("requiredPermission="); pw.println(requiredPermission);

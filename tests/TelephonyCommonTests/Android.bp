@@ -32,11 +32,11 @@ android_test {
     static_libs: [
         "mockito-target-extended",
         "androidx.test.rules",
-        "truth-prebuilt",
+        "truth",
         "platform-test-annotations",
         "androidx.core_core",
         "androidx.fragment_fragment",
-        "androidx.test.ext.junit"
+        "androidx.test.ext.junit",
     ],
 
     jni_libs: ["libdexmakerjvmtiagent"],
@@ -47,7 +47,7 @@ android_test {
 
     // Uncomment this and comment out the jarjar rule if you want to attach a debugger and step
     // through the renamed classes.
-    // platform_apis: true,
+    platform_apis: true,
 
     libs: [
         "android.test.runner",

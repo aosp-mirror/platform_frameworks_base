@@ -26,4 +26,21 @@ object KeyguardBouncerConstants {
     const val EXPANSION_HIDDEN = 1f
     const val EXPANSION_VISIBLE = 0f
     const val ALPHA_EXPANSION_THRESHOLD = 0.95f
+
+    /**
+     * This value is used for denoting the PIN length at which we want to layout the view in which
+     * PIN hinting is enabled
+     */
+    const val DEFAULT_PIN_LENGTH = 6
+
+    object ColorId {
+        const val TITLE = com.android.internal.R.attr.materialColorOnSurface
+        const val PIN_SHAPES = com.android.internal.R.attr.materialColorOnSurfaceVariant
+        const val NUM_PAD_BACKGROUND = com.android.internal.R.attr.materialColorSurfaceContainerHigh
+        const val NUM_PAD_BACKGROUND_PRESSED = com.android.internal.R.attr.materialColorPrimaryFixed
+        const val NUM_PAD_PRESSED = com.android.internal.R.attr.materialColorOnPrimaryFixed
+        const val NUM_PAD_KEY = com.android.internal.R.attr.materialColorOnSurface
+        const val NUM_PAD_BUTTON = com.android.internal.R.attr.materialColorOnSecondaryFixed
+        const val EMERGENCY_BUTTON = com.android.internal.R.attr.materialColorTertiaryFixed
+    }
 }

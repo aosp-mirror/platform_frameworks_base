@@ -21,6 +21,7 @@ import static com.android.wm.shell.pip.PipUtils.dpToPx;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -31,6 +32,7 @@ import android.util.Size;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 
 import java.io.PrintWriter;
 
@@ -40,10 +42,9 @@ import java.io.PrintWriter;
 public class PipSizeSpecHandler {
     private static final String TAG = PipSizeSpecHandler.class.getSimpleName();
 
-    @NonNull private final DisplayLayout mDisplayLayout = new DisplayLayout();
+    @NonNull private final PipDisplayLayoutState mPipDisplayLayoutState;
 
-    @VisibleForTesting
-    final SizeSpecSource mSizeSpecSourceImpl;
+    private final SizeSpecSource mSizeSpecSourceImpl;
 
     /** The preferred minimum (and default minimum) size specified by apps. */
     @Nullable private Size mOverrideMinSize;
@@ -134,14 +135,14 @@ public class PipSizeSpecHandler {
                 maxWidth = (int) (mOptimizedAspectRatio * shorterLength
                         + shorterLength * (aspectRatio - mOptimizedAspectRatio) / (1
                         + aspectRatio));
-                maxHeight = (int) (maxWidth / aspectRatio);
+                maxHeight = Math.round(maxWidth / aspectRatio);
             } else {
                 if (aspectRatio > 1f) {
                     maxWidth = shorterLength;
-                    maxHeight = (int) (maxWidth / aspectRatio);
+                    maxHeight = Math.round(maxWidth / aspectRatio);
                 } else {
                     maxHeight = shorterLength;
-                    maxWidth = (int) (maxHeight * aspectRatio);
+                    maxWidth = Math.round(maxHeight * aspectRatio);
                 }
             }
 
@@ -164,10 +165,9 @@ public class PipSizeSpecHandler {
 
             Size maxSize = this.getMaxSize(aspectRatio);
 
-            int defaultWidth = Math.max((int) (maxSize.getWidth() * mDefaultSizePercent),
+            int defaultWidth = Math.max(Math.round(maxSize.getWidth() * mDefaultSizePercent),
                     minSize.getWidth());
-            int defaultHeight = Math.max((int) (maxSize.getHeight() * mDefaultSizePercent),
-                    minSize.getHeight());
+            int defaultHeight = Math.round(defaultWidth / aspectRatio);
 
             return new Size(defaultWidth, defaultHeight);
         }
@@ -187,16 +187,16 @@ public class PipSizeSpecHandler {
 
             Size maxSize = this.getMaxSize(aspectRatio);
 
-            int minWidth = (int) (maxSize.getWidth() * mMinimumSizePercent);
-            int minHeight = (int) (maxSize.getHeight() * mMinimumSizePercent);
+            int minWidth = Math.round(maxSize.getWidth() * mMinimumSizePercent);
+            int minHeight = Math.round(maxSize.getHeight() * mMinimumSizePercent);
 
             // make sure the calculated min size is not smaller than the allowed default min size
             if (aspectRatio > 1f) {
-                minHeight = (int) Math.max(minHeight, mDefaultMinSize);
-                minWidth = (int) (minHeight * aspectRatio);
+                minHeight = Math.max(minHeight, mDefaultMinSize);
+                minWidth = Math.round(minHeight * aspectRatio);
             } else {
-                minWidth = (int) Math.max(minWidth, mDefaultMinSize);
-                minHeight = (int) (minWidth / aspectRatio);
+                minWidth = Math.max(minWidth, mDefaultMinSize);
+                minHeight = Math.round(minWidth / aspectRatio);
             }
             return new Size(minWidth, minHeight);
         }
@@ -362,14 +362,12 @@ public class PipSizeSpecHandler {
         }
     }
 
-    public PipSizeSpecHandler(Context context) {
+    public PipSizeSpecHandler(Context context, PipDisplayLayoutState pipDisplayLayoutState) {
         mContext = context;
-
-        boolean enablePipSizeLargeScreen = SystemProperties
-                .getBoolean("persist.wm.debug.enable_pip_size_large_screen", true);
+        mPipDisplayLayoutState = pipDisplayLayoutState;
 
         // choose between two implementations of size spec logic
-        if (enablePipSizeLargeScreen) {
+        if (supportsPipSizeLargeScreen()) {
             mSizeSpecSourceImpl = new SizeSpecLargeScreenOptimizedImpl();
         } else {
             mSizeSpecSourceImpl = new SizeSpecDefaultImpl();
@@ -404,15 +402,9 @@ public class PipSizeSpecHandler {
         mSizeSpecSourceImpl.reloadResources();
     }
 
-    /** Returns the display's bounds. */
     @NonNull
-    public Rect getDisplayBounds() {
-        return new Rect(0, 0, mDisplayLayout.width(), mDisplayLayout.height());
-    }
-
-    /** Update the display layout. */
-    public void setDisplayLayout(@NonNull DisplayLayout displayLayout) {
-        mDisplayLayout.set(displayLayout);
+    private Rect getDisplayBounds() {
+        return mPipDisplayLayoutState.getDisplayBounds();
     }
 
     public Point getScreenEdgeInsets() {
@@ -424,11 +416,12 @@ public class PipSizeSpecHandler {
      */
     public Rect getInsetBounds() {
         Rect insetBounds = new Rect();
-        Rect insets = mDisplayLayout.stableInsets();
+        DisplayLayout displayLayout = mPipDisplayLayoutState.getDisplayLayout();
+        Rect insets = displayLayout.stableInsets();
         insetBounds.set(insets.left + mScreenEdgeInsets.x,
                 insets.top + mScreenEdgeInsets.y,
-                mDisplayLayout.width() - insets.right - mScreenEdgeInsets.x,
-                mDisplayLayout.height() - insets.bottom - mScreenEdgeInsets.y);
+                displayLayout.width() - insets.right - mScreenEdgeInsets.x,
+                displayLayout.height() - insets.bottom - mScreenEdgeInsets.y);
         return insetBounds;
     }
 
@@ -519,12 +512,24 @@ public class PipSizeSpecHandler {
         }
     }
 
+    @VisibleForTesting
+    boolean supportsPipSizeLargeScreen() {
+        // TODO(b/271468706): switch Tv to having a dedicated SizeSpecSource once the SizeSpecSource
+        // can be injected
+        return SystemProperties
+                .getBoolean("persist.wm.debug.enable_pip_size_large_screen", true) && !isTv();
+    }
+
+    private boolean isTv() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+    }
+
     /** Dumps internal state. */
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mSizeSpecSourceImpl=" + mSizeSpecSourceImpl.toString());
-        pw.println(innerPrefix + "mDisplayLayout=" + mDisplayLayout);
+        pw.println(innerPrefix + "mSizeSpecSourceImpl=" + mSizeSpecSourceImpl);
         pw.println(innerPrefix + "mOverrideMinSize=" + mOverrideMinSize);
+        pw.println(innerPrefix + "mScreenEdgeInsets=" + mScreenEdgeInsets);
     }
 }

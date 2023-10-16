@@ -28,8 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
-import android.app.timedetector.GnssTimeSuggestion;
-import android.app.timedetector.TimeDetector;
+import android.app.time.UnixEpochTime;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -37,7 +36,6 @@ import android.location.LocationManager;
 import android.location.LocationManagerInternal;
 import android.location.LocationRequest;
 import android.location.LocationTime;
-import android.os.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -55,10 +53,10 @@ public final class GnssTimeUpdateServiceTest {
     private static final long ELAPSED_REALTIME_MS = ELAPSED_REALTIME_NS / 1_000_000L;
 
     @Mock private Context mMockContext;
-    @Mock private TimeDetector mMockTimeDetector;
     @Mock private AlarmManager mMockAlarmManager;
     @Mock private LocationManager mMockLocationManager;
     @Mock private LocationManagerInternal mMockLocationManagerInternal;
+    @Mock private TimeDetectorInternal mMockTimeDetectorInternal;
 
     private GnssTimeUpdateService mGnssTimeUpdateService;
 
@@ -70,12 +68,12 @@ public final class GnssTimeUpdateServiceTest {
 
         mGnssTimeUpdateService = new GnssTimeUpdateService(
                 mMockContext, mMockAlarmManager, mMockLocationManager, mMockLocationManagerInternal,
-                mMockTimeDetector);
+                mMockTimeDetectorInternal);
     }
 
     @Test
     public void testLocationListenerOnLocationChanged_validLocationTime_suggestsGnssTime() {
-        TimestampedValue<Long> timeSignal = new TimestampedValue<>(
+        UnixEpochTime timeSignal = new UnixEpochTime(
                 ELAPSED_REALTIME_MS, GNSS_TIME);
         GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);
         LocationTime locationTime = new LocationTime(GNSS_TIME, ELAPSED_REALTIME_NS);
@@ -98,7 +96,7 @@ public final class GnssTimeUpdateServiceTest {
         locationListener.onLocationChanged(location);
 
         verify(mMockLocationManager).removeUpdates(locationListener);
-        verify(mMockTimeDetector).suggestGnssTime(timeSuggestion);
+        verify(mMockTimeDetectorInternal).suggestGnssTime(timeSuggestion);
         verify(mMockAlarmManager).set(
                 eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
                 anyLong(),
@@ -128,7 +126,7 @@ public final class GnssTimeUpdateServiceTest {
         locationListener.onLocationChanged(location);
 
         verify(mMockLocationManager).removeUpdates(locationListener);
-        verifyZeroInteractions(mMockTimeDetector);
+        verifyZeroInteractions(mMockTimeDetectorInternal);
         verify(mMockAlarmManager).set(
                 eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
                 anyLong(),
@@ -152,7 +150,7 @@ public final class GnssTimeUpdateServiceTest {
 
         // Verify the service returned to location listening.
         verify(mMockLocationManager).requestLocationUpdates(any(), any(), any(), any());
-        verifyZeroInteractions(mMockAlarmManager, mMockTimeDetector);
+        verifyZeroInteractions(mMockAlarmManager, mMockTimeDetectorInternal);
     }
 
     // Tests what happens when a call is made to startGnssListeningInternal() when service is
@@ -174,13 +172,13 @@ public final class GnssTimeUpdateServiceTest {
         // listening again.
         verify(mMockAlarmManager).cancel(alarmListenerCaptor.getValue());
         verify(mMockLocationManager).requestLocationUpdates(any(), any(), any(), any());
-        verifyZeroInteractions(mMockTimeDetector);
+        verifyZeroInteractions(mMockTimeDetectorInternal);
     }
 
     private void advanceServiceToSleepingState(
             ArgumentCaptor<LocationListener> locationListenerCaptor,
             ArgumentCaptor<OnAlarmListener> alarmListenerCaptor) {
-        TimestampedValue<Long> timeSignal = new TimestampedValue<>(
+        UnixEpochTime timeSignal = new UnixEpochTime(
                 ELAPSED_REALTIME_MS, GNSS_TIME);
         GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);
         LocationTime locationTime = new LocationTime(GNSS_TIME, ELAPSED_REALTIME_NS);
@@ -192,12 +190,12 @@ public final class GnssTimeUpdateServiceTest {
                 any(), any(), any(), locationListenerCaptor.capture());
         LocationListener locationListener = locationListenerCaptor.getValue();
         Location location = new Location(LocationManager.GPS_PROVIDER);
-        verifyZeroInteractions(mMockAlarmManager, mMockTimeDetector);
+        verifyZeroInteractions(mMockAlarmManager, mMockTimeDetectorInternal);
 
         locationListener.onLocationChanged(location);
 
         verify(mMockLocationManager).removeUpdates(locationListener);
-        verify(mMockTimeDetector).suggestGnssTime(timeSuggestion);
+        verify(mMockTimeDetectorInternal).suggestGnssTime(timeSuggestion);
 
         // Verify the service is now "sleeping", i.e. waiting for a period before listening for
         // GNSS locations again.
@@ -209,7 +207,7 @@ public final class GnssTimeUpdateServiceTest {
                 any());
 
         // Reset mocks making it easier to verify the calls that follow.
-        reset(mMockAlarmManager, mMockTimeDetector, mMockLocationManager,
+        reset(mMockAlarmManager, mMockTimeDetectorInternal, mMockLocationManager,
                 mMockLocationManagerInternal);
         installGpsProviderInMockLocationManager();
     }

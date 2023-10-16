@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.plugins.log.LogLevel.VERBOSE
+import com.android.systemui.log.LogLevel.VERBOSE
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

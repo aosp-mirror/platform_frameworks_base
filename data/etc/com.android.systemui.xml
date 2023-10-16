@@ -24,12 +24,14 @@
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
         <permission name="android.permission.CHANGE_OVERLAY_PACKAGES"/>
+        <permission name="android.permission.BROADCAST_OPTION_INTERACTIVE"/>
         <permission name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS"/>
         <permission name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS"/>
         <permission name="android.permission.CONTROL_VPN"/>
         <permission name="android.permission.DUMP"/>
         <permission name="android.permission.GET_APP_OPS_STATS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.LOCATION_HARDWARE"/>
         <permission name="android.permission.MANAGE_DEBUGGING"/>
         <permission name="android.permission.MANAGE_GAME_MODE" />
         <permission name="android.permission.MANAGE_SENSOR_PRIVACY"/>
@@ -50,6 +52,7 @@
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.READ_PRECISE_PHONE_STATE"/>
+        <permission name="android.permission.READ_WALLPAPER_INTERNAL"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.REQUEST_NETWORK_SCORES"/>
         <permission name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE"/>
@@ -83,5 +86,6 @@
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
         <permission name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
         <permission name="android.permission.READ_SEARCH_INDEXABLES" />
+        <permission name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT"/>
     </privapp-permissions>
 </permissions>

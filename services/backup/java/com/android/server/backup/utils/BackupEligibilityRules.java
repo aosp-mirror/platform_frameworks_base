@@ -19,16 +19,19 @@ package com.android.server.backup.utils;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
+import static com.android.server.backup.UserBackupManagerService.SETTINGS_PACKAGE;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.UserBackupManagerService.WALLPAPER_PACKAGE;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupTransport;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -37,10 +40,12 @@ import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Build;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.backup.SetUtils;
 import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 
@@ -54,14 +59,27 @@ import java.util.Set;
  */
 public class BackupEligibilityRules {
     private static final boolean DEBUG = false;
-    // List of system packages that are eligible for backup in non-system users.
-    private static final Set<String> systemPackagesAllowedForAllUsers =
+
+    /**
+     * List of system packages that are eligible for backup in "profile" users (such as work
+     * profile). See {@link UserManager#isProfile()}. This is a subset of {@link
+     * #systemPackagesAllowedForNonSystemUsers}
+     */
+    private static final Set<String> systemPackagesAllowedForProfileUser =
             Sets.newArraySet(PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME);
+
+    /**
+     * List of system packages that are eligible for backup in non-system users.
+     */
+    private static final Set<String> systemPackagesAllowedForNonSystemUsers = SetUtils.union(
+            systemPackagesAllowedForProfileUser,
+            Sets.newArraySet(WALLPAPER_PACKAGE, SETTINGS_PACKAGE));
 
     private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
     private final int mUserId;
-    @OperationType  private final int mOperationType;
+    private boolean mIsProfileUser = false;
+    @BackupDestination  private final int mBackupDestination;
 
     /**
      * When  this change is enabled, {@code adb backup}  is automatically turned on for apps
@@ -83,19 +101,23 @@ public class BackupEligibilityRules {
 
     public static BackupEligibilityRules forBackup(PackageManager packageManager,
             PackageManagerInternal packageManagerInternal,
-            int userId) {
-        return new BackupEligibilityRules(packageManager, packageManagerInternal, userId,
-                OperationType.BACKUP);
+            int userId,
+            Context context) {
+        return new BackupEligibilityRules(packageManager, packageManagerInternal, userId, context,
+                BackupDestination.CLOUD);
     }
 
     public BackupEligibilityRules(PackageManager packageManager,
             PackageManagerInternal packageManagerInternal,
             int userId,
-            @OperationType int operationType) {
+            Context context,
+            @BackupDestination int backupDestination) {
         mPackageManager = packageManager;
         mPackageManagerInternal = packageManagerInternal;
         mUserId = userId;
-        mOperationType = operationType;
+        mBackupDestination = backupDestination;
+        UserManager userManager = context.getSystemService(UserManager.class);
+        mIsProfileUser = userManager.isProfile();
     }
 
     /**
@@ -111,7 +133,7 @@ public class BackupEligibilityRules {
      * </ol>
      *
      * However, the above eligibility rules are ignored for non-system apps in in case of
-     * device-to-device migration, see {@link OperationType}.
+     * device-to-device migration, see {@link BackupDestination}.
      */
     @VisibleForTesting
     public boolean appIsEligibleForBackup(ApplicationInfo app) {
@@ -123,11 +145,17 @@ public class BackupEligibilityRules {
 
         // 2. they run as a system-level uid
         if (UserHandle.isCore(app.uid)) {
-            // and the backup is happening for a non-system user on a package that is not explicitly
-            // allowed.
-            if (mUserId != UserHandle.USER_SYSTEM
-                    && !systemPackagesAllowedForAllUsers.contains(app.packageName)) {
-                return false;
+            // and the backup is happening for a non-system user or profile on a package that is
+            // not explicitly allowed.
+            if (mUserId != UserHandle.USER_SYSTEM) {
+                if (mIsProfileUser && !systemPackagesAllowedForProfileUser.contains(
+                        app.packageName)) {
+                    return false;
+                }
+                if (!mIsProfileUser && !systemPackagesAllowedForNonSystemUsers.contains(
+                        app.packageName)) {
+                    return false;
+                }
             }
 
             // or do not supply their own backup agent
@@ -152,22 +180,22 @@ public class BackupEligibilityRules {
     /**
     * Check if this app allows backup. Apps can opt out of backup by stating
     * android:allowBackup="false" in their manifest. However, this flag is ignored for non-system
-    * apps during device-to-device migrations, see {@link OperationType}.
+    * apps during device-to-device migrations, see {@link BackupDestination}.
     *
     * @param app The app under check.
     * @return boolean indicating whether backup is allowed.
     */
     public boolean isAppBackupAllowed(ApplicationInfo app) {
         boolean allowBackup = (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
-        switch (mOperationType) {
-            case OperationType.MIGRATION:
+        switch (mBackupDestination) {
+            case BackupDestination.DEVICE_TRANSFER:
                 // Backup / restore of all non-system apps is force allowed during
                 // device-to-device migration.
                 boolean isSystemApp = (app.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                 boolean ignoreAllowBackup = !isSystemApp && CompatChanges.isChangeEnabled(
                         IGNORE_ALLOW_BACKUP_IN_D2D, app.packageName, UserHandle.of(mUserId));
                 return ignoreAllowBackup || allowBackup;
-            case OperationType.ADB_BACKUP:
+            case BackupDestination.ADB_BACKUP:
                 String packageName = app.packageName;
                 if (packageName == null) {
                     Slog.w(TAG, "Invalid ApplicationInfo object");
@@ -190,8 +218,9 @@ public class BackupEligibilityRules {
                 boolean isDebuggable = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
                 if (UserHandle.isCore(app.uid) || isPrivileged) {
                     try {
-                        return mPackageManager.getProperty(PackageManager.PROPERTY_ALLOW_ADB_BACKUP,
-                                packageName).getBoolean();
+                        return mPackageManager.getPropertyAsUser(
+                                PackageManager.PROPERTY_ALLOW_ADB_BACKUP, packageName,
+                                null /* className */, mUserId).getBoolean();
                     } catch (PackageManager.NameNotFoundException e) {
                         Slog.w(TAG, "Failed to read allowAdbBackup property for + "
                                 + packageName);
@@ -206,10 +235,10 @@ public class BackupEligibilityRules {
                     // All other apps can use adb backup only when running in debuggable mode.
                     return isDebuggable;
                 }
-            case OperationType.BACKUP:
+            case BackupDestination.CLOUD:
                 return allowBackup;
             default:
-                Slog.w(TAG, "Unknown operation type:" + mOperationType);
+                Slog.w(TAG, "Unknown operation type:" + mBackupDestination);
                 return false;
         }
     }
@@ -397,7 +426,7 @@ public class BackupEligibilityRules {
         }
     }
 
-    public int getOperationType() {
-        return mOperationType;
+    public int getBackupDestination() {
+        return mBackupDestination;
     }
 }

@@ -16,62 +16,54 @@
 package com.android.systemui.dreams.conditions;
 
 import android.app.DreamManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.text.TextUtils;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.shared.condition.Condition;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * {@link DreamCondition} provides a signal when a dream begins and ends.
  */
 public class DreamCondition extends Condition {
-    private final Context mContext;
     private final DreamManager mDreamManager;
+    private final KeyguardUpdateMonitor mUpdateMonitor;
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            processIntent(intent);
-        }
-    };
+    private final KeyguardUpdateMonitorCallback mUpdateCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onDreamingStateChanged(boolean dreaming) {
+                    updateCondition(dreaming);
+                }
+            };
 
     @Inject
-    public DreamCondition(Context context,
-            DreamManager dreamManager) {
-        mContext = context;
+    public DreamCondition(
+            @Application CoroutineScope scope,
+            DreamManager dreamManager,
+            KeyguardUpdateMonitor monitor) {
+        super(scope);
         mDreamManager = dreamManager;
-    }
-
-    private void processIntent(Intent intent) {
-        // In the case of a non-existent sticky broadcast, ignore when there is no intent.
-        if (intent == null) {
-            return;
-        }
-        if (TextUtils.equals(intent.getAction(), Intent.ACTION_DREAMING_STARTED)) {
-            updateCondition(true);
-        } else if (TextUtils.equals(intent.getAction(), Intent.ACTION_DREAMING_STOPPED)) {
-            updateCondition(false);
-        } else {
-            throw new IllegalStateException("unexpected intent:" + intent);
-        }
+        mUpdateMonitor = monitor;
     }
 
     @Override
     protected void start() {
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_DREAMING_STARTED);
-        filter.addAction(Intent.ACTION_DREAMING_STOPPED);
-        mContext.registerReceiver(mReceiver, filter);
+        mUpdateMonitor.registerCallback(mUpdateCallback);
         updateCondition(mDreamManager.isDreaming());
     }
 
     @Override
     protected void stop() {
-        mContext.unregisterReceiver(mReceiver);
+        mUpdateMonitor.removeCallback(mUpdateCallback);
+    }
+
+    @Override
+    protected int getStartStrategy() {
+        return START_EAGERLY;
     }
 }

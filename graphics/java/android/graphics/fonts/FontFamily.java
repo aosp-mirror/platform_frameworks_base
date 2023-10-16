@@ -114,17 +114,19 @@ public final class FontFamily {
          * @return a font family
          */
         public @NonNull FontFamily build() {
-            return build("", FontConfig.FontFamily.VARIANT_DEFAULT, true /* isCustomFallback */);
+            return build("", FontConfig.FontFamily.VARIANT_DEFAULT, true /* isCustomFallback */,
+                    false /* isDefaultFallback */);
         }
 
         /** @hide */
         public @NonNull FontFamily build(@NonNull String langTags, int variant,
-                boolean isCustomFallback) {
+                boolean isCustomFallback, boolean isDefaultFallback) {
             final long builderPtr = nInitBuilder();
             for (int i = 0; i < mFonts.size(); ++i) {
                 nAddFont(builderPtr, mFonts.get(i).getNativePtr());
             }
-            final long ptr = nBuild(builderPtr, langTags, variant, isCustomFallback);
+            final long ptr = nBuild(builderPtr, langTags, variant, isCustomFallback,
+                    isDefaultFallback);
             final FontFamily family = new FontFamily(ptr);
             sFamilyRegistory.registerNativeAllocation(family, ptr);
             return family;
@@ -138,7 +140,7 @@ public final class FontFamily {
         @CriticalNative
         private static native void nAddFont(long builderPtr, long fontPtr);
         private static native long nBuild(long builderPtr, String langTags, int variant,
-                boolean isCustomFallback);
+                boolean isCustomFallback, boolean isDefaultFallback);
         @CriticalNative
         private static native long nGetReleaseNativeFamily();
     }

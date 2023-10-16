@@ -21,53 +21,44 @@ import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shade.ShadeExpansionStateManager
-import com.android.systemui.statusbar.phone.CentralSurfaces
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Optional
-import javax.inject.Inject
 
-/**
- * Provides state from the main SystemUI process on behalf of the Screenshot process.
- */
-internal class ScreenshotProxyService @Inject constructor(
+/** Provides state from the main SystemUI process on behalf of the Screenshot process. */
+internal class ScreenshotProxyService
+@Inject
+constructor(
     private val mExpansionMgr: ShadeExpansionStateManager,
-    private val mCentralSurfacesOptional: Optional<CentralSurfaces>,
     @Main private val mMainDispatcher: CoroutineDispatcher,
+    private val activityStarter: ActivityStarter,
 ) : LifecycleService() {
 
-    private val mBinder: IBinder = object : IScreenshotProxy.Stub() {
-        /**
-         * @return true when the notification shade is partially or fully expanded.
-         */
-        override fun isNotificationShadeExpanded(): Boolean {
-            val expanded = !mExpansionMgr.isClosed()
-            Log.d(TAG, "isNotificationShadeExpanded(): $expanded")
-            return expanded
-        }
+    private val mBinder: IBinder =
+        object : IScreenshotProxy.Stub() {
+            /** @return true when the notification shade is partially or fully expanded. */
+            override fun isNotificationShadeExpanded(): Boolean {
+                val expanded = !mExpansionMgr.isClosed()
+                Log.d(TAG, "isNotificationShadeExpanded(): $expanded")
+                return expanded
+            }
 
-        override fun dismissKeyguard(callback: IOnDoneCallback) {
-            lifecycleScope.launch {
-                executeAfterDismissing(callback)
+            override fun dismissKeyguard(callback: IOnDoneCallback) {
+                lifecycleScope.launch { executeAfterDismissing(callback) }
             }
         }
-    }
 
     private suspend fun executeAfterDismissing(callback: IOnDoneCallback) =
         withContext(mMainDispatcher) {
-            mCentralSurfacesOptional.ifPresentOrElse(
-                    {
-                        it.executeRunnableDismissingKeyguard(
-                                Runnable {
-                                    callback.onDone(true)
-                                }, null,
-                                true /* dismissShade */, true /* afterKeyguardGone */,
-                                true /* deferred */
-                        )
-                    },
-                    { callback.onDone(false) }
+            activityStarter.executeRunnableDismissingKeyguard(
+                Runnable { callback.onDone(true) },
+                null,
+                true /* dismissShade */,
+                true /* afterKeyguardGone */,
+                true /* deferred */
             )
         }
 

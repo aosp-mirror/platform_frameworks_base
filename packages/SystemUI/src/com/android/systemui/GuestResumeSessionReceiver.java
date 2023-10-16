@@ -152,7 +152,7 @@ public class GuestResumeSessionReceiver {
                 UserSwitcherController userSwitcherController,
                 UiEventLogger uiEventLogger,
                 @Assisted int userId) {
-            super(context, false /* dismissOnDeviceLock */);
+            super(context, DEFAULT_THEME, false /* dismissOnDeviceLock */);
 
             setTitle(context.getString(R.string.guest_wipe_session_title));
             setMessage(context.getString(R.string.guest_wipe_session_message));

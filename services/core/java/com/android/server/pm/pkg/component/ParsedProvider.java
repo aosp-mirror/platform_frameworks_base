@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PathPermission;
 import android.os.PatternMatcher;
+import android.processor.immutability.Immutable;
 
 import java.util.List;
 
@@ -34,12 +35,14 @@ public interface ParsedProvider extends ParsedMainComponent {
 
     boolean isMultiProcess();
 
+    @Immutable.Ignore
     @NonNull
     List<PathPermission> getPathPermissions();
 
     @Nullable
     String getReadPermission();
 
+    @Immutable.Ignore
     @NonNull
     List<PatternMatcher> getUriPermissionPatterns();
 

@@ -18,11 +18,10 @@
 #define AAPT_LINK_MANIFESTFIXER_H
 
 #include <string>
+#include <vector>
 
 #include "android-base/macros.h"
-
 #include "process/IResourceTableConsumer.h"
-
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 
@@ -76,6 +75,9 @@ struct ManifestFixerOptions {
   // is set.
   std::optional<std::string> compile_sdk_version_codename;
 
+  // The fingerprint prefixes to be added to the <install-constraints> tag.
+  std::vector<std::string> fingerprint_prefixes;
+
   // Whether validation errors should be treated only as warnings. If this is 'true', then an
   // incorrect node will not result in an error, but only as a warning, and the parsing will
   // continue.
@@ -103,7 +105,7 @@ class ManifestFixer : public IXmlResourceConsumer {
  private:
   DISALLOW_COPY_AND_ASSIGN(ManifestFixer);
 
-  bool BuildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag);
+  bool BuildRules(xml::XmlActionExecutor* executor, android::IDiagnostics* diag);
 
   ManifestFixerOptions options_;
 };

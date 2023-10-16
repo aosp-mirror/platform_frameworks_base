@@ -222,6 +222,28 @@ public abstract class Vibrator {
     }
 
     /**
+     * Checks whether or not the vibrator supports all components of a given {@link VibrationEffect}
+     * (i.e. the vibrator can play the given effect as intended).
+     *
+     * <p>If this method returns {@code true}, then the VibrationEffect should play as expected.
+     * If {@code false}, playing the VibrationEffect might still make a vibration, but the vibration
+     * may be significantly degraded from the intention.
+     *
+     * <p>This method aggregates the results of feature check methods such as
+     * {@link #hasAmplitudeControl}, {@link #areAllPrimitivesSupported(int...)}, etc, depending
+     * on the features that are actually used by the VibrationEffect.
+     *
+     * @param effect the {@link VibrationEffect} to check if it is supported
+     * @return {@code true} if the vibrator can play the given {@code effect} as intended,
+     *         {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean areVibrationFeaturesSupported(@NonNull VibrationEffect effect) {
+        return effect.areVibrationFeaturesSupported(this);
+    }
+
+    /**
      * Check whether the vibrator can be controlled by an external service with the
      * {@link IExternalVibratorService}.
      *
@@ -238,9 +260,7 @@ public abstract class Vibrator {
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
      * applicable, or if this vibrator is a composite of multiple physical devices with different
      * frequencies.
-     * @hide
      */
-    @TestApi
     public float getResonantFrequency() {
         return getInfo().getResonantFrequencyHz();
     }
@@ -251,9 +271,7 @@ public abstract class Vibrator {
      * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
      * applicable, or if this vibrator is a composite of multiple physical devices with different
      * Q factors.
-     * @hide
      */
-    @TestApi
     public float getQFactor() {
         return getInfo().getQFactor();
     }

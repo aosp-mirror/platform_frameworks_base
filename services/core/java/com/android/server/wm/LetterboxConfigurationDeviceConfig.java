@@ -52,11 +52,6 @@ final class LetterboxConfigurationDeviceConfig
 
     private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY = true;
 
-    static final String KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP =
-            "disable_size_compat_mode_after_orientation_change_from_app";
-    private static final boolean
-            DEFAULT_VALUE_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP = true;
-
     @VisibleForTesting
     static final Map<String, Boolean> sKeyToDefaultValueMap = Map.of(
             KEY_ENABLE_CAMERA_COMPAT_TREATMENT,
@@ -68,9 +63,7 @@ final class LetterboxConfigurationDeviceConfig
             KEY_ENABLE_COMPAT_FAKE_FOCUS,
             DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS,
             KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
-            DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
-            KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP,
-            DEFAULT_VALUE_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP
+            DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY
     );
 
     // Whether camera compatibility treatment is enabled.
@@ -98,10 +91,6 @@ final class LetterboxConfigurationDeviceConfig
     // Whether the letterbox strategy for transparent activities is allowed
     private boolean mIsTranslucentLetterboxingAllowed =
             DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY;
-
-    // Whether size compat mode is disabled after an orientation change request comes from the app
-    private boolean mIsSizeCompatModeDisabledAfterOrientationChangeFromApp =
-            DEFAULT_VALUE_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP;
 
     // Set of active device configs that need to be updated in
     // DeviceConfig.OnPropertiesChangedListener#onPropertiesChanged.
@@ -152,8 +141,6 @@ final class LetterboxConfigurationDeviceConfig
                 return mIsCompatFakeFocusAllowed;
             case KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY:
                 return mIsTranslucentLetterboxingAllowed;
-            case KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP:
-                return mIsSizeCompatModeDisabledAfterOrientationChangeFromApp;
             default:
                 throw new AssertionError("Unexpected flag name: " + key);
         }
@@ -180,10 +167,6 @@ final class LetterboxConfigurationDeviceConfig
                 break;
             case KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY:
                 mIsTranslucentLetterboxingAllowed = getDeviceConfig(key, defaultValue);
-                break;
-            case KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP:
-                mIsSizeCompatModeDisabledAfterOrientationChangeFromApp =
-                        getDeviceConfig(key, defaultValue);
                 break;
             default:
                 throw new AssertionError("Unexpected flag name: " + key);

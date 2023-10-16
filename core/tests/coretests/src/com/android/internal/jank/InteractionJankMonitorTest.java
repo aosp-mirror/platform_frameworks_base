@@ -20,7 +20,6 @@ import static android.text.TextUtils.formatSimple;
 
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_LAUNCH_CAMERA;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_ADD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_APP_START;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_HEADS_UP_APPEAR;
@@ -32,7 +31,6 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_ROW_EXPAND;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_ROW_SWIPE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_TO_STATSD_INTERACTION_TYPE;
 import static com.android.internal.jank.InteractionJankMonitor.MAX_LENGTH_OF_CUJ_NAME;
 import static com.android.internal.jank.InteractionJankMonitor.getNameOfCuj;
@@ -92,7 +90,6 @@ import java.util.stream.Collectors;
 public class InteractionJankMonitorTest {
     private static final String CUJ_POSTFIX = "";
     private static final SparseArray<String> ENUM_NAME_EXCEPTION_MAP = new SparseArray<>();
-    private static final SparseArray<String> CUJ_NAME_EXCEPTION_MAP = new SparseArray<>();
     private static final String ENUM_NAME_PREFIX =
             "UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__";
 
@@ -129,22 +126,6 @@ public class InteractionJankMonitorTest {
                 CUJ_NOTIFICATION_SHADE_ROW_SWIPE, getEnumName("SHADE_ROW_SWIPE"));
         ENUM_NAME_EXCEPTION_MAP.put(
                 CUJ_NOTIFICATION_SHADE_SCROLL_FLING, getEnumName("SHADE_SCROLL_FLING"));
-
-        CUJ_NAME_EXCEPTION_MAP.put(
-                CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE, "CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE");
-        CUJ_NAME_EXCEPTION_MAP.put(
-                CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE,
-                "CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE");
-        CUJ_NAME_EXCEPTION_MAP.put(
-                CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE, "CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE");
-        CUJ_NAME_EXCEPTION_MAP.put(
-                CUJ_NOTIFICATION_SHADE_ROW_EXPAND, "CUJ_NOTIFICATION_SHADE_ROW_EXPAND");
-        CUJ_NAME_EXCEPTION_MAP.put(
-                CUJ_NOTIFICATION_SHADE_ROW_SWIPE, "CUJ_NOTIFICATION_SHADE_ROW_SWIPE");
-        CUJ_NAME_EXCEPTION_MAP.put(
-                CUJ_NOTIFICATION_SHADE_SCROLL_FLING, "CUJ_NOTIFICATION_SHADE_SCROLL_FLING");
-        CUJ_NAME_EXCEPTION_MAP.put(CUJ_LOCKSCREEN_LAUNCH_CAMERA, "CUJ_LOCKSCREEN_LAUNCH_CAMERA");
-        CUJ_NAME_EXCEPTION_MAP.put(CUJ_SPLIT_SCREEN_RESIZE, "CUJ_SPLIT_SCREEN_RESIZE");
     }
 
     private static String getEnumName(String name) {
@@ -272,9 +253,8 @@ public class InteractionJankMonitorTest {
                     : formatSimple("%s%s", ENUM_NAME_PREFIX, cujName.substring(4));
             final int enumKey = CUJ_TO_STATSD_INTERACTION_TYPE[cuj];
             final String enumName = enumsMap.get(enumKey);
-            final String expectedNameOfCuj = CUJ_NAME_EXCEPTION_MAP.contains(cuj)
-                    ? CUJ_NAME_EXCEPTION_MAP.get(cuj)
-                    : formatSimple("CUJ_%s", getNameOfCuj(cuj));
+            final String expectedNameOfCuj = formatSimple("CUJ_%s", getNameOfCuj(cuj));
+
             mExpect
                     .withMessage(formatSimple(
                             "%s (%d) not matches %s (%d)", cujName, cuj, enumName, enumKey))
@@ -323,7 +303,7 @@ public class InteractionJankMonitorTest {
         // Since the length of the cuj name is tested in another test, no need to test it here.
         // Too long postfix case, should trim the postfix and keep the cuj name completed.
         final String expectedTrimmedName = formatSimple("J<%s::%s>", cujName,
-                "ThisIsTheCujTagThisIsTheCujTagThisIsTheCujTagThisIsTheCujTagThisIsTheCujTagT...");
+                "ThisIsTheCujTagThisIsTheCujTagThisIsTheCujTagThisIsTheCujTagThi...");
         Session longPostfix = new Session(cujType, tooLongTag);
         assertThat(longPostfix.getName()).isEqualTo(expectedTrimmedName);
     }
@@ -358,10 +338,11 @@ public class InteractionJankMonitorTest {
         when(configuration.isSurfaceOnly()).thenReturn(false);
         when(configuration.getView()).thenReturn(mView);
         when(configuration.getHandler()).thenReturn(mView.getHandler());
+        when(configuration.getDisplayId()).thenReturn(42);
 
         FrameTracker tracker = spy(new FrameTracker(monitor, session, mWorker.getThreadHandler(),
                 threadedRenderer, viewRoot, surfaceControl, choreographer,
-                new FrameMetricsWrapper(), new StatsLogWrapper(),
+                new FrameMetricsWrapper(), new StatsLogWrapper(null),
                 /* traceThresholdMissedFrames= */ 1,
                 /* traceThresholdFrameTimeMillis= */ -1, listener, configuration));
 

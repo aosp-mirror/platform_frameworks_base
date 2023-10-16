@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.notification
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.plugins.log.LogcatEchoTracker
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
+import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.statusbar.StatusBarState
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before

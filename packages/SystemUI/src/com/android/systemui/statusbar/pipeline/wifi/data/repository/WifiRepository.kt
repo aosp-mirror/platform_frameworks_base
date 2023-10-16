@@ -33,6 +33,15 @@ interface WifiRepository {
 
     /** Observable for the current wifi network activity. */
     val wifiActivity: StateFlow<DataActivityModel>
+
+    /**
+     * Returns true if the device is currently connected to a wifi network with a valid SSID and
+     * false otherwise.
+     */
+    fun isWifiConnectedWithValidSsid(): Boolean {
+        val currentNetwork = wifiNetwork.value
+        return currentNetwork is WifiNetworkModel.Active && currentNetwork.hasValidSsid()
+    }
 }
 
 /**

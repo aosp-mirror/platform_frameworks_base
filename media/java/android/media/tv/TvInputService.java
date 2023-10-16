@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -58,11 +59,15 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
+
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -757,6 +762,74 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Sends an updated list of all audio presentations available from a Next Generation Audio
+         * service. This is used by the framework to maintain the audio presentation information for
+         * a given track of {@link TvTrackInfo#TYPE_AUDIO}, which in turn is used by
+         * {@link TvView#getAudioPresentations} for the application to retrieve metadata for the
+         * current audio track. The TV input service must call this method as soon as the audio
+         * track presentation information becomes available or is updated. Note that in a case
+         * where a part of the information for the current track is updated, it is not necessary
+         * to create a new {@link TvTrackInfo} object with a different track ID.
+         *
+         * @param audioPresentations A list of audio presentation information pertaining to the
+         * selected track.
+         */
+        public void notifyAudioPresentationChanged(@NonNull final List<AudioPresentation>
+                audioPresentations) {
+            final List<AudioPresentation> ap = new ArrayList<>(audioPresentations);
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyAudioPresentationsChanged");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAudioPresentationsChanged(ap);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error in notifyAudioPresentationsChanged", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the presentation and program IDs of the selected audio presentation. This is used
+         * to inform the application that a specific audio presentation is selected. The TV input
+         * service must call this method as soon as an audio presentation is selected either by
+         * default or in response to a call to {@link #onSelectTrack}. The selected audio
+         * presentation ID for a currently selected audio track is maintained in the framework until
+         * the next call to this method even after the entire audio presentation list for the track
+         * is updated (but is reset when the session is tuned to a new channel), so care must be
+         * taken not to result in an obsolete track audio presentation ID.
+         *
+         * @param presentationId The ID of the selected audio presentation for the current track.
+         * @param programId The ID of the program providing the selected audio presentation.
+         * @see #onSelectAudioPresentation
+         */
+        public void notifyAudioPresentationSelected(final int presentationId, final int programId) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyAudioPresentationSelected");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAudioPresentationSelected(presentationId, programId);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error in notifyAudioPresentationSelected", e);
+                    }
+                }
+            });
+        }
+
+
+        /**
          * Informs the application that the user is allowed to watch the current program content.
          *
          * <p>Each TV input service is required to query the system whether the user is allowed to
@@ -931,6 +1004,70 @@ public abstract class TvInputService extends Service {
             });
         }
 
+        /**
+         * Notifies the advertisement buffer is consumed.
+         *
+         * @param buffer the {@link AdBuffer} that was consumed.
+         */
+        public void notifyAdBufferConsumed(@NonNull AdBuffer buffer) {
+            AdBuffer dupBuffer;
+            try {
+                dupBuffer = AdBuffer.dupAdBuffer(buffer);
+            } catch (IOException e) {
+                Log.w(TAG, "dup AdBuffer error in notifyAdBufferConsumed:", e);
+                return;
+            }
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyAdBufferConsumed");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAdBufferConsumed(dupBuffer);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAdBufferConsumed", e);
+                    } finally {
+                        if (dupBuffer != null) {
+                            dupBuffer.getSharedMemory().close();
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the raw data from the received TV message as well as the type of message received.
+         *
+         * @param type The of message that was sent, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message. The bundle keys are:
+         *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+         *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+         *             how to parse this data.
+         */
+        public void notifyTvMessage(@TvInputManager.TvMessageType int type,
+                @NonNull Bundle data) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTvMessage");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTvMessage(type, data);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTvMessage", e);
+                    }
+                }
+            });
+        }
+
         private void notifyTimeShiftStartPositionChanged(final long timeMs) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -992,6 +1129,61 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the app that the time shift mode is set or updated.
+         *
+         * @param mode The current time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         */
+        public void notifyTimeShiftMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTimeShiftMode");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTimeShiftMode(mode);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTimeShiftMode", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the app available speeds for time-shifting.
+         * <p>This should be called when time-shifting is enabled.
+         *
+         * @param speeds An ordered array of playback speeds, expressed as values relative to the
+         *               normal playback speed (1.0), at which the current content can be played as
+         *               a time-shifted broadcast. This is an empty array if the supported playback
+         *               speeds are unknown or the video/broadcast is not in time shift mode. If
+         *               currently in time shift mode, this array will normally include at least
+         *               the values 1.0 (normal speed) and 0.0 (paused).
+         * @see PlaybackParams#getSpeed()
+         */
+        public void notifyAvailableSpeeds(@NonNull float[] speeds) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyAvailableSpeeds");
+                        if (mSessionCallback != null) {
+                            Arrays.sort(speeds);
+                            mSessionCallback.onAvailableSpeeds(speeds);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAvailableSpeeds", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Notifies signal strength.
          */
         public void notifySignalStrength(@TvInputManager.SignalStrength final int strength) {
@@ -1006,6 +1198,32 @@ public abstract class TvInputService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifySignalStrength", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that cueing message is available or unavailable.
+         *
+         * <p>The cueing message is used for digital program insertion, based on the standard
+         * ANSI/SCTE 35 2019r1.
+         *
+         * @param available {@code true} if cueing message is available; {@code false} if it becomes
+         *                  unavailable.
+         */
+        public void notifyCueingMessageAvailability(boolean available) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyCueingMessageAvailability");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onCueingMessageAvailability(available);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyCueingMessageAvailability", e);
                     }
                 }
             });
@@ -1147,6 +1365,14 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Called when an advertisement buffer is ready for playback.
+         *
+         * @param buffer The {@link AdBuffer} that became ready for playback.
+         */
+        public void onAdBufferReady(@NonNull AdBuffer buffer) {
+        }
+
+        /**
          * Tunes to a given channel.
          *
          * <p>No video will be displayed until {@link #notifyVideoAvailable()} is called.
@@ -1236,6 +1462,23 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Selects an audio presentation.
+         *
+         * <p>On successfully selecting the audio presentation,
+         * {@link #notifyAudioPresentationSelected} is invoked to provide updated information about
+         * the selected audio presentation to applications.
+         *
+         * @param presentationId The ID of the audio presentation to select.
+         * @param programId The ID of the program providing the selected audio presentation.
+         * @return {@code true} if the audio presentation selection was successful,
+         *         {@code false} otherwise.
+         * @see #notifyAudioPresentationSelected
+         */
+        public boolean onSelectAudioPresentation(int presentationId, int programId) {
+            return false;
+        }
+
+        /**
          * Processes a private command sent from the application to the TV input. This can be used
          * to provide domain-specific features that are only known between certain TV inputs and
          * their clients.
@@ -1256,6 +1499,35 @@ public abstract class TvInputService extends Service {
          */
         public View onCreateOverlayView() {
             return null;
+        }
+
+        /**
+         * Called when the application enables or disables the detection of the specified message
+         * type.
+         * @param type The type of message received, such as
+         *             {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param enabled {@code true} if TV message detection is enabled,
+         *                {@code false} otherwise.
+         */
+        public void onSetTvMessageEnabled(@TvInputManager.TvMessageType int type,
+                boolean enabled) {
+        }
+
+        /**
+         * Called when a TV message is received
+         *
+         * @param type The type of message received, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message. The bundle keys are:
+         *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+         *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+         *             how to parse this data.
+         */
+        public void onTvMessage(@TvInputManager.TvMessageType int type,
+                @NonNull Bundle data) {
         }
 
         /**
@@ -1331,6 +1603,17 @@ public abstract class TvInputService extends Service {
          * @see #onTimeShiftGetCurrentPosition()
          */
         public void onTimeShiftSetPlaybackParams(PlaybackParams params) {
+        }
+
+        /**
+         * Called when the application sets time shift mode.
+         *
+         * @param mode The time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         */
+        public void onTimeShiftSetMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
         }
 
         /**
@@ -1569,6 +1852,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Calls {@link #onSelectAudioPresentation}.
+         */
+        void selectAudioPresentation(int presentationId, int programId) {
+            onSelectAudioPresentation(presentationId, programId);
+        }
+
+        /**
          * Calls {@link #onSelectTrack}.
          */
         void selectTrack(int type, String trackId) {
@@ -1588,6 +1878,13 @@ public abstract class TvInputService extends Service {
          */
         void setInteractiveAppNotificationEnabled(boolean enabled) {
             onSetInteractiveAppNotificationEnabled(enabled);
+        }
+
+        /**
+         * Calls {@link #onSetTvMessageEnabled(int, boolean)}.
+         */
+        void setTvMessageEnabled(int type, boolean enabled) {
+            onSetTvMessageEnabled(type, enabled);
         }
 
         /**
@@ -1732,6 +2029,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Calls {@link #onTimeShiftSetMode}.
+         */
+        void timeShiftSetMode(int mode) {
+            onTimeShiftSetMode(mode);
+        }
+
+        /**
          * Enable/disable position tracking.
          *
          * @param enable {@code true} to enable tracking, {@code false} otherwise.
@@ -1769,6 +2073,14 @@ public abstract class TvInputService extends Service {
 
         void requestAd(AdRequest request) {
             onRequestAd(request);
+        }
+
+        void notifyAdBufferReady(AdBuffer buffer) {
+            onAdBufferReady(buffer);
+        }
+
+        void onTvMessageReceived(int type, Bundle data) {
+            onTvMessage(type, data);
         }
 
         /**

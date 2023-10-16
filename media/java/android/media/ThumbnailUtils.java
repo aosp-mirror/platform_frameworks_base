@@ -236,7 +236,7 @@ public class ThumbnailUtils {
      * which enables remote providers to efficiently cache and invalidate
      * thumbnails.
      *
-     * @param file The audio file.
+     * @param file The image file.
      * @param size The desired thumbnail size.
      * @throws IOException If any trouble was encountered while generating or
      *             loading the thumbnail, or if

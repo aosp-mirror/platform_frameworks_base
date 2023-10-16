@@ -26,7 +26,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.RemoteException;
-import android.provider.Settings;
+import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -1194,6 +1194,7 @@ public class NotificationContentView extends FrameLayout implements Notification
 
     private void updateSingleLineView() {
         if (mIsChildInGroup) {
+            Trace.beginSection("NotifContentView#updateSingleLineView");
             boolean isNewView = mSingleLineView == null;
             mSingleLineView = mHybridGroupManager.bindFromNotification(
                     mSingleLineView, mContractedChild, mNotificationEntry.getSbn(), this);
@@ -1201,6 +1202,7 @@ public class NotificationContentView extends FrameLayout implements Notification
                 updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
                         mSingleLineView, mSingleLineView);
             }
+            Trace.endSection();
         } else if (mSingleLineView != null) {
             removeView(mSingleLineView);
             mSingleLineView = null;
@@ -1440,11 +1442,9 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (snoozeButton == null || actionContainer == null) {
             return;
         }
-        final boolean showSnooze = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1;
         // Notification.Builder can 'disable' the snooze button to prevent it from being shown here
         boolean snoozeDisabled = !snoozeButton.isEnabled();
-        if (!showSnooze || snoozeDisabled) {
+        if (!mContainingNotification.getShowSnooze() || snoozeDisabled) {
             snoozeButton.setVisibility(GONE);
             return;
         }
@@ -2062,6 +2062,23 @@ public class NotificationContentView extends FrameLayout implements Notification
             pw.print("null");
         }
         pw.println();
+
+        pw.print("RemoteInputViews { ");
+        pw.print(" visibleType: " + mVisibleType);
+        if (mHeadsUpRemoteInputController != null) {
+            pw.print(", headsUpRemoteInputController.isActive: "
+                    + mHeadsUpRemoteInputController.isActive());
+        } else {
+            pw.print(", headsUpRemoteInputController: null");
+        }
+
+        if (mExpandedRemoteInputController != null) {
+            pw.print(", expandedRemoteInputController.isActive: "
+                    + mExpandedRemoteInputController.isActive());
+        } else {
+            pw.print(", expandedRemoteInputController: null");
+        }
+        pw.println(" }");
     }
 
     /** Add any existing SmartReplyView to the dump */

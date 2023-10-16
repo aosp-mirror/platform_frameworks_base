@@ -46,6 +46,7 @@ import android.app.ActivityManager.ProcessState;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.AppLaunchEstimateInfo;
 import android.app.usage.AppStandbyInfo;
@@ -433,11 +434,9 @@ public class UsageStatsService extends SystemService implements
     private void onUserUnlocked(int userId) {
         // fetch the installed packages outside the lock so it doesn't block package manager.
         final HashMap<String, Long> installedPackages = getInstalledPackages(userId);
-        // delay updating of package mappings for user 0 since their data is not likely to be stale.
-        // this also makes it less likely for restored data to be erased on unexpected reboots.
-        if (userId == UserHandle.USER_SYSTEM) {
-            UsageStatsIdleService.scheduleUpdateMappingsJob(getContext());
-        }
+
+        UsageStatsIdleService.scheduleUpdateMappingsJob(getContext(), userId);
+
         final boolean deleteObsoleteData = shouldDeleteObsoleteData(UserHandle.of(userId));
         synchronized (mLock) {
             // This should be safe to add this early. Other than reportEventOrAddToQueue and
@@ -594,32 +593,16 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private final IUidObserver mUidObserver = new IUidObserver.Stub() {
+    private final IUidObserver mUidObserver = new UidObserver() {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
         }
 
         @Override
-        public void onUidIdle(int uid, boolean disabled) {
-            // Ignored
-        }
-
-        @Override
         public void onUidGone(int uid, boolean disabled) {
             onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT, 0,
                     ActivityManager.PROCESS_CAPABILITY_NONE);
-        }
-
-        @Override
-        public void onUidActive(int uid) {
-            // Ignored
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
@@ -638,6 +621,15 @@ public class UsageStatsService extends SystemService implements
     @Override
     public void onNewUpdate(int userId) {
         mAppStandby.initializeDefaultsForSystemApps(userId);
+    }
+
+    private boolean sameApp(int callingUid, @UserIdInt int userId, String packageName) {
+        return mPackageManagerInternal.getPackageUid(packageName, 0 /* flags */, userId)
+                == callingUid;
+    }
+
+    private boolean isInstantApp(String packageName, int userId) {
+        return mPackageManagerInternal.isPackageEphemeral(userId, packageName);
     }
 
     private boolean shouldObfuscateInstantAppsForCaller(int callingUid, int userId) {
@@ -1028,8 +1020,7 @@ public class UsageStatsService extends SystemService implements
                 uid = 0;
         }
 
-        if (event.mPackage != null
-                && mPackageManagerInternal.isPackageEphemeral(userId, event.mPackage)) {
+        if (event.mPackage != null && isInstantApp(event.mPackage, userId)) {
             event.mFlags |= Event.FLAG_IS_PACKAGE_INSTANT_APP;
         }
 
@@ -1253,8 +1244,8 @@ public class UsageStatsService extends SystemService implements
         }
         mAppStandby.onUserRemoved(userId);
         // Cancel any scheduled jobs for this user since the user is being removed.
-        UsageStatsIdleService.cancelJob(getContext(), userId);
-        UsageStatsIdleService.cancelUpdateMappingsJob(getContext());
+        UsageStatsIdleService.cancelPruneJob(getContext(), userId);
+        UsageStatsIdleService.cancelUpdateMappingsJob(getContext(), userId);
     }
 
     /**
@@ -1292,7 +1283,7 @@ public class UsageStatsService extends SystemService implements
 
         // Schedule a job to prune any data related to this package.
         if (tokenRemoved != PackagesTokenData.UNASSIGNED_TOKEN) {
-            UsageStatsIdleService.scheduleJob(getContext(), userId);
+            UsageStatsIdleService.schedulePruneJob(getContext(), userId);
         }
     }
 
@@ -1317,19 +1308,19 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
-    private boolean updatePackageMappingsData() {
+    private boolean updatePackageMappingsData(@UserIdInt int userId) {
         // don't update the mappings if a profile user is defined
-        if (!shouldDeleteObsoleteData(UserHandle.SYSTEM)) {
+        if (!shouldDeleteObsoleteData(UserHandle.of(userId))) {
             return true; // return true so job scheduler doesn't reschedule the job
         }
         // fetch the installed packages outside the lock so it doesn't block package manager.
-        final HashMap<String, Long> installedPkgs = getInstalledPackages(UserHandle.USER_SYSTEM);
+        final HashMap<String, Long> installedPkgs = getInstalledPackages(userId);
         synchronized (mLock) {
-            if (!mUserUnlockedStates.contains(UserHandle.USER_SYSTEM)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 return false; // user is no longer unlocked
             }
 
-            final UserUsageStatsService userService = mUserState.get(UserHandle.USER_SYSTEM);
+            final UserUsageStatsService userService = mUserState.get(userId);
             if (userService == null) {
                 return false; // user was stopped or removed
             }
@@ -1363,7 +1354,7 @@ public class UsageStatsService extends SystemService implements
             if (obfuscateInstantApps) {
                 for (int i = list.size() - 1; i >= 0; i--) {
                     final UsageStats stats = list.get(i);
-                    if (mPackageManagerInternal.isPackageEphemeral(userId, stats.mPackageName)) {
+                    if (isInstantApp(stats.mPackageName, userId)) {
                         list.set(i, stats.getObfuscatedForInstantApp());
                     }
                 }
@@ -1854,6 +1845,21 @@ public class UsageStatsService extends SystemService implements
                 } else if ("broadcast-response-stats".equals(arg)) {
                     synchronized (mLock) {
                         mResponseStatsTracker.dump(idpw);
+                    }
+                    return;
+                } else if ("app-component-usage".equals(arg)) {
+                    final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    synchronized (mLock) {
+                        if (!mLastTimeComponentUsedGlobal.isEmpty()) {
+                            ipw.println("App Component Usages:");
+                            ipw.increaseIndent();
+                            for (String pkg : mLastTimeComponentUsedGlobal.keySet()) {
+                                ipw.println("package=" + pkg
+                                            + " lastUsed=" + UserUsageStatsService.formatDateTime(
+                                                    mLastTimeComponentUsedGlobal.get(pkg), true));
+                            }
+                            ipw.decreaseIndent();
+                        }
                     }
                     return;
                 } else if (arg != null && !arg.startsWith("-")) {
@@ -2359,31 +2365,32 @@ public class UsageStatsService extends SystemService implements
             }
             final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
             // If the calling app is asking about itself, continue, else check for permission.
-            if (packageUid != callingUid) {
-                if (!hasPermission(callingPackage)) {
-                    throw new SecurityException(
-                            "Don't have permission to query app standby bucket");
-                }
+            final boolean sameApp = packageUid == callingUid;
+            if (!sameApp && !hasPermission(callingPackage)) {
+                throw new SecurityException("Don't have permission to query app standby bucket");
             }
-            if (packageUid < 0) {
+
+            final boolean isInstantApp = isInstantApp(packageName, userId);
+            final boolean cannotAccessInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
+                    userId);
+            if (packageUid < 0 || (!sameApp && isInstantApp && cannotAccessInstantApps)) {
                 throw new IllegalArgumentException(
                         "Cannot get standby bucket for non existent package (" + packageName + ")");
             }
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
-                    userId);
             final long token = Binder.clearCallingIdentity();
             try {
                 return mAppStandby.getAppStandbyBucket(packageName, userId,
-                        SystemClock.elapsedRealtime(), obfuscateInstantApps);
+                        SystemClock.elapsedRealtime(), false /* obfuscateInstantApps */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
         @Override
         public void setAppStandbyBucket(String packageName, int bucket, int userId) {
-            getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
-                    "No permission to change app standby state");
+
+            super.setAppStandbyBucket_enforcePermission();
 
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -2411,21 +2418,31 @@ public class UsageStatsService extends SystemService implements
                 throw new SecurityException(
                         "Don't have permission to query app standby bucket");
             }
+            final boolean cannotAccessInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
+                    userId);
             final long token = Binder.clearCallingIdentity();
             try {
                 final List<AppStandbyInfo> standbyBucketList =
                         mAppStandby.getAppStandbyBuckets(userId);
-                return (standbyBucketList == null) ? ParceledListSlice.emptyList()
-                        : new ParceledListSlice<>(standbyBucketList);
+                if (standbyBucketList == null) {
+                    return ParceledListSlice.emptyList();
+                }
+                final int targetUserId = userId;
+                standbyBucketList.removeIf(
+                        i -> !sameApp(callingUid, targetUserId, i.mPackageName)
+                                && isInstantApp(i.mPackageName, targetUserId)
+                                && cannotAccessInstantApps);
+                return new ParceledListSlice<>(standbyBucketList);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
         @Override
         public void setAppStandbyBuckets(ParceledListSlice appBuckets, int userId) {
-            getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
-                    "No permission to change app standby state");
+
+            super.setAppStandbyBuckets_enforcePermission();
 
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -2456,28 +2473,29 @@ public class UsageStatsService extends SystemService implements
                             "Don't have permission to query min app standby bucket");
                 }
             }
-            if (packageUid < 0) {
+            final boolean isInstantApp = isInstantApp(packageName, userId);
+            final boolean cannotAccessInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
+                    userId);
+            if (packageUid < 0 || (isInstantApp && cannotAccessInstantApps)) {
                 throw new IllegalArgumentException(
                         "Cannot get min standby bucket for non existent package ("
                                 + packageName + ")");
             }
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
-                    userId);
             final long token = Binder.clearCallingIdentity();
             try {
-                return mAppStandby.getAppMinStandbyBucket(
-                        packageName, UserHandle.getAppId(packageUid), userId, obfuscateInstantApps);
+                return mAppStandby.getAppMinStandbyBucket(packageName,
+                        UserHandle.getAppId(packageUid), userId, false /* obfuscateInstantApps */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
         @Override
         public void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime,
                 int userId) {
-            getContext().enforceCallingPermission(
-                    Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE,
-                    "No permission to change app launch estimates");
+
+            super.setEstimatedLaunchTime_enforcePermission();
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -2488,11 +2506,11 @@ public class UsageStatsService extends SystemService implements
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
         @Override
         public void setEstimatedLaunchTimes(ParceledListSlice estimatedLaunchTimes, int userId) {
-            getContext().enforceCallingPermission(
-                    Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE,
-                    "No permission to change app launch estimates");
+
+            super.setEstimatedLaunchTimes_enforcePermission();
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -2521,10 +2539,19 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public void reportChooserSelection(String packageName, int userId, String contentType,
-                                           String[] annotations, String action) {
+        public void reportChooserSelection(@NonNull String packageName, int userId,
+                @NonNull String contentType, String[] annotations, @NonNull String action) {
             if (packageName == null) {
-                Slog.w(TAG, "Event report user selecting a null package");
+                throw new IllegalArgumentException("Package selection must not be null.");
+            }
+            // A valid contentType and action must be provided for chooser selection events.
+            if (contentType == null || contentType.isBlank()
+                    || action == null || action.isBlank()) {
+                return;
+            }
+            // Verify if this package exists before reporting an event for it.
+            if (mPackageManagerInternal.getPackageUid(packageName, 0, userId) < 0) {
+                Slog.w(TAG, "Event report user selecting an invalid package");
                 return;
             }
 
@@ -3020,44 +3047,35 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public byte[] getBackupPayload(int user, String key) {
-            if (!mUserUnlockedStates.contains(user)) {
-                Slog.w(TAG, "Failed to get backup payload for locked user " + user);
+        public byte[] getBackupPayload(@UserIdInt int userId, String key) {
+            if (!mUserUnlockedStates.contains(userId)) {
+                Slog.w(TAG, "Failed to get backup payload for locked user " + userId);
                 return null;
             }
             synchronized (mLock) {
-                // Check to ensure that only user 0's data is b/r for now
-                // Note: if backup and restore is enabled for users other than the system user, the
-                // #onUserUnlocked logic, specifically when the update mappings job is scheduled via
-                // UsageStatsIdleService.scheduleUpdateMappingsJob, will have to be updated.
-                if (user == UserHandle.USER_SYSTEM) {
-                    final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(user);
-                    if (userStats == null) {
-                        return null; // user was stopped or removed
-                    }
-                    return userStats.getBackupPayload(key);
-                } else {
-                    return null;
+                final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(userId);
+                if (userStats == null) {
+                    return null; // user was stopped or removed
                 }
+                Slog.i(TAG, "Returning backup payload for u=" + userId);
+                return userStats.getBackupPayload(key);
             }
         }
 
         @Override
-        public void applyRestoredPayload(int user, String key, byte[] payload) {
+        public void applyRestoredPayload(@UserIdInt int userId, String key, byte[] payload) {
             synchronized (mLock) {
-                if (!mUserUnlockedStates.contains(user)) {
-                    Slog.w(TAG, "Failed to apply restored payload for locked user " + user);
+                if (!mUserUnlockedStates.contains(userId)) {
+                    Slog.w(TAG, "Failed to apply restored payload for locked user " + userId);
                     return;
                 }
 
-                if (user == UserHandle.USER_SYSTEM) {
-                    final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(user);
-                    if (userStats == null) {
-                        return; // user was stopped or removed
-                    }
-                    final Set<String> restoredApps = userStats.applyRestoredPayload(key, payload);
-                    mAppStandby.restoreAppsToRare(restoredApps, user);
+                final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(userId);
+                if (userStats == null) {
+                    return; // user was stopped or removed
                 }
+                final Set<String> restoredApps = userStats.applyRestoredPayload(key, payload);
+                mAppStandby.restoreAppsToRare(restoredApps, userId);
             }
         }
 
@@ -3135,8 +3153,8 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public boolean updatePackageMappingsData() {
-            return UsageStatsService.this.updatePackageMappingsData();
+        public boolean updatePackageMappingsData(@UserIdInt int userId) {
+            return UsageStatsService.this.updatePackageMappingsData(userId);
         }
 
         /**

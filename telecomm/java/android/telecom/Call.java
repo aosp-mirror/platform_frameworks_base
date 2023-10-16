@@ -168,6 +168,18 @@ public final class Call {
     public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
 
     /**
+     * Extra key intended for {@link InCallService}s that notify the user of an incoming call. When
+     * EXTRA_IS_SUPPRESSED_BY_DO_NOT_DISTURB returns true, the {@link InCallService} should not
+     * interrupt the user of the incoming call because the call is being suppressed by Do Not
+     * Disturb settings.
+     *
+     * This extra will be removed from the {@link Call} object for {@link InCallService}s that do
+     * not hold the {@link android.Manifest.permission#READ_CONTACTS} permission.
+     */
+    public static final String EXTRA_IS_SUPPRESSED_BY_DO_NOT_DISTURB =
+            "android.telecom.extra.IS_SUPPRESSED_BY_DO_NOT_DISTURB";
+
+    /**
      * Key for extra used to pass along a list of {@link PhoneAccountSuggestion}s to the in-call
      * UI when a call enters the {@link #STATE_SELECT_PHONE_ACCOUNT} state. The list included here
      * will have the same length and be in the same order as the list passed with
@@ -346,6 +358,18 @@ public final class Call {
      */
     public static final String EXTRA_DIAGNOSTIC_MESSAGE =
             "android.telecom.extra.DIAGNOSTIC_MESSAGE";
+
+    /**
+     * Event reported from the Telecom stack to indicate that the {@link Connection} is not able to
+     * find any network and likely will not get connected. Upon receiving this event, the dialer
+     * app should show satellite SOS button if satellite is provisioned.
+     * <p>
+     * The dialer app receives this event via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * @hide
+     */
+    public static final String EVENT_DISPLAY_SOS_MESSAGE =
+            "android.telecom.event.DISPLAY_SOS_MESSAGE";
 
     /**
      * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this
@@ -726,6 +750,7 @@ public final class Call {
         private final String mContactDisplayName;
         private final @CallDirection int mCallDirection;
         private final @Connection.VerificationStatus int mCallerNumberVerificationStatus;
+        private final Uri mContactPhotoUri;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -933,6 +958,17 @@ public final class Call {
         }
 
         /**
+         * @return The contact photo URI which corresponds to
+         * {@link android.provider.ContactsContract.PhoneLookup#PHOTO_URI}, or {@code null} if the
+         * lookup is not yet complete, if there's no contacts entry for the caller,
+         * or if the {@link InCallService} does not hold the
+         * {@link android.Manifest.permission#READ_CONTACTS} permission.
+         */
+        public @Nullable Uri getContactPhotoUri() {
+            return mContactPhotoUri;
+        }
+
+        /**
          * The display name for the caller.
          * <p>
          * This is the name as reported by the {@link ConnectionService} associated with this call.
@@ -1131,7 +1167,8 @@ public final class Call {
                         Objects.equals(mContactDisplayName, d.mContactDisplayName) &&
                         Objects.equals(mCallDirection, d.mCallDirection) &&
                         Objects.equals(mCallerNumberVerificationStatus,
-                                d.mCallerNumberVerificationStatus);
+                                d.mCallerNumberVerificationStatus) &&
+                        Objects.equals(mContactPhotoUri, d.mContactPhotoUri);
             }
             return false;
         }
@@ -1156,7 +1193,8 @@ public final class Call {
                             mCreationTimeMillis,
                             mContactDisplayName,
                             mCallDirection,
-                            mCallerNumberVerificationStatus);
+                            mCallerNumberVerificationStatus,
+                    mContactPhotoUri);
         }
 
         /** {@hide} */
@@ -1180,7 +1218,8 @@ public final class Call {
                 long creationTimeMillis,
                 String contactDisplayName,
                 int callDirection,
-                int callerNumberVerificationStatus) {
+                int callerNumberVerificationStatus,
+                Uri contactPhotoUri) {
             mState = state;
             mTelecomCallId = telecomCallId;
             mHandle = handle;
@@ -1201,6 +1240,7 @@ public final class Call {
             mContactDisplayName = contactDisplayName;
             mCallDirection = callDirection;
             mCallerNumberVerificationStatus = callerNumberVerificationStatus;
+            mContactPhotoUri = contactPhotoUri;
         }
 
         /** {@hide} */
@@ -1225,7 +1265,9 @@ public final class Call {
                     parcelableCall.getCreationTimeMillis(),
                     parcelableCall.getContactDisplayName(),
                     parcelableCall.getCallDirection(),
-                    parcelableCall.getCallerNumberVerificationStatus());
+                    parcelableCall.getCallerNumberVerificationStatus(),
+                    parcelableCall.getContactPhotoUri()
+            );
         }
 
         @Override
@@ -2100,6 +2142,14 @@ public final class Call {
      * <p>
      * No assumptions should be made as to how an In-Call UI or service will handle these
      * extras.  Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     * <p>
+     * Extras added using this method will be made available to the {@link ConnectionService}
+     * associated with this {@link Call} and notified via
+     * {@link Connection#onExtrasChanged(Bundle)}.
+     * <p>
+     * Extras added using this method will also be available to other running {@link InCallService}s
+     * and notified via {@link Call.Callback#onDetailsChanged(Call, Details)}.  The extras can be
+     * accessed via {@link Details#getExtras()}.
      *
      * @param extras The extras to add.
      */
@@ -2639,7 +2689,8 @@ public final class Call {
                         mDetails.getCreationTimeMillis(),
                         mDetails.getContactDisplayName(),
                         mDetails.getCallDirection(),
-                        mDetails.getCallerNumberVerificationStatus()
+                        mDetails.getCallerNumberVerificationStatus(),
+                        mDetails.getContactPhotoUri()
                         );
                 fireDetailsChanged(mDetails);
             }

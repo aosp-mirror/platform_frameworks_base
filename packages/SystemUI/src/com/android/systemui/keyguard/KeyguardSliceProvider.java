@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
+import com.android.systemui.util.wakelock.WakeLockLogger;
 
 import java.util.Date;
 import java.util.Locale;
@@ -148,6 +149,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private int mStatusBarState;
     private boolean mMediaIsVisible;
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
+    @Inject
+    WakeLockLogger mWakeLockLogger;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -305,8 +308,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     @Override
     public boolean onCreateSliceProvider() {
         mContextAvailableCallback.onContextAvailable(getContext());
-        mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
-                "media");
+        mMediaWakeLock = new SettableWakeLock(
+                WakeLock.createPartial(getContext(), mWakeLockLogger, "media"), "media");
         synchronized (KeyguardSliceProvider.sInstanceLock) {
             KeyguardSliceProvider oldInstance = KeyguardSliceProvider.sInstance;
             if (oldInstance != null) {
@@ -416,7 +419,11 @@ public class KeyguardSliceProvider extends SliceProvider implements
         if (mDateFormat == null) {
             final Locale l = Locale.getDefault();
             DateFormat format = DateFormat.getInstanceForSkeleton(mDatePattern, l);
-            format.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
+            // The use of CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE instead of
+            // CAPITALIZATION_FOR_STANDALONE is to address
+            // https://unicode-org.atlassian.net/browse/ICU-21631
+            // TODO(b/229287642): Switch back to CAPITALIZATION_FOR_STANDALONE
+            format.setContext(DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE);
             mDateFormat = format;
         }
         mCurrentTime.setTime(System.currentTimeMillis());

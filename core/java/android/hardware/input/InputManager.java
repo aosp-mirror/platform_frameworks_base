@@ -26,38 +26,21 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.BatteryState;
-import android.hardware.SensorManager;
-import android.hardware.lights.Light;
-import android.hardware.lights.LightState;
-import android.hardware.lights.LightsManager;
-import android.hardware.lights.LightsRequest;
-import android.os.Binder;
-import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
-import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionSync;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.os.VibratorManager;
-import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
-import android.util.SparseArray;
+import android.view.Display;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
@@ -66,16 +49,14 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
 import android.view.WindowManager.LayoutParams;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.SomeArgs;
-import com.android.internal.util.ArrayUtils;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -85,45 +66,19 @@ import java.util.concurrent.Executor;
 @SystemService(Context.INPUT_SERVICE)
 public final class InputManager {
     private static final String TAG = "InputManager";
-    private static final boolean DEBUG = false;
-
-    private static final int MSG_DEVICE_ADDED = 1;
-    private static final int MSG_DEVICE_REMOVED = 2;
-    private static final int MSG_DEVICE_CHANGED = 3;
-
-    /** @hide */
-    public static final int[] BLOCK_UNTRUSTED_TOUCHES_MODES = {
-            BlockUntrustedTouchesMode.DISABLED,
-            BlockUntrustedTouchesMode.PERMISSIVE,
-            BlockUntrustedTouchesMode.BLOCK
-    };
-
-    private static InputManager sInstance;
+    // To enable these logs, run: 'adb shell setprop log.tag.InputManager DEBUG' (requires restart)
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final IInputManager mIm;
 
-    // Guarded by mInputDevicesLock
-    private final Object mInputDevicesLock = new Object();
-    private SparseArray<InputDevice> mInputDevices;
-    private InputDevicesChangedListener mInputDevicesChangedListener;
-    private final ArrayList<InputDeviceListenerDelegate> mInputDeviceListeners =
-            new ArrayList<InputDeviceListenerDelegate>();
+    /**
+     * Whether a PointerIcon is shown for stylus pointers.
+     * Obtain using {@link #isStylusPointerIconEnabled()}.
+     */
+    @Nullable
+    private Boolean mIsStylusPointerIconEnabled = null;
 
-    // Guarded by mTabletModeLock
-    private final Object mTabletModeLock = new Object();
-    private TabletModeChangedListener mTabletModeChangedListener;
-    private List<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
-
-    private final Object mBatteryListenersLock = new Object();
-    // Maps a deviceId whose battery is currently being monitored to an entry containing the
-    // registered listeners for that device.
-    @GuardedBy("mBatteryListenersLock")
-    private SparseArray<RegisteredBatteryListeners> mBatteryListeners;
-    @GuardedBy("mBatteryListenersLock")
-    private IInputDeviceBatteryListener mInputDeviceBatteryListener;
-
-    private InputDeviceSensorManager mInputDeviceSensorManager;
     /**
      * Broadcast Action: Query available keyboard layouts.
      * <p>
@@ -170,6 +125,14 @@ public final class InputManager {
      * The <code>android:keyboardLayout</code> attribute refers to a
      * <a href="https://source.android.com/docs/core/interaction/input/key-character-map-files">
      * key character map</a> resource that defines the keyboard layout.
+     * The <code>android:keyboardLocale</code> attribute specifies a comma separated list of BCP 47
+     * language tags depicting the locales supported by the keyboard layout. This attribute is
+     * optional and will be used for auto layout selection for external physical keyboards.
+     * The <code>android:keyboardLayoutType</code> attribute specifies the layoutType for the
+     * keyboard layout. This can be either empty or one of the following supported layout types:
+     * qwerty, qwertz, azerty, dvorak, colemak, workman, extended, turkish_q, turkish_f. This
+     * attribute is optional and will be used for auto layout selection for external physical
+     * keyboards.
      * </p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -186,38 +149,6 @@ public final class InputManager {
      */
     public static final String META_DATA_KEYBOARD_LAYOUTS =
             "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
-
-    /**
-     * Pointer Speed: The minimum (slowest) pointer speed (-7).
-     * @hide
-     */
-    public static final int MIN_POINTER_SPEED = -7;
-
-    /**
-     * Pointer Speed: The maximum (fastest) pointer speed (7).
-     * @hide
-     */
-    public static final int MAX_POINTER_SPEED = 7;
-
-    /**
-     * Pointer Speed: The default pointer speed (0).
-     * @hide
-     */
-    public static final int DEFAULT_POINTER_SPEED = 0;
-
-    /**
-     * The maximum allowed obscuring opacity by UID to propagate touches (0 <= x <= 1).
-     * @hide
-     */
-    public static final float DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH = .8f;
-
-    /**
-     * Default mode of the block untrusted touches mode feature.
-     * @hide
-     */
-    @BlockUntrustedTouchesMode
-    public static final int DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE =
-            BlockUntrustedTouchesMode.BLOCK;
 
     /**
      * Prevent touches from being consumed by apps if these touches passed through a non-trusted
@@ -265,6 +196,31 @@ public final class InputManager {
     })
     public @interface SwitchState {}
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "REMAPPABLE_MODIFIER_KEY_" }, value = {
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_CTRL_LEFT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_CTRL_RIGHT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_META_LEFT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_META_RIGHT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_ALT_LEFT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_ALT_RIGHT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_SHIFT_LEFT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_SHIFT_RIGHT,
+            RemappableModifierKey.REMAPPABLE_MODIFIER_KEY_CAPS_LOCK,
+    })
+    public @interface RemappableModifierKey {
+        int REMAPPABLE_MODIFIER_KEY_CTRL_LEFT = KeyEvent.KEYCODE_CTRL_LEFT;
+        int REMAPPABLE_MODIFIER_KEY_CTRL_RIGHT = KeyEvent.KEYCODE_CTRL_RIGHT;
+        int REMAPPABLE_MODIFIER_KEY_META_LEFT = KeyEvent.KEYCODE_META_LEFT;
+        int REMAPPABLE_MODIFIER_KEY_META_RIGHT = KeyEvent.KEYCODE_META_RIGHT;
+        int REMAPPABLE_MODIFIER_KEY_ALT_LEFT = KeyEvent.KEYCODE_ALT_LEFT;
+        int REMAPPABLE_MODIFIER_KEY_ALT_RIGHT = KeyEvent.KEYCODE_ALT_RIGHT;
+        int REMAPPABLE_MODIFIER_KEY_SHIFT_LEFT = KeyEvent.KEYCODE_SHIFT_LEFT;
+        int REMAPPABLE_MODIFIER_KEY_SHIFT_RIGHT = KeyEvent.KEYCODE_SHIFT_RIGHT;
+        int REMAPPABLE_MODIFIER_KEY_CAPS_LOCK = KeyEvent.KEYCODE_CAPS_LOCK;
+    }
+
     /**
      * Switch State: Unknown.
      *
@@ -285,57 +241,43 @@ public final class InputManager {
      */
     public static final int SWITCH_STATE_ON = 1;
 
-    private InputManager(IInputManager im) {
-        mIm = im;
+    private final InputManagerGlobal mGlobal;
+    private final Context mContext;
+
+    /** @hide */
+    public InputManager(Context context) {
+        mGlobal = InputManagerGlobal.getInstance();
+        mIm = mGlobal.getInputManagerService();
+        mContext = context;
     }
 
     /**
      * Gets an instance of the input manager.
      *
-     * @return The input manager instance.
+     *  Warning: The usage of this method is not supported!
+     *
+     *  @return The input manager instance.
+     *  Use {@link Context#getSystemService(Class)}
+     *  to obtain the InputManager instance.
+     *
+     * TODO (b/277717573): Soft remove this API in version V.
+     * TODO (b/277039664): Migrate app usage off this API.
      *
      * @hide
      */
-    @VisibleForTesting
-    public static InputManager resetInstance(IInputManager inputManagerService) {
-        synchronized (InputManager.class) {
-            sInstance = new InputManager(inputManagerService);
-            return sInstance;
-        }
-    }
-
-    /**
-     * Clear the instance of the input manager.
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    public static void clearInstance() {
-        synchronized (InputManager.class) {
-            sInstance = null;
-        }
-    }
-
-    /**
-     * Gets an instance of the input manager.
-     *
-     * @return The input manager instance.
-     *
-     * @hide
-     */
+    @Deprecated
     @UnsupportedAppUsage
     public static InputManager getInstance() {
-        synchronized (InputManager.class) {
-            if (sInstance == null) {
-                try {
-                    sInstance = new InputManager(IInputManager.Stub
-                            .asInterface(ServiceManager.getServiceOrThrow(Context.INPUT_SERVICE)));
-                } catch (ServiceNotFoundException e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-            return sInstance;
-        }
+        return Objects.requireNonNull(ActivityThread.currentApplication())
+                .getSystemService(InputManager.class);
+    }
+
+    /**
+     * Get the current VelocityTracker strategy.
+     * @hide
+     */
+    public String getVelocityTrackerStrategy() {
+        return mGlobal.getVelocityTrackerStrategy();
     }
 
     /**
@@ -343,28 +285,9 @@ public final class InputManager {
      * @param id The device id.
      * @return The input device or null if not found.
      */
+    @Nullable
     public InputDevice getInputDevice(int id) {
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-
-            int index = mInputDevices.indexOfKey(id);
-            if (index < 0) {
-                return null;
-            }
-
-            InputDevice inputDevice = mInputDevices.valueAt(index);
-            if (inputDevice == null) {
-                try {
-                    inputDevice = mIm.getInputDevice(id);
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
-                if (inputDevice != null) {
-                    mInputDevices.setValueAt(index, inputDevice);
-                }
-            }
-            return inputDevice;
-        }
+        return mGlobal.getInputDevice(id);
     }
 
     /**
@@ -374,34 +297,7 @@ public final class InputManager {
      * @hide
      */
     public InputDevice getInputDeviceByDescriptor(String descriptor) {
-        if (descriptor == null) {
-            throw new IllegalArgumentException("descriptor must not be null.");
-        }
-
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-
-            int numDevices = mInputDevices.size();
-            for (int i = 0; i < numDevices; i++) {
-                InputDevice inputDevice = mInputDevices.valueAt(i);
-                if (inputDevice == null) {
-                    int id = mInputDevices.keyAt(i);
-                    try {
-                        inputDevice = mIm.getInputDevice(id);
-                    } catch (RemoteException ex) {
-                        throw ex.rethrowFromSystemServer();
-                    }
-                    if (inputDevice == null) {
-                        continue;
-                    }
-                    mInputDevices.setValueAt(i, inputDevice);
-                }
-                if (descriptor.equals(inputDevice.getDescriptor())) {
-                    return inputDevice;
-                }
-            }
-            return null;
-        }
+        return mGlobal.getInputDeviceByDescriptor(descriptor);
     }
 
     /**
@@ -409,16 +305,7 @@ public final class InputManager {
      * @return The input device ids.
      */
     public int[] getInputDeviceIds() {
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-
-            final int count = mInputDevices.size();
-            final int[] ids = new int[count];
-            for (int i = 0; i < count; i++) {
-                ids[i] = mInputDevices.keyAt(i);
-            }
-            return ids;
-        }
+        return mGlobal.getInputDeviceIds();
     }
 
     /**
@@ -431,18 +318,13 @@ public final class InputManager {
      * @hide
      */
     public boolean isInputDeviceEnabled(int id) {
-        try {
-            return mIm.isInputDeviceEnabled(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not check enabled status of input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.isInputDeviceEnabled(id);
     }
 
     /**
      * Enables an InputDevice.
      * <p>
-     * Requires {@link android.Manifest.permission.DISABLE_INPUT_DEVICE}.
+     * Requires {@link android.Manifest.permission#DISABLE_INPUT_DEVICE}.
      * </p>
      *
      * @param id The input device Id.
@@ -450,18 +332,13 @@ public final class InputManager {
      * @hide
      */
     public void enableInputDevice(int id) {
-        try {
-            mIm.enableInputDevice(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not enable input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.enableInputDevice(id);
     }
 
     /**
      * Disables an InputDevice.
      * <p>
-     * Requires {@link android.Manifest.permission.DISABLE_INPUT_DEVICE}.
+     * Requires {@link android.Manifest.permission#DISABLE_INPUT_DEVICE}.
      * </p>
      *
      * @param id The input device Id.
@@ -469,12 +346,7 @@ public final class InputManager {
      * @hide
      */
     public void disableInputDevice(int id) {
-        try {
-            mIm.disableInputDevice(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not disable input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.disableInputDevice(id);
     }
 
     /**
@@ -488,17 +360,7 @@ public final class InputManager {
      * @see #unregisterInputDeviceListener
      */
     public void registerInputDeviceListener(InputDeviceListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-            int index = findInputDeviceListenerLocked(listener);
-            if (index < 0) {
-                mInputDeviceListeners.add(new InputDeviceListenerDelegate(listener, handler));
-            }
-        }
+        mGlobal.registerInputDeviceListener(listener, handler);
     }
 
     /**
@@ -509,28 +371,7 @@ public final class InputManager {
      * @see #registerInputDeviceListener
      */
     public void unregisterInputDeviceListener(InputDeviceListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        synchronized (mInputDevicesLock) {
-            int index = findInputDeviceListenerLocked(listener);
-            if (index >= 0) {
-                InputDeviceListenerDelegate d = mInputDeviceListeners.get(index);
-                d.removeCallbacksAndMessages(null);
-                mInputDeviceListeners.remove(index);
-            }
-        }
-    }
-
-    private int findInputDeviceListenerLocked(InputDeviceListener listener) {
-        final int numListeners = mInputDeviceListeners.size();
-        for (int i = 0; i < numListeners; i++) {
-            if (mInputDeviceListeners.get(i).mListener == listener) {
-                return i;
-            }
-        }
-        return -1;
+        mGlobal.unregisterInputDeviceListener(listener);
     }
 
     /**
@@ -559,20 +400,7 @@ public final class InputManager {
      */
     public void registerOnTabletModeChangedListener(
             OnTabletModeChangedListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-        synchronized (mTabletModeLock) {
-            if (mOnTabletModeChangedListeners == null) {
-                initializeTabletModeListenerLocked();
-            }
-            int idx = findOnTabletModeChangedListenerLocked(listener);
-            if (idx < 0) {
-                OnTabletModeChangedListenerDelegate d =
-                    new OnTabletModeChangedListenerDelegate(listener, handler);
-                mOnTabletModeChangedListeners.add(d);
-            }
-        }
+        mGlobal.registerOnTabletModeChangedListener(listener, handler);
     }
 
     /**
@@ -582,37 +410,7 @@ public final class InputManager {
      * @hide
      */
     public void unregisterOnTabletModeChangedListener(OnTabletModeChangedListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-        synchronized (mTabletModeLock) {
-            int idx = findOnTabletModeChangedListenerLocked(listener);
-            if (idx >= 0) {
-                OnTabletModeChangedListenerDelegate d = mOnTabletModeChangedListeners.remove(idx);
-                d.removeCallbacksAndMessages(null);
-            }
-        }
-    }
-
-    private void initializeTabletModeListenerLocked() {
-        final TabletModeChangedListener listener = new TabletModeChangedListener();
-        try {
-            mIm.registerTabletModeChangedListener(listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-        mTabletModeChangedListener = listener;
-        mOnTabletModeChangedListeners = new ArrayList<>();
-    }
-
-    private int findOnTabletModeChangedListenerLocked(OnTabletModeChangedListener listener) {
-        final int N = mOnTabletModeChangedListeners.size();
-        for (int i = 0; i < N; i++) {
-            if (mOnTabletModeChangedListeners.get(i).mListener == listener) {
-                return i;
-            }
-        }
-        return -1;
+        mGlobal.unregisterOnTabletModeChangedListener(listener);
     }
 
     /**
@@ -676,6 +474,30 @@ public final class InputManager {
     }
 
     /**
+     * Returns the layout type of the queried layout
+     * <p>
+     * The input manager consults the built-in keyboard layouts as well as all keyboard layouts
+     * advertised by applications using a {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
+     * </p>
+     *
+     * @param layoutDescriptor The layout descriptor of the queried layout
+     * @return layout type of the queried layout
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public String getKeyboardLayoutTypeForLayoutDescriptor(@NonNull String layoutDescriptor) {
+        KeyboardLayout[] layouts = getKeyboardLayouts();
+        for (KeyboardLayout kl : layouts) {
+            if (layoutDescriptor.equals(kl.getDescriptor())) {
+                return kl.getLayoutType();
+            }
+        }
+        return "";
+    }
+
+    /**
      * Gets information about all supported keyboard layouts appropriate
      * for a specific input device.
      * <p>
@@ -692,11 +514,7 @@ public final class InputManager {
     @NonNull
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             @NonNull InputDeviceIdentifier identifier) {
-        try {
-            return mIm.getKeyboardLayoutsForInputDevice(identifier);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.getKeyboardLayoutsForInputDevice(identifier);
     }
 
     /**
@@ -755,19 +573,8 @@ public final class InputManager {
     @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void setCurrentKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
             @NonNull String keyboardLayoutDescriptor) {
-        if (identifier == null) {
-            throw new IllegalArgumentException("identifier must not be null");
-        }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
-
-        try {
-            mIm.setCurrentKeyboardLayoutForInputDevice(identifier,
-                    keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.setCurrentKeyboardLayoutForInputDevice(identifier,
+                keyboardLayoutDescriptor);
     }
 
     /**
@@ -850,6 +657,61 @@ public final class InputManager {
     }
 
     /**
+     * Remaps modifier keys. Remapping a modifier key to itself will clear any previous remappings
+     * for that key.
+     *
+     * @param fromKey The modifier key getting remapped.
+     * @param toKey The modifier key that it is remapped to.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.REMAP_MODIFIER_KEYS)
+    public void remapModifierKey(@RemappableModifierKey int fromKey,
+            @RemappableModifierKey int toKey) {
+        try {
+            mIm.remapModifierKey(fromKey, toKey);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears all existing modifier key remappings
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.REMAP_MODIFIER_KEYS)
+    public void clearAllModifierKeyRemappings() {
+        try {
+            mIm.clearAllModifierKeyRemappings();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Provides the current modifier key remapping
+     *
+     * @return a {fromKey, toKey} map that contains the existing modifier key remappings..
+     * {@link RemappableModifierKey}
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @SuppressWarnings("unchecked")
+    @RequiresPermission(Manifest.permission.REMAP_MODIFIER_KEYS)
+    public Map<Integer, Integer> getModifierKeyRemapping() {
+        try {
+            return mIm.getModifierKeyRemapping();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the TouchCalibration applied to the specified input device's coordinates.
      *
      * @param inputDeviceDescriptor The input device descriptor.
@@ -870,7 +732,7 @@ public final class InputManager {
      * Sets the TouchCalibration to apply to the specified input device's coordinates.
      * <p>
      * This method may have the side-effect of causing the input device in question
-     * to be reconfigured. Requires {@link android.Manifest.permission.SET_INPUT_CALIBRATION}.
+     * to be reconfigured. Requires {@link android.Manifest.permission#SET_INPUT_CALIBRATION}.
      * </p>
      *
      * @param inputDeviceDescriptor The input device descriptor.
@@ -888,62 +750,103 @@ public final class InputManager {
     }
 
     /**
-     * Gets the mouse pointer speed.
-     * <p>
-     * Only returns the permanent mouse pointer speed.  Ignores any temporary pointer
-     * speed set by {@link #tryPointerSpeed}.
-     * </p>
+     * Gets the keyboard layout descriptor for the specified input device, userId, imeInfo and
+     * imeSubtype.
      *
-     * @param context The application context.
-     * @return The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     * @param identifier Identifier for the input device
+     * @param userId user profile ID
+     * @param imeInfo contains IME information like imeId, etc.
+     * @param imeSubtype contains IME subtype information like input languageTag, layoutType, etc.
+     * @return The keyboard layout descriptor, or null if no keyboard layout has been set.
      *
      * @hide
      */
-    public int getPointerSpeed(Context context) {
-        int speed = DEFAULT_POINTER_SPEED;
+    @Nullable
+    public String getKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @Nullable InputMethodSubtype imeSubtype) {
         try {
-            speed = Settings.System.getInt(context.getContentResolver(),
-                    Settings.System.POINTER_SPEED);
-        } catch (SettingNotFoundException snfe) {
+            return mIm.getKeyboardLayoutForInputDevice(identifier, userId, imeInfo, imeSubtype);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
-        return speed;
     }
 
     /**
-     * Sets the mouse pointer speed.
+     * Sets the keyboard layout descriptor for the specified input device, userId, imeInfo and
+     * imeSubtype.
+     *
      * <p>
-     * Requires {@link android.Manifest.permission.WRITE_SETTINGS}.
+     * This method may have the side-effect of causing the input device in question to be
+     * reconfigured.
      * </p>
      *
-     * @param context The application context.
-     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     * @param identifier The identifier for the input device.
+     * @param userId user profile ID
+     * @param imeInfo contains IME information like imeId, etc.
+     * @param imeSubtype contains IME subtype information like input languageTag, layoutType, etc.
+     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use, must not be null.
      *
      * @hide
      */
-    public void setPointerSpeed(Context context, int speed) {
-        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
-            throw new IllegalArgumentException("speed out of range");
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    public void setKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @Nullable InputMethodSubtype imeSubtype, @NonNull String keyboardLayoutDescriptor) {
+        if (identifier == null) {
+            throw new IllegalArgumentException("identifier must not be null");
+        }
+        if (keyboardLayoutDescriptor == null) {
+            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
         }
 
-        Settings.System.putInt(context.getContentResolver(),
-                Settings.System.POINTER_SPEED, speed);
+        try {
+            mIm.setKeyboardLayoutForInputDevice(identifier, userId, imeInfo, imeSubtype,
+                    keyboardLayoutDescriptor);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets all keyboard layouts that are enabled for the specified input device, userId, imeInfo
+     * and imeSubtype.
+     *
+     * @param identifier The identifier for the input device.
+     * @param userId user profile ID
+     * @param imeInfo contains IME information like imeId, etc.
+     * @param imeSubtype contains IME subtype information like input languageTag, layoutType, etc.
+     * @return The keyboard layout descriptors.
+     *
+     * @hide
+     */
+    public KeyboardLayout[] getKeyboardLayoutListForInputDevice(InputDeviceIdentifier identifier,
+            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
+            @Nullable InputMethodSubtype imeSubtype) {
+        if (identifier == null) {
+            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        }
+
+        try {
+            return mIm.getKeyboardLayoutListForInputDevice(identifier, userId, imeInfo, imeSubtype);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
      * Changes the mouse pointer speed temporarily, but does not save the setting.
      * <p>
-     * Requires {@link android.Manifest.permission.SET_POINTER_SPEED}.
+     * Requires {@link android.Manifest.permission#SET_POINTER_SPEED}.
      * </p>
      *
-     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     * @param speed The pointer speed as a value between {@link InputSettings#MIN_POINTER_SPEED} and
+     * {@link InputSettings#MAX_POINTER_SPEED}, or the default value {@link InputSettings#DEFAULT_POINTER_SPEED}.
      *
      * @hide
      */
     public void tryPointerSpeed(int speed) {
-        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
+        if (speed < InputSettings.MIN_POINTER_SPEED || speed > InputSettings.MAX_POINTER_SPEED) {
             throw new IllegalArgumentException("speed out of range");
         }
 
@@ -968,90 +871,7 @@ public final class InputManager {
      */
     @FloatRange(from = 0, to = 1)
     public float getMaximumObscuringOpacityForTouch() {
-        Context context = ActivityThread.currentApplication();
-        return Settings.Global.getFloat(context.getContentResolver(),
-                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
-                DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
-    }
-
-    /**
-     * Sets the maximum allowed obscuring opacity by UID to propagate touches.
-     *
-     * <p>For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
-     * #FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring opacity of the windows
-     * above the touch-consuming window.
-     *
-     * <p>For a certain UID:
-     * <ul>
-     *     <li>If it's the same as the UID of the touch-consuming window, allow it to propagate
-     *     the touch.
-     *     <li>Otherwise take all its windows of eligible window types above the touch-consuming
-     *     window, compute their combined obscuring opacity considering that {@code
-     *     opacity(A, B) = 1 - (1 - opacity(A))*(1 - opacity(B))}. If the computed value is
-     *     lesser than or equal to this setting and there are no other windows preventing the
-     *     touch, allow the UID to propagate the touch.
-     * </ul>
-     *
-     * <p>This value should be between 0 (inclusive) and 1 (inclusive).
-     *
-     * @see #getMaximumObscuringOpacityForTouch()
-     *
-     * @hide
-     */
-    @TestApi
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void setMaximumObscuringOpacityForTouch(@FloatRange(from = 0, to = 1) float opacity) {
-        if (opacity < 0 || opacity > 1) {
-            throw new IllegalArgumentException(
-                    "Maximum obscuring opacity for touch should be >= 0 and <= 1");
-        }
-        Context context = ActivityThread.currentApplication();
-        Settings.Global.putFloat(context.getContentResolver(),
-                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH, opacity);
-    }
-
-    /**
-     * Returns the current mode of the block untrusted touches feature, one of:
-     * <ul>
-     *     <li>{@link BlockUntrustedTouchesMode#DISABLED}
-     *     <li>{@link BlockUntrustedTouchesMode#PERMISSIVE}
-     *     <li>{@link BlockUntrustedTouchesMode#BLOCK}
-     * </ul>
-     *
-     * @hide
-     */
-    @TestApi
-    @BlockUntrustedTouchesMode
-    public int getBlockUntrustedTouchesMode(@NonNull Context context) {
-        int mode = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE, DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE);
-        if (!ArrayUtils.contains(BLOCK_UNTRUSTED_TOUCHES_MODES, mode)) {
-            Log.w(TAG, "Unknown block untrusted touches feature mode " + mode + ", using "
-                    + "default " + DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE);
-            return DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE;
-        }
-        return mode;
-    }
-
-    /**
-     * Sets the mode of the block untrusted touches feature to one of:
-     * <ul>
-     *     <li>{@link BlockUntrustedTouchesMode#DISABLED}
-     *     <li>{@link BlockUntrustedTouchesMode#PERMISSIVE}
-     *     <li>{@link BlockUntrustedTouchesMode#BLOCK}
-     * </ul>
-     *
-     * @hide
-     */
-    @TestApi
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void setBlockUntrustedTouchesMode(@NonNull Context context,
-            @BlockUntrustedTouchesMode int mode) {
-        if (!ArrayUtils.contains(BLOCK_UNTRUSTED_TOUCHES_MODES, mode)) {
-            throw new IllegalArgumentException("Invalid feature mode " + mode);
-        }
-        Settings.Global.putInt(context.getContentResolver(),
-                Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE, mode);
+        return InputSettings.getMaximumObscuringOpacityForTouch(mContext);
     }
 
     /**
@@ -1082,13 +902,7 @@ public final class InputManager {
      * @hide
      */
     public boolean[] deviceHasKeys(int id, int[] keyCodes) {
-        boolean[] ret = new boolean[keyCodes.length];
-        try {
-            mIm.hasKeys(id, InputDevice.SOURCE_ANY, keyCodes, ret);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return ret;
+        return mGlobal.deviceHasKeys(id, keyCodes);
     }
 
     /**
@@ -1113,11 +927,7 @@ public final class InputManager {
      * @hide
      */
     public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
-        try {
-            return mIm.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mGlobal.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
     }
 
     /**
@@ -1131,7 +941,7 @@ public final class InputManager {
      * The synchronization mode determines whether the method blocks while waiting for
      * input injection to proceed.
      * <p>
-     * Requires the {@link android.Manifest.permission.INJECT_EVENTS} permission.
+     * Requires the {@link android.Manifest.permission#INJECT_EVENTS} permission.
      * </p><p>
      * Make sure you correctly set the event time and input source of the event
      * before calling this method.
@@ -1139,9 +949,9 @@ public final class InputManager {
      *
      * @param event The event to inject.
      * @param mode The synchronization mode.  One of:
-     * {@link android.os.InputEventInjectionSync.NONE},
-     * {@link android.os.InputEventInjectionSync.WAIT_FOR_RESULT}, or
-     * {@link android.os.InputEventInjectionSync.WAIT_FOR_FINISHED}.
+     * {@link android.os.InputEventInjectionSync#NONE},
+     * {@link android.os.InputEventInjectionSync#WAIT_FOR_RESULT}, or
+     * {@link android.os.InputEventInjectionSync#WAIT_FOR_FINISHED}.
      * @param targetUid The uid to target, or {@link android.os.Process#INVALID_UID} to target all
      *                 windows.
      * @return True if input event injection succeeded.
@@ -1150,20 +960,7 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.INJECT_EVENTS)
     public boolean injectInputEvent(InputEvent event, int mode, int targetUid) {
-        if (event == null) {
-            throw new IllegalArgumentException("event must not be null");
-        }
-        if (mode != InputEventInjectionSync.NONE
-                && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
-                && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
-            throw new IllegalArgumentException("mode is invalid");
-        }
-
-        try {
-            return mIm.injectInputEventToTarget(event, mode, targetUid);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.injectInputEvent(event, mode, targetUid);
     }
 
     /**
@@ -1171,7 +968,7 @@ public final class InputManager {
      * The synchronization mode determines whether the method blocks while waiting for
      * input injection to proceed.
      * <p>
-     * Requires the {@link android.Manifest.permission.INJECT_EVENTS} permission.
+     * Requires the {@link android.Manifest.permission#INJECT_EVENTS} permission.
      * </p><p>
      * Make sure you correctly set the event time and input source of the event
      * before calling this method.
@@ -1179,9 +976,9 @@ public final class InputManager {
      *
      * @param event The event to inject.
      * @param mode The synchronization mode.  One of:
-     * {@link android.os.InputEventInjectionSync.NONE},
-     * {@link android.os.InputEventInjectionSync.WAIT_FOR_RESULT}, or
-     * {@link android.os.InputEventInjectionSync.WAIT_FOR_FINISHED}.
+     * {@link android.os.InputEventInjectionSync#NONE},
+     * {@link android.os.InputEventInjectionSync#WAIT_FOR_RESULT}, or
+     * {@link android.os.InputEventInjectionSync#WAIT_FOR_FINISHED}.
      * @return True if input event injection succeeded.
      *
      * @hide
@@ -1189,7 +986,7 @@ public final class InputManager {
     @RequiresPermission(Manifest.permission.INJECT_EVENTS)
     @UnsupportedAppUsage
     public boolean injectInputEvent(InputEvent event, int mode) {
-        return injectInputEvent(event, mode, Process.INVALID_UID);
+        return mGlobal.injectInputEvent(event, mode);
     }
 
     /**
@@ -1205,7 +1002,8 @@ public final class InputManager {
      * {@link android.view.InputEvent}
      *         {@code null} if the event could not be verified.
      */
-    public @Nullable VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {
+    @Nullable
+    public VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {
         try {
             return mIm.verifyInputEvent(event);
         } catch (RemoteException ex) {
@@ -1217,26 +1015,31 @@ public final class InputManager {
      * Changes the mouse pointer's icon shape into the specified id.
      *
      * @param iconId The id of the pointer graphic, as a value between
-     * {@link PointerIcon.TYPE_ARROW} and {@link PointerIcon.TYPE_GRABBING}.
+     * {@link PointerIcon#TYPE_ARROW} and {@link PointerIcon#TYPE_HANDWRITING}.
      *
      * @hide
      */
     @UnsupportedAppUsage
     public void setPointerIconType(int iconId) {
-        try {
-            mIm.setPointerIconType(iconId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.setPointerIconType(iconId);
     }
 
     /** @hide */
     public void setCustomPointerIcon(PointerIcon icon) {
-        try {
-            mIm.setCustomPointerIcon(icon);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
+        mGlobal.setCustomPointerIcon(icon);
+    }
+
+    /**
+     * Check if showing a {@link android.view.PointerIcon} for styluses is enabled.
+     *
+     * @return true if a pointer icon will be shown over the location of a
+     * stylus pointer, false if there is no pointer icon shown for styluses.
+     */
+    public boolean isStylusPointerIconEnabled() {
+        if (mIsStylusPointerIconEnabled == null) {
+            mIsStylusPointerIconEnabled = InputSettings.isStylusPointerIconEnabled(mContext);
         }
+        return mIsStylusPointerIconEnabled;
     }
 
     /**
@@ -1251,11 +1054,7 @@ public final class InputManager {
      * @hide
      */
     public void requestPointerCapture(IBinder windowToken, boolean enable) {
-        try {
-            mIm.requestPointerCapture(windowToken, enable);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.requestPointerCapture(windowToken, enable);
     }
 
     /**
@@ -1264,11 +1063,7 @@ public final class InputManager {
      * @hide
      */
     public InputMonitor monitorGestureInput(String name, int displayId) {
-        try {
-            return mIm.monitorGestureInput(new Binder(), name, displayId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.monitorGestureInput(name, displayId);
     }
 
     /**
@@ -1277,11 +1072,7 @@ public final class InputManager {
      * @hide
      */
     public InputSensorInfo[] getSensorList(int deviceId) {
-        try {
-            return mIm.getSensorList(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.getSensorList(deviceId);
     }
 
     /**
@@ -1291,12 +1082,8 @@ public final class InputManager {
      */
     public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
             int maxBatchReportLatencyUs) {
-        try {
-            return mIm.enableSensor(deviceId, sensorType, samplingPeriodUs,
-                    maxBatchReportLatencyUs);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.enableSensor(deviceId, sensorType, samplingPeriodUs,
+                maxBatchReportLatencyUs);
     }
 
     /**
@@ -1305,11 +1092,7 @@ public final class InputManager {
      * @hide
      */
     public void disableSensor(int deviceId, int sensorType) {
-        try {
-            mIm.disableSensor(deviceId, sensorType);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.disableSensor(deviceId, sensorType);
     }
 
     /**
@@ -1318,11 +1101,7 @@ public final class InputManager {
      * @hide
      */
     public boolean flushSensor(int deviceId, int sensorType) {
-        try {
-            return mIm.flushSensor(deviceId, sensorType);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.flushSensor(deviceId, sensorType);
     }
 
     /**
@@ -1331,11 +1110,7 @@ public final class InputManager {
      * @hide
      */
     public boolean registerSensorListener(IInputSensorEventListener listener) {
-        try {
-            return mIm.registerSensorListener(listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.registerSensorListener(listener);
     }
 
     /**
@@ -1344,37 +1119,7 @@ public final class InputManager {
      * @hide
      */
     public void unregisterSensorListener(IInputSensorEventListener listener) {
-        try {
-            mIm.unregisterSensorListener(listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the battery status of the input device
-     * @param deviceId The input device ID
-     * @hide
-     */
-    public int getBatteryStatus(int deviceId) {
-        try {
-            return mIm.getBatteryStatus(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the remaining battery capacity of the input device
-     * @param deviceId The input device ID
-     * @hide
-     */
-    public int getBatteryCapacity(int deviceId) {
-        try {
-            return mIm.getBatteryCapacity(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.unregisterSensorListener(listener);
     }
 
     /**
@@ -1383,7 +1128,7 @@ public final class InputManager {
      * @param inputPort The port of the input device.
      * @param displayPort The physical port of the associated display.
      * <p>
-     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1400,7 +1145,7 @@ public final class InputManager {
      * static association for the cleared input port will be restored.
      * @param inputPort The port of the input device to be cleared.
      * <p>
-     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1418,137 +1163,53 @@ public final class InputManager {
      * @param inputPort The port of the input device.
      * @param displayUniqueId The unique id of the associated display.
      * <p>
-     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
-    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
-        try {
-            mIm.addUniqueIdAssociation(inputPort, displayUniqueId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+    @TestApi
+    public void addUniqueIdAssociation(@NonNull String inputPort,
+            @NonNull String displayUniqueId) {
+        mGlobal.addUniqueIdAssociation(inputPort, displayUniqueId);
     }
 
     /**
      * Removes a runtime association between the input device and display.
      * @param inputPort The port of the input device.
      * <p>
-     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @TestApi
     public void removeUniqueIdAssociation(@NonNull String inputPort) {
-        try {
-            mIm.removeUniqueIdAssociation(inputPort);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mGlobal.removeUniqueIdAssociation(inputPort);
     }
 
-    private void populateInputDevicesLocked() {
-        if (mInputDevicesChangedListener == null) {
-            final InputDevicesChangedListener listener = new InputDevicesChangedListener();
-            try {
-                mIm.registerInputDevicesChangedListener(listener);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
-            mInputDevicesChangedListener = listener;
-        }
-
-        if (mInputDevices == null) {
-            final int[] ids;
-            try {
-                ids = mIm.getInputDeviceIds();
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
-
-            mInputDevices = new SparseArray<InputDevice>();
-            // TODO(b/223905476): remove when the rootcause is fixed.
-            if (ids != null) {
-                for (int i = 0; i < ids.length; i++) {
-                    mInputDevices.put(ids[i], null);
-                }
-            }
-        }
+    /**
+     * Reports the version of the Universal Stylus Initiative (USI) protocol supported by the given
+     * display, if any.
+     *
+     * @return the USI version supported by the display, or null if the device does not support USI
+     * @see <a href="https://universalstylus.org">Universal Stylus Initiative</a>
+     */
+    @Nullable
+    public HostUsiVersion getHostUsiVersion(@NonNull Display display) {
+        return mGlobal.getHostUsiVersion(display);
     }
 
-    private void onInputDevicesChanged(int[] deviceIdAndGeneration) {
-        if (DEBUG) {
-            Log.d(TAG, "Received input devices changed.");
-        }
-
-        synchronized (mInputDevicesLock) {
-            for (int i = mInputDevices.size(); --i > 0; ) {
-                final int deviceId = mInputDevices.keyAt(i);
-                if (!containsDeviceId(deviceIdAndGeneration, deviceId)) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Device removed: " + deviceId);
-                    }
-                    mInputDevices.removeAt(i);
-                    sendMessageToInputDeviceListenersLocked(MSG_DEVICE_REMOVED, deviceId);
-                }
-            }
-
-            for (int i = 0; i < deviceIdAndGeneration.length; i += 2) {
-                final int deviceId = deviceIdAndGeneration[i];
-                int index = mInputDevices.indexOfKey(deviceId);
-                if (index >= 0) {
-                    final InputDevice device = mInputDevices.valueAt(index);
-                    if (device != null) {
-                        final int generation = deviceIdAndGeneration[i + 1];
-                        if (device.getGeneration() != generation) {
-                            if (DEBUG) {
-                                Log.d(TAG, "Device changed: " + deviceId);
-                            }
-                            mInputDevices.setValueAt(index, null);
-                            sendMessageToInputDeviceListenersLocked(MSG_DEVICE_CHANGED, deviceId);
-                        }
-                    }
-                } else {
-                    if (DEBUG) {
-                        Log.d(TAG, "Device added: " + deviceId);
-                    }
-                    mInputDevices.put(deviceId, null);
-                    sendMessageToInputDeviceListenersLocked(MSG_DEVICE_ADDED, deviceId);
-                }
-            }
-        }
-    }
-
-    private void sendMessageToInputDeviceListenersLocked(int what, int deviceId) {
-        final int numListeners = mInputDeviceListeners.size();
-        for (int i = 0; i < numListeners; i++) {
-            InputDeviceListenerDelegate listener = mInputDeviceListeners.get(i);
-            listener.sendMessage(listener.obtainMessage(what, deviceId, 0));
-        }
-    }
-
-    private static boolean containsDeviceId(int[] deviceIdAndGeneration, int deviceId) {
-        for (int i = 0; i < deviceIdAndGeneration.length; i += 2) {
-            if (deviceIdAndGeneration[i] == deviceId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    private void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
-        if (DEBUG) {
-            Log.d(TAG, "Received tablet mode changed: "
-                    + "whenNanos=" + whenNanos + ", inTabletMode=" + inTabletMode);
-        }
-        synchronized (mTabletModeLock) {
-            final int N = mOnTabletModeChangedListeners.size();
-            for (int i = 0; i < N; i++) {
-                OnTabletModeChangedListenerDelegate listener =
-                        mOnTabletModeChangedListeners.get(i);
-                listener.sendTabletModeChanged(whenNanos, inTabletMode);
-            }
-        }
+    /**
+     * Returns the Bluetooth address of this input device, if known.
+     *
+     * The returned string is always null if this input device is not connected
+     * via Bluetooth, or if the Bluetooth address of the device cannot be
+     * determined. The returned address will look like: "11:22:33:44:55:66".
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @Nullable
+    public String getInputDeviceBluetoothAddress(int deviceId) {
+        return mGlobal.getInputDeviceBluetoothAddress(deviceId);
     }
 
     /**
@@ -1557,198 +1218,7 @@ public final class InputManager {
      * @hide
      */
     public Vibrator getInputDeviceVibrator(int deviceId, int vibratorId) {
-        return new InputDeviceVibrator(this, deviceId, vibratorId);
-    }
-
-    /**
-     * Gets a vibrator manager service associated with an input device, always creates a new
-     * instance.
-     * @return The vibrator manager, never null.
-     * @hide
-     */
-    @NonNull
-    public VibratorManager getInputDeviceVibratorManager(int deviceId) {
-        return new InputDeviceVibratorManager(InputManager.this, deviceId);
-    }
-
-    /*
-     * Get the list of device vibrators
-     * @return The list of vibrators IDs
-     */
-    int[] getVibratorIds(int deviceId) {
-        try {
-            return mIm.getVibratorIds(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /*
-     * Perform vibration effect
-     */
-    void vibrate(int deviceId, VibrationEffect effect, IBinder token) {
-        try {
-            mIm.vibrate(deviceId, effect, token);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /*
-     * Perform combined vibration effect
-     */
-    void vibrate(int deviceId, CombinedVibration effect, IBinder token) {
-        try {
-            mIm.vibrateCombined(deviceId, effect, token);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /*
-     * Cancel an ongoing vibration
-     */
-    void cancelVibrate(int deviceId, IBinder token) {
-        try {
-            mIm.cancelVibrate(deviceId, token);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /*
-     * Check if input device is vibrating
-     */
-    boolean isVibrating(int deviceId)  {
-        try {
-            return mIm.isVibrating(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Register input device vibrator state listener
-     */
-    boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
-        try {
-            return mIm.registerVibratorStateListener(deviceId, listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Unregister input device vibrator state listener
-     */
-    boolean unregisterVibratorStateListener(int deviceId, IVibratorStateListener listener) {
-        try {
-            return mIm.unregisterVibratorStateListener(deviceId, listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Gets a sensor manager service associated with an input device, always creates a new instance.
-     * @return The sensor manager, never null.
-     * @hide
-     */
-    @NonNull
-    public SensorManager getInputDeviceSensorManager(int deviceId) {
-        if (mInputDeviceSensorManager == null) {
-            mInputDeviceSensorManager = new InputDeviceSensorManager(this);
-        }
-        return mInputDeviceSensorManager.getSensorManager(deviceId);
-    }
-
-    /**
-     * Gets a battery state object associated with an input device, assuming it has one.
-     * @return The battery, never null.
-     * @hide
-     */
-    public InputDeviceBatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
-        return new InputDeviceBatteryState(this, deviceId, hasBattery);
-    }
-
-    /**
-     * Gets a lights manager associated with an input device, always creates a new instance.
-     * @return The lights manager, never null.
-     * @hide
-     */
-    @NonNull
-    public LightsManager getInputDeviceLightsManager(int deviceId) {
-        return new InputDeviceLightsManager(InputManager.this, deviceId);
-    }
-
-    /**
-     * Gets a list of light objects associated with an input device.
-     * @return The list of lights, never null.
-     */
-    @NonNull List<Light> getLights(int deviceId) {
-        try {
-            return mIm.getLights(deviceId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns the state of an input device light.
-     * @return the light state
-     */
-    @NonNull LightState getLightState(int deviceId, @NonNull Light light) {
-        try {
-            return mIm.getLightState(deviceId, light.getId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Request to modify the states of multiple lights.
-     *
-     * @param request the settings for lights that should change
-     */
-    void requestLights(int deviceId, @NonNull LightsRequest request, IBinder token) {
-        try {
-            List<Integer> lightIdList = request.getLights();
-            int[] lightIds = new int[lightIdList.size()];
-            for (int i = 0; i < lightIds.length; i++) {
-                lightIds[i] = lightIdList.get(i);
-            }
-            List<LightState> lightStateList = request.getLightStates();
-            mIm.setLightStates(deviceId, lightIds,
-                    lightStateList.toArray(new LightState[lightStateList.size()]),
-                    token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Open light session for input device manager
-     *
-     * @param token The token for the light session
-     */
-    void openLightSession(int deviceId, String opPkg, @NonNull IBinder token) {
-        try {
-            mIm.openLightSession(deviceId, opPkg, token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Close light session
-     *
-     */
-    void closeLightSession(int deviceId, @NonNull IBinder token) {
-        try {
-            mIm.closeLightSession(deviceId, token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return new InputDeviceVibrator(deviceId, vibratorId);
     }
 
     /**
@@ -1756,66 +1226,7 @@ public final class InputManager {
      * @hide
      */
     public void cancelCurrentTouch() {
-        try {
-            mIm.cancelCurrentTouch();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Adds a battery listener to be notified about {@link BatteryState} changes for an input
-     * device. The same listener can be registered for multiple input devices.
-     * The listener will be notified of the initial battery state of the device after it is
-     * successfully registered.
-     * @param deviceId the input device that should be monitored
-     * @param executor an executor on which the callback will be called
-     * @param listener the {@link InputDeviceBatteryListener}
-     * @see #removeInputDeviceBatteryListener(int, InputDeviceBatteryListener)
-     * @hide
-     */
-    public void addInputDeviceBatteryListener(int deviceId, @NonNull Executor executor,
-            @NonNull InputDeviceBatteryListener listener) {
-        Objects.requireNonNull(executor, "executor should not be null");
-        Objects.requireNonNull(listener, "listener should not be null");
-
-        synchronized (mBatteryListenersLock) {
-            if (mBatteryListeners == null) {
-                mBatteryListeners = new SparseArray<>();
-                mInputDeviceBatteryListener = new LocalInputDeviceBatteryListener();
-            }
-            RegisteredBatteryListeners listenersForDevice = mBatteryListeners.get(deviceId);
-            if (listenersForDevice == null) {
-                // The deviceId is currently not being monitored for battery changes.
-                // Start monitoring the device.
-                listenersForDevice = new RegisteredBatteryListeners();
-                mBatteryListeners.put(deviceId, listenersForDevice);
-                try {
-                    mIm.registerBatteryListener(deviceId, mInputDeviceBatteryListener);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            } else {
-                // The deviceId is already being monitored for battery changes.
-                // Ensure that the listener is not already registered.
-                for (InputDeviceBatteryListenerDelegate delegate : listenersForDevice.mDelegates) {
-                    if (Objects.equals(listener, delegate.mListener)) {
-                        throw new IllegalArgumentException(
-                                "Attempting to register an InputDeviceBatteryListener that has "
-                                        + "already been registered for deviceId: "
-                                        + deviceId);
-                    }
-                }
-            }
-            final InputDeviceBatteryListenerDelegate delegate =
-                    new InputDeviceBatteryListenerDelegate(listener, executor);
-            listenersForDevice.mDelegates.add(delegate);
-
-            // Notify the listener immediately if we already have the latest battery state.
-            if (listenersForDevice.mLatestBatteryState != null) {
-                delegate.notifyBatteryStateChanged(listenersForDevice.mLatestBatteryState);
-            }
-        }
+        mGlobal.cancelCurrentTouch();
     }
 
     /**
@@ -1839,11 +1250,23 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.MONITOR_INPUT)
     public void pilferPointers(IBinder inputChannelToken) {
-        try {
-            mIm.pilferPointers(inputChannelToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mGlobal.pilferPointers(inputChannelToken);
+    }
+
+    /**
+     * Adds a battery listener to be notified about {@link BatteryState} changes for an input
+     * device. The same listener can be registered for multiple input devices.
+     * The listener will be notified of the initial battery state of the device after it is
+     * successfully registered.
+     * @param deviceId the input device that should be monitored
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link InputDeviceBatteryListener}
+     * @see #removeInputDeviceBatteryListener(int, InputDeviceBatteryListener)
+     * @hide
+     */
+    public void addInputDeviceBatteryListener(int deviceId, @NonNull Executor executor,
+            @NonNull InputDeviceBatteryListener listener) {
+        mGlobal.addInputDeviceBatteryListener(deviceId, executor, listener);
     }
 
     /**
@@ -1853,64 +1276,46 @@ public final class InputManager {
      */
     public void removeInputDeviceBatteryListener(int deviceId,
             @NonNull InputDeviceBatteryListener listener) {
-        Objects.requireNonNull(listener, "listener should not be null");
-
-        synchronized (mBatteryListenersLock) {
-            if (mBatteryListeners == null) {
-                return;
-            }
-            RegisteredBatteryListeners listenersForDevice = mBatteryListeners.get(deviceId);
-            if (listenersForDevice == null) {
-                // The deviceId is not currently being monitored.
-                return;
-            }
-            final List<InputDeviceBatteryListenerDelegate> delegates =
-                    listenersForDevice.mDelegates;
-            for (int i = 0; i < delegates.size();) {
-                if (Objects.equals(listener, delegates.get(i).mListener)) {
-                    delegates.remove(i);
-                    continue;
-                }
-                i++;
-            }
-            if (!delegates.isEmpty()) {
-                return;
-            }
-
-            // There are no more battery listeners for this deviceId. Stop monitoring this device.
-            mBatteryListeners.remove(deviceId);
-            try {
-                mIm.unregisterBatteryListener(deviceId, mInputDeviceBatteryListener);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-            if (mBatteryListeners.size() == 0) {
-                // There are no more devices being monitored, so the registered
-                // IInputDeviceBatteryListener will be automatically dropped by the server.
-                mBatteryListeners = null;
-                mInputDeviceBatteryListener = null;
-            }
-        }
+        mGlobal.removeInputDeviceBatteryListener(deviceId, listener);
     }
 
     /**
-     * Whether stylus has ever been used on device (false by default).
+     * Whether there is a gesture-compatible touchpad connected to the device.
      * @hide
      */
-    public boolean isStylusEverUsed(@NonNull Context context) {
-        return Settings.Global.getInt(context.getContentResolver(),
-                        Settings.Global.STYLUS_EVER_USED, 0) == 1;
+    public boolean areTouchpadGesturesAvailable(@NonNull Context context) {
+        // TODO: implement the right logic
+        return true;
     }
 
     /**
-     * Set whether stylus has ever been used on device.
-     * Should only ever be set to true once after stylus first usage.
+     * Registers a Keyboard backlight change listener to be notified about {@link
+     * KeyboardBacklightState} changes for connected keyboard devices.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link KeyboardBacklightListener}
+     * @hide
+     * @see #unregisterKeyboardBacklightListener(KeyboardBacklightListener)
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException if {@code listener} or {@code executor} is null.
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)
+    public void registerKeyboardBacklightListener(@NonNull Executor executor,
+            @NonNull KeyboardBacklightListener listener) throws IllegalArgumentException {
+        mGlobal.registerKeyboardBacklightListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added Keyboard backlight change listener.
+     *
+     * @param listener the {@link KeyboardBacklightListener}
+     * @see #registerKeyboardBacklightListener(Executor, KeyboardBacklightListener)
      * @hide
      */
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void setStylusEverUsed(@NonNull Context context, boolean stylusEverUsed) {
-        Settings.Global.putInt(context.getContentResolver(),
-                Settings.Global.STYLUS_EVER_USED, stylusEverUsed ? 1 : 0);
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)
+    public void unregisterKeyboardBacklightListener(
+            @NonNull KeyboardBacklightListener listener) {
+        mGlobal.unregisterKeyboardBacklightListener(listener);
     }
 
     /**
@@ -1940,7 +1345,7 @@ public final class InputManager {
     public interface InputDeviceListener {
         /**
          * Called whenever an input device has been added to the system.
-         * Use {@link InputManager#getInputDevice} to get more information about the device.
+         * Use {@link InputManagerGlobal#getInputDevice} to get more information about the device.
          *
          * @param deviceId The id of the input device that was added.
          */
@@ -1963,37 +1368,6 @@ public final class InputManager {
         void onInputDeviceChanged(int deviceId);
     }
 
-    private final class InputDevicesChangedListener extends IInputDevicesChangedListener.Stub {
-        @Override
-        public void onInputDevicesChanged(int[] deviceIdAndGeneration) throws RemoteException {
-            InputManager.this.onInputDevicesChanged(deviceIdAndGeneration);
-        }
-    }
-
-    private static final class InputDeviceListenerDelegate extends Handler {
-        public final InputDeviceListener mListener;
-
-        public InputDeviceListenerDelegate(InputDeviceListener listener, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper());
-            mListener = listener;
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_DEVICE_ADDED:
-                    mListener.onInputDeviceAdded(msg.arg1);
-                    break;
-                case MSG_DEVICE_REMOVED:
-                    mListener.onInputDeviceRemoved(msg.arg1);
-                    break;
-                case MSG_DEVICE_CHANGED:
-                    mListener.onInputDeviceChanged(msg.arg1);
-                    break;
-            }
-        }
-    }
-
     /** @hide */
     public interface OnTabletModeChangedListener {
         /**
@@ -2006,114 +1380,24 @@ public final class InputManager {
         void onTabletModeChanged(long whenNanos, boolean inTabletMode);
     }
 
-    private final class TabletModeChangedListener extends ITabletModeChangedListener.Stub {
-        @Override
-        public void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
-            InputManager.this.onTabletModeChanged(whenNanos, inTabletMode);
-        }
-    }
-
-    private static final class OnTabletModeChangedListenerDelegate extends Handler {
-        private static final int MSG_TABLET_MODE_CHANGED = 0;
-
-        public final OnTabletModeChangedListener mListener;
-
-        public OnTabletModeChangedListenerDelegate(
-                OnTabletModeChangedListener listener, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper());
-            mListener = listener;
-        }
-
-        public void sendTabletModeChanged(long whenNanos, boolean inTabletMode) {
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = (int) (whenNanos & 0xFFFFFFFF);
-            args.argi2 = (int) (whenNanos >> 32);
-            args.arg1 = (Boolean) inTabletMode;
-            obtainMessage(MSG_TABLET_MODE_CHANGED, args).sendToTarget();
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_TABLET_MODE_CHANGED:
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    long whenNanos = (args.argi1 & 0xFFFFFFFFl) | ((long) args.argi2 << 32);
-                    boolean inTabletMode = (boolean) args.arg1;
-                    mListener.onTabletModeChanged(whenNanos, inTabletMode);
-                    break;
-            }
-        }
-    }
-
-    private static final class LocalBatteryState extends BatteryState {
-        final int mDeviceId;
-        final boolean mIsPresent;
-        final int mStatus;
-        final float mCapacity;
-        final long mEventTime;
-
-        LocalBatteryState(int deviceId, boolean isPresent, int status, float capacity,
-                long eventTime) {
-            mDeviceId = deviceId;
-            mIsPresent = isPresent;
-            mStatus = status;
-            mCapacity = capacity;
-            mEventTime = eventTime;
-        }
-
-        @Override
-        public boolean isPresent() {
-            return mIsPresent;
-        }
-
-        @Override
-        public int getStatus() {
-            return mStatus;
-        }
-
-        @Override
-        public float getCapacity() {
-            return mCapacity;
-        }
-    }
-
-    private static final class RegisteredBatteryListeners {
-        final List<InputDeviceBatteryListenerDelegate> mDelegates = new ArrayList<>();
-        LocalBatteryState mLatestBatteryState;
-    }
-
-    private static final class InputDeviceBatteryListenerDelegate {
-        final InputDeviceBatteryListener mListener;
-        final Executor mExecutor;
-
-        InputDeviceBatteryListenerDelegate(InputDeviceBatteryListener listener, Executor executor) {
-            mListener = listener;
-            mExecutor = executor;
-        }
-
-        void notifyBatteryStateChanged(LocalBatteryState batteryState) {
-            mExecutor.execute(() ->
-                    mListener.onBatteryStateChanged(batteryState.mDeviceId, batteryState.mEventTime,
-                            batteryState));
-        }
-    }
-
-    private class LocalInputDeviceBatteryListener extends IInputDeviceBatteryListener.Stub {
-        @Override
-        public void onBatteryStateChanged(int deviceId, boolean isBatteryPresent, int status,
-                float capacity, long eventTime) {
-            synchronized (mBatteryListenersLock) {
-                if (mBatteryListeners == null) return;
-                final RegisteredBatteryListeners entry = mBatteryListeners.get(deviceId);
-                if (entry == null) return;
-
-                entry.mLatestBatteryState =
-                        new LocalBatteryState(
-                                deviceId, isBatteryPresent, status, capacity, eventTime);
-                for (InputDeviceBatteryListenerDelegate delegate : entry.mDelegates) {
-                    delegate.notifyBatteryStateChanged(entry.mLatestBatteryState);
-                }
-            }
-        }
+    /**
+     * A callback used to be notified about keyboard backlight state changes for keyboard device.
+     * The {@link #onKeyboardBacklightChanged(int, KeyboardBacklightState, boolean)} method
+     * will be called once after the listener is successfully registered to provide the initial
+     * keyboard backlight state of the device.
+     * @see #registerKeyboardBacklightListener(Executor, KeyboardBacklightListener)
+     * @see #unregisterKeyboardBacklightListener(KeyboardBacklightListener)
+     * @hide
+     */
+    public interface KeyboardBacklightListener {
+        /**
+         * Called when the keyboard backlight brightness level changes.
+         * @param deviceId the keyboard for which the backlight brightness changed.
+         * @param state the new keyboard backlight state, never null.
+         * @param isTriggeredByKeyPress whether brightness change was triggered by the user
+         *                              pressing up/down key on the keyboard.
+         */
+        void onKeyboardBacklightChanged(
+                int deviceId, @NonNull KeyboardBacklightState state, boolean isTriggeredByKeyPress);
     }
 }

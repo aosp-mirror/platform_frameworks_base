@@ -13,12 +13,15 @@ android_library {
 
     static_libs: [
         "androidx.annotation_annotation",
-        "androidx.legacy_legacy-support-v4",
-        "androidx.recyclerview_recyclerview",
-        "androidx.preference_preference",
         "androidx.appcompat_appcompat",
+        "androidx.coordinatorlayout_coordinatorlayout",
+        "androidx.core_core",
+        "androidx.fragment_fragment",
         "androidx.lifecycle_lifecycle-runtime",
-        "androidx.mediarouter_mediarouter-nodeps",
+        "androidx.loader_loader",
+        "androidx.localbroadcastmanager_localbroadcastmanager",
+        "androidx.preference_preference",
+        "androidx.recyclerview_recyclerview",
         "com.google.android.material_material",
         "iconloader",
 
@@ -39,7 +42,7 @@ android_library {
         "SettingsLibAdaptiveIcon",
         "SettingsLibRadioButtonPreference",
         "SettingsLibSelectorWithWidgetPreference",
-        "SettingsLibDisplayDensityUtils",
+        "SettingsLibDisplayUtils",
         "SettingsLibUtils",
         "SettingsLibEmergencyNumber",
         "SettingsLibTopIntroPreference",
@@ -51,12 +54,14 @@ android_library {
         "SettingsLibSettingsTransition",
         "SettingsLibButtonPreference",
         "SettingsLibDeviceStateRotationLock",
+        "SettingsLibProfileSelector",
         "setupdesign",
         "zxing-core-1.7",
+        "androidx.room_room-runtime",
+
     ],
 
-    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
-    // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
+    plugins: ["androidx.room_room-compiler-plugin"],
 
     resource_dirs: ["res"],
 
@@ -64,9 +69,6 @@ android_library {
         "src/**/*.java",
         "src/**/*.kt",
     ],
-
-    min_sdk_version: "30",
-
 }
 
 // NOTE: Keep this module in sync with ./common.mk
@@ -74,13 +76,15 @@ java_defaults {
     name: "SettingsLibDefaults",
     static_libs: [
         "androidx.annotation_annotation",
-        "androidx.lifecycle_lifecycle-common",
-        "androidx.legacy_legacy-support-v4",
-        "androidx.lifecycle_lifecycle-runtime",
-        "androidx.recyclerview_recyclerview",
-        "androidx.preference_preference",
         "androidx.appcompat_appcompat",
-        "androidx.legacy_legacy-preference-v14",
+        "androidx.coordinatorlayout_coordinatorlayout",
+        "androidx.core_core",
+        "androidx.fragment_fragment",
+        "androidx.lifecycle_lifecycle-runtime",
+        "androidx.loader_loader",
+        "androidx.localbroadcastmanager_localbroadcastmanager",
+        "androidx.preference_preference",
+        "androidx.recyclerview_recyclerview",
         "SettingsLib",
     ],
 }

@@ -22,7 +22,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
-import androidx.core.animation.AnimatorTestRule2
+import androidx.core.animation.AnimatorTestRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -60,9 +60,13 @@ import org.mockito.MockitoAnnotations
 class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
     @Mock private lateinit var systemEventCoordinator: SystemEventCoordinator
+
     @Mock private lateinit var statusBarWindowController: StatusBarWindowController
+
     @Mock private lateinit var statusBarContentInsetProvider: StatusBarContentInsetsProvider
+
     @Mock private lateinit var dumpManager: DumpManager
+
     @Mock private lateinit var listener: SystemStatusAnimationCallback
 
     private lateinit var systemClock: FakeSystemClock
@@ -70,7 +74,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     private lateinit var systemStatusAnimationScheduler: SystemStatusAnimationScheduler
     private val fakeFeatureFlags = FakeFeatureFlags()
 
-    @get:Rule val animatorTestRule = AnimatorTestRule2()
+    @get:Rule val animatorTestRule = AnimatorTestRule()
 
     @Before
     fun setup() {
@@ -380,6 +384,79 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testPrivacyDot_isRemovedDuringChipDisappearAnimation() = runTest {
+        // Instantiate class under test with TestScope from runTest
+        initializeSystemStatusAnimationScheduler(testScope = this)
+
+        // create and schedule high priority event
+        createAndScheduleFakePrivacyEvent()
+
+        // fast forward to ANIMATING_OUT state
+        fastForwardAnimationToState(ANIMATING_OUT)
+        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
+
+        // remove persistent dot
+        systemStatusAnimationScheduler.removePersistentDot()
+        testScheduler.runCurrent()
+
+        // skip disappear animation
+        animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
+        testScheduler.runCurrent()
+
+        // verify that animationState changes to IDLE and onHidePersistentDot callback is invoked
+        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
+        verify(listener, times(1)).onHidePersistentDot()
+    }
+
+    @Test
+    fun testPrivacyEvent_forceVisibleIsUpdated_whenRescheduledDuringQueuedState() = runTest {
+        // Instantiate class under test with TestScope from runTest
+        initializeSystemStatusAnimationScheduler(testScope = this)
+
+        // create and schedule privacy event
+        createAndScheduleFakePrivacyEvent()
+        // request removal of persistent dot (sets forceVisible to false)
+        systemStatusAnimationScheduler.removePersistentDot()
+        // create and schedule a privacy event again (resets forceVisible to true)
+        createAndScheduleFakePrivacyEvent()
+
+        // skip chip animation lifecycle and fast forward to SHOWING_PERSISTENT_DOT state
+        fastForwardAnimationToState(SHOWING_PERSISTENT_DOT)
+
+        // verify that we reach SHOWING_PERSISTENT_DOT and that listener callback is invoked
+        assertEquals(SHOWING_PERSISTENT_DOT, systemStatusAnimationScheduler.getAnimationState())
+        verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
+    }
+
+    @Test
+    fun testPrivacyEvent_forceVisibleIsUpdated_whenRescheduledDuringAnimatingState() = runTest {
+        // Instantiate class under test with TestScope from runTest
+        initializeSystemStatusAnimationScheduler(testScope = this)
+
+        // create and schedule privacy event
+        createAndScheduleFakePrivacyEvent()
+        // request removal of persistent dot (sets forceVisible to false)
+        systemStatusAnimationScheduler.removePersistentDot()
+        fastForwardAnimationToState(RUNNING_CHIP_ANIM)
+
+        // create and schedule a privacy event again (resets forceVisible to true)
+        createAndScheduleFakePrivacyEvent()
+
+        // skip status chip display time
+        advanceTimeBy(DISPLAY_LENGTH + 1)
+        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        verify(listener, times(1)).onSystemEventAnimationFinish(anyBoolean())
+
+        // skip disappear animation
+        animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
+
+        // verify that we reach SHOWING_PERSISTENT_DOT and that listener callback is invoked
+        assertEquals(SHOWING_PERSISTENT_DOT, systemStatusAnimationScheduler.getAnimationState())
+        verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
+    }
+
+    @Test
     fun testNewEvent_isScheduled_whenPostedDuringRemovalAnimation() = runTest {
         // Instantiate class under test with TestScope from runTest
         initializeSystemStatusAnimationScheduler(testScope = this)
@@ -440,8 +517,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
     private fun createAndScheduleFakePrivacyEvent(): OngoingPrivacyChip {
         val privacyChip = OngoingPrivacyChip(mContext)
-        val fakePrivacyStatusEvent =
-            FakeStatusEvent(viewCreator = { privacyChip }, priority = 100, forceVisible = true)
+        val fakePrivacyStatusEvent = FakePrivacyStatusEvent(viewCreator = { privacyChip })
         systemStatusAnimationScheduler.onStatusEvent(fakePrivacyStatusEvent)
         return privacyChip
     }

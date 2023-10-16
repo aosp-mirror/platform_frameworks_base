@@ -40,6 +40,8 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.RemoteLockscreenValidationResult;
+import android.app.RemoteLockscreenValidationSession;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -58,12 +60,18 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.security.SecureBox;
+import com.android.server.locksettings.LockSettingsService;
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.CleanupManager;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.RemoteLockscreenValidationSessionStorage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -79,10 +87,12 @@ import org.mockito.Spy;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
@@ -133,7 +143,6 @@ public class RecoverableKeyStoreManagerTest {
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
     private static final String TEST_ALIAS = "nick";
     private static final String TEST_ALIAS2 = "bob";
-    private static final int RECOVERABLE_KEY_SIZE_BYTES = 32;
     private static final int APPLICATION_KEY_SIZE_BYTES = 32;
     private static final int GENERATION_ID = 1;
     private static final byte[] NONCE = getUtf8Bytes("nonce");
@@ -151,6 +160,10 @@ public class RecoverableKeyStoreManagerTest {
             .setKeyDerivationParams(KeyDerivationParams.createSha256Params(TEST_SALT))
             .setSecret(TEST_SECRET)
             .build();
+    private static final byte[] VALID_GUESS = getUtf8Bytes("password123");
+    private static final byte[] INVALID_GUESS = getUtf8Bytes("not_password");
+    private static final byte[] GUESS_LOCKOUT = getUtf8Bytes("need_to_wait");
+    private static final int TIMEOUT_MILLIS = 30 * 1000;
 
     @Mock private Context mMockContext;
     @Mock private RecoverySnapshotListenersStorage mMockListenersStorage;
@@ -159,14 +172,17 @@ public class RecoverableKeyStoreManagerTest {
     @Mock private ApplicationKeyStorage mApplicationKeyStorage;
     @Mock private CleanupManager mCleanupManager;
     @Mock private ScheduledExecutorService mExecutorService;
+    @Mock private LockSettingsService mLockSettingsService;
     @Spy private TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
 
+    private int mUserId;
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
     private RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     private RecoverySessionStorage mRecoverySessionStorage;
     private RecoverySnapshotStorage mRecoverySnapshotStorage;
     private PlatformEncryptionKey mPlatformEncryptionKey;
+    private RemoteLockscreenValidationSessionStorage mRemoteLockscreenValidationSessionStorage;
 
     @Before
     public void setUp() throws Exception {
@@ -176,7 +192,9 @@ public class RecoverableKeyStoreManagerTest {
         mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
         mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
 
+        mUserId = UserHandle.getCallingUserId();
         mRecoverySessionStorage = new RecoverySessionStorage();
+        mRemoteLockscreenValidationSessionStorage = new RemoteLockscreenValidationSessionStorage();
 
         when(mMockContext.getSystemService(anyString())).thenReturn(mKeyguardManager);
         when(mMockContext.getSystemServiceName(any())).thenReturn("test");
@@ -197,11 +215,22 @@ public class RecoverableKeyStoreManagerTest {
                 mPlatformKeyManager,
                 mApplicationKeyStorage,
                 mTestOnlyInsecureCertificateHelper,
-                mCleanupManager);
+                mCleanupManager,
+                mRemoteLockscreenValidationSessionStorage);
+        when(mLockSettingsService.verifyCredential(
+                any(LockscreenCredential.class), anyInt(), anyInt())).thenAnswer(args -> {
+                    LockscreenCredential argument = (LockscreenCredential) args.getArguments()[0];
+                    if (Arrays.equals(argument.getCredential(), VALID_GUESS)) {
+                        return VerifyCredentialResponse.OK;
+                    } else if (Arrays.equals(argument.getCredential(), INVALID_GUESS)) {
+                        return VerifyCredentialResponse.ERROR;
+                    } else return VerifyCredentialResponse.fromTimeout(TIMEOUT_MILLIS);
+                });
     }
 
     @After
     public void tearDown() {
+        mRemoteLockscreenValidationSessionStorage.finishSession(mUserId);
         mRecoverableKeyStoreDb.close();
         mDatabaseFile.delete();
     }
@@ -510,8 +539,6 @@ public class RecoverableKeyStoreManagerTest {
     @Ignore("Causing breakages so ignoring to resolve, b/281583079")
     @Test
     public void initRecoveryService_throwsExceptionOnSmallerSerial() throws Exception {
-        int uid = Binder.getCallingUid();
-        int userId = UserHandle.getCallingUserId();
         long certSerial = 1000L;
 
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
@@ -646,7 +673,6 @@ public class RecoverableKeyStoreManagerTest {
             throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        long certSerial = 1000L;
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
 
         mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
@@ -822,7 +848,6 @@ public class RecoverableKeyStoreManagerTest {
         }
     }
 
-    @Ignore("Causing breakages so ignoring to resolve, b/281583079")
     @Test
     public void startRecoverySession_throwsIfBadNumberOfSecrets() throws Exception {
         try {
@@ -839,7 +864,6 @@ public class RecoverableKeyStoreManagerTest {
         }
     }
 
-    @Ignore("Causing breakages so ignoring to resolve, b/281583079")
     @Test
     public void startRecoverySession_throwsIfPublicKeysMismatch() throws Exception {
         byte[] vaultParams = TEST_VAULT_PARAMS.clone();
@@ -1093,7 +1117,9 @@ public class RecoverableKeyStoreManagerTest {
         int uid = Binder.getCallingUid();
         PendingIntent intent = PendingIntent.getBroadcast(
                 InstrumentationRegistry.getTargetContext(), /*requestCode=*/1,
-                new Intent(), /*flags=*/ PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                new Intent()
+                        .setPackage(InstrumentationRegistry.getTargetContext().getPackageName()),
+                /*flags=*/ PendingIntent.FLAG_MUTABLE);
         mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent);
         verify(mMockListenersStorage).setSnapshotListener(eq(uid), any(PendingIntent.class));
     }
@@ -1286,6 +1312,172 @@ public class RecoverableKeyStoreManagerTest {
         verify(mExecutorService).schedule(any(Runnable.class), anyLong(), any());
     }
 
+    @Test
+    public void startRemoteLockscreenValidation_credentialsNotSet() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_NONE);
+        try {
+            mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+            fail("should have thrown");
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage()).contains("not set");
+        }
+        verify(mLockSettingsService).getCredentialType(mUserId);
+    }
+    @Test
+    public void startRemoteLockscreenValidation_checksPermission() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PIN);
+
+        mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+
+        verify(mMockContext, times(1))
+                .enforceCallingOrSelfPermission(
+                        eq(Manifest.permission.CHECK_REMOTE_LOCKSCREEN), any());
+        mRemoteLockscreenValidationSessionStorage.finishSession(mUserId);
+    }
+    @Test
+    public void startRemoteLockscreenValidation_returnsCredentailsType() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PIN);
+
+        RemoteLockscreenValidationSession request =
+                mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+
+        assertThat(request.getLockType()).isEqualTo(KeyguardManager.PIN);
+        assertThat(request.getRemainingAttempts()).isEqualTo(5);
+        verify(mLockSettingsService).getCredentialType(anyInt());
+    }
+    @Test
+    public void startRemoteLockscreenValidation_returnsRemainingAttempts() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PATTERN);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 3);
+
+        RemoteLockscreenValidationSession request =
+                mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+
+        assertThat(request.getLockType()).isEqualTo(KeyguardManager.PATTERN);
+        assertThat(request.getRemainingAttempts()).isEqualTo(2);
+    }
+    @Test
+    public void startRemoteLockscreenValidation_password() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 7);
+
+        RemoteLockscreenValidationSession request =
+                mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+
+        assertThat(request.getRemainingAttempts()).isEqualTo(0);
+        assertThat(request.getLockType()).isEqualTo(KeyguardManager.PASSWORD);
+    }
+    @Test
+    public void validateRemoteLockscreen_noActiveSession() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+
+        RemoteLockscreenValidationResult result =
+                mRecoverableKeyStoreManager.validateRemoteLockscreen(INVALID_GUESS,
+                        mLockSettingsService);
+
+        assertThat(result.getResultCode()).isEqualTo(
+                RemoteLockscreenValidationResult.RESULT_SESSION_EXPIRED);
+    }
+    @Test
+    public void validateRemoteLockscreen_decryptionError() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 4);
+
+        mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+
+        try {
+            mRecoverableKeyStoreManager.validateRemoteLockscreen(
+                        new byte[] {1, 2, 3},
+                        mLockSettingsService);
+            fail("should have thrown");
+        } catch (IllegalStateException e) {
+            // Decryption error
+        }
+    }
+    @Test
+    public void validateRemoteLockscreen_zeroRemainingAttempts() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 5);
+        mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+
+        RemoteLockscreenValidationResult result =
+                    mRecoverableKeyStoreManager.validateRemoteLockscreen(
+                    encryptCredentialsForNewSession(VALID_GUESS),
+                        mLockSettingsService);
+
+        assertThat(result.getResultCode()).isEqualTo(
+                RemoteLockscreenValidationResult.RESULT_NO_REMAINING_ATTEMPTS);
+    }
+    @Test
+    public void validateRemoteLockscreen_guessValid() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 4);
+        mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+
+        RemoteLockscreenValidationResult result =
+                mRecoverableKeyStoreManager.validateRemoteLockscreen(
+                        encryptCredentialsForNewSession(VALID_GUESS),
+                        mLockSettingsService);
+
+        assertThat(result.getResultCode()).isEqualTo(
+                RemoteLockscreenValidationResult.RESULT_GUESS_VALID);
+        // Valid guess resets counter
+        assertThat(mRecoverableKeyStoreDb.getBadRemoteGuessCounter(mUserId)).isEqualTo(0);
+    }
+    @Test
+    public void validateRemoteLockscreen_timeout() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 4);
+
+        RemoteLockscreenValidationResult result =
+                mRecoverableKeyStoreManager.validateRemoteLockscreen(
+                        encryptCredentialsForNewSession(GUESS_LOCKOUT),
+                        mLockSettingsService);
+
+        assertThat(result.getResultCode()).isEqualTo(
+                RemoteLockscreenValidationResult.RESULT_LOCKOUT);
+        assertThat(result.getTimeoutMillis()).isEqualTo((long) TIMEOUT_MILLIS);
+        // Counter was not changed
+        assertThat(mRecoverableKeyStoreDb.getBadRemoteGuessCounter(mUserId)).isEqualTo(4);
+    }
+    @Test
+    public void validateRemoteLockscreen_guessInvalid() throws Exception {
+        when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 4);
+        mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+
+        RemoteLockscreenValidationResult result =
+                mRecoverableKeyStoreManager.validateRemoteLockscreen(
+                        encryptCredentialsForNewSession(INVALID_GUESS),
+                        mLockSettingsService);
+
+        assertThat(result.getResultCode()).isEqualTo(
+                RemoteLockscreenValidationResult.RESULT_GUESS_INVALID);
+        assertThat(mRecoverableKeyStoreDb.getBadRemoteGuessCounter(mUserId)).isEqualTo(5);
+    }
+
+    private byte[] encryptCredentialsForNewSession(byte[] credentials) throws Exception {
+        RemoteLockscreenValidationSession request =
+                mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
+        PublicKey publicKey = SecureBox.decodePublicKey(request.getSourcePublicKey());
+        return SecureBox.encrypt(
+              publicKey,
+              /* sharedSecret= */ null,
+              LockPatternUtils.ENCRYPTED_REMOTE_CREDENTIALS_HEADER,
+              credentials);
+    }
+
     private static byte[] encryptedApplicationKey(
             SecretKey recoveryKey, byte[] applicationKey) throws Exception {
         return KeySyncUtils.encryptKeysWithRecoveryKey(recoveryKey, ImmutableMap.of(
@@ -1304,7 +1496,7 @@ public class RecoverableKeyStoreManagerTest {
         return SecureBox.encrypt(
                 /*theirPublicKey=*/ null,
                 /*sharedSecret=*/ keyClaimant,
-                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*header=*/ ArrayUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
                 /*payload=*/ locallyEncryptedRecoveryKey);
     }
 

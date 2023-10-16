@@ -16,13 +16,13 @@
 
 package com.android.server.app;
 
+import static android.Manifest.permission.MANAGE_GAME_ACTIVITY;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER;
 import static android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE;
 
-import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
@@ -52,6 +52,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost.SurfacePackage;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -183,10 +184,10 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameServiceController mGameServiceController =
             new IGameServiceController.Stub() {
                 @Override
-                @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void createGameSession(int taskId) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "createGameSession()");
+                    super.createGameSession_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.createGameSession(taskId);
                     });
@@ -196,11 +197,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameSessionController mGameSessionController =
             new IGameSessionController.Stub() {
                 @Override
-                @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void takeScreenshot(int taskId,
                         @NonNull AndroidFuture gameScreenshotResultFuture) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "takeScreenshot()");
+                    super.takeScreenshot_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.takeScreenshot(taskId,
                                 gameScreenshotResultFuture);
@@ -208,10 +209,10 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 }
 
                 @Override
-                @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void restartGame(int taskId) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "restartGame()");
+                    super.restartGame_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.restartGame(taskId);
                     });
@@ -850,8 +851,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         final SurfaceControl overlaySurfaceControl =
                 overlaySurfacePackage != null ? overlaySurfacePackage.getSurfaceControl() : null;
         mBackgroundExecutor.execute(() -> {
-            final SurfaceControl.LayerCaptureArgs.Builder layerCaptureArgsBuilder =
-                    new SurfaceControl.LayerCaptureArgs.Builder(/* layer */ null);
+            final ScreenCapture.LayerCaptureArgs.Builder layerCaptureArgsBuilder =
+                    new ScreenCapture.LayerCaptureArgs.Builder(/* layer */ null);
             if (overlaySurfaceControl != null) {
                 SurfaceControl[] excludeLayers = new SurfaceControl[1];
                 excludeLayers[0] = overlaySurfaceControl;

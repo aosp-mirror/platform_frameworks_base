@@ -16,7 +16,6 @@
 
 package com.android.server.companion.virtual.audio;
 
-import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.media.AudioAttributes.FLAG_SECURE;
 import static android.media.AudioPlaybackConfiguration.PLAYER_STATE_STARTED;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -37,9 +36,11 @@ import android.media.MediaRecorder;
 import android.media.PlayerBase;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.companion.virtual.GenericWindowPolicyController;
@@ -54,6 +55,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class VirtualAudioControllerTest {
     private static final int APP1_UID = 100;
@@ -72,21 +74,27 @@ public class VirtualAudioControllerTest {
         MockitoAnnotations.initMocks(this);
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         mVirtualAudioController = new VirtualAudioController(mContext);
-        mGenericWindowPolicyController = new GenericWindowPolicyController(
-                FLAG_SECURE,
-                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
-                /* allowedUsers= */ new ArraySet<>(),
-                /* allowedCrossTaskNavigations= */ new ArraySet<>(),
-                /* blockedCrossTaskNavigations= */ new ArraySet<>(),
-                /* allowedActivities= */ new ArraySet<>(),
-                /* blockedActivities= */ new ArraySet<>(),
-                VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
-                /* activityListener= */ null,
-                /* activityBlockedCallback= */ null,
-                /* secureWindowCallback= */ null,
-                /* deviceProfile= */ DEVICE_PROFILE_APP_STREAMING);
+        mGenericWindowPolicyController =
+                new GenericWindowPolicyController(
+                        FLAG_SECURE,
+                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        /* allowedUsers= */ new ArraySet<>(),
+                        /* allowedCrossTaskNavigations= */ new ArraySet<>(),
+                        /* blockedCrossTaskNavigations= */ new ArraySet<>(),
+                        /* allowedActivities= */ new ArraySet<>(),
+                        /* blockedActivities= */ new ArraySet<>(),
+                        VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
+                        /* activityListener= */ null,
+                        /* pipBlockedCallback= */ null,
+                        /* activityBlockedCallback= */ null,
+                        /* secureWindowCallback= */ null,
+                        /* intentListenerCallback= */ null,
+                        /* displayCategories= */ new ArraySet<>(),
+                        /* showTasksInHostDeviceRecents= */ true);
     }
 
+
+    @FlakyTest(bugId = 265155135)
     @Test
     public void startListening_receivesCallback() throws RemoteException {
         ArraySet<Integer> runningUids = new ArraySet<>();

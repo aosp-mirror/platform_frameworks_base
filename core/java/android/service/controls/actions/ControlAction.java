@@ -154,7 +154,7 @@ public abstract class ControlAction {
     public static final @ResponseResult int RESPONSE_CHALLENGE_PASSPHRASE = 5;
 
     /**
-     * The {@link ActionType} associated with this class.
+     * The action type associated with this class.
      */
     public abstract @ActionType int getActionType();
 

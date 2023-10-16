@@ -20,11 +20,11 @@ import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.os.UserManager;
+import android.view.IWindowManager;
 import android.view.WindowManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -41,6 +41,7 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.taskview.TaskViewTransitions;
 
 import java.util.Optional;
 
@@ -68,17 +69,18 @@ public class TestableBubbleController extends BubbleController {
             BubblePositioner positioner,
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             ShellExecutor shellMainExecutor,
             Handler shellMainHandler,
             TaskViewTransitions taskViewTransitions,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            IWindowManager wmService) {
         super(context, shellInit, shellCommandHandler, shellController, data, Runnable::run,
                 floatingContentCoordinator, dataRepository, statusBarService, windowManager,
                 windowManagerShellWrapper, userManager, launcherApps, bubbleLogger,
                 taskStackListener, shellTaskOrganizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, shellMainExecutor, shellMainHandler,
-                new SyncExecutor(), taskViewTransitions, syncQueue);
+                new SyncExecutor(), taskViewTransitions, syncQueue, wmService);
         setInflateSynchronously(true);
         onInit();
     }

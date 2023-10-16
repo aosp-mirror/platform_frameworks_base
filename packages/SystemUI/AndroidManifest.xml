@@ -27,6 +27,7 @@
 
     <!-- Used to read wallpaper -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
 
     <!-- Used to read storage for all users -->
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
@@ -81,6 +82,7 @@
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
+    <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -171,6 +173,7 @@
 
     <!-- Screen Recording -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
 
@@ -179,6 +182,9 @@
 
     <!-- Doze mode temp whitelisting for notification dispatching. -->
     <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
+
+    <!-- Adjust delivery policies for broadcast intents -->
+    <uses-permission android:name="android.permission.BROADCAST_OPTION_INTERACTIVE" />
 
     <!-- Listen for keyboard attachment / detachment -->
     <uses-permission android:name="android.permission.TABLET_MODE" />
@@ -230,7 +236,10 @@
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- role holder APIs -->
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
+    <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
 
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
@@ -337,9 +346,13 @@
 
     <uses-permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
 
+    <uses-permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
+    <protected-broadcast android:name="com.android.systemui.action.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG" />
+    <protected-broadcast android:name="com.android.systemui.STARTED" />
 
     <application
         android:name=".SystemUIApplication"
@@ -349,7 +362,7 @@
         android:killAfterRestore="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
-        android:icon="@drawable/icon"
+        android:icon="@drawable/android14_patch_adaptive"
         android:process="com.android.systemui"
         android:supportsRtl="true"
         android:theme="@style/Theme.SystemUI"
@@ -368,6 +381,9 @@
         <service android:name="SystemUIService"
             android:exported="true"
         />
+        <service android:name=".wallet.controller.WalletContextualLocationsService"
+            android:exported="true"
+            />
 
         <!-- Service for dumping extremely verbose content during a bug report -->
         <service android:name=".dump.SystemUIAuxiliaryDumpService"
@@ -414,7 +430,36 @@
                  android:permission="com.android.systemui.permission.SELF"
                  android:exported="false" />
 
-        <service android:name=".screenrecord.RecordingService" />
+        <activity android:name=".screenshot.appclips.AppClipsTrampolineActivity"
+            android:theme="@style/AppClipsTrampolineActivity"
+            android:label="@string/screenshot_preview_description"
+            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE"
+            android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="android.intent.action.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".screenshot.appclips.AppClipsActivity"
+            android:theme="@style/AppClipsActivity"
+            android:process=":appclips.screenshot"
+            android:label="@string/screenshot_preview_description"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true" />
+
+        <service android:name=".screenshot.appclips.AppClipsScreenshotHelperService"
+            android:permission="com.android.systemui.permission.SELF"
+            android:exported="false" />
+
+        <service android:name=".screenshot.appclips.AppClipsService"
+            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE"
+            android:exported="true" />
+
+        <service android:name=".screenrecord.RecordingService"
+                 android:foregroundServiceType="systemExempted"/>
 
         <receiver android:name=".SysuiRestartReceiver"
             android:exported="false">
@@ -559,6 +604,16 @@
                   android:showForAllUsers="true">
         </activity>
 
+        <!-- started from SensoryPrivacyService -->
+        <activity android:name=".sensorprivacy.television.TvSensorPrivacyChangedActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
+            android:theme="@style/BottomSheet"
+            android:finishOnCloseSystemDialogs="true"
+            android:showForAllUsers="true">
+        </activity>
+
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"
@@ -585,12 +640,6 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
-        <activity-alias
-            android:name=".UsbDebuggingActivityAlias"
-            android:permission="android.permission.DUMP"
-            android:targetActivity=".usb.UsbDebuggingActivity"
-            android:exported="true">
-        </activity-alias>
         <activity android:name=".usb.UsbDebuggingSecondaryUserActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
@@ -647,7 +696,9 @@
             android:relinquishTaskIdentity="true"
             android:configChanges=
                 "screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-            android:visibleToInstantApps="true"/>
+            android:visibleToInstantApps="true"
+            android:exported="false"
+            android:permission="android.permission.MANAGE_MEDIA_PROJECTION"/>
 
         <!-- started from TvNotificationPanel -->
         <activity
@@ -665,8 +716,11 @@
             android:exported="true" />
 
         <!-- started from Telecomm(CallsManager) -->
+        <!-- Sets an empty label to avoid an announcement from TalkBack,
+             the dialog contents are sufficient and will still be read by TalkBack -->
         <activity
             android:name=".telephony.ui.activity.SwitchToManagedProfileForCallActivity"
+            android:label=" "
             android:excludeFromRecents="true"
             android:exported="true"
             android:finishOnCloseSystemDialogs="true"
@@ -818,6 +872,20 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".contrast.ContrastDialogActivity"
+            android:label="@string/quick_settings_contrast_label"
+            android:theme="@style/Theme.SystemUI.ContrastDialog"
+            android:finishOnCloseSystemDialogs="true"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.intent.action.SHOW_CONTRAST_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".ForegroundServicesDialog"
             android:process=":fgservices"
             android:excludeFromRecents="true"
@@ -845,8 +913,9 @@
                   android:excludeFromRecents="true"
                   android:launchMode="singleInstance"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                  android:visibleToInstantApps="true">
-        </activity>
+                  android:visibleToInstantApps="true"
+                  android:exported="true"
+                  />
 
         <activity android:name=".controls.management.ControlsEditingActivity"
                   android:label="@string/controls_menu_edit"
@@ -879,8 +948,9 @@
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|orientation"
-                  android:visibleToInstantApps="true">
-        </activity>
+                  android:visibleToInstantApps="true"
+                  android:exported="true"
+                  />
 
         <activity android:name=".wallet.ui.WalletActivity"
                   android:label="@string/wallet_title"
@@ -909,6 +979,7 @@
             android:enabled="false"
             android:exported="true"
             android:excludeFromRecents="true"
+            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay"
             android:label="@string/note_task_button_label"
             android:icon="@drawable/ic_note_task_shortcut_widget">
@@ -919,11 +990,40 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".notetask.NoteTaskControllerUpdateService" />
+
         <activity
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
             android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.NoDisplay" >
+
+            <intent-filter>
+                <action android:name="com.android.systemui.action.LAUNCH_NOTE_TASK"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- LaunchNoteTaskManagedProfileProxyActivity MUST NOT be exported because it allows caller
+             to specify an Android user when launching the default notes app. -->
+        <activity
+            android:name=".notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
+            android:exported="false"
+            android:enabled="true"
+            android:excludeFromRecents="true"
             android:theme="@android:style/Theme.NoDisplay" />
+
+        <activity
+            android:name=".notetask.LaunchNotesRoleSettingsTrampolineActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:resizeableActivity="false"
+            android:theme="@android:style/Theme.NoDisplay" >
+            <intent-filter>
+                <action android:name="com.android.systemui.action.MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <!-- endregion -->
 
         <!-- started from ControlsRequestReceiver -->
@@ -989,7 +1089,7 @@
 
         <receiver android:name=".media.dialog.MediaOutputDialogReceiver"
                   android:exported="true">
-            <intent-filter>
+            <intent-filter android:priority="1">
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG" />
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG" />
                 <action android:name="com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG" />
@@ -1005,11 +1105,28 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".logcat.LogAccessDialogActivity"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:excludeFromRecents="true"
+                  android:exported="false">
+        </activity>
+
         <provider
             android:authorities="com.android.systemui.customization"
             android:name="com.android.systemui.keyguard.CustomizationProvider"
             android:exported="true"
             android:permission="android.permission.CUSTOMIZE_SYSTEM_UI"
             />
+
+        <!-- TODO(b/278897602): Disable EmojiCompatInitializer until threading issues are fixed.
+             https://developer.android.com/reference/androidx/emoji2/text/EmojiCompatInitializer -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
+                tools:node="remove" />
+        </provider>
     </application>
 </manifest>

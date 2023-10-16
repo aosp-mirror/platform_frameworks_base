@@ -24,6 +24,8 @@ import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
 import com.android.systemui.screenshot.ScreenshotProxyService;
 import com.android.systemui.screenshot.TakeScreenshotService;
+import com.android.systemui.screenshot.appclips.AppClipsScreenshotHelperService;
+import com.android.systemui.screenshot.appclips.AppClipsService;
 
 import dagger.Binds;
 import dagger.Module;
@@ -52,4 +54,13 @@ public abstract class ScreenshotModule {
     @Binds
     abstract ImageCapture bindImageCaptureImpl(ImageCaptureImpl capture);
 
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsScreenshotHelperService.class)
+    abstract Service bindAppClipsScreenshotHelperService(AppClipsScreenshotHelperService service);
+
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsService.class)
+    abstract Service bindAppClipsService(AppClipsService service);
 }

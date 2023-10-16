@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Fake {@link NativeWrapper} useful for testing. */
+/** Fake {@link NativeWrapper} for the HDMI CEC HAL, useful for testing. */
 final class FakeNativeWrapper implements NativeWrapper {
     private static final String TAG = "FakeNativeWrapper";
 
@@ -112,7 +112,11 @@ final class FakeNativeWrapper implements NativeWrapper {
     public HdmiPortInfo[] nativeGetPortInfos() {
         if (mHdmiPortInfo == null) {
             mHdmiPortInfo = new HdmiPortInfo[1];
-            mHdmiPortInfo[0] = new HdmiPortInfo(1, 1, 0x1000, true, true, true);
+            mHdmiPortInfo[0] = new HdmiPortInfo.Builder(1, 1, 0x1000)
+                    .setCecSupported(true)
+                    .setMhlSupported(true)
+                    .setArcSupported(true)
+                    .build();
         }
         return mHdmiPortInfo;
     }
@@ -136,6 +140,14 @@ final class FakeNativeWrapper implements NativeWrapper {
     public boolean nativeIsConnected(int port) {
         Boolean isConnected = mPortConnectionStatus.get(port);
         return isConnected == null ? false : isConnected;
+    }
+
+    @Override
+    public void nativeSetHpdSignalType(int signal, int portId) {}
+
+    @Override
+    public int nativeGetHpdSignalType(int portId) {
+        return Constants.HDMI_HPD_TYPE_PHYSICAL;
     }
 
     public void setPortConnectionStatus(int port, boolean connected) {

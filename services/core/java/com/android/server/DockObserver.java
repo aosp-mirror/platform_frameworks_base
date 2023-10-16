@@ -37,6 +37,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ExtconUEventObserver.ExtconInfo;
 
 import java.io.FileDescriptor;
@@ -70,7 +71,7 @@ final class DockObserver extends SystemService {
 
     private boolean mUpdatesStopped;
 
-    private final boolean mKeepDreamingWhenUndocking;
+    private final boolean mKeepDreamingWhenUnplugging;
     private final boolean mAllowTheaterModeWakeFromDock;
 
     private final List<ExtconStateConfig> mExtconStateConfigs;
@@ -167,8 +168,8 @@ final class DockObserver extends SystemService {
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mAllowTheaterModeWakeFromDock = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromDock);
-        mKeepDreamingWhenUndocking = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_keepDreamingWhenUndocking);
+        mKeepDreamingWhenUnplugging = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_keepDreamingWhenUnplugging);
         mDeviceProvisionedObserver = new DeviceProvisionedObserver(mHandler);
 
         mExtconStateConfigs = loadExtconStateConfigs(context);
@@ -195,6 +196,8 @@ final class DockObserver extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(TAG, new BinderService());
+        // Logs dock state after setDockStateFromProviderLocked sets mReportedDockState
+        FrameworkStatsLog.write(FrameworkStatsLog.DOCK_STATE_CHANGED, mReportedDockState);
     }
 
     @Override
@@ -237,7 +240,7 @@ final class DockObserver extends SystemService {
     }
 
     private boolean allowWakeFromDock() {
-        if (mKeepDreamingWhenUndocking) {
+        if (mKeepDreamingWhenUnplugging) {
             return false;
         }
         return (mAllowTheaterModeWakeFromDock
@@ -256,7 +259,6 @@ final class DockObserver extends SystemService {
                     + mReportedDockState);
             final int previousDockState = mPreviousDockState;
             mPreviousDockState = mReportedDockState;
-
             // Skip the dock intent if not yet provisioned.
             final ContentResolver cr = getContext().getContentResolver();
             if (!mDeviceProvisionedObserver.isDeviceProvisioned()) {

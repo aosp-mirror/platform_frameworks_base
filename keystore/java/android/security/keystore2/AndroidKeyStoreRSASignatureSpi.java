@@ -189,7 +189,7 @@ abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSp
     protected final void initKey(AndroidKeyStoreKey key) throws InvalidKeyException {
         if (!KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(key.getAlgorithm())) {
             throw new InvalidKeyException("Unsupported key algorithm: " + key.getAlgorithm()
-                    + ". Only" + KeyProperties.KEY_ALGORITHM_RSA + " supported");
+                    + ". Only " + KeyProperties.KEY_ALGORITHM_RSA + " supported");
         }
         super.initKey(key);
     }

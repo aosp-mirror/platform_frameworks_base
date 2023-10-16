@@ -1,6 +1,9 @@
 {
     "presubmit": [
         {
+            "name": "CtsLocationFineTestCases"
+        },
+        {
             "name": "CtsLocationCoarseTestCases"
         },
         {
@@ -50,6 +53,26 @@
             "file_patterns": ["BinaryTransparencyService\\.java"]
         },
         {
+            "name": "BinaryTransparencyHostTest",
+            "file_patterns": [
+                "BinaryTransparencyService\\.java"
+            ]
+        },
+        {
+            "name": "CtsMediaProjectionTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                }
+            ]
+        },
+        {
             // GWP-ASan's CTS test ensures that recoverable tombstones work,
             // which is emitted by the NativeTombstoneManager.
             "name": "CtsGwpAsanTestCases"
@@ -61,6 +84,15 @@
         {
             "name": "CtsVcnTestCases",
             "file_patterns": ["VcnManagementService\\.java"]
+        },
+        {
+            "name": "FrameworksNetTests",
+            "options": [
+                {
+                    "exclude-annotation": "com.android.testutils.SkipPresubmit"
+                }
+            ],
+            "file_patterns": ["VpnManagerService\\.java"]
         }
     ],
     "presubmit-large": [
@@ -78,11 +110,21 @@
                 }
             ],
             "file_patterns": ["ClipboardService\\.java"]
-        }
-    ],
-    "postsubmit": [
+        },
         {
-            "name": "CtsLocationFineTestCases"
+            "name": "CtsHostsideNetworkTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "com.android.testutils.SkipPresubmit"
+                }
+            ],
+            "file_patterns": ["VpnManagerService\\.java"]
         }
     ]
 }

@@ -20,6 +20,7 @@ per-file com_android_server_lights_* = file:/services/core/java/com/android/serv
 per-file com_android_server_location_* = file:/location/java/android/location/OWNERS
 per-file com_android_server_locksettings_* = file:/services/core/java/com/android/server/locksettings/OWNERS
 per-file com_android_server_net_* = file:/services/core/java/com/android/server/net/OWNERS
+per-file com_android_server_pdb_* = file:/services/core/java/com/android/server/pdb/OWNERS
 per-file com_android_server_pm_* = file:/services/core/java/com/android/server/pm/OWNERS
 per-file com_android_server_power_* = file:/services/core/java/com/android/server/power/OWNERS
 per-file com_android_server_powerstats_* = file:/services/core/java/com/android/server/powerstats/OWNERS

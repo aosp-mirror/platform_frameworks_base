@@ -18,6 +18,9 @@ package com.android.wm.shell.unfold;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
+
+import android.app.ActivityManager;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -27,6 +30,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -36,6 +40,7 @@ import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
 import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
 import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,8 +110,14 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             animator.clearTasks();
 
             info.getChanges().forEach(change -> {
-                if (change.getTaskInfo() != null
-                        && change.getMode() == TRANSIT_CHANGE
+                if (change.getTaskInfo() != null) {
+                    ProtoLog.v(WM_SHELL_TRANSITIONS,
+                            "startAnimation, check taskInfo: %s, mode: %s, isApplicableTask: %s",
+                            change.getTaskInfo(), TransitionInfo.modeToString(change.getMode()),
+                            animator.isApplicableTask(change.getTaskInfo()));
+                }
+                if (change.getTaskInfo() != null && (change.getMode() == TRANSIT_CHANGE
+                        || TransitionUtil.isOpeningType(change.getMode()))
                         && animator.isApplicableTask(change.getTaskInfo())) {
                     animator.onTaskAppeared(change.getTaskInfo(), change.getLeash());
                 }
@@ -163,12 +174,41 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
         mTransition = null;
     }
 
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull TransitionFinishCallback finishCallback) {
+        if (info.getType() == TRANSIT_CHANGE) {
+            // TODO (b/286928742) unfold transition handler should be part of mixed handler to
+            //  handle merges better.
+            for (int i = 0; i < info.getChanges().size(); ++i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                if (taskInfo != null
+                        && taskInfo.configuration.windowConfiguration.isAlwaysOnTop()) {
+                    // Tasks that are always on top (e.g. bubbles), will handle their own transition
+                    // as they are on top of everything else. So skip merging transitions here.
+                    return;
+                }
+            }
+            // Apply changes happening during the unfold animation immediately
+            t.apply();
+            finishCallback.onTransitionFinished(null, null);
+        }
+    }
+
+    /** Whether `request` contains an unfold action. */
+    public boolean hasUnfold(@NonNull TransitionRequestInfo request) {
+        return (request.getType() == TRANSIT_CHANGE
+                && request.getDisplayChange() != null
+                && request.getDisplayChange().isPhysicalDisplayChanged());
+    }
+
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        if (request.getType() == TRANSIT_CHANGE && request.getDisplayChange() != null
-                && request.getDisplayChange().isPhysicalDisplayChanged()) {
+        if (hasUnfold(request)) {
             mTransition = transition;
             return new WindowContainerTransaction();
         }

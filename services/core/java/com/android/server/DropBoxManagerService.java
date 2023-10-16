@@ -19,6 +19,7 @@ package com.android.server;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,6 +30,8 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.BundleMerger;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
@@ -76,6 +79,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
@@ -91,7 +95,7 @@ public final class DropBoxManagerService extends SystemService {
     private static final int DEFAULT_MAX_FILES_LOWRAM = 300;
     private static final int DEFAULT_QUOTA_KB = 10 * 1024;
     private static final int DEFAULT_QUOTA_PERCENT = 10;
-    private static final int DEFAULT_RESERVE_PERCENT = 10;
+    private static final int DEFAULT_RESERVE_PERCENT = 0;
     private static final int QUOTA_RESCAN_MILLIS = 5000;
 
     private static final boolean PROFILE_DUMP = false;
@@ -101,6 +105,10 @@ public final class DropBoxManagerService extends SystemService {
 
     // Size beyond which to force-compress newly added entries.
     private static final long COMPRESS_THRESHOLD_BYTES = 16_384;
+
+    // Tags that we should drop by default.
+    private static final List<String> DISABLED_BY_DEFAULT_TAGS =
+            List.of("data_app_wtf", "system_app_wtf", "system_server_wtf");
 
     // TODO: This implementation currently uses one file per entry, which is
     // inefficient for smallish entries -- consider using a single queue file
@@ -264,7 +272,7 @@ public final class DropBoxManagerService extends SystemService {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SEND_BROADCAST:
-                    prepareAndSendBroadcast((Intent) msg.obj);
+                    prepareAndSendBroadcast((Intent) msg.obj, null);
                     break;
                 case MSG_SEND_DEFERRED_BROADCAST:
                     Intent deferredIntent;
@@ -272,25 +280,44 @@ public final class DropBoxManagerService extends SystemService {
                         deferredIntent = mDeferredMap.remove((String) msg.obj);
                     }
                     if (deferredIntent != null) {
-                        prepareAndSendBroadcast(deferredIntent);
+                        prepareAndSendBroadcast(deferredIntent,
+                                createBroadcastOptions(deferredIntent));
                     }
                     break;
             }
         }
 
-        private void prepareAndSendBroadcast(Intent intent) {
+        private void prepareAndSendBroadcast(Intent intent, Bundle options) {
             if (!DropBoxManagerService.this.mBooted) {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             }
             getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                    android.Manifest.permission.READ_LOGS);
+                    android.Manifest.permission.READ_LOGS, options);
         }
 
         private Intent createIntent(String tag, long time) {
             final Intent dropboxIntent = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
             dropboxIntent.putExtra(DropBoxManager.EXTRA_TAG, tag);
             dropboxIntent.putExtra(DropBoxManager.EXTRA_TIME, time);
+            dropboxIntent.putExtra(DropBoxManager.EXTRA_DROPPED_COUNT, 0);
             return dropboxIntent;
+        }
+
+        private Bundle createBroadcastOptions(Intent intent) {
+            final BundleMerger extrasMerger = new BundleMerger();
+            extrasMerger.setDefaultMergeStrategy(BundleMerger.STRATEGY_FIRST);
+            extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
+                    BundleMerger.STRATEGY_COMPARABLE_MAX);
+            extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
+                    BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
+
+            return BroadcastOptions.makeBasic()
+                    .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
+                    .setDeliveryGroupMatchingKey(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED,
+                            intent.getStringExtra(DropBoxManager.EXTRA_TAG))
+                    .setDeliveryGroupExtrasMerger(extrasMerger)
+                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                    .toBundle();
         }
 
         /**
@@ -479,6 +506,10 @@ public final class DropBoxManagerService extends SystemService {
             if (length > max) {
                 // Log and fall through to create empty tombstone below
                 Slog.w(TAG, "Dropping: " + tag + " (" + length + " > " + max + " bytes)");
+                logDropboxDropped(
+                        FrameworkStatsLog.DROPBOX_ENTRY_DROPPED__DROP_REASON__ENTRY_TOO_LARGE,
+                        tag,
+                        0);
             } else {
                 temp = new File(mDropBoxDir, "drop" + Thread.currentThread().getId() + ".tmp");
                 try (FileOutputStream out = new FileOutputStream(temp)) {
@@ -519,8 +550,13 @@ public final class DropBoxManagerService extends SystemService {
     public boolean isTagEnabled(String tag) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return !"disabled".equals(Settings.Global.getString(
+            if (DISABLED_BY_DEFAULT_TAGS.contains(tag)) {
+                return "enabled".equals(Settings.Global.getString(
                     mContentResolver, Settings.Global.DROPBOX_TAG_PREFIX + tag));
+            } else {
+                return !"disabled".equals(Settings.Global.getString(
+                    mContentResolver, Settings.Global.DROPBOX_TAG_PREFIX + tag));
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }

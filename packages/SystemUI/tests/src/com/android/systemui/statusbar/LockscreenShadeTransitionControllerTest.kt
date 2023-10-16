@@ -11,9 +11,11 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
-import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.AmbientState
@@ -44,8 +46,8 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -69,7 +71,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var mediaHierarchyManager: MediaHierarchyManager
     @Mock lateinit var scrimController: ScrimController
     @Mock lateinit var falsingManager: FalsingManager
-    @Mock lateinit var notificationPanelController: NotificationPanelViewController
+    @Mock lateinit var shadeViewController: ShadeViewController
     @Mock lateinit var nsslController: NotificationStackScrollLayoutController
     @Mock lateinit var depthController: NotificationShadeDepthController
     @Mock lateinit var stackscroller: NotificationStackScrollLayout
@@ -79,6 +81,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
     @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
     @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
+    @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -124,11 +127,13 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                         dumpManager)
                 },
                 qsTransitionControllerFactory = { qsTransitionController },
+                activityStarter = activityStarter,
+                shadeRepository = FakeShadeRepository(),
             )
         transitionController.addCallback(transitionControllerCallback)
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
-        transitionController.notificationPanelController = notificationPanelController
+        transitionController.shadeViewController = shadeViewController
         transitionController.centralSurfaces = mCentralSurfaces
         transitionController.qS = qS
         transitionController.setStackScroller(nsslController)
@@ -223,7 +228,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeCreatesQSAnimation() {
         transitionController.goToLockedShade(null)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(shadeViewController).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
     }
 
@@ -231,7 +236,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeDoesntCreateQSAnimation() {
         transitionController.goToLockedShade(null, needsQSAnimation = false)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(shadeViewController).transitionToExpandedShade(anyLong())
         assertNull(transitionController.dragDownAnimator)
     }
 
@@ -239,7 +244,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeAlwaysCreatesQSAnimationInSplitShade() {
         enableSplitShade()
         transitionController.goToLockedShade(null, needsQSAnimation = true)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(shadeViewController).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
     }
 
@@ -293,7 +298,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun setDragAmount_setsKeyguardTransitionProgress() {
         transitionController.dragDownAmount = 10f
 
-        verify(notificationPanelController).setKeyguardTransitionProgress(anyFloat(), anyInt())
+        verify(shadeViewController).setKeyguardTransitionProgress(anyFloat(), anyInt())
     }
 
     @Test
@@ -303,7 +308,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = 10f
 
         val expectedAlpha = 1 - 10f / alphaDistance
-        verify(notificationPanelController)
+        verify(shadeViewController)
                 .setKeyguardTransitionProgress(eq(expectedAlpha), anyInt())
     }
 
@@ -317,7 +322,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         transitionController.dragDownAmount = 10f
 
-        verify(notificationPanelController).setKeyguardTransitionProgress(anyFloat(), eq(0))
+        verify(shadeViewController).setKeyguardTransitionProgress(anyFloat(), eq(0))
     }
 
     @Test
@@ -330,7 +335,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         transitionController.dragDownAmount = 10f
 
-        verify(notificationPanelController)
+        verify(shadeViewController)
             .setKeyguardTransitionProgress(anyFloat(), eq(mediaTranslationY))
     }
 
@@ -349,7 +354,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_keyguard_transition_vertical_offset)
         val expectedTranslation = 10f / distance * offset
-        verify(notificationPanelController)
+        verify(shadeViewController)
             .setKeyguardTransitionProgress(anyFloat(), eq(expectedTranslation.toInt()))
     }
 
@@ -468,7 +473,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = dragDownAmount
 
         val expectedAlpha = 1 - dragDownAmount / alphaDistance
-        verify(notificationPanelController).setKeyguardStatusBarAlpha(expectedAlpha)
+        verify(shadeViewController).setKeyguardStatusBarAlpha(expectedAlpha)
     }
 
     @Test
@@ -477,7 +482,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
         transitionController.dragDownAmount = 10f
 
-        verify(notificationPanelController).setKeyguardStatusBarAlpha(-1f)
+        verify(shadeViewController).setKeyguardStatusBarAlpha(-1f)
     }
 
     private fun enableSplitShade() {

@@ -24,7 +24,6 @@ import android.app.timedetector.TimeSuggestionHelper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ShellCommand;
-import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -48,9 +47,9 @@ import java.util.Objects;
  *
  * <p>The creator of an external suggestion is expected to be separate Android process, e.g. a
  * process integrating with the external time source via a HAL or local network. The creator must
- * capture the elapsed realtime reference clock, e.g. via {@link SystemClock#elapsedRealtime()},
- * when the Unix epoch time is first obtained (usually under a wakelock). This enables Android to
- * adjust for latency introduced between suggestion creation and eventual use. Adjustments for other
+ * capture the elapsed realtime clock value, e.g. via {@link SystemClock#elapsedRealtime()}, when
+ * the Unix epoch time is first obtained (usually under a wakelock). This enables Android to adjust
+ * for latency introduced between suggestion creation and eventual use. Adjustments for other
  * sources of latency, i.e. those before the external time suggestion is created, must be handled by
  * the creator.
  *
@@ -97,7 +96,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
     public ExternalTimeSuggestion(@ElapsedRealtimeLong long elapsedRealtimeMillis,
             @CurrentTimeMillisLong long suggestionMillis) {
         mTimeSuggestionHelper = new TimeSuggestionHelper(ExternalTimeSuggestion.class,
-                new TimestampedValue<>(elapsedRealtimeMillis, suggestionMillis));
+                new UnixEpochTime(elapsedRealtimeMillis, suggestionMillis));
     }
 
     private ExternalTimeSuggestion(@NonNull TimeSuggestionHelper helper) {
@@ -118,7 +117,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
      * {@hide}
      */
     @NonNull
-    public TimestampedValue<Long> getUnixEpochTime() {
+    public UnixEpochTime getUnixEpochTime() {
         return mTimeSuggestionHelper.getUnixEpochTime();
     }
 

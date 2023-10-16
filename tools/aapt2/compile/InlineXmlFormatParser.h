@@ -21,8 +21,8 @@
 #include <vector>
 
 #include "android-base/macros.h"
-
 #include "process/IResourceTableConsumer.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
 

@@ -179,7 +179,7 @@ void GrouperTest::expectHasGroupWithSplits(const Vector<const char*>& expectedSt
             errorMessage.append("\n");
         }
     }
-    ADD_FAILURE() << errorMessage.string();
+    ADD_FAILURE() << errorMessage.c_str();
 }
 
 void GrouperTest::addSplit(Vector<SplitDescription>& splits, const char* str) {

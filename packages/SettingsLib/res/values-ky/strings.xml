@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Ажыратылды"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Өчүрүлгөн"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP конфигурациясы бузулду"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Тармактын сапаты начар болгондуктан, туташкан жок"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi туташуусу бузулду"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Аутентификация маселеси бар"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Туташпай жатат"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\"<xliff:g id="AP_NAME">%1$s</xliff:g>\" тармагына туташпай койду"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Автоматтык түрдө туташпайт"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Интернетке туташпай турат"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> тарабынан сакталды"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Чектелген трафикке туташтырылды"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s аркылуу автоматтык түрдө туташты"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Тармактар рейтингинин булагы аркылуу автоматтык түрдө туташты"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s аркылуу жеткиликтүү"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> аркылуу туташты"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s аркылуу жеткиликтүү"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Катталуу үчүн таптап коюңуз"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Интернет жок"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Жеке DNS сервери жеткиликсиз"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Интернет жок"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Аккаунтка кирүү талап кылынат"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Байланыш түйүнүнө өтө көп түзмөк туташып турат"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s аркылуу туташты"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s аркылуу иштейт"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> ачылууда"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Туташпай койду"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Катталуу аяктоодо…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Катталуу аягына чыккан жок. Кайра аракет кылуу үчүн таптап коюңуз."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Катталуу аягына чыкты. Туташууда…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Өтө жай"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Жай"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"Жарайт"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Орто"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Ылдам"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Абдан ылдам"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Эскирип калган"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Туташууда…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Туташып турат (телефониясыз)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Туташып турат (медиасыз)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Туташып турат (SMS/MMS жазышуусуз)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Туташып турат (телефониясыз же медиасыз)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Туташып турат, батареянын деңгээли – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Туташып турат (телефониясыз), батареянын деңгээли – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -125,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD форматындагы аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD форматындагы аудио"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Угуу аппараттары"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE аудио"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Угуу аппараттарына туташып турат"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE аудио менен туташты"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Медиа аудиого туташты"</string>
@@ -212,19 +202,20 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Сүйлөө тонун баштапкы абалга келтирүү"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Текст айтылчу тонду демейки тонго коюңуз."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Өтө жай"</item>
-    <item msgid="1815382991399815061">"Жай"</item>
-    <item msgid="3075292553049300105">"Орточо"</item>
-    <item msgid="1158955023692670059">"Ылдам"</item>
-    <item msgid="5664310435707146591">"Ылдамыраак"</item>
-    <item msgid="5491266922147715962">"Абдан ылдам"</item>
-    <item msgid="7659240015901486196">"Тез"</item>
-    <item msgid="7147051179282410945">"Өтө тез"</item>
-    <item msgid="581904787661470707">"Эң ылдам"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Профиль тандоо"</string>
     <string name="category_personal" msgid="6236798763159385225">"Жеке"</string>
     <string name="category_work" msgid="4014193632325996115">"Жумуш"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Иштеп чыгуучунун параметрлери"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Иштеп чыгуучунун параметрлерин иштетүү"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Колдонмо өндүрүү мүмкүнчүлүктөрүн орнотуу"</string>
@@ -268,7 +259,7 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"Ойгоо туруу"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Түзмөк кубатталып жатканда экран өчпөйт"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI журналын иштетүү"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth таңгактарын алуу. (Бул жөндөөнү өзгөрткөндөн кийин Bluetooth\'ду өчүрүп / күйгүзүңүз)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth таңгактарын алуу. (Бул параметрди өзгөрткөндөн кийин Bluetooth\'ду өчүрүп / күйгүзүңүз)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM бөгөттөн чыгаруу"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Кайра жүктөгүчтү бөгөттөн чыгарууга уруксат берүү"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM бөгөттөн чыгарууга уруксатпы?"</string>
@@ -360,10 +351,10 @@
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Мониторинг"</string>
     <string name="strict_mode" msgid="889864762140862437">"Катаал режим иштетилди"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Узак операцияларда экран күйүп-өчүп турат"</string>
-    <string name="pointer_location" msgid="7516929526199520173">"Көрсөткүчтүн жайгшкн жери"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"Көрсөткүчтүн турган жери"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Басылган жерлер жана жаңсоолор экранда көрүнүп турат"</string>
     <string name="show_touches" msgid="8437666942161289025">"Басылган жерлерди көрсөтүү"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Экранда басылган жерлер көрүнүп турат"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Экрандын басылган жерлери көрүнүп турат"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Экран жаңыруусун көрсөтүү"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Экран жаңырганда анын үстү жарык болот"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Жаңыртууларды көрсөтүү"</string>
@@ -381,6 +372,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Кесилген нерсенин чектери жана жээктери көрүнөт"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Интерфейсти чагылдыруу"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Интерфейстин элементтери бардык тилдерде оңдон солго карай жайгашат"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Тунук чабыттоо тилкеси"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Чабыттоо тилкесинин фонунун түсүн демейки боюнча тунук кылуу"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Терезенин деңгээлинде бүдөмүктөтүүгө уруксат берүү"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA иштетүү"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 колдонмолорунда 4x MSAA иштетилет"</string>
@@ -527,6 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Көбүрөөк убакыт."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Азыраак убакыт."</string>
     <string name="cancel" msgid="5665114069455378395">"Жок"</string>
+    <string name="next" msgid="2699398661093607009">"Кийинки"</string>
+    <string name="back" msgid="5554327870352703710">"Артка"</string>
+    <string name="save" msgid="3745809743277153149">"Сактоо"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Бүттү"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ойготкучтар жана эстеткичтер"</string>
@@ -549,7 +545,17 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Жаңы эле"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ушул телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ушул планшет"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Док бекети үчүн динамик"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Тышкы түзмөк"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Туташкан түзмөк"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ушул телефон"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Бул түзмөктө ойнотууга болбойт"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Премиум аккаунтка которулуу керек"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Жүктөлүп алынгандар ойнотулбайт"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Жарнамадан кийин кайталаңыз"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Угуу үчүн түзмөктү уйкудан чыгарыңыз"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Ойнотуу үчүн уруксат алышыңыз керек"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Медиа файлды ойното албайсыз"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Туташууда маселе келип чыкты. Түзмөктү өчүрүп, кайра күйгүзүп көрүңүз"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Зымдуу аудио түзмөк"</string>
     <string name="help_label" msgid="3528360748637781274">"Жардам/Пикир билдирүү"</string>
@@ -574,6 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңы колдонуучу кошосузбу?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Эгер түзмөгүңүздү дагы бир адам колдонуп жаткан болсо, кошумча профилдерди түзүп коюңуз. Профилдин ээси аны өзү каалагандай тууралап, тушкагаздарды коюп, керектүү колдонмолорду орнотуп алат. Мындан тышкары, колдонуучулар түзмөктүн Wi‑Fi´ды өчүрүү/күйгүзүү сыяктуу жалпы параметрлерин өзгөртө алышат.\n\nПрофиль түзүлгөндөн кийин, аны тууралап алуу керек.\n\nЖалпы колдонмолорду баары жаңырта алат, бирок атайын мүмкүнчүлүктөр өз-өзүнчө жөндөлөт."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңы колдонуучу кошулганда, ал өз мейкиндигин түзүп алышы керек.\n\nКолдонмолорду бир колдонуучу жаңыртканда, ал калган бардык колдонуучулар үчүн да жаңырат."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Бул колдонуучуну админ кыласызбы?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Админдердин өзгөчө укуктары бар. Админ бардык колдонуучуларды тескеп, бул түзмөктү жаңыртып же баштапкы абалга келтирип, параметрлерди өзгөртүп, орнотулган колдонмолордун баарын көрүп, башкаларга админ укуктарын берип же жокко чыгара алат."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Админ кылуу"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профилди жөндөйсүзбү?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Өз мейкиндигин жөндөп алышы үчүн, түзмөктү колдонуучуга беришиңиз керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл азыр түзүлсүнбү?"</string>
@@ -605,6 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Учурдагы конок сеансындагы бардык колдонмолор менен алардагы нерселер өчүп калат"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Ооба, аны админ кылуу"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Жок, ал админ болбосун"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Чыгуу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттерин сактайсызбы?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана алардагы нерселерди жок кылсаңыз болот"</string>
@@ -672,4 +683,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Божомолдонгон анимациялар"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Божомолдоп билүү үчүн системанын анимацияларын иштетиңиз."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Бул параметр жаңсоо анимациясын божомолдоп билүү үчүн системанын анимацияларын иштетет. Ал үчүн манифест файлындагы enableOnBackInvokedCallback параметри ар бир колдонмо үчүн \"true\" деп коюлушу керек."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Солго жылдыруу"</item>
+    <item msgid="5425394847942513942">"Төмөн жылдыруу"</item>
+    <item msgid="7728484337962740316">"Оңго жылдыруу"</item>
+    <item msgid="324200556467459329">"Жогору жылдыруу"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

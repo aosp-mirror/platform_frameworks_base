@@ -39,6 +39,7 @@
 #include "idmap2/PrettyPrintVisitor.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
+#include <fcntl.h>
 
 using android::base::StringPrintf;
 using android::binder::Status;
@@ -235,7 +236,16 @@ Status Idmap2Service::createFabricatedOverlay(
   }
 
   for (const auto& res : overlay.entries) {
-    builder.SetResourceValue(res.resourceName, res.dataType, res.data);
+    if (res.dataType == Res_value::TYPE_STRING) {
+      builder.SetResourceValue(res.resourceName, res.dataType, res.stringData.value(),
+            res.configuration.value_or(std::string()));
+    } else if (res.binaryData.has_value()) {
+      builder.SetResourceValue(res.resourceName, res.binaryData->get(),
+            res.configuration.value_or(std::string()));
+    } else {
+      builder.SetResourceValue(res.resourceName, res.dataType, res.data,
+            res.configuration.value_or(std::string()));
+    }
   }
 
   // Generate the file path of the fabricated overlay and ensure it does not collide with an
@@ -258,6 +268,7 @@ Status Idmap2Service::createFabricatedOverlay(
                              file_name.c_str(), kMaxFileNameLength));
     }
   } while (std::filesystem::exists(path));
+  builder.setFrroPath(path);
 
   const uid_t uid = IPCThreadState::self()->getCallingUid();
   if (!UidHasWriteAccessToPath(uid, path)) {

@@ -43,6 +43,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 
@@ -181,6 +182,8 @@ public class AndroidKeyStoreProvider extends Provider {
             spi = ((Mac) cryptoPrimitive).getCurrentSpi();
         } else if (cryptoPrimitive instanceof Cipher) {
             spi = ((Cipher) cryptoPrimitive).getCurrentSpi();
+        } else if (cryptoPrimitive instanceof KeyAgreement) {
+            spi = ((KeyAgreement) cryptoPrimitive).getCurrentSpi();
         } else {
             throw new IllegalArgumentException("Unsupported crypto primitive: " + cryptoPrimitive
                     + ". Supported: Signature, Mac, Cipher");

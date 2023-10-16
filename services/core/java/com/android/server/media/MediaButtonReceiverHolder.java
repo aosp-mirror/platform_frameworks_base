@@ -252,10 +252,13 @@ final class MediaButtonReceiverHolder {
 
     @Override
     public String toString() {
-        if (mPendingIntent != null) {
-            return "MBR {pi=" + mPendingIntent + ", type=" + mComponentType + "}";
-        }
-        return "Restored MBR {component=" + mComponentName + ", type=" + mComponentType + "}";
+        StringBuilder sb = new StringBuilder();
+        sb.append("MBR {pi=").append(mPendingIntent);
+        sb.append(", componentName=").append(mComponentName);
+        sb.append(", type=").append(mComponentType);
+        sb.append(", pkg=").append(mPackageName);
+        sb.append("}");
+        return sb.toString();
     }
 
     /**
@@ -270,6 +273,10 @@ final class MediaButtonReceiverHolder {
                 mComponentName.flattenToString(),
                 String.valueOf(mUserId),
                 String.valueOf(mComponentType));
+    }
+
+    public ComponentName getComponentName() {
+        return mComponentName;
     }
 
     @ComponentType

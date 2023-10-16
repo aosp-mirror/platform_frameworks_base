@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"መተግበሪያ ተጭኗል።"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ይህን መተግበሪያ መጫን ይፈልጋሉ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ይህን መተግበሪያ ማዘመን ይፈልጋሉ?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"ይህ መተግበሪያ ከ<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ይዘምን?\n\nይህ መተግበሪያ በመደበኛነት ዝማኔዎችን ከ<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> ይቀበላል። ከተለየ ምንጭ በማዘመን በስልክዎ ላይ ካለ ማንኛውም ምንጭ የወደፊት ዝማኔዎችን ሊቀበሉ ይችላሉ። የመተግበሪያ ተግባራዊነት ሊለወጥ ይችላል።"</string>
     <string name="install_failed" msgid="5777824004474125469">"መተግበሪያ አልተጫነም።"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ጥቅሉ እንዳይጫን ታግዷል።"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"እንደ ጥቅል ያልተጫነ መተግበሪያ ከነባር ጥቅል ጋር ይጋጫል።"</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ያልታወቁ መተግበሪያዎች በዚህ ተጠቃሚ ሊጫኑ አይችሉም"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ይህ ተጠቃሚ መተግበሪያዎችን እንዲጭን አልተፈቀደለትም"</string>
     <string name="ok" msgid="7871959885003339302">"እሺ"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"የሆነው ሆኖ አዘምን"</string>
     <string name="manage_applications" msgid="5400164782453975580">"መተግበሪያዎችን ያቀናብሩ"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ቦታ ሞልቷል"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g>ን መጫን አልቻለም። የተወሰነ ቦታ ያስለቅቁና እንደገና ይሞክሩ።"</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ይህ መተግበሪያ በፋብሪካው ስሪት ይተካ? ሁሉም ውሂብ ይወገዳል።"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ይህ መተግበሪያ በፋብሪካው ስሪት ይተካ? ሁሉም ውሂብ ይወገዳል። እነዚያን የሥራ መገለጫዎች ያላቸውን ጨምሮ ሁሉንም በዚህ መሣሪያ ላይ ባሉ ተጠቃሚዎች ላይ ተጽዕኖ ያሳርፍባቸዋል።"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ከመተግበሪያ ውሂብ <xliff:g id="SIZE">%1$s</xliff:g> አቆይ።"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ይህን መተግበሪያ መሰረዝ ይፈልጋሉ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ይህን መተግበሪያ ማራገፍ ይፈልጋሉ? የተባዛውም <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ይሰረዛል።"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"በማሄድ ላይ ያሉ ማራገፎች"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ያልተሳኩ ማራገፎች"</string>
     <string name="uninstalling" msgid="8709566347688966845">"በማራገፍ ላይ…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ን በማራገፍ ላይ…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"ማራግፍ ተጠናቅቋል።"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ተራግፏል"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"የተሰረዘ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ብዜት"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ማራገፍ አልተሳካም።"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ን ማራገፍ ስኬታማ አልነበረም።"</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"የተባዛ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ን በመሰረዝ ላይ…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ገቢር የመሣሪያ አስተዳደር መተግበሪያን ማራገፍ አይቻልም"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"ለ<xliff:g id="USERNAME">%1$s</xliff:g> ገቢር የመሣሪያ አስተዳደር መተግበሪያን ማራገፍ አይቻልም"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ይህ መተግበሪያ ለአንዳንድ ተጠቃሚዎች ወይም መገለጫዎች የሚያስፈልግ ሲሆን ለሌሎች ተራግፏል"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"ያልታወቀ"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"ለእርስዎ ደህንነት ሲባል በአሁኑ ጊዜ ጡባዊዎ ከዚህ ምንጭ ያልታወቁ መተግበሪያዎችን እንዲጭን አይፈቀድለትም። ይህን በቅንብሮች ውስጥ መቀየር ይችላሉ።"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"ለእርስዎ ደህንነት ሲባል በአሁኑ ጊዜ የእርስዎ ቲቪ ከዚህ ምንጭ ያልታወቁ መተግበሪያዎችን እንዲጭን አይፈቀድለትም። ይህን በቅንብሮች ውስጥ መቀየር ይችላሉ።"</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"ለደህንነትዎ ሲባል በአሁኑ ጊዜ የእጅ ሰዓትዎ ያልታወቁ መተግበሪያዎችን ከዚህ ምንጭ እንዲጭን አይፈቀድለትም። ይህን በቅንብሮች ውስጥ መለወጥ ይችላሉ።"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"ለእርስዎ ደህንነት ሲባል በአሁኑ ጊዜ ስልክዎ ከዚህ ምንጭ ያልታወቁ መተግበሪያዎችን እንዲጭን አልተፈቀደለትም። ይህን በቅንብሮች ውስጥ መቀየር ይችላሉ።"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"የእርስዎ ስልክ እና የግል ውሂብ በማይታወቁ መተግበሪያዎች ለሚደርሱ ጥቃቶች በይልበልጥ ተጋላጭ ናቸው። ይህን መተግበሪያ በመጫንዎ በእርስዎ ስልክ ላይ ለሚደርስ ማናቸውም ጉዳት ወይም መተግበሪያውን በመጠቀም ለሚከሰት የውሂብ መጥፋት ኃላፊነቱን እንደሚወስዱ ተስማምተዋል።"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"የእርስዎ ጡባዊ እና የግል ውሂብ በማይታወቁ መተግበሪያዎች ለሚደርሱ ጥቃቶች በይበልጥ ተጋላጭ ናቸው። ይህን መተግበሪያ በመጫንዎ በእርስዎ ጡባዊ ላይ ለሚደርስ ማናቸውም ጉዳት ወይም መተግበሪያውን በመጠቀም ለሚከሰት የውሂብ መጥፋት ኃላፊነቱን እንደሚወስዱ ተስማምተዋል።"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"የእርስዎ ቴሌቪዥን እና የግል ውሂብ በማይታወቁ መተግበሪያዎች ለሚደርሱ ጥቃቶች በይበልጥ ተጋላጭ ናቸው። ይህን መተግበሪያ በመጫንዎ በእርስዎ ቴሌቪዥን ላይ ለሚደርስ ማናቸውም ጉዳት ወይም መተግበሪያውን በመጠቀም ለሚከሰት የውሂብ መጥፋት ኃላፊነቱን እንደሚወስዱ ተስማምተዋል።"</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"የተባዛ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ቀጥል"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ቅንብሮች"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"የWear መተግበሪያዎችን መጫን/ማራገፍ"</string>

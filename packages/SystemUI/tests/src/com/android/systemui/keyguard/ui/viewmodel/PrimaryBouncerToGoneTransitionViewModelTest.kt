@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -32,6 +33,7 @@ import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -41,6 +43,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     private lateinit var underTest: PrimaryBouncerToGoneTransitionViewModel
@@ -52,7 +55,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         repository = FakeKeyguardTransitionRepository()
-        val interactor = KeyguardTransitionInteractor(repository)
+        val interactor = KeyguardTransitionInteractor(repository, TestScope().backgroundScope)
         underTest =
             PrimaryBouncerToGoneTransitionViewModel(
                 interactor,

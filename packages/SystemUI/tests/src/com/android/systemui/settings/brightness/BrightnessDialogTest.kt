@@ -52,7 +52,8 @@ class BrightnessDialogTest : SysuiTestCase() {
     @Mock private lateinit var mainExecutor: Executor
     @Mock private lateinit var backgroundHandler: Handler
     @Mock private lateinit var brightnessSliderController: BrightnessSliderController
-    private val displayTracker = FakeDisplayTracker(mContext)
+
+    private var displayTracker = FakeDisplayTracker(mContext)
 
     @Rule
     @JvmField

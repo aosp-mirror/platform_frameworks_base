@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Přesunout"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Rozbalit"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Sbalit"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Ovládací prvky zobrazíte dvojitým stisknutím "<annotation icon="home_icon">"tlačítka plochy"</annotation></string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Ovládací prvky zobrazíte dvojitým stisknutím "<annotation icon="home_icon">"HOME"</annotation></string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Nabídka režimu obrazu v obraze"</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Přesunout doleva"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Přesunout doprava"</string>

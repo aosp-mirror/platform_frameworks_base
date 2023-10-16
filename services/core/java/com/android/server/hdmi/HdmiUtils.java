@@ -27,11 +27,11 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.hdmi.Constants.AbortReason;
 import com.android.server.hdmi.Constants.AudioCodec;
 import com.android.server.hdmi.Constants.FeatureOpcode;

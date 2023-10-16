@@ -16,6 +16,7 @@
 
 package android.security.keystore;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,7 +35,10 @@ import java.security.KeyPairGenerator;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -71,16 +75,18 @@ import javax.security.auth.x500.X500Principal;
  * {@link java.security.interfaces.ECPublicKey} or {@link java.security.interfaces.RSAPublicKey}
  * interfaces.
  *
- * <p>For asymmetric key pairs, a self-signed X.509 certificate will be also generated and stored in
- * the Android Keystore. This is because the {@link java.security.KeyStore} abstraction does not
- * support storing key pairs without a certificate. The subject, serial number, and validity dates
- * of the certificate can be customized in this spec. The self-signed certificate may be replaced at
- * a later time by a certificate signed by a Certificate Authority (CA).
+ * <p>For asymmetric key pairs, a X.509 certificate will be also generated and stored in the Android
+ * Keystore. This is because the {@link java.security.KeyStore} abstraction does not support storing
+ * key pairs without a certificate. The subject, serial number, and validity dates of the
+ * certificate can be customized in this spec. The certificate may be replaced at a later time by a
+ * certificate signed by a Certificate Authority (CA).
  *
- * <p>NOTE: If a private key is not authorized to sign the self-signed certificate, then the
- * certificate will be created with an invalid signature which will not verify. Such a certificate
- * is still useful because it provides access to the public key. To generate a valid signature for
- * the certificate the key needs to be authorized for all of the following:
+ * <p>NOTE: If attestation is not requested using {@link Builder#setAttestationChallenge(byte[])},
+ * generated certificate may be self-signed. If a private key is not authorized to sign the
+ * certificate, then the certificate will be created with an invalid signature which will not
+ * verify. Such a certificate is still useful because it provides access to the public key. To
+ * generate a valid signature for the certificate the key needs to be authorized for all of the
+ * following:
  * <ul>
  * <li>{@link KeyProperties#PURPOSE_SIGN},</li>
  * <li>operation without requiring the user to be authenticated (see
@@ -300,6 +306,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final Date mKeyValidityForConsumptionEnd;
     private final @KeyProperties.PurposeEnum int mPurposes;
     private final @KeyProperties.DigestEnum String[] mDigests;
+    private final @NonNull @KeyProperties.DigestEnum Set<String> mMgf1Digests;
     private final @KeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
     private final @KeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
     private final @KeyProperties.BlockModeEnum String[] mBlockModes;
@@ -320,6 +327,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final boolean mCriticalToDeviceEncryption;
     private final int mMaxUsageCount;
     private final String mAttestKeyAlias;
+    private final long mBoundToSecureUserId;
+
     /*
      * ***NOTE***: All new fields MUST also be added to the following:
      * ParcelableKeyGenParameterSpec class.
@@ -343,6 +352,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             Date keyValidityForConsumptionEnd,
             @KeyProperties.PurposeEnum int purposes,
             @KeyProperties.DigestEnum String[] digests,
+            @KeyProperties.DigestEnum Set<String> mgf1Digests,
             @KeyProperties.EncryptionPaddingEnum String[] encryptionPaddings,
             @KeyProperties.SignaturePaddingEnum String[] signaturePaddings,
             @KeyProperties.BlockModeEnum String[] blockModes,
@@ -362,7 +372,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             boolean unlockedDeviceRequired,
             boolean criticalToDeviceEncryption,
             int maxUsageCount,
-            String attestKeyAlias) {
+            String attestKeyAlias,
+            long boundToSecureUserId) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -401,6 +412,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
         mPurposes = purposes;
         mDigests = ArrayUtils.cloneIfNotEmpty(digests);
+        // No need to copy the input parameter because the Builder class passes in an immutable
+        // collection.
+        mMgf1Digests = mgf1Digests != null ? mgf1Digests : Collections.emptySet();
         mEncryptionPaddings =
                 ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(encryptionPaddings));
         mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(signaturePaddings));
@@ -422,6 +436,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mCriticalToDeviceEncryption = criticalToDeviceEncryption;
         mMaxUsageCount = maxUsageCount;
         mAttestKeyAlias = attestKeyAlias;
+        mBoundToSecureUserId = boundToSecureUserId;
     }
 
     /**
@@ -562,7 +577,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
 
     /**
      * Returns the set of digest algorithms (e.g., {@code SHA-256}, {@code SHA-384} with which the
-     * key can be used or {@code null} if not specified.
+     * key can be used.
      *
      * <p>See {@link KeyProperties}.{@code DIGEST} constants.
      *
@@ -587,6 +602,40 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     @NonNull
     public boolean isDigestsSpecified() {
         return mDigests != null;
+    }
+
+    /**
+     * Returns the set of digests that can be used by the MGF1 mask generation function
+     * (e.g., {@code SHA-256}, {@code SHA-384}) with the key. Useful with the {@code RSA-OAEP}
+     * scheme.
+     * If not explicitly specified during key generation, the default {@code SHA-1} digest is
+     * used and may be specified when using the key.
+     *
+     * <p>See {@link KeyProperties}.{@code DIGEST} constants.
+     *
+     * @throws IllegalStateException if this set has not been specified.
+     *
+     * @see #isMgf1DigestsSpecified()
+     */
+    @NonNull
+    @FlaggedApi("MGF1_DIGEST_SETTER")
+    public @KeyProperties.DigestEnum Set<String> getMgf1Digests() {
+        if (mMgf1Digests.isEmpty()) {
+            throw new IllegalStateException("Mask generation function (MGF) not specified");
+        }
+        return new HashSet(mMgf1Digests);
+    }
+
+    /**
+     * Returns {@code true} if the set of digests for the MGF1 mask generation function,
+     * with which the key can be used, has been specified. Useful with the {@code RSA-OAEP} scheme.
+     *
+     * @see #getMgf1Digests()
+     */
+    @NonNull
+    @FlaggedApi("MGF1_DIGEST_SETTER")
+    public boolean isMgf1DigestsSpecified() {
+        return !mMgf1Digests.isEmpty();
     }
 
     /**
@@ -842,10 +891,20 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
+     * Return the secure user id that this key should be bound to.
+     *
+     * Normally an authentication-bound key is tied to the secure user id of the current user
+     * (either the root SID from GateKeeper for auth-bound keys with a timeout, or the authenticator
+     * id of the current biometric set for keys requiring explicit biometric authorization).
+     * If this parameter is set (this method returning non-zero value), the key should be tied to
+     * the specified secure user id, overriding the logic above.
+     *
+     * This is only applicable when {@link #isUserAuthenticationRequired} is {@code true}
+     *
      * @hide
      */
     public long getBoundToSpecificSecureUserId() {
-        return GateKeeper.INVALID_SECURE_USER_ID;
+        return mBoundToSecureUserId;
     }
 
     /**
@@ -899,6 +958,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private Date mKeyValidityForOriginationEnd;
         private Date mKeyValidityForConsumptionEnd;
         private @KeyProperties.DigestEnum String[] mDigests;
+        private @NonNull @KeyProperties.DigestEnum Set<String> mMgf1Digests =
+                Collections.emptySet();
         private @KeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
         private @KeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
         private @KeyProperties.BlockModeEnum String[] mBlockModes;
@@ -920,6 +981,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private boolean mCriticalToDeviceEncryption = false;
         private int mMaxUsageCount = KeyProperties.UNRESTRICTED_USAGE_COUNT;
         private String mAttestKeyAlias = null;
+        private long mBoundToSecureUserId = GateKeeper.INVALID_SECURE_USER_ID;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -928,12 +990,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          *        Android KeyStore. Must not be empty.
          * @param purposes set of purposes (e.g., encrypt, decrypt, sign) for which the key can be
          *        used. Attempts to use the key for any other purpose will be rejected.
-         *
-         *        <p>If the set of purposes for which the key can be used does not contain
-         *        {@link KeyProperties#PURPOSE_SIGN}, the self-signed certificate generated by
-         *        {@link KeyPairGenerator} of {@code AndroidKeyStore} provider will contain an
-         *        invalid signature. This is OK if the certificate is only used for obtaining the
-         *        public key from Android KeyStore.
          *
          *        <p>See {@link KeyProperties}.{@code PURPOSE} flags.
          */
@@ -968,6 +1024,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             if (sourceSpec.isDigestsSpecified()) {
                 mDigests = sourceSpec.getDigests();
             }
+            if (sourceSpec.isMgf1DigestsSpecified()) {
+                mMgf1Digests = sourceSpec.getMgf1Digests();
+            }
             mEncryptionPaddings = sourceSpec.getEncryptionPaddings();
             mSignaturePaddings = sourceSpec.getSignaturePaddings();
             mBlockModes = sourceSpec.getBlockModes();
@@ -990,6 +1049,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mCriticalToDeviceEncryption = sourceSpec.isCriticalToDeviceEncryption();
             mMaxUsageCount = sourceSpec.getMaxUsageCount();
             mAttestKeyAlias = sourceSpec.getAttestKeyAlias();
+            mBoundToSecureUserId = sourceSpec.getBoundToSpecificSecureUserId();
         }
 
         /**
@@ -1076,7 +1136,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets the subject used for the self-signed certificate of the generated key pair.
+         * Sets the subject used for the certificate of the generated key pair.
          *
          * <p>By default, the subject is {@code CN=fake}.
          */
@@ -1090,7 +1150,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets the serial number used for the self-signed certificate of the generated key pair.
+         * Sets the serial number used for the certificate of the generated key pair.
          *
          * <p>By default, the serial number is {@code 1}.
          */
@@ -1104,8 +1164,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets the start of the validity period for the self-signed certificate of the generated
-         * key pair.
+         * Sets the start of the validity period for the certificate of the generated key pair.
          *
          * <p>By default, this date is {@code Jan 1 1970}.
          */
@@ -1119,8 +1178,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets the end of the validity period for the self-signed certificate of the generated key
-         * pair.
+         * Sets the end of the validity period for the certificate of the generated key pair.
          *
          * <p>By default, this date is {@code Jan 1 2048}.
          */
@@ -1210,6 +1268,30 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         @NonNull
         public Builder setDigests(@KeyProperties.DigestEnum String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
+            return this;
+        }
+
+        /**
+         * Sets the set of hash functions (e.g., {@code SHA-256}, {@code SHA-384}) which could be
+         * used by the mask generation function MGF1 (which is used for certain operations with
+         * the key). Attempts to use the key with any other digest for the mask generation
+         * function will be rejected.
+         *
+         * <p>This can only be specified for signing/verification keys and RSA encryption/decryption
+         * keys used with RSA OAEP padding scheme because these operations involve a mask generation
+         * function (MGF1) with a digest.
+         * The default digest for MGF1 is {@code SHA-1}, which will be specified during key creation
+         * time if no digests have been explicitly provided.
+         * When using the key, the caller may not specify any digests that were not provided during
+         * key creation time. The caller may specify the default digest, {@code SHA-1}, if no
+         * digests were explicitly provided during key creation (but it is not necessary to do so).
+         *
+         * <p>See {@link KeyProperties}.{@code DIGEST} constants.
+         */
+        @NonNull
+        @FlaggedApi("MGF1_DIGEST_SETTER")
+        public Builder setMgf1Digests(@Nullable @KeyProperties.DigestEnum String... mgf1Digests) {
+            mMgf1Digests = Set.of(mgf1Digests);
             return this;
         }
 
@@ -1508,7 +1590,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * key has purpose {@link android.security.keystore.KeyProperties#PURPOSE_SIGN}. If the key
          * does not have purpose {@link android.security.keystore.KeyProperties#PURPOSE_SIGN}, it is
          * not possible to use the key to sign a certificate, so the public key certificate will
-         * contain a dummy signature.
+         * contain a placeholder signature.
          *
          * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
          * {@link #getAttestationChallenge()} returns non-null and the spec is used to generate a
@@ -1727,6 +1809,27 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
+         * Set the secure user id that this key should be bound to.
+         *
+         * Normally an authentication-bound key is tied to the secure user id of the current user
+         * (either the root SID from GateKeeper for auth-bound keys with a timeout, or the
+         * authenticator id of the current biometric set for keys requiring explicit biometric
+         * authorization). If this parameter is set (this method returning non-zero value), the key
+         * should be tied to the specified secure user id, overriding the logic above.
+         *
+         * This is only applicable when {@link #setUserAuthenticationRequired} is set to
+         * {@code true}
+         *
+         * @see KeyGenParameterSpec#getBoundToSpecificSecureUserId()
+         * @hide
+         */
+        @NonNull
+        public Builder setBoundToSpecificSecureUserId(long secureUserId) {
+            mBoundToSecureUserId = secureUserId;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
         @NonNull
@@ -1745,6 +1848,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mKeyValidityForConsumptionEnd,
                     mPurposes,
                     mDigests,
+                    mMgf1Digests,
                     mEncryptionPaddings,
                     mSignaturePaddings,
                     mBlockModes,
@@ -1764,7 +1868,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mUnlockedDeviceRequired,
                     mCriticalToDeviceEncryption,
                     mMaxUsageCount,
-                    mAttestKeyAlias);
+                    mAttestKeyAlias,
+                    mBoundToSecureUserId);
         }
     }
 }

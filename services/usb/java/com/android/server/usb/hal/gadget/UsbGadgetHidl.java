@@ -184,18 +184,18 @@ public final class UsbGadgetHidl implements UsbGadgetHal {
     }
 
     @Override
-    public void reset() {
+    public void reset(long transactionId) {
         try {
             synchronized(mGadgetProxyLock) {
-                if (android.hardware.usb.gadget.V1_2.IUsbGadget.castFrom(mGadgetProxy) != null) {
-                    android.hardware.usb.gadget.V1_2.IUsbGadget gadgetProxy =
-                    android.hardware.usb.gadget.V1_2.IUsbGadget.castFrom(mGadgetProxy);
+                if (android.hardware.usb.gadget.V1_1.IUsbGadget.castFrom(mGadgetProxy) != null) {
+                    android.hardware.usb.gadget.V1_1.IUsbGadget gadgetProxy =
+                    android.hardware.usb.gadget.V1_1.IUsbGadget.castFrom(mGadgetProxy);
                     gadgetProxy.reset();
                 }
             }
         } catch (RemoteException e) {
             logAndPrintException(mPw,
-                    "RemoteException while calling getUsbSpeed", e);
+                    "RemoteException while calling reset", e);
             return;
         }
     }

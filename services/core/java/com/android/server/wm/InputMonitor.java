@@ -18,13 +18,13 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -49,10 +49,12 @@ import static com.android.server.wm.WindowManagerService.LOGTAG_INPUT_FOCUS;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.InputConfig;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -78,14 +80,14 @@ final class InputMonitor {
     private final WindowManagerService mService;
 
     // Current input focus token for keys and other non-touch events.  May be null.
-    private IBinder mInputFocus = null;
+    IBinder mInputFocus = null;
+    long mInputFocusRequestTimeMillis = 0;
 
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;
     private boolean mUpdateInputWindowsPending;
     private boolean mUpdateInputWindowsImmediately;
 
-    private boolean mDisableWallpaperTouchEvents;
     private final Region mTmpRegion = new Region();
     private final UpdateInputForAllWindowsConsumer mUpdateInputForAllWindowsConsumer;
 
@@ -152,13 +154,13 @@ final class InputMonitor {
 
     void onDisplayRemoved() {
         mHandler.removeCallbacks(mUpdateInputWindows);
-        mHandler.post(() -> {
-            // Make sure any pending setInputWindowInfo transactions are completed. That prevents
-            // the timing of updating input info of removed display after cleanup.
-            mService.mTransactionFactory.get().syncInputWindows().apply();
-            // It calls InputDispatcher::setInputWindows directly.
-            mService.mInputManager.onDisplayRemoved(mDisplayId);
-        });
+        mService.mTransactionFactory.get()
+            // Make sure any pending setInputWindowInfo transactions are completed. That
+            // prevents the timing of updating input info of removed display after cleanup.
+            .addWindowInfosReportedListener(() ->
+                // It calls InputDispatcher::setInputWindows directly.
+                mService.mInputManager.onDisplayRemoved(mDisplayId))
+            .apply();
         mDisplayRemoved = true;
     }
 
@@ -270,12 +272,12 @@ final class InputMonitor {
                 InputConfigAdapter.getMask());
 
         final boolean focusable = w.canReceiveKeys()
-                && (mService.mPerDisplayFocusEnabled || mDisplayContent.isOnTop());
+                && (mDisplayContent.hasOwnFocus() || mDisplayContent.isOnTop());
         inputWindowHandle.setFocusable(focusable);
 
         final boolean hasWallpaper = mDisplayContent.mWallpaperController.isWallpaperTarget(w)
                 && !mService.mPolicy.isKeyguardShowing()
-                && !mDisableWallpaperTouchEvents;
+                && w.mAttrs.areWallpaperTouchEventsEnabled();
         inputWindowHandle.setHasWallpaper(hasWallpaper);
 
         // Surface insets are hardcoded to be the same in all directions
@@ -296,8 +298,11 @@ final class InputMonitor {
                 // be applied using the SurfaceControl hierarchy from the Organizer. This means
                 // we need to make sure that these changes in crop are reflected in the input
                 // windows, and so ensure this flag is set so that the input crop always reflects
-                // the surface hierarchy.
-                useSurfaceBoundsAsTouchRegion = true;
+                // the surface hierarchy. However, we only want to set this when the client did
+                // not already provide a touchable region, so that we don't ignore the one provided.
+                if (w.mTouchableInsets != TOUCHABLE_INSETS_REGION) {
+                    useSurfaceBoundsAsTouchRegion = true;
+                }
 
                 if (w.mAttrs.isModal()) {
                     TaskFragment parent = w.getTaskFragment();
@@ -405,14 +410,22 @@ final class InputMonitor {
             // Apply recents input consumer when the focusing window is in recents animation.
             final boolean shouldApplyRecentsInputConsumer = (recentsAnimationController != null
                     && recentsAnimationController.shouldApplyInputConsumer(focus.mActivityRecord))
-                    // Shell transitions doesn't use RecentsAnimationController
-                    || getWeak(mActiveRecentsActivity) != null && focus.inTransition();
+                    // Shell transitions doesn't use RecentsAnimationController but we still
+                    // have carryover legacy logic that relies on the consumer.
+                    || (getWeak(mActiveRecentsActivity) != null && focus.inTransition()
+                            // only take focus from the recents activity to avoid intercepting
+                            // events before the gesture officially starts.
+                            && focus.isActivityTypeHomeOrRecents());
             if (shouldApplyRecentsInputConsumer) {
                 if (mInputFocus != recentsAnimationInputConsumer.mWindowHandle.token) {
                     requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,
                             recentsAnimationInputConsumer.mName);
+                }
+                if (mDisplayContent.mInputMethodWindow != null
+                        && mDisplayContent.mInputMethodWindow.isVisible()) {
                     // Hiding IME/IME icon when recents input consumer gain focus.
-                    if (!mDisplayContent.isImeAttachedToApp()) {
+                    final boolean isImeAttachedToApp = mDisplayContent.isImeAttachedToApp();
+                    if (!isImeAttachedToApp) {
                         // Hiding IME if IME window is not attached to app since it's not proper to
                         // snapshot Task with IME window to animate together in this case.
                         final InputMethodManagerInternal inputMethodManagerInternal =
@@ -420,6 +433,17 @@ final class InputMonitor {
                         if (inputMethodManagerInternal != null) {
                             inputMethodManagerInternal.hideCurrentInputMethod(
                                     SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
+                        }
+                        // Ensure removing the IME snapshot when the app no longer to show on the
+                        // task snapshot (also taking the new task snaphot to update the overview).
+                        final ActivityRecord app = mDisplayContent.getImeInputTarget() != null
+                                ? mDisplayContent.getImeInputTarget().getActivityRecord() : null;
+                        if (app != null) {
+                            mDisplayContent.removeImeSurfaceImmediately();
+                            if (app.getTask() != null) {
+                                mDisplayContent.mAtmService.takeTaskSnapshot(app.getTask().mTaskId,
+                                        true /* updateCache */);
+                            }
                         }
                     } else {
                         // Disable IME icon explicitly when IME attached to the app in case
@@ -481,6 +505,7 @@ final class InputMonitor {
         }
 
         mInputFocus = focusToken;
+        mInputFocusRequestTimeMillis = SystemClock.uptimeMillis();
         mInputTransaction.setFocusedWindow(mInputFocus, windowName, mDisplayId);
         EventLog.writeEvent(LOGTAG_INPUT_FOCUS, "Focus request " + windowName,
                 "reason=UpdateInputWindows");
@@ -534,7 +559,8 @@ final class InputMonitor {
         private boolean mAddWallpaperInputConsumerHandle;
         private boolean mAddRecentsAnimationInputConsumerHandle;
 
-        boolean mInDrag;
+        private boolean mInDrag;
+        private final Rect mTmpRect = new Rect();
 
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
@@ -547,7 +573,6 @@ final class InputMonitor {
             mAddWallpaperInputConsumerHandle = mWallpaperInputConsumer != null;
             mAddRecentsAnimationInputConsumerHandle = mRecentsAnimationInputConsumer != null;
 
-            mDisableWallpaperTouchEvents = false;
             mInDrag = inDrag;
 
             resetInputConsumers(mInputTransaction);
@@ -559,8 +584,11 @@ final class InputMonitor {
                 layer = layer != null ? layer : activeRecents;
                 // Handle edge-case for SUW where windows don't exist yet
                 if (layer.getSurfaceControl() != null) {
-                    mRecentsAnimationInputConsumer.mWindowHandle
-                            .replaceTouchableRegionWithCrop(layer.getSurfaceControl());
+                    final WindowState targetAppMainWindow = activeRecents.findMainWindow();
+                    if (targetAppMainWindow != null) {
+                        targetAppMainWindow.getBounds(mTmpRect);
+                        mRecentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
+                    }
                     mRecentsAnimationInputConsumer.show(mInputTransaction, layer);
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }
@@ -591,8 +619,6 @@ final class InputMonitor {
                 // Skip this window because it cannot possibly receive input.
                 return;
             }
-
-            final int privateFlags = w.mAttrs.privateFlags;
 
             // This only works for legacy transitions.
             final RecentsAnimationController recentsAnimationController =
@@ -636,10 +662,6 @@ final class InputMonitor {
                     mWallpaperInputConsumer.show(mInputTransaction, w);
                     mAddWallpaperInputConsumerHandle = false;
                 }
-            }
-
-            if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
-                mDisableWallpaperTouchEvents = true;
             }
 
             // If there's a drag in progress and 'child' is a potential drop target,

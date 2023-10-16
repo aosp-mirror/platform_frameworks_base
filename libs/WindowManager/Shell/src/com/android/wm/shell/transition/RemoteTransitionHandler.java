@@ -39,6 +39,7 @@ import androidx.annotation.BinderThread;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -93,10 +94,16 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        if (!Transitions.SHELL_TRANSITIONS_ROTATION && TransitionUtil.hasDisplayChange(info)) {
+            // Note that if the remote doesn't have permission ACCESS_SURFACE_FLINGER, some
+            // operations of the start transaction may be ignored.
+            mRequestedRemotes.remove(transition);
+            return false;
+        }
         RemoteTransition pendingRemote = mRequestedRemotes.get(transition);
         if (pendingRemote == null) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s doesn't have "
-                    + "explicit remote, search filters for match for %s", transition, info);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition doesn't have "
+                    + "explicit remote, search filters for match for %s", info);
             // If no explicit remote, search filters until one matches
             for (int i = mFilters.size() - 1; i >= 0; --i) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Checking filter %s",
@@ -110,8 +117,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
         }
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Delegate animation for %s to %s",
-                transition, pendingRemote);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Delegate animation for #%d to %s",
+                info.getDebugId(), pendingRemote);
 
         if (pendingRemote == null) return false;
 
@@ -178,9 +185,10 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        final IRemoteTransition remote = mRequestedRemotes.get(mergeTarget).getRemoteTransition();
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt merge %s into %s",
-                transition, remote);
+        final RemoteTransition remoteTransition = mRequestedRemotes.get(mergeTarget);
+        final IRemoteTransition remote = remoteTransition.getRemoteTransition();
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "   Merge into remote: %s",
+                remoteTransition);
         if (remote == null) return;
 
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {

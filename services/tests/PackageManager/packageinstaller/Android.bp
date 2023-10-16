@@ -32,7 +32,7 @@ android_test {
         "androidx.test.runner",
         "junit",
         "kotlin-test",
-        "truth-prebuilt",
+        "truth",
     ],
     platform_apis: true,
     test_suites: ["device-tests"],

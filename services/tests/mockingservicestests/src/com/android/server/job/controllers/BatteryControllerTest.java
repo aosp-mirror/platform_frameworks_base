@@ -33,15 +33,15 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.ServiceInfo;
 import android.os.BatteryManagerInternal;
 import android.os.RemoteException;
 import android.util.ArraySet;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 
@@ -62,6 +62,7 @@ public class BatteryControllerTest {
     private static final int SOURCE_USER_ID = 0;
 
     private BatteryController mBatteryController;
+    private FlexibilityController mFlexibilityController;
     private BroadcastReceiver mPowerReceiver;
     private JobSchedulerService.Constants mConstants = new JobSchedulerService.Constants();
     private int mSourceUid;
@@ -75,6 +76,8 @@ public class BatteryControllerTest {
     private JobSchedulerService mJobSchedulerService;
     @Mock
     private PackageManagerInternal mPackageManagerInternal;
+    @Mock
+    private PackageManager mPackageManager;
 
     @Before
     public void setUp() {
@@ -99,7 +102,13 @@ public class BatteryControllerTest {
         // Capture the listeners.
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
-        mBatteryController = new BatteryController(mJobSchedulerService);
+
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(false);
+        mFlexibilityController =
+                new FlexibilityController(mJobSchedulerService, mock(PrefetchController.class));
+        mBatteryController = new BatteryController(mJobSchedulerService, mFlexibilityController);
 
         verify(mContext).registerReceiver(receiverCaptor.capture(),
                 ArgumentMatchers.argThat(filter ->
@@ -171,7 +180,7 @@ public class BatteryControllerTest {
     }
 
     private void waitForNonDelayedMessagesProcessed() {
-        JobSchedulerBackgroundThread.getHandler().runWithScissors(() -> {}, 15_000);
+        AppSchedulingModuleThread.getHandler().runWithScissors(() -> {}, 15_000);
     }
 
     private JobInfo.Builder createBaseJobInfoBuilder(int jobId) {
@@ -185,8 +194,8 @@ public class BatteryControllerTest {
     private JobStatus createJobStatus(String testTag, String packageName, int callingUid,
             JobInfo jobInfo) {
         JobStatus js = JobStatus.createFromJobInfo(
-                jobInfo, callingUid, packageName, SOURCE_USER_ID, testTag);
-        js.serviceInfo = mock(ServiceInfo.class);
+                jobInfo, callingUid, packageName, SOURCE_USER_ID, "BCTest", testTag);
+        js.serviceProcessName = "testProcess";
         // Make sure tests aren't passing just because the default bucket is likely ACTIVE.
         js.setStandbyBucket(FREQUENT_INDEX);
         return js;
@@ -208,6 +217,63 @@ public class BatteryControllerTest {
 
         trackJobs(job2);
         assertTrue(job2.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+    }
+
+    @Test
+    public void testFlexibilityController_BatteryNotLow() {
+        setBatteryNotLow(false);
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        setBatteryNotLow(true);
+        assertTrue(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        setBatteryNotLow(false);
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+    }
+
+    @Test
+    public void testFlexibilityController_Charging() {
+        setDischarging();
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+        setCharging();
+        assertTrue(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+        setDischarging();
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+    }
+
+    @Test
+    public void testFlexibilityController_Charging_BatterNotLow() {
+        setDischarging();
+        setBatteryNotLow(false);
+
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+
+        setCharging();
+
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertTrue(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+
+        setBatteryNotLow(true);
+
+        assertTrue(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertTrue(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+
+        setDischarging();
+
+        assertTrue(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+
+        setBatteryNotLow(false);
+
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
     }
 
     @Test
@@ -366,10 +432,10 @@ public class BatteryControllerTest {
         assertFalse(topStartedJobs.contains(unrelatedJob));
 
         // Job cleanup
-        mBatteryController.maybeStopTrackingJobLocked(batteryJob, null, false);
-        mBatteryController.maybeStopTrackingJobLocked(chargingJob, null, false);
-        mBatteryController.maybeStopTrackingJobLocked(bothPowerJob, null, false);
-        mBatteryController.maybeStopTrackingJobLocked(unrelatedJob, null, false);
+        mBatteryController.maybeStopTrackingJobLocked(batteryJob, null);
+        mBatteryController.maybeStopTrackingJobLocked(chargingJob, null);
+        mBatteryController.maybeStopTrackingJobLocked(bothPowerJob, null);
+        mBatteryController.maybeStopTrackingJobLocked(unrelatedJob, null);
         assertFalse(trackedJobs.contains(batteryJob));
         assertFalse(trackedJobs.contains(chargingJob));
         assertFalse(trackedJobs.contains(bothPowerJob));

@@ -22,6 +22,7 @@ import static android.content.pm.UserInfo.FLAG_EPHEMERAL;
 import static android.content.pm.UserInfo.FLAG_FULL;
 import static android.content.pm.UserInfo.FLAG_GUEST;
 import static android.content.pm.UserInfo.FLAG_INITIALIZED;
+import static android.content.pm.UserInfo.FLAG_MAIN;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.content.pm.UserInfo.FLAG_PROFILE;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
@@ -206,6 +207,13 @@ public class UserManagerServiceUserInfoTest {
         assertFalse("Switching to a profiles should be disabled", userInfo.supportsSwitchTo());
     }
 
+    /** Test UserInfo.canHaveProfile for main user */
+    @Test
+    public void testCanHaveProfile() throws Exception {
+        UserInfo userInfo = createUser(100, FLAG_MAIN, null);
+        assertTrue("Main users can have profile", userInfo.canHaveProfile());
+    }
+
     /** Tests upgradeIfNecessaryLP (but without locking) for upgrading from version 8 to 9+. */
     @Test
     public void testUpgradeIfNecessaryLP_9() {
@@ -222,7 +230,7 @@ public class UserManagerServiceUserInfoTest {
         mUserManagerService.putUserInfo(createUser(105, FLAG_SYSTEM | FLAG_FULL, null));
         mUserManagerService.putUserInfo(createUser(106, FLAG_DEMO | FLAG_FULL, null));
 
-        mUserManagerService.upgradeIfNecessaryLP(null, versionToTest - 1, userTypeVersion);
+        mUserManagerService.upgradeIfNecessaryLP(versionToTest - 1, userTypeVersion);
 
         assertTrue(mUserManagerService.isUserOfType(100, USER_TYPE_PROFILE_MANAGED));
         assertTrue((mUserManagerService.getUserInfo(100).flags & FLAG_PROFILE) != 0);

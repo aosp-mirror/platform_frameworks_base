@@ -84,7 +84,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -1296,49 +1295,61 @@ public final class FileUtils {
      * value, such as 256MB or 32GB. This avoids showing weird values like
      * "29.5GB" in UI.
      *
+     * Some storage devices are still using GiB (powers of 1024) over
+     * GB (powers of 1000) measurements and this method takes it into account.
+     *
+     * Round ranges:
+     * ...
+     * [256 GiB + 1; 512 GiB] -> 512 GB
+     * [512 GiB + 1; 1 TiB]   -> 1 TB
+     * [1 TiB + 1; 2 TiB]     -> 2 TB
+     * etc
+     *
      * @hide
      */
     public static long roundStorageSize(long size) {
         long val = 1;
-        long pow = 1;
-        while ((val * pow) < size) {
+        long kiloPow = 1;
+        long kibiPow = 1;
+        while ((val * kibiPow) < size) {
             val <<= 1;
             if (val > 512) {
                 val = 1;
-                pow *= 1000;
+                kibiPow *= 1024;
+                kiloPow *= 1000;
             }
         }
-        return val * pow;
+        return val * kiloPow;
     }
 
     private static long toBytes(long value, String unit) {
         unit = unit.toUpperCase();
 
-        if (List.of("B").contains(unit)) {
+        if ("B".equals(unit)) {
             return value;
         }
 
-        if (List.of("K", "KB").contains(unit)) {
+        if ("K".equals(unit) || "KB".equals(unit)) {
             return DataUnit.KILOBYTES.toBytes(value);
         }
 
-        if (List.of("M", "MB").contains(unit)) {
+        if ("M".equals(unit) || "MB".equals(unit)) {
             return DataUnit.MEGABYTES.toBytes(value);
         }
 
-        if (List.of("G", "GB").contains(unit)) {
+        if ("G".equals(unit) || "GB".equals(unit)) {
             return DataUnit.GIGABYTES.toBytes(value);
         }
 
-        if (List.of("KI", "KIB").contains(unit)) {
+        if ("KI".equals(unit) || "KIB".equals(unit)) {
             return DataUnit.KIBIBYTES.toBytes(value);
         }
 
-        if (List.of("MI", "MIB").contains(unit)) {
+        if ("MI".equals(unit) || "MIB".equals(unit)) {
             return DataUnit.MEBIBYTES.toBytes(value);
         }
 
-        if (List.of("GI", "GIB").contains(unit)) {
+        if ("GI".equals(unit) || "GIB".equals(unit)) {
             return DataUnit.GIBIBYTES.toBytes(value);
         }
 
@@ -1370,7 +1381,7 @@ public final class FileUtils {
                 sign = -1;
             }
 
-            fmtSize = fmtSize.replace(first + "", "");
+            fmtSize = fmtSize.substring(1);
         }
 
         int index = 0;

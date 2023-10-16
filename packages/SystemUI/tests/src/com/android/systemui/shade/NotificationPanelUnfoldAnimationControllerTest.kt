@@ -37,6 +37,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -54,10 +55,12 @@ class NotificationPanelUnfoldAnimationControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var parent: ViewGroup
 
+    @Mock private lateinit var splitShadeStatusBar: ViewGroup
+
     @Mock private lateinit var statusBarStateController: StatusBarStateController
 
     private lateinit var underTest: NotificationPanelUnfoldAnimationController
-    private lateinit var progressListener: TransitionProgressListener
+    private lateinit var progressListeners: List<TransitionProgressListener>
     private var xTranslationMax = 0f
 
     @Before
@@ -73,10 +76,13 @@ class NotificationPanelUnfoldAnimationControllerTest : SysuiTestCase() {
                 statusBarStateController,
                 progressProvider
             )
+        whenever(parent.findViewById<ViewGroup>(R.id.split_shade_status_bar)).thenReturn(
+            splitShadeStatusBar
+        )
         underTest.setup(parent)
 
-        verify(progressProvider).addCallback(capture(progressListenerCaptor))
-        progressListener = progressListenerCaptor.value
+        verify(progressProvider, atLeastOnce()).addCallback(capture(progressListenerCaptor))
+        progressListeners = progressListenerCaptor.allValues
     }
 
     @Test
@@ -86,16 +92,16 @@ class NotificationPanelUnfoldAnimationControllerTest : SysuiTestCase() {
         val view = View(context)
         whenever(parent.findViewById<View>(R.id.quick_settings_panel)).thenReturn(view)
 
-        progressListener.onTransitionStarted()
+        onTransitionStarted()
         assertThat(view.translationX).isZero()
 
-        progressListener.onTransitionProgress(0f)
+        onTransitionProgress(0f)
         assertThat(view.translationX).isZero()
 
-        progressListener.onTransitionProgress(0.5f)
+        onTransitionProgress(0.5f)
         assertThat(view.translationX).isZero()
 
-        progressListener.onTransitionFinished()
+        onTransitionFinished()
         assertThat(view.translationX).isZero()
     }
 
@@ -106,16 +112,16 @@ class NotificationPanelUnfoldAnimationControllerTest : SysuiTestCase() {
         val view = View(context)
         whenever(parent.findViewById<View>(R.id.quick_settings_panel)).thenReturn(view)
 
-        progressListener.onTransitionStarted()
+        onTransitionStarted()
         assertThat(view.translationX).isZero()
 
-        progressListener.onTransitionProgress(0f)
+        onTransitionProgress(0f)
         assertThat(view.translationX).isEqualTo(xTranslationMax)
 
-        progressListener.onTransitionProgress(0.5f)
+        onTransitionProgress(0.5f)
         assertThat(view.translationX).isEqualTo(0.5f * xTranslationMax)
 
-        progressListener.onTransitionFinished()
+        onTransitionFinished()
         assertThat(view.translationX).isZero()
     }
 
@@ -126,16 +132,88 @@ class NotificationPanelUnfoldAnimationControllerTest : SysuiTestCase() {
         val view = View(context)
         whenever(parent.findViewById<View>(R.id.quick_settings_panel)).thenReturn(view)
 
-        progressListener.onTransitionStarted()
+        onTransitionStarted()
         assertThat(view.translationX).isZero()
 
-        progressListener.onTransitionProgress(0f)
+        onTransitionProgress(0f)
         assertThat(view.translationX).isEqualTo(xTranslationMax)
 
-        progressListener.onTransitionProgress(0.5f)
+        onTransitionProgress(0.5f)
         assertThat(view.translationX).isEqualTo(0.5f * xTranslationMax)
 
-        progressListener.onTransitionFinished()
+        onTransitionFinished()
         assertThat(view.translationX).isZero()
     }
+
+    @Test
+    fun whenInKeyguardState_statusBarViewDoesNotMove() {
+        whenever(statusBarStateController.getState()).thenReturn(KEYGUARD)
+
+        val view = View(context)
+        whenever(splitShadeStatusBar.findViewById<View>(R.id.date)).thenReturn(view)
+
+        onTransitionStarted()
+        assertThat(view.translationX).isZero()
+
+        onTransitionProgress(0f)
+        assertThat(view.translationX).isZero()
+
+        onTransitionProgress(0.5f)
+        assertThat(view.translationX).isZero()
+
+        onTransitionFinished()
+        assertThat(view.translationX).isZero()
+    }
+
+    @Test
+    fun whenInShadeState_statusBarViewDoesMove() {
+        whenever(statusBarStateController.getState()).thenReturn(SHADE)
+
+        val view = View(context)
+        whenever(splitShadeStatusBar.findViewById<View>(R.id.date)).thenReturn(view)
+
+        onTransitionStarted()
+        assertThat(view.translationX).isZero()
+
+        onTransitionProgress(0f)
+        assertThat(view.translationX).isEqualTo(xTranslationMax)
+
+        onTransitionProgress(0.5f)
+        assertThat(view.translationX).isEqualTo(0.5f * xTranslationMax)
+
+        onTransitionFinished()
+        assertThat(view.translationX).isZero()
+    }
+
+    @Test
+    fun whenInShadeLockedState_statusBarViewDoesMove() {
+        whenever(statusBarStateController.getState()).thenReturn(SHADE_LOCKED)
+
+        val view = View(context)
+        whenever(splitShadeStatusBar.findViewById<View>(R.id.date)).thenReturn(view)
+        onTransitionStarted()
+        assertThat(view.translationX).isZero()
+
+        onTransitionProgress(0f)
+        assertThat(view.translationX).isEqualTo(xTranslationMax)
+
+        onTransitionProgress(0.5f)
+        assertThat(view.translationX).isEqualTo(0.5f * xTranslationMax)
+
+        onTransitionFinished()
+        assertThat(view.translationX).isZero()
+    }
+
+    private fun onTransitionStarted() {
+        progressListeners.forEach { it.onTransitionStarted() }
+    }
+
+    private fun onTransitionProgress(progress: Float) {
+        progressListeners.forEach { it.onTransitionProgress(progress) }
+    }
+
+    private fun onTransitionFinished() {
+        progressListeners.forEach { it.onTransitionFinished() }
+    }
+
 }

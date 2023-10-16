@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Translation request sent to the {@link android.service.translation.TranslationService} by the
+ * Translation request sent to the translation service by the
  * {@link android.view.translation.Translator} which contains the text to be translated.
  */
 @DataClass(genToString = true, genHiddenConstDefs = true, genBuilder = true)

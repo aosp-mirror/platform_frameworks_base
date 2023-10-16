@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <SkCamera.h>
 #include <SkMatrix.h>
 
 #include <utils/LinearAllocator.h>
@@ -115,15 +114,15 @@ public:
         return mDisplayList.containsProjectionReceiver();
     }
 
-    const char* getName() const { return mName.string(); }
+    const char* getName() const { return mName.c_str(); }
 
     void setName(const char* name) {
         if (name) {
             const char* lastPeriod = strrchr(name, '.');
             if (lastPeriod) {
-                mName.setTo(lastPeriod + 1);
+                mName = (lastPeriod + 1);
             } else {
-                mName.setTo(name);
+                mName = name;
             }
         }
     }
@@ -222,6 +221,8 @@ public:
 
     int64_t uniqueId() const { return mUniqueId; }
 
+    void setIsTextureView() { mIsTextureView = true; }
+
     void markDrawStart(SkCanvas& canvas);
     void markDrawEnd(SkCanvas& canvas);
 
@@ -290,6 +291,8 @@ private:
 
     bool mHasHolePunches;
     StretchMask mStretchMask;
+
+    bool mIsTextureView = false;
 
     // METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
 public:

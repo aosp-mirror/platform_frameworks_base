@@ -18,10 +18,9 @@ package com.android.systemui.mediaprojection.appselector
 
 import android.content.ComponentName
 import android.os.UserHandle
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -33,7 +32,7 @@ class MediaProjectionAppSelectorController
 constructor(
     private val recentTaskListProvider: RecentTaskListProvider,
     private val view: MediaProjectionAppSelectorView,
-    private val flags: FeatureFlags,
+    private val devicePolicyResolver: ScreenCaptureDevicePolicyResolver,
     @HostUserHandle private val hostUserHandle: UserHandle,
     @MediaProjectionAppSelector private val scope: CoroutineScope,
     @MediaProjectionAppSelector private val appSelectorComponentName: ComponentName,
@@ -55,17 +54,13 @@ constructor(
         scope.cancel()
     }
 
-    /**
-     * Removes all recent tasks that are different from the profile of the host app to avoid any
-     * cross-profile sharing
-     */
-    private fun List<RecentTask>.filterDevicePolicyRestrictedTasks(): List<RecentTask> =
-        if (flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
-            // TODO(b/263950746): filter tasks based on the enterprise policies
-            this
-        } else {
-            filter { UserHandle.of(it.userId) == hostUserHandle }
-        }
+    /** Removes all recent tasks that should be blocked according to the policy */
+    private fun List<RecentTask>.filterDevicePolicyRestrictedTasks(): List<RecentTask> = filter {
+        devicePolicyResolver.isScreenCaptureAllowed(
+            targetAppUserHandle = UserHandle.of(it.userId),
+            hostAppUserHandle = hostUserHandle
+        )
+    }
 
     private fun List<RecentTask>.filterAppSelector(): List<RecentTask> = filter {
         // Only take tasks that is not the app selector

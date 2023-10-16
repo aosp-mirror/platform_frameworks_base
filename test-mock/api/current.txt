@@ -1,4 +1,6 @@
 // Signature format: 2.0
+// - add-additional-overrides=no
+// - migrating=Migration in progress see b/299366704
 package android.test.mock {
 
   @Deprecated public class MockAccountManager {
@@ -235,7 +237,6 @@ package android.test.mock {
     method @Deprecated public android.content.Intent getLaunchIntentForPackage(String);
     method @Deprecated public android.content.Intent getLeanbackLaunchIntentForPackage(String);
     method @Deprecated public String getNameForUid(int);
-    method @Deprecated public android.content.pm.PackageInfo getPackageArchiveInfo(String, int);
     method @Deprecated public int[] getPackageGids(String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated public int[] getPackageGids(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated public android.content.pm.PackageInfo getPackageInfo(String, int) throws android.content.pm.PackageManager.NameNotFoundException;

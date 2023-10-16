@@ -334,7 +334,7 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject senderWeak,
     if (status) {
         String8 message;
         message.appendFormat("Failed to initialize input event sender.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        jniThrowRuntimeException(env, message.c_str());
         return 0;
     }
 
@@ -353,8 +353,7 @@ static jboolean nativeSendKeyEvent(JNIEnv* env, jclass clazz, jlong senderPtr,
         jint seq, jobject eventObj) {
     sp<NativeInputEventSender> sender =
             reinterpret_cast<NativeInputEventSender*>(senderPtr);
-    KeyEvent event;
-    android_view_KeyEvent_toNative(env, eventObj, &event);
+    const KeyEvent event = android_view_KeyEvent_toNative(env, eventObj);
     status_t status = sender->sendKeyEvent(seq, &event);
     return !status;
 }

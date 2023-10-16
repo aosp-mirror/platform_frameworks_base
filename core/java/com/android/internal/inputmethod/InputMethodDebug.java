@@ -16,10 +16,11 @@
 
 package com.android.internal.inputmethod;
 
-import android.annotation.AnyThread;
-import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.inputmethod.HandwritingGesture;
 
 import java.util.StringJoiner;
 
@@ -46,10 +47,10 @@ public final class InputMethodDebug {
                 return "UNSPECIFIED";
             case StartInputReason.WINDOW_FOCUS_GAIN:
                 return "WINDOW_FOCUS_GAIN";
-            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION:
-                return "WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION";
-            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION:
-                return "WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION";
+            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY:
+                return "WINDOW_FOCUS_GAIN_REPORT_ONLY";
+            case StartInputReason.SCHEDULED_CHECK_FOCUS:
+                return "SCHEDULED_CHECK_FOCUS";
             case StartInputReason.APP_CALLED_RESTART_INPUT_API:
                 return "APP_CALLED_RESTART_INPUT_API";
             case StartInputReason.CHECK_FOCUS:
@@ -93,8 +94,6 @@ public final class InputMethodDebug {
                 return "SWITCH_IME_FAILED";
             case UnbindReason.SWITCH_USER:
                 return "SWITCH_USER";
-            case UnbindReason.ACCESSIBILITY_SERVICE_DISABLED:
-                return "ACCESSIBILITY_SERVICE_DISABLED";
             default:
                 return "Unknown=" + reason;
         }
@@ -228,6 +227,8 @@ public final class InputMethodDebug {
                 return "HIDE_DOCKED_STACK_ATTACHED";
             case SoftInputShowHideReason.HIDE_RECENTS_ANIMATION:
                 return "HIDE_RECENTS_ANIMATION";
+            case SoftInputShowHideReason.HIDE_BUBBLES:
+                return "HIDE_BUBBLES";
             case SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR:
                 return "HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR";
             case SoftInputShowHideReason.HIDE_REMOVE_CLIENT:
@@ -252,26 +253,68 @@ public final class InputMethodDebug {
                 return "HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED";
             case SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION:
                 return "HIDE_SOFT_INPUT_IMM_DEPRECATION";
+            case SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR:
+                return "HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR";
+            case SoftInputShowHideReason.SHOW_IME_SCREENSHOT_FROM_IMMS:
+                return "SHOW_IME_SCREENSHOT_FROM_IMMS";
+            case SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS:
+                return "REMOVE_IME_SCREENSHOT_FROM_IMMS";
+            case SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE:
+                return "HIDE_WHEN_INPUT_TARGET_INVISIBLE";
             default:
                 return "Unknown=" + reason;
         }
     }
 
     /**
-     * Return a fixed size string of the object.
-     * TODO(b/151575861): Take & return with StringBuilder to make more memory efficient.
+     * Converts {@link HandwritingGesture.GestureTypeFlags} to {@link String} for debug logging.
+     *
+     * @param gestureTypeFlags integer constant for {@link HandwritingGesture.GestureTypeFlags}.
+     * @return {@link String} message corresponds for the given {@code gestureTypeFlags}.
      */
-    @NonNull
-    @AnyThread
-    public static String objToString(Object obj) {
-        if (obj == null) {
+    public static String handwritingGestureTypeFlagsToString(
+            @HandwritingGesture.GestureTypeFlags int gestureTypeFlags) {
+        final StringJoiner joiner = new StringJoiner("|");
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_SELECT) != 0) {
+            joiner.add("SELECT");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_SELECT_RANGE) != 0) {
+            joiner.add("SELECT_RANGE");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_INSERT) != 0) {
+            joiner.add("INSERT");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_DELETE) != 0) {
+            joiner.add("DELETE");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_DELETE_RANGE) != 0) {
+            joiner.add("DELETE_RANGE");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_REMOVE_SPACE) != 0) {
+            joiner.add("REMOVE_SPACE");
+        }
+        if ((gestureTypeFlags & HandwritingGesture.GESTURE_TYPE_JOIN_OR_SPLIT) != 0) {
+            joiner.add("JOIN_OR_SPLIT");
+        }
+        return joiner.setEmptyValue("(none)").toString();
+    }
+
+    /**
+     * Dumps the given {@link View} related to input method focus state for debugging.
+     */
+    public static String dumpViewInfo(@Nullable View view) {
+        if (view == null) {
             return "null";
         }
-        StringBuilder sb = new StringBuilder(64);
-        sb.setLength(0);
-        sb.append(obj.getClass().getName());
-        sb.append("@");
-        sb.append(Integer.toHexString(obj.hashCode()));
+        final StringBuilder sb = new StringBuilder();
+        sb.append(view);
+        sb.append(",focus=" + view.hasFocus());
+        sb.append(",windowFocus=" + view.hasWindowFocus());
+        sb.append(",window=" + view.getWindowToken());
+        sb.append(",displayId=" + view.getContext().getDisplayId());
+        sb.append(",temporaryDetach=" + view.isTemporarilyDetached());
+        sb.append(",hasImeFocus=" + view.hasImeFocus());
+
         return sb.toString();
     }
 }

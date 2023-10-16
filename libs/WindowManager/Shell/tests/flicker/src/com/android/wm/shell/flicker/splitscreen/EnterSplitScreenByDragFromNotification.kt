@@ -16,25 +16,24 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.view.WindowManagerPolicyConstants
+import android.tools.common.NavBar
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.wm.shell.flicker.ICommonAssertions
+import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
+import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisibleByDrag
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
-import org.junit.Assume
-import org.junit.Before
+import com.android.wm.shell.flicker.splitscreen.benchmark.EnterSplitScreenByDragFromNotificationBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,8 +41,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test enter split screen by dragging app icon from notification.
- * This test is only for large screen devices.
+ * Test enter split screen by dragging app icon from notification. This test is only for large
+ * screen devices.
  *
  * To run this test: `atest WMShellFlickerTests:EnterSplitScreenByDragFromNotification`
  */
@@ -51,88 +50,122 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
-class EnterSplitScreenByDragFromNotification(
-    testSpec: FlickerTestParameter
-) : SplitScreenBase(testSpec) {
-
-    private val sendNotificationApp = SplitScreenHelper.getSendNotification(instrumentation)
-
-    @Before
-    fun before() {
-        Assume.assumeTrue(taplInstrumentation.isTablet)
-    }
-
+class EnterSplitScreenByDragFromNotification(override val flicker: FlickerTest) :
+    EnterSplitScreenByDragFromNotificationBenchmark(flicker), ICommonAssertions {
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-            setup {
-                eachRun {
-                    // Send a notification
-                    sendNotificationApp.launchViaIntent(wmHelper)
-                    val sendNotification = device.wait(
-                        Until.findObject(By.text("Send Notification")),
-                        SplitScreenHelper.TIMEOUT_MS
-                    )
-                    sendNotification?.click() ?: error("Send notification button not found")
-
-                    taplInstrumentation.goHome()
-                    primaryApp.launchViaIntent(wmHelper)
-                }
-            }
-            transitions {
-                SplitScreenHelper.dragFromNotificationToSplit(instrumentation, device, wmHelper)
-            }
-            teardown {
-                eachRun {
-                    sendNotificationApp.exit(wmHelper)
-                }
-            }
+            defaultSetup(this)
+            defaultTeardown(this)
+            thisTransition(this)
         }
 
+    @FlakyTest(bugId = 245472831)
+    @Test
+    fun splitScreenDividerBecomesVisible() {
+        flicker.splitScreenDividerBecomesVisible()
+    }
+
+    // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
     @Presubmit
     @Test
-    fun dividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun splitScreenDividerIsVisibleAtEnd() {
+        flicker.assertLayersEnd { this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
+    }
+
+    @Presubmit @Test fun primaryAppLayerIsVisibleAtEnd() = flicker.layerIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
-    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp.component)
+    fun secondaryAppLayerBecomesVisible() {
+        flicker.layerBecomesVisible(sendNotificationApp)
+    }
 
     @Presubmit
     @Test
-    fun secondaryAppLayerBecomesVisible() =
-        testSpec.layerBecomesVisible(sendNotificationApp.component)
+    fun primaryAppBoundsIsVisibleAtEnd() =
+        flicker.splitAppLayerBoundsIsVisibleAtEnd(
+            primaryApp,
+            landscapePosLeft = false,
+            portraitPosTop = false
+        )
 
     @Presubmit
     @Test
-    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        testSpec.endRotation, primaryApp.component, false /* splitLeftTop */
-    )
+    fun secondaryAppBoundsBecomesVisible() =
+        flicker.splitAppLayerBoundsBecomesVisibleByDrag(sendNotificationApp)
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        testSpec.endRotation, sendNotificationApp.component, true /* splitLeftTop */
-    )
+    fun primaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
-    fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp.component)
+    fun secondaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(sendNotificationApp)
 
-    @Presubmit
+    /** {@inheritDoc} */
+    @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Postsubmit
     @Test
-    fun secondaryAppWindowIsVisibleAtEnd() =
-        testSpec.appWindowIsVisibleAtEnd(sendNotificationApp.component)
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                repetitions = SplitScreenHelper.TEST_REPETITIONS,
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
         }
     }

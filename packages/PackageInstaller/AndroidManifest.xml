@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.READ_INSTALL_SESSIONS" />
+    <uses-permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS" />
     <uses-permission android:name="android.permission.USE_RESERVED_DISK" />
@@ -19,6 +20,8 @@
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
 
     <uses-permission android:name="com.google.android.permission.INSTALL_WEARABLE_PACKAGES" />
 
@@ -58,6 +61,10 @@
             </intent-filter>
             <intent-filter android:priority="1">
                 <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter android:priority="1">
+                <action android:name="android.content.pm.action.CONFIRM_PRE_APPROVAL" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -137,12 +144,13 @@
         <!-- Wearable Components -->
         <service android:name=".wear.WearPackageInstallerService"
                  android:permission="com.google.android.permission.INSTALL_WEARABLE_PACKAGES"
+                 android:foregroundServiceType="systemExempted"
                  android:exported="true"/>
 
         <provider android:name=".wear.WearPackageIconProvider"
                   android:authorities="com.google.android.packageinstaller.wear.provider"
                   android:grantUriPermissions="true"
-                  android:exported="true" />
+                  android:exported="false" />
 
         <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver"
             tools:node="remove" />

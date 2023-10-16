@@ -16,8 +16,14 @@
 
 package android.hardware;
 
+import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
+import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
+import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -45,6 +51,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,10 +87,13 @@ public class SystemSensorManager extends SensorManager {
     private static native boolean nativeGetSensorAtIndex(long nativeInstance,
             Sensor sensor, int index);
     private static native void nativeGetDynamicSensors(long nativeInstance, List<Sensor> list);
+    private static native void nativeGetRuntimeSensors(
+            long nativeInstance, int deviceId, List<Sensor> list);
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
 
     private static native int nativeCreateDirectChannel(
-            long nativeInstance, long size, int channelType, int fd, HardwareBuffer buffer);
+            long nativeInstance, int deviceId, long size, int channelType, int fd,
+            HardwareBuffer buffer);
     private static native void nativeDestroyDirectChannel(
             long nativeInstance, int channelHandle);
     private static native int nativeConfigDirectChannel(
@@ -100,6 +110,10 @@ public class SystemSensorManager extends SensorManager {
 
     private final ArrayList<Sensor> mFullSensorsList = new ArrayList<>();
     private List<Sensor> mFullDynamicSensorsList = new ArrayList<>();
+    private final SparseArray<List<Sensor>> mFullRuntimeSensorListByDevice = new SparseArray<>();
+    private final SparseArray<SparseArray<List<Sensor>>> mRuntimeSensorListByDeviceByType =
+            new SparseArray<>();
+
     private boolean mDynamicSensorListDirty = true;
 
     private final HashMap<Integer, Sensor> mHandleToSensor = new HashMap<>();
@@ -114,6 +128,7 @@ public class SystemSensorManager extends SensorManager {
     private HashMap<DynamicSensorCallback, Handler>
             mDynamicSensorCallbacks = new HashMap<>();
     private BroadcastReceiver mDynamicSensorBroadcastReceiver;
+    private BroadcastReceiver mRuntimeSensorBroadcastReceiver;
 
     // Looper associated with the context in which this instance was created.
     private final Looper mMainLooper;
@@ -121,6 +136,7 @@ public class SystemSensorManager extends SensorManager {
     private final boolean mIsPackageDebuggable;
     private final Context mContext;
     private final long mNativeInstance;
+    private VirtualDeviceManager mVdm;
 
     private Optional<Boolean> mHasHighSamplingRateSensorsPermission = Optional.empty();
 
@@ -147,12 +163,67 @@ public class SystemSensorManager extends SensorManager {
             mFullSensorsList.add(sensor);
             mHandleToSensor.put(sensor.getHandle(), sensor);
         }
+
+    }
+
+    /** @hide */
+    @Override
+    public List<Sensor> getSensorList(int type) {
+        final int deviceId = mContext.getDeviceId();
+        if (isDeviceSensorPolicyDefault(deviceId)) {
+            return super.getSensorList(type);
+        }
+
+        // Cache the per-device lists on demand.
+        List<Sensor> list;
+        synchronized (mFullRuntimeSensorListByDevice) {
+            List<Sensor> fullList = mFullRuntimeSensorListByDevice.get(deviceId);
+            if (fullList == null) {
+                fullList = createRuntimeSensorListLocked(deviceId);
+            }
+            SparseArray<List<Sensor>> deviceSensorListByType =
+                    mRuntimeSensorListByDeviceByType.get(deviceId);
+            list = deviceSensorListByType.get(type);
+            if (list == null) {
+                if (type == Sensor.TYPE_ALL) {
+                    list = fullList;
+                } else {
+                    list = new ArrayList<>();
+                    for (Sensor i : fullList) {
+                        if (i.getType() == type) {
+                            list.add(i);
+                        }
+                    }
+                }
+                list = Collections.unmodifiableList(list);
+                deviceSensorListByType.append(type, list);
+            }
+        }
+        return list;
     }
 
     /** @hide */
     @Override
     protected List<Sensor> getFullSensorList() {
-        return mFullSensorsList;
+        final int deviceId = mContext.getDeviceId();
+        if (isDeviceSensorPolicyDefault(deviceId)) {
+            return mFullSensorsList;
+        }
+
+        List<Sensor> fullList;
+        synchronized (mFullRuntimeSensorListByDevice) {
+            fullList = mFullRuntimeSensorListByDevice.get(deviceId);
+            if (fullList == null) {
+                fullList = createRuntimeSensorListLocked(deviceId);
+            }
+        }
+        return fullList;
+    }
+
+    /** @hide */
+    @Override
+    public Sensor getSensorByHandle(int sensorHandle) {
+        return mHandleToSensor.get(sensorHandle);
     }
 
     /** @hide */
@@ -446,12 +517,53 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
+    private List<Sensor> createRuntimeSensorListLocked(int deviceId) {
+        setupRuntimeSensorBroadcastReceiver();
+        List<Sensor> list = new ArrayList<>();
+        nativeGetRuntimeSensors(mNativeInstance, deviceId, list);
+        mFullRuntimeSensorListByDevice.put(deviceId, list);
+        mRuntimeSensorListByDeviceByType.put(deviceId, new SparseArray<>());
+        for (Sensor s : list) {
+            mHandleToSensor.put(s.getHandle(), s);
+        }
+        return list;
+    }
+
+    private void setupRuntimeSensorBroadcastReceiver() {
+        if (mRuntimeSensorBroadcastReceiver == null) {
+            mRuntimeSensorBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getAction().equals(ACTION_VIRTUAL_DEVICE_REMOVED)) {
+                        synchronized (mFullRuntimeSensorListByDevice) {
+                            final int deviceId = intent.getIntExtra(
+                                    EXTRA_VIRTUAL_DEVICE_ID, DEVICE_ID_DEFAULT);
+                            List<Sensor> removedSensors =
+                                    mFullRuntimeSensorListByDevice.removeReturnOld(deviceId);
+                            if (removedSensors != null) {
+                                for (Sensor s : removedSensors) {
+                                    cleanupSensorConnection(s);
+                                }
+                            }
+                            mRuntimeSensorListByDeviceByType.remove(deviceId);
+                        }
+                    }
+                }
+            };
+
+            IntentFilter filter = new IntentFilter("virtual_device_removed");
+            filter.addAction(ACTION_VIRTUAL_DEVICE_REMOVED);
+            mContext.registerReceiver(mRuntimeSensorBroadcastReceiver, filter,
+                    Context.RECEIVER_NOT_EXPORTED);
+        }
+    }
+
     private void setupDynamicSensorBroadcastReceiver() {
         if (mDynamicSensorBroadcastReceiver == null) {
             mDynamicSensorBroadcastReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction() == Intent.ACTION_DYNAMIC_SENSOR_CHANGED) {
+                    if (intent.getAction().equals(Intent.ACTION_DYNAMIC_SENSOR_CHANGED)) {
                         if (DEBUG_DYNAMIC_SENSOR) {
                             Log.i(TAG, "DYNS received DYNAMIC_SENSOR_CHANGED broadcast");
                         }
@@ -590,6 +702,10 @@ public class SystemSensorManager extends SensorManager {
     /** @hide */
     protected SensorDirectChannel createDirectChannelImpl(
             MemoryFile memoryFile, HardwareBuffer hardwareBuffer) {
+        int deviceId = mContext.getDeviceId();
+        if (isDeviceSensorPolicyDefault(deviceId)) {
+            deviceId = DEVICE_ID_DEFAULT;
+        }
         int id;
         int type;
         long size;
@@ -608,8 +724,8 @@ public class SystemSensorManager extends SensorManager {
             }
 
             size = memoryFile.length();
-            id = nativeCreateDirectChannel(
-                    mNativeInstance, size, SensorDirectChannel.TYPE_MEMORY_FILE, fd, null);
+            id = nativeCreateDirectChannel(mNativeInstance, deviceId, size,
+                    SensorDirectChannel.TYPE_MEMORY_FILE, fd, null);
             if (id <= 0) {
                 throw new UncheckedIOException(
                         new IOException("create MemoryFile direct channel failed " + id));
@@ -633,7 +749,7 @@ public class SystemSensorManager extends SensorManager {
             }
             size = hardwareBuffer.getWidth();
             id = nativeCreateDirectChannel(
-                    mNativeInstance, size, SensorDirectChannel.TYPE_HARDWARE_BUFFER,
+                    mNativeInstance, deviceId, size, SensorDirectChannel.TYPE_HARDWARE_BUFFER,
                     -1, hardwareBuffer);
             if (id <= 0) {
                 throw new UncheckedIOException(
@@ -1026,6 +1142,17 @@ public class SystemSensorManager extends SensorManager {
         return nativeSetOperationParameter(
                 mNativeInstance, handle,
                 parameter.type, parameter.floatValues, parameter.intValues) == 0;
+    }
+
+    private boolean isDeviceSensorPolicyDefault(int deviceId) {
+        if (deviceId == DEVICE_ID_DEFAULT) {
+            return true;
+        }
+        if (mVdm == null) {
+            mVdm = mContext.getSystemService(VirtualDeviceManager.class);
+        }
+        return mVdm == null
+                || mVdm.getDevicePolicy(deviceId, POLICY_TYPE_SENSORS) == DEVICE_POLICY_DEFAULT;
     }
 
     /**

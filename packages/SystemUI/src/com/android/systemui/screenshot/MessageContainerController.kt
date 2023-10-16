@@ -47,48 +47,43 @@ constructor(
 
     // Minimal implementation for use when Flags.SCREENSHOT_METADATA isn't turned on.
     fun onScreenshotTaken(userHandle: UserHandle) {
-        if (featureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-            val workProfileData = workProfileMessageController.onScreenshotTaken(userHandle)
-            if (workProfileData != null) {
-                workProfileFirstRunView.visibility = View.VISIBLE
-                detectionNoticeView.visibility = View.GONE
+        val workProfileData = workProfileMessageController.onScreenshotTaken(userHandle)
+        if (workProfileData != null) {
+            workProfileFirstRunView.visibility = View.VISIBLE
+            detectionNoticeView.visibility = View.GONE
 
-                workProfileMessageController.populateView(
-                    workProfileFirstRunView,
-                    workProfileData,
-                    this::animateOutMessageContainer
-                )
-                animateInMessageContainer()
-            }
+            workProfileMessageController.populateView(
+                workProfileFirstRunView,
+                workProfileData,
+                this::animateOutMessageContainer
+            )
+            animateInMessageContainer()
         }
     }
 
     fun onScreenshotTaken(screenshot: ScreenshotData) {
-        if (featureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-            val workProfileData =
-                workProfileMessageController.onScreenshotTaken(screenshot.userHandle)
-            var notifiedApps: List<CharSequence> = listOf()
-            if (featureFlags.isEnabled(Flags.SCREENSHOT_DETECTION)) {
-                notifiedApps = screenshotDetectionController.maybeNotifyOfScreenshot(screenshot)
-            }
+        val workProfileData = workProfileMessageController.onScreenshotTaken(screenshot.userHandle)
+        var notifiedApps: List<CharSequence> = listOf()
+        if (featureFlags.isEnabled(Flags.SCREENSHOT_DETECTION)) {
+            notifiedApps = screenshotDetectionController.maybeNotifyOfScreenshot(screenshot)
+        }
 
-            // If work profile first run needs to show, bias towards that, otherwise show screenshot
-            // detection notification if needed.
-            if (workProfileData != null) {
-                workProfileFirstRunView.visibility = View.VISIBLE
-                detectionNoticeView.visibility = View.GONE
-                workProfileMessageController.populateView(
-                    workProfileFirstRunView,
-                    workProfileData,
-                    this::animateOutMessageContainer
-                )
-                animateInMessageContainer()
-            } else if (notifiedApps.isNotEmpty()) {
-                detectionNoticeView.visibility = View.VISIBLE
-                workProfileFirstRunView.visibility = View.GONE
-                screenshotDetectionController.populateView(detectionNoticeView, notifiedApps)
-                animateInMessageContainer()
-            }
+        // If work profile first run needs to show, bias towards that, otherwise show screenshot
+        // detection notification if needed.
+        if (workProfileData != null) {
+            workProfileFirstRunView.visibility = View.VISIBLE
+            detectionNoticeView.visibility = View.GONE
+            workProfileMessageController.populateView(
+                workProfileFirstRunView,
+                workProfileData,
+                this::animateOutMessageContainer
+            )
+            animateInMessageContainer()
+        } else if (notifiedApps.isNotEmpty()) {
+            detectionNoticeView.visibility = View.VISIBLE
+            workProfileFirstRunView.visibility = View.GONE
+            screenshotDetectionController.populateView(detectionNoticeView, notifiedApps)
+            animateInMessageContainer()
         }
     }
 

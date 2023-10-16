@@ -18,8 +18,6 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState
@@ -28,9 +26,12 @@ import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
@@ -40,6 +41,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.doReturn
+
 import java.util.UUID
 
 class DomainVerificationUserStateOverrideTest {
@@ -107,7 +110,7 @@ class DomainVerificationUserStateOverrideTest {
 
     fun mockPkgState(pkgName: String, domainSetId: UUID) =
         mockThrowOnUnmocked<PackageStateInternal> {
-            val pkg = mockThrowOnUnmocked<AndroidPackage> {
+            val pkg = mockThrowOnUnmocked<AndroidPackageInternal> {
                 whenever(packageName) { pkgName }
                 whenever(targetSdkVersion) { Build.VERSION_CODES.S }
                 whenever(isEnabled) { true }
@@ -154,12 +157,12 @@ class DomainVerificationUserStateOverrideTest {
             whenever(this.domainSetId) { domainSetId }
             whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
             whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
-            whenever(userStates) {
+            doReturn(
                 SparseArray<PackageUserStateInternal>().apply {
                     this[0] = PackageUserStateInternal.DEFAULT
                     this[1] = PackageUserStateInternal.DEFAULT
                 }
-            }
+            ).whenever(this).userStates
             whenever(isSystem) { false }
         }
 

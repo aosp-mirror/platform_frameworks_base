@@ -17,6 +17,7 @@
 package android.nfc;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -484,7 +485,6 @@ public final class NfcAdapter {
     /**
      * A callback to be invoked when the system successfully delivers your {@link NdefMessage}
      * to another device.
-     * @see #setOnNdefPushCompleteCallback
      * @deprecated this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
@@ -496,7 +496,6 @@ public final class NfcAdapter {
          * <p>This callback is usually made on a binder thread (not the UI thread).
          *
          * @param event {@link NfcEvent} with the {@link NfcEvent#nfcAdapter} field set
-         * @see #setNdefPushMessageCallback
          */
         public void onNdefPushComplete(NfcEvent event);
     }
@@ -504,11 +503,11 @@ public final class NfcAdapter {
     /**
      * A callback to be invoked when another NFC device capable of NDEF push (Android Beam)
      * is within range.
-     * <p>Implement this interface and pass it to {@link
+     * <p>Implement this interface and pass it to {@code
      * NfcAdapter#setNdefPushMessageCallback setNdefPushMessageCallback()} in order to create an
      * {@link NdefMessage} at the moment that another device is within range for NFC. Using this
      * callback allows you to create a message with data that might vary based on the
-     * content currently visible to the user. Alternatively, you can call {@link
+     * content currently visible to the user. Alternatively, you can call {@code
      * #setNdefPushMessage setNdefPushMessage()} if the {@link NdefMessage} always contains the
      * same data.
      * @deprecated this feature is removed. File sharing can work using other technology like
@@ -600,6 +599,17 @@ public final class NfcAdapter {
         return offHostSE;
     }
 
+    private static void retrieveServiceRegisterer() {
+        if (sServiceRegisterer == null) {
+            NfcServiceManager manager = NfcFrameworkInitializer.getNfcServiceManager();
+            if (manager == null) {
+                Log.e(TAG, "NfcServiceManager is null");
+                throw new UnsupportedOperationException();
+            }
+            sServiceRegisterer = manager.getNfcManagerServiceRegisterer();
+        }
+    }
+
     /**
      * Returns the NfcAdapter for application context,
      * or throws if NFC is not available.
@@ -627,12 +637,7 @@ public final class NfcAdapter {
                 Log.v(TAG, "this device does not have NFC support");
                 throw new UnsupportedOperationException();
             }
-            NfcServiceManager manager = NfcFrameworkInitializer.getNfcServiceManager();
-            if (manager == null) {
-                Log.e(TAG, "NfcServiceManager is null");
-                throw new UnsupportedOperationException();
-            }
-            sServiceRegisterer = manager.getNfcManagerServiceRegisterer();
+            retrieveServiceRegisterer();
             sService = getServiceInterface();
             if (sService == null) {
                 Log.e(TAG, "could not retrieve NFC service");
@@ -706,12 +711,15 @@ public final class NfcAdapter {
             throw new IllegalArgumentException(
                     "context not associated with any application (using a mock context?)");
         }
-
-        if (sIsInitialized && sServiceRegisterer.tryGet() == null) {
-            synchronized (NfcAdapter.class) {
-                /* Stale sService pointer */
-                if (sIsInitialized) sIsInitialized = false;
+        retrieveServiceRegisterer();
+        if (sServiceRegisterer.tryGet() == null) {
+            if (sIsInitialized) {
+                synchronized (NfcAdapter.class) {
+                    /* Stale sService pointer */
+                    if (sIsInitialized) sIsInitialized = false;
+                }
             }
+            return null;
         }
         /* Try to initialize the service */
         NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
@@ -1811,6 +1819,97 @@ public final class NfcAdapter {
             }
             try {
                 return sService.isNfcSecureEnabled();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Sets NFC Reader option feature.
+     * <p>This API is for the Settings application.
+     * @return True if successful
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_READER_OPTION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean enableReaderOption(boolean enable) {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.enableReaderOption(enable);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.enableReaderOption(enable);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the device supports NFC Reader option functionality.
+     *
+     * @return True if device supports NFC Reader option, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_READER_OPTION)
+    public boolean isReaderOptionSupported() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.isReaderOptionSupported();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isReaderOptionSupported();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Checks NFC Reader option feature is enabled.
+     *
+     * @return True if NFC Reader option  is enabled, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @throws UnsupportedOperationException if device doesn't support
+     *         NFC Reader option functionality. {@link #isReaderOptionSupported}
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_READER_OPTION)
+    public boolean isReaderOptionEnabled() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.isReaderOptionEnabled();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isReaderOptionEnabled();
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }

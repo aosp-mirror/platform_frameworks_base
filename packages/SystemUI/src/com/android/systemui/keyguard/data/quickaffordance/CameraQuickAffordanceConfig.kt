@@ -34,7 +34,7 @@ import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -52,23 +52,27 @@ constructor(
     override val key: String
         get() = BuiltInKeyguardQuickAffordanceKeys.CAMERA
 
-    override val pickerName: String
-        get() = context.getString(R.string.accessibility_camera_button)
+    override fun pickerName(): String = context.getString(R.string.accessibility_camera_button)
 
     override val pickerIconResourceId: Int
         get() = R.drawable.ic_camera
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState>
-        get() =
-            flowOf(
-                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
-                    icon =
-                        Icon.Resource(
-                            R.drawable.ic_camera,
-                            ContentDescription.Resource(R.string.accessibility_camera_button)
-                        )
-                )
+        get() = flow {
+            emit(
+                if (isLaunchable()) {
+                    KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                        icon =
+                            Icon.Resource(
+                                R.drawable.ic_camera,
+                                ContentDescription.Resource(R.string.accessibility_camera_button)
+                            )
+                    )
+                } else {
+                    KeyguardQuickAffordanceConfig.LockScreenState.Hidden
+                }
             )
+        }
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
         return if (isLaunchable()) {

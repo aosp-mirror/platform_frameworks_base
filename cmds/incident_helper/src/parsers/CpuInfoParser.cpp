@@ -130,11 +130,11 @@ CpuInfoParser::Parse(const int in, const int out) const
         record = parseRecordByColumns(line, columnIndices);
         diff = record.size() - header.size();
         if (diff < 0) {
-            fprintf(stderr, "[%s]Line %d has %d missing fields\n%s\n", this->name.string(), nline, -diff, line.c_str());
+            fprintf(stderr, "[%s]Line %d has %d missing fields\n%s\n", this->name.c_str(), nline, -diff, line.c_str());
             printRecord(record);
             continue;
         } else if (diff > 0) {
-            fprintf(stderr, "[%s]Line %d has %d extra fields\n%s\n", this->name.string(), nline, diff, line.c_str());
+            fprintf(stderr, "[%s]Line %d has %d extra fields\n%s\n", this->name.c_str(), nline, diff, line.c_str());
             printRecord(record);
             continue;
         }
@@ -143,7 +143,7 @@ CpuInfoParser::Parse(const int in, const int out) const
         for (int i=0; i<(int)record.size(); i++) {
             if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d fails to insert field %s with value %s\n",
-                        this->name.string(), nline, header[i].c_str(), record[i].c_str());
+                        this->name.c_str(), nline, header[i].c_str(), record[i].c_str());
             }
         }
         proto.end(token);
@@ -155,9 +155,9 @@ CpuInfoParser::Parse(const int in, const int out) const
     }
 
     if (!proto.flush(out)) {
-        fprintf(stderr, "[%s]Error writing proto back\n", this->name.string());
+        fprintf(stderr, "[%s]Error writing proto back\n", this->name.c_str());
         return -1;
     }
-    fprintf(stderr, "[%s]Proto size: %zu bytes\n", this->name.string(), proto.size());
+    fprintf(stderr, "[%s]Proto size: %zu bytes\n", this->name.c_str(), proto.size());
     return NO_ERROR;
 }

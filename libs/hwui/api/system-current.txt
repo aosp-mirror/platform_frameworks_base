@@ -1,1 +1,3 @@
 // Signature format: 2.0
+// - add-additional-overrides=no
+// - migrating=Migration in progress see b/299366704

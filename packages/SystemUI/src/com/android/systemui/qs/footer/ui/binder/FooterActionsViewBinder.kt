@@ -33,27 +33,27 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.binder.IconViewBinder
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.people.ui.view.PeopleViewBinder.bind
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import javax.inject.Inject
 import kotlin.math.roundToInt
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /** A ViewBinder for [FooterActionsViewBinder]. */
-object FooterActionsViewBinder {
+@SysUISingleton
+class FooterActionsViewBinder @Inject constructor() {
     /** Create a view that can later be [bound][bind] to a [FooterActionsViewModel]. */
-    @JvmStatic
     fun create(context: Context): LinearLayout {
         return LayoutInflater.from(context).inflate(R.layout.footer_actions, /* root= */ null)
             as LinearLayout
     }
 
     /** Bind [view] to [viewModel]. */
-    @JvmStatic
     fun bind(
         view: LinearLayout,
         viewModel: FooterActionsViewModel,
@@ -98,6 +98,11 @@ object FooterActionsViewBinder {
         var previousForegroundServices: FooterActionsForegroundServicesButtonViewModel? = null
         var previousUserSwitcher: FooterActionsButtonViewModel? = null
 
+        // Set the initial visibility on the View directly so that we don't briefly show it for a
+        // few frames before [viewModel.isVisible] is collected.
+        view.isInvisible = !viewModel.isVisible.value
+
+        // Listen for ViewModel updates when the View is attached.
         view.repeatWhenAttached {
             val attachedScope = this.lifecycleScope
 

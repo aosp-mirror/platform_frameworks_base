@@ -73,7 +73,7 @@ public abstract class PluginsModule {
         return new PluginInstance.Factory(
                 PluginModule.class.getClassLoader(),
                 new PluginInstance.InstanceFactory<>(),
-                new PluginInstance.VersionChecker(),
+                new PluginInstance.VersionCheckerImpl(),
                 privilegedPlugins,
                 isDebug);
     }

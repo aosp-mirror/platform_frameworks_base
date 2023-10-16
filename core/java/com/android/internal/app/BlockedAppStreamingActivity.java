@@ -45,7 +45,7 @@ public class BlockedAppStreamingActivity extends AlertActivity {
 
         Intent intent = getIntent();
         CharSequence appLabel = null;
-        ActivityInfo activityInfo = intent.getParcelableExtra(EXTRA_BLOCKED_ACTIVITY_INFO);
+        ActivityInfo activityInfo = intent.getParcelableExtra(EXTRA_BLOCKED_ACTIVITY_INFO, android.content.pm.ActivityInfo.class);
         if (activityInfo != null) {
             appLabel = activityInfo.loadLabel(getPackageManager());
         }

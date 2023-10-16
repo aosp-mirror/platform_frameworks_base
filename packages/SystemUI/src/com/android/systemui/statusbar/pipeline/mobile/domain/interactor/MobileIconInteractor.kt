@@ -16,16 +16,21 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
+import android.content.Context
 import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
-import com.android.settingslib.mobile.TelephonyIcons.NOT_DEFAULT_DATA
+import com.android.settingslib.mobile.MobileIconCarrierIdOverrides
+import com.android.settingslib.mobile.MobileIconCarrierIdOverridesImpl
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel.DefaultIcon
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel.OverriddenIcon
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,8 +40,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
@@ -46,17 +49,8 @@ interface MobileIconInteractor {
     /** The current mobile data activity */
     val activity: Flow<DataActivityModel>
 
-    /**
-     * This bit is meant to be `true` if and only if the default network capabilities (see
-     * [android.net.ConnectivityManager.registerDefaultNetworkCallback]) result in a network that
-     * has the [android.net.NetworkCapabilities.TRANSPORT_CELLULAR] represented.
-     *
-     * Note that this differs from [isDataConnected], which is tracked by telephony and has to do
-     * with the state of using this mobile connection for data as opposed to just voice. It is
-     * possible for a mobile subscription to be connected but not be in a connected data state, and
-     * thus we wouldn't want to show the network type icon.
-     */
-    val isConnected: Flow<Boolean>
+    /** See [MobileConnectionsRepository.mobileIsDefault]. */
+    val mobileIsDefault: Flow<Boolean>
 
     /**
      * True when telephony tells us that the data state is CONNECTED. See
@@ -86,7 +80,7 @@ interface MobileIconInteractor {
     val alwaysUseCdmaLevel: StateFlow<Boolean>
 
     /** Observable for RAT type (network type) indicator */
-    val networkTypeIconGroup: StateFlow<MobileIconGroup>
+    val networkTypeIconGroup: StateFlow<NetworkTypeIconModel>
 
     /**
      * Provider name for this network connection. The name can be one of 3 values:
@@ -116,6 +110,9 @@ interface MobileIconInteractor {
 
     /** See [MobileIconsInteractor.isForceHidden]. */
     val isForceHidden: Flow<Boolean>
+
+    /** True when in carrier network change mode */
+    val carrierNetworkChangeActive: StateFlow<Boolean>
 }
 
 /** Interactor for a single mobile connection. This connection _should_ have one subscription ID */
@@ -126,30 +123,32 @@ class MobileIconInteractorImpl(
     defaultSubscriptionHasDataEnabled: StateFlow<Boolean>,
     override val alwaysShowDataRatIcon: StateFlow<Boolean>,
     override val alwaysUseCdmaLevel: StateFlow<Boolean>,
-    defaultMobileConnectivity: StateFlow<MobileConnectivityModel>,
+    override val mobileIsDefault: StateFlow<Boolean>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
-    defaultDataSubId: StateFlow<Int>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
     override val isForceHidden: Flow<Boolean>,
     connectionRepository: MobileConnectionRepository,
+    private val context: Context,
+    val carrierIdOverrides: MobileIconCarrierIdOverrides = MobileIconCarrierIdOverridesImpl()
 ) : MobileIconInteractor {
     override val tableLogBuffer: TableLogBuffer = connectionRepository.tableLogBuffer
 
     override val activity = connectionRepository.dataActivityDirection
 
-    override val isConnected: Flow<Boolean> = defaultMobileConnectivity.mapLatest { it.isConnected }
-
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
 
-    private val isDefault =
-        defaultDataSubId
-            .mapLatest { connectionRepository.subId == it }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                connectionRepository.subId == defaultDataSubId.value
-            )
+    override val carrierNetworkChangeActive: StateFlow<Boolean> =
+        connectionRepository.carrierNetworkChangeActive
+
+    // True if there exists _any_ icon override for this carrierId. Note that overrides can include
+    // any or none of the icon groups defined in MobileMappings, so we still need to check on a
+    // per-network-type basis whether or not the given icon group is overridden
+    private val carrierIdIconOverrideExists =
+        connectionRepository.carrierId
+            .map { carrierIdOverrides.carrierIdEntryExists(it) }
+            .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isDefaultDataEnabled = defaultSubscriptionHasDataEnabled
 
@@ -169,35 +168,56 @@ class MobileIconInteractorImpl(
                 connectionRepository.networkName.value
             )
 
-    /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
-    override val networkTypeIconGroup: StateFlow<MobileIconGroup> =
+    /** What the mobile icon would be before carrierId overrides */
+    private val defaultNetworkType: StateFlow<MobileIconGroup> =
         combine(
                 connectionRepository.resolvedNetworkType,
                 defaultMobileIconMapping,
                 defaultMobileIconGroup,
-                isDefault,
-            ) { resolvedNetworkType, mapping, defaultGroup, isDefault ->
-                if (!isDefault) {
-                    return@combine NOT_DEFAULT_DATA
-                }
-
+            ) { resolvedNetworkType, mapping, defaultGroup ->
                 when (resolvedNetworkType) {
                     is ResolvedNetworkType.CarrierMergedNetworkType ->
                         resolvedNetworkType.iconGroupOverride
-                    else -> mapping[resolvedNetworkType.lookupKey] ?: defaultGroup
+                    else -> {
+                        mapping[resolvedNetworkType.lookupKey] ?: defaultGroup
+                    }
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
+
+    override val networkTypeIconGroup =
+        combine(
+                defaultNetworkType,
+                carrierIdIconOverrideExists,
+            ) { networkType, overrideExists ->
+                // DefaultIcon comes out of the icongroup lookup, we check for overrides here
+                if (overrideExists) {
+                    val iconOverride =
+                        carrierIdOverrides.getOverrideFor(
+                            connectionRepository.carrierId.value,
+                            networkType.name,
+                            context.resources,
+                        )
+                    if (iconOverride > 0) {
+                        OverriddenIcon(networkType, iconOverride)
+                    } else {
+                        DefaultIcon(networkType)
+                    }
+                } else {
+                    DefaultIcon(networkType)
                 }
             }
             .distinctUntilChanged()
-            .onEach {
-                // Doesn't use [logDiffsForTable] because [MobileIconGroup] can't implement the
-                // [Diffable] interface.
-                tableLogBuffer.logChange(
-                    prefix = "",
-                    columnName = "networkTypeIcon",
-                    value = it.name
-                )
-            }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                initialValue = DefaultIcon(defaultMobileIconGroup.value),
+            )
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                DefaultIcon(defaultMobileIconGroup.value),
+            )
 
     override val isEmergencyOnly = connectionRepository.isEmergencyOnly
 

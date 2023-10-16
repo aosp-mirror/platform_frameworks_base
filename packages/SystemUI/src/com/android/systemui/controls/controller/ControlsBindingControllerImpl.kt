@@ -41,7 +41,8 @@ open class ControlsBindingControllerImpl @Inject constructor(
     private val context: Context,
     @Background private val backgroundExecutor: DelayableExecutor,
     private val lazyController: Lazy<ControlsController>,
-    userTracker: UserTracker
+    private val packageUpdateMonitorFactory: PackageUpdateMonitor.Factory,
+    userTracker: UserTracker,
 ) : ControlsBindingController {
 
     companion object {
@@ -93,7 +94,8 @@ open class ControlsBindingControllerImpl @Inject constructor(
                 backgroundExecutor,
                 actionCallbackService,
                 currentUser,
-                component
+                component,
+                packageUpdateMonitorFactory
         )
     }
 

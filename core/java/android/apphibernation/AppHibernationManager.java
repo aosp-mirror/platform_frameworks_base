@@ -161,7 +161,22 @@ public class AppHibernationManager {
     public @NonNull Map<String, HibernationStats> getHibernationStatsForUser() {
         try {
             return mIAppHibernationService.getHibernationStatsForUser(
-                    null /* packageNames */, mContext.getUserId());
+                null /* packageNames */, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Whether global hibernation should delete ART ahead-of-time compilation artifacts
+     * and prevent package manager from re-optimizing the APK.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_APP_HIBERNATION)
+    public boolean isOatArtifactDeletionEnabled() {
+        try {
+            return mIAppHibernationService.isOatArtifactDeletionEnabled();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

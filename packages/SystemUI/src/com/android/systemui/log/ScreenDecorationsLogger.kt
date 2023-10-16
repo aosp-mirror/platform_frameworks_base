@@ -21,10 +21,11 @@ import android.graphics.Rect
 import android.graphics.RectF
 import androidx.core.graphics.toRectF
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.dagger.ScreenDecorationsLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel.DEBUG
-import com.android.systemui.plugins.log.LogLevel.ERROR
+import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
 private const val TAG = "ScreenDecorationsLog"
@@ -130,5 +131,37 @@ constructor(
 
     fun onSensorLocationChanged() {
         logBuffer.log(TAG, DEBUG, "AuthControllerCallback in ScreenDecorations triggered")
+    }
+
+    fun cameraProtectionShownOrHidden(
+        faceDetectionRunning: Boolean,
+        biometricPromptShown: Boolean,
+        requestedState: Boolean,
+        currentlyShowing: Boolean
+    ) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = faceDetectionRunning
+                bool2 = biometricPromptShown
+                bool3 = requestedState
+                bool4 = currentlyShowing
+            },
+            {
+                "isFaceDetectionRunning: $bool1, " +
+                    "isBiometricPromptShowing: $bool2, " +
+                    "requestedState: $bool3, " +
+                    "currentState: $bool4"
+            }
+        )
+    }
+
+    fun biometricEvent(@CompileTimeConstant info: String) {
+        logBuffer.log(TAG, DEBUG, info)
+    }
+
+    fun cameraProtectionEvent(@CompileTimeConstant cameraProtectionEvent: String) {
+        logBuffer.log(TAG, DEBUG, cameraProtectionEvent)
     }
 }

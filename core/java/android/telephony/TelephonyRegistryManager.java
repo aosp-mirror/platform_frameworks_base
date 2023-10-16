@@ -32,14 +32,15 @@ import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.DataActivityType;
 import android.telephony.Annotation.DisconnectCauses;
 import android.telephony.Annotation.NetworkType;
-import android.telephony.Annotation.PreciseCallStates;
 import android.telephony.Annotation.PreciseDisconnectCauses;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
 import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.telephony.emergency.EmergencyNumber;
+import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.MediaQualityStatus;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -52,9 +53,7 @@ import com.android.internal.telephony.ITelephonyRegistry;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -82,15 +81,16 @@ public class TelephonyRegistryManager {
      * A mapping between {@link SubscriptionManager.OnSubscriptionsChangedListener} and
      * its callback IOnSubscriptionsChangedListener.
      */
-    private final Map<SubscriptionManager.OnSubscriptionsChangedListener,
-                IOnSubscriptionsChangedListener> mSubscriptionChangedListenerMap = new HashMap<>();
+    private final ConcurrentHashMap<SubscriptionManager.OnSubscriptionsChangedListener,
+            IOnSubscriptionsChangedListener>
+                    mSubscriptionChangedListenerMap = new ConcurrentHashMap<>();
     /**
      * A mapping between {@link SubscriptionManager.OnOpportunisticSubscriptionsChangedListener} and
      * its callback IOnSubscriptionsChangedListener.
      */
-    private final Map<SubscriptionManager.OnOpportunisticSubscriptionsChangedListener,
-            IOnSubscriptionsChangedListener> mOpportunisticSubscriptionChangedListenerMap
-            = new HashMap<>();
+    private final ConcurrentHashMap<SubscriptionManager.OnOpportunisticSubscriptionsChangedListener,
+            IOnSubscriptionsChangedListener>
+                    mOpportunisticSubscriptionChangedListenerMap = new ConcurrentHashMap<>();
 
     /**
      * A mapping between {@link CarrierConfigManager.CarrierConfigChangeListener} and its callback
@@ -545,6 +545,27 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Notify change of media quality status {@link MediaQualityStatus} crosses media quality
+     * threshold
+     * <p/>
+     * Currently thresholds for this indication can be configurable by CARRIER_CONFIG
+     * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_PACKET_LOSS_RATE_INT}
+     * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_INACTIVITY_TIME_IN_MILLIS_INT}
+     * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_JITTER_INT}
+     *
+     * @param status media quality status
+     */
+    public void notifyMediaQualityStatusChanged(
+            int slotIndex, int subId, @NonNull MediaQualityStatus status) {
+        try {
+            sRegistry.notifyMediaQualityStatusChanged(slotIndex, subId, status);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Notify emergency number list changed on certain subscription.
      *
      * @param slotIndex for which emergency number list changed. Can be derived from subId except
@@ -752,17 +773,20 @@ public class TelephonyRegistryManager {
      * @param slotIndex for which precise call state changed. Can be derived from subId except when
      * subId is invalid.
      * @param subId for which precise call state changed.
-     * @param ringCallPreciseState ringCall state.
-     * @param foregroundCallPreciseState foreground call state.
-     * @param backgroundCallPreciseState background call state.
+     * @param callStates Array of PreciseCallState of foreground, background & ringing calls.
+     * @param imsCallIds Array of IMS call session ID{@link ImsCallSession#getCallId} for
+     *                   ringing, foreground & background calls.
+     * @param imsServiceTypes Array of IMS call service type for ringing, foreground &
+     *                        background calls.
+     * @param imsCallTypes Array of IMS call type for ringing, foreground & background calls.
      */
     public void notifyPreciseCallState(int slotIndex, int subId,
-            @PreciseCallStates int ringCallPreciseState,
-            @PreciseCallStates int foregroundCallPreciseState,
-            @PreciseCallStates int backgroundCallPreciseState) {
+            @Annotation.PreciseCallStates int[] callStates, String[] imsCallIds,
+            @Annotation.ImsCallServiceType int[] imsServiceTypes,
+            @Annotation.ImsCallType int[] imsCallTypes) {
         try {
-            sRegistry.notifyPreciseCallState(slotIndex, subId, ringCallPreciseState,
-                foregroundCallPreciseState, backgroundCallPreciseState);
+            sRegistry.notifyPreciseCallState(slotIndex, subId, callStates,
+                    imsCallIds, imsServiceTypes, imsCallTypes);
         } catch (RemoteException ex) {
             // system process is dead
             throw ex.rethrowFromSystemServer();
@@ -1083,6 +1107,15 @@ public class TelephonyRegistryManager {
         if (telephonyCallback instanceof TelephonyCallback.LinkCapacityEstimateChangedListener) {
             eventList.add(TelephonyCallback.EVENT_LINK_CAPACITY_ESTIMATE_CHANGED);
         }
+
+        if (telephonyCallback instanceof TelephonyCallback.MediaQualityStatusChangedListener) {
+            eventList.add(TelephonyCallback.EVENT_MEDIA_QUALITY_STATUS_CHANGED);
+        }
+
+        if (telephonyCallback instanceof TelephonyCallback.EmergencyCallbackModeListener) {
+            eventList.add(TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED);
+        }
+
 
         return eventList;
     }
@@ -1508,6 +1541,45 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCarrierConfigChanged(slotIndex, subId, carrierId, specificCarrierId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify Callback Mode has been started.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param type for callback mode entry.
+     *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     */
+    public void notifyCallBackModeStarted(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type) {
+        try {
+            Log.d(TAG, "notifyCallBackModeStarted:type=" + type);
+            sRegistry.notifyCallbackModeStarted(phoneId, subId, type);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify Callback Mode has been stopped.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param type for callback mode entry.
+     *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @param reason for changing callback mode.
+     *             See {@link TelephonyManager.EmergencyCallbackModeStopReason}.
+     */
+    public void notifyCallbackModeStopped(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type,
+            @TelephonyManager.EmergencyCallbackModeStopReason int reason) {
+        try {
+            Log.d(TAG, "notifyCallbackModeStopped:type=" + type + ", reason=" + reason);
+            sRegistry.notifyCallbackModeStopped(phoneId, subId, type, reason);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 }

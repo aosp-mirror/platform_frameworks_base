@@ -25,6 +25,11 @@ python_binary_host {
     name: "lint_fix",
     main: "soong_lint_fix.py",
     srcs: ["soong_lint_fix.py"],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
 }
 
 python_library_host {

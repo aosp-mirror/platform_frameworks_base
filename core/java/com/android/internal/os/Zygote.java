@@ -1295,6 +1295,15 @@ public final class Zygote {
             @NonNull ApplicationInfo info,
             @Nullable ProcessInfo processInfo,
             @Nullable IPlatformCompat platformCompat) {
+        String appOverride = SystemProperties.get("persist.arm64.memtag.app." + info.packageName);
+        if ("sync".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_SYNC;
+        } else if ("async".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_ASYNC;
+        } else if ("off".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_NONE;
+        }
+
         // Look at the process attribute first.
         if (processInfo != null && processInfo.memtagMode != ApplicationInfo.MEMTAG_DEFAULT) {
             return memtagModeToZygoteMemtagLevel(processInfo.memtagMode);
@@ -1358,6 +1367,15 @@ public final class Zygote {
         } else {
             // Otherwise disable all tagging.
             level = MEMORY_TAG_LEVEL_NONE;
+        }
+
+        // If we requested "sync" mode for the whole platform, upgrade mode for apps that enable
+        // MTE.
+        // This makes debugging a lot easier.
+        if (level == MEMORY_TAG_LEVEL_ASYNC
+                && (Build.IS_USERDEBUG || Build.IS_ENG)
+                && "sync".equals(SystemProperties.get("persist.arm64.memtag.default"))) {
+            level = MEMORY_TAG_LEVEL_SYNC;
         }
 
         return level;

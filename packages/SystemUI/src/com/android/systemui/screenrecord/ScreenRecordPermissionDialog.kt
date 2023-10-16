@@ -62,8 +62,8 @@ class ScreenRecordPermissionDialog(
     private lateinit var options: Spinner
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setDialogTitle(R.string.screenrecord_start_label)
-        setStartButtonText(R.string.screenrecord_start_recording)
+        setDialogTitle(R.string.screenrecord_permission_dialog_title)
+        setStartButtonText(R.string.screenrecord_permission_dialog_continue)
         setStartButtonOnClickListener { v: View? ->
             onStartRecordingClicked?.run()
             if (selectedScreenShareOption.mode == ENTIRE_SCREEN) {
@@ -93,17 +93,18 @@ class ScreenRecordPermissionDialog(
             }
             dismiss()
         }
+        setCancelButtonOnClickListener { dismiss() }
         initRecordOptionsView()
     }
 
     @LayoutRes override fun getOptionsViewLayoutId(): Int = R.layout.screen_record_options
 
     private fun initRecordOptionsView() {
-        audioSwitch = findViewById(R.id.screenrecord_audio_switch)
-        tapsSwitch = findViewById(R.id.screenrecord_taps_switch)
-        tapsView = findViewById(R.id.show_taps)
+        audioSwitch = requireViewById(R.id.screenrecord_audio_switch)
+        tapsSwitch = requireViewById(R.id.screenrecord_taps_switch)
+        tapsView = requireViewById(R.id.show_taps)
         updateTapsViewVisibility()
-        options = findViewById(R.id.screen_recording_options)
+        options = requireViewById(R.id.screen_recording_options)
         val a: ArrayAdapter<*> =
             ScreenRecordingAdapter(context, android.R.layout.simple_spinner_dropdown_item, MODES)
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -186,13 +187,13 @@ class ScreenRecordPermissionDialog(
             return listOf(
                 ScreenShareOption(
                     ENTIRE_SCREEN,
-                    R.string.screenrecord_option_entire_screen,
-                    R.string.screenrecord_warning_entire_screen
+                    R.string.screen_share_permission_dialog_option_entire_screen,
+                    R.string.screenrecord_permission_dialog_warning_entire_screen
                 ),
                 ScreenShareOption(
                     SINGLE_APP,
-                    R.string.screenrecord_option_single_app,
-                    R.string.screenrecord_warning_single_app
+                    R.string.screen_share_permission_dialog_option_single_app,
+                    R.string.screenrecord_permission_dialog_warning_single_app
                 )
             )
         }

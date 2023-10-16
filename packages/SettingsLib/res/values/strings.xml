@@ -91,10 +91,6 @@
     <string name="wifi_disabled_generic">Disabled</string>
     <!-- Status for networked disabled from a DNS or DHCP failure -->
     <string name="wifi_disabled_network_failure">IP Configuration Failure</string>
-    <!-- Status for networks disabled by the network recommendation provider -->
-    <string name="wifi_disabled_by_recommendation_provider">Not connected due to low quality network</string>
-    <!-- Status for networked disabled from a wifi association failure -->
-    <string name="wifi_disabled_wifi_failure">WiFi Connection Failure</string>
     <!-- Status for networks disabled from authentication failure (wrong password
          or certificate). -->
     <string name="wifi_disabled_password_failure">Authentication problem</string>
@@ -114,20 +110,14 @@
     <string name="wifi_no_internet">No internet access</string>
     <!-- Summary for saved networks -->
     <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
-    <!-- Summary for connect to metered access point [CHAR LIMIT=NONE] -->
-    <string name="connected_to_metered_access_point">Connected to metered network</string>
 
 
     <!-- Status message of Wi-Fi when it is automatically connected by a network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer">Automatically connected via %1$s</string>
     <!-- Status message of Wi-Fi when it is automatically connected by a default network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer_default">Automatically connected via network rating provider</string>
-    <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
-    <string name="connected_via_passpoint">Connected via %1$s</string>
     <!-- Status message of Wi-Fi when it is connected by a app (via suggestion or network request). [CHAR LIMIT=NONE] -->
     <string name="connected_via_app">Connected via <xliff:g id="name" example="Wifi App">%1$s</xliff:g></string>
-    <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
-    <string name="available_via_passpoint">Available via %1$s</string>
     <!-- Status message of OSU Provider network when not connected. [CHAR LIMIT=NONE] -->
     <string name="tap_to_sign_up">Tap to sign up</string>
     <!-- Package name for Settings app-->
@@ -153,11 +143,6 @@
     <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
     <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
 
-    <!-- Status message of Wi-Fi when it is connected to a Carrier Network. [CHAR LIMIT=NONE] -->
-    <string name="connected_via_carrier">Connected via %1$s</string>
-    <!-- Status message of Wi-Fi when an available network is a carrier network. [CHAR LIMIT=NONE] -->
-    <string name="available_via_carrier">Available via %1$s</string>
-
     <!-- Status message of OSU Provider upon initiating provisioning flow [CHAR LIMIT=NONE] -->
     <string name="osu_opening_provider">Opening <xliff:g id="passpointProvider" example="Passpoint Provider">%1$s</xliff:g></string>
     <!-- Status message of OSU Provider when connection fails [CHAR LIMIT=NONE] -->
@@ -169,14 +154,10 @@
     <!-- Status message of OSU Provider on completing provisioning. [CHAR LIMIT=NONE] -->
     <string name="osu_sign_up_complete">Sign-up complete. Connecting\u2026</string>
 
-    <!-- Speed label for very slow network speed -->
-    <string name="speed_label_very_slow">Very Slow</string>
     <!-- Speed label for slow network speed -->
     <string name="speed_label_slow">Slow</string>
     <!-- Speed label for okay network speed -->
     <string name="speed_label_okay">OK</string>
-    <!-- Speed label for medium network speed -->
-    <string name="speed_label_medium">Medium</string>
     <!-- Speed label for fast network speed -->
     <string name="speed_label_fast">Fast</string>
     <!-- Speed label for very fast network speed -->
@@ -203,8 +184,6 @@
     <string name="bluetooth_connected_no_headset">Connected (no phone)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for media audio. [CHAR LIMIT=40] -->
     <string name="bluetooth_connected_no_a2dp">Connected (no media)<xliff:g id="active_device">%1$s</xliff:g></string>
-    <!-- Bluetooth settings.  Message when connected to a device, except for map. [CHAR LIMIT=40] -->
-    <string name="bluetooth_connected_no_map">Connected (no message access)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio. [CHAR LIMIT=40] -->
     <string name="bluetooth_connected_no_headset_no_a2dp">Connected (no phone or media)<xliff:g id="active_device">%1$s</xliff:g></string>
 
@@ -265,7 +244,7 @@
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
     <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE audio profile. -->
-    <string name="bluetooth_profile_le_audio">LE audio</string>
+    <string name="bluetooth_profile_le_audio">LE Audio</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
     <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the LE audio checkbox preference when LE audio is connected. -->
@@ -488,15 +467,15 @@
 
     <!-- Default speech rate choices -->
     <string-array name="tts_rate_entries">
-        <item>Very slow</item>
-        <item>Slow</item>
-        <item>Normal</item>
-        <item>Fast</item>
-        <item>Faster</item>
-        <item>Very fast</item>
-        <item>Rapid</item>
-        <item>Very rapid</item>
-        <item>Fastest</item>
+        <item>60%</item>
+        <item>80%</item>
+        <item>100%</item>
+        <item>150%</item>
+        <item>200%</item>
+        <item>250%</item>
+        <item>300%</item>
+        <item>350%</item>
+        <item>400%</item>
     </string-array>
     <!-- Do not translate. -->
     <string-array name="tts_rate_values">
@@ -537,6 +516,9 @@
     <string name="category_personal">Personal</string>
     <!-- Header for items under the work user [CHAR LIMIT=30] -->
     <string name="category_work">Work</string>
+    <!-- Header for items under the clone user [CHAR LIMIT=30] -->
+    <string name="category_clone">Clone</string>
+
 
     <!-- Full package name of OEM preferred device feedback reporter. Leave this blank, overlaid in Settings/TvSettings [DO NOT TRANSLATE] -->
     <string name="oem_preferred_feedback_reporter" translatable="false" />
@@ -889,6 +871,11 @@
     <!-- UI debug setting: force right to left layout summary [CHAR LIMIT=100] -->
     <string name="force_rtl_layout_all_locales_summary">Force screen layout direction to RTL for all locales</string>
 
+    <!-- UI debug setting: make navigation bar background color transparent by default [CHAR LIMIT=50] -->
+    <string name="transparent_navigation_bar">Transparent navigation bar</string>
+    <!-- UI debug setting: make navigation bar background color transparent by default summary [CHAR LIMIT=100] -->
+    <string name="transparent_navigation_bar_summary">Make navigation bar background color transparent by default</string>
+
     <!-- UI debug setting: enable or disable window blurs [CHAR LIMIT=50] -->
     <string name="window_blurs">Allow window-level blurs</string>
 
@@ -942,7 +929,7 @@
     <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->
     <string name="show_all_anrs_summary">Display App Not Responding dialog for background apps</string>
 
-    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=25] -->
+    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=30] -->
     <string name="show_notification_channel_warnings">Show notification channel warnings</string>
     <!-- UI debug setting: show missing channel toasts summary [CHAR LIMIT=50] -->
     <string name="show_notification_channel_warnings_summary">Displays on-screen warning when an app posts a notification without a valid channel</string>
@@ -1278,6 +1265,12 @@
 
     <!-- Button label for generic cancel action [CHAR LIMIT=20] -->
     <string name="cancel">Cancel</string>
+    <!-- Button label for generic next action [CHAR LIMIT=20] -->
+    <string name="next">Next</string>
+    <!-- Button label for generic back action [CHAR LIMIT=20] -->
+    <string name="back">Back</string>
+    <!-- Button label for generic save action [CHAR LIMIT=20] -->
+    <string name="save">Save</string>
     <!-- Button label for generic OK action [CHAR LIMIT=20] -->
     <string name="okay">OK</string>
     <!-- Button label for generic Done action, to be pressed when an action has been completed [CHAR LIMIT=20] -->
@@ -1334,8 +1327,28 @@
     <string name="media_transfer_this_device_name" product="default">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
+    <!-- Name of the dock device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
+    <!-- Default name of the external device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_external_device_name">External Device</string>
+    <!-- Default name of the connected device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_default_device_name">Connected device</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
+    <!-- Sub status indicates device is not available due to an unknown error. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_unknown_error">Can\’t play on this device</string>
+    <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_require_premium">Upgrade account to switch</string>
+    <!-- Sub status indicates device not support download content. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_not_support_downloads">Can\’t play downloads here</string>
+    <!-- Sub status indicates device need to wait after ad. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_try_after_ad">Try again after the ad</string>
+    <!-- Sub status indicates device is in low-power mode. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_device_in_low_power_mode">Wake up device to play here</string>
+    <!-- Sub status indicates the device does not authorize the user. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_unauthorized">Device not approved to play</string>
+    <!-- Sub status indicates the device does not support the current media track. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_track_unsupported">Can\’t play this media here</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
@@ -1389,6 +1402,12 @@
     <string name="user_add_user_message_long">You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper, and so on. Users can also adjust device settings like Wi\u2011Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user.</string>
     <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
     <string name="user_add_user_message_short">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
+    <!-- Title for grant user admin privileges dialog [CHAR LIMIT=65] -->
+    <string name="user_grant_admin_title">Make this user an admin?</string>
+    <!-- Message for grant admin privileges dialog. [CHAR LIMIT=none] -->
+    <string name="user_grant_admin_message">Admins have special privileges that other users don\’t. An admin can manage all users, update or reset this device, modify settings, see all installed apps, and grant or revoke admin privileges for others.</string>
+    <!-- Confirmation button for grant user admin privileges dialog [CHAR LIMIT=65] -->
+    <string name="user_grant_admin_button">Make admin</string>
     <!-- Title of dialog to setup a new user [CHAR LIMIT=30] -->
     <string name="user_setup_dialog_title">Set up user now?</string>
     <!-- Message in dialog to setup a new user after creation [CHAR LIMIT=none] -->
@@ -1455,6 +1474,10 @@
     <!-- Dialog message on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
     <string name="guest_exit_dialog_message">This will delete
         apps and data from the current guest session</string>
+    <!-- Dialog message on action grant admin privileges [CHAR LIMIT=60] -->
+    <string name="grant_admin">Yes, make them an admin</string>
+    <!-- Dialog message on action not grant admin privileges [CHAR LIMIT=60] -->
+    <string name="not_grant_admin">No, don\’t make them an admin</string>
     <!-- Dialog button on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
     <string name="guest_exit_dialog_button">Exit</string>
     <!-- Dialog title on action exit guest (non-ephemeral guest) [CHAR LIMIT=32] -->
@@ -1639,4 +1662,15 @@
     <string name="back_navigation_animation_summary">Enable system animations for predictive back.</string>
     <!-- Developer setting: enable animations when a back gesture is executed, full explanation[CHAR LIMIT=NONE] -->
     <string name="back_navigation_animation_dialog">This setting enables system animations for predictive gesture animation. It requires setting per-app "enableOnBackInvokedCallback" to true in the manifest file.</string>
+
+    <!-- [CHAR LIMIT=NONE] Messages shown when users press outside of udfps region during -->
+    <string-array name="udfps_accessibility_touch_hints">
+        <item>Move left</item>
+        <item>Move down</item>
+        <item>Move right</item>
+        <item>Move up</item>
+    </string-array>
+
+    <!-- Formatting states for the scale of font size, in percent. Double "%" is required to represent the symbol "%". [CHAR LIMIT=20] -->
+    <string name="font_scale_percentage"> <xliff:g id="percentage">%1$d</xliff:g> %%</string>
 </resources>

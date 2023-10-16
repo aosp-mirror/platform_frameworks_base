@@ -22,9 +22,11 @@ import android.security.keystore.KeyProtection;
 import android.security.keystore2.AndroidKeyStoreLoadStoreParameter;
 import android.system.keystore2.Domain;
 import android.system.keystore2.KeyDescriptor;
+import android.text.TextUtils;
 import android.util.Slog;
 
-import java.io.ByteArrayOutputStream;
+import com.android.internal.util.ArrayUtils;
+
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -47,12 +49,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class SyntheticPasswordCrypto {
+class SyntheticPasswordCrypto {
     private static final String TAG = "SyntheticPasswordCrypto";
-    private static final int PROFILE_KEY_IV_SIZE = 12;
-    private static final int DEFAULT_TAG_LENGTH_BITS = 128;
-    private static final int AES_KEY_LENGTH = 32; // 256-bit AES key
-    private static final byte[] APPLICATION_ID_PERSONALIZATION = "application-id".getBytes();
+    private static final int AES_GCM_KEY_SIZE = 32; // AES-256-GCM
+    private static final int AES_GCM_IV_SIZE = 12;
+    private static final int AES_GCM_TAG_SIZE = 16;
+    private static final byte[] PROTECTOR_SECRET_PERSONALIZATION = "application-id".getBytes();
     // Time between the user credential is verified with GK and the decryption of synthetic password
     // under the auth-bound key. This should always happen one after the other, but give it 15
     // seconds just to be sure.
@@ -64,11 +66,11 @@ public class SyntheticPasswordCrypto {
         if (blob == null) {
             return null;
         }
-        byte[] iv = Arrays.copyOfRange(blob, 0, PROFILE_KEY_IV_SIZE);
-        byte[] ciphertext = Arrays.copyOfRange(blob, PROFILE_KEY_IV_SIZE, blob.length);
+        byte[] iv = Arrays.copyOfRange(blob, 0, AES_GCM_IV_SIZE);
+        byte[] ciphertext = Arrays.copyOfRange(blob, AES_GCM_IV_SIZE, blob.length);
         Cipher cipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
                 + KeyProperties.BLOCK_MODE_GCM + "/" + KeyProperties.ENCRYPTION_PADDING_NONE);
-        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(DEFAULT_TAG_LENGTH_BITS, iv));
+        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(AES_GCM_TAG_SIZE * 8, iv));
         return cipher.doFinal(ciphertext);
     }
 
@@ -85,23 +87,20 @@ public class SyntheticPasswordCrypto {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] ciphertext = cipher.doFinal(blob);
         byte[] iv = cipher.getIV();
-        if (iv.length != PROFILE_KEY_IV_SIZE) {
-            throw new IllegalArgumentException("Invalid iv length: " + iv.length);
+        if (iv.length != AES_GCM_IV_SIZE) {
+            throw new IllegalArgumentException("Invalid iv length: " + iv.length + " bytes");
         }
         final GCMParameterSpec spec = cipher.getParameters().getParameterSpec(
                 GCMParameterSpec.class);
-        if (spec.getTLen() != DEFAULT_TAG_LENGTH_BITS) {
-            throw new IllegalArgumentException("Invalid tag length: " + spec.getTLen());
+        if (spec.getTLen() != AES_GCM_TAG_SIZE * 8) {
+            throw new IllegalArgumentException("Invalid tag length: " + spec.getTLen() + " bits");
         }
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        outputStream.write(iv);
-        outputStream.write(ciphertext);
-        return outputStream.toByteArray();
+        return ArrayUtils.concat(iv, ciphertext);
     }
 
-    public static byte[] encrypt(byte[] keyBytes, byte[] personalisation, byte[] message) {
-        byte[] keyHash = personalisedHash(personalisation, keyBytes);
-        SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_KEY_LENGTH),
+    public static byte[] encrypt(byte[] keyBytes, byte[] personalization, byte[] message) {
+        byte[] keyHash = personalizedHash(personalization, keyBytes);
+        SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_GCM_KEY_SIZE),
                 KeyProperties.KEY_ALGORITHM_AES);
         try {
             return encrypt(key, message);
@@ -113,9 +112,9 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static byte[] decrypt(byte[] keyBytes, byte[] personalisation, byte[] ciphertext) {
-        byte[] keyHash = personalisedHash(personalisation, keyBytes);
-        SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_KEY_LENGTH),
+    public static byte[] decrypt(byte[] keyBytes, byte[] personalization, byte[] ciphertext) {
+        byte[] keyHash = personalizedHash(personalization, keyBytes);
+        SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_GCM_KEY_SIZE),
                 KeyProperties.KEY_ALGORITHM_AES);
         try {
             return decrypt(key, ciphertext);
@@ -127,15 +126,21 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static byte[] decryptBlobV1(String keyAlias, byte[] blob, byte[] applicationId) {
+    /**
+     * Decrypts a legacy SP blob which did the Keystore and software encryption layers in the wrong
+     * order.
+     */
+    public static byte[] decryptBlobV1(String protectorKeyAlias, byte[] blob,
+            byte[] protectorSecret) {
         try {
             KeyStore keyStore = getKeyStore();
-            SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
-            if (decryptionKey == null) {
-                throw new IllegalStateException("SP key is missing: " + keyAlias);
+            SecretKey protectorKey = (SecretKey) keyStore.getKey(protectorKeyAlias, null);
+            if (protectorKey == null) {
+                throw new IllegalStateException("SP protector key is missing: "
+                        + protectorKeyAlias);
             }
-            byte[] intermediate = decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, blob);
-            return decrypt(decryptionKey, intermediate);
+            byte[] intermediate = decrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, blob);
+            return decrypt(protectorKey, intermediate);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to decrypt V1 blob", e);
             throw new IllegalStateException("Failed to decrypt blob", e);
@@ -157,16 +162,21 @@ public class SyntheticPasswordCrypto {
         return keyStore;
     }
 
-    public static byte[] decryptBlob(String keyAlias, byte[] blob, byte[] applicationId) {
+    /**
+     * Decrypts an SP blob that was created by {@link #createBlob}.
+     */
+    public static byte[] decryptBlob(String protectorKeyAlias, byte[] blob,
+            byte[] protectorSecret) {
         try {
             final KeyStore keyStore = getKeyStore();
 
-            SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
-            if (decryptionKey == null) {
-                throw new IllegalStateException("SP key is missing: " + keyAlias);
+            SecretKey protectorKey = (SecretKey) keyStore.getKey(protectorKeyAlias, null);
+            if (protectorKey == null) {
+                throw new IllegalStateException("SP protector key is missing: "
+                        + protectorKeyAlias);
             }
-            byte[] intermediate = decrypt(decryptionKey, blob);
-            return decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, intermediate);
+            byte[] intermediate = decrypt(protectorKey, blob);
+            return decrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
@@ -177,11 +187,23 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static byte[] createBlob(String keyAlias, byte[] data, byte[] applicationId, long sid) {
+    /**
+     * Creates a new SP blob by encrypting the given data.  Two encryption layers are applied: an
+     * inner layer using a hash of protectorSecret as the key, and an outer layer using the
+     * protector key, which is a Keystore key that is optionally bound to a SID.  This method
+     * creates the protector key and stores it under protectorKeyAlias.
+     *
+     * The reason we use a layer of software encryption, instead of using protectorSecret as the
+     * applicationId of the Keystore key, is to work around buggy KeyMint implementations that don't
+     * cryptographically bind the applicationId to the key.  The Keystore layer has to be the outer
+     * layer, so that LSKF verification is ratelimited by Gatekeeper when Weaver is unavailable.
+     */
+    public static byte[] createBlob(String protectorKeyAlias, byte[] data, byte[] protectorSecret,
+            long sid) {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
-            keyGenerator.init(AES_KEY_LENGTH * 8, new SecureRandom());
-            SecretKey secretKey = keyGenerator.generateKey();
+            keyGenerator.init(AES_GCM_KEY_SIZE * 8, new SecureRandom());
+            SecretKey protectorKey = keyGenerator.generateKey();
             final KeyStore keyStore = getKeyStore();
             KeyProtection.Builder builder = new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -192,12 +214,21 @@ public class SyntheticPasswordCrypto {
                         .setBoundToSpecificSecureUserId(sid)
                         .setUserAuthenticationValidityDurationSeconds(USER_AUTHENTICATION_VALIDITY);
             }
+            final KeyProtection protNonRollbackResistant = builder.build();
+            builder.setRollbackResistant(true);
+            final KeyProtection protRollbackResistant = builder.build();
+            final KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(protectorKey);
+            try {
+                keyStore.setEntry(protectorKeyAlias, entry, protRollbackResistant);
+                Slog.i(TAG, "Using rollback-resistant key");
+            } catch (KeyStoreException e) {
+                Slog.w(TAG, "Rollback-resistant keys unavailable.  Falling back to "
+                        + "non-rollback-resistant key");
+                keyStore.setEntry(protectorKeyAlias, entry, protNonRollbackResistant);
+            }
 
-            keyStore.setEntry(keyAlias,
-                    new KeyStore.SecretKeyEntry(secretKey),
-                    builder.build());
-            byte[] intermediate = encrypt(applicationId, APPLICATION_ID_PERSONALIZATION, data);
-            return encrypt(secretKey, intermediate);
+            byte[] intermediate = encrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, data);
+            return encrypt(protectorKey, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
@@ -208,29 +239,29 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static void destroyBlobKey(String keyAlias) {
+    public static void destroyProtectorKey(String keyAlias) {
         KeyStore keyStore;
         try {
             keyStore = getKeyStore();
             keyStore.deleteEntry(keyAlias);
-            Slog.i(TAG, "SP key deleted: " + keyAlias);
+            Slog.i(TAG, "Deleted SP protector key " + keyAlias);
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                 | IOException e) {
-            Slog.e(TAG, "Failed to destroy blob", e);
+            Slog.e(TAG, "Failed to delete SP protector key " + keyAlias, e);
         }
     }
 
-    protected static byte[] personalisedHash(byte[] personalisation, byte[]... message) {
+    protected static byte[] personalizedHash(byte[] personalization, byte[]... message) {
         try {
             final int PADDING_LENGTH = 128;
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
-            if (personalisation.length > PADDING_LENGTH) {
-                throw new IllegalArgumentException("Personalisation too long");
+            if (personalization.length > PADDING_LENGTH) {
+                throw new IllegalArgumentException("Personalization too long");
             }
             // Personalize the hash
             // Pad it to the block size of the hash function
-            personalisation = Arrays.copyOf(personalisation, PADDING_LENGTH);
-            digest.update(personalisation);
+            personalization = Arrays.copyOf(personalization, PADDING_LENGTH);
+            digest.update(personalization);
             for (byte[] data : message) {
                 digest.update(data);
             }
@@ -263,7 +294,7 @@ public class SyntheticPasswordCrypto {
             // Treat this as a success so we don't migrate again.
             return true;
         } else {
-            Slog.e(TAG, String.format("Failed to migrate key: %d", err));
+            Slog.e(TAG, TextUtils.formatSimple("Failed to migrate key: %d", err));
             return false;
         }
     }

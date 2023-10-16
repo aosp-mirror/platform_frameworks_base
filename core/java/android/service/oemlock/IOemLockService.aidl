@@ -22,14 +22,21 @@ package android.service.oemlock;
  * @hide
  */
 interface IOemLockService {
+    @EnforcePermission("MANAGE_CARRIER_OEM_UNLOCK_STATE")
     String getLockName();
 
+    @EnforcePermission("MANAGE_CARRIER_OEM_UNLOCK_STATE")
     void setOemUnlockAllowedByCarrier(boolean allowed, in byte[] signature);
+    @EnforcePermission("MANAGE_CARRIER_OEM_UNLOCK_STATE")
     boolean isOemUnlockAllowedByCarrier();
 
+    @EnforcePermission("MANAGE_USER_OEM_UNLOCK_STATE")
     void setOemUnlockAllowedByUser(boolean allowed);
+    @EnforcePermission("MANAGE_USER_OEM_UNLOCK_STATE")
     boolean isOemUnlockAllowedByUser();
 
+    @EnforcePermission(anyOf = {"READ_OEM_UNLOCK_STATE", "OEM_UNLOCK_STATE"})
     boolean isOemUnlockAllowed();
+    @EnforcePermission(anyOf = {"READ_OEM_UNLOCK_STATE", "OEM_UNLOCK_STATE"})
     boolean isDeviceOemUnlocked();
 }

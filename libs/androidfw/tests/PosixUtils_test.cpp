@@ -28,27 +28,27 @@ namespace util {
 
 TEST(PosixUtilsTest, AbsolutePathToBinary) {
   const auto result = ExecuteBinary({"/bin/date", "--help"});
-  ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, 0);
-  ASSERT_GE(result->stdout_str.find("usage: date "), 0);
+  ASSERT_TRUE((bool)result);
+  ASSERT_EQ(result.status, 0);
+  ASSERT_GE(result.stdout_str.find("usage: date "), 0);
 }
 
 TEST(PosixUtilsTest, RelativePathToBinary) {
   const auto result = ExecuteBinary({"date", "--help"});
-  ASSERT_THAT(result, NotNull());
-  ASSERT_EQ(result->status, 0);
-  ASSERT_GE(result->stdout_str.find("usage: date "), 0);
+  ASSERT_TRUE((bool)result);
+  ASSERT_EQ(result.status, 0);
+  ASSERT_GE(result.stdout_str.find("usage: date "), 0);
 }
 
 TEST(PosixUtilsTest, BadParameters) {
   const auto result = ExecuteBinary({"/bin/date", "--this-parameter-is-not-supported"});
-  ASSERT_THAT(result, NotNull());
-  ASSERT_NE(result->status, 0);
+  ASSERT_TRUE((bool)result);
+  ASSERT_GT(result.status, 0);
 }
 
 TEST(PosixUtilsTest, NoSuchBinary) {
   const auto result = ExecuteBinary({"/this/binary/does/not/exist"});
-  ASSERT_THAT(result, IsNull());
+  ASSERT_FALSE((bool)result);
 }
 
 } // android

@@ -46,6 +46,7 @@ public class VoiceInteractionServiceInfo {
     private String mSessionService;
     private String mRecognitionService;
     private String mHotwordDetectionService;
+    private String mVisualQueryDetectionService;
     private String mSettingsActivity;
     private boolean mSupportsAssist;
     private boolean mSupportsLaunchFromKeyguard;
@@ -137,6 +138,8 @@ public class VoiceInteractionServiceInfo {
                     R.styleable.VoiceInteractionService_supportsLocalInteraction, false);
             mHotwordDetectionService = array.getString(com.android.internal.R.styleable
                     .VoiceInteractionService_hotwordDetectionService);
+            mVisualQueryDetectionService = array.getString(com.android.internal.R.styleable
+                    .VoiceInteractionService_visualQueryDetectionService);
             array.recycle();
             if (mSessionService == null) {
                 mParseError = "No sessionService specified";
@@ -189,5 +192,10 @@ public class VoiceInteractionServiceInfo {
     @Nullable
     public String getHotwordDetectionService() {
         return mHotwordDetectionService;
+    }
+
+    @Nullable
+    public String getVisualQueryDetectionService() {
+        return mVisualQueryDetectionService;
     }
 }

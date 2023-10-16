@@ -39,9 +39,9 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,25 +50,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class ActionProxyReceiverTest extends SysuiTestCase {
-
-    @Mock
-    private CentralSurfaces mMockCentralSurfaces;
     @Mock
     private ActivityManagerWrapper mMockActivityManagerWrapper;
     @Mock
     private ScreenshotSmartActions mMockScreenshotSmartActions;
     @Mock
     private PendingIntent mMockPendingIntent;
+    @Mock
+    private ActivityStarter mActivityStarter;
 
     private Intent mIntent;
-    private final FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
@@ -78,32 +76,19 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPendingIntentSentWithoutStatusBar() throws PendingIntent.CanceledException {
-        ActionProxyReceiver actionProxyReceiver = constructActionProxyReceiver(false);
-
-        actionProxyReceiver.onReceive(mContext, mIntent);
-
-        verify(mMockActivityManagerWrapper).closeSystemWindows(SYSTEM_DIALOG_REASON_SCREENSHOT);
-        verify(mMockCentralSurfaces, never()).executeRunnableDismissingKeyguard(
-                any(Runnable.class), any(Runnable.class), anyBoolean(), anyBoolean(), anyBoolean());
-        verify(mMockPendingIntent).send(
-                eq(mContext), anyInt(), isNull(), isNull(), isNull(), isNull(), any(Bundle.class));
-    }
-
-    @Test
     public void testPendingIntentSentWithStatusBar() throws PendingIntent.CanceledException {
-        ActionProxyReceiver actionProxyReceiver = constructActionProxyReceiver(true);
+        ActionProxyReceiver actionProxyReceiver = constructActionProxyReceiver();
         // ensure that the pending intent call is passed through
         doAnswer((Answer<Object>) invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
-        }).when(mMockCentralSurfaces).executeRunnableDismissingKeyguard(
+        }).when(mActivityStarter).executeRunnableDismissingKeyguard(
                 any(Runnable.class), isNull(), anyBoolean(), anyBoolean(), anyBoolean());
 
         actionProxyReceiver.onReceive(mContext, mIntent);
 
         verify(mMockActivityManagerWrapper).closeSystemWindows(SYSTEM_DIALOG_REASON_SCREENSHOT);
-        verify(mMockCentralSurfaces).executeRunnableDismissingKeyguard(
+        verify(mActivityStarter).executeRunnableDismissingKeyguard(
                 any(Runnable.class), isNull(), eq(true), eq(true), eq(true));
         verify(mMockPendingIntent).send(
                 eq(mContext), anyInt(), isNull(), isNull(), isNull(), isNull(), any(Bundle.class));
@@ -111,7 +96,7 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
 
     @Test
     public void testSmartActionsNotNotifiedByDefault() {
-        ActionProxyReceiver actionProxyReceiver = constructActionProxyReceiver(true);
+        ActionProxyReceiver actionProxyReceiver = constructActionProxyReceiver();
 
         actionProxyReceiver.onReceive(mContext, mIntent);
 
@@ -122,7 +107,7 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
 
     @Test
     public void testSmartActionsNotifiedIfEnabled() {
-        ActionProxyReceiver actionProxyReceiver = constructActionProxyReceiver(true);
+        ActionProxyReceiver actionProxyReceiver = constructActionProxyReceiver();
         mIntent.putExtra(EXTRA_SMART_ACTIONS_ENABLED, true);
         String testId = "testID";
         mIntent.putExtra(EXTRA_ID, testId);
@@ -133,15 +118,12 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
                 testId, ACTION_TYPE_SHARE, false, null);
     }
 
-    private ActionProxyReceiver constructActionProxyReceiver(boolean withStatusBar) {
-        if (withStatusBar) {
-            return new ActionProxyReceiver(
-                    Optional.of(mMockCentralSurfaces), mMockActivityManagerWrapper,
-                    mMockScreenshotSmartActions, mDisplayTracker);
-        } else {
-            return new ActionProxyReceiver(
-                    Optional.empty(), mMockActivityManagerWrapper, mMockScreenshotSmartActions,
-                    mDisplayTracker);
-        }
+    private ActionProxyReceiver constructActionProxyReceiver() {
+        return new ActionProxyReceiver(
+                mMockActivityManagerWrapper,
+                mMockScreenshotSmartActions,
+                mDisplayTracker,
+                mActivityStarter
+        );
     }
 }

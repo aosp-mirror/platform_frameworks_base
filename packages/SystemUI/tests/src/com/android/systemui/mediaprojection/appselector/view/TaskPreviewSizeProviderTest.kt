@@ -107,7 +107,7 @@ class TaskPreviewSizeProviderTest : SysuiTestCase() {
 
     private fun givenDisplay(width: Int, height: Int, isTablet: Boolean = false) {
         val bounds = Rect(0, 0, width, height)
-        val windowMetrics = WindowMetrics(bounds, null)
+        val windowMetrics = WindowMetrics(bounds, { null }, 1.0f)
         whenever(windowManager.maximumWindowMetrics).thenReturn(windowMetrics)
         whenever(windowManager.currentWindowMetrics).thenReturn(windowMetrics)
 

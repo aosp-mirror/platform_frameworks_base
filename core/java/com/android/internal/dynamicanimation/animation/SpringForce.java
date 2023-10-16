@@ -228,7 +228,7 @@ public final class SpringForce implements Force {
     }
 
     /**
-     * Initialize the string by doing the necessary pre-calculation as well as some sanity check
+     * Initialize the string by doing the necessary pre-calculation as well as some initial check
      * on the setup.
      *
      * @throws IllegalStateException if the final position is not yet set by the time the spring

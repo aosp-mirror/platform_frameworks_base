@@ -38,13 +38,13 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  */
@@ -451,6 +451,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         @Override
         public void onBiometricsCleared() {
             update(false /* alwaysUpdate */);
+        }
+
+        @Override
+        public void onEnabledTrustAgentsChanged(int userId) {
+            update(false /* updateAlways */);
         }
     }
 }

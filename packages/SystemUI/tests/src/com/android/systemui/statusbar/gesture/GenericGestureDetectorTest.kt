@@ -18,10 +18,11 @@ import org.junit.runner.RunWith
 class GenericGestureDetectorTest : SysuiTestCase() {
 
     private lateinit var gestureDetector: TestGestureDetector
-    private val displayTracker = FakeDisplayTracker(mContext)
+    private lateinit var displayTracker: FakeDisplayTracker
 
     @Before
     fun setUp() {
+        displayTracker = FakeDisplayTracker(mContext)
         gestureDetector = TestGestureDetector()
     }
 
@@ -117,7 +118,10 @@ class GenericGestureDetectorTest : SysuiTestCase() {
         assertThat(oldCallbackNotified).isFalse()
     }
 
-    inner class TestGestureDetector : GenericGestureDetector("fakeTag", displayTracker) {
+    inner class TestGestureDetector : GenericGestureDetector(
+            "fakeTag",
+            displayTracker.defaultDisplayId
+    ) {
         var isGestureListening = false
 
         override fun onInputEvent(ev: InputEvent) {

@@ -35,6 +35,7 @@ import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.flags.FeatureFlags;
 
@@ -42,6 +43,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -104,14 +106,26 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
             reset(mLayoutInflater);
             when(mLayoutInflater.inflate(anyInt(), eq(mView), eq(false)))
                     .thenReturn(mInputView);
-            mKeyguardSecurityViewFlipperController.getSecurityView(mode, mKeyguardSecurityCallback);
-            if (mode == SecurityMode.Invalid || mode == SecurityMode.None) {
-                verify(mLayoutInflater, never()).inflate(
-                        anyInt(), any(ViewGroup.class), anyBoolean());
-            } else {
-                verify(mLayoutInflater).inflate(anyInt(), eq(mView), eq(false));
-            }
+            mKeyguardSecurityViewFlipperController.getSecurityView(mode, mKeyguardSecurityCallback,
+                    controller -> {
+                        if (mode == SecurityMode.Invalid || mode == SecurityMode.None) {
+                            verify(mLayoutInflater, never()).inflate(
+                                    anyInt(), any(ViewGroup.class), anyBoolean());
+                        } else {
+                            verify(mLayoutInflater).inflate(anyInt(), eq(mView), eq(false));
+                        }
+                    });
         }
+    }
+
+    @Test
+    public void getSecurityView_NotInflated() {
+        mKeyguardSecurityViewFlipperController.clearViews();
+        mKeyguardSecurityViewFlipperController.getSecurityView(SecurityMode.PIN,
+                mKeyguardSecurityCallback,
+                controller -> {});
+        verify(mAsyncLayoutInflater).inflate(anyInt(), eq(mView), any(
+                AsyncLayoutInflater.OnInflateFinishedListener.class));
     }
 
     @Test
@@ -120,6 +134,18 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
                 mKeyguardSecurityCallback, null);
         verify(mAsyncLayoutInflater).inflate(anyInt(), eq(mView), any(
                 AsyncLayoutInflater.OnInflateFinishedListener.class));
+    }
+
+    @Test
+    public void asynchronouslyInflateView_setNeedsInput() {
+        ArgumentCaptor<AsyncLayoutInflater.OnInflateFinishedListener> argumentCaptor =
+                ArgumentCaptor.forClass(AsyncLayoutInflater.OnInflateFinishedListener.class);
+        mKeyguardSecurityViewFlipperController.asynchronouslyInflateView(SecurityMode.PIN,
+                mKeyguardSecurityCallback, null);
+        verify(mAsyncLayoutInflater).inflate(anyInt(), eq(mView), argumentCaptor.capture());
+        argumentCaptor.getValue().onInflateFinished(
+                LayoutInflater.from(getContext()).inflate(R.layout.keyguard_password_view, null),
+                R.layout.keyguard_password_view, mView);
     }
 
     @Test

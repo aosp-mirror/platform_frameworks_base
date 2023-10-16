@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Binder;
@@ -41,6 +42,7 @@ import java.util.List;
  * @see TaskFragmentTransaction.Change
  * @hide
  */
+@TestApi
 public final class TaskFragmentTransaction implements Parcelable {
 
     /** Unique token to represent this transaction. */

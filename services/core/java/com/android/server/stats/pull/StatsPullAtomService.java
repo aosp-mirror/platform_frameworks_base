@@ -15,10 +15,15 @@
  */
 
 package com.android.server.stats.pull;
+
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
+import static android.app.AppProtoEnums.HOSTING_COMPONENT_TYPE_EMPTY;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_UNSUPPORTED;
+import static android.hardware.graphics.common.Hdr.DOLBY_VISION;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
@@ -31,12 +36,14 @@ import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
 import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
+import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 import static android.provider.Settings.Global.NETSTATS_UID_BUCKET_DURATION;
 import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 import static android.util.MathUtils.constrain;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
@@ -85,8 +92,10 @@ import android.bluetooth.UidTraffic;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -163,6 +172,8 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
+import android.uwb.UwbActivityEnergyInfo;
+import android.uwb.UwbManager;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
@@ -182,14 +193,11 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeRea
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.os.KernelSingleProcessCpuThreadReader.ProcessCpuUsage;
-import com.android.internal.os.KernelWakelockReader;
-import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.SelectedProcessCpuThreadReader;
 import com.android.internal.os.StoragedUidIoStatsReader;
-import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.net.module.util.NetworkStatsUtils;
@@ -205,6 +213,9 @@ import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.health.HealthServiceWrapper;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.power.stats.KernelWakelockReader;
+import com.android.server.power.stats.KernelWakelockStats;
+import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
@@ -243,6 +254,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 /**
@@ -337,6 +349,7 @@ public class StatsPullAtomService extends SystemService {
     private StorageManager mStorageManager;
     private WifiManager mWifiManager;
     private TelephonyManager mTelephony;
+    private UwbManager mUwbManager;
     private SubscriptionManager mSubscriptionManager;
     private NetworkStatsManager mNetworkStatsManager;
 
@@ -406,6 +419,7 @@ public class StatsPullAtomService extends SystemService {
     private final Object mWifiActivityInfoLock = new Object();
     private final Object mModemActivityInfoLock = new Object();
     private final Object mBluetoothActivityInfoLock = new Object();
+    private final Object mUwbActivityInfoLock = new Object();
     private final Object mSystemElapsedRealtimeLock = new Object();
     private final Object mSystemUptimeLock = new Object();
     private final Object mProcessMemoryStateLock = new Object();
@@ -527,6 +541,10 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.BLUETOOTH_ACTIVITY_INFO:
                         synchronized (mBluetoothActivityInfoLock) {
                             return pullBluetoothActivityInfoLocked(atomTag, data);
+                        }
+                    case FrameworkStatsLog.UWB_ACTIVITY_INFO:
+                        synchronized (mUwbActivityInfoLock) {
+                            return pullUwbActivityInfoLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.SYSTEM_ELAPSED_REALTIME:
                         synchronized (mSystemElapsedRealtimeLock) {
@@ -740,6 +758,10 @@ public class StatsPullAtomService extends SystemService {
                         return pullSystemServerPinnerStats(atomTag, data);
                     case FrameworkStatsLog.PENDING_INTENTS_PER_PACKAGE:
                         return pullPendingIntentsPerPackage(atomTag, data);
+                    case FrameworkStatsLog.HDR_CAPABILITIES:
+                        return pullHdrCapabilities(atomTag, data);
+                    case FrameworkStatsLog.CACHED_APPS_HIGH_WATERMARK:
+                        return pullCachedAppsHighWatermark(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -765,8 +787,12 @@ public class StatsPullAtomService extends SystemService {
                 registerEventListeners();
             });
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            // Network stats related pullers can only be initialized after service is ready.
-            BackgroundThread.getHandler().post(() -> initAndRegisterNetworkStatsPullers());
+            BackgroundThread.getHandler().post(() -> {
+                // Network stats related pullers can only be initialized after service is ready.
+                initAndRegisterNetworkStatsPullers();
+                // For services that are not ready at boot phase PHASE_SYSTEM_SERVICES_READY
+                initAndRegisterDeferredPullers();
+            });
         }
     }
 
@@ -939,6 +965,8 @@ public class StatsPullAtomService extends SystemService {
         registerMediaCapabilitiesStats();
         registerPendingIntentsPerPackagePuller();
         registerPinnerServiceStats();
+        registerHdrCapabilitiesPuller();
+        registerCachedAppsHighWatermarkPuller();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -973,6 +1001,13 @@ public class StatsPullAtomService extends SystemService {
         registerBytesTransferByTagAndMetered();
         registerDataUsageBytesTransfer();
         registerOemManagedBytesTransfer();
+    }
+
+    private void initAndRegisterDeferredPullers() {
+        mUwbManager = mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)
+            ? mContext.getSystemService(UwbManager.class) : null;
+
+        registerUwbActivityInfo();
     }
 
     private IThermalService getIThermalService() {
@@ -2137,6 +2172,49 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
+    private void registerUwbActivityInfo() {
+        if (mUwbManager == null) {
+            return;
+        }
+        int tagId = FrameworkStatsLog.UWB_ACTIVITY_INFO;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullUwbActivityInfoLocked(int atomTag, List<StatsEvent> pulledData) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            SynchronousResultReceiver uwbReceiver = new SynchronousResultReceiver("uwb");
+            mUwbManager.getUwbActivityEnergyInfoAsync(Runnable::run,
+                    info -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                        uwbReceiver.send(0, bundle);
+                }
+            );
+            final UwbActivityEnergyInfo uwbInfo = awaitControllerInfo(uwbReceiver);
+            if (uwbInfo == null) {
+                return StatsManager.PULL_SKIP;
+            }
+            pulledData.add(
+                    FrameworkStatsLog.buildStatsEvent(atomTag,
+                            uwbInfo.getControllerTxDurationMillis(),
+                            uwbInfo.getControllerRxDurationMillis(),
+                            uwbInfo.getControllerIdleDurationMillis(),
+                            uwbInfo.getControllerWakeCount()));
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "failed to getUwbActivityEnergyInfoAsync", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
     private void registerSystemElapsedRealtime() {
         int tagId = FrameworkStatsLog.SYSTEM_ELAPSED_REALTIME;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
@@ -2276,7 +2354,9 @@ public class StatsPullAtomService extends SystemService {
                     managedProcess.processName, managedProcess.pid, managedProcess.oomScore,
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
                     snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
-                    gpuMemPerPid.get(managedProcess.pid), managedProcess.hasForegroundServices));
+                    gpuMemPerPid.get(managedProcess.pid), managedProcess.hasForegroundServices,
+                    snapshot.rssShmemKilobytes, managedProcess.mHostingComponentTypes,
+                    managedProcess.mHistoricalHostingComponentTypes));
         }
         // Complement the data with native system processes. Given these measurements can be taken
         // in response to LMKs happening, we want to first collect the managed app stats (to
@@ -2295,7 +2375,11 @@ public class StatsPullAtomService extends SystemService {
                     -1001 /*Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.*/,
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
                     snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
-                    gpuMemPerPid.get(pid), false /* has_foreground_services */));
+                    gpuMemPerPid.get(pid), false /* has_foreground_services */,
+                    snapshot.rssShmemKilobytes,
+                    // Native processes don't really have a hosting component type.
+                    HOSTING_COMPONENT_TYPE_EMPTY,
+                    HOSTING_COMPONENT_TYPE_EMPTY));
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -2414,7 +2498,20 @@ public class StatsPullAtomService extends SystemService {
                         metrics.gpuTotalUsageKb,
                         metrics.gpuPrivateAllocationsKb,
                         metrics.dmaBufTotalExportedKb,
-                        metrics.shmemKb));
+                        metrics.shmemKb,
+                        metrics.totalKb,
+                        metrics.freeKb,
+                        metrics.availableKb,
+                        metrics.activeKb,
+                        metrics.inactiveKb,
+                        metrics.activeAnonKb,
+                        metrics.inactiveAnonKb,
+                        metrics.activeFileKb,
+                        metrics.inactiveFileKb,
+                        metrics.swapTotalKb,
+                        metrics.swapFreeKb,
+                        metrics.cmaTotalKb,
+                        metrics.cmaFreeKb));
         return StatsManager.PULL_SUCCESS;
     }
 
@@ -2638,7 +2735,7 @@ public class StatsPullAtomService extends SystemService {
             latency = -1;
         }
         // File based encryption.
-        boolean fileBased = StorageManager.isFileEncryptedNativeOnly();
+        boolean fileBased = StorageManager.isFileEncrypted();
 
         //Recent disk write speed. Binder call to storaged.
         int writeSpeed = -1;
@@ -4189,20 +4286,26 @@ public class StatsPullAtomService extends SystemService {
 
     int pullInstalledIncrementalPackagesLocked(int atomTag, List<StatsEvent> pulledData) {
         final PackageManager pm = mContext.getPackageManager();
+        final PackageManagerInternal pmIntenral =
+                LocalServices.getService(PackageManagerInternal.class);
         if (!pm.hasSystemFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY)) {
             // Incremental is not enabled on this device. The result list will be empty.
             return StatsManager.PULL_SUCCESS;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            final int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
             for (int userId : userIds) {
-                List<PackageInfo> installedPackages = pm.getInstalledPackagesAsUser(0, userId);
+                final List<PackageInfo> installedPackages = pm.getInstalledPackagesAsUser(
+                        0, userId);
                 for (PackageInfo pi : installedPackages) {
                     if (IncrementalManager.isIncrementalPath(
                             pi.applicationInfo.getBaseCodePath())) {
+                        final IncrementalStatesInfo info = pmIntenral.getIncrementalStatesInfo(
+                                pi.packageName, SYSTEM_UID, userId);
                         pulledData.add(
-                                FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid));
+                                FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid,
+                                        info.isLoading(), info.getLoadingCompletedTime()));
                     }
                 }
             }
@@ -4680,6 +4783,46 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
+    private int pullHdrCapabilities(int atomTag, List<StatsEvent> pulledData) {
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+
+        int hdrConversionMode = displayManager.getHdrConversionMode().getConversionMode();
+        int preferredHdrType = displayManager.getHdrConversionMode().getPreferredHdrOutputType();
+        boolean userDisabledHdrConversion = hdrConversionMode == HDR_CONVERSION_PASSTHROUGH;
+        int forceHdrFormat = preferredHdrType == HDR_TYPE_INVALID ? 0 : preferredHdrType;
+        boolean hasDolbyVisionIssue = hasDolbyVisionIssue(display);
+        byte[] hdrOutputTypes = toBytes(displayManager.getSupportedHdrOutputTypes());
+        boolean hdrOutputControlSupported = hdrConversionMode != HDR_CONVERSION_UNSUPPORTED;
+
+        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, hdrOutputTypes,
+                userDisabledHdrConversion, forceHdrFormat, hasDolbyVisionIssue,
+                hdrOutputControlSupported));
+
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private int pullCachedAppsHighWatermark(int atomTag, List<StatsEvent> pulledData) {
+        pulledData.add(LocalServices.getService(ActivityManagerInternal.class)
+                .getCachedAppsHighWatermarkStats(atomTag, true));
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private boolean hasDolbyVisionIssue(Display display) {
+        AtomicInteger modesSupportingDolbyVision = new AtomicInteger();
+        Arrays.stream(display.getSupportedModes())
+                .map(Display.Mode::getSupportedHdrTypes)
+                .filter(types -> Arrays.stream(types).anyMatch(hdrType -> hdrType == DOLBY_VISION))
+                .forEach(ignored -> modesSupportingDolbyVision.incrementAndGet());
+
+        if (modesSupportingDolbyVision.get() != 0
+                && modesSupportingDolbyVision.get() < display.getSupportedModes().length) {
+            return true;
+        }
+
+        return false;
+    }
+
     private int pullPendingIntentsPerPackage(int atomTag, List<StatsEvent> pulledData) {
         List<PendingIntentStats> pendingIntentStats =
                 LocalServices.getService(ActivityManagerInternal.class).getPendingIntentStats();
@@ -4692,6 +4835,26 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerPinnerServiceStats() {
         int tagId = FrameworkStatsLog.PINNED_FILE_SIZES_PER_PACKAGE;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerHdrCapabilitiesPuller() {
+        int tagId = FrameworkStatsLog.HDR_CAPABILITIES;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerCachedAppsHighWatermarkPuller() {
+        final int tagId = FrameworkStatsLog.CACHED_APPS_HIGH_WATERMARK;
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values

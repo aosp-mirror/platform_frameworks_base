@@ -114,6 +114,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         assertTrue(recentActivity.isVisibleRequested());
         assertEquals(ActivityTaskManagerService.DEMOTE_TOP_REASON_ANIMATING_RECENTS,
                 mAtm.mDemoteTopAppReasons);
+        assertFalse(mAtm.mInternal.useTopSchedGroupForTopProcess());
 
         // Simulate the animation is cancelled without changing the stack order.
         recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, false /* sendUserLeaveHint */);

@@ -16,9 +16,6 @@ per-file UserspaceRebootLogger.java = ioffe@google.com, dvander@google.com
 # ServiceWatcher
 per-file ServiceWatcher.java = sooniln@google.com
 
-# Health
-per-file BatteryService.java = file:platform/hardware/interfaces:/health/aidl/OWNERS
-
 per-file *Accessibility* = file:/services/accessibility/OWNERS
 per-file *Alarm* = file:/apex/jobscheduler/OWNERS
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
@@ -39,7 +36,7 @@ per-file MmsServiceBroker.java = file:/telephony/OWNERS
 per-file NetIdManager.java = file:/services/core/java/com/android/server/net/OWNERS
 per-file PackageWatchdog.java, RescueParty.java = file:/services/core/java/com/android/server/rollback/OWNERS
 per-file PinnerService.java = file:/apct-tests/perftests/OWNERS
-per-file RescueParty.java = fdunlap@google.com, shuc@google.com, ancr@google.com, harshitmahajan@google.com
+per-file RescueParty.java = shuc@google.com, ancr@google.com, harshitmahajan@google.com
 per-file SystemClockTime.java = file:/services/core/java/com/android/server/timedetector/OWNERS
 per-file SystemTimeZone.java = file:/services/core/java/com/android/server/timezonedetector/OWNERS
 per-file TelephonyRegistry.java = file:/telephony/OWNERS

@@ -111,7 +111,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         stopProfiling();
     }
 
-    /** A dummy view to get IWindow. */
+    /** A placeholder view to get IWindow. */
     private static class ContentView extends LinearLayout {
         ContentView(Context context) {
             super(context);
@@ -127,7 +127,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final ClientWindowFrames mOutFrames = new ClientWindowFrames();
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
-        final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
+        final InsetsSourceControl.Array mOutControls = new InsetsSourceControl.Array();
         final IWindow mWindow;
         final View mView;
         final WindowManager.LayoutParams mParams;

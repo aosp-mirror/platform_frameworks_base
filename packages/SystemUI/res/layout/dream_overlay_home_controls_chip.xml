@@ -21,8 +21,6 @@
     android:layout_width="@dimen/dream_overlay_bottom_affordance_width"
     android:layout_gravity="bottom|start"
     android:padding="@dimen/dream_overlay_bottom_affordance_padding"
-    android:background="@drawable/dream_overlay_bottom_affordance_bg"
     android:scaleType="fitCenter"
     android:tint="?android:attr/textColorPrimary"
-    android:src="@drawable/controls_icon"
     android:contentDescription="@string/quick_controls_title" />

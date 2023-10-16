@@ -56,7 +56,7 @@ import java.util.function.Consumer;
  * translation framework.
  *
  * <p>The TranslationManager manages {@link Translator}s and help bridge client calls to
- * the server {@link android.service.translation.TranslationService} </p>
+ * the server translation service </p>
  */
 @SystemService(Context.TRANSLATION_MANAGER_SERVICE)
 public final class TranslationManager {
@@ -247,7 +247,7 @@ public final class TranslationManager {
                 return Collections.emptySet();
             }
             ParceledListSlice<TranslationCapability> listSlice =
-                    result.bundle.getParcelable(EXTRA_CAPABILITIES);
+                    result.bundle.getParcelable(EXTRA_CAPABILITIES, android.content.pm.ParceledListSlice.class);
             ArraySet<TranslationCapability> capabilities =
                     new ArraySet<>(listSlice == null ? null : listSlice.getList());
             return capabilities;
@@ -467,7 +467,7 @@ public final class TranslationManager {
 
         private void onTranslationCapabilityUpdate(Bundle bundle) {
             TranslationCapability capability =
-                    (TranslationCapability) bundle.getParcelable(EXTRA_CAPABILITIES);
+                    (TranslationCapability) bundle.getParcelable(EXTRA_CAPABILITIES, android.view.translation.TranslationCapability.class);
             mListener.accept(capability);
         }
     }

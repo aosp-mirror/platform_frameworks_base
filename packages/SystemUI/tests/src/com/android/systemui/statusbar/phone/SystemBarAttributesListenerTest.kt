@@ -3,12 +3,9 @@ package com.android.systemui.statusbar.phone
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.Display
-import android.view.InsetsVisibilities
+import android.view.WindowInsets
 import android.view.WindowInsetsController
-import android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-import android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS
-import android.view.WindowInsetsController.Appearance
+import android.view.WindowInsetsController.*
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
@@ -27,8 +24,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -88,7 +85,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
         changeSysBarAttrs(TEST_APPEARANCE)
 
         verify(statusBarStateController)
-            .setSystemBarAttributes(eq(TEST_APPEARANCE), anyInt(), any(), any())
+            .setSystemBarAttributes(eq(TEST_APPEARANCE), anyInt(), anyInt(), any())
     }
 
     @Test
@@ -97,7 +94,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
         verify(statusBarStateController)
             .setSystemBarAttributes(
-                eq(TEST_LETTERBOX_APPEARANCE.appearance), anyInt(), any(), any())
+                eq(TEST_LETTERBOX_APPEARANCE.appearance), anyInt(), anyInt(), any())
     }
 
     @Test
@@ -130,7 +127,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
         verify(statusBarStateController)
             .setSystemBarAttributes(
-                eq(TEST_LETTERBOX_APPEARANCE.appearance), anyInt(), any(), any())
+                eq(TEST_LETTERBOX_APPEARANCE.appearance), anyInt(), anyInt(), any())
     }
 
     @Test
@@ -197,7 +194,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
             appearanceRegions,
             /* navbarColorManagedByIme= */ false,
             WindowInsetsController.BEHAVIOR_DEFAULT,
-            InsetsVisibilities(),
+            WindowInsets.Type.defaultVisible(),
             "package name",
             letterboxDetails)
     }

@@ -50,10 +50,7 @@ object KeyguardLongPressViewBinder {
                         return
                     }
 
-                    viewModel.onLongPress(
-                        x = x,
-                        y = y,
-                    )
+                    viewModel.onLongPress()
                 }
 
                 override fun onSingleTapDetected(view: View) {
@@ -70,23 +67,6 @@ object KeyguardLongPressViewBinder {
                 launch {
                     viewModel.isLongPressHandlingEnabled.collect { isEnabled ->
                         view.setLongPressHandlingEnabled(isEnabled)
-                    }
-                }
-
-                launch {
-                    var dismissMenu: (() -> Unit)? = null
-
-                    viewModel.menu.collect { menuOrNull ->
-                        if (menuOrNull != null) {
-                            dismissMenu =
-                                KeyguardLongPressPopupViewBinder.createAndShow(
-                                    container = view,
-                                    viewModel = menuOrNull,
-                                    onDismissed = menuOrNull.onDismissed,
-                                )
-                        } else {
-                            dismissMenu?.invoke()
-                        }
                     }
                 }
             }

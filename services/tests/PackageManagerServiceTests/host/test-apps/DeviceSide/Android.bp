@@ -38,6 +38,6 @@ android_test_helper_app {
         "junit-params",
         "androidx.test.ext.junit",
         "androidx.test.rules",
-        "truth-prebuilt",
+        "truth",
     ],
 }
