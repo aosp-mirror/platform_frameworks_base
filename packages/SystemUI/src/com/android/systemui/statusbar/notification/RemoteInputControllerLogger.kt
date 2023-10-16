@@ -52,20 +52,25 @@ constructor(@NotificationRemoteInputLog private val logBuffer: LogBuffer) {
         remoteEditImeVisible: Boolean,
         remoteEditImeAnimatingAway: Boolean,
         isRemoteInputActiveForEntry: Boolean,
-        isRemoteInputActive: Boolean
+        isRemoteInputActive: Boolean,
+        reason: String,
+        notificationStyle: String
     ) =
         logBuffer.log(
             TAG,
             DEBUG,
             {
                 str1 = entryKey
+                str2 = reason
+                str3 = notificationStyle
                 bool1 = remoteEditImeVisible
                 bool2 = remoteEditImeAnimatingAway
                 bool3 = isRemoteInputActiveForEntry
                 bool4 = isRemoteInputActive
             },
             {
-                "removeRemoteInput entry: $str1, remoteEditImeVisible: $bool1" +
+                "removeRemoteInput reason: $str2 entry: $str1" +
+                    ", style: $str3, remoteEditImeVisible: $bool1" +
                     ", remoteEditImeAnimatingAway: $bool2, isRemoteInputActiveForEntry: $bool3" +
                     ", isRemoteInputActive: $bool4"
             }

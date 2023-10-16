@@ -979,6 +979,19 @@ public final class NotificationEntry extends ListEntry {
         return mExpandAnimationRunning;
     }
 
+    /**
+     * @return NotificationStyle
+     */
+    public String getNotificationStyle() {
+        if (isSummaryWithChildren()) {
+            return "summary";
+        }
+
+        final Class<? extends Notification.Style> style =
+                getSbn().getNotification().getNotificationStyle();
+        return style == null ? "nostyle" : style.getSimpleName();
+    }
+
     /** Information about a suggestion that is being edited. */
     public static class EditedSuggestionInfo {
 

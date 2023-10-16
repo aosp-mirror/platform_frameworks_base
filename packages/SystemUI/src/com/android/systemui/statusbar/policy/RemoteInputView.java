@@ -305,7 +305,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                             && editTextRootWindowInsets.isVisible(WindowInsets.Type.ime());
                     if (!mEntry.mRemoteEditImeVisible && !mEditText.mShowImeOnInputConnection) {
                         // Pass null to ensure all inputs are cleared for this entry b/227115380
-                        mController.removeRemoteInput(mEntry, null);
+                            mController.removeRemoteInput(mEntry, null,
+                                    /* reason= */"RemoteInputView$WindowInsetAnimation#onEnd");
                     }
                 }
             }
@@ -426,7 +427,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     @VisibleForTesting
     void onDefocus(boolean animate, boolean logClose, @Nullable Runnable doAfterDefocus) {
-        mController.removeRemoteInput(mEntry, mToken);
+        mController.removeRemoteInput(mEntry, mToken, /* reason= */"RemoteInputView#onDefocus");
         mEntry.remoteInputText = mEditText.getText();
 
         // During removal, we get reattached and lose focus. Not hiding in that
@@ -536,7 +537,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (mEntry.getRow().isChangingPosition() || isTemporarilyDetached()) {
             return;
         }
-        mController.removeRemoteInput(mEntry, mToken);
+        mController.removeRemoteInput(mEntry, mToken,
+                /* reason= */"RemoteInputView#onDetachedFromWindow");
         mController.removeSpinning(mEntry.getKey(), mToken);
     }
 
