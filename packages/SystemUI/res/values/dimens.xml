@@ -1669,6 +1669,15 @@
     <!-- Height percentage of the parent container occupied by the communal view -->
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>
 
+    <!-- Size of each communal grid column -->
+    <dimen name="communal_grid_column_size">64dp</dimen>
+    <!-- Size of each communal grid gutter between columns -->
+    <dimen name="communal_grid_gutter_size">16dp</dimen>
+    <!-- Height of the communal grid layout -->
+    <dimen name="communal_grid_height">630dp</dimen>
+    <!-- Number of columns for each communal card -->
+    <integer name="communal_grid_columns_per_card">6</integer>
+
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
 
     <dimen name="qs_tile_service_request_dialog_width">304dp</dimen>

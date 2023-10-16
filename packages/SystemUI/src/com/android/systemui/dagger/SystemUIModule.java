@@ -42,6 +42,7 @@ import com.android.systemui.bouncer.ui.BouncerViewModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.common.ui.data.repository.CommonRepositoryModule;
+import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -170,6 +171,7 @@ import javax.inject.Named;
         ClipboardOverlayModule.class,
         ClockRegistryModule.class,
         CommonRepositoryModule.class,
+        CommunalModule.class,
         ConnectivityModule.class,
         ControlsModule.class,
         CoroutinesModule.class,
