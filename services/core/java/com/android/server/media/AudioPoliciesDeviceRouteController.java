@@ -22,6 +22,8 @@ import static android.media.MediaRoute2Info.FEATURE_LOCAL_PLAYBACK;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
+import static android.media.MediaRoute2Info.TYPE_HDMI_ARC;
+import static android.media.MediaRoute2Info.TYPE_HDMI_EARC;
 import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
@@ -160,7 +162,6 @@ import java.util.Objects;
     @NonNull
     private MediaRoute2Info createRouteFromAudioInfo(@MediaRoute2Info.Type int type) {
         int name = R.string.default_audio_route_name;
-
         switch (type) {
             case TYPE_WIRED_HEADPHONES:
             case TYPE_WIRED_HEADSET:
@@ -170,6 +171,8 @@ import java.util.Objects;
                 name = R.string.default_audio_route_name_dock_speakers;
                 break;
             case TYPE_HDMI:
+            case TYPE_HDMI_ARC:
+            case TYPE_HDMI_EARC:
                 name = R.string.default_audio_route_name_external_device;
                 break;
             case TYPE_USB_DEVICE:
@@ -211,6 +214,8 @@ import java.util.Objects;
             case TYPE_WIRED_HEADSET:
             case TYPE_DOCK:
             case TYPE_HDMI:
+            case TYPE_HDMI_ARC:
+            case TYPE_HDMI_EARC:
             case TYPE_USB_DEVICE:
                 return true;
             default:

@@ -21,6 +21,8 @@ import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
+import static android.media.MediaRoute2Info.TYPE_HDMI_ARC;
+import static android.media.MediaRoute2Info.TYPE_HDMI_EARC;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
@@ -140,7 +142,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             mType = MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
             return;
         }
-
         switch (info.getType()) {
             case TYPE_GROUP:
                 mType = MediaDeviceType.TYPE_CAST_GROUP_DEVICE;
@@ -157,6 +158,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             case TYPE_USB_ACCESSORY:
             case TYPE_DOCK:
             case TYPE_HDMI:
+            case TYPE_HDMI_ARC:
+            case TYPE_HDMI_EARC:
                 mType = MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE;
                 break;
             case TYPE_HEARING_AID:
