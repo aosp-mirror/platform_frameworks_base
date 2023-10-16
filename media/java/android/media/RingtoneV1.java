@@ -16,15 +16,14 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
 import android.media.audiofx.HapticGenerator;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.VibrationEffect;
@@ -62,6 +61,7 @@ class RingtoneV1 implements Ringtone.ApiInterface {
 
     private final Context mContext;
     private final AudioManager mAudioManager;
+    private final Ringtone.Injectables mInjectables;
     private VolumeShaper.Configuration mVolumeShaperConfig;
     private VolumeShaper mVolumeShaper;
 
@@ -74,12 +74,10 @@ class RingtoneV1 implements Ringtone.ApiInterface {
     private final IRingtonePlayer mRemotePlayer;
     private final Binder mRemoteToken;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private MediaPlayer mLocalPlayer;
     private final MyOnCompletionListener mCompletionListener = new MyOnCompletionListener();
     private HapticGenerator mHapticGenerator;
 
-    @UnsupportedAppUsage
     private Uri mUri;
     private String mTitle;
 
@@ -94,10 +92,15 @@ class RingtoneV1 implements Ringtone.ApiInterface {
     private boolean mHapticGeneratorEnabled = false;
     private final Object mPlaybackSettingsLock = new Object();
 
-    /** {@hide} */
-    @UnsupportedAppUsage
+    /** @hide */
     public RingtoneV1(Context context, boolean allowRemote) {
+        this(context, new Ringtone.Injectables(), allowRemote);
+    }
+
+    /** @hide */
+    RingtoneV1(Context context, @NonNull Ringtone.Injectables injectables, boolean allowRemote) {
         mContext = context;
+        mInjectables = injectables;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAllowRemote = allowRemote;
         mRemotePlayer = allowRemote ? mAudioManager.getRingtonePlayer() : null;
@@ -200,7 +203,7 @@ class RingtoneV1 implements Ringtone.ApiInterface {
         }
         destroyLocalPlayer();
         // try opening uri locally before delegating to remote player
-        mLocalPlayer = new MediaPlayer();
+        mLocalPlayer = mInjectables.newMediaPlayer();
         try {
             mLocalPlayer.setDataSource(mContext, mUri);
             mLocalPlayer.setAudioAttributes(mAudioAttributes);
@@ -240,19 +243,7 @@ class RingtoneV1 implements Ringtone.ApiInterface {
      */
     public boolean hasHapticChannels() {
         // FIXME: support remote player, or internalize haptic channels support and remove entirely.
-        try {
-            android.os.Trace.beginSection("Ringtone.hasHapticChannels");
-            if (mLocalPlayer != null) {
-                for(MediaPlayer.TrackInfo trackInfo : mLocalPlayer.getTrackInfo()) {
-                    if (trackInfo.hasHapticChannels()) {
-                        return true;
-                    }
-                }
-            }
-        } finally {
-            android.os.Trace.endSection();
-        }
-        return false;
+        return mInjectables.hasHapticChannels(mLocalPlayer);
     }
 
     /**
@@ -334,7 +325,7 @@ class RingtoneV1 implements Ringtone.ApiInterface {
      * @see android.media.audiofx.HapticGenerator#isAvailable()
      */
     public boolean setHapticGeneratorEnabled(boolean enabled) {
-        if (!HapticGenerator.isAvailable()) {
+        if (!mInjectables.isHapticGeneratorAvailable()) {
             return false;
         }
         synchronized (mPlaybackSettingsLock) {
@@ -362,7 +353,7 @@ class RingtoneV1 implements Ringtone.ApiInterface {
             mLocalPlayer.setVolume(mVolume);
             mLocalPlayer.setLooping(mIsLooping);
             if (mHapticGenerator == null && mHapticGeneratorEnabled) {
-                mHapticGenerator = HapticGenerator.create(mLocalPlayer.getAudioSessionId());
+                mHapticGenerator = mInjectables.createHapticGenerator(mLocalPlayer);
             }
             if (mHapticGenerator != null) {
                 mHapticGenerator.setEnabled(mHapticGeneratorEnabled);
@@ -397,7 +388,6 @@ class RingtoneV1 implements Ringtone.ApiInterface {
      *
      * @hide
      */
-    @UnsupportedAppUsage
     public void setUri(Uri uri) {
         setUri(uri, null);
     }
@@ -425,7 +415,6 @@ class RingtoneV1 implements Ringtone.ApiInterface {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
     public Uri getUri() {
         return mUri;
     }
@@ -556,7 +545,7 @@ class RingtoneV1 implements Ringtone.ApiInterface {
                 Log.e(TAG, "Could not load fallback ringtone");
                 return false;
             }
-            mLocalPlayer = new MediaPlayer();
+            mLocalPlayer = mInjectables.newMediaPlayer();
             if (afd.getDeclaredLength() < 0) {
                 mLocalPlayer.setDataSource(afd.getFileDescriptor());
             } else {
@@ -594,12 +583,12 @@ class RingtoneV1 implements Ringtone.ApiInterface {
     }
 
     public boolean isLocalOnly() {
-        return mAllowRemote;
+        return !mAllowRemote;
     }
 
     public boolean isUsingRemotePlayer() {
         // V2 testing api, but this is the v1 approximation.
-        return (mLocalPlayer == null) && mAllowRemote && (mRemotePlayer != null);
+        return (mLocalPlayer == null) && mAllowRemote && (mRemotePlayer != null) && (mUri != null);
     }
 
     class MyOnCompletionListener implements MediaPlayer.OnCompletionListener {
