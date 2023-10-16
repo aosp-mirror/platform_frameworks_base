@@ -22,7 +22,9 @@ import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 
+import static com.android.systemui.Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG;
 import static com.android.systemui.accessibility.floatingmenu.MenuViewLayer.LayerIndex;
+import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -50,6 +52,7 @@ import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -110,6 +113,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        setFlagDefault(mSetFlagsRule, FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
         final Rect mDisplayBounds = new Rect();
         mDisplayBounds.set(/* left= */ 0, /* top= */ 0, DISPLAY_WINDOW_WIDTH,
                 DISPLAY_WINDOW_HEIGHT);
@@ -145,6 +149,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
                 UserHandle.USER_CURRENT);
 
         mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
+        mMenuAnimationController.mPositionAnimations.values().forEach(DynamicAnimation::cancel);
         mMenuViewLayer.onDetachedFromWindow();
     }
 

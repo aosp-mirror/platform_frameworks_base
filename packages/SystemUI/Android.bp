@@ -437,6 +437,7 @@ android_library {
         "SystemUI-statsd",
         "SettingsLib",
         "com_android_systemui_flags_lib",
+        "flag-junit-base",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",

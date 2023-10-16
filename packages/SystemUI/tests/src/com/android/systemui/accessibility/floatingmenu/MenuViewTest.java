@@ -18,6 +18,9 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.app.UiModeManager.MODE_NIGHT_YES;
 
+import static com.android.systemui.Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG;
+import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -67,6 +70,7 @@ public class MenuViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        setFlagDefault(mSetFlagsRule, FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mNightMode = mUiModeManager.getNightMode();
         mUiModeManager.setNightMode(MODE_NIGHT_YES);
