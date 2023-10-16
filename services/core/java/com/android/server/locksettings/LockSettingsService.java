@@ -1050,7 +1050,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
                 return;
             }
-            setUserKeyProtection(userId, result.syntheticPassword.deriveFileBasedEncryptionKey());
+            setUserKeyProtection(userId, result.syntheticPassword);
         }
     }
 
@@ -2012,7 +2012,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.writeChildProfileLock(profileUserId, ArrayUtils.concat(iv, ciphertext));
     }
 
-    private void setUserKeyProtection(@UserIdInt int userId, byte[] secret) {
+    private void setUserKeyProtection(@UserIdInt int userId, SyntheticPassword sp) {
+        final byte[] secret = sp.deriveFileBasedEncryptionKey();
         final long callingId = Binder.clearCallingIdentity();
         try {
             mStorageManager.setUserKeyProtection(userId, secret);
@@ -2769,7 +2770,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             final long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
                     LockscreenCredential.createNone(), sp, userId);
             setCurrentLskfBasedProtectorId(protectorId, userId);
-            setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
+            setUserKeyProtection(userId, sp);
             onSyntheticPasswordCreated(userId, sp);
             Slogf.i(TAG, "Successfully initialized synthetic password for user %d", userId);
             return sp;
