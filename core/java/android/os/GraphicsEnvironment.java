@@ -123,6 +123,7 @@ public class GraphicsEnvironment {
 
     private int mAngleOptInIndex = -1;
     private boolean mEnabledByGameMode = false;
+    private boolean mShouldUseAngle = false;
 
     /**
      * Set up GraphicsEnvironment
@@ -141,19 +142,16 @@ public class GraphicsEnvironment {
 
         // Setup ANGLE and pass down ANGLE details to the C++ code
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setupAngle");
-        boolean useAngle = false;
         if (setupAngle(context, coreSettings, pm, packageName)) {
-            if (shouldUseAngle(context, coreSettings, packageName)) {
-                useAngle = true;
-                setGpuStats(ANGLE_DRIVER_NAME, ANGLE_DRIVER_VERSION_NAME, ANGLE_DRIVER_VERSION_CODE,
-                        0, packageName, getVulkanVersion(pm));
-            }
+            mShouldUseAngle = true;
+            setGpuStats(ANGLE_DRIVER_NAME, ANGLE_DRIVER_VERSION_NAME, ANGLE_DRIVER_VERSION_CODE,
+                    0, packageName, getVulkanVersion(pm));
         }
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
 
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "chooseDriver");
         if (!chooseDriver(context, coreSettings, pm, packageName, appInfoWithMetaData)) {
-            if (!useAngle) {
+            if (!mShouldUseAngle) {
                 setGpuStats(SYSTEM_DRIVER_NAME, SYSTEM_DRIVER_VERSION_NAME,
                         SYSTEM_DRIVER_VERSION_CODE,
                         SystemProperties.getLong(PROPERTY_GFX_DRIVER_BUILD_TIME, 0),
@@ -636,7 +634,10 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Show the ANGLE in Use Dialog Box
+     * Show the ANGLE in use dialog box.
+     * The ANGLE in use dialog box will show up as long as the application
+     * should use ANGLE. It does not mean the application has successfully
+     * loaded ANGLE because this check happens before the loading completes.
      * @param context
      */
     public void showAngleInUseDialogBox(Context context) {
@@ -644,8 +645,7 @@ public class GraphicsEnvironment {
             return;
         }
 
-        final String packageName = context.getPackageName();
-        if (!getShouldUseAngle(packageName)) {
+        if (!mShouldUseAngle) {
             return;
         }
 
@@ -890,9 +890,8 @@ public class GraphicsEnvironment {
     private static native void setDriverPathAndSphalLibraries(String path, String sphalLibraries);
     private static native void setGpuStats(String driverPackageName, String driverVersionName,
             long driverVersionCode, long driverBuildTime, String appPackageName, int vulkanVersion);
-    private static native void setAngleInfo(String path, String appPackage,
+    private static native void setAngleInfo(String path, String packageName,
             String devOptIn, String[] features);
-    private static native boolean getShouldUseAngle(String packageName);
     private static native boolean setInjectLayersPrSetDumpable();
     private static native void nativeToggleAngleAsSystemDriver(boolean enabled);
 
