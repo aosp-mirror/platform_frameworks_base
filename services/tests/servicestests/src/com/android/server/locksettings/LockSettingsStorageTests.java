@@ -457,6 +457,31 @@ public class LockSettingsStorageTests {
         assertEquals(2, PersistentData.TYPE_SP_WEAVER);
     }
 
+    @Test
+    public void testRepairMode_emptyPersistentData() {
+        assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
+    }
+
+    @Test
+    public void testRepairMode_writeGatekeeperPersistentData() {
+        mStorage.writeRepairModePersistentData(
+                PersistentData.TYPE_SP_GATEKEEPER, SOME_USER_ID, PAYLOAD);
+
+        final PersistentData data = mStorage.readRepairModePersistentData();
+        assertEquals(PersistentData.TYPE_SP_GATEKEEPER, data.type);
+        assertArrayEquals(PAYLOAD, data.payload);
+    }
+
+    @Test
+    public void testRepairMode_writeWeaverPersistentData() {
+        mStorage.writeRepairModePersistentData(
+                PersistentData.TYPE_SP_WEAVER, SOME_USER_ID, PAYLOAD);
+
+        final PersistentData data = mStorage.readRepairModePersistentData();
+        assertEquals(PersistentData.TYPE_SP_WEAVER, data.type);
+        assertArrayEquals(PAYLOAD, data.payload);
+    }
+
     private static void assertArrayEquals(byte[] expected, byte[] actual) {
         if (!Arrays.equals(expected, actual)) {
             fail("expected:<" + Arrays.toString(expected) +
