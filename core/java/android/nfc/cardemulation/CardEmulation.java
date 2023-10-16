@@ -936,6 +936,39 @@ public final class CardEmulation {
         return true;
     }
 
+    /**
+     * Allows to set or unset preferred service (category other) to avoid  AID Collision.
+     *
+     * @param service The ComponentName of the service
+     * @param status  true to enable, false to disable
+     * @return set service for the category and true if service is already set return false.
+     *
+     * @hide
+     */
+    public boolean setServiceEnabledForCategoryOther(ComponentName service, boolean status) {
+        if (service == null) {
+            throw new NullPointerException("activity or service or category is null");
+        }
+        int userId = mContext.getUser().getIdentifier();
+
+        try {
+            return sService.setServiceEnabledForCategoryOther(userId, service, status);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.setServiceEnabledForCategoryOther(userId, service, status);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
     void recoverService() {
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
         sService = adapter.getCardEmulationService();
