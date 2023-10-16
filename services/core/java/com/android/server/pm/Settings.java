@@ -6411,16 +6411,25 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     }
 
     boolean clearPersistentPreferredActivity(IntentFilter filter, int userId) {
+        ArrayList<PersistentPreferredActivity> removed = null;
         PersistentPreferredIntentResolver ppir = mPersistentPreferredActivities.get(userId);
         Iterator<PersistentPreferredActivity> it = ppir.filterIterator();
         boolean changed = false;
         while (it.hasNext()) {
             PersistentPreferredActivity ppa = it.next();
             if (IntentFilter.filterEquals(ppa.getIntentFilter(), filter)) {
-                ppir.removeFilter(ppa);
-                changed = true;
-                break;
+                if (removed == null) {
+                    removed = new ArrayList<>();
+                }
+                removed.add(ppa);
             }
+        }
+        if (removed != null) {
+            for (int i = 0; i < removed.size(); i++) {
+                PersistentPreferredActivity ppa = removed.get(i);
+                ppir.removeFilter(ppa);
+            }
+            changed = true;
         }
         if (changed) {
             onChanged();
