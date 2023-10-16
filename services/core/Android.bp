@@ -191,7 +191,7 @@ java_library_static {
         "ImmutabilityAnnotation",
         "securebox",
         "apache-commons-math",
-        "power_optimization_flags_lib",
+        "backstage_power_flags_lib",
         "notification_flags_lib",
         "camera_platform_flags_core_java_lib",
         "biometrics_flags_lib",
