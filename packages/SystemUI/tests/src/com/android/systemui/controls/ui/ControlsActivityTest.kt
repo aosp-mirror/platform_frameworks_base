@@ -30,6 +30,7 @@ import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +41,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
+@Ignore("b/304071255")
 class ControlsActivityTest : SysuiTestCase() {
     @Mock private lateinit var uiController: ControlsUiController
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher

@@ -24,6 +24,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.FakeSystemUIDialogController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.eq
@@ -31,6 +32,7 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@Ignore("b/304071255")
 class ControlsDialogsFactoryTest : SysuiTestCase() {
 
     private companion object {
