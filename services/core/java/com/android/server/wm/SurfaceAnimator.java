@@ -49,7 +49,8 @@ import java.util.function.Supplier;
  * {@link AnimationAdapter}. When the animation is done animating, our callback to finish the
  * animation will be invoked, at which we reparent the children back to the original parent.
  */
-class SurfaceAnimator {
+@VisibleForTesting
+public class SurfaceAnimator {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SurfaceAnimator" : TAG_WM;
 
@@ -617,7 +618,8 @@ class SurfaceAnimator {
      * Callback to be passed into {@link AnimationAdapter#startAnimation} to be invoked by the
      * component that is running the animation when the animation is finished.
      */
-    interface OnAnimationFinishedCallback {
+    @VisibleForTesting
+    public interface OnAnimationFinishedCallback {
         void onAnimationFinished(@AnimationType int type, AnimationAdapter anim);
     }
 

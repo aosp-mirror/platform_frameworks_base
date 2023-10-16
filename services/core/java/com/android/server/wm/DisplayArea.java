@@ -54,7 +54,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
 /**
  * Container for grouping WindowContainer below DisplayContent.
  *
@@ -786,7 +785,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      * DisplayArea that can be dimmed.
      */
     static class Dimmable extends DisplayArea<DisplayArea> {
-        private final Dimmer mDimmer = new Dimmer(this);
+        private final Dimmer mDimmer = Dimmer.create(this);
 
         Dimmable(WindowManagerService wms, Type type, String name, int featureId) {
             super(wms, type, name, featureId);

@@ -13,3 +13,10 @@ flag {
   description: "On close to square display, when necessary, configuration includes status bar"
   bug: "291870756"
 }
+
+flag {
+  name: "dimmer_refactor"
+  namespace: "windowing_frontend"
+  description: "Refactor dim to fix flickers"
+  bug: "281632483,295291019"
+}
