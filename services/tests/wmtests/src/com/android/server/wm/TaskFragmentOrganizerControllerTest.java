@@ -26,7 +26,9 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
@@ -1655,6 +1657,127 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertEquals(frontMostTaskFragment, tf0);
     }
 
+    @Test
+    public void testApplyTransaction_reorderToBottomOfTask() {
+        mController.unregisterOrganizer(mIOrganizer);
+        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        final Task task = createTask(mDisplayContent);
+        // Create a non-embedded Activity at the bottom.
+        final ActivityRecord bottomActivity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .build();
+        final TaskFragment tf0 = createTaskFragment(task);
+        final TaskFragment tf1 = createTaskFragment(task);
+        // Create a non-embedded Activity at the top.
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .build();
+
+        // Ensure correct order of the children before the operation
+        assertEquals(topActivity, task.getChildAt(3).asActivityRecord());
+        assertEquals(tf1, task.getChildAt(2).asTaskFragment());
+        assertEquals(tf0, task.getChildAt(1).asTaskFragment());
+        assertEquals(bottomActivity, task.getChildAt(0).asActivityRecord());
+
+        // Reorder TaskFragment to bottom
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_REORDER_TO_BOTTOM_OF_TASK).build();
+        mTransaction.addTaskFragmentOperation(tf1.getFragmentToken(), operation);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // Ensure correct order of the children after the operation
+        assertEquals(topActivity, task.getChildAt(3).asActivityRecord());
+        assertEquals(tf0, task.getChildAt(2).asTaskFragment());
+        assertEquals(bottomActivity, task.getChildAt(1).asActivityRecord());
+        assertEquals(tf1, task.getChildAt(0).asTaskFragment());
+    }
+
+    @Test
+    public void testApplyTransaction_reorderToTopOfTask() {
+        mController.unregisterOrganizer(mIOrganizer);
+        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        final Task task = createTask(mDisplayContent);
+        // Create a non-embedded Activity at the bottom.
+        final ActivityRecord bottomActivity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .build();
+        final TaskFragment tf0 = createTaskFragment(task);
+        final TaskFragment tf1 = createTaskFragment(task);
+        // Create a non-embedded Activity at the top.
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .build();
+
+        // Ensure correct order of the children before the operation
+        assertEquals(topActivity, task.getChildAt(3).asActivityRecord());
+        assertEquals(tf1, task.getChildAt(2).asTaskFragment());
+        assertEquals(tf0, task.getChildAt(1).asTaskFragment());
+        assertEquals(bottomActivity, task.getChildAt(0).asActivityRecord());
+
+        // Reorder TaskFragment to top
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_REORDER_TO_TOP_OF_TASK).build();
+        mTransaction.addTaskFragmentOperation(tf0.getFragmentToken(), operation);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // Ensure correct order of the children after the operation
+        assertEquals(tf0, task.getChildAt(3).asTaskFragment());
+        assertEquals(topActivity, task.getChildAt(2).asActivityRecord());
+        assertEquals(tf1, task.getChildAt(1).asTaskFragment());
+        assertEquals(bottomActivity, task.getChildAt(0).asActivityRecord());
+    }
+
+    @Test
+    public void testApplyTransaction_reorderToBottomOfTask_failsIfNotSystemOrganizer() {
+        testApplyTransaction_reorder_failsIfNotSystemOrganizer_common(
+                OP_TYPE_REORDER_TO_BOTTOM_OF_TASK);
+    }
+
+    @Test
+    public void testApplyTransaction_reorderToTopOfTask_failsIfNotSystemOrganizer() {
+        testApplyTransaction_reorder_failsIfNotSystemOrganizer_common(
+                OP_TYPE_REORDER_TO_TOP_OF_TASK);
+    }
+
+    private void testApplyTransaction_reorder_failsIfNotSystemOrganizer_common(
+            @TaskFragmentOperation.OperationType int opType) {
+        final Task task = createTask(mDisplayContent);
+        // Create a non-embedded Activity at the bottom.
+        final ActivityRecord bottomActivity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .build();
+        final TaskFragment tf0 = createTaskFragment(task);
+        final TaskFragment tf1 = createTaskFragment(task);
+        // Create a non-embedded Activity at the top.
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .build();
+
+        // Ensure correct order of the children before the operation
+        assertEquals(topActivity, task.getChildAt(3).asActivityRecord());
+        assertEquals(tf1, task.getChildAt(2).asTaskFragment());
+        assertEquals(tf0, task.getChildAt(1).asTaskFragment());
+        assertEquals(bottomActivity, task.getChildAt(0).asActivityRecord());
+
+        // Apply reorder transaction, which is expected to fail for non-system organizer.
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                opType).build();
+        mTransaction
+                .addTaskFragmentOperation(tf0.getFragmentToken(), operation)
+                .setErrorCallbackToken(mErrorToken);
+        assertApplyTransactionAllowed(mTransaction);
+        // The pending event will be dispatched on the handler (from requestTraversal).
+        waitHandlerIdle(mWm.mAnimationHandler);
+
+        assertTaskFragmentErrorTransaction(opType, SecurityException.class);
+
+        // Ensure no change to the order of the children after the operation
+        assertEquals(topActivity, task.getChildAt(3).asActivityRecord());
+        assertEquals(tf1, task.getChildAt(2).asTaskFragment());
+        assertEquals(tf0, task.getChildAt(1).asTaskFragment());
+        assertEquals(bottomActivity, task.getChildAt(0).asActivityRecord());
+    }
+
     /**
      * Creates a {@link TaskFragment} with the {@link WindowContainerTransaction}. Calls
      * {@link WindowOrganizerController#applyTransaction(WindowContainerTransaction)} to apply the
@@ -1780,6 +1903,19 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertIntentsEqualForOrganizer(intent, change.getActivityIntent());
         assertIntentTrimmed(change.getActivityIntent());
         assertEquals(activityToken, change.getActivityToken());
+    }
+
+    /** Setups an embedded TaskFragment. */
+    private TaskFragment createTaskFragment(Task task) {
+        final IBinder token = new Binder();
+        TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(token)
+                .setOrganizer(mOrganizer)
+                .createActivityCount(1)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(token, taskFragment);
+        return taskFragment;
     }
 
     /** Setups an embedded TaskFragment in a PIP Task. */

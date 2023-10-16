@@ -362,6 +362,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     private boolean mIsolatedNav;
 
+    /** When set, will force the task to report as invisible. */
+    static final int FLAG_FORCE_HIDDEN_FOR_PINNED_TASK = 1;
+    static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
+    static final int FLAG_FORCE_HIDDEN_FOR_TASK_FRAGMENT_ORG = 1 << 2;
+
+    @IntDef(prefix = {"FLAG_FORCE_HIDDEN_"}, value = {
+            FLAG_FORCE_HIDDEN_FOR_PINNED_TASK,
+            FLAG_FORCE_HIDDEN_FOR_TASK_ORG,
+            FLAG_FORCE_HIDDEN_FOR_TASK_FRAGMENT_ORG,
+    }, flag = true)
+    @interface FlagForceHidden {}
+    protected int mForceHiddenFlags = 0;
+
     final Point mLastSurfaceSize = new Point();
 
     private final Rect mTmpBounds = new Rect();
@@ -845,7 +858,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * Returns whether this TaskFragment is currently forced to be hidden for any reason.
      */
     protected boolean isForceHidden() {
-        return false;
+        return mForceHiddenFlags != 0;
+    }
+
+    /**
+     * Sets/unsets the forced-hidden state flag for this task depending on {@param set}.
+     * @return Whether the force hidden state changed
+     */
+    boolean setForceHidden(@FlagForceHidden int flags, boolean set) {
+        int newFlags = mForceHiddenFlags;
+        if (set) {
+            newFlags |= flags;
+        } else {
+            newFlags &= ~flags;
+        }
+        if (mForceHiddenFlags == newFlags) {
+            return false;
+        }
+        mForceHiddenFlags = newFlags;
+        return true;
     }
 
     protected boolean isForceTranslucent() {
