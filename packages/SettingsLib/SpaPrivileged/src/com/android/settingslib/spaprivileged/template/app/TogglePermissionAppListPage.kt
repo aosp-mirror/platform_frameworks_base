@@ -45,6 +45,7 @@ import com.android.settingslib.spaprivileged.model.app.userId
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
+import com.android.settingslib.spaprivileged.model.enterprise.rememberRestrictedMode
 import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreference
 import kotlinx.coroutines.flow.Flow
 
@@ -149,14 +150,13 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
 
     @Composable
     fun getSummary(record: T): State<String> {
-        val restrictionsProvider = remember(record.app.userId) {
-            val restrictions = Restrictions(
+        val restrictions = remember(record.app.userId) {
+            Restrictions(
                 userId = record.app.userId,
                 keys = listModel.switchRestrictionKeys,
             )
-            restrictionsProviderFactory(context, restrictions)
         }
-        val restrictedMode = restrictionsProvider.restrictedModeState()
+        val restrictedMode = restrictionsProviderFactory.rememberRestrictedMode(restrictions)
         val allowed = listModel.isAllowed(record)
         return remember {
             derivedStateOf {

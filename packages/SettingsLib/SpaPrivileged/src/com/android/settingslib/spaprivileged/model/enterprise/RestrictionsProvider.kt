@@ -22,6 +22,8 @@ import android.os.UserHandle
 import android.os.UserManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.RestrictedLockUtils
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
@@ -32,15 +34,15 @@ import kotlinx.coroutines.flow.flowOn
 import com.android.settingslib.widget.restricted.R
 
 data class Restrictions(
-    val userId: Int,
+    val userId: Int = UserHandle.myUserId(),
     val keys: List<String>,
 )
 
 sealed interface RestrictedMode
 
-object NoRestricted : RestrictedMode
+data object NoRestricted : RestrictedMode
 
-object BaseUserRestricted : RestrictedMode
+data object BaseUserRestricted : RestrictedMode
 
 interface BlockedByAdmin : RestrictedMode {
     fun getSummary(checked: Boolean?): String
@@ -78,6 +80,17 @@ interface RestrictionsProvider {
 }
 
 typealias RestrictionsProviderFactory = (Context, Restrictions) -> RestrictionsProvider
+
+@Composable
+internal fun RestrictionsProviderFactory.rememberRestrictedMode(
+    restrictions: Restrictions,
+): State<RestrictedMode?> {
+    val context = LocalContext.current
+    val restrictionsProvider = remember(restrictions) {
+        this(context, restrictions)
+    }
+    return restrictionsProvider.restrictedModeState()
+}
 
 internal class RestrictionsProviderImpl(
     private val context: Context,
