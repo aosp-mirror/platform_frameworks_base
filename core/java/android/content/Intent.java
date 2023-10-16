@@ -5323,6 +5323,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final String ACTION_UNARCHIVE_PACKAGE = "android.intent.action.UNARCHIVE_PACKAGE";
 
     // ---------------------------------------------------------------------
