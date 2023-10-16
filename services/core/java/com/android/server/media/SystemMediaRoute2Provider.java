@@ -109,21 +109,28 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-        mBluetoothRouteController = BluetoothRouteController.createInstance(context, (routes) -> {
-            publishProviderState();
-            if (updateSessionInfosIfNeeded()) {
-                notifySessionInfoUpdated();
-            }
-        });
+        mBluetoothRouteController =
+                BluetoothRouteController.createInstance(
+                        context,
+                        () -> {
+                            publishProviderState();
+                            if (updateSessionInfosIfNeeded()) {
+                                notifySessionInfoUpdated();
+                            }
+                        });
 
-        mDeviceRouteController = DeviceRouteController.createInstance(context, (deviceRoute) -> {
-            mHandler.post(() -> {
-                publishProviderState();
-                if (updateSessionInfosIfNeeded()) {
-                    notifySessionInfoUpdated();
-                }
-            });
-        });
+        mDeviceRouteController =
+                DeviceRouteController.createInstance(
+                        context,
+                        () -> {
+                            mHandler.post(
+                                    () -> {
+                                        publishProviderState();
+                                        if (updateSessionInfosIfNeeded()) {
+                                            notifySessionInfoUpdated();
+                                        }
+                                    });
+                        });
 
         mAudioManager.addOnDevicesForAttributesChangedListener(
                 AudioAttributesUtils.ATTRIBUTES_MEDIA, mContext.getMainExecutor(),
