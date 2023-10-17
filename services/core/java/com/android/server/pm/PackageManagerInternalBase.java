@@ -747,7 +747,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     public void notifyComponentUsed(@NonNull String packageName, @UserIdInt int userId,
-            @NonNull String recentCallingPackage, @NonNull String debugInfo) {
+            @Nullable String recentCallingPackage, @NonNull String debugInfo) {
         mService.notifyComponentUsed(snapshot(), packageName, userId,
                 recentCallingPackage, debugInfo);
     }

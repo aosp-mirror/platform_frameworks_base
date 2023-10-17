@@ -1440,10 +1440,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     r.curComponent.getPackageName(), r.userId, Event.APP_COMPONENT_USED);
         }
 
-        // Broadcast is being executed, its package can't be stopped.
         try {
-            mService.mPackageManagerInt.setPackageStoppedState(
-                    r.curComponent.getPackageName(), false, r.userId);
+            mService.mPackageManagerInt.notifyComponentUsed(
+                    r.curComponent.getPackageName(), r.userId, r.callerPackage, r.toString());
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
                     + r.curComponent.getPackageName() + ": " + e);
