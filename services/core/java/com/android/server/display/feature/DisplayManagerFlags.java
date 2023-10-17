@@ -71,6 +71,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_POWER_THROTTLING_CLAMPER,
             Flags::enablePowerThrottlingClamper);
 
+    private final FlagState mSmallAreaDetectionFlagState = new FlagState(
+            Flags.FLAG_ENABLE_SMALL_AREA_DETECTION,
+            Flags::enableSmallAreaDetection);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -145,6 +149,10 @@ public class DisplayManagerFlags {
 
     public boolean isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled() {
         return mBackUpSmoothDisplayAndForcePeakRefreshRateFlagState.isEnabled();
+    }
+
+    public boolean isSmallAreaDetectionEnabled() {
+        return mSmallAreaDetectionFlagState.isEnabled();
     }
 
     private static class FlagState {

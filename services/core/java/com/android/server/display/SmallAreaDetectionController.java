@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 import android.util.ArrayMap;
@@ -30,15 +31,14 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Map;
 
 final class SmallAreaDetectionController {
-    private static native void nativeUpdateSmallAreaDetection(int[] uids, float[] thresholds);
-    private static native void nativeSetSmallAreaDetectionThreshold(int uid, float threshold);
+    private static native void nativeUpdateSmallAreaDetection(int[] appIds, float[] thresholds);
+    private static native void nativeSetSmallAreaDetectionThreshold(int appId, float threshold);
 
     // TODO(b/281720315): Move this to DeviceConfig once server side ready.
     private static final String KEY_SMALL_AREA_DETECTION_ALLOWLIST =
@@ -47,12 +47,8 @@ final class SmallAreaDetectionController {
     private final Object mLock = new Object();
     private final Context mContext;
     private final PackageManagerInternal mPackageManager;
-    private final UserManagerInternal mUserManager;
     @GuardedBy("mLock")
     private final Map<String, Float> mAllowPkgMap = new ArrayMap<>();
-    // TODO(b/298722189): Update allowlist when user changes
-    @GuardedBy("mLock")
-    private int[] mUserIds;
 
     static SmallAreaDetectionController create(@NonNull Context context) {
         final SmallAreaDetectionController controller =
@@ -67,7 +63,6 @@ final class SmallAreaDetectionController {
     SmallAreaDetectionController(Context context, DeviceConfigInterface deviceConfig) {
         mContext = context;
         mPackageManager = LocalServices.getService(PackageManagerInternal.class);
-        mUserManager = LocalServices.getService(UserManagerInternal.class);
         deviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                 BackgroundThread.getExecutor(),
                 new SmallAreaDetectionController.OnPropertiesChangedListener());
@@ -76,6 +71,7 @@ final class SmallAreaDetectionController {
 
     @VisibleForTesting
     void updateAllowlist(@Nullable String property) {
+        final Map<String, Float> allowPkgMap = new ArrayMap<>();
         synchronized (mLock) {
             mAllowPkgMap.clear();
             if (property != null) {
@@ -86,8 +82,11 @@ final class SmallAreaDetectionController {
                         .getStringArray(R.array.config_smallAreaDetectionAllowlist);
                 for (String defaultMapString : defaultMapStrings) putToAllowlist(defaultMapString);
             }
-            updateSmallAreaDetection();
+
+            if (mAllowPkgMap.isEmpty()) return;
+            allowPkgMap.putAll(mAllowPkgMap);
         }
+        updateSmallAreaDetection(allowPkgMap);
     }
 
     @GuardedBy("mLock")
@@ -105,43 +104,32 @@ final class SmallAreaDetectionController {
         }
     }
 
-    @GuardedBy("mLock")
-    private void updateUidListForAllUsers(SparseArray<Float> list, String pkg, float threshold) {
-        for (int i = 0; i < mUserIds.length; i++) {
-            final int userId = mUserIds[i];
-            final int uid = mPackageManager.getPackageUid(pkg, 0, userId);
-            if (uid > 0) list.put(uid, threshold);
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void updateSmallAreaDetection() {
-        if (mAllowPkgMap.isEmpty()) return;
-
-        mUserIds = mUserManager.getUserIds();
-
-        final SparseArray<Float> uidThresholdList = new SparseArray<>();
-        for (String pkg : mAllowPkgMap.keySet()) {
-            final float threshold = mAllowPkgMap.get(pkg);
-            updateUidListForAllUsers(uidThresholdList, pkg, threshold);
+    private void updateSmallAreaDetection(Map<String, Float> allowPkgMap) {
+        final SparseArray<Float> appIdThresholdList = new SparseArray(allowPkgMap.size());
+        for (String pkg : allowPkgMap.keySet()) {
+            final float threshold = allowPkgMap.get(pkg);
+            final PackageStateInternal stage = mPackageManager.getPackageStateInternal(pkg);
+            if (stage != null) {
+                appIdThresholdList.put(stage.getAppId(), threshold);
+            }
         }
 
-        final int[] uids = new int[uidThresholdList.size()];
-        final float[] thresholds = new float[uidThresholdList.size()];
-        for (int i = 0; i < uidThresholdList.size();  i++) {
-            uids[i] = uidThresholdList.keyAt(i);
-            thresholds[i] = uidThresholdList.valueAt(i);
+        final int[] appIds = new int[appIdThresholdList.size()];
+        final float[] thresholds = new float[appIdThresholdList.size()];
+        for (int i = 0; i < appIdThresholdList.size();  i++) {
+            appIds[i] = appIdThresholdList.keyAt(i);
+            thresholds[i] = appIdThresholdList.valueAt(i);
         }
-        updateSmallAreaDetection(uids, thresholds);
+        updateSmallAreaDetection(appIds, thresholds);
     }
 
     @VisibleForTesting
-    void updateSmallAreaDetection(int[] uids, float[] thresholds) {
-        nativeUpdateSmallAreaDetection(uids, thresholds);
+    void updateSmallAreaDetection(int[] appIds, float[] thresholds) {
+        nativeUpdateSmallAreaDetection(appIds, thresholds);
     }
 
-    void setSmallAreaDetectionThreshold(int uid, float threshold) {
-        nativeSetSmallAreaDetectionThreshold(uid, threshold);
+    void setSmallAreaDetectionThreshold(int appId, float threshold) {
+        nativeSetSmallAreaDetectionThreshold(appId, threshold);
     }
 
     void dump(PrintWriter pw) {
@@ -151,7 +139,6 @@ final class SmallAreaDetectionController {
             for (String pkg : mAllowPkgMap.keySet()) {
                 pw.println("    " + pkg + " threshold = " + mAllowPkgMap.get(pkg));
             }
-            pw.println("  mUserIds=" + Arrays.toString(mUserIds));
         }
     }
 
@@ -167,10 +154,14 @@ final class SmallAreaDetectionController {
     private final class PackageReceiver implements PackageManagerInternal.PackageListObserver {
         @Override
         public void onPackageAdded(@NonNull String packageName, int uid) {
+            float threshold = 0.0f;
             synchronized (mLock) {
                 if (mAllowPkgMap.containsKey(packageName)) {
-                    setSmallAreaDetectionThreshold(uid, mAllowPkgMap.get(packageName));
+                    threshold = mAllowPkgMap.get(packageName);
                 }
+            }
+            if (threshold > 0.0f) {
+                setSmallAreaDetectionThreshold(UserHandle.getAppId(uid), threshold);
             }
         }
     }
