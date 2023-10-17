@@ -131,13 +131,7 @@ droidstubs {
     defaults: ["framework-doc-stubs-sources-default"],
     args: metalava_framework_docs_args +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
-    api_levels_sdk_type: "system",
-    extensions_info_file: ":sdk-extensions-info",
+    api_levels_module: "api_versions_system",
 }
 
 /////////////////////////////////////////////////////////////////////
