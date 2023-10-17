@@ -19,6 +19,7 @@ package com.android.server.locksettings.recoverablekeystore;
 import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
 import static android.security.keystore.recovery.RecoveryController.ERROR_DECRYPTION_FAILED;
 import static android.security.keystore.recovery.RecoveryController.ERROR_DOWNGRADE_CERTIFICATE;
+import static android.security.keystore.recovery.RecoveryController.ERROR_INSECURE_USER;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_KEY_FORMAT;
 import static android.security.keystore.recovery.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
@@ -750,6 +751,8 @@ public class RecoverableKeyStoreManager {
             throw new RuntimeException(e);
         } catch (KeyStoreException | UnrecoverableKeyException | IOException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        } catch (InsecureUserException e) {
+            throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
         }
 
         try {
@@ -817,6 +820,8 @@ public class RecoverableKeyStoreManager {
             throw new RuntimeException(e);
         } catch (KeyStoreException | UnrecoverableKeyException | IOException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        } catch (InsecureUserException e) {
+            throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
         }
 
         try {
