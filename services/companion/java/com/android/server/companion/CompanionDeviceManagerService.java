@@ -543,8 +543,7 @@ public class CompanionDeviceManagerService extends SystemService {
         public PendingIntent requestNotificationAccess(ComponentName component, int userId)
                 throws RemoteException {
             String callingPackage = component.getPackageName();
-            checkCanCallNotificationApi(callingPackage);
-            // TODO: check userId.
+            checkCanCallNotificationApi(callingPackage, userId);
             if (component.flattenToString().length() > MAX_CN_LENGTH) {
                 throw new IllegalArgumentException("Component name is too long.");
             }
@@ -570,7 +569,7 @@ public class CompanionDeviceManagerService extends SystemService {
         @Deprecated
         @Override
         public boolean hasNotificationAccess(ComponentName component) throws RemoteException {
-            checkCanCallNotificationApi(component.getPackageName());
+            checkCanCallNotificationApi(component.getPackageName(), getCallingUserId());
             NotificationManager nm = getContext().getSystemService(NotificationManager.class);
             return nm.isNotificationListenerAccessGranted(component);
         }
@@ -727,8 +726,7 @@ public class CompanionDeviceManagerService extends SystemService {
             legacyCreateAssociation(userId, macAddress, packageName, null);
         }
 
-        private void checkCanCallNotificationApi(String callingPackage) {
-            final int userId = getCallingUserId();
+        private void checkCanCallNotificationApi(String callingPackage, int userId) {
             enforceCallerIsSystemOr(userId, callingPackage);
 
             if (getCallingUid() == SYSTEM_UID) return;
