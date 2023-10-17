@@ -757,7 +757,7 @@ class TransitionController {
 
             final TransitionRequestInfo request = new TransitionRequestInfo(transition.mType,
                     startTaskInfo, pipTaskInfo, remoteTransition, displayChange,
-                    transition.getFlags());
+                    transition.getFlags(), transition.getSyncId());
 
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
@@ -1592,8 +1592,8 @@ class TransitionController {
         TransitionInfo mInfo;
 
         private String buildOnSendLog() {
-            StringBuilder sb = new StringBuilder("Sent Transition #").append(mSyncId)
-                    .append(" createdAt=").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
+            StringBuilder sb = new StringBuilder("Sent Transition (#").append(mSyncId)
+                    .append(") createdAt=").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
             if (mRequest != null) {
                 sb.append(" via request=").append(mRequest);
             }
@@ -1617,7 +1617,8 @@ class TransitionController {
         void logOnSend() {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "%s", buildOnSendLog());
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    startWCT=%s", mStartWCT);
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    info=%s", mInfo);
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    info=%s",
+                    mInfo.toString("    " /* prefix */));
         }
 
         private static String toMsString(long nanos) {
@@ -1625,8 +1626,8 @@ class TransitionController {
         }
 
         private String buildOnFinishLog() {
-            StringBuilder sb = new StringBuilder("Finish Transition #").append(mSyncId)
-                    .append(": created at ").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
+            StringBuilder sb = new StringBuilder("Finish Transition (#").append(mSyncId)
+                    .append("): created at ").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
             sb.append(" collect-started=").append(toMsString(mCollectTimeNs - mCreateTimeNs));
             if (mRequestTimeNs != 0) {
                 sb.append(" request-sent=").append(toMsString(mRequestTimeNs - mCreateTimeNs));

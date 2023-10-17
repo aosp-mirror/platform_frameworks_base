@@ -179,6 +179,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     private final DefaultTransitionHandler mDefaultTransitionHandler;
     private final RemoteTransitionHandler mRemoteTransitionHandler;
     private final DisplayController mDisplayController;
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
     private final SleepHandler mSleepHandler = new SleepHandler();
@@ -187,9 +188,6 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
-
-    @Nullable
-    private final ShellCommandHandler mShellCommandHandler;
 
     private final ArrayList<TransitionObserver> mObservers = new ArrayList<>();
 
@@ -237,7 +235,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         @Override
         public String toString() {
             if (mInfo != null && mInfo.getDebugId() >= 0) {
-                return "(#" + mInfo.getDebugId() + ")" + mToken + "@" + getTrack();
+                return "(#" + mInfo.getDebugId() + ") " + mToken + "@" + getTrack();
             }
             return mToken.toString() + "@" + getTrack();
         }
@@ -275,13 +273,14 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull ShellExecutor mainExecutor,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor) {
-        this(context, shellInit, shellController, organizer, pool, displayController, mainExecutor,
-                mainHandler, animExecutor, null,
+        this(context, shellInit, new ShellCommandHandler(), shellController, organizer, pool,
+                displayController, mainExecutor, mainHandler, animExecutor,
                 new RootTaskDisplayAreaOrganizer(mainExecutor, context, shellInit));
     }
 
     public Transitions(@NonNull Context context,
             @NonNull ShellInit shellInit,
+            @Nullable ShellCommandHandler shellCommandHandler,
             @NonNull ShellController shellController,
             @NonNull WindowOrganizer organizer,
             @NonNull TransactionPool pool,
@@ -289,7 +288,6 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull ShellExecutor mainExecutor,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor,
-            @Nullable ShellCommandHandler shellCommandHandler,
             @NonNull RootTaskDisplayAreaOrganizer rootTDAOrganizer) {
         mOrganizer = organizer;
         mContext = context;
@@ -300,13 +298,13 @@ public class Transitions implements RemoteCallable<Transitions>,
         mDefaultTransitionHandler = new DefaultTransitionHandler(context, shellInit,
                 displayController, pool, mainExecutor, mainHandler, animExecutor, rootTDAOrganizer);
         mRemoteTransitionHandler = new RemoteTransitionHandler(mMainExecutor);
+        mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(mDefaultTransitionHandler);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Default");
         // Next lowest priority is remote transitions.
         mHandlers.add(mRemoteTransitionHandler);
-        mShellCommandHandler = shellCommandHandler;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Remote");
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -339,9 +337,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             TransitionMetrics.getInstance();
         }
 
-        if (mShellCommandHandler != null) {
-            mShellCommandHandler.addCommandCallback("transitions", this, this);
-        }
+        mShellCommandHandler.addCommandCallback("transitions", this, this);
+        mShellCommandHandler.addDumpCallback(this::dump, this);
     }
 
     public boolean isRegistered() {
@@ -655,8 +652,8 @@ public class Transitions implements RemoteCallable<Transitions>,
     void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         info.setUnreleasedWarningCallSiteForAllSurfaces("Transitions.onTransitionReady");
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady %s: %s",
-                transitionToken, info);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady (#%d) %s: %s",
+                info.getDebugId(), transitionToken, info);
         final int activeIdx = findByToken(mPendingTransitions, transitionToken);
         if (activeIdx < 0) {
             throw new IllegalStateException("Got transitionReady for non-pending transition "
@@ -1073,8 +1070,8 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     void requestStartTransition(@NonNull IBinder transitionToken,
             @Nullable TransitionRequestInfo request) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested: %s %s",
-                transitionToken, request);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested (#%d): %s %s",
+                request.getDebugId(), transitionToken, request);
         if (isTransitionKnown(transitionToken)) {
             throw new RuntimeException("Transition already started " + transitionToken);
         }
@@ -1474,5 +1471,69 @@ public class Transitions implements RemoteCallable<Transitions>,
     public void printShellCommandHelp(PrintWriter pw, String prefix) {
         pw.println(prefix + "tracing");
         mTracer.printShellCommandHelp(pw, prefix + "  ");
+    }
+
+    private void dump(@NonNull PrintWriter pw, String prefix) {
+        pw.println(prefix + TAG);
+
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + "Handlers:");
+        for (TransitionHandler handler : mHandlers) {
+            pw.print(innerPrefix);
+            pw.print(handler.getClass().getSimpleName());
+            pw.println(" (" + Integer.toHexString(System.identityHashCode(handler)) + ")");
+        }
+
+        pw.println(prefix + "Observers:");
+        for (TransitionObserver observer : mObservers) {
+            pw.print(innerPrefix);
+            pw.println(observer.getClass().getSimpleName());
+        }
+
+        pw.println(prefix + "Pending Transitions:");
+        for (ActiveTransition transition : mPendingTransitions) {
+            pw.print(innerPrefix + "token=");
+            pw.println(transition.mToken);
+            pw.print(innerPrefix + "id=");
+            pw.println(transition.mInfo != null
+                    ? transition.mInfo.getDebugId()
+                    : -1);
+            pw.print(innerPrefix + "handler=");
+            pw.println(transition.mHandler != null
+                    ? transition.mHandler.getClass().getSimpleName()
+                    : null);
+        }
+        if (mPendingTransitions.isEmpty()) {
+            pw.println(innerPrefix + "none");
+        }
+
+        pw.println(prefix + "Ready-during-sync Transitions:");
+        for (ActiveTransition transition : mReadyDuringSync) {
+            pw.print(innerPrefix + "token=");
+            pw.println(transition.mToken);
+            pw.print(innerPrefix + "id=");
+            pw.println(transition.mInfo != null
+                    ? transition.mInfo.getDebugId()
+                    : -1);
+            pw.print(innerPrefix + "handler=");
+            pw.println(transition.mHandler != null
+                    ? transition.mHandler.getClass().getSimpleName()
+                    : null);
+        }
+        if (mReadyDuringSync.isEmpty()) {
+            pw.println(innerPrefix + "none");
+        }
+
+        pw.println(prefix + "Tracks:");
+        for (int i = 0; i < mTracks.size(); i++) {
+            final ActiveTransition transition = mTracks.get(i).mActiveTransition;
+            pw.println(innerPrefix + "Track #" + i);
+            pw.print(innerPrefix + "active=");
+            pw.println(transition);
+            if (transition != null) {
+                pw.print(innerPrefix + "hander=");
+                pw.println(transition.mHandler);
+            }
+        }
     }
 }

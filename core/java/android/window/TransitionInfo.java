@@ -402,6 +402,18 @@ public final class TransitionInfo implements Parcelable {
 
     @Override
     public String toString() {
+        return toString("");
+    }
+
+    /**
+     * Returns a string representation of this transition info.
+     * @hide
+     */
+    public String toString(@NonNull String prefix) {
+        final boolean shouldPrettyPrint = !prefix.isEmpty() && !mChanges.isEmpty();
+        final String innerPrefix = shouldPrettyPrint ? prefix + "    " : "";
+        final String changesLineStart = shouldPrettyPrint ? "\n" + prefix : "";
+        final String perChangeLineStart = shouldPrettyPrint ? "\n" + innerPrefix : "";
         StringBuilder sb = new StringBuilder();
         sb.append("{id=").append(mDebugId).append(" t=").append(transitTypeToString(mType))
                 .append(" f=0x").append(Integer.toHexString(mFlags)).append(" trk=").append(mTrack)
@@ -413,12 +425,15 @@ public final class TransitionInfo implements Parcelable {
             sb.append(mRoots.get(i).mDisplayId).append("@").append(mRoots.get(i).mOffset);
         }
         sb.append("] c=[");
+        sb.append(perChangeLineStart);
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
+                sb.append(perChangeLineStart);
             }
             sb.append(mChanges.get(i));
         }
+        sb.append(changesLineStart);
         sb.append("]}");
         return sb.toString();
     }
