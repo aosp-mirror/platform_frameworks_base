@@ -58,6 +58,7 @@ public final class TextFlags {
             Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN,
             Flags.FLAG_PHRASE_STRICT_FALLBACK,
             Flags.FLAG_USE_BOUNDS_FOR_WIDTH,
+            Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE,
     };
 
     /**
@@ -69,6 +70,7 @@ public final class TextFlags {
             Flags.noBreakNoHyphenationSpan(),
             Flags.phraseStrictFallback(),
             Flags.useBoundsForWidth(),
+            Flags.fixLineHeightForLocale(),
     };
 
     /**
