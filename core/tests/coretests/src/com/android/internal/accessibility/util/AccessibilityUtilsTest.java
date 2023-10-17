@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.accessibility;
+package com.android.internal.accessibility.util;
 
 import static com.android.internal.accessibility.util.AccessibilityUtils.ACCESSIBILITY_MENU_IN_SYSTEM;
 import static com.android.internal.accessibility.util.AccessibilityUtils.MENU_SERVICE_RELATIVE_CLASS_NAME;
@@ -34,8 +34,6 @@ import android.text.SpannableString;
 import android.text.style.LocaleSpan;
 
 import androidx.test.runner.AndroidJUnit4;
-
-import com.android.internal.accessibility.util.AccessibilityUtils;
 
 import org.junit.Before;
 import org.junit.Test;
