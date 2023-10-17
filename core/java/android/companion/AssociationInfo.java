@@ -206,9 +206,8 @@ public final class AssociationInfo implements Parcelable {
     /**
      * @return whether the association is managed by the companion application it belongs to.
      * @see AssociationRequest.Builder#setSelfManaged(boolean)
-     * @hide
      */
-    @SystemApi
+    @SuppressLint("UnflaggedApi") // promoting from @SystemApi
     public boolean isSelfManaged() {
         return mSelfManaged;
     }
