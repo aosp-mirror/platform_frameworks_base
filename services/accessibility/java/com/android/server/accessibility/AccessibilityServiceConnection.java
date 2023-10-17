@@ -26,16 +26,25 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
+import android.accessibilityservice.BrailleDisplayController;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.IBrailleDisplayController;
 import android.accessibilityservice.TouchInteractionController;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -44,6 +53,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -55,6 +65,8 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -81,6 +93,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     final int mUserId;
     final Intent mIntent;
     final ActivityTaskManagerInternal mActivityTaskManagerService;
+
+    private BrailleDisplayConnection mBrailleDisplayConnection;
+    private List<Bundle> mTestBrailleDisplays = null;
 
     private final Handler mMainHandler;
 
@@ -448,6 +463,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
+    @Override
+    public void resetLocked() {
+        super.resetLocked();
+        if (android.view.accessibility.Flags.brailleDisplayHid()) {
+            if (mBrailleDisplayConnection != null) {
+                mBrailleDisplayConnection.disconnect();
+            }
+        }
+    }
+
     public boolean isAccessibilityButtonAvailableLocked(AccessibilityUserState userState) {
         // If the service does not request the accessibility button, it isn't available
         if (!mRequestAccessibilityButton) {
@@ -639,5 +664,124 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 Slog.e(LOG_TAG, "Error sending motion event to" + mService, re);
             }
         }
+    }
+
+    private void checkAccessibilityAccessLocked() {
+        if (!hasRightsToCurrentUserLocked()
+                || !mSecurityPolicy.checkAccessibilityAccess(this)) {
+            throw new SecurityException("Caller does not have accessibility access");
+        }
+    }
+
+    /**
+     * Sets up a BrailleDisplayConnection interface for the requested Bluetooth-connected
+     * Braille display.
+     *
+     * @param bluetoothAddress The address from
+     *                         {@link android.bluetooth.BluetoothDevice#getAddress()}.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    public void connectBluetoothBrailleDisplay(
+            @NonNull String bluetoothAddress, @NonNull IBrailleDisplayController controller) {
+        if (!android.view.accessibility.Flags.brailleDisplayHid()) {
+            throw new IllegalStateException("Flag BRAILLE_DISPLAY_HID not enabled");
+        }
+        Objects.requireNonNull(bluetoothAddress);
+        Objects.requireNonNull(controller);
+        mContext.enforceCallingPermission(Manifest.permission.BLUETOOTH_CONNECT,
+                "Missing BLUETOOTH_CONNECT permission");
+        if (!BluetoothAdapter.checkBluetoothAddress(bluetoothAddress)) {
+            throw new IllegalArgumentException(
+                    bluetoothAddress + " is not a valid Bluetooth address");
+        }
+        synchronized (mLock) {
+            checkAccessibilityAccessLocked();
+            if (mBrailleDisplayConnection != null) {
+                throw new IllegalStateException(
+                        "This service already has a connected Braille display");
+            }
+            BrailleDisplayConnection connection = new BrailleDisplayConnection(mLock, this);
+            if (mTestBrailleDisplays != null) {
+                connection.setTestData(mTestBrailleDisplays);
+            }
+            connection.connectLocked(
+                    bluetoothAddress, BrailleDisplayConnection.BUS_BLUETOOTH, controller);
+        }
+    }
+
+    /**
+     * Sets up a BrailleDisplayConnection interface for the requested USB-connected
+     * Braille display.
+     *
+     * <p>The caller package must already have USB permission for this {@link UsbDevice}.
+     */
+    @SuppressLint("MissingPermission") // system_server has the required MANAGE_USB permission
+    @Override
+    @NonNull
+    public void connectUsbBrailleDisplay(@NonNull UsbDevice usbDevice,
+            @NonNull IBrailleDisplayController controller) {
+        if (!android.view.accessibility.Flags.brailleDisplayHid()) {
+            throw new IllegalStateException("Flag BRAILLE_DISPLAY_HID not enabled");
+        }
+        Objects.requireNonNull(usbDevice);
+        Objects.requireNonNull(controller);
+        final UsbManager usbManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+        final String usbSerialNumber;
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (usbManager == null || !usbManager.hasPermission(
+                    usbDevice, mComponentName.getPackageName(), /*pid=*/ pid, /*uid=*/ uid)) {
+                throw new SecurityException(
+                        "Caller does not have permission to access this UsbDevice");
+            }
+            usbSerialNumber = usbDevice.getSerialNumber();
+            if (TextUtils.isEmpty(usbSerialNumber)) {
+                // If the UsbDevice does not report a serial number for locating the HIDRAW
+                // node then notify connection error ERROR_BRAILLE_DISPLAY_NOT_FOUND.
+                try {
+                    controller.onConnectionFailed(BrailleDisplayController.BrailleDisplayCallback
+                            .FLAG_ERROR_BRAILLE_DISPLAY_NOT_FOUND);
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Error calling onConnectionFailed", e);
+                }
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        synchronized (mLock) {
+            checkAccessibilityAccessLocked();
+            if (mBrailleDisplayConnection != null) {
+                throw new IllegalStateException(
+                        "This service already has a connected Braille display");
+            }
+            BrailleDisplayConnection connection = new BrailleDisplayConnection(mLock, this);
+            if (mTestBrailleDisplays != null) {
+                connection.setTestData(mTestBrailleDisplays);
+            }
+            connection.connectLocked(
+                    usbSerialNumber, BrailleDisplayConnection.BUS_USB, controller);
+        }
+    }
+
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void setTestBrailleDisplayData(List<Bundle> brailleDisplays) {
+        // Enforce that this TestApi is only called by trusted (test) callers.
+        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
+                "Missing MANAGE_ACCESSIBILITY permission");
+        mTestBrailleDisplays = brailleDisplays;
+    }
+
+    void onBrailleDisplayConnectedLocked(BrailleDisplayConnection connection) {
+        mBrailleDisplayConnection = connection;
+    }
+
+    // Reset state when the BrailleDisplayConnection object disconnects itself.
+    void onBrailleDisplayDisconnectedLocked() {
+        mBrailleDisplayConnection = null;
     }
 }
