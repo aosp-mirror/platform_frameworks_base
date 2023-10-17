@@ -65,6 +65,7 @@ android_test {
         "device-time-shell-utils",
         "testables",
         "com.android.text.flags-aconfig-java",
+        "flag-junit",
     ],
 
     libs: [
@@ -75,6 +76,7 @@ android_test {
         "framework",
         "ext",
         "framework-res",
+        "android.view.flags-aconfig-java",
     ],
     jni_libs: [
         "libpowermanagertest_jni",
