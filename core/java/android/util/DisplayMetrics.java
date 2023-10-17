@@ -16,6 +16,9 @@
 
 package android.util;
 
+import static com.android.window.flags.Flags.FLAG_DENSITY_390_API;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -59,6 +62,7 @@ public class DisplayMetrics {
             DENSITY_XHIGH,
             DENSITY_340,
             DENSITY_360,
+            DENSITY_390,
             DENSITY_400,
             DENSITY_420,
             DENSITY_440,
@@ -175,6 +179,15 @@ public class DisplayMetrics {
      * on the system to scale their {@link #DENSITY_XXHIGH} assets for them.
      */
     public static final int DENSITY_360 = 360;
+
+    /**
+     * Intermediate density for screens that sit somewhere between
+     * {@link #DENSITY_XHIGH} (320 dpi) and {@link #DENSITY_XXHIGH} (480 dpi).
+     * This is not a density that applications should target, instead relying
+     * on the system to scale their {@link #DENSITY_XXHIGH} assets for them.
+     */
+    @FlaggedApi(FLAG_DENSITY_390_API)
+    public static final int DENSITY_390 = 390;
 
     /**
      * Intermediate density for screens that sit somewhere between
