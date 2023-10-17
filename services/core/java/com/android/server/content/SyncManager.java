@@ -221,9 +221,8 @@ public class SyncManager {
 
     /** Flags used when connecting to a sync adapter service */
     private static final Context.BindServiceFlags SYNC_ADAPTER_CONNECTION_FLAGS =
-            Context.BindServiceFlags.of(
-                    Context.BIND_FILTER_OUT_QUARANTINED_COMPONENTS | Context.BIND_AUTO_CREATE
-                            | Context.BIND_NOT_FOREGROUND | Context.BIND_ALLOW_OOM_MANAGEMENT);
+            Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                    | Context.BIND_ALLOW_OOM_MANAGEMENT);
 
     /** Singleton instance. */
     @GuardedBy("SyncManager.class")

@@ -1,6 +1,4 @@
 // Signature format: 2.0
-// - add-additional-overrides=no
-// - migrating=Migration in progress see b/299366704
 package android {
 
   public static final class Manifest.permission {
@@ -314,7 +312,7 @@ package android {
     field public static final String REMOVE_DRM_CERTIFICATES = "android.permission.REMOVE_DRM_CERTIFICATES";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String RENOUNCE_PERMISSIONS = "android.permission.RENOUNCE_PERMISSIONS";
-    field public static final String REPORT_USAGE_STATS = "android.permission.REPORT_USAGE_STATS";
+    field @FlaggedApi("backstage_power.report_usage_stats_permission") public static final String REPORT_USAGE_STATS = "android.permission.REPORT_USAGE_STATS";
     field @Deprecated public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
@@ -3557,7 +3555,7 @@ package android.content {
     field public static final String ACTION_SHOW_SUSPENDED_APP_DETAILS = "android.intent.action.SHOW_SUSPENDED_APP_DETAILS";
     field @Deprecated public static final String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
     field public static final String ACTION_SPLIT_CONFIGURATION_CHANGED = "android.intent.action.SPLIT_CONFIGURATION_CHANGED";
-    field public static final String ACTION_UNARCHIVE_PACKAGE = "android.intent.action.UNARCHIVE_PACKAGE";
+    field @FlaggedApi("android.content.pm.archiving") public static final String ACTION_UNARCHIVE_PACKAGE = "android.intent.action.UNARCHIVE_PACKAGE";
     field public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
     field public static final String ACTION_USER_ADDED = "android.intent.action.USER_ADDED";
     field public static final String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
@@ -4030,7 +4028,7 @@ package android.content.pm {
     field @Deprecated public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1; // 0x1
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
-    field public static final long MATCH_ARCHIVED_PACKAGES = 4294967296L; // 0x100000000L
+    field @FlaggedApi("android.content.pm.archiving") public static final long MATCH_ARCHIVED_PACKAGES = 4294967296L; // 0x100000000L
     field public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000
@@ -4061,7 +4059,9 @@ package android.content.pm {
   }
 
   public static final class PackageManager.UninstallCompleteCallback implements android.os.Parcelable {
+    method public int describeContents();
     method public void onUninstallComplete(@NonNull String, int, @Nullable String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageManager.UninstallCompleteCallback> CREATOR;
   }
 
@@ -5961,6 +5961,7 @@ package android.hardware.soundtrigger {
 
   public static final class SoundTrigger.Keyphrase implements android.os.Parcelable {
     ctor public SoundTrigger.Keyphrase(int, int, @NonNull java.util.Locale, @NonNull String, @Nullable int[]);
+    method public int describeContents();
     method public int getId();
     method @NonNull public java.util.Locale getLocale();
     method public int getRecognitionModes();
@@ -5983,6 +5984,7 @@ package android.hardware.soundtrigger {
   public static final class SoundTrigger.KeyphraseSoundModel extends android.hardware.soundtrigger.SoundTrigger.SoundModel implements android.os.Parcelable {
     ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[], int);
     ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[]);
+    method public int describeContents();
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.Keyphrase[] getKeyphrases();
     method @NonNull public static android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel readFromParcel(@NonNull android.os.Parcel);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -5990,6 +5992,7 @@ package android.hardware.soundtrigger {
   }
 
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
+    method public int describeContents();
     method public int getEnd();
     method public int getStart();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -6717,7 +6720,7 @@ package android.media.audiopolicy {
     method public boolean setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public boolean setUserIdDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public String toLogFriendlyString();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int updateMixingRules(@NonNull java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>);
+    method @FlaggedApi("com.android.media.audio.flags.audio_policy_update_mixing_rules_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int updateMixingRules(@NonNull java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>);
     field public static final int FOCUS_POLICY_DUCKING_DEFAULT = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_APP = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_POLICY = 1; // 0x1
@@ -6800,6 +6803,7 @@ package android.media.musicrecognition {
 
   public abstract class MusicRecognitionService extends android.app.Service {
     ctor public MusicRecognitionService();
+    method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onRecognize(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.media.musicrecognition.MusicRecognitionService.Callback);
   }
 
@@ -6858,6 +6862,7 @@ package android.media.soundtrigger {
 
   public abstract class SoundTriggerDetectionService extends android.app.Service {
     ctor public SoundTriggerDetectionService();
+    method public final android.os.IBinder onBind(android.content.Intent);
     method @MainThread public void onConnected(@NonNull java.util.UUID, @Nullable android.os.Bundle);
     method @MainThread public void onDisconnected(@NonNull java.util.UUID, @Nullable android.os.Bundle);
     method @MainThread public void onError(@NonNull java.util.UUID, @Nullable android.os.Bundle, int, int);
@@ -7571,6 +7576,7 @@ package android.media.tv.tuner.filter {
   }
 
   public class MediaEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method protected void finalize();
     method public long getAudioHandle();
     method @NonNull public java.util.List<android.media.AudioPresentation> getAudioPresentations();
     method public long getAvDataId();
@@ -8965,6 +8971,8 @@ package android.net {
 package android.net.metrics {
 
   @Deprecated public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
   }
 
   @Deprecated public static final class ApfProgramEvent.Builder {
@@ -8979,6 +8987,8 @@ package android.net.metrics {
   }
 
   @Deprecated public final class ApfStats implements android.net.metrics.IpConnectivityLog.Event {
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
   }
 
   @Deprecated public static final class ApfStats.Builder {
@@ -8997,6 +9007,8 @@ package android.net.metrics {
   }
 
   @Deprecated public final class DhcpClientEvent implements android.net.metrics.IpConnectivityLog.Event {
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
   }
 
   @Deprecated public static final class DhcpClientEvent.Builder {
@@ -9008,7 +9020,9 @@ package android.net.metrics {
 
   @Deprecated public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
     ctor @Deprecated public DhcpErrorEvent(int);
+    method @Deprecated public int describeContents();
     method @Deprecated public static int errorCodeWithOption(int, int);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
     field @Deprecated public static final int BOOTP_TOO_SHORT = 67174400; // 0x4010000
     field @Deprecated public static final int BUFFER_UNDERFLOW = 83951616; // 0x5010000
     field @Deprecated public static final int DHCP_BAD_MAGIC_COOKIE = 67239936; // 0x4020000
@@ -9046,6 +9060,8 @@ package android.net.metrics {
 
   @Deprecated public final class IpManagerEvent implements android.net.metrics.IpConnectivityLog.Event {
     ctor @Deprecated public IpManagerEvent(int, long);
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
     field @Deprecated public static final int COMPLETE_LIFECYCLE = 3; // 0x3
     field @Deprecated public static final int ERROR_INTERFACE_NOT_FOUND = 8; // 0x8
     field @Deprecated public static final int ERROR_INVALID_PROVISIONING = 7; // 0x7
@@ -9058,6 +9074,8 @@ package android.net.metrics {
 
   @Deprecated public final class IpReachabilityEvent implements android.net.metrics.IpConnectivityLog.Event {
     ctor @Deprecated public IpReachabilityEvent(int);
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
     field @Deprecated public static final int NUD_FAILED = 512; // 0x200
     field @Deprecated public static final int NUD_FAILED_ORGANIC = 1024; // 0x400
     field @Deprecated public static final int PROBE = 256; // 0x100
@@ -9068,6 +9086,8 @@ package android.net.metrics {
   @Deprecated public final class NetworkEvent implements android.net.metrics.IpConnectivityLog.Event {
     ctor @Deprecated public NetworkEvent(int, long);
     ctor @Deprecated public NetworkEvent(int);
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
     field @Deprecated public static final int NETWORK_CAPTIVE_PORTAL_FOUND = 4; // 0x4
     field @Deprecated public static final int NETWORK_CONNECTED = 1; // 0x1
     field @Deprecated public static final int NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND = 12; // 0xc
@@ -9084,6 +9104,8 @@ package android.net.metrics {
   }
 
   @Deprecated public final class RaEvent implements android.net.metrics.IpConnectivityLog.Event {
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
   }
 
   @Deprecated public static final class RaEvent.Builder {
@@ -9098,7 +9120,9 @@ package android.net.metrics {
   }
 
   @Deprecated public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
+    method @Deprecated public int describeContents();
     method @Deprecated @NonNull public static String getProbeName(int);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
     field @Deprecated public static final int DNS_FAILURE = 0; // 0x0
     field @Deprecated public static final int DNS_SUCCESS = 1; // 0x1
     field @Deprecated public static final int PROBE_DNS = 0; // 0x0
@@ -11503,6 +11527,7 @@ package android.service.assist.classification {
 
   public abstract class FieldClassificationService extends android.app.Service {
     ctor public FieldClassificationService();
+    method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClassificationRequest(@NonNull android.service.assist.classification.FieldClassificationRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.assist.classification.FieldClassificationResponse,java.lang.Exception>);
     method public void onConnected();
     method public void onDisconnected();
@@ -11581,6 +11606,7 @@ package android.service.autofill.augmented {
     method protected final void dump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
     method protected void dump(@NonNull java.io.PrintWriter, @NonNull String[]);
     method @Nullable public final android.service.autofill.FillEventHistory getFillEventHistory();
+    method public final android.os.IBinder onBind(android.content.Intent);
     method public void onConnected();
     method public void onDisconnected();
     method public void onFillRequest(@NonNull android.service.autofill.augmented.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.augmented.FillController, @NonNull android.service.autofill.augmented.FillCallback);
@@ -11619,6 +11645,7 @@ package android.service.autofill.augmented {
 
   public final class FillWindow implements java.lang.AutoCloseable {
     ctor public FillWindow();
+    method public void close();
     method public void destroy();
     method public boolean update(@NonNull android.service.autofill.augmented.PresentationParams.Area, @NonNull android.view.View, long);
   }
@@ -11644,6 +11671,7 @@ package android.service.carrier {
   public final class CarrierMessagingServiceWrapper implements java.lang.AutoCloseable {
     ctor public CarrierMessagingServiceWrapper();
     method public boolean bindToCarrierMessagingService(@NonNull android.content.Context, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull Runnable);
+    method public void close();
     method public void disconnect();
     method public void downloadMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
     method public void receiveSms(@NonNull android.service.carrier.MessagePdu, @NonNull String, int, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
@@ -11694,6 +11722,7 @@ package android.service.contentcapture {
     method public final void disableSelf();
     method public void onActivityEvent(@NonNull android.service.contentcapture.ActivityEvent);
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
+    method public final android.os.IBinder onBind(android.content.Intent);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
     method public void onCreateContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureContext, @NonNull android.view.contentcapture.ContentCaptureSessionId);
@@ -11732,6 +11761,7 @@ package android.service.contentsuggestions {
 
   public abstract class ContentSuggestionsService extends android.app.Service {
     ctor public ContentSuggestionsService();
+    method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClassifyContentSelections(@NonNull android.app.contentsuggestions.ClassificationsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
     method public abstract void onNotifyInteraction(@NonNull String, @NonNull android.os.Bundle);
     method public abstract void onProcessContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
@@ -11745,6 +11775,7 @@ package android.service.dataloader {
 
   public abstract class DataLoaderService extends android.app.Service {
     ctor public DataLoaderService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
   }
 
@@ -12417,6 +12448,7 @@ package android.service.tracing {
 
   public class TraceReportService extends android.app.Service {
     ctor public TraceReportService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onReportTrace(@NonNull android.service.tracing.TraceReportService.TraceParams);
   }
 
@@ -13042,6 +13074,7 @@ package android.telecom {
     method @Nullable public android.content.ComponentName getCallScreeningComponent();
     method public boolean isBlocked();
     method public boolean isInContacts();
+    method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.Connection.CallFilteringCompletionInfo> CREATOR;
   }
 
@@ -13351,6 +13384,7 @@ package android.telephony {
     method public int getReason();
     method public int getTimeoutSeconds();
     method public boolean isEnabled();
+    method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallForwardingInfo> CREATOR;
     field public static final int REASON_ALL = 4; // 0x4
     field public static final int REASON_ALL_CONDITIONAL = 5; // 0x5
@@ -13635,6 +13669,7 @@ package android.telephony {
     method public int getDownlinkCapacityKbps();
     method public int getType();
     method public int getUplinkCapacityKbps();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.LinkCapacityEstimate> CREATOR;
     field public static final int INVALID = -1; // 0xffffffff
     field public static final int LCE_TYPE_COMBINED = 2; // 0x2
@@ -13644,8 +13679,10 @@ package android.telephony {
 
   public final class LteVopsSupportInfo extends android.telephony.VopsSupportInfo {
     ctor public LteVopsSupportInfo(int, int);
+    method public boolean equals(@Nullable Object);
     method public int getEmcBearerSupport();
     method public int getVopsSupport();
+    method public int hashCode();
     method public boolean isEmergencyServiceFallbackSupported();
     method public boolean isEmergencyServiceSupported();
     method public boolean isVopsSupported();
@@ -13746,9 +13783,11 @@ package android.telephony {
 
   public final class NrVopsSupportInfo extends android.telephony.VopsSupportInfo {
     ctor public NrVopsSupportInfo(int, int, int);
+    method public boolean equals(@Nullable Object);
     method public int getEmcSupport();
     method public int getEmfSupport();
     method public int getVopsSupport();
+    method public int hashCode();
     method public boolean isEmergencyServiceFallbackSupported();
     method public boolean isEmergencyServiceSupported();
     method public boolean isVopsSupported();
@@ -14861,6 +14900,7 @@ package android.telephony.data {
 
   public abstract class QualifiedNetworksService extends android.app.Service {
     ctor public QualifiedNetworksService();
+    method public android.os.IBinder onBind(android.content.Intent);
     method @NonNull public abstract android.telephony.data.QualifiedNetworksService.NetworkAvailabilityProvider onCreateNetworkAvailabilityProvider(int);
     field public static final String QUALIFIED_NETWORKS_SERVICE_INTERFACE = "android.telephony.data.QualifiedNetworksService";
   }
@@ -15052,6 +15092,7 @@ package android.telephony.gba {
   public class GbaService extends android.app.Service {
     ctor public GbaService();
     method public void onAuthenticationRequest(int, int, int, @NonNull android.net.Uri, @NonNull byte[], boolean);
+    method public android.os.IBinder onBind(android.content.Intent);
     method public final void reportAuthenticationFailure(int, int) throws java.lang.RuntimeException;
     method public final void reportKeysAvailable(int, @NonNull byte[], @NonNull String) throws java.lang.RuntimeException;
     field public static final String SERVICE_INTERFACE = "android.telephony.gba.GbaService";
@@ -15554,6 +15595,7 @@ package android.telephony.ims {
     method @Deprecated public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
     method @NonNull public android.telephony.ims.stub.ImsRegistrationImplBase getRegistrationForSubscription(int, int);
     method @Nullable public android.telephony.ims.stub.SipTransportImplBase getSipTransport(int);
+    method public android.os.IBinder onBind(android.content.Intent);
     method public final void onUpdateSupportedImsFeatures(android.telephony.ims.stub.ImsFeatureConfiguration) throws android.os.RemoteException;
     method public android.telephony.ims.stub.ImsFeatureConfiguration querySupportedImsFeatures();
     method public void readyForFeatureCreation();

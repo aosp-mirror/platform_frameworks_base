@@ -23,6 +23,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.io.FileDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public class TinyFrameworkClassTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -139,5 +143,43 @@ public class TinyFrameworkClassTest {
         // This class doesn't have a class load hook, so shouldn't be included.
         assertThat(TinyFrameworkClassLoadHook.sLoadedClasses)
                 .doesNotContain(TinyFrameworkNestedClasses.class);
+    }
+
+    /**
+     * Test to try accessing JDK private fields using reflections + setAccessible(true),
+     * which is now disallowed due to Java Modules, unless you run the javacommand with.
+     *   --add-opens=java.base/java.io=ALL-UNNAMED
+     *
+     * You can try it from the command line, like:
+     * $ JAVA_OPTS="--add-opens=java.base/java.io=ALL-UNNAMED" ./run-test-manually.sh
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testFileDescriptor() throws Exception {
+        var fd = FileDescriptor.out;
+
+        // Get the FD value directly from the private field.
+        // This is now prohibited due to Java Modules.
+        // It throws:
+        // java.lang.reflect.InaccessibleObjectException: Unable to make field private int java.io.FileDescriptor.fd accessible: module java.base does not "opens java.io" to unnamed module @3bb50eaa
+
+        thrown.expect(java.lang.reflect.InaccessibleObjectException.class);
+
+        // Access the private field.
+        final Field f = FileDescriptor.class.getDeclaredField("fd");
+        final Method m = FileDescriptor.class.getDeclaredMethod("set", int.class);
+        f.setAccessible(true);
+        m.setAccessible(true);
+
+        assertThat(f.get(fd)).isEqualTo(1);
+
+        // Set
+        f.set(fd, 2);
+        assertThat(f.get(fd)).isEqualTo(2);
+
+        // Call the package private method, set(int).
+        m.invoke(fd, 0);
+        assertThat(f.get(fd)).isEqualTo(0);
     }
 }

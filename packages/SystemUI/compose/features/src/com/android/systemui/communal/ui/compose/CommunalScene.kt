@@ -19,6 +19,7 @@ package com.android.systemui.communal.ui.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
@@ -32,7 +33,11 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /** The communal scene shows glanceable hub when the device is locked and docked. */
 @SysUISingleton
-class CommunalScene @Inject constructor() : ComposableScene {
+class CommunalScene
+@Inject
+constructor(
+    private val viewModel: CommunalViewModel,
+) : ComposableScene {
     override val key = SceneKey.Communal
 
     override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
@@ -45,6 +50,6 @@ class CommunalScene @Inject constructor() : ComposableScene {
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        CommunalHub(modifier)
+        CommunalHub(modifier, viewModel)
     }
 }

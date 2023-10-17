@@ -3231,7 +3231,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Called when the user tapped or clicked an {@link android.widget.Editor}.
+     * Called when the user tapped or clicked an editor.
      * This can be useful when IME makes a decision of showing Virtual keyboard based on what
      * {@link MotionEvent#getToolType(int)} was used to click the editor.
      * e.g. when toolType is {@link MotionEvent#TOOL_TYPE_STYLUS}, IME may choose to show a

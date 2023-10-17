@@ -113,15 +113,15 @@ public class BatteryStatsHistoryIteratorTest {
     public void constrainedIteration() {
         prepareHistory();
 
-        // Initial time is 3000
+        // Initial time is 1000_000
         assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(0, 0),
-                3_000L, 3_000L, 1003_000L, 2003_000L, 2004_000L);
-        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(1000_000, 0),
-                1003_000L, 2003_000L, 2004_000L);
-        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(0, 2000_000L),
-                3_000L, 3_000L, 1003_000L);
+                1000_000L, 1000_000L, 2000_000L, 3000_000L, 3001_000L);
+        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(2000_000, 0),
+                2000_000L, 3000_000L, 3001_000L);
+        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(0, 3000_000L),
+                1000_000L, 1000_000L, 2000_000L);
         assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(1003_000L, 2004_000L),
-                1003_000L, 2003_000L);
+                2000_000L);
     }
 
     private void prepareHistory() {
@@ -144,7 +144,7 @@ public class BatteryStatsHistoryIteratorTest {
         ArrayList<Long> actualTimestamps = new ArrayList<>();
         while (iterator.hasNext()) {
             BatteryStats.HistoryItem item = iterator.next();
-            actualTimestamps.add(item.currentTime);
+            actualTimestamps.add(item.time);
         }
         assertThat(actualTimestamps).isEqualTo(Arrays.asList(expectedTimestamps));
     }

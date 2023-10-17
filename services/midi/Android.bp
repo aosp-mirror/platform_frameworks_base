@@ -19,4 +19,7 @@ java_library_static {
     defaults: ["platform_service_defaults"],
     srcs: [":services.midi-sources"],
     libs: ["services.core"],
+    static_libs: [
+        "aconfig_midi_flags_java_lib",
+    ],
 }

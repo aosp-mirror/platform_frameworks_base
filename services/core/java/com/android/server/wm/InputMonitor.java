@@ -224,7 +224,7 @@ final class InputMonitor {
         }
 
         final InputConsumerImpl consumer = new InputConsumerImpl(mService, token, name,
-                inputChannel, clientPid, clientUser, mDisplayId);
+                inputChannel, clientPid, clientUser, mDisplayId, mInputTransaction);
         switch (name) {
             case INPUT_CONSUMER_WALLPAPER:
                 consumer.mWindowHandle.inputConfig |= InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER;
@@ -675,11 +675,6 @@ final class InputMonitor {
                     w.getKeyInterceptionInfo());
 
             if (w.mWinAnimator.hasSurface()) {
-                // Update trusted overlay changes here because they are tied to input info. Input
-                // changes can be updated even if surfaces aren't.
-                inputWindowHandle.setTrustedOverlay(mInputTransaction,
-                        w.mWinAnimator.mSurfaceController.mSurfaceControl,
-                        w.isWindowTrustedOverlay());
                 populateInputWindowHandle(inputWindowHandle, w);
                 setInputWindowInfoIfNeeded(mInputTransaction,
                         w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);

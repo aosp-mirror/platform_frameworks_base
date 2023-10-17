@@ -503,10 +503,9 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_PARTIAL_SCREEN_SHARING =
-        unreleasedFlag(
-            name = "record_task_content",
+        releasedFlag(
+            name = "enable_record_task_content",
             namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-            teamfood = true
         )
 
     // TODO(b/254512674): Tracking Bug
@@ -626,7 +625,7 @@ object Flags {
 
     /** TODO(b/295143676): Tracking bug. When enable, captures a screenshot for each display. */
     @JvmField
-    val MULTI_DISPLAY_SCREENSHOT = unreleasedFlag("multi_display_screenshot")
+    val MULTI_DISPLAY_SCREENSHOT = unreleasedFlag("multi_display_screenshot", teamfood = true)
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug

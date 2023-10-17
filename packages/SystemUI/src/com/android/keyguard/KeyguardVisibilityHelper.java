@@ -23,6 +23,8 @@ import android.util.Property;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
@@ -53,6 +55,7 @@ public class KeyguardVisibilityHelper {
     private boolean mKeyguardViewVisibilityAnimating;
     private boolean mLastOccludedState = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
+    private final FeatureFlags mFeatureFlags;
     private final LogBuffer mLogBuffer;
 
     public KeyguardVisibilityHelper(View view,
@@ -60,12 +63,14 @@ public class KeyguardVisibilityHelper {
             DozeParameters dozeParameters,
             ScreenOffAnimationController screenOffAnimationController,
             boolean animateYPos,
+            FeatureFlags featureFlags,
             LogBuffer logBuffer) {
         mView = view;
         mKeyguardStateController = keyguardStateController;
         mDozeParameters = dozeParameters;
         mScreenOffAnimationController = screenOffAnimationController;
         mAnimateYPos = animateYPos;
+        mFeatureFlags = featureFlags;
         mLogBuffer = logBuffer;
     }
 
@@ -162,13 +167,17 @@ public class KeyguardVisibilityHelper {
                         animProps,
                         true /* animate */);
             } else if (mScreenOffAnimationController.shouldAnimateInKeyguard()) {
-                log("ScreenOff transition");
-                mKeyguardViewVisibilityAnimating = true;
+                if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+                    log("Using GoneToAodTransition");
+                    mKeyguardViewVisibilityAnimating = false;
+                } else {
+                    log("ScreenOff transition");
+                    mKeyguardViewVisibilityAnimating = true;
 
-                // Ask the screen off animation controller to animate the keyguard visibility for us
-                // since it may need to be cancelled due to keyguard lifecycle events.
-                mScreenOffAnimationController.animateInKeyguard(
-                        mView, mSetVisibleEndRunnable);
+                    // Ask the screen off animation controller to animate the keyguard visibility
+                    // for us since it may need to be cancelled due to keyguard lifecycle events.
+                    mScreenOffAnimationController.animateInKeyguard(mView, mSetVisibleEndRunnable);
+                }
             } else {
                 log("Direct set Visibility to VISIBLE");
                 mView.setVisibility(View.VISIBLE);

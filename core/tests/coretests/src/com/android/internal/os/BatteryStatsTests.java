@@ -34,6 +34,7 @@ import org.junit.runners.Suite;
         KernelSingleUidTimeReaderTest.class,
         LongArrayMultiStateCounterTest.class,
         LongMultiStateCounterTest.class,
+        MonotonicClockTest.class,
         PowerProfileTest.class,
         PowerStatsTest.class,
 

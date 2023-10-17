@@ -632,6 +632,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
             @VirtualDeviceParams.DevicePolicy int devicePolicy) {
         super.setDevicePolicy_enforcePermission();
+        if (!Flags.dynamicPolicy()) {
+            return;
+        }
+
         switch (policyType) {
             case POLICY_TYPE_RECENTS:
                 synchronized (mVirtualDeviceLock) {

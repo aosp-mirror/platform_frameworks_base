@@ -65,6 +65,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
     private val requestProcessor = mock<RequestProcessor>()
     private val devicePolicyManager = mock<DevicePolicyManager>()
     private val devicePolicyResourcesManager = mock<DevicePolicyResourcesManager>()
+    private val notificationsControllerFactory = mock<ScreenshotNotificationsController.Factory>()
     private val notificationsController = mock<ScreenshotNotificationsController>()
     private val callback = mock<RequestCallback>()
 
@@ -87,6 +88,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             .thenReturn(false)
         whenever(userManager.isUserUnlocked).thenReturn(true)
         whenever(controllerFactory.create(any(), any())).thenReturn(controller)
+        whenever(notificationsControllerFactory.create(any())).thenReturn(notificationsController)
 
         // Stub request processor as a synchronous no-op for tests with the flag enabled
         doAnswer {
@@ -323,7 +325,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
                 userManager,
                 devicePolicyManager,
                 eventLogger,
-                notificationsController,
+                notificationsControllerFactory,
                 mContext,
                 Runnable::run,
                 flags,

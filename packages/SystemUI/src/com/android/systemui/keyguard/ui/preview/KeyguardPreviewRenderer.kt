@@ -27,6 +27,7 @@ import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.view.ContextThemeWrapper
 import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DisplayInfo
@@ -179,7 +180,11 @@ constructor(
 
     fun render() {
         mainHandler.post {
-            val previewContext = display?.let { context.createDisplayContext(it) } ?: context
+            val previewContext =
+                display?.let {
+                    ContextThemeWrapper(context.createDisplayContext(it), context.getTheme())
+                }
+                    ?: context
 
             val rootView = FrameLayout(previewContext)
 
@@ -322,7 +327,7 @@ constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
-        val keyguardRootView = KeyguardRootView(previewContext, null).apply { removeAllViews() }
+        val keyguardRootView = KeyguardRootView(previewContext, null)
         disposables.add(
             KeyguardRootViewBinder.bind(
                 keyguardRootView,
@@ -333,6 +338,7 @@ constructor(
                 keyguardStateController,
                 shadeInteractor,
                 null, // clock provider only needed for burn in
+                null, // jank monitor not required for preview mode
             )
         )
         rootView.addView(
@@ -342,26 +348,29 @@ constructor(
                 FrameLayout.LayoutParams.MATCH_PARENT,
             ),
         )
-        PreviewKeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel) {
-            if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
-                setupShortcuts(keyguardRootView)
-            }
-            setUpUdfps(previewContext, rootView)
 
-            if (!shouldHideClock) {
-                setUpClock(previewContext, rootView)
-                KeyguardPreviewClockViewBinder.bind(
-                    largeClockHostView,
-                    smallClockHostView,
-                    clockViewModel,
-                )
-            }
+        disposables.add(
+            PreviewKeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel) {
+                if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+                    setupShortcuts(keyguardRootView)
+                }
+                setUpUdfps(previewContext, rootView)
 
-            setUpSmartspace(previewContext, rootView)
-            smartSpaceView?.let {
-                KeyguardPreviewSmartspaceViewBinder.bind(it, smartspaceViewModel)
+                if (!shouldHideClock) {
+                    setUpClock(previewContext, rootView)
+                    KeyguardPreviewClockViewBinder.bind(
+                        largeClockHostView,
+                        smallClockHostView,
+                        clockViewModel,
+                    )
+                }
+
+                setUpSmartspace(previewContext, rootView)
+                smartSpaceView?.let {
+                    KeyguardPreviewSmartspaceViewBinder.bind(it, smartspaceViewModel)
+                }
             }
-        }
+        )
     }
 
     private fun setupShortcuts(keyguardRootView: ConstraintLayout) {

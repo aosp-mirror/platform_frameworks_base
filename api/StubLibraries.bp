@@ -695,6 +695,7 @@ java_api_library {
         "api-stubs-docs-non-updatable.api.contribution",
     ],
     visibility: ["//visibility:public"],
+    enable_validation: false,
 }
 
 java_api_library {
@@ -710,6 +711,7 @@ java_api_library {
         "system-api-stubs-docs-non-updatable.api.contribution",
     ],
     visibility: ["//visibility:public"],
+    enable_validation: false,
 }
 
 java_api_library {
@@ -727,6 +729,7 @@ java_api_library {
         "test-api-stubs-docs-non-updatable.api.contribution",
     ],
     visibility: ["//visibility:public"],
+    enable_validation: false,
 }
 
 java_api_library {
@@ -742,6 +745,7 @@ java_api_library {
         "api-stubs-docs-non-updatable.api.contribution",
         "system-api-stubs-docs-non-updatable.api.contribution",
     ],
+    enable_validation: false,
 }
 
 java_api_library {
@@ -761,6 +765,7 @@ java_api_library {
         "module-lib-api-stubs-docs-non-updatable.api.contribution",
     ],
     visibility: ["//visibility:public"],
+    enable_validation: false,
 }
 
 java_api_library {
@@ -774,6 +779,7 @@ java_api_library {
         "stub-annotations",
     ],
     visibility: ["//visibility:public"],
+    enable_validation: false,
 }
 
 java_api_library {
@@ -798,6 +804,7 @@ java_api_library {
     visibility: [
         "//visibility:private",
     ],
+    enable_validation: false,
 }
 
 java_api_library {
@@ -814,6 +821,7 @@ java_api_library {
         "android_module_lib_stubs_current.from-text",
     ],
     visibility: ["//visibility:public"],
+    enable_validation: false,
 }
 
 ////////////////////////////////////////////////////////////////////////

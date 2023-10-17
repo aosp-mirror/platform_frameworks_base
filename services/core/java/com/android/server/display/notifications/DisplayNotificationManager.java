@@ -34,12 +34,16 @@ import com.android.server.display.feature.DisplayManagerFlags;
 /**
  * Manages notifications for {@link com.android.server.display.DisplayManagerService}.
  */
-public class DisplayNotificationManager {
+public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDetector.Listener {
     /** Dependency injection interface for {@link DisplayNotificationManager} */
     public interface Injector {
         /** Get {@link NotificationManager} service or null if not available. */
         @Nullable
         NotificationManager getNotificationManager();
+
+        /** Get {@link ConnectedDisplayUsbErrorsDetector} or null if not available. */
+        @Nullable
+        ConnectedDisplayUsbErrorsDetector getUsbErrorsDetector();
     }
 
     private static final String TAG = "DisplayNotificationManager";
@@ -52,9 +56,22 @@ public class DisplayNotificationManager {
     private final Context mContext;
     private final boolean mConnectedDisplayErrorHandlingEnabled;
     private NotificationManager mNotificationManager;
+    private ConnectedDisplayUsbErrorsDetector mConnectedDisplayUsbErrorsDetector;
 
     public DisplayNotificationManager(final DisplayManagerFlags flags, final Context context) {
-        this(flags, context, () -> context.getSystemService(NotificationManager.class));
+        this(flags, context, new Injector() {
+            @Nullable
+            @Override
+            public NotificationManager getNotificationManager() {
+                return context.getSystemService(NotificationManager.class);
+            }
+
+            @Nullable
+            @Override
+            public ConnectedDisplayUsbErrorsDetector getUsbErrorsDetector() {
+                return new ConnectedDisplayUsbErrorsDetector(flags, context);
+            }
+        });
     }
 
     @VisibleForTesting
@@ -75,6 +92,44 @@ public class DisplayNotificationManager {
             Slog.e(TAG, "onBootCompleted: NotificationManager is null");
             return;
         }
+
+        mConnectedDisplayUsbErrorsDetector = mInjector.getUsbErrorsDetector();
+        if (mConnectedDisplayUsbErrorsDetector != null) {
+            mConnectedDisplayUsbErrorsDetector.registerListener(this);
+        }
+    }
+
+    /**
+     * Display error notification upon DisplayPort link training failure.
+     */
+    @Override
+    public void onDisplayPortLinkTrainingFailure() {
+        if (!mConnectedDisplayErrorHandlingEnabled) {
+            Slog.d(TAG, "onDisplayPortLinkTrainingFailure:"
+                                + " mConnectedDisplayErrorHandlingEnabled is false");
+            return;
+        }
+
+        sendErrorNotification(createErrorNotification(
+                R.string.connected_display_unavailable_notification_title,
+                R.string.connected_display_unavailable_notification_content));
+    }
+
+    /**
+     * Display error notification upon cable not capable of DisplayPort connected to a device
+     * capable of DisplayPort.
+     */
+    @Override
+    public void onCableNotCapableDisplayPort() {
+        if (!mConnectedDisplayErrorHandlingEnabled) {
+            Slog.d(TAG, "onCableNotCapableDisplayPort:"
+                                + " mConnectedDisplayErrorHandlingEnabled is false");
+            return;
+        }
+
+        sendErrorNotification(createErrorNotification(
+                R.string.connected_display_cable_dont_support_displays_notification_title,
+                R.string.connected_display_cable_dont_support_displays_notification_content));
     }
 
     /**

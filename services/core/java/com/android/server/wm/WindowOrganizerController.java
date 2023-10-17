@@ -24,7 +24,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
@@ -34,6 +36,8 @@ import static android.window.TaskFragmentOperation.OP_TYPE_SET_ISOLATED_NAVIGATI
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_RELATIVE_BOUNDS;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_UNKNOWN;
+import static android.window.WindowContainerTransaction.Change.CHANGE_FOCUSABLE;
+import static android.window.WindowContainerTransaction.Change.CHANGE_HIDDEN;
 import static android.window.WindowContainerTransaction.Change.CHANGE_RELATIVE_BOUNDS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION;
@@ -61,6 +65,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
+import static com.android.server.wm.TaskFragment.FLAG_FORCE_HIDDEN_FOR_TASK_FRAGMENT_ORG;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -821,6 +826,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             return TRANSACT_EFFECTS_NONE;
         }
 
+        int effects = TRANSACT_EFFECTS_NONE;
         // When the TaskFragment is resized, we may want to create a change transition for it, for
         // which we want to defer the surface update until we determine whether or not to start
         // change transition.
@@ -843,7 +849,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             c.getConfiguration().windowConfiguration.setBounds(absBounds);
             taskFragment.setRelativeEmbeddedBounds(relBounds);
         }
-        final int effects = applyChanges(taskFragment, c);
+        if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
+            if (taskFragment.setForceHidden(
+                    FLAG_FORCE_HIDDEN_FOR_TASK_FRAGMENT_ORG, c.getHidden())) {
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
+        }
+        effects |= applyChanges(taskFragment, c);
+
         if (taskFragment.shouldStartChangeTransition(mTmpBounds0, mTmpBounds1)) {
             taskFragment.initializeChangeTransition(mTmpBounds0);
         }
@@ -1393,6 +1406,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 taskFragment.setIsolatedNav(isolatedNav);
                 break;
             }
+            case OP_TYPE_REORDER_TO_BOTTOM_OF_TASK: {
+                final Task task = taskFragment.getTask();
+                if (task != null) {
+                    task.mChildren.remove(taskFragment);
+                    task.mChildren.add(0, taskFragment);
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
+                break;
+            }
+            case OP_TYPE_REORDER_TO_TOP_OF_TASK: {
+                final Task task = taskFragment.getTask();
+                if (task != null) {
+                    task.mChildren.remove(taskFragment);
+                    task.mChildren.add(taskFragment);
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
+                break;
+            }
         }
         return effects;
     }
@@ -1417,6 +1448,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         if (!validateTaskFragment(taskFragment, opType, errorCallbackToken, organizer)) {
+            return false;
+        }
+
+        if ((opType == OP_TYPE_REORDER_TO_BOTTOM_OF_TASK
+                || opType == OP_TYPE_REORDER_TO_TOP_OF_TASK)
+                && !mTaskFragmentOrganizerController.isSystemOrganizer(organizer.asBinder())) {
+            final Throwable exception = new SecurityException(
+                    "Only a system organizer can perform OP_TYPE_REORDER_TO_BOTTOM_OF_TASK or "
+                            + "OP_TYPE_REORDER_TO_TOP_OF_TASK."
+            );
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
+                    opType, exception);
             return false;
         }
 
@@ -1920,6 +1963,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * For config change on {@link TaskFragment}, we only support the following operations:
      * {@link WindowContainerTransaction#setRelativeBounds(WindowContainerToken, Rect)},
      * {@link WindowContainerTransaction#setWindowingMode(WindowContainerToken, int)}.
+     *
+     * For a system organizer, we additionally support
+     * {@link WindowContainerTransaction#setHidden(WindowContainerToken, boolean)}, and
+     * {@link WindowContainerTransaction#setFocusable(WindowContainerToken, boolean)}. See
+     * {@link TaskFragmentOrganizerController#registerOrganizer(ITaskFragmentOrganizer, boolean)}
      */
     private void enforceTaskFragmentConfigChangeAllowed(@NonNull String func,
             @Nullable WindowContainer wc, @NonNull WindowContainerTransaction.Change change,
@@ -1938,31 +1986,49 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             throw new SecurityException(msg);
         }
 
-        final int changeMask = change.getChangeMask();
-        final int configSetMask = change.getConfigSetMask();
-        final int windowSetMask = change.getWindowSetMask();
-        if (changeMask == 0 && configSetMask == 0 && windowSetMask == 0
-                && change.getWindowingMode() >= 0) {
-            // The change contains only setWindowingMode, which is allowed.
-            return;
+        final int originalChangeMask = change.getChangeMask();
+        final int originalConfigSetMask = change.getConfigSetMask();
+        final int originalWindowSetMask = change.getWindowSetMask();
+
+        int changeMaskToBeChecked = originalChangeMask;
+        int configSetMaskToBeChecked = originalConfigSetMask;
+        int windowSetMaskToBeChecked = originalWindowSetMask;
+
+        if (mTaskFragmentOrganizerController.isSystemOrganizer(organizer.asBinder())) {
+            // System organizer is allowed to update the hidden and focusable state.
+            // We unset the CHANGE_HIDDEN and CHANGE_FOCUSABLE bits because they are checked here.
+            changeMaskToBeChecked &= ~CHANGE_HIDDEN;
+            changeMaskToBeChecked &= ~CHANGE_FOCUSABLE;
         }
-        if (changeMask != CHANGE_RELATIVE_BOUNDS
-                || configSetMask != ActivityInfo.CONFIG_WINDOW_CONFIGURATION
-                || windowSetMask != WindowConfiguration.WINDOW_CONFIG_BOUNDS) {
-            // None of the change should be requested from a TaskFragment organizer except
-            // setRelativeBounds and setWindowingMode.
-            // For setRelativeBounds, we don't need to check whether it is outside of the Task
+
+        // setRelativeBounds is allowed.
+        if ((changeMaskToBeChecked & CHANGE_RELATIVE_BOUNDS) != 0
+                && (configSetMaskToBeChecked & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0
+                && (windowSetMaskToBeChecked & WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0) {
+            // For setRelativeBounds, we don't need to check whether it is outside the Task
             // bounds, because it is possible that the Task is also resizing, for which we don't
             // want to throw an exception. The bounds will be adjusted in
             // TaskFragment#translateRelativeBoundsToAbsoluteBounds.
-            String msg = "Permission Denial: " + func + " from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " trying to apply changes of changeMask=" + changeMask
-                    + " configSetMask=" + configSetMask + " windowSetMask=" + windowSetMask
-                    + " to TaskFragment=" + tf + " TaskFragmentOrganizer=" + organizer;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
+            changeMaskToBeChecked &= ~CHANGE_RELATIVE_BOUNDS;
+            configSetMaskToBeChecked &= ~ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+            windowSetMaskToBeChecked &= ~WindowConfiguration.WINDOW_CONFIG_BOUNDS;
         }
+
+        if (changeMaskToBeChecked == 0 && configSetMaskToBeChecked == 0
+                && windowSetMaskToBeChecked == 0) {
+            // All the changes have been checked.
+            // Note that setWindowingMode is always allowed, so we don't need to check the mask.
+            return;
+        }
+
+        final String msg = "Permission Denial: " + func + " from pid="
+                + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                + " trying to apply changes of changeMask=" + originalChangeMask
+                + " configSetMask=" + originalConfigSetMask
+                + " windowSetMask=" + originalWindowSetMask
+                + " to TaskFragment=" + tf + " TaskFragmentOrganizer=" + organizer;
+        Slog.w(TAG, msg);
+        throw new SecurityException(msg);
     }
 
     private void createTaskFragment(@NonNull TaskFragmentCreationParams creationParams,
@@ -2019,7 +2085,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         TaskFragmentOrganizerToken organizerToken = creationParams.getOrganizer();
         taskFragment.setTaskFragmentOrganizer(organizerToken,
                 ownerActivity.getUid(), ownerActivity.info.processName,
-                mTaskFragmentOrganizerController.isSystemOrganizer(organizerToken));
+                mTaskFragmentOrganizerController.isSystemOrganizer(organizerToken.asBinder()));
         final int position;
         if (creationParams.getPairedPrimaryFragmentToken() != null) {
             // When there is a paired primary TaskFragment, we want to place the new TaskFragment

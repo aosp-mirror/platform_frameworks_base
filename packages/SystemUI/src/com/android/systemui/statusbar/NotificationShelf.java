@@ -133,7 +133,7 @@ public class NotificationShelf extends ActivatableNotificationView implements St
 
     public void bind(AmbientState ambientState,
                      NotificationStackScrollLayoutController hostLayoutController) {
-        mShelfRefactor.assertDisabled();
+        mShelfRefactor.assertInLegacyMode();
         mAmbientState = ambientState;
         mHostLayoutController = hostLayoutController;
         hostLayoutController.setOnNotificationRemovedListener((child, isTransferInProgress) -> {
@@ -143,7 +143,7 @@ public class NotificationShelf extends ActivatableNotificationView implements St
 
     public void bind(AmbientState ambientState, NotificationStackScrollLayout hostLayout,
             NotificationRoundnessManager roundnessManager) {
-        if (!mShelfRefactor.expectEnabled()) return;
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
         mAmbientState = ambientState;
         mHostLayout = hostLayout;
         mRoundnessManager = roundnessManager;
@@ -964,7 +964,7 @@ public class NotificationShelf extends ActivatableNotificationView implements St
 
     @Override
     public void onStateChanged(int newState) {
-        mShelfRefactor.assertDisabled();
+        mShelfRefactor.assertInLegacyMode();
         mStatusBarState = newState;
         updateInteractiveness();
     }
@@ -1022,17 +1022,17 @@ public class NotificationShelf extends ActivatableNotificationView implements St
     }
 
     public void setController(NotificationShelfController notificationShelfController) {
-        mShelfRefactor.assertDisabled();
+        mShelfRefactor.assertInLegacyMode();
         mController = notificationShelfController;
     }
 
     public void setCanModifyColorOfNotifications(boolean canModifyColorOfNotifications) {
-        if (!mShelfRefactor.expectEnabled()) return;
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
         mCanModifyColorOfNotifications = canModifyColorOfNotifications;
     }
 
     public void setCanInteract(boolean canInteract) {
-        if (!mShelfRefactor.expectEnabled()) return;
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
         mCanInteract = canInteract;
         updateInteractiveness();
     }
@@ -1050,7 +1050,7 @@ public class NotificationShelf extends ActivatableNotificationView implements St
     }
 
     public void requestRoundnessResetFor(ExpandableView child) {
-        if (!mShelfRefactor.expectEnabled()) return;
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
         child.requestRoundnessReset(SHELF_SCROLL);
     }
 

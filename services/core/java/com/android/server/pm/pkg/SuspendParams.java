@@ -17,7 +17,6 @@
 package com.android.server.pm.pkg;
 
 import android.annotation.Nullable;
-import android.content.pm.Flags;
 import android.content.pm.SuspendDialogInfo;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
@@ -142,8 +141,7 @@ public final class SuspendParams {
         PersistableBundle readAppExtras = null;
         PersistableBundle readLauncherExtras = null;
 
-        final boolean quarantined = in.getAttributeBoolean(null, ATTR_QUARANTINED, false)
-                && Flags.quarantinedEnabled();
+        final boolean quarantined = in.getAttributeBoolean(null, ATTR_QUARANTINED, false);
 
         final int currentDepth = in.getDepth();
         int type;

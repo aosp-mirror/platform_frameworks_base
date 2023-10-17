@@ -280,7 +280,7 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
 
     private void notifyBluetoothRoutesUpdated() {
         if (mListener != null) {
-            mListener.onBluetoothRoutesUpdated(getAllBluetoothRoutes());
+            mListener.onBluetoothRoutesUpdated();
         }
     }
 

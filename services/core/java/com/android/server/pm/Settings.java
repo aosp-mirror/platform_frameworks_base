@@ -1060,7 +1060,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             boolean virtualPreload, boolean isStoppedSystemApp, UserManagerService userManager,
             String[] usesSdkLibraries, long[] usesSdkLibrariesVersions,
             String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
-            Set<String> mimeGroupNames, @NonNull UUID domainSetId) {
+            Set<String> mimeGroupNames, @NonNull UUID domainSetId, boolean isPersistent,
+            int targetSdkVersion, byte[] restrictUpdatedHash) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
@@ -1080,7 +1081,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setUsesStaticLibrariesVersions(usesStaticLibrariesVersions)
                     // Update new package state.
                     .setLastModifiedTime(codePath.lastModified())
-                    .setDomainSetId(domainSetId);
+                    .setDomainSetId(domainSetId)
+                    .setIsPersistent(isPersistent)
+                    .setTargetSdkVersion(targetSdkVersion)
+                    .setRestrictUpdateHash(restrictUpdatedHash);
             pkgSetting.setFlags(pkgFlags)
                     .setPrivateFlags(pkgPrivateFlags);
         } else {
@@ -1092,7 +1096,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
                     0 /*sharedUserAppId*/, usesSdkLibraries, usesSdkLibrariesVersions,
                     usesStaticLibraries, usesStaticLibrariesVersions,
-                    createMimeGroups(mimeGroupNames), domainSetId);
+                    createMimeGroups(mimeGroupNames), domainSetId)
+                    .setIsPersistent(isPersistent)
+                    .setTargetSdkVersion(targetSdkVersion)
+                    .setRestrictUpdateHash(restrictUpdatedHash);
             pkgSetting.setLastModifiedTime(codePath.lastModified());
             if (sharedUser != null) {
                 pkgSetting.setSharedUserAppId(sharedUser.mAppId);
@@ -1206,7 +1213,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             int pkgPrivateFlags, @NonNull UserManagerService userManager,
             @Nullable String[] usesSdkLibraries, @Nullable long[] usesSdkLibrariesVersions,
             @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions,
-            @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId)
+            @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId, boolean isPersistent,
+            int targetSdkVersion, byte[] restrictUpdatedHash)
                     throws PackageManagerException {
         final String pkgName = pkgSetting.getPackageName();
         if (sharedUser != null) {
@@ -1258,7 +1266,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         pkgSetting.setPrimaryCpuAbi(primaryCpuAbi)
                 .setSecondaryCpuAbi(secondaryCpuAbi)
                 .updateMimeGroups(mimeGroupNames)
-                .setDomainSetId(domainSetId);
+                .setDomainSetId(domainSetId)
+                .setIsPersistent(isPersistent)
+                .setTargetSdkVersion(targetSdkVersion)
+                .setRestrictUpdateHash(restrictUpdatedHash);
         // Update SDK library dependencies if needed.
         if (usesSdkLibraries != null && usesSdkLibrariesVersions != null
                 && usesSdkLibraries.length == usesSdkLibrariesVersions.length) {
@@ -6400,16 +6411,25 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     }
 
     boolean clearPersistentPreferredActivity(IntentFilter filter, int userId) {
+        ArrayList<PersistentPreferredActivity> removed = null;
         PersistentPreferredIntentResolver ppir = mPersistentPreferredActivities.get(userId);
         Iterator<PersistentPreferredActivity> it = ppir.filterIterator();
         boolean changed = false;
         while (it.hasNext()) {
             PersistentPreferredActivity ppa = it.next();
             if (IntentFilter.filterEquals(ppa.getIntentFilter(), filter)) {
-                ppir.removeFilter(ppa);
-                changed = true;
-                break;
+                if (removed == null) {
+                    removed = new ArrayList<>();
+                }
+                removed.add(ppa);
             }
+        }
+        if (removed != null) {
+            for (int i = 0; i < removed.size(); i++) {
+                PersistentPreferredActivity ppa = removed.get(i);
+                ppir.removeFilter(ppa);
+            }
+            changed = true;
         }
         if (changed) {
             onChanged();

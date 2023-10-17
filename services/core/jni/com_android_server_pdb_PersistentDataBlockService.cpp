@@ -15,106 +15,99 @@
  */
 
 #include <android_runtime/AndroidRuntime.h>
-#include <nativehelper/JNIHelp.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <inttypes.h>
 #include <jni.h>
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
-
-#include <utils/misc.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <utils/Log.h>
-
-
-#include <inttypes.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
+#include <utils/misc.h>
 
 namespace android {
 
-    uint64_t get_block_device_size(int fd)
-    {
-        uint64_t size = 0;
-        int ret;
+uint64_t get_block_device_size(int fd) {
+    uint64_t size = 0;
+    int ret;
 
-        ret = ioctl(fd, BLKGETSIZE64, &size);
+    ret = ioctl(fd, BLKGETSIZE64, &size);
 
-        if (ret)
-            return 0;
+    if (ret) return 0;
 
-        return size;
-    }
+    return size;
+}
 
-    int wipe_block_device(int fd)
-    {
-        uint64_t range[2];
-        int ret;
-        uint64_t len = get_block_device_size(fd);
+int wipe_block_device(int fd) {
+    uint64_t range[2];
+    int ret;
+    uint64_t len = get_block_device_size(fd);
 
+    range[0] = 0;
+    range[1] = len;
+
+    if (range[1] == 0) return 0;
+
+    ret = ioctl(fd, BLKSECDISCARD, &range);
+    if (ret < 0) {
+        ALOGE("Something went wrong secure discarding block: %s\n", strerror(errno));
         range[0] = 0;
         range[1] = len;
-
-        if (range[1] == 0)
-            return 0;
-
-        ret = ioctl(fd, BLKSECDISCARD, &range);
+        ret = ioctl(fd, BLKDISCARD, &range);
         if (ret < 0) {
-            ALOGE("Something went wrong secure discarding block: %s\n", strerror(errno));
-            range[0] = 0;
-            range[1] = len;
-            ret = ioctl(fd, BLKDISCARD, &range);
-            if (ret < 0) {
-                ALOGE("Discard failed: %s\n", strerror(errno));
-                return -1;
-            } else {
-                ALOGE("Wipe via secure discard failed, used non-secure discard instead\n");
-                return 0;
-            }
-
+            ALOGE("Discard failed: %s\n", strerror(errno));
+            return -1;
+        } else {
+            ALOGE("Wipe via secure discard failed, used non-secure discard instead\n");
+            return 0;
         }
-
-        return ret;
     }
 
-    static jlong com_android_server_pdb_PersistentDataBlockService_getBlockDeviceSize(JNIEnv *env, jclass, jstring jpath)
-    {
-        ScopedUtfChars path(env, jpath);
-        int fd = open(path.c_str(), O_RDONLY);
+    return ret;
+}
 
-        if (fd < 0)
-            return 0;
+static jlong com_android_server_pdb_PersistentDataBlockService_getBlockDeviceSize(JNIEnv *env,
+                                                                                  jclass,
+                                                                                  jstring jpath) {
+    ScopedUtfChars path(env, jpath);
+    int fd = open(path.c_str(), O_RDONLY);
 
-        const uint64_t size = get_block_device_size(fd);
+    if (fd < 0) return 0;
 
-        close(fd);
+    const uint64_t size = get_block_device_size(fd);
 
-        return size;
-    }
+    close(fd);
 
-    static int com_android_server_pdb_PersistentDataBlockService_wipe(JNIEnv *env, jclass, jstring jpath) {
-        ScopedUtfChars path(env, jpath);
-        int fd = open(path.c_str(), O_WRONLY);
+    return size;
+}
 
-        if (fd < 0)
-            return 0;
+static int com_android_server_pdb_PersistentDataBlockService_wipe(JNIEnv *env, jclass,
+                                                                  jstring jpath) {
+    ScopedUtfChars path(env, jpath);
+    int fd = open(path.c_str(), O_WRONLY);
 
-        const int ret = wipe_block_device(fd);
+    if (fd < 0) return 0;
 
-        close(fd);
+    const int ret = wipe_block_device(fd);
 
-        return ret;
-    }
+    close(fd);
 
-    static const JNINativeMethod sMethods[] = {
-         /* name, signature, funcPtr */
-        {"nativeGetBlockDeviceSize", "(Ljava/lang/String;)J", (void*)com_android_server_pdb_PersistentDataBlockService_getBlockDeviceSize},
-        {"nativeWipe", "(Ljava/lang/String;)I", (void*)com_android_server_pdb_PersistentDataBlockService_wipe},
-    };
+    return ret;
+}
 
-    int register_android_server_pdb_PersistentDataBlockService(JNIEnv* env)
-    {
-        return jniRegisterNativeMethods(env, "com/android/server/pdb/PersistentDataBlockService",
-                                        sMethods, NELEM(sMethods));
-    }
+static const JNINativeMethod sMethods[] = {
+        /* name, signature, funcPtr */
+        {"nativeGetBlockDeviceSize", "(Ljava/lang/String;)J",
+         (void *)com_android_server_pdb_PersistentDataBlockService_getBlockDeviceSize},
+        {"nativeWipe", "(Ljava/lang/String;)I",
+         (void *)com_android_server_pdb_PersistentDataBlockService_wipe},
+};
+
+int register_android_server_pdb_PersistentDataBlockService(JNIEnv *env) {
+    return jniRegisterNativeMethods(env, "com/android/server/pdb/PersistentDataBlockService",
+                                    sMethods, NELEM(sMethods));
+}
 
 } /* namespace android */

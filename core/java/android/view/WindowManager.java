@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
+import static android.view.flags.Flags.FLAG_WM_DISPLAY_REFRESH_RATE_TEST;
 import static android.view.View.STATUS_BAR_DISABLE_BACK;
 import static android.view.View.STATUS_BAR_DISABLE_CLOCK;
 import static android.view.View.STATUS_BAR_DISABLE_EXPAND;
@@ -3905,6 +3906,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @FlaggedApi(FLAG_WM_DISPLAY_REFRESH_RATE_TEST)
         @TestApi
         public float preferredMinDisplayRefreshRate;
 
@@ -3914,6 +3916,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @FlaggedApi(FLAG_WM_DISPLAY_REFRESH_RATE_TEST)
         @TestApi
         public float preferredMaxDisplayRefreshRate;
 

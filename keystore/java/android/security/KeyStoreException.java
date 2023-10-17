@@ -319,7 +319,7 @@ public class KeyStoreException extends Exception {
     /**
      * Returns one of the error codes exported by the class.
      *
-     * @return a public error code, one of the values in {@link PublicErrorCode}.
+     * @return a public error code
      */
     @PublicErrorCode
     public int getNumericErrorCode() {

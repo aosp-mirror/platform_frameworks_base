@@ -1549,7 +1549,8 @@ public final class ViewRootImpl implements ViewParent,
                         mHandler,
                         DisplayManager.EVENT_FLAG_DISPLAY_ADDED
                         | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
+                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED,
+                        mBasePackageName);
     }
 
     /**

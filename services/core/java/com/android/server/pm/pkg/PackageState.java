@@ -434,4 +434,26 @@ public interface PackageState {
      */
     @Nullable
     String getApexModuleName();
+
+    /**
+     * @see ApplicationInfo#FLAG_PERSISTENT
+     * @see R.styleable#AndroidManifestApplication_persistent
+     * @hide
+     */
+    boolean isPersistent();
+
+    /**
+     * @see ApplicationInfo#targetSdkVersion
+     * @see R.styleable#AndroidManifestUsesSdk_targetSdkVersion
+     * @hide
+     */
+    int getTargetSdkVersion();
+
+    /**
+     * @see R.styleable#AndroidManifestRestrictUpdate
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    byte[] getRestrictUpdateHash();
 }

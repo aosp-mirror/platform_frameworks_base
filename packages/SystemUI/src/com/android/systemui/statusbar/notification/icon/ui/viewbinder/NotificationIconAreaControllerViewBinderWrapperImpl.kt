@@ -167,17 +167,16 @@ constructor(
         NotificationShelfViewBinderWrapperControllerImpl.unsupported
 
     override fun setShelfIcons(icons: NotificationIconContainer) {
-        if (shelfRefactor.expectEnabled()) {
-            NotificationIconContainerViewBinder.bind(
-                icons,
-                shelfIconsViewModel,
-                configurationController,
-                dozeParameters,
-                featureFlags,
-                screenOffAnimationController,
-            )
-            shelfIcons = icons
-        }
+        if (shelfRefactor.isUnexpectedlyInLegacyMode()) return
+        NotificationIconContainerViewBinder.bind(
+            icons,
+            shelfIconsViewModel,
+            configurationController,
+            dozeParameters,
+            featureFlags,
+            screenOffAnimationController,
+        )
+        shelfIcons = icons
     }
 
     override fun onDensityOrFontScaleChanged(context: Context) {

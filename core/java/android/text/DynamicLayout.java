@@ -1274,7 +1274,7 @@ public class DynamicLayout extends Layout {
     }
 
     /**
-     * Gets the {@link LineBreakconfig} used in this DynamicLayout.
+     * Gets the {@link LineBreakConfig} used in this DynamicLayout.
      * Use this only to consult the LineBreakConfig's properties and not
      * to change them.
      *

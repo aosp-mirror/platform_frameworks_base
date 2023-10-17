@@ -15033,15 +15033,6 @@ public class TelephonyManager {
     @TestApi
     public static final int HAL_SERVICE_IMS = 7;
 
-    /**
-     * HAL service type that supports the HAL APIs implementation of IRadioSatellite
-     * {@link RadioSatelliteProxy}
-     * @hide
-     */
-    @TestApi
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    public static final int HAL_SERVICE_SATELLITE = 8;
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"HAL_SERVICE_"},
@@ -15054,7 +15045,6 @@ public class TelephonyManager {
                     HAL_SERVICE_SIM,
                     HAL_SERVICE_VOICE,
                     HAL_SERVICE_IMS,
-                    HAL_SERVICE_SATELLITE
             })
     public @interface HalService {}
 

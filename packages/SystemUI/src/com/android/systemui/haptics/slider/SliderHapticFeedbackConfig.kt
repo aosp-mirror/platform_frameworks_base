@@ -32,6 +32,8 @@ data class SliderHapticFeedbackConfig(
     @FloatRange(from = 0.0, to = 1.0) val additionalVelocityMaxBump: Float = 0.15f,
     /** Additional time delta to wait between drag texture vibrations */
     @FloatRange(from = 0.0) val deltaMillisForDragInterval: Float = 0f,
+    /** Progress threshold beyond which a new drag texture is delivered */
+    @FloatRange(from = 0.0, to = 1.0) val deltaProgressForDragThreshold: Float = 0.015f,
     /** Number of low ticks in a drag texture composition. This is not expected to change */
     val numberOfLowTicks: Int = 5,
     /** Maximum velocity allowed for vibration scaling. This is not expected to change. */

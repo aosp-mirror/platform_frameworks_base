@@ -25,6 +25,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.lang.IllegalStateException
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
@@ -43,8 +44,11 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
 
     private val controller0 = mock<ScreenshotController>()
     private val controller1 = mock<ScreenshotController>()
+    private val notificationsController0 = mock<ScreenshotNotificationsController>()
+    private val notificationsController1 = mock<ScreenshotNotificationsController>()
     private val controllerFactory = mock<ScreenshotController.Factory>()
     private val callback = mock<TakeScreenshotService.RequestCallback>()
+    private val notificationControllerFactory = mock<ScreenshotNotificationsController.Factory>()
 
     private val fakeDisplayRepository = FakeDisplayRepository()
     private val requestProcessor = FakeRequestProcessor()
@@ -59,12 +63,15 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             testScope,
             requestProcessor,
             eventLogger,
+            notificationControllerFactory
         )
 
     @Before
     fun setUp() {
         whenever(controllerFactory.create(eq(0), any())).thenReturn(controller0)
         whenever(controllerFactory.create(eq(1), any())).thenReturn(controller1)
+        whenever(notificationControllerFactory.create(eq(0))).thenReturn(notificationsController0)
+        whenever(notificationControllerFactory.create(eq(1))).thenReturn(notificationsController1)
     }
 
     @Test
@@ -310,6 +317,123 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             screenshotExecutor.onDestroy()
         }
 
+    @Test
+    fun executeScreenshots_errorFromProcessor_logsScreenshotRequested() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri -> }
+            requestProcessor.shouldThrowException = true
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            val screenshotRequested =
+                eventLogger.logs.filter {
+                    it.eventId == ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER.id
+                }
+            assertThat(screenshotRequested).hasSize(2)
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    fun executeScreenshots_errorFromProcessor_logsUiError() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri -> }
+            requestProcessor.shouldThrowException = true
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            val screenshotRequested =
+                eventLogger.logs.filter {
+                    it.eventId == ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED.id
+                }
+            assertThat(screenshotRequested).hasSize(2)
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    fun executeScreenshots_errorFromProcessorOnDefaultDisplay_showsErrorNotification() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri -> }
+            requestProcessor.shouldThrowException = true
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            verify(notificationsController0).notifyScreenshotError(any())
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    fun executeScreenshots_errorFromProcessorOnSecondaryDisplay_showsErrorNotification() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0))
+            val onSaved = { _: Uri -> }
+            requestProcessor.shouldThrowException = true
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            verify(notificationsController0).notifyScreenshotError(any())
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    fun executeScreenshots_errorFromScreenshotController_reportsRequested() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri -> }
+            whenever(controller0.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+            whenever(controller1.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            val screenshotRequested =
+                eventLogger.logs.filter {
+                    it.eventId == ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER.id
+                }
+            assertThat(screenshotRequested).hasSize(2)
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    fun executeScreenshots_errorFromScreenshotController_reportsError() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri -> }
+            whenever(controller0.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+            whenever(controller1.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            val screenshotRequested =
+                eventLogger.logs.filter {
+                    it.eventId == ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED.id
+                }
+            assertThat(screenshotRequested).hasSize(2)
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    fun executeScreenshots_errorFromScreenshotController_showsErrorNotification() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri -> }
+            whenever(controller0.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+            whenever(controller1.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            verify(notificationsController0).notifyScreenshotError(any())
+            verify(notificationsController1).notifyScreenshotError(any())
+            screenshotExecutor.onDestroy()
+        }
+
     private suspend fun TestScope.setDisplays(vararg displays: Display) {
         fakeDisplayRepository.emit(displays.toSet())
         runCurrent()
@@ -328,8 +452,9 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     private class FakeRequestProcessor : ScreenshotRequestProcessor {
         var processed: ScreenshotData? = null
         var toReturn: ScreenshotData? = null
-
+        var shouldThrowException = false
         override suspend fun process(screenshot: ScreenshotData): ScreenshotData {
+            if (shouldThrowException) throw RequestProcessorException("")
             processed = screenshot
             return toReturn ?: screenshot
         }

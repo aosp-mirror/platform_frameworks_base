@@ -1,6 +1,4 @@
 // Signature format: 2.0
-// - add-additional-overrides=no
-// - migrating=Migration in progress see b/299366704
 package android {
 
   public static final class Manifest.permission {
@@ -3187,7 +3185,6 @@ package android.telephony {
     field public static final int HAL_SERVICE_MESSAGING = 2; // 0x2
     field public static final int HAL_SERVICE_MODEM = 3; // 0x3
     field public static final int HAL_SERVICE_NETWORK = 4; // 0x4
-    field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int HAL_SERVICE_SATELLITE = 8; // 0x8
     field public static final int HAL_SERVICE_SIM = 5; // 0x5
     field public static final int HAL_SERVICE_VOICE = 6; // 0x6
     field public static final android.util.Pair HAL_VERSION_UNKNOWN;
@@ -3587,8 +3584,8 @@ package android.view {
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
     field public static final int FLAG_SLIPPERY = 536870912; // 0x20000000
     field public CharSequence accessibilityTitle;
-    field public float preferredMaxDisplayRefreshRate;
-    field public float preferredMinDisplayRefreshRate;
+    field @FlaggedApi("android.view.flags.wm_display_refresh_rate_test") public float preferredMaxDisplayRefreshRate;
+    field @FlaggedApi("android.view.flags.wm_display_refresh_rate_test") public float preferredMinDisplayRefreshRate;
     field public int privateFlags;
   }
 
@@ -3618,7 +3615,6 @@ package android.view.accessibility {
 
   public final class AccessibilityWindowInfo implements android.os.Parcelable {
     method public static void setNumInstancesInUseCounter(java.util.concurrent.atomic.AtomicInteger);
-    field public static final int UNDEFINED_WINDOW_ID = -1; // 0xffffffff
   }
 
 }
@@ -3946,7 +3942,9 @@ package android.widget.inline {
 package android.window {
 
   public final class BackNavigationInfo implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public static String typeToString(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.BackNavigationInfo> CREATOR;
     field public static final String KEY_TRIGGER_BACK = "TriggerBack";
     field public static final int TYPE_CALLBACK = 4; // 0x4
@@ -4007,11 +4005,13 @@ package android.window {
   }
 
   public final class TaskFragmentCreationParams implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public android.os.IBinder getFragmentToken();
     method @NonNull public android.graphics.Rect getInitialRelativeBounds();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizer();
     method @NonNull public android.os.IBinder getOwnerToken();
     method public int getWindowingMode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentCreationParams> CREATOR;
   }
 
@@ -4023,6 +4023,7 @@ package android.window {
   }
 
   public final class TaskFragmentInfo implements android.os.Parcelable {
+    method public int describeContents();
     method public boolean equalsForTaskFragmentOrganizer(@Nullable android.window.TaskFragmentInfo);
     method @NonNull public java.util.List<android.os.IBinder> getActivities();
     method @NonNull public java.util.List<android.os.IBinder> getActivitiesRequestedInTaskFragment();
@@ -4036,6 +4037,7 @@ package android.window {
     method public boolean isEmpty();
     method public boolean isTaskClearedForReuse();
     method public boolean isVisible();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentInfo> CREATOR;
   }
 
@@ -4058,6 +4060,8 @@ package android.window {
   }
 
   public final class TaskFragmentOrganizerToken implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentOrganizerToken> CREATOR;
   }
 

@@ -53,6 +53,7 @@ import android.app.usage.AppStandbyInfo;
 import android.app.usage.BroadcastResponseStatsList;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventStats;
+import android.app.usage.Flags;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
@@ -2127,7 +2128,8 @@ public class UsageStatsService extends SystemService implements
 
         private boolean canReportUsageStats() {
             if (isCallingUidSystem()) {
-                return true; // System UID can always report UsageStats
+                // System UID can always report UsageStats
+                return true;
             }
 
             return getContext().checkCallingPermission(Manifest.permission.REPORT_USAGE_STATS)
@@ -2623,9 +2625,12 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            if (!canReportUsageStats()) {
-                throw new SecurityException("Only the system or holders of the REPORT_USAGE_STATS"
-                        + " permission are allowed to call reportChooserSelection");
+            if (Flags.reportUsageStatsPermission()) {
+                if (!canReportUsageStats()) {
+                    throw new SecurityException(
+                        "Only the system or holders of the REPORT_USAGE_STATS"
+                            + " permission are allowed to call reportChooserSelection");
+                }
             }
 
             // Verify if this package exists before reporting an event for it.
@@ -2645,9 +2650,17 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportUserInteraction(String packageName, int userId) {
             Objects.requireNonNull(packageName);
-            if (!canReportUsageStats()) {
-                throw new SecurityException("Only the system or holders of the REPORT_USAGE_STATS"
-                        + " permission are allowed to call reportUserInteraction");
+            if (Flags.reportUsageStatsPermission()) {
+                if (!canReportUsageStats()) {
+                    throw new SecurityException(
+                        "Only the system or holders of the REPORT_USAGE_STATS"
+                            + " permission are allowed to call reportUserInteraction");
+                }
+            } else {
+                if (!isCallingUidSystem()) {
+                    throw new SecurityException("Only system is allowed to call"
+                            + " reportUserInteraction");
+                }
             }
 
             final Event event = new Event(USER_INTERACTION, SystemClock.elapsedRealtime());

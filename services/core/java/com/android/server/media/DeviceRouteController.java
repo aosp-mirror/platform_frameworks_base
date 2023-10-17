@@ -93,12 +93,8 @@ import com.android.media.flags.Flags;
      */
     interface OnDeviceRouteChangedListener {
 
-        /**
-         * Called when device route has changed.
-         *
-         * @param deviceRoute non-null device route.
-         */
-        void onDeviceRouteChanged(@NonNull MediaRoute2Info deviceRoute);
+        /** Called when device route has changed. */
+        void onDeviceRouteChanged();
     }
 
 }

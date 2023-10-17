@@ -494,6 +494,7 @@ public final class DisplayManagerService extends SystemService {
 
     // If we would like to keep a particular eye on a package, we can set the package name.
     private final boolean mExtraDisplayEventLogging;
+    private final String mExtraDisplayLoggingPackageName;
 
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
@@ -584,8 +585,8 @@ public final class DisplayManagerService extends SystemService {
         mOverlayProperties = SurfaceControl.getOverlaySupport();
         mSystemReady = false;
         mConfigParameterProvider = new DeviceConfigParameterProvider(DeviceConfigInterface.REAL);
-        final String name = DisplayProperties.debug_vri_package().orElse(null);
-        mExtraDisplayEventLogging = !TextUtils.isEmpty(name);
+        mExtraDisplayLoggingPackageName = DisplayProperties.debug_vri_package().orElse(null);
+        mExtraDisplayEventLogging = !TextUtils.isEmpty(mExtraDisplayLoggingPackageName);
     }
 
     public void setupSchedulerPolicies() {
@@ -2934,12 +2935,17 @@ public final class DisplayManagerService extends SystemService {
         // Only send updates outside of DisplayManagerService for enabled displays
         if (display.isEnabledLocked()) {
             sendDisplayEventLocked(display, event);
+        } else if (mExtraDisplayEventLogging) {
+            Slog.i(TAG, "Not Sending Display Event; display is not enabled: " + display);
         }
     }
 
     private void sendDisplayEventLocked(@NonNull LogicalDisplay display, @DisplayEvent int event) {
         int displayId = display.getDisplayIdLocked();
         Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_EVENT, displayId, event);
+        if (mExtraDisplayEventLogging) {
+            Slog.i(TAG, "Deliver Display Event on Handler: " + event);
+        }
         mHandler.sendMessage(msg);
     }
 
@@ -3005,6 +3011,10 @@ public final class DisplayManagerService extends SystemService {
                 // For cached apps, save the pending event until it becomes non-cached
                 synchronized (mPendingCallbackSelfLocked) {
                     PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
+                    if (extraLogging(callbackRecord.mPackageName)) {
+                        Slog.i(TAG,
+                                "Uid is cached: " + uid + ", pendingCallback: " + pendingCallback);
+                    }
                     if (pendingCallback == null) {
                         mPendingCallbackSelfLocked.put(uid,
                                 new PendingCallback(callbackRecord, displayId, event));
@@ -3017,6 +3027,10 @@ public final class DisplayManagerService extends SystemService {
             }
         }
         mTempCallbacks.clear();
+    }
+
+    private boolean extraLogging(String packageName) {
+        return mExtraDisplayEventLogging && mExtraDisplayLoggingPackageName.equals(packageName);
     }
 
     // Runs on Handler thread.
@@ -3462,6 +3476,7 @@ public final class DisplayManagerService extends SystemService {
         public final int mUid;
         private final IDisplayManagerCallback mCallback;
         private @EventsMask AtomicLong mEventsMask;
+        private final String mPackageName;
 
         public boolean mWifiDisplayScanRequested;
 
@@ -3471,6 +3486,9 @@ public final class DisplayManagerService extends SystemService {
             mUid = uid;
             mCallback = callback;
             mEventsMask = new AtomicLong(eventsMask);
+
+            String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
+            mPackageName = packageNames == null ? null : packageNames[0];
         }
 
         public void updateEventsMask(@EventsMask long eventsMask) {
@@ -3479,7 +3497,8 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void binderDied() {
-            if (DEBUG) {
+            if (DEBUG || mExtraDisplayEventLogging && mExtraDisplayLoggingPackageName.equals(
+                    mPackageName)) {
                 Slog.d(TAG, "Display listener for pid " + mPid + " died.");
             }
             onCallbackDied(this);
@@ -3490,6 +3509,11 @@ public final class DisplayManagerService extends SystemService {
          */
         public boolean notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
             if (!shouldSendEvent(event)) {
+                if (mExtraDisplayEventLogging && mExtraDisplayLoggingPackageName.equals(
+                        mPackageName)) {
+                    Slog.i(TAG,
+                            "Not sending displayEvent: " + event + " due to mask:" + mEventsMask);
+                }
                 return true;
             }
 

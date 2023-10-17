@@ -838,7 +838,7 @@ public abstract class PackageManager {
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
-            FILTER_OUT_QUARANTINED_COMPONENTS,
+            MATCH_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ComponentInfoFlagsBits {}
@@ -863,7 +863,7 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_CLONE_PROFILE,
-            FILTER_OUT_QUARANTINED_COMPONENTS,
+            MATCH_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResolveInfoFlagsBits {}
@@ -1252,12 +1252,13 @@ public abstract class PackageManager {
      */
     // TODO(b/278553670) Unhide and update @links before launch.
     @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final long MATCH_ARCHIVED_PACKAGES = 1L << 32;
 
     /**
      * @hide
      */
-    public static final long FILTER_OUT_QUARANTINED_COMPONENTS = 0x100000000L;
+    public static final long MATCH_QUARANTINED_COMPONENTS = 0x100000000L;
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when

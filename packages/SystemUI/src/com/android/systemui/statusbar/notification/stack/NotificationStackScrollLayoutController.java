@@ -1431,7 +1431,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void setShelfController(NotificationShelfController notificationShelfController) {
-        mShelfRefactor.assertDisabled();
+        mShelfRefactor.assertInLegacyMode();
         mView.setShelfController(notificationShelfController);
     }
 
@@ -1644,12 +1644,12 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void setShelf(NotificationShelf shelf) {
-        if (!mShelfRefactor.expectEnabled()) return;
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
         mView.setShelf(shelf);
     }
 
     public int getShelfHeight() {
-        if (!mShelfRefactor.expectEnabled()) {
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) {
             return 0;
         }
         ExpandableView shelf = mView.getShelf();

@@ -114,7 +114,8 @@ constructor(
                 .collect { (isAsleep, lastStartedStep, isAodAvailable) ->
                     if (lastStartedStep.to == KeyguardState.GONE && isAsleep) {
                         startTransitionTo(
-                            if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
+                            if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING,
+                            resetIfCancelled = true,
                         )
                     }
                 }
@@ -127,6 +128,7 @@ constructor(
             duration =
                 when (toState) {
                     KeyguardState.DREAMING -> TO_DREAMING_DURATION
+                    KeyguardState.AOD -> TO_AOD_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -134,5 +136,6 @@ constructor(
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
+        val TO_AOD_DURATION = 1100.milliseconds
     }
 }

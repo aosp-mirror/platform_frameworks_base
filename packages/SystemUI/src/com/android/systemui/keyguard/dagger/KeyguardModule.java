@@ -38,9 +38,6 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
-import com.android.systemui.communal.data.repository.CommunalRepositoryModule;
-import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule;
-import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -96,9 +93,6 @@ import kotlinx.coroutines.CoroutineDispatcher;
         KeyguardStatusViewComponent.class,
         KeyguardUserSwitcherComponent.class},
         includes = {
-            CommunalRepositoryModule.class,
-            CommunalTutorialRepositoryModule.class,
-            CommunalWidgetRepositoryModule.class,
             FalsingModule.class,
             KeyguardDataQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,

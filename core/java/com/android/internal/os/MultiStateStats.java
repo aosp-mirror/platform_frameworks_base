@@ -16,9 +16,17 @@
 
 package com.android.internal.os;
 
+import android.util.Slog;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
@@ -29,15 +37,21 @@ import java.util.Arrays;
  * values;
  */
 public class MultiStateStats {
+    private static final String TAG = "MultiStateStats";
+
+    private static final String XML_TAG_STATS = "stats";
+
     /**
      * A set of states, e.g. on-battery, screen-on, procstate.  The state values are integers
      * from 0 to States.mLabels.length
      */
     public static class States {
+        final String mName;
         final boolean mTracked;
         final String[] mLabels;
 
-        public States(boolean tracked, String... labels) {
+        public States(String name, boolean tracked, String... labels) {
+            mName = name;
             this.mTracked = tracked;
             this.mLabels = labels;
         }
@@ -155,9 +169,26 @@ public class MultiStateStats {
                    >>> mStateBitFieldShifts[stateIndex];
         }
 
-        private int setStateInComposite(int baseCompositeState, int stateIndex, int value) {
+        int setStateInComposite(int baseCompositeState, int stateIndex, int value) {
             return (baseCompositeState & ~mStateBitFieldMasks[stateIndex])
                     | (value << mStateBitFieldShifts[stateIndex]);
+        }
+
+        int setStateInComposite(int compositeState, String stateName, String stateLabel) {
+            for (int stateIndex = 0; stateIndex < mStates.length; stateIndex++) {
+                States stateConfig = mStates[stateIndex];
+                if (stateConfig.mName.equals(stateName)) {
+                    for (int state = 0; state < stateConfig.mLabels.length; state++) {
+                        if (stateConfig.mLabels[state].equals(stateLabel)) {
+                            return setStateInComposite(compositeState, stateIndex, state);
+                        }
+                    }
+                    Slog.e(TAG, "Unexpected label '" + stateLabel + "' for state: " + stateName);
+                    return -1;
+                }
+            }
+            Slog.e(TAG, "Unsupported state: " + stateName);
+            return -1;
         }
 
         /**
@@ -194,6 +225,10 @@ public class MultiStateStats {
                                                    + Arrays.toString(states));
             }
             return serialState;
+        }
+
+        int getSerialState(int compositeState) {
+            return mCompositeToSerialState[compositeState];
         }
     }
 
@@ -251,6 +286,106 @@ public class MultiStateStats {
     @Override
     public String toString() {
         return mCounter.toString();
+    }
+
+    /**
+     * Stores contents in an XML doc.
+     */
+    public void writeXml(TypedXmlSerializer serializer) throws IOException {
+        long[] tmpArray = new long[mCounter.getArrayLength()];
+        writeXmlAllStates(serializer, new int[mFactory.mStates.length], 0, tmpArray);
+    }
+
+    private void writeXmlAllStates(TypedXmlSerializer serializer, int[] states, int stateIndex,
+            long[] values) throws IOException {
+        if (stateIndex < states.length) {
+            if (!mFactory.mStates[stateIndex].mTracked) {
+                writeXmlAllStates(serializer, states, stateIndex + 1, values);
+                return;
+            }
+
+            for (int i = 0; i < mFactory.mStates[stateIndex].mLabels.length; i++) {
+                states[stateIndex] = i;
+                writeXmlAllStates(serializer, states, stateIndex + 1, values);
+            }
+            return;
+        }
+
+        mCounter.getCounts(values, mFactory.getSerialState(states));
+        boolean nonZero = false;
+        for (long value : values) {
+            if (value != 0) {
+                nonZero = true;
+                break;
+            }
+        }
+        if (!nonZero) {
+            return;
+        }
+
+        serializer.startTag(null, XML_TAG_STATS);
+
+        for (int i = 0; i < states.length; i++) {
+            if (mFactory.mStates[i].mTracked && states[i] != 0) {
+                serializer.attribute(null, mFactory.mStates[i].mName,
+                        mFactory.mStates[i].mLabels[states[i]]);
+            }
+        }
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] != 0) {
+                serializer.attributeLong(null, "_" + i, values[i]);
+            }
+        }
+        serializer.endTag(null, XML_TAG_STATS);
+    }
+
+    /**
+     * Populates the object with contents in an XML doc. The parser is expected to be
+     * positioned on the opening tag of the corresponding element.
+     */
+    public boolean readFromXml(TypedXmlPullParser parser) throws XmlPullParserException,
+            IOException {
+        String outerTag = parser.getName();
+        long[] tmpArray = new long[mCounter.getArrayLength()];
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.END_DOCUMENT
+               && !(eventType == XmlPullParser.END_TAG && parser.getName().equals(outerTag))) {
+            if (eventType == XmlPullParser.START_TAG) {
+                if (parser.getName().equals(XML_TAG_STATS)) {
+                    Arrays.fill(tmpArray, 0);
+                    int compositeState = 0;
+                    int attributeCount = parser.getAttributeCount();
+                    for (int i = 0; i < attributeCount; i++) {
+                        String attributeName = parser.getAttributeName(i);
+                        if (attributeName.startsWith("_")) {
+                            int index;
+                            try {
+                                index = Integer.parseInt(attributeName.substring(1));
+                            } catch (NumberFormatException e) {
+                                throw new XmlPullParserException(
+                                        "Unexpected index syntax: " + attributeName, parser, e);
+                            }
+                            if (index < 0 || index >= tmpArray.length) {
+                                Slog.e(TAG, "State index out of bounds: " + index
+                                            + " length: " + tmpArray.length);
+                                return false;
+                            }
+                            tmpArray[index] = parser.getAttributeLong(i);
+                        } else {
+                            String attributeValue = parser.getAttributeValue(i);
+                            compositeState = mFactory.setStateInComposite(compositeState,
+                                    attributeName, attributeValue);
+                            if (compositeState == -1) {
+                                return false;
+                            }
+                        }
+                    }
+                    mCounter.setValues(mFactory.getSerialState(compositeState), tmpArray);
+                }
+            }
+            eventType = parser.next();
+        }
+        return true;
     }
 
     /**

@@ -15,6 +15,8 @@
  */
 package com.android.systemui;
 
+import static com.android.systemui.Flags.FLAG_EXAMPLE_FLAG;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -25,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.ParcelFileDescriptor;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.testing.LeakCheck;
 import android.testing.TestWithLooperRule;
@@ -68,6 +71,9 @@ public abstract class SysuiTestCase {
             new AndroidXAnimatorIsolationRule();
 
     @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Rule
     public SysuiTestableContext mContext = new SysuiTestableContext(
             InstrumentationRegistry.getContext(), getLeakCheck());
     @Rule
@@ -88,6 +94,10 @@ public abstract class SysuiTestCase {
         if (isRobolectricTest()) {
             mContext = mContext.createDefaultDisplayContext();
         }
+        // Set the value of a single gantry flag inside the com.android.systemui package to
+        // ensure all flags in that package are faked (and thus require a value to be set).
+        mSetFlagsRule.disableFlags(FLAG_EXAMPLE_FLAG);
+
         mDependency = SysuiTestDependencyKt.installSysuiTestDependency(mContext);
         mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(
                 mContext,

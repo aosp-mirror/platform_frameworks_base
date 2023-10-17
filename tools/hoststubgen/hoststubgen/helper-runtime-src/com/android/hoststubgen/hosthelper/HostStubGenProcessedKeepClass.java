@@ -17,8 +17,6 @@ package com.android.hoststubgen.hosthelper;
 
 import static java.lang.annotation.ElementType.TYPE;
 
-import org.objectweb.asm.Type;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -29,6 +27,6 @@ import java.lang.annotation.Target;
 @Target({TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface HostStubGenProcessedKeepClass {
-    String CLASS_INTERNAL_NAME = Type.getInternalName(HostStubGenProcessedKeepClass.class);
+    String CLASS_INTERNAL_NAME = HostTestUtils.getInternalName(HostStubGenProcessedKeepClass.class);
     String CLASS_DESCRIPTOR = "L" + CLASS_INTERNAL_NAME + ";";
 }

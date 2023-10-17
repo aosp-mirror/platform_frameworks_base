@@ -88,6 +88,10 @@ public class BatteryUsageStatsRule implements TestRule {
         mBatteryStats.onSystemReady();
     }
 
+    public MockClock getMockClock() {
+        return mMockClock;
+    }
+
     public BatteryUsageStatsRule setTestPowerProfile(@XmlRes int xmlId) {
         mPowerProfile.forceInitForTesting(mContext, xmlId);
         return this;

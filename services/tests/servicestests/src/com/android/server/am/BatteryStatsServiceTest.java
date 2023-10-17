@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -34,6 +36,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,8 +52,9 @@ public final class BatteryStatsServiceTest {
         final Context context = InstrumentationRegistry.getContext();
         mBgThread = new HandlerThread("bg thread");
         mBgThread.start();
-        mBatteryStatsService = new BatteryStatsService(context,
-                context.getCacheDir(), new Handler(mBgThread.getLooper()));
+        File systemDir = context.getCacheDir();
+        Handler handler = new Handler(mBgThread.getLooper());
+        mBatteryStatsService = new BatteryStatsService(context, systemDir, handler);
     }
 
     @After
@@ -120,5 +124,15 @@ public final class BatteryStatsServiceTest {
             waitThread.interrupt();
             waitThread.join(1000);
         }
+    }
+
+    @Test
+    public void testSavingStatsdAtomPullTimestamp() {
+        mBatteryStatsService.setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(1234);
+        assertThat(mBatteryStatsService.getLastBatteryUsageStatsBeforeResetAtomPullTimestamp())
+                .isEqualTo(1234);
+        mBatteryStatsService.setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(5478);
+        assertThat(mBatteryStatsService.getLastBatteryUsageStatsBeforeResetAtomPullTimestamp())
+                .isEqualTo(5478);
     }
 }

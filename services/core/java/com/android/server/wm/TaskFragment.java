@@ -103,6 +103,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -209,7 +210,26 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    Dimmer mDimmer = new Dimmer(this);
+    Dimmer mDimmer = Flags.dimmerRefactor()
+            ? new SmoothDimmer(this) : new LegacyDimmer(this);
+
+    /** Apply the dim layer on the embedded TaskFragment. */
+    static final int EMBEDDED_DIM_AREA_TASK_FRAGMENT = 0;
+
+    /** Apply the dim layer on the parent Task for an embedded TaskFragment. */
+    static final int EMBEDDED_DIM_AREA_PARENT_TASK = 1;
+
+    /**
+     * The type of dim layer area for an embedded TaskFragment.
+     */
+    @IntDef(prefix = {"EMBEDDED_DIM_AREA_"}, value = {
+            EMBEDDED_DIM_AREA_TASK_FRAGMENT,
+            EMBEDDED_DIM_AREA_PARENT_TASK,
+    })
+    @interface EmbeddedDimArea {}
+
+    @EmbeddedDimArea
+    private int mEmbeddedDimArea = EMBEDDED_DIM_AREA_TASK_FRAGMENT;
 
     /** This task fragment will be removed when the cleanup of its children are done. */
     private boolean mIsRemovalRequested;
@@ -341,6 +361,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * Note that only an embedded TaskFragment can be isolated.
      */
     private boolean mIsolatedNav;
+
+    /** When set, will force the task to report as invisible. */
+    static final int FLAG_FORCE_HIDDEN_FOR_PINNED_TASK = 1;
+    static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
+    static final int FLAG_FORCE_HIDDEN_FOR_TASK_FRAGMENT_ORG = 1 << 2;
+
+    @IntDef(prefix = {"FLAG_FORCE_HIDDEN_"}, value = {
+            FLAG_FORCE_HIDDEN_FOR_PINNED_TASK,
+            FLAG_FORCE_HIDDEN_FOR_TASK_ORG,
+            FLAG_FORCE_HIDDEN_FOR_TASK_FRAGMENT_ORG,
+    }, flag = true)
+    @interface FlagForceHidden {}
+    protected int mForceHiddenFlags = 0;
 
     final Point mLastSurfaceSize = new Point();
 
@@ -825,7 +858,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * Returns whether this TaskFragment is currently forced to be hidden for any reason.
      */
     protected boolean isForceHidden() {
-        return false;
+        return mForceHiddenFlags != 0;
+    }
+
+    /**
+     * Sets/unsets the forced-hidden state flag for this task depending on {@param set}.
+     * @return Whether the force hidden state changed
+     */
+    boolean setForceHidden(@FlagForceHidden int flags, boolean set) {
+        int newFlags = mForceHiddenFlags;
+        if (set) {
+            newFlags |= flags;
+        } else {
+            newFlags &= ~flags;
+        }
+        if (mForceHiddenFlags == newFlags) {
+            return false;
+        }
+        mForceHiddenFlags = newFlags;
+        return true;
     }
 
     protected boolean isForceTranslucent() {
@@ -969,7 +1020,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // A TaskFragment isn't translucent if it has at least one visible activity that occludes
         // this TaskFragment.
         return mTaskSupervisor.mOpaqueActivityHelper.getVisibleOpaqueActivity(this,
-                starting) == null;
+                starting, true /* ignoringKeyguard */) == null;
     }
 
     /**
@@ -982,7 +1033,20 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return true;
         }
         // Including finishing Activity if the TaskFragment is becoming invisible in the transition.
-        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this) == null;
+        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this,
+                true /* ignoringKeyguard */) == null;
+    }
+
+    /**
+     * Like {@link  #isTranslucent(ActivityRecord)} but evaluating the actual visibility of the
+     * windows rather than their visibility ignoring keyguard.
+     */
+    boolean isTranslucentAndVisible() {
+        if (!isAttached() || isForceHidden() || isForceTranslucent()) {
+            return true;
+        }
+        return mTaskSupervisor.mOpaqueActivityHelper.getVisibleOpaqueActivity(this, null,
+                false /* ignoringKeyguard */) == null;
     }
 
     ActivityRecord getTopNonFinishingActivity() {
@@ -2929,12 +2993,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     Dimmer getDimmer() {
-        // If the window is in an embedded TaskFragment, we want to dim at the TaskFragment.
-        if (asTask() == null) {
+        // If this is in an embedded TaskFragment and we want the dim applies on the TaskFragment.
+        if (mIsEmbedded && mEmbeddedDimArea == EMBEDDED_DIM_AREA_TASK_FRAGMENT) {
             return mDimmer;
         }
 
         return super.getDimmer();
+    }
+
+    /** Bounds to be used for dimming, as well as touch related tests. */
+    void getDimBounds(@NonNull Rect out) {
+        if (mIsEmbedded && mEmbeddedDimArea == EMBEDDED_DIM_AREA_PARENT_TASK) {
+            out.set(getTask().getBounds());
+        } else {
+            out.set(getBounds());
+        }
+    }
+
+    void setEmbeddedDimArea(@EmbeddedDimArea int embeddedDimArea) {
+        mEmbeddedDimArea = embeddedDimArea;
     }
 
     @Override

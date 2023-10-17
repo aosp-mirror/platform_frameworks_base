@@ -1373,7 +1373,7 @@ public final class InputManager {
     public interface InputDeviceListener {
         /**
          * Called whenever an input device has been added to the system.
-         * Use {@link InputManagerGlobal#getInputDevice} to get more information about the device.
+         * Use {@link #getInputDevice(int)} to get more information about the device.
          *
          * @param deviceId The id of the input device that was added.
          */

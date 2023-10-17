@@ -1316,6 +1316,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLaunchIntoPipHostActivity != null) {
             pw.println(prefix + "launchIntoPipHostActivity=" + mLaunchIntoPipHostActivity);
         }
+        if (mWaitForEnteringPinnedMode) {
+            pw.print(prefix); pw.println("mWaitForEnteringPinnedMode=true");
+        }
 
         mLetterboxUiController.dump(pw, prefix);
 
@@ -3132,9 +3135,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean canReceiveKeys() {
-        // TODO(156521483): Propagate the state down the hierarchy instead of checking the parent
-        return getWindowConfiguration().canReceiveKeys()
-                && (task == null || task.getWindowConfiguration().canReceiveKeys());
+        return getWindowConfiguration().canReceiveKeys() && !mWaitForEnteringPinnedMode;
     }
 
     boolean isResizeable() {

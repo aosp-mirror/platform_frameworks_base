@@ -16,7 +16,6 @@
 
 package com.android.internal.os;
 
-import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -34,8 +33,8 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
     private static final boolean DEBUG = false;
     private static final String TAG = "BatteryStatsHistoryItr";
     private final BatteryStatsHistory mBatteryStatsHistory;
-    private final @CurrentTimeMillisLong long mStartTimeMs;
-    private final @CurrentTimeMillisLong long mEndTimeMs;
+    private final long mStartTimeMs;
+    private final long mEndTimeMs;
     private final BatteryStats.HistoryStepDetails mReadHistoryStepDetails =
             new BatteryStats.HistoryStepDetails();
     private final SparseArray<BatteryStats.HistoryTag> mHistoryTags = new SparseArray<>();
@@ -43,10 +42,10 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             new PowerStats.DescriptorRegistry();
     private BatteryStats.HistoryItem mHistoryItem = new BatteryStats.HistoryItem();
     private boolean mNextItemReady;
+    private boolean mTimeInitialized;
 
-    public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history,
-            @CurrentTimeMillisLong long startTimeMs,
-            @CurrentTimeMillisLong long endTimeMs) {
+    public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history, long startTimeMs,
+            long endTimeMs) {
         mBatteryStatsHistory = history;
         mStartTimeMs = startTimeMs;
         mEndTimeMs = (endTimeMs != 0) ? endTimeMs : Long.MAX_VALUE;
@@ -82,7 +81,12 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
                 break;
             }
 
-            final long lastRealtimeMs = mHistoryItem.time;
+            if (!mTimeInitialized) {
+                mHistoryItem.time = mBatteryStatsHistory.getHistoryBufferStartTime(p);
+                mTimeInitialized = true;
+            }
+
+            final long lastMonotonicTimeMs = mHistoryItem.time;
             final long lastWalltimeMs = mHistoryItem.currentTime;
             try {
                 readHistoryDelta(p, mHistoryItem);
@@ -93,12 +97,13 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             if (mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_CURRENT_TIME
                     && mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_RESET
                     && lastWalltimeMs != 0) {
-                mHistoryItem.currentTime = lastWalltimeMs + (mHistoryItem.time - lastRealtimeMs);
+                mHistoryItem.currentTime =
+                        lastWalltimeMs + (mHistoryItem.time - lastMonotonicTimeMs);
             }
-            if (mEndTimeMs != 0 && mHistoryItem.currentTime >= mEndTimeMs) {
+            if (mEndTimeMs != 0 && mHistoryItem.time >= mEndTimeMs) {
                 break;
             }
-            if (mHistoryItem.currentTime >= mStartTimeMs) {
+            if (mHistoryItem.time >= mStartTimeMs) {
                 mNextItemReady = true;
                 return;
             }

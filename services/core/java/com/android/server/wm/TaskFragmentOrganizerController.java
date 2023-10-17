@@ -51,7 +51,6 @@ import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOperation;
-import android.window.TaskFragmentOrganizerToken;
 import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
@@ -745,9 +744,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
-    boolean isSystemOrganizer(@NonNull TaskFragmentOrganizerToken token) {
+    boolean isSystemOrganizer(@NonNull IBinder organizerToken) {
         final TaskFragmentOrganizerState state =
-                mTaskFragmentOrganizerState.get(token.asBinder());
+                mTaskFragmentOrganizerState.get(organizerToken);
         return state != null && state.mIsSystemOrganizer;
     }
 
