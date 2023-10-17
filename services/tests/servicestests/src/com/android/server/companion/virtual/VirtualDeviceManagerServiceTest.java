@@ -337,11 +337,7 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
-        mSetFlagsRule.disableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
-        mSetFlagsRule.disableFlags(Flags.FLAG_DYNAMIC_POLICY);
-        mSetFlagsRule.disableFlags(Flags.FLAG_STREAM_PERMISSIONS);
-        mSetFlagsRule.disableFlags(Flags.FLAG_VDM_CUSTOM_HOME);
-        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_NATIVE_VDM);
+        mSetFlagsRule.initAllFlagsToReleaseConfigDefault();
 
         doReturn(true).when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
         doNothing().when(mInputManagerInternalMock).setPointerAcceleration(anyFloat(), anyInt());
