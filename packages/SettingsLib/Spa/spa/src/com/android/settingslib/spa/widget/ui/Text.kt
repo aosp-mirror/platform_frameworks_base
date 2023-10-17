@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.SettingsOpacity.alphaForEnabled
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.toMediumWeight
 
@@ -44,6 +45,17 @@ fun SettingsTitle(title: String, useMediumWeight: Boolean = false) {
                 else -> it
             }
         },
+    )
+}
+
+@Composable
+fun SettingsDialogItem(text: String, enabled: Boolean = true) {
+    Text(
+        text = text,
+        modifier = Modifier.alphaForEnabled(enabled),
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.bodyLarge,
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
@@ -82,6 +94,9 @@ fun PlaceholderTitle(title: String) {
 private fun BasePreferencePreview() {
     SettingsTheme {
         Column(Modifier.width(100.dp)) {
+            SettingsTitle(
+                title = "Title",
+            )
             SettingsBody(
                 body = "Long long long long long long text",
             )
