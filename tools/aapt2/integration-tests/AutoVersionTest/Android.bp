@@ -26,4 +26,5 @@ package {
 android_test {
     name: "AaptAutoVersionTest",
     sdk_version: "current",
+    use_resource_processor: false,
 }

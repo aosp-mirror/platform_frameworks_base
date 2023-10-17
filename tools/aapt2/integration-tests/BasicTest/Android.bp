@@ -26,4 +26,5 @@ package {
 android_test {
     name: "AaptBasicTest",
     sdk_version: "current",
+    use_resource_processor: false,
 }
