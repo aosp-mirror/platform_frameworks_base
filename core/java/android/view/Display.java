@@ -2654,6 +2654,7 @@ public final class Display {
             if (displayId == getDisplayId()) {
                 float newRatio = getHdrSdrRatio();
                 if (newRatio != mLastReportedRatio) {
+                    mLastReportedRatio = newRatio;
                     mListener.accept(Display.this);
                 }
             }
