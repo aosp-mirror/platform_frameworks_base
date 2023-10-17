@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.DrawableRes
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ import com.android.keyguard.KeyguardClockSwitch.MISSING_CLOCK_ID
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -38,6 +40,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
@@ -45,6 +48,7 @@ import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
 import javax.inject.Provider
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 /** Bind occludingAppDeviceEntryMessageViewModel to run whenever the keyguard view is attached. */
@@ -62,6 +66,8 @@ object KeyguardRootViewBinder {
         shadeInteractor: ShadeInteractor,
         clockControllerProvider: Provider<ClockController>?,
         interactionJankMonitor: InteractionJankMonitor?,
+        deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor?,
+        vibratorHelper: VibratorHelper?,
     ): DisposableHandle {
         var onLayoutChangeListener: OnLayoutChange? = null
         val childViews = mutableMapOf<Int, View?>()
@@ -174,6 +180,44 @@ object KeyguardRootViewBinder {
                                     View.INVISIBLE
                                 } else {
                                     View.VISIBLE
+                                }
+                        }
+                    }
+
+                    if (deviceEntryHapticsInteractor != null && vibratorHelper != null) {
+                        launch {
+                            deviceEntryHapticsInteractor.playSuccessHaptic
+                                .filter { it }
+                                .collect {
+                                    if (
+                                        featureFlags.isEnabled(Flags.ONE_WAY_HAPTICS_API_MIGRATION)
+                                    ) {
+                                        vibratorHelper.performHapticFeedback(
+                                            view,
+                                            HapticFeedbackConstants.CONFIRM,
+                                        )
+                                    } else {
+                                        vibratorHelper.vibrateAuthSuccess("device-entry::success")
+                                    }
+                                    deviceEntryHapticsInteractor.handleSuccessHaptic()
+                                }
+                        }
+
+                        launch {
+                            deviceEntryHapticsInteractor.playErrorHaptic
+                                .filter { it }
+                                .collect {
+                                    if (
+                                        featureFlags.isEnabled(Flags.ONE_WAY_HAPTICS_API_MIGRATION)
+                                    ) {
+                                        vibratorHelper.performHapticFeedback(
+                                            view,
+                                            HapticFeedbackConstants.REJECT,
+                                        )
+                                    } else {
+                                        vibratorHelper.vibrateAuthSuccess("device-entry::error")
+                                    }
+                                    deviceEntryHapticsInteractor.handleErrorHaptic()
                                 }
                         }
                     }

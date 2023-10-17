@@ -46,6 +46,7 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
@@ -114,6 +115,7 @@ constructor(
     private val chipbarCoordinator: ChipbarCoordinator,
     private val keyguardStateController: KeyguardStateController,
     private val shadeInteractor: ShadeInteractor,
+    private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
 ) {
 
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
@@ -339,6 +341,8 @@ constructor(
                 shadeInteractor,
                 null, // clock provider only needed for burn in
                 null, // jank monitor not required for preview mode
+                null, // device entry haptics not required for preview mode
+                null, // device entry haptics not required for preview mode
             )
         )
         rootView.addView(
