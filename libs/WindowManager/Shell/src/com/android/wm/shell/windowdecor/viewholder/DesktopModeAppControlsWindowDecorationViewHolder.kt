@@ -2,7 +2,7 @@ package com.android.wm.shell.windowdecor.viewholder
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.res.ColorStateList
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -22,7 +22,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         onCaptionButtonClickListener: View.OnClickListener,
         onLongClickListener: OnLongClickListener,
         appName: CharSequence,
-        appIcon: Drawable
+        appIconBitmap: Bitmap
 ) : DesktopModeWindowDecorationViewHolder(rootView) {
 
     private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
@@ -44,7 +44,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         maximizeWindowButton.onLongClickListener = onLongClickListener
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         appNameTextView.text = appName
-        appIconImageView.setImageDrawable(appIcon)
+        appIconImageView.setImageBitmap(appIconBitmap)
     }
 
     override fun bindData(taskInfo: RunningTaskInfo) {
