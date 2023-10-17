@@ -153,8 +153,8 @@ public class UserManager {
 
     /**
      * User type representing a clone profile. Clone profile is a user profile type used to run
-     * second instance of an otherwise single user App (eg, messengers). Only the primary user
-     * is allowed to have a clone profile.
+     * second instance of an otherwise single user App (eg, messengers). Currently only the
+     * {@link android.content.pm.UserInfo#isMain()} user can have a clone profile.
      *
      * @hide
      */
@@ -166,6 +166,8 @@ public class UserManager {
      * User type representing a private profile.
      * @hide
      */
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @TestApi
     public static final String USER_TYPE_PROFILE_PRIVATE = "android.os.usertype.profile.PRIVATE";
 
     /**
@@ -3261,11 +3263,15 @@ public class UserManager {
     /**
      * Checks if the context user is a private profile.
      *
+     * <p>A Private profile is a separate {@link #isProfile() profile} that can be used to store
+     * sensitive apps and data, which can be hidden or revealed at the user's discretion.
+     *
      * @return whether the context user is a private profile.
      *
-     * @see android.os.UserManager#USER_TYPE_PROFILE_PRIVATE
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
                     android.Manifest.permission.MANAGE_USERS,
