@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.view.flags.Flags;
 
 /**
@@ -62,23 +63,37 @@ import android.view.flags.Flags;
  * </ul>
  *
  * <b>Note</b> that not all valid input device source and motion axis inputs are necessarily
- * supported for scroll feedback. If you are implementing this interface, provide clear
- * documentation in your implementation class about which input device source and motion axis are
- * supported for your specific implementation. If you are using one of the implementations of this
- * interface, please refer to the documentation of the implementation for details on which input
- * device source and axis are supported.
+ * supported for scroll feedback; the implementation may choose to provide no feedback for some
+ * valid input device source and motion axis arguments.
  */
 @FlaggedApi(Flags.FLAG_SCROLL_FEEDBACK_API)
 public interface ScrollFeedbackProvider {
+
+    /**
+     * Creates a {@link ScrollFeedbackProvider} implementation for this device.
+     *
+     * <p>Use a feedback provider created by this method, unless you intend to use your custom
+     * scroll feedback providing logic. This allows your use cases to generate scroll feedback that
+     * is consistent with the rest of the use cases on the device.
+     *
+     * @param view the {@link View} for which to provide scroll feedback.
+     * @return the default {@link ScrollFeedbackProvider} implementation for the device.
+     */
+    @FlaggedApi(Flags.FLAG_SCROLL_FEEDBACK_API)
+    @NonNull
+    static ScrollFeedbackProvider createProvider(@NonNull View view) {
+        return new HapticScrollFeedbackProvider(view);
+    }
+
     /**
      * Call this when the view has snapped to an item.
-     *
      *
      * @param inputDeviceId the ID of the {@link InputDevice} that generated the motion triggering
      *          the snap.
      * @param source the input source of the motion causing the snap.
      * @param axis the axis of {@code event} that caused the item to snap.
      */
+    @FlaggedApi(Flags.FLAG_SCROLL_FEEDBACK_API)
     void onSnapToItem(int inputDeviceId, int source, int axis);
 
     /**
@@ -99,6 +114,7 @@ public interface ScrollFeedbackProvider {
      *                "start" for some views may be at the bottom of a scrolling list, while it may
      *                be at the top of scrolling list for others.
      */
+    @FlaggedApi(Flags.FLAG_SCROLL_FEEDBACK_API)
     void onScrollLimit(int inputDeviceId, int source, int axis, boolean isStart);
 
     /**
@@ -122,5 +138,6 @@ public interface ScrollFeedbackProvider {
      * @param axis the axis of {@code event} that caused scroll progress.
      * @param deltaInPixels the amount of scroll progress, in pixels.
      */
+    @FlaggedApi(Flags.FLAG_SCROLL_FEEDBACK_API)
     void onScrollProgress(int inputDeviceId, int source, int axis, int deltaInPixels);
 }
