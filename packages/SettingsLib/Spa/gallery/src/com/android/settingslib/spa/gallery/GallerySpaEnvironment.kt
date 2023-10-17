@@ -22,6 +22,7 @@ import com.android.settingslib.spa.framework.common.SettingsPageProviderReposito
 import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
+import com.android.settingslib.spa.gallery.card.CardPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.AlertDialogPageProvider
 import com.android.settingslib.spa.gallery.editor.EditorMainPageProvider
@@ -96,6 +97,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 SettingsExposedDropdownMenuCheckBoxProvider,
                 SettingsTextFieldPasswordPageProvider,
                 SearchScaffoldPageProvider,
+                CardPageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),

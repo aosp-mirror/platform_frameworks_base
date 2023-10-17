@@ -28,6 +28,7 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
+import com.android.settingslib.spa.gallery.card.CardPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.AlertDialogPageProvider
 import com.android.settingslib.spa.gallery.editor.EditorMainPageProvider
@@ -69,6 +70,7 @@ object HomePageProvider : SettingsPageProvider {
             ChartPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             AlertDialogPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             EditorMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            CardPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
     }
 
