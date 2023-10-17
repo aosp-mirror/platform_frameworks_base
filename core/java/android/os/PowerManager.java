@@ -2670,7 +2670,7 @@ public final class PowerManager {
 
         /**
          * Called when overall thermal throttling status changed.
-         * @param status defined in {@link android.os.Temperature}.
+         * @param status the status
          */
         void onThermalStatusChanged(@ThermalStatus int status);
     }

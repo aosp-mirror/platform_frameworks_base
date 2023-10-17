@@ -2832,17 +2832,22 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     static class OpaqueActivityHelper implements Predicate<ActivityRecord> {
         private ActivityRecord mStarting;
         private boolean mIncludeInvisibleAndFinishing;
+        private boolean mIgnoringKeyguard;
 
-        ActivityRecord getOpaqueActivity(@NonNull WindowContainer<?> container) {
+        ActivityRecord getOpaqueActivity(
+                @NonNull WindowContainer<?> container, boolean ignoringKeyguard) {
             mIncludeInvisibleAndFinishing = true;
+            mIgnoringKeyguard = ignoringKeyguard;
             return container.getActivity(this,
                     true /* traverseTopToBottom */, null /* boundary */);
         }
 
-        ActivityRecord getVisibleOpaqueActivity(@NonNull WindowContainer<?> container,
-                @Nullable ActivityRecord starting) {
+        ActivityRecord getVisibleOpaqueActivity(
+                @NonNull WindowContainer<?> container, @Nullable ActivityRecord starting,
+                boolean ignoringKeyguard) {
             mStarting = starting;
             mIncludeInvisibleAndFinishing = false;
+            mIgnoringKeyguard = ignoringKeyguard;
             final ActivityRecord opaque = container.getActivity(this,
                     true /* traverseTopToBottom */, null /* boundary */);
             mStarting = null;
@@ -2851,7 +2856,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         @Override
         public boolean test(ActivityRecord r) {
-            if (!mIncludeInvisibleAndFinishing && !r.visibleIgnoringKeyguard && r != mStarting) {
+            if (!mIncludeInvisibleAndFinishing && r != mStarting
+                    && ((mIgnoringKeyguard && !r.visibleIgnoringKeyguard)
+                    || (!mIgnoringKeyguard && !r.isVisible()))) {
                 // Ignore invisible activities that are not the currently starting activity
                 // (about to be visible).
                 return false;

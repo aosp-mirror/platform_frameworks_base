@@ -2,6 +2,7 @@ package com.android.systemui.communal.ui.view.layout.sections
 
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.sections.removeView
@@ -9,14 +10,20 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 
 /** A keyguard section that hosts the communal hub. */
-class DefaultCommunalHubSection @Inject constructor() : KeyguardSection() {
+class DefaultCommunalHubSection
+@Inject
+constructor(
+    private val viewModel: CommunalViewModel,
+) : KeyguardSection() {
     private val communalHubViewId = R.id.communal_hub
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         constraintLayout.addView(
-            ComposeFacade.createCommunalView(constraintLayout.context).apply {
-                id = communalHubViewId
-            },
+            ComposeFacade.createCommunalView(
+                    context = constraintLayout.context,
+                    viewModel = viewModel,
+                )
+                .apply { id = communalHubViewId },
         )
     }
 

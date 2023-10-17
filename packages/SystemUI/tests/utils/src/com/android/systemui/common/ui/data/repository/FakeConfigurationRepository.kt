@@ -47,7 +47,7 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
     }
 
     override fun getDimensionPixelSize(id: Int): Int {
-        throw IllegalStateException("Don't use for tests")
+        return 0
     }
 }
 

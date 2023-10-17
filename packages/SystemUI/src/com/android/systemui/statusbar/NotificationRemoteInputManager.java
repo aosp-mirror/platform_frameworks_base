@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar;
 
+
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
@@ -48,10 +49,10 @@ import androidx.annotation.Nullable;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.dagger.CentralSurfacesDependenciesModule;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
@@ -535,7 +536,8 @@ public class NotificationRemoteInputManager implements Dumpable {
     public void cleanUpRemoteInputForUserRemoval(NotificationEntry entry) {
         if (isRemoteInputActive(entry)) {
             entry.mRemoteEditImeVisible = false;
-            mRemoteInputController.removeRemoteInput(entry, null);
+            mRemoteInputController.removeRemoteInput(entry, null,
+                    /* reason= */"RemoteInputManager#cleanUpRemoteInputForUserRemoval");
         }
     }
 

@@ -1269,10 +1269,9 @@ final class InstallPackageHelper {
                     replace = true;
                     if (DEBUG_INSTALL) Slog.d(TAG, "Replace existing package: " + pkgName);
                 }
-                final AndroidPackage oldPackage = mPm.mPackages.get(pkgName);
-                if (replace && oldPackage != null) {
+                if (replace) {
                     // Prevent apps opting out from runtime permissions
-                    final int oldTargetSdk = oldPackage.getTargetSdkVersion();
+                    final int oldTargetSdk = ps.getTargetSdkVersion();
                     final int newTargetSdk = parsedPackage.getTargetSdkVersion();
                     if (oldTargetSdk > Build.VERSION_CODES.LOLLIPOP_MR1
                             && newTargetSdk <= Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -1284,10 +1283,10 @@ final class InstallPackageHelper {
                                         + " target SDK " + oldTargetSdk + " does.");
                     }
                     // Prevent persistent apps from being updated
-                    if (oldPackage.isPersistent()
+                    if (ps.isPersistent()
                             && ((installFlags & PackageManager.INSTALL_STAGED) == 0)) {
                         throw new PrepareFailure(PackageManager.INSTALL_FAILED_INVALID_APK,
-                                "Package " + oldPackage.getPackageName() + " is a persistent app. "
+                                "Package " + pkgName + " is a persistent app. "
                                         + "Persistent apps are not updateable.");
                     }
                 }
@@ -1668,7 +1667,7 @@ final class InstallPackageHelper {
                     }
 
                     // don't allow a system upgrade unless the upgrade hash matches
-                    if (oldPackage != null && oldPackage.getRestrictUpdateHash() != null
+                    if (oldPackageState.getRestrictUpdateHash() != null
                             && oldPackageState.isSystem()) {
                         final byte[] digestBytes;
                         try {
@@ -1684,12 +1683,13 @@ final class InstallPackageHelper {
                             throw new PrepareFailure(INSTALL_FAILED_INVALID_APK,
                                     "Could not compute hash: " + pkgName11);
                         }
-                        if (!Arrays.equals(oldPackage.getRestrictUpdateHash(), digestBytes)) {
+                        if (!Arrays.equals(oldPackageState.getRestrictUpdateHash(), digestBytes)) {
                             throw new PrepareFailure(INSTALL_FAILED_INVALID_APK,
                                     "New package fails restrict-update check: " + pkgName11);
                         }
                         // retain upgrade restriction
-                        parsedPackage.setRestrictUpdateHash(oldPackage.getRestrictUpdateHash());
+                        parsedPackage.setRestrictUpdateHash(
+                                oldPackageState.getRestrictUpdateHash());
                     }
 
                     if (oldPackage != null) {

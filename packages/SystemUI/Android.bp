@@ -243,9 +243,6 @@ filegroup {
         "tests/src/com/android/systemui/statusbar/pipeline/shared/data/repository/FakeConnectivityRepository.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/FakeWifiRepository.kt",
 
-        /* Log fakes */
-        "tests/src/com/android/systemui/log/core/FakeLogBuffer.kt",
-
         /* QS fakes */
         "tests/src/com/android/systemui/qs/pipeline/domain/interactor/FakeQSTile.kt",
     ],
@@ -437,6 +434,7 @@ android_library {
         "SystemUI-statsd",
         "SettingsLib",
         "com_android_systemui_flags_lib",
+        "flag-junit-base",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",

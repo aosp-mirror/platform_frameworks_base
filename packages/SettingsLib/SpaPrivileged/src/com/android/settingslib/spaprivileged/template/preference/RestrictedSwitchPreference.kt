@@ -17,6 +17,7 @@
 package com.android.settingslib.spaprivileged.template.preference
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -40,22 +41,29 @@ import com.android.settingslib.spaprivileged.model.enterprise.RestrictedMode
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
+import com.android.settingslib.spaprivileged.model.enterprise.rememberRestrictedMode
 
 @Composable
 fun RestrictedSwitchPreference(
     model: SwitchPreferenceModel,
     restrictions: Restrictions,
-    restrictionsProviderFactory: RestrictionsProviderFactory = ::RestrictionsProviderImpl,
+) {
+    RestrictedSwitchPreference(model, restrictions, ::RestrictionsProviderImpl)
+}
+
+@VisibleForTesting
+@Composable
+internal fun RestrictedSwitchPreference(
+    model: SwitchPreferenceModel,
+    restrictions: Restrictions,
+    restrictionsProviderFactory: RestrictionsProviderFactory,
 ) {
     if (restrictions.keys.isEmpty()) {
         SwitchPreference(model)
         return
     }
     val context = LocalContext.current
-    val restrictionsProvider = remember(restrictions) {
-        restrictionsProviderFactory(context, restrictions)
-    }
-    val restrictedMode = restrictionsProvider.restrictedModeState().value
+    val restrictedMode = restrictionsProviderFactory.rememberRestrictedMode(restrictions).value
     val restrictedSwitchModel = remember(restrictedMode) {
         RestrictedSwitchPreferenceModel(context, model, restrictedMode)
     }
@@ -112,8 +120,8 @@ private class RestrictedSwitchPreferenceModel(
     override val onCheckedChange = when (restrictedMode) {
         null -> null
         is NoRestricted -> model.onCheckedChange
-        // Need to pass a non null onCheckedChange to enable semantics ToggleableState, although
-        // since changeable is false this will not be called.
+        // Need to passthrough onCheckedChange for toggleable semantics, although since changeable
+        // is false so this will not be called.
         is BaseUserRestricted -> model.onCheckedChange
         // Pass null since semantics ToggleableState is provided in RestrictionWrapper.
         is BlockedByAdmin -> null

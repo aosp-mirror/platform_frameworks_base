@@ -41,6 +41,9 @@ interface KeyguardFaceAuthInteractor {
     /** Whether face auth is in lock out state. */
     fun isLockedOut(): Boolean
 
+    /** Whether face auth is enrolled and enabled for the current user */
+    fun isFaceAuthEnabledAndEnrolled(): Boolean
+
     /**
      * Register listener for use from code that cannot use [authenticationStatus] or
      * [detectionStatus]

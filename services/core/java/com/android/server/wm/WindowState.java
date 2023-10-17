@@ -1189,7 +1189,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    public boolean isWindowTrustedOverlay() {
+    @Override
+    void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
+        super.setInitialSurfaceControlProperties(b);
+        if (surfaceTrustedOverlay() && isWindowTrustedOverlay()) {
+            getPendingTransaction().setTrustedOverlay(mSurfaceControl, true);
+        }
+    }
+
+    void updateTrustedOverlay() {
+        mInputWindowHandle.setTrustedOverlay(getPendingTransaction(), mSurfaceControl,
+                isWindowTrustedOverlay());
+    }
+
+    boolean isWindowTrustedOverlay() {
         return InputMonitor.isTrustedOverlay(mAttrs.type)
                 || ((mAttrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0
                         && mSession.mCanAddInternalSystemWindow)
@@ -2756,12 +2769,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // bounds, as they would be used to display the dim layer.
                 final TaskFragment taskFragment = getTaskFragment();
                 if (taskFragment != null) {
-                    final Task task = taskFragment.asTask();
-                    if (task != null) {
-                        task.getDimBounds(mTmpRect);
-                    } else {
-                        mTmpRect.set(taskFragment.getBounds());
-                    }
+                    taskFragment.getDimBounds(mTmpRect);
                 } else if (getRootTask() != null) {
                     getRootTask().getDimBounds(mTmpRect);
                 }
@@ -5205,9 +5213,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             updateFrameRateSelectionPriorityIfNeeded();
             updateScaleIfNeeded();
             mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
-            if (surfaceTrustedOverlay()) {
-                getSyncTransaction().setTrustedOverlay(mSurfaceControl, isWindowTrustedOverlay());
-            }
         }
         super.prepareSurfaces();
     }

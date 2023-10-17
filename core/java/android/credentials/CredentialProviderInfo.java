@@ -128,6 +128,11 @@ public final class CredentialProviderInfo implements Parcelable {
     @TestApi
     @FlaggedApi(Flags.FLAG_SETTINGS_ACTIVITY_ENABLED)
     public CharSequence getSettingsActivity() {
+        // Add a manual check to make sure this returns null if
+        // the flag is not enabled.
+        if (!Flags.settingsActivityEnabled()) {
+            return null;
+        }
         return mSettingsActivity;
     }
 

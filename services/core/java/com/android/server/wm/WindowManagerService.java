@@ -2261,6 +2261,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
+                final boolean wasTrustedOverlay = win.isWindowTrustedOverlay();
                 flagChanges = win.mAttrs.flags ^ attrs.flags;
                 privateFlagChanges = win.mAttrs.privateFlags ^ attrs.privateFlags;
                 attrChanges = win.mAttrs.copyFrom(attrs);
@@ -2272,6 +2273,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (layoutChanged && win.providesDisplayDecorInsets()) {
                     configChanged = displayPolicy.updateDecorInsetsInfo();
+                }
+                if (wasTrustedOverlay != win.isWindowTrustedOverlay()) {
+                    win.updateTrustedOverlay();
                 }
                 if (win.mActivityRecord != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
                         || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {
@@ -5299,7 +5303,11 @@ public class WindowManagerService extends IWindowManager.Stub
     public void displayReady() {
         synchronized (mGlobalLock) {
             if (mMaxUiWidth > 0) {
-                mRoot.forAllDisplays(displayContent -> displayContent.setMaxUiWidth(mMaxUiWidth));
+                mRoot.forAllDisplays(dc -> {
+                    if (dc.mDisplay.getType() == Display.TYPE_INTERNAL) {
+                        dc.setMaxUiWidth(mMaxUiWidth);
+                    }
+                });
             }
             applyForcedPropertiesForDefaultDisplay();
             mAnimator.ready();

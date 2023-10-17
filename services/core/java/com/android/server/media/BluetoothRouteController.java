@@ -136,12 +136,8 @@ import java.util.Objects;
      */
     interface BluetoothRoutesUpdatedListener {
 
-        /**
-         * Called when Bluetooth routes have changed.
-         *
-         * @param routes updated Bluetooth routes list.
-         */
-        void onBluetoothRoutesUpdated(@NonNull List<MediaRoute2Info> routes);
+        /** Called when Bluetooth routes have changed. */
+        void onBluetoothRoutesUpdated();
     }
 
     /**

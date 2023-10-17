@@ -730,6 +730,9 @@
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
 
+    <!-- Component names of allowed communal widgets -->
+    <string-array name="config_communalWidgetAllowlist" translatable="false" />
+
     <!-- Component name of communal source service -->
     <string name="config_communalSourceComponent" translatable="false">@null</string>
 

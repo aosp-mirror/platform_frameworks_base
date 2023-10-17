@@ -22,6 +22,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
@@ -31,7 +32,8 @@ import java.io.PrintWriter;
  * Interface that describes an animation and bridges the animation start to the component
  * responsible for running the animation.
  */
-interface AnimationAdapter {
+@VisibleForTesting
+public interface AnimationAdapter {
 
     long STATUS_BAR_TRANSITION_DURATION = 120L;
 

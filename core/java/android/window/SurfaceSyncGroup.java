@@ -263,6 +263,7 @@ public final class SurfaceSyncGroup {
             Trace.instantForTrack(Trace.TRACE_TAG_VIEW, mTrackName, "markSyncReady");
         }
         synchronized (mLock) {
+            toggleTimeout(false);
             if (mHasWMSync) {
                 try {
                     WindowManagerGlobal.getWindowManagerService().markSurfaceSyncGroupReady(mToken);

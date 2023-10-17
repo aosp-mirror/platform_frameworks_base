@@ -24,6 +24,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
@@ -147,7 +148,8 @@ public class DisplayResolutionTracker {
                 public void registerDisplayListener(DisplayManager.DisplayListener listener) {
                     manager.registerDisplayListener(listener, handler,
                             DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                                    | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED);
+                                    | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED,
+                            ActivityThread.currentPackageName());
                 }
 
                 @Override

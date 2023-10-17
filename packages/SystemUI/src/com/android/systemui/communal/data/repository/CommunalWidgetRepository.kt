@@ -27,13 +27,17 @@ import android.content.pm.PackageManager
 import android.os.UserManager
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.communal.data.model.CommunalWidgetMetadata
 import com.android.systemui.communal.shared.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.CommunalContentSize
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -45,15 +49,20 @@ import kotlinx.coroutines.flow.map
 interface CommunalWidgetRepository {
     /** A flow of provider info for the stopwatch widget, or null if widget is unavailable. */
     val stopwatchAppWidgetInfo: Flow<CommunalAppWidgetInfo?>
+
+    /** Widgets that are allowed to render in the glanceable hub */
+    val communalWidgetAllowlist: List<CommunalWidgetMetadata>
 }
 
 @SysUISingleton
 class CommunalWidgetRepositoryImpl
 @Inject
 constructor(
+    @Application private val applicationContext: Context,
     private val appWidgetManager: AppWidgetManager,
     private val appWidgetHost: AppWidgetHost,
     broadcastDispatcher: BroadcastDispatcher,
+    communalRepository: CommunalRepository,
     private val packageManager: PackageManager,
     private val userManager: UserManager,
     private val userTracker: UserTracker,
@@ -64,11 +73,17 @@ constructor(
         const val TAG = "CommunalWidgetRepository"
         const val WIDGET_LABEL = "Stopwatch"
     }
+    override val communalWidgetAllowlist: List<CommunalWidgetMetadata>
 
     private val logger = Logger(logBuffer, TAG)
 
     // Whether the [AppWidgetHost] is listening for updates.
     private var isHostListening = false
+
+    init {
+        communalWidgetAllowlist =
+            if (communalRepository.isCommunalEnabled) getWidgetAllowlist() else emptyList()
+    }
 
     // Widgets that should be rendered in communal mode.
     private val widgets: HashMap<Int, CommunalAppWidgetInfo> = hashMapOf()
@@ -128,6 +143,18 @@ constructor(
 
             return@map addWidget(providerInfo)
         }
+
+    private fun getWidgetAllowlist(): List<CommunalWidgetMetadata> {
+        val componentNames =
+            applicationContext.resources.getStringArray(R.array.config_communalWidgetAllowlist)
+        return componentNames.mapIndexed { index, name ->
+            CommunalWidgetMetadata(
+                componentName = name,
+                priority = componentNames.size - index,
+                sizes = listOf(CommunalContentSize.HALF)
+            )
+        }
+    }
 
     private fun startListening() {
         if (isHostListening) {

@@ -15,6 +15,8 @@
  */
 package com.android.keyguard
 
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -37,7 +39,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.DOZING_MIGRATION_1
+import com.android.systemui.flags.Flags.MIGRATE_KEYGUARD_STATUS_VIEW
 import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -61,6 +63,7 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.TimeZone
@@ -297,7 +300,7 @@ constructor(
         object : KeyguardUpdateMonitorCallback() {
             override fun onKeyguardVisibilityChanged(visible: Boolean) {
                 isKeyguardVisible = visible
-                if (!featureFlags.isEnabled(DOZING_MIGRATION_1)) {
+                if (!featureFlags.isEnabled(MIGRATE_KEYGUARD_STATUS_VIEW)) {
                     if (!isKeyguardVisible) {
                         clock?.run {
                             smallClock.animations.doze(if (isDozing) 1f else 0f)
@@ -342,9 +345,9 @@ constructor(
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         disposableHandle =
             parent.repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
                     listenForDozing(this)
-                    if (featureFlags.isEnabled(DOZING_MIGRATION_1)) {
+                    if (featureFlags.isEnabled(MIGRATE_KEYGUARD_STATUS_VIEW)) {
                         listenForDozeAmountTransition(this)
                         listenForAnyStateToAodTransition(this)
                     } else {
@@ -454,8 +457,9 @@ constructor(
     @VisibleForTesting
     internal fun listenForAnyStateToAodTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor.anyStateToAodTransition
-                .filter { it.transitionState == TransitionState.FINISHED }
+            keyguardTransitionInteractor.transitionStepsToState(AOD)
+                .filter { it.transitionState == TransitionState.STARTED }
+                .filter { it.from != LOCKSCREEN }
                 .collect { handleDoze(1f) }
         }
     }

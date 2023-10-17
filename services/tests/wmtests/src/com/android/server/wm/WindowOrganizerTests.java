@@ -40,6 +40,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.wm.testing.Assert.assertThrows;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
@@ -58,6 +59,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
@@ -77,11 +79,13 @@ import android.util.Rational;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
+import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskOrganizer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
+import android.window.TaskFragmentOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -576,6 +580,87 @@ public class WindowOrganizerTests extends WindowTestsBase {
         t.setHidden(rootTask.mRemoteToken.toWindowContainerToken(), false);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertTrue(rootTask.shouldBeVisible(null));
+    }
+
+    @Test
+    public void testTaskFragmentHiddenAndFocusableChanges() {
+        removeGlobalMinSizeRestriction();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
+
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+        final TaskFragmentOrganizer organizer =
+                createTaskFragmentOrganizer(t, true /* isSystemOrganizer */);
+
+        final IBinder token = new Binder();
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(rootTask)
+                .setFragmentToken(token)
+                .setOrganizer(organizer)
+                .createActivityCount(1)
+                .build();
+
+        // Should be visible and focusable initially.
+        assertTrue(rootTask.shouldBeVisible(null));
+        assertTrue(taskFragment.shouldBeVisible(null));
+        assertTrue(taskFragment.isFocusable());
+        assertTrue(taskFragment.isTopActivityFocusable());
+
+        // Apply transaction to the TaskFragment hidden and not focusable.
+        t.setHidden(taskFragment.mRemoteToken.toWindowContainerToken(), true);
+        t.setFocusable(taskFragment.mRemoteToken.toWindowContainerToken(), false);
+        mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
+                t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
+
+        // Should be not visible and not focusable after the transaction.
+        assertFalse(taskFragment.shouldBeVisible(null));
+        assertFalse(taskFragment.isFocusable());
+        assertFalse(taskFragment.isTopActivityFocusable());
+
+        // Apply transaction to the TaskFragment not hidden and focusable.
+        t.setHidden(taskFragment.mRemoteToken.toWindowContainerToken(), false);
+        t.setFocusable(taskFragment.mRemoteToken.toWindowContainerToken(), true);
+        mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
+                t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
+
+        // Should be visible and focusable after the transaction.
+        assertTrue(taskFragment.shouldBeVisible(null));
+        assertTrue(taskFragment.isFocusable());
+        assertTrue(taskFragment.isTopActivityFocusable());
+    }
+
+    @Test
+    public void testTaskFragmentHiddenAndFocusableChanges_throwsWhenNotSystemOrganizer() {
+        removeGlobalMinSizeRestriction();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
+
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+        final TaskFragmentOrganizer organizer =
+                createTaskFragmentOrganizer(t, false /* isSystemOrganizer */);
+
+        final IBinder token = new Binder();
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(rootTask)
+                .setFragmentToken(token)
+                .setOrganizer(organizer)
+                .createActivityCount(1)
+                .build();
+
+        assertTrue(rootTask.shouldBeVisible(null));
+        assertTrue(taskFragment.shouldBeVisible(null));
+
+        t.setHidden(taskFragment.mRemoteToken.toWindowContainerToken(), true);
+        t.setFocusable(taskFragment.mRemoteToken.toWindowContainerToken(), false);
+
+        // Non-system organizers are not allow to update the hidden and focusable states.
+        assertThrows(SecurityException.class, () ->
+                mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
+                        t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
+                        false /* shouldApplyIndependently */)
+        );
     }
 
     @Test
@@ -1599,5 +1684,21 @@ public class WindowOrganizerTests extends WindowTestsBase {
         for (int i = 0; i < expectedTasks.length; i++) {
             assertTrue(taskIds.contains(expectedTasks[i].mTaskId));
         }
+    }
+
+    @NonNull
+    private TaskFragmentOrganizer createTaskFragmentOrganizer(
+            @NonNull WindowContainerTransaction t, boolean isSystemOrganizer) {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final ITaskFragmentOrganizer organizerInterface =
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
+        mWm.mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController
+                .registerOrganizerInternal(
+                        ITaskFragmentOrganizer.Stub.asInterface(
+                                organizer.getOrganizerToken().asBinder()),
+                        isSystemOrganizer);
+        t.setTaskFragmentOrganizer(organizerInterface);
+
+        return organizer;
     }
 }

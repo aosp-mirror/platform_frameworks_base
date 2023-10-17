@@ -24,6 +24,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.launch
 
 /**
@@ -46,8 +47,8 @@ class PreviewKeyguardBlueprintViewBinder {
             constraintLayout: ConstraintLayout,
             viewModel: KeyguardBlueprintViewModel,
             finishedAddViewCallback: () -> Unit
-        ) {
-            constraintLayout.repeatWhenAttached {
+        ): DisposableHandle {
+            return constraintLayout.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
                         viewModel.blueprint.collect { blueprint ->

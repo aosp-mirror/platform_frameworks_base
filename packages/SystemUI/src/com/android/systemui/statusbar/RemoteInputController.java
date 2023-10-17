@@ -31,6 +31,8 @@ import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -69,7 +71,8 @@ public class RemoteInputController {
      * @param entry the entry for which a remote input is now active.
      * @param token a token identifying the view that is managing the remote input
      */
-    public void addRemoteInput(NotificationEntry entry, Object token) {
+    public void addRemoteInput(NotificationEntry entry, Object token,
+            @CompileTimeConstant String reason) {
         Objects.requireNonNull(entry);
         Objects.requireNonNull(token);
         boolean isActive = isRemoteInputActive(entry);
@@ -77,7 +80,9 @@ public class RemoteInputController {
                 entry /* contains */, null /* remove */, token /* removeToken */);
         mLogger.logAddRemoteInput(entry.getKey()/* entryKey */,
                 isActive /* isRemoteInputAlreadyActive */,
-                found /* isRemoteInputFound */);
+                found /* isRemoteInputFound */,
+                reason /* reason */,
+                entry.getNotificationStyle()/* notificationStyle */);
         if (!found) {
             mOpen.add(new Pair<>(new WeakReference<>(entry), token));
         }
@@ -96,7 +101,8 @@ public class RemoteInputController {
      *              the entry is only removed if the token matches the last added token for this
      *              entry. If null, the entry is removed regardless.
      */
-    public void removeRemoteInput(NotificationEntry entry, Object token) {
+    public void removeRemoteInput(NotificationEntry entry, Object token,
+            @CompileTimeConstant String reason) {
         Objects.requireNonNull(entry);
         if (entry.mRemoteEditImeVisible && entry.mRemoteEditImeAnimatingAway) {
             mLogger.logRemoveRemoteInput(
@@ -104,9 +110,12 @@ public class RemoteInputController {
                     true /* remoteEditImeVisible */,
                     true /* remoteEditImeAnimatingAway */,
                     isRemoteInputActive(entry) /* isRemoteInputActiveForEntry */,
-                    isRemoteInputActive() /* isRemoteInputActive */);
+                    isRemoteInputActive() /* isRemoteInputActive */,
+                    reason /* reason */,
+                    entry.getNotificationStyle()/* notificationStyle */);
             return;
         }
+
         // If the view is being removed, this may be called even though we're not active
         boolean remoteInputActiveForEntry = isRemoteInputActive(entry);
         mLogger.logRemoveRemoteInput(
@@ -114,7 +123,9 @@ public class RemoteInputController {
                 entry.mRemoteEditImeVisible /* remoteEditImeVisible */,
                 entry.mRemoteEditImeAnimatingAway /* remoteEditImeAnimatingAway */,
                 remoteInputActiveForEntry /* isRemoteInputActiveForEntry */,
-                isRemoteInputActive()/* isRemoteInputActive */);
+                isRemoteInputActive()/* isRemoteInputActive */,
+                reason/* reason */,
+                entry.getNotificationStyle()/* notificationStyle */);
 
         if (!remoteInputActiveForEntry) return;
 

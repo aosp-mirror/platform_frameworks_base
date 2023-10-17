@@ -34,8 +34,7 @@ public final class GnssSignalType implements Parcelable {
     /**
      * Creates a {@link GnssSignalType} with a full list of parameters.
      *
-     * @param constellationType the constellation type as defined in
-     * {@link GnssStatus.ConstellationType}
+     * @param constellationType the constellation type
      * @param carrierFrequencyHz the carrier frequency in Hz
      * @param codeType the code type as defined in {@link GnssMeasurement#getCodeType()}
      */
@@ -66,7 +65,7 @@ public final class GnssSignalType implements Parcelable {
         this.mCodeType = codeType;
     }
 
-    /** Returns the {@link GnssStatus.ConstellationType}. */
+    /** Returns the constellation type. */
     @GnssStatus.ConstellationType
     public int getConstellationType() {
         return mConstellationType;

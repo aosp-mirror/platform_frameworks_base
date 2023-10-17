@@ -1469,8 +1469,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             archPkg.versionCodeMajor = (int) (longVersionCode >> 32);
             archPkg.versionCode = (int) longVersionCode;
 
-            // TODO(b/297916136): extract target sdk version.
-            archPkg.targetSdkVersion = MIN_INSTALLABLE_TARGET_SDK;
+            archPkg.targetSdkVersion = ps.getTargetSdkVersion();
 
             // These get translated in flags important for user data management.
             archPkg.defaultToDeviceProtectedStorage = String.valueOf(

@@ -15,8 +15,6 @@
  */
 package com.android.hoststubgen.hosthelper;
 
-import org.objectweb.asm.Type;
-
 import java.io.PrintStream;
 import java.lang.StackWalker.Option;
 import java.lang.reflect.Method;
@@ -32,7 +30,15 @@ public class HostTestUtils {
     private HostTestUtils() {
     }
 
-    public static final String CLASS_INTERNAL_NAME = Type.getInternalName(HostTestUtils.class);
+    /**
+     * Same as ASM's Type.getInternalName(). Copied here, to avoid having a reference to ASM
+     * in this JAR.
+     */
+    public static String getInternalName(final Class<?> clazz) {
+        return clazz.getName().replace('.', '/');
+    }
+
+    public static final String CLASS_INTERNAL_NAME = getInternalName(HostTestUtils.class);
 
     /** If true, we won't print method call log. */
     private static final boolean SKIP_METHOD_LOG = "1".equals(System.getenv(

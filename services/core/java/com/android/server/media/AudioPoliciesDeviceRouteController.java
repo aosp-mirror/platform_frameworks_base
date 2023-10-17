@@ -231,7 +231,7 @@ import java.util.Objects;
             }
 
             if (isDeviceRouteChanged) {
-                mOnDeviceRouteChangedListener.onDeviceRouteChanged(deviceRoute);
+                mOnDeviceRouteChangedListener.onDeviceRouteChanged();
             }
         }
     }

@@ -16,6 +16,7 @@
 
 package android.media.audiopolicy;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,6 +49,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.media.audio.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -417,6 +419,7 @@ public class AudioPolicy {
      * @return {@link AudioManager#SUCCESS} if the update was successful,
      *  {@link AudioManager#ERROR} otherwise.
      */
+    @FlaggedApi(Flags.FLAG_AUDIO_POLICY_UPDATE_MIXING_RULES_API)
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int updateMixingRules(
             @NonNull List<Pair<AudioMix, AudioMixingRule>> mixingRuleUpdates) {

@@ -34,7 +34,7 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
         get() = _isFingerprintAuthCurrentlyAllowed
 
     private val _isFaceAuthEnrolledAndEnabled = MutableStateFlow(false)
-    override val isFaceAuthEnrolledAndEnabled: Flow<Boolean>
+    override val isFaceAuthEnrolledAndEnabled: StateFlow<Boolean>
         get() = _isFaceAuthEnrolledAndEnabled
 
     private val _isFaceAuthCurrentlyAllowed = MutableStateFlow(false)

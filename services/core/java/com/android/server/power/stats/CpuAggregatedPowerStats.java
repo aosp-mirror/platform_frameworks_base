@@ -16,14 +16,8 @@
 
 package com.android.server.power.stats;
 
-import android.os.BatteryConsumer;
-
-import com.android.internal.os.MultiStateStats;
-
 class CpuAggregatedPowerStats extends PowerComponentAggregatedPowerStats {
-
-    CpuAggregatedPowerStats(MultiStateStats.States[] deviceStates,
-            MultiStateStats.States[] uidStates) {
-        super(BatteryConsumer.POWER_COMPONENT_CPU, deviceStates, uidStates);
+    CpuAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config) {
+        super(config);
     }
 }

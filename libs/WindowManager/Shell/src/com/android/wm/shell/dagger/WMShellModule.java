@@ -32,6 +32,7 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
@@ -366,11 +367,12 @@ public abstract class WMShellModule {
             KeyguardTransitionHandler keyguardTransitionHandler,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<UnfoldTransitionHandler> unfoldHandler,
+            Optional<ActivityEmbeddingController> activityEmbeddingController,
             Transitions transitions) {
         return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
                 pipTransitionController, recentsTransitionHandler,
                 keyguardTransitionHandler, desktopTasksController,
-                unfoldHandler);
+                unfoldHandler, activityEmbeddingController);
     }
 
     @WMSingleton

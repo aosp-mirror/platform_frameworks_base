@@ -199,6 +199,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.uri.NeededUriGrants;
+import com.android.window.flags.Flags;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -488,10 +489,6 @@ class Task extends TaskFragment {
 
     private boolean mForceShowForAllUsers;
 
-    /** When set, will force the task to report as invisible. */
-    static final int FLAG_FORCE_HIDDEN_FOR_PINNED_TASK = 1;
-    static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
-    private int mForceHiddenFlags = 0;
     private boolean mForceTranslucent = false;
 
     // The display category name for this task.
@@ -2858,7 +2855,8 @@ class Task extends TaskFragment {
     }
 
     /** Bounds of the task to be used for dimming, as well as touch related tests. */
-    void getDimBounds(Rect out) {
+    @Override
+    void getDimBounds(@NonNull Rect out) {
         if (isRootTask()) {
             getBounds(out);
             return;
@@ -3306,7 +3304,8 @@ class Task extends TaskFragment {
         // Once at the root task level, we want to check {@link #isTranslucent(ActivityRecord)}.
         // If true, we want to get the Dimmer from the level above since we don't want to animate
         // the dim with the Task.
-        if (!isRootTask() || isTranslucent(null)) {
+        if (!isRootTask() || (Flags.dimmerRefactor() && isTranslucentAndVisible())
+                || isTranslucent(null)) {
             return super.getDimmer();
         }
 
@@ -4492,20 +4491,13 @@ class Task extends TaskFragment {
      * Sets/unsets the forced-hidden state flag for this task depending on {@param set}.
      * @return Whether the force hidden state changed
      */
-    boolean setForceHidden(int flags, boolean set) {
-        int newFlags = mForceHiddenFlags;
-        if (set) {
-            newFlags |= flags;
-        } else {
-            newFlags &= ~flags;
-        }
-        if (mForceHiddenFlags == newFlags) {
-            return false;
-        }
-
+    @Override
+    boolean setForceHidden(@FlagForceHidden int flags, boolean set) {
         final boolean wasHidden = isForceHidden();
         final boolean wasVisible = isVisible();
-        mForceHiddenFlags = newFlags;
+        if (!super.setForceHidden(flags, set)) {
+            return false;
+        }
         final boolean nowHidden = isForceHidden();
         if (wasHidden != nowHidden) {
             final String reason = "setForceHidden";
@@ -4534,11 +4526,6 @@ class Task extends TaskFragment {
      */
     public boolean isAlwaysOnTopWhenVisible() {
         return super.isAlwaysOnTop();
-    }
-
-    @Override
-    protected boolean isForceHidden() {
-        return mForceHiddenFlags != 0;
     }
 
     boolean isForceHiddenForPinnedTask() {

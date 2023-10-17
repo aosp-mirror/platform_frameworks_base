@@ -9,15 +9,24 @@ android_test {
     srcs: ["src/**/*.java"],
 
     libs: [
-        "android.test.runner",
         "android.test.base",
+        "android.test.mock",
+        "android.test.runner",
     ],
 
     static_libs: [
-        "androidx.test.rules",
-        "testng",
+        "androidx.test.ext.junit",
         "androidx.test.ext.truth",
+        "androidx.test.rules",
         "frameworks-base-testutils",
+        "mockito-target-inline-minus-junit4",
+        "testables",
+        "testng",
+    ],
+
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
     ],
 
     test_suites: [

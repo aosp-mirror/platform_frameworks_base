@@ -28,7 +28,6 @@ import android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.internal.util.ScreenshotRequest
-import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.screenshot.ScreenshotPolicy.DisplayContentInfo
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +46,6 @@ class RequestProcessorTest {
 
     private val scope = CoroutineScope(Dispatchers.Unconfined)
     private val policy = FakeScreenshotPolicy()
-    private val flags = FakeFeatureFlags()
 
     /** Tests the Java-compatible function wrapper, ensures callback is invoked. */
     @Test
@@ -58,7 +56,7 @@ class RequestProcessorTest {
                     .setBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
                     .build()
             )
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+        val processor = RequestProcessor(imageCapture, policy, scope)
 
         var result: ScreenshotData? = null
         var callbackCount = 0
@@ -86,7 +84,7 @@ class RequestProcessorTest {
 
         val request =
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_OTHER).build()
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+        val processor = RequestProcessor(imageCapture, policy, scope)
 
         val processedData = processor.process(ScreenshotData.fromRequest(request))
 
@@ -111,7 +109,7 @@ class RequestProcessorTest {
 
         val request =
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER).build()
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+        val processor = RequestProcessor(imageCapture, policy, scope)
 
         val processedData = processor.process(ScreenshotData.fromRequest(request))
 
@@ -138,7 +136,7 @@ class RequestProcessorTest {
 
         val request =
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER).build()
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+        val processor = RequestProcessor(imageCapture, policy, scope)
 
         Assert.assertThrows(IllegalStateException::class.java) {
             runBlocking { processor.process(ScreenshotData.fromRequest(request)) }
@@ -148,7 +146,7 @@ class RequestProcessorTest {
     @Test
     fun testProvidedImageScreenshot() = runBlocking {
         val bounds = Rect(50, 50, 150, 150)
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+        val processor = RequestProcessor(imageCapture, policy, scope)
 
         policy.setManagedProfile(USER_ID, false)
 
@@ -173,7 +171,7 @@ class RequestProcessorTest {
     @Test
     fun testProvidedImageScreenshot_managedProfile() = runBlocking {
         val bounds = Rect(50, 50, 150, 150)
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+        val processor = RequestProcessor(imageCapture, policy, scope)
 
         // Indicate that the screenshot belongs to a manged profile
         policy.setManagedProfile(USER_ID, true)

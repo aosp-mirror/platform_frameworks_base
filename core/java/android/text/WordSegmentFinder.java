@@ -24,7 +24,7 @@ import android.text.method.WordIterator;
 
 /**
  * Implementation of {@link SegmentFinder} using words as the text segment. Word boundaries are
- * found using {@link WordIterator}. Whitespace characters are excluded, so they are not included in
+ * found using {@code WordIterator}. Whitespace characters are excluded, so they are not included in
  * any text segments.
  *
  * <p>For example, the text "Hello, World!" would be subdivided into four text segments: "Hello",

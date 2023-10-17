@@ -16,6 +16,9 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static com.android.systemui.Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG;
+import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.any;
@@ -75,6 +78,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        setFlagDefault(mSetFlagsRule, FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
@@ -96,6 +100,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         Prefs.putBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
                 mLastIsMoveToTucked);
         mEndListenerCaptor.getAllValues().clear();
+        mMenuAnimationController.mPositionAnimations.values().forEach(DynamicAnimation::cancel);
     }
 
     @Test

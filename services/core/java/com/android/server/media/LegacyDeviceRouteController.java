@@ -165,8 +165,8 @@ import java.util.Objects;
         }
     }
 
-    private void notifyDeviceRouteUpdate(@NonNull MediaRoute2Info deviceRoute) {
-        mOnDeviceRouteChangedListener.onDeviceRouteChanged(deviceRoute);
+    private void notifyDeviceRouteUpdate() {
+        mOnDeviceRouteChangedListener.onDeviceRouteChanged();
     }
 
     private class AudioRoutesObserver extends IAudioRoutesObserver.Stub {
@@ -177,7 +177,7 @@ import java.util.Objects;
             synchronized (LegacyDeviceRouteController.this) {
                 mDeviceRoute = deviceRoute;
             }
-            notifyDeviceRouteUpdate(deviceRoute);
+            notifyDeviceRouteUpdate();
         }
     }
 

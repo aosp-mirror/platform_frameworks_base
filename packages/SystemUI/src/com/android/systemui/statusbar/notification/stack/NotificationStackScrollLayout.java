@@ -2735,7 +2735,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param listener callback for notification removed
      */
     public void setOnNotificationRemovedListener(OnNotificationRemovedListener listener) {
-        mShelfRefactor.assertDisabled();
+        mShelfRefactor.assertInLegacyMode();
         mOnNotificationRemovedListener = listener;
     }
 
@@ -4982,12 +4982,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @Nullable
     public ExpandableView getShelf() {
-        if (!mShelfRefactor.expectEnabled()) return null;
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return null;
         return mShelf;
     }
 
     public void setShelf(NotificationShelf shelf) {
-        if (!mShelfRefactor.expectEnabled()) return;
+        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
         int index = -1;
         if (mShelf != null) {
             index = indexOfChild(mShelf);
@@ -5001,7 +5001,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public void setShelfController(NotificationShelfController notificationShelfController) {
-        mShelfRefactor.assertDisabled();
+        mShelfRefactor.assertInLegacyMode();
         int index = -1;
         if (mShelf != null) {
             index = indexOfChild(mShelf);

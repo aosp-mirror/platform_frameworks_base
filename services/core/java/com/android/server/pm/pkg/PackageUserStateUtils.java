@@ -16,9 +16,9 @@
 
 package com.android.server.pm.pkg;
 
-import static android.content.pm.PackageManager.FILTER_OUT_QUARANTINED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_QUARANTINED_COMPONENTS;
 
 import android.annotation.NonNull;
 import android.content.pm.ComponentInfo;
@@ -147,7 +147,7 @@ public class PackageUserStateUtils {
             return true;
         }
 
-        if ((flags & FILTER_OUT_QUARANTINED_COMPONENTS) != 0 && state.isQuarantined()) {
+        if ((flags & MATCH_QUARANTINED_COMPONENTS) == 0 && state.isQuarantined()) {
             return false;
         }
 

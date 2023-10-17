@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -699,7 +700,7 @@ public class LocalDisplayAdapterTest {
 
         // Turn off.
         Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_OFF, 0,
-                0);
+                0, null);
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         assertThat(mListener.changedDisplays.size()).isEqualTo(1);
         mListener.changedDisplays.clear();
@@ -1003,7 +1004,7 @@ public class LocalDisplayAdapterTest {
         // Turn on / initialize
         assumeTrue(displayDevice.getDisplayDeviceConfig().hasSdrToHdrRatioSpline());
         Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
-                0);
+                0, null);
         changeStateRunnable.run();
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         mListener.changedDisplays.clear();
@@ -1012,7 +1013,7 @@ public class LocalDisplayAdapterTest {
 
         // HDR time!
         Runnable goHdrRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 1f,
-                0);
+                0, null);
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         // Display state didn't change, no listeners should have happened
         assertThat(mListener.changedDisplays.size()).isEqualTo(0);
@@ -1043,7 +1044,7 @@ public class LocalDisplayAdapterTest {
 
         // Turn on / initialize
         Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
-                0);
+                0, null);
         changeStateRunnable.run();
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         mListener.changedDisplays.clear();
@@ -1070,7 +1071,7 @@ public class LocalDisplayAdapterTest {
 
         // Turn on / initialize
         Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
-                0);
+                0, null);
         changeStateRunnable.run();
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         mListener.changedDisplays.clear();
@@ -1095,7 +1096,7 @@ public class LocalDisplayAdapterTest {
 
         // Turn on / initialize
         Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
-                0);
+                0, null);
         changeStateRunnable.run();
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         mListener.changedDisplays.clear();
@@ -1118,7 +1119,7 @@ public class LocalDisplayAdapterTest {
 
         // Turn on / initialize
         Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
-                0);
+                0, null);
         changeStateRunnable.run();
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         mListener.changedDisplays.clear();
@@ -1145,9 +1146,9 @@ public class LocalDisplayAdapterTest {
             Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(
                     supportedState, 0, 0, mDisplayOffloadSession);
             changeStateRunnable.run();
-
-            verify(mDisplayOffloader).startOffload();
         }
+
+        verify(mDisplayOffloader, times(mDisplayOffloadSupportedStates.size())).startOffload();
     }
 
     @Test

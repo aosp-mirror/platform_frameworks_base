@@ -1901,16 +1901,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return traceTag;
         }
 
-        if (isSummaryWithChildren()) {
-            return traceTag + "(summary)";
-        }
-        Class<? extends Notification.Style> style =
-                getEntry().getSbn().getNotification().getNotificationStyle();
-        if (style == null) {
-            return traceTag + "(nostyle)";
-        } else {
-            return traceTag + "(" + style.getSimpleName() + ")";
-        }
+        return  traceTag + "(" + getEntry().getNotificationStyle() + ")";
     }
 
     @Override

@@ -31,4 +31,13 @@
     is a relatively expensive operation, this throttle period may need to be adjusted for low-power
     devices-->
     <integer name="config_defaultPowerStatsThrottlePeriodCpu">60000</integer>
+
+    <!-- PowerStats aggregation period in milliseconds. This is the interval at which the power
+    stats aggregation procedure is performed and the results stored in PowerStatsStore. -->
+    <integer name="config_powerStatsAggregationPeriod">14400000</integer>
+
+    <!-- PowerStats aggregation span duration in milliseconds. This is the length of battery
+    history time for every aggregated power stats span that is stored stored in PowerStatsStore.
+    It should not be larger than config_powerStatsAggregationPeriod (but it can be the same) -->
+    <integer name="config_aggregatedPowerStatsSpanDuration">3600000</integer>
 </resources>

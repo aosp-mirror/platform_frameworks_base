@@ -32,6 +32,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
@@ -81,6 +82,7 @@ constructor(
     private val facePropertyRepository: FacePropertyRepository,
     private val faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig,
     private val powerInteractor: PowerInteractor,
+    private val biometricSettingsRepository: BiometricSettingsRepository,
 ) : CoreStartable, KeyguardFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
@@ -149,7 +151,10 @@ constructor(
             .onEach {
                 if (it) {
                     faceAuthenticationLogger.faceLockedOut("Fingerprint locked out")
-                    repository.setLockedOut(true)
+                    // We don't care about this if face auth is not enabled.
+                    if (isFaceAuthEnabledAndEnrolled()) {
+                        repository.setLockedOut(true)
+                    }
                 }
             }
             .launchIn(applicationScope)
@@ -262,6 +267,9 @@ constructor(
             )
         }
     }
+
+    override fun isFaceAuthEnabledAndEnrolled(): Boolean =
+        biometricSettingsRepository.isFaceAuthEnrolledAndEnabled.value
 
     private fun observeFaceAuthStateUpdates() {
         authenticationStatus

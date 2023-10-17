@@ -13,3 +13,10 @@ flag {
     description: "Allows the a11y shortcut disambig dialog to appear on the lockscreen"
     bug: "303871725"
 }
+
+flag {
+        name: "a11y_overlay_callbacks"
+    namespace: "accessibility"
+    description: "Whether to allow the passing of result callbacks when attaching a11y overlays."
+    bug: "304478691"
+}

@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.unit;
+package com.android.media;
 
 import static android.media.Ringtone.MEDIA_SOUND;
 import static android.media.Ringtone.MEDIA_SOUND_AND_VIBRATION;
 import static android.media.Ringtone.MEDIA_VIBRATION;
 
+import static com.android.media.testing.MediaPlayerTestHelper.verifyPlayerFallbackSetup;
+import static com.android.media.testing.MediaPlayerTestHelper.verifyPlayerSetup;
+import static com.android.media.testing.MediaPlayerTestHelper.verifyPlayerStarted;
+import static com.android.media.testing.MediaPlayerTestHelper.verifyPlayerStopped;
+
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -53,34 +55,29 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.testing.TestableContext;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.mediaframeworktest.R;
+import com.android.framework.base.media.ringtone.tests.R;
+import com.android.media.testing.RingtoneInjectablesTrackingTestRule;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.Statement;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayDeque;
-import java.util.Map;
-import java.util.Queue;
 
+/**
+ * Test behavior of {@link Ringtone} when it's created via {@link Ringtone.Builder}.
+ */
 @RunWith(AndroidJUnit4.class)
-public class RingtoneTest {
+public class RingtoneBuilderTest {
 
     private static final Uri SOUND_URI = Uri.parse("content://fake-sound-uri");
 
@@ -93,11 +90,8 @@ public class RingtoneTest {
 
     private static final VibrationEffect VIBRATION_EFFECT =
             VibrationEffect.createWaveform(new long[] { 0, 100, 50, 100}, -1);
-    private static final VibrationEffect VIBRATION_EFFECT_REPEATING =
-            VibrationEffect.createWaveform(new long[] { 0, 100, 50, 100, 50}, 1);
 
-    @Rule
-    public final RingtoneInjectablesTrackingTestRule
+    @Rule public final RingtoneInjectablesTrackingTestRule
             mMediaPlayerRule = new RingtoneInjectablesTrackingTestRule();
 
     @Captor private ArgumentCaptor<IBinder> mIBinderCaptor;
@@ -122,6 +116,7 @@ public class RingtoneTest {
         mContext = spy(testContext);
     }
 
+
     @Test
     public void testRingtone_fullLifecycleUsingLocalMediaPlayer() throws Exception {
         MediaPlayer mockMediaPlayer = mMediaPlayerRule.expectLocalMediaPlayer();
@@ -142,14 +137,14 @@ public class RingtoneTest {
         assertThat(ringtone.isLocalOnly()).isFalse();
 
         // Prepare
-        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES);
+        verifyPlayerSetup(mContext, mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES);
         verify(mockMediaPlayer).setVolume(1.0f);
         verify(mockMediaPlayer).setLooping(false);
         verify(mockMediaPlayer).prepare();
 
         // Play
         ringtone.play();
-        verifyLocalPlay(mockMediaPlayer);
+        verifyPlayerStarted(mockMediaPlayer);
 
         // Verify dynamic controls.
         ringtone.setVolume(0.8f);
@@ -165,7 +160,7 @@ public class RingtoneTest {
 
         // Release
         ringtone.stop();
-        verifyLocalStop(mockMediaPlayer);
+        verifyPlayerStopped(mockMediaPlayer);
 
         // This test is intended to strictly verify all interactions with MediaPlayer in a local
         // playback case. This shouldn't be necessary in other tests that have the same basic
@@ -199,16 +194,16 @@ public class RingtoneTest {
         assertThat(ringtone.getAudioAttributes()).isEqualTo(audioAttributes);
 
         // Prepare
-        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, audioAttributes);
+        verifyPlayerSetup(mContext, mockMediaPlayer, SOUND_URI, audioAttributes);
         verify(mockMediaPlayer).prepare();
 
         // Play
         ringtone.play();
-        verifyLocalPlay(mockMediaPlayer);
+        verifyPlayerStarted(mockMediaPlayer);
 
         // Release
         ringtone.stop();
-        verifyLocalStop(mockMediaPlayer);
+        verifyPlayerStopped(mockMediaPlayer);
 
         verifyZeroInteractions(mMockRemotePlayer);
         verifyZeroInteractions(mMockVibrator);
@@ -220,8 +215,8 @@ public class RingtoneTest {
         setupFileNotFound(mockMediaPlayer, SOUND_URI);
         Ringtone ringtone =
                 newBuilder(MEDIA_SOUND, RINGTONE_ATTRIBUTES)
-                .setUri(SOUND_URI)
-                .build();
+                        .setUri(SOUND_URI)
+                        .build();
         assertThat(ringtone).isNotNull();
         assertThat(ringtone.isUsingRemotePlayer()).isTrue();
 
@@ -284,7 +279,7 @@ public class RingtoneTest {
         // Prepare
         // Uses attributes with haptic channels enabled, but will use the effect when there aren't
         // any present.
-        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
+        verifyPlayerSetup(mContext, mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
         verify(mockMediaPlayer).setVolume(1.0f);
         verify(mockMediaPlayer).setLooping(false);
         verify(mockMediaPlayer).prepare();
@@ -292,7 +287,7 @@ public class RingtoneTest {
         // Play
         ringtone.play();
 
-        verifyLocalPlay(mockMediaPlayer);
+        verifyPlayerStarted(mockMediaPlayer);
         verify(mMockVibrator).vibrate(VIBRATION_EFFECT, RINGTONE_VIB_ATTRIBUTES);
 
         // Verify dynamic controls.
@@ -310,7 +305,7 @@ public class RingtoneTest {
 
         // Release
         ringtone.stop();
-        verifyLocalStop(mockMediaPlayer);
+        verifyPlayerStopped(mockMediaPlayer);
         verify(mMockVibrator).cancel(VibrationAttributes.USAGE_RINGTONE);
 
         // This test is intended to strictly verify all interactions with MediaPlayer in a local
@@ -388,7 +383,7 @@ public class RingtoneTest {
         // Prepare
         // Uses attributes with haptic channels enabled, but will abandon the MediaPlayer when it
         // knows there aren't any.
-        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
+        verifyPlayerSetup(mContext, mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
         verify(mockMediaPlayer).setVolume(0.0f);  // Vibration-only: sound muted.
         verify(mockMediaPlayer).setLooping(false);
         verify(mockMediaPlayer).prepare();
@@ -443,7 +438,7 @@ public class RingtoneTest {
         // Prepare
         // Uses attributes with haptic channels enabled, but will use the effect when there aren't
         // any present.
-        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
+        verifyPlayerSetup(mContext, mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
         verify(mockMediaPlayer).setVolume(0.0f);  // Vibration-only: sound muted.
         verify(mockMediaPlayer).setLooping(false);
         verify(mockMediaPlayer).prepare();
@@ -451,7 +446,7 @@ public class RingtoneTest {
         // Play
         ringtone.play();
         // Vibrator.vibrate isn't called because the vibration comes from the sound.
-        verifyLocalPlay(mockMediaPlayer);
+        verifyPlayerStarted(mockMediaPlayer);
 
         // Verify dynamic controls (no-op without sound)
         ringtone.setVolume(0.8f);
@@ -466,7 +461,7 @@ public class RingtoneTest {
 
         // Release
         ringtone.stop();
-        verifyLocalStop(mockMediaPlayer);
+        verifyPlayerStopped(mockMediaPlayer);
 
         // This test is intended to strictly verify all interactions with MediaPlayer in a local
         // playback case. This shouldn't be necessary in other tests that have the same basic
@@ -496,17 +491,17 @@ public class RingtoneTest {
 
         // Prepare
         // The attributes here have haptic channels enabled (unlike above)
-        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
+        verifyPlayerSetup(mContext, mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
         verify(mockMediaPlayer).prepare();
 
         // Play
         ringtone.play();
         when(mockMediaPlayer.isPlaying()).thenReturn(true);
-        verifyLocalPlay(mockMediaPlayer);
+        verifyPlayerStarted(mockMediaPlayer);
 
         // Release
         ringtone.stop();
-        verifyLocalStop(mockMediaPlayer);
+        verifyPlayerStopped(mockMediaPlayer);
 
         verifyZeroInteractions(mMockRemotePlayer);
         // Nothing after the initial hasVibrator - it uses audio-coupled.
@@ -536,7 +531,7 @@ public class RingtoneTest {
 
         // Prepare
         // The attributes here have haptic channels enabled (unlike above)
-        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
+        verifyPlayerSetup(mContext, mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
         verify(mockMediaPlayer).prepare();
 
         // Play
@@ -559,7 +554,7 @@ public class RingtoneTest {
     @Test
     public void testRingtone_nullMediaOnBuilderUsesFallback() throws Exception {
         AssetFileDescriptor testResourceFd =
-                mContext.getResources().openRawResourceFd(R.raw.shortmp3);
+                mContext.getResources().openRawResourceFd(R.raw.test_sound_file);
         // Ensure it will flow as expected.
         assertThat(testResourceFd).isNotNull();
         assertThat(testResourceFd.getDeclaredLength()).isAtLeast(0);
@@ -575,18 +570,18 @@ public class RingtoneTest {
 
         // Delegates straight to fallback in local player.
         // Prepare
-        verifyLocalPlayerFallbackSetup(mockMediaPlayer, testResourceFd, RINGTONE_ATTRIBUTES);
+        verifyPlayerFallbackSetup(mockMediaPlayer, testResourceFd, RINGTONE_ATTRIBUTES);
         verify(mockMediaPlayer).setVolume(1.0f);
         verify(mockMediaPlayer).setLooping(false);
         verify(mockMediaPlayer).prepare();
 
         // Play
         ringtone.play();
-        verifyLocalPlay(mockMediaPlayer);
+        verifyPlayerStarted(mockMediaPlayer);
 
         // Release
         ringtone.stop();
-        verifyLocalStop(mockMediaPlayer);
+        verifyPlayerStopped(mockMediaPlayer);
 
         verifyNoMoreInteractions(mockMediaPlayer);
         verifyNoMoreInteractions(mMockRemotePlayer);
@@ -615,24 +610,10 @@ public class RingtoneTest {
         verifyNoMoreInteractions(mMockRemotePlayer);
     }
 
-    @Test
-    public void testRingtone_noMediaSetOnBuilderFallbackFailsAndNoRemote() throws Exception {
-        mContext.getOrCreateTestableResources()
-                .addOverride(com.android.internal.R.raw.fallbackring, null);
-        Ringtone ringtone = newBuilder(MEDIA_SOUND, RINGTONE_ATTRIBUTES)
-                .setUri(null)
-                .setLocalOnly()
-                .build();
-        // Local player fallback fails as the resource isn't found (no media player creation is
-        // attempted), and since there is no local player, the ringtone ends up having nothing to
-        // do.
-        assertThat(ringtone).isNull();
-    }
-
     private Ringtone.Builder newBuilder(@Ringtone.RingtoneMedia int ringtoneMedia,
             AudioAttributes audioAttributes) {
         return new Ringtone.Builder(mContext, ringtoneMedia, audioAttributes)
-                .setInjectables(mMediaPlayerRule.injectables);
+                .setInjectables(mMediaPlayerRule.getRingtoneTestInjectables());
     }
 
     private static AudioAttributes audioAttributes(int audioUsage) {
@@ -646,195 +627,5 @@ public class RingtoneTest {
     private void setupFileNotFound(MediaPlayer mockMediaPlayer, Uri uri) throws Exception {
         doThrow(new FileNotFoundException("Fake file not found"))
                 .when(mockMediaPlayer).setDataSource(any(Context.class), eq(uri));
-    }
-
-    private void verifyLocalPlayerSetup(MediaPlayer mockPlayer, Uri expectedUri,
-            AudioAttributes expectedAudioAttributes) throws Exception {
-        verify(mockPlayer).setDataSource(mContext, expectedUri);
-        verify(mockPlayer).setAudioAttributes(expectedAudioAttributes);
-        verify(mockPlayer).setPreferredDevice(null);
-        verify(mockPlayer).prepare();
-    }
-
-    private void verifyLocalPlayerFallbackSetup(MediaPlayer mockPlayer, AssetFileDescriptor afd,
-            AudioAttributes expectedAudioAttributes) throws Exception {
-        // This is very specific but it's a simple way to test that the test resource matches.
-        if (afd.getDeclaredLength() < 0) {
-            verify(mockPlayer).setDataSource(afd.getFileDescriptor());
-        } else {
-            verify(mockPlayer).setDataSource(afd.getFileDescriptor(),
-                    afd.getStartOffset(),
-                    afd.getDeclaredLength());
-        }
-        verify(mockPlayer).setAudioAttributes(expectedAudioAttributes);
-        verify(mockPlayer).setPreferredDevice(null);
-        verify(mockPlayer).prepare();
-    }
-
-    private void verifyLocalPlay(MediaPlayer mockMediaPlayer) {
-        verify(mockMediaPlayer).setOnCompletionListener(any());
-        verify(mockMediaPlayer).start();
-    }
-
-    private void verifyLocalStop(MediaPlayer mockMediaPlayer) {
-        verify(mockMediaPlayer).stop();
-        verify(mockMediaPlayer).setOnCompletionListener(isNull());
-        verify(mockMediaPlayer).reset();
-        verify(mockMediaPlayer).release();
-    }
-
-    /**
-     * This rule ensures that all expected media player creations from the factory do actually
-     * occur. The reason for this level of control is that creating a media player is fairly
-     * expensive and blocking, so we do want unit tests of this class to "declare" interactions
-     * of all created media players.
-     *
-     * This needs to be a TestRule so that the teardown assertions can be skipped if the test has
-     * failed (and media player assertions may just be a distracting side effect). Otherwise, the
-     * teardown failures hide the real test ones.
-     */
-    public static class RingtoneInjectablesTrackingTestRule implements TestRule {
-        public Ringtone.Injectables injectables = new TestInjectables();
-        public boolean hapticGeneratorAvailable = true;
-
-        // Queue of (local) media players, in order of expected creation. Enqueue using
-        // expectNewMediaPlayer(), dequeued by the media player factory passed to Ringtone.
-        // This queue is asserted to be empty at the end of the test.
-        private Queue<MediaPlayer> mMockMediaPlayerQueue = new ArrayDeque<>();
-
-        // Similar to media players, but for haptic generator, which also needs releasing.
-        private Map<MediaPlayer, HapticGenerator> mMockHapticGeneratorMap = new ArrayMap<>();
-
-        // Media players with haptic channels.
-        private ArraySet<MediaPlayer> mHapticChannels = new ArraySet<>();
-
-        @Override
-        public Statement apply(Statement base, Description description) {
-            return new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    base.evaluate();
-                    // Only assert if the test didn't fail (base.evaluate() would throw).
-                    assertWithMessage("Test setup an expectLocalMediaPlayer but it wasn't consumed")
-                            .that(mMockMediaPlayerQueue).isEmpty();
-                    // Only assert if the test didn't fail (base.evaluate() would throw).
-                    assertWithMessage(
-                            "Test setup an expectLocalHapticGenerator but it wasn't consumed")
-                            .that(mMockHapticGeneratorMap).isEmpty();
-                }
-            };
-        }
-
-        private TestMediaPlayer expectLocalMediaPlayer() {
-            TestMediaPlayer mockMediaPlayer = Mockito.mock(TestMediaPlayer.class);
-            // Delegate to simulated methods. This means they can be verified but also reflect
-            // realistic transitions from the TestMediaPlayer.
-            doCallRealMethod().when(mockMediaPlayer).start();
-            doCallRealMethod().when(mockMediaPlayer).stop();
-            doCallRealMethod().when(mockMediaPlayer).setLooping(anyBoolean());
-            when(mockMediaPlayer.isLooping()).thenCallRealMethod();
-            when(mockMediaPlayer.isLooping()).thenCallRealMethod();
-            mMockMediaPlayerQueue.add(mockMediaPlayer);
-            return mockMediaPlayer;
-        }
-
-        private HapticGenerator expectHapticGenerator(MediaPlayer mockMediaPlayer) {
-            HapticGenerator mockHapticGenerator = Mockito.mock(HapticGenerator.class);
-            // A test should never want this.
-            assertWithMessage("Can't expect a second haptic generator created "
-                    + "for one media player")
-                    .that(mMockHapticGeneratorMap.put(mockMediaPlayer, mockHapticGenerator))
-                    .isNull();
-            return mockHapticGenerator;
-        }
-
-        private void setHasHapticChannels(MediaPlayer mp, boolean hasHapticChannels) {
-            if (hasHapticChannels) {
-                mHapticChannels.add(mp);
-            } else {
-                mHapticChannels.remove(mp);
-            }
-        }
-
-        private class TestInjectables extends Ringtone.Injectables {
-            @Override
-            public MediaPlayer newMediaPlayer() {
-                assertWithMessage(
-                        "Unexpected MediaPlayer creation. Bug or need expectNewMediaPlayer")
-                        .that(mMockMediaPlayerQueue)
-                        .isNotEmpty();
-                return mMockMediaPlayerQueue.remove();
-            }
-
-            @Override
-            public boolean isHapticGeneratorAvailable() {
-                return hapticGeneratorAvailable;
-            }
-
-            @Override
-            public HapticGenerator createHapticGenerator(MediaPlayer mediaPlayer) {
-                HapticGenerator mockHapticGenerator = mMockHapticGeneratorMap.remove(mediaPlayer);
-                assertWithMessage("Unexpected HapticGenerator creation. "
-                        + "Bug or need expectHapticGenerator")
-                        .that(mockHapticGenerator)
-                        .isNotNull();
-                return mockHapticGenerator;
-            }
-
-            @Override
-            public boolean isHapticPlaybackSupported() {
-                return true;
-            }
-
-            @Override
-            public boolean hasHapticChannels(MediaPlayer mp) {
-                return mHapticChannels.contains(mp);
-            }
-        }
-    }
-
-    /**
-     * MediaPlayer relies on a native backend and so its necessary to intercept calls from
-     * fake usage hitting them.
-     *
-     * Mocks don't work directly on native calls, but if they're overridden then it does work.
-     * Some basic state faking is also done to make the mocks more realistic.
-     */
-    private static class TestMediaPlayer extends MediaPlayer {
-        private boolean mIsPlaying = false;
-        private boolean mIsLooping = false;
-
-        @Override
-        public void start() {
-            mIsPlaying = true;
-        }
-
-        @Override
-        public void stop() {
-            mIsPlaying = false;
-        }
-
-        @Override
-        public void setLooping(boolean value) {
-            mIsLooping = value;
-        }
-
-        @Override
-        public boolean isLooping() {
-            return mIsLooping;
-        }
-
-        @Override
-        public boolean isPlaying() {
-            return mIsPlaying;
-        }
-
-        void simulatePlayingFinished() {
-            if (!mIsPlaying) {
-                throw new IllegalStateException(
-                        "Attempted to pretend playing finished when not playing");
-            }
-            mIsPlaying = false;
-        }
     }
 }

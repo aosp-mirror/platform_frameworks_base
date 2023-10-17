@@ -22,6 +22,7 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
@@ -66,6 +67,7 @@ object ComposeFacade : BaseComposeFacade {
 
     override fun createCommunalView(
         context: Context,
+        viewModel: CommunalViewModel,
     ): View {
         throwComposeUnavailableError()
     }

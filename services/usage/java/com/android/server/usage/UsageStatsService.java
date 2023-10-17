@@ -2127,15 +2127,13 @@ public class UsageStatsService extends SystemService implements
         }
 
         private boolean canReportUsageStats() {
-            final boolean isSystem = isCallingUidSystem();
-            if (!Flags.reportUsageStatsPermission()) {
-                // If the flag is disabled, do no check for the new permission and instead return
-                // true only if the calling uid is system since System UID can always report stats.
-                return isSystem;
+            if (isCallingUidSystem()) {
+                // System UID can always report UsageStats
+                return true;
             }
-            return isSystem
-                    || getContext().checkCallingPermission(Manifest.permission.REPORT_USAGE_STATS)
-                        == PackageManager.PERMISSION_GRANTED;
+
+            return getContext().checkCallingPermission(Manifest.permission.REPORT_USAGE_STATS)
+                    == PackageManager.PERMISSION_GRANTED;
         }
 
         private boolean hasObserverPermission() {
@@ -2627,9 +2625,12 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            if (!canReportUsageStats()) {
-                throw new SecurityException("Only the system or holders of the REPORT_USAGE_STATS"
-                        + " permission are allowed to call reportChooserSelection");
+            if (Flags.reportUsageStatsPermission()) {
+                if (!canReportUsageStats()) {
+                    throw new SecurityException(
+                        "Only the system or holders of the REPORT_USAGE_STATS"
+                            + " permission are allowed to call reportChooserSelection");
+                }
             }
 
             // Verify if this package exists before reporting an event for it.
@@ -2649,9 +2650,17 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportUserInteraction(String packageName, int userId) {
             Objects.requireNonNull(packageName);
-            if (!canReportUsageStats()) {
-                throw new SecurityException("Only the system or holders of the REPORT_USAGE_STATS"
-                        + " permission are allowed to call reportUserInteraction");
+            if (Flags.reportUsageStatsPermission()) {
+                if (!canReportUsageStats()) {
+                    throw new SecurityException(
+                        "Only the system or holders of the REPORT_USAGE_STATS"
+                            + " permission are allowed to call reportUserInteraction");
+                }
+            } else {
+                if (!isCallingUidSystem()) {
+                    throw new SecurityException("Only system is allowed to call"
+                            + " reportUserInteraction");
+                }
             }
 
             final Event event = new Event(USER_INTERACTION, SystemClock.elapsedRealtime());
