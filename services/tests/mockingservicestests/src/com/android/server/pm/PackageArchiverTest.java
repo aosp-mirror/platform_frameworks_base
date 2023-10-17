@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -427,6 +428,7 @@ public class PackageArchiverTest {
         for (LauncherActivityInfo mainActivity : createLauncherActivities()) {
             ArchiveState.ArchiveActivityInfo activityInfo = new ArchiveState.ArchiveActivityInfo(
                     mainActivity.getLabel().toString(),
+                    mainActivity.getComponentName(),
                     ICON_PATH, null);
             activityInfos.add(activityInfo);
         }
@@ -437,9 +439,11 @@ public class PackageArchiverTest {
         ActivityInfo activityInfo = mock(ActivityInfo.class);
         LauncherActivityInfo activity1 = mock(LauncherActivityInfo.class);
         when(activity1.getLabel()).thenReturn("activity1");
+        when(activity1.getComponentName()).thenReturn(new ComponentName("pkg1", "class1"));
         when(activity1.getActivityInfo()).thenReturn(activityInfo);
         LauncherActivityInfo activity2 = mock(LauncherActivityInfo.class);
         when(activity2.getLabel()).thenReturn("activity2");
+        when(activity2.getComponentName()).thenReturn(new ComponentName("pkg2", "class2"));
         when(activity2.getActivityInfo()).thenReturn(activityInfo);
         return List.of(activity1, activity2);
     }

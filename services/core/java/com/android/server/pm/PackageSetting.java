@@ -1228,6 +1228,9 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             long activityInfoToken = proto.start(
                     PackageProto.UserInfoProto.ArchiveState.ACTIVITY_INFOS);
             proto.write(ArchiveActivityInfo.TITLE, activityInfo.getTitle());
+            proto.write(
+                    ArchiveActivityInfo.ORIGINAL_COMPONENT_NAME,
+                    activityInfo.getOriginalComponentName().flattenToString());
             if (activityInfo.getIconBitmap() != null) {
                 proto.write(ArchiveActivityInfo.ICON_BITMAP_PATH,
                         activityInfo.getIconBitmap().toAbsolutePath().toString());

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.overlay.OverlayPaths;
@@ -192,8 +193,8 @@ public class PackageUserStateTest {
         return new SuspendParams(dialogInfo, appExtras, launcherExtras);
     }
 
-    private static PersistableBundle createPersistableBundle(String lKey, long lValue, String sKey,
-            String sValue, String dKey, double dValue) {
+    private static PersistableBundle createPersistableBundle(
+            String lKey, long lValue, String sKey, String sValue, String dKey, double dValue) {
         final PersistableBundle result = new PersistableBundle(3);
         if (lKey != null) {
             result.putLong("com.unit_test." + lKey, lValue);
@@ -320,6 +321,7 @@ public class PackageUserStateTest {
             assertEquals(0L, state.getLastPackageUsageTimeInMills()[i]);
         }
     }
+
     private static void assertLastPackageUsageSet(
             PackageStateUnserialized state, int reason, long value) throws Exception {
         for (int i = state.getLastPackageUsageTimeInMills().length - 1; i >= 0; --i) {
@@ -330,6 +332,7 @@ public class PackageUserStateTest {
             }
         }
     }
+
     @Test
     public void testPackageUseReasons() throws Exception {
         PackageSetting packageSetting = Mockito.mock(PackageSetting.class);
@@ -377,6 +380,7 @@ public class PackageUserStateTest {
         assertTrue(testState.setOverlayPaths(new OverlayPaths.Builder().build()));
         assertFalse(testState.setOverlayPaths(null));
     }
+
     @Test
     public void testSharedLibOverlayPaths() {
         final PackageUserStateImpl testState = new PackageUserStateImpl();
@@ -401,8 +405,12 @@ public class PackageUserStateTest {
     @Test
     public void archiveState() {
         PackageUserStateImpl packageUserState = new PackageUserStateImpl();
-        ArchiveState.ArchiveActivityInfo archiveActivityInfo = new ArchiveState.ArchiveActivityInfo(
-                "appTitle", Path.of("/path1"), Path.of("/path2"));
+        ArchiveState.ArchiveActivityInfo archiveActivityInfo =
+                new ArchiveState.ArchiveActivityInfo(
+                        "appTitle",
+                        new ComponentName("pkg", "class"),
+                        Path.of("/path1"),
+                        Path.of("/path2"));
         ArchiveState archiveState = new ArchiveState(List.of(archiveActivityInfo),
                 "installerTitle");
         packageUserState.setArchiveState(archiveState);

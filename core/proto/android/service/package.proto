@@ -115,6 +115,9 @@ message PackageProto {
 
                 // Only set if the app defined a monochrome icon.
                 optional string monochrome_icon_bitmap_path = 3;
+
+                // The component name of the original activity (pre-archival).
+                optional string original_component_name = 4;
             }
 
             /** Information about main activities. */

@@ -196,8 +196,12 @@ public class PackageArchiver {
             for (int i = 0, size = mainActivities.length; i < size; ++i) {
                 var mainActivity = mainActivities[i];
                 Path iconPath = storeIconForParcel(packageName, mainActivity, userId, i);
-                ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
-                        mainActivity.title, iconPath, null);
+                ArchiveActivityInfo activityInfo =
+                        new ArchiveActivityInfo(
+                                mainActivity.title,
+                                mainActivity.originalComponentName,
+                                iconPath,
+                                null);
                 archiveActivityInfos.add(activityInfo);
             }
 
@@ -215,8 +219,12 @@ public class PackageArchiver {
         for (int i = 0, size = mainActivities.size(); i < size; i++) {
             LauncherActivityInfo mainActivity = mainActivities.get(i);
             Path iconPath = storeIcon(packageName, mainActivity, userId, i);
-            ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
-                    mainActivity.getLabel().toString(), iconPath, null);
+            ArchiveActivityInfo activityInfo =
+                    new ArchiveActivityInfo(
+                            mainActivity.getLabel().toString(),
+                            mainActivity.getComponentName(),
+                            iconPath,
+                            null);
             archiveActivityInfos.add(activityInfo);
         }
 
@@ -593,6 +601,7 @@ public class PackageArchiver {
             }
             var archivedActivity = new ArchivedActivityParcel();
             archivedActivity.title = info.getTitle();
+            archivedActivity.originalComponentName = info.getOriginalComponentName();
             archivedActivity.iconBitmap = bytesFromBitmapFile(info.getIconBitmap());
             archivedActivity.monochromeIconBitmap = bytesFromBitmapFile(
                     info.getMonochromeIconBitmap());
@@ -624,6 +633,7 @@ public class PackageArchiver {
             }
             var archivedActivity = new ArchivedActivityParcel();
             archivedActivity.title = info.getLabel().toString();
+            archivedActivity.originalComponentName = info.getComponentName();
             archivedActivity.iconBitmap =
                     info.getActivityInfo().getIconResource() == 0 ? null : bytesFromBitmap(
                             drawableToBitmap(info.getIcon(/* density= */ 0)));
