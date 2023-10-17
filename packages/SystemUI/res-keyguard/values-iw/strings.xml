@@ -130,5 +130,5 @@
     <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"צריך למתוח את קו ביטול הנעילה כדי להתקין את העדכון מאוחר יותר"</string>
     <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"המכשיר עודכן. צריך להזין את קוד האימות כדי להמשיך."</string>
     <string name="kg_prompt_after_update_password" msgid="153703052501352094">"המכשיר עודכן. צריך להזין את הסיסמה כדי להמשיך."</string>
-    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"המכשיר עודכן. צריך למתוח את קו ביטול הנעילה כדי להמשיך."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"המכשיר עודכן. יש למתוח קו ביטול נעילה כדי להמשיך"</string>
 </resources>
