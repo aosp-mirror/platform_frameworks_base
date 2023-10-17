@@ -60,6 +60,7 @@ constructor(
                 .map {
                     RecentTask(
                         it.taskId,
+                        it.displayId,
                         it.userId,
                         it.topActivity,
                         it.baseIntent?.component,
