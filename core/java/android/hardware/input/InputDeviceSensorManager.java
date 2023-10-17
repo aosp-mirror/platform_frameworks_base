@@ -644,7 +644,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
         }
 
         @Override
-        protected boolean initDataInjectionImpl(boolean enable) {
+        protected boolean initDataInjectionImpl(boolean enable, int mode) {
             return false;
         }
 

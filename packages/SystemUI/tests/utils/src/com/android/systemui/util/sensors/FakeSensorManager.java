@@ -186,7 +186,7 @@ public class FakeSensorManager extends SensorManager {
     }
 
     @Override
-    protected boolean initDataInjectionImpl(boolean enable) {
+    protected boolean initDataInjectionImpl(boolean enable, @DataInjectionMode int mode) {
         return false;
     }
 

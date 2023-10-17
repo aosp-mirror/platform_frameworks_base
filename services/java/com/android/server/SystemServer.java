@@ -338,6 +338,8 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.modes.ModeManagerService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
             "com.android.clockwork.display.WearDisplayService";
+    private static final String WEAR_DEBUG_SERVICE_CLASS =
+            "com.android.clockwork.debug.WearDebugService";
     private static final String WEAR_TIME_SERVICE_CLASS =
             "com.android.clockwork.time.WearTimeService";
     private static final String WEAR_SETTINGS_SERVICE_CLASS =
@@ -2635,6 +2637,12 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartWearDisplayService");
             mSystemServiceManager.startService(WEAR_DISPLAY_SERVICE_CLASS);
             t.traceEnd();
+
+            if (Build.IS_DEBUGGABLE) {
+                t.traceBegin("StartWearDebugService");
+                mSystemServiceManager.startService(WEAR_DEBUG_SERVICE_CLASS);
+                t.traceEnd();
+            }
 
             t.traceBegin("StartWearTimeService");
             mSystemServiceManager.startService(WEAR_TIME_SERVICE_CLASS);
