@@ -1415,6 +1415,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 break;
             }
         }
+        if (!request.getWarnings().isEmpty()) {
+            extras.putStringArrayList(PackageInstaller.EXTRA_WARNINGS, request.getWarnings());
+        }
         return extras;
     }
 

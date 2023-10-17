@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.pdb;
 
 /**
  * Internal interface for storing and retrieving persistent data.

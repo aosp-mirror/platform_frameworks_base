@@ -46,7 +46,7 @@ int register_android_server_connectivity_Vpn(JNIEnv* env);
 int register_android_server_devicepolicy_CryptoTestHelper(JNIEnv*);
 int register_android_server_tv_TvUinputBridge(JNIEnv* env);
 int register_android_server_tv_TvInputHal(JNIEnv* env);
-int register_android_server_PersistentDataBlockService(JNIEnv* env);
+int register_android_server_pdb_PersistentDataBlockService(JNIEnv* env);
 int register_android_server_Watchdog(JNIEnv* env);
 int register_android_server_HardwarePropertiesManagerService(JNIEnv* env);
 int register_android_server_SyntheticPasswordManager(JNIEnv* env);
@@ -104,7 +104,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_BatteryStatsService(env);
     register_android_server_tv_TvUinputBridge(env);
     register_android_server_tv_TvInputHal(env);
-    register_android_server_PersistentDataBlockService(env);
+    register_android_server_pdb_PersistentDataBlockService(env);
     register_android_server_HardwarePropertiesManagerService(env);
     register_android_server_storage_AppFuse(env);
     register_android_server_SyntheticPasswordManager(env);
