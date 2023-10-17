@@ -16,6 +16,7 @@
 
 package android.telephony.satellite.stub;
 
+import android.telephony.satellite.stub.INtnSignalStrengthConsumer;
 import android.telephony.satellite.stub.ISatelliteCapabilitiesConsumer;
 import android.telephony.satellite.stub.ISatelliteListener;
 import android.telephony.satellite.stub.SatelliteDatagram;
@@ -454,4 +455,44 @@ oneway interface ISatellite {
      */
     void requestIsSatelliteEnabledForCarrier(int simSlot, in IIntegerConsumer resultCallback,
             in IBooleanConsumer callback);
+
+    /**
+     * Request to get the signal strength of the satellite connection.
+     *
+     * @param resultCallback The {@link SatelliteError} result of the operation.
+     * @param callback The callback to handle the NTN signal strength changed event.
+     */
+    void requestSignalStrength(in IIntegerConsumer resultCallback,
+            in INtnSignalStrengthConsumer callback);
+
+    /**
+     * The satellite service should report the NTN signal strength via
+     * ISatelliteListener#onNtnSignalStrengthChanged when the NTN signal strength changes.
+     *
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *
+     * Valid result codes returned:
+     *   SatelliteResult:SATELLITE_RESULT_SUCCESS
+     *   SatelliteResult:SATELLITE_RESULT_SERVICE_ERROR
+     *   SatelliteResult:SATELLITE_RESULT_INVALID_MODEM_STATE
+     *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
+     *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
+     */
+     void startSendingNtnSignalStrength(in IIntegerConsumer resultCallback);
+
+    /**
+     * The satellite service should stop reporting NTN signal strength to the framework. This will
+     * be called when device is screen off to save power by not letting signal strength updates to
+     * wake up application processor.
+     *
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *
+     * Valid result codes returned:
+     *   SatelliteResult:SATELLITE_RESULT_SUCCESS
+     *   SatelliteResult:SATELLITE_RESULT_SERVICE_ERROR
+     *   SatelliteResult:SATELLITE_RESULT_INVALID_MODEM_STATE
+     *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
+     *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
+     */
+     void stopSendingNtnSignalStrength(in IIntegerConsumer resultCallback);
 }

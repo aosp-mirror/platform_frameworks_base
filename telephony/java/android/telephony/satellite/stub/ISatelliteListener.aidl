@@ -16,6 +16,7 @@
 
 package android.telephony.satellite.stub;
 
+import android.telephony.satellite.stub.NtnSignalStrength;
 import android.telephony.satellite.stub.NTRadioTechnology;
 import android.telephony.satellite.stub.PointingInfo;
 import android.telephony.satellite.stub.SatelliteDatagram;
@@ -58,4 +59,10 @@ oneway interface ISatelliteListener {
      * @param state The current satellite modem state.
      */
     void onSatelliteModemStateChanged(in SatelliteModemState state);
+
+    /**
+     * Called when NTN signal strength changes.
+     * @param ntnSignalStrength The new NTN signal strength.
+     */
+    void onNtnSignalStrengthChanged(in NtnSignalStrength ntnSignalStrength);
 }
