@@ -347,8 +347,15 @@ public final class PermissionPolicyService extends SystemService {
                 UserHandle user = UserHandle.getUserHandleForUid(uid);
                 PermissionControllerManager manager = mPermControllerManagers.get(user);
                 if (manager == null) {
-                    manager = new PermissionControllerManager(
-                            getUserContext(getContext(), user), PermissionThread.getHandler());
+                    try {
+                        manager = new PermissionControllerManager(
+                                getUserContext(getContext(), user), PermissionThread.getHandler());
+                    } catch (IllegalArgumentException exception) {
+                        // There's a possible race condition when a user is being removed
+                        Log.e(LOG_TAG, "Could not create PermissionControllerManager for user"
+                                        + user, exception);
+                        return;
+                    }
                     mPermControllerManagers.put(user, manager);
                 }
                 manager.updateUserSensitiveForApp(uid);
