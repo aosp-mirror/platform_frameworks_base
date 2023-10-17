@@ -115,7 +115,7 @@ class CameraGestureHelper @Inject constructor(
                         Intent.FLAG_ACTIVITY_NEW_TASK,
                         null,
                         activityOptions.toBundle(),
-                        selectedUserInteractor.getSelectedUserId(),
+                        selectedUserInteractor.getSelectedUserId(true),
                     )
                 } catch (e: RemoteException) {
                     Log.w(

@@ -35,6 +35,8 @@ import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionOldType;
 import static android.view.WindowManager.TransitionType;
 
+import static com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -608,6 +610,9 @@ public class KeyguardService extends Service {
         public void setCurrentUser(int userId) {
             trace("Deprecated/NOT USED: setCurrentUser userId=" + userId);
             checkPermission();
+            if (!mFlags.isEnabled(REFACTOR_GETCURRENTUSER)) {
+                mKeyguardViewMediator.setCurrentUser(userId);
+            }
         }
 
         @Override // Binder interface

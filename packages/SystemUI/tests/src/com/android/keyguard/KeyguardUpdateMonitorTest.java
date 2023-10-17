@@ -333,6 +333,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ExtendedMockito.doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
                 .when(SubscriptionManager::getDefaultSubscriptionId);
         when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(mCurrentUserId);
+        when(mSelectedUserInteractor.getSelectedUserId(anyBoolean())).thenReturn(mCurrentUserId);
 
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.systemui.res.R.integer.config_face_auth_supported_posture,

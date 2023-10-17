@@ -254,7 +254,8 @@ public class DozeSensors {
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
                         Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
                         mConfig.wakeScreenGestureAvailable()
-                          && mConfig.alwaysOnEnabled(mSelectedUserInteractor.getSelectedUserId()),
+                          && mConfig.alwaysOnEnabled(
+                                  mSelectedUserInteractor.getSelectedUserId(true)),
                         DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE,
                         false /* reports touch coordinates */,
                         false /* touchscreen */
@@ -295,7 +296,7 @@ public class DozeSensors {
 
     private boolean udfpsLongPressConfigured() {
         return mUdfpsEnrolled
-                && (mConfig.alwaysOnEnabled(mSelectedUserInteractor.getSelectedUserId())
+                && (mConfig.alwaysOnEnabled(mSelectedUserInteractor.getSelectedUserId(true))
                 || mScreenOffUdfpsEnabled);
     }
 
@@ -471,7 +472,7 @@ public class DozeSensors {
     private final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
-            if (userId != mSelectedUserInteractor.getSelectedUserId()) {
+            if (userId != mSelectedUserInteractor.getSelectedUserId(true)) {
                 return;
             }
             for (TriggerSensor s : mTriggerSensors) {
@@ -697,13 +698,13 @@ public class DozeSensors {
         }
 
         protected boolean enabledBySetting() {
-            if (!mConfig.enabled(mSelectedUserInteractor.getSelectedUserId())) {
+            if (!mConfig.enabled(mSelectedUserInteractor.getSelectedUserId(true))) {
                 return false;
             } else if (TextUtils.isEmpty(mSetting)) {
                 return true;
             }
             return mSecureSettings.getIntForUser(mSetting, mSettingDefault ? 1 : 0,
-                    mSelectedUserInteractor.getSelectedUserId()) != 0;
+                    mSelectedUserInteractor.getSelectedUserId(true)) != 0;
         }
 
         @Override

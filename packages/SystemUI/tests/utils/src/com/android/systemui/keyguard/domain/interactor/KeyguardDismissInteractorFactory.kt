@@ -60,6 +60,7 @@ object KeyguardDismissInteractorFactory {
             FakeFeatureFlagsClassic().apply {
                 set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, true)
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+                set(Flags.REFACTOR_GETCURRENTUSER, true)
             },
         powerRepository: FakePowerRepository = FakePowerRepository(),
         userRepository: FakeUserRepository = FakeUserRepository(),
@@ -94,9 +95,7 @@ object KeyguardDismissInteractorFactory {
                 repository = powerRepository,
             )
         val selectedUserInteractor =
-            SelectedUserInteractor(
-                repository = userRepository,
-            )
+            SelectedUserInteractor(repository = userRepository, flags = featureFlags)
         return WithDependencies(
             trustRepository = trustRepository,
             keyguardRepository = keyguardRepository,

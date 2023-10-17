@@ -3,6 +3,8 @@ package com.android.systemui.user.domain.interactor
 import android.content.pm.UserInfo
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
@@ -22,7 +24,11 @@ class SelectedUserInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         userRepository.setUserInfos(USER_INFOS)
-        underTest = SelectedUserInteractor(userRepository)
+        underTest =
+            SelectedUserInteractor(
+                userRepository,
+                FakeFeatureFlagsClassic().apply { set(Flags.REFACTOR_GETCURRENTUSER, true) }
+            )
     }
 
     @Test

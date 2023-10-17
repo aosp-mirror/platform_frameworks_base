@@ -235,6 +235,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 .thenReturn(mock(Flow.class));
         when(mDreamingToLockscreenTransitionViewModel.getTransitionEnded())
                 .thenReturn(mock(Flow.class));
+        when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(mDefaultUserId);
+        when(mSelectedUserInteractor.getSelectedUserId(anyBoolean())).thenReturn(mDefaultUserId);
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
                 mContext,
                 new FakeWindowRootViewComponent.Factory(mock(WindowRootView.class)),
@@ -257,6 +259,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mSelectedUserInteractor);
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
+        mFeatureFlags.set(Flags.REFACTOR_GETCURRENTUSER, true);
 
         DejankUtils.setImmediate(true);
 
@@ -269,7 +272,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         }).when(mKeyguardStateController).notifyKeyguardGoingAway(anyBoolean());
 
         createAndStartViewMediator();
-        when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(mDefaultUserId);
     }
 
     /**

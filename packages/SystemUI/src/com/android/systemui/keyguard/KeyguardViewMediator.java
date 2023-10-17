@@ -38,6 +38,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER;
 import static com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.DREAMING_ANIMATION_DURATION_MS;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -618,7 +619,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         public void onUserSwitching(int userId) {
             if (DEBUG) Log.d(TAG, String.format("onUserSwitching %d", userId));
             synchronized (KeyguardViewMediator.this) {
-                notifyTrustedChangedLocked(mUpdateMonitor.getUserHasTrust(userId));
+                if (mFeatureFlags.isEnabled(REFACTOR_GETCURRENTUSER)) {
+                    notifyTrustedChangedLocked(mUpdateMonitor.getUserHasTrust(userId));
+                }
                 resetKeyguardDonePendingLocked();
                 dismiss(null /* callback */, null /* message */);
                 adjustStatusBarLocked();
@@ -1497,6 +1500,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+
+        if (!mFeatureFlags.isEnabled(REFACTOR_GETCURRENTUSER)) {
+            KeyguardUpdateMonitor.setCurrentUser(mUserTracker.getUserId());
+        }
 
         // Assume keyguard is showing (unless it's disabled) until we know for sure, unless Keyguard
         // is disabled.
@@ -2415,6 +2422,19 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     public void setSwitchingUser(boolean switching) {
         mUpdateMonitor.setSwitchingUser(switching);
+    }
+
+    /**
+     * Update the newUserId. Call while holding WindowManagerService lock.
+     * NOTE: Should only be called by KeyguardViewMediator in response to the user id changing.
+     *
+     * @param newUserId The id of the incoming user.
+     */
+    public void setCurrentUser(int newUserId) {
+        KeyguardUpdateMonitor.setCurrentUser(newUserId);
+        synchronized (this) {
+            notifyTrustedChangedLocked(mUpdateMonitor.getUserHasTrust(newUserId));
+        }
     }
 
     /**
@@ -3371,7 +3391,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             if (forceClearFlags) {
                 try {
                     mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
-                            mContext.getPackageName(), mSelectedUserInteractor.getSelectedUserId());
+                            mContext.getPackageName(),
+                            mSelectedUserInteractor.getSelectedUserId(true));
                 } catch (RemoteException e) {
                     Log.d(TAG, "Failed to force clear flags", e);
                 }
@@ -3398,7 +3419,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
             try {
                 mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
-                        mContext.getPackageName(), mSelectedUserInteractor.getSelectedUserId());
+                        mContext.getPackageName(),
+                        mSelectedUserInteractor.getSelectedUserId(true));
             } catch (RemoteException e) {
                 Log.d(TAG, "Failed to set disable flags: " + flags, e);
             }
