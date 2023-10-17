@@ -2,14 +2,14 @@ package: "com.android.server.power.optimization"
 
 flag {
     name: "power_monitor_api"
-    namespace: "power_optimization"
+    namespace: "backstage_power"
     description: "Feature flag for ODPM API"
     bug: "295027807"
 }
 
 flag {
     name: "streamlined_battery_stats"
-    namespace: "power_optimization"
+    namespace: "backstage_power"
     description: "Feature flag for streamlined battery stats"
     bug: "285646152"
 }
