@@ -368,12 +368,20 @@ JTvInputHal::TvInputEventWrapper JTvInputHal::TvInputEventWrapper::createEventWr
 }
 
 JTvInputHal::TvMessageEventWrapper JTvInputHal::TvMessageEventWrapper::createEventWrapper(
-        const AidlTvMessageEvent& aidlTvMessageEvent) {
+        const AidlTvMessageEvent& aidlTvMessageEvent, bool isLegacyMessage) {
+    auto messageList = aidlTvMessageEvent.messages;
     TvMessageEventWrapper event;
-    event.messages.insert(event.messages.begin(), std::begin(aidlTvMessageEvent.messages) + 1,
-                          std::end(aidlTvMessageEvent.messages));
+    // Handle backwards compatibility for V1
+    if (isLegacyMessage) {
+        event.deviceId = messageList[0].groupId;
+        event.messages.insert(event.messages.begin(), std::begin(messageList) + 1,
+                              std::end(messageList));
+    } else {
+        event.deviceId = aidlTvMessageEvent.deviceId;
+        event.messages.insert(event.messages.begin(), std::begin(messageList),
+                              std::end(messageList));
+    }
     event.streamId = aidlTvMessageEvent.streamId;
-    event.deviceId = aidlTvMessageEvent.messages[0].groupId;
     event.type = aidlTvMessageEvent.type;
     return event;
 }
@@ -449,15 +457,30 @@ JTvInputHal::TvInputCallback::TvInputCallback(JTvInputHal* hal) {
 ::ndk::ScopedAStatus JTvInputHal::TvInputCallback::notifyTvMessageEvent(
         const AidlTvMessageEvent& event) {
     const std::string DEVICE_ID_SUBTYPE = "device_id";
-    if (event.messages.size() > 1 && event.messages[0].subType == DEVICE_ID_SUBTYPE) {
-        mHal->mLooper
-                ->sendMessage(new NotifyTvMessageHandler(mHal,
-                                                         TvMessageEventWrapper::createEventWrapper(
-                                                                 event)),
-                              static_cast<int>(event.type));
+    ::ndk::ScopedAStatus status = ::ndk::ScopedAStatus::ok();
+    int32_t aidlVersion = 0;
+    if (mHal->mTvInput->getAidlInterfaceVersion(&aidlVersion).isOk() && event.messages.size() > 0) {
+        bool validLegacyMessage = aidlVersion == 1 &&
+                event.messages[0].subType == DEVICE_ID_SUBTYPE && event.messages.size() > 1;
+        bool validTvMessage = aidlVersion > 1 && event.messages.size() > 0;
+        if (validLegacyMessage || validTvMessage) {
+            mHal->mLooper->sendMessage(
+                    new NotifyTvMessageHandler(mHal,
+                                               TvMessageEventWrapper::
+                                                       createEventWrapper(event,
+                                                                          validLegacyMessage)),
+                    static_cast<int>(event.type));
+        } else {
+            status = ::ndk::ScopedAStatus::fromExceptionCode(EX_ILLEGAL_ARGUMENT);
+            ALOGE("The TVMessage event was malformed for HAL version: %d", aidlVersion);
+        }
+    } else {
+        status = ::ndk::ScopedAStatus::fromExceptionCode(EX_ILLEGAL_ARGUMENT);
+        ALOGE("The TVMessage event was empty or the HAL version (version: %d) could not "
+              "be inferred.",
+              aidlVersion);
     }
-
-    return ::ndk::ScopedAStatus::ok();
+    return status;
 }
 
 JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aidlTvInput)
@@ -518,6 +541,14 @@ JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aid
         return ::ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
     } else {
         return mAidlTvInput->getTvMessageQueueDesc(out_queue, in_deviceId, in_streamId);
+    }
+}
+
+::ndk::ScopedAStatus JTvInputHal::ITvInputWrapper::getAidlInterfaceVersion(int32_t* _aidl_return) {
+    if (mIsHidl) {
+        return ::ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
+    } else {
+        return mAidlTvInput->getInterfaceVersion(_aidl_return);
     }
 }
 
