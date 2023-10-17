@@ -390,6 +390,17 @@ class DisplayRepositoryTest : SysuiTestCase() {
             assertThat(pendingDisplay!!.id).isEqualTo(1)
         }
 
+    @Test
+    fun onDisplayAdded_emitsDisplayAdditionEvent() =
+        testScope.runTest {
+            val display by lastDisplayAdditionEvent()
+
+            sendOnDisplayAdded(1, TYPE_EXTERNAL)
+
+            assertThat(display!!.displayId).isEqualTo(1)
+            assertThat(display!!.type).isEqualTo(TYPE_EXTERNAL)
+        }
+
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
 
     // Wrapper to capture the displayListener.
@@ -411,6 +422,12 @@ class DisplayRepositoryTest : SysuiTestCase() {
         return flowValue
     }
 
+    private fun TestScope.lastDisplayAdditionEvent(): FlowValue<Display?> {
+        val flowValue = collectLastValue(displayRepository.displayAdditionEvent)
+        captureAddedRemovedListener()
+        return flowValue
+    }
+
     private fun captureAddedRemovedListener() {
         verify(displayManager)
             .registerDisplayListener(
@@ -423,9 +440,17 @@ class DisplayRepositoryTest : SysuiTestCase() {
                 )
             )
     }
+
+    private fun sendOnDisplayAdded(id: Int, displayType: Int) {
+        val mockDisplay = display(id = id, type = displayType)
+        whenever(displayManager.getDisplay(eq(id))).thenReturn(mockDisplay)
+        displayListener.value.onDisplayAdded(id)
+    }
+
     private fun sendOnDisplayAdded(id: Int) {
         displayListener.value.onDisplayAdded(id)
     }
+
     private fun sendOnDisplayRemoved(id: Int) {
         displayListener.value.onDisplayRemoved(id)
     }
