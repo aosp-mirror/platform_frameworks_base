@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 
@@ -66,6 +67,7 @@ import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -371,6 +373,13 @@ public final class WMShell implements
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
+        Log.d(TAG, "Dumping with args: " + String.join(", ", args));
+
+        // Strip out the SysUI "dependency" arg before sending to WMShell
+        if (args[0].equals("dependency")) {
+            args = Arrays.copyOfRange(args, 1, args.length);
+        }
+
         // Handle commands if provided
         if (mShell.handleCommand(args, pw)) {
             return;
