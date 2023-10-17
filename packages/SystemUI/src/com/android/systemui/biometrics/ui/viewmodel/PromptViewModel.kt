@@ -81,10 +81,22 @@ constructor(
     val faceIconHeight: Int =
         context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_face_icon_size)
 
+    val fingerprintSensorDiameter: Int =
+        (udfpsOverlayInteractor.udfpsOverlayParams.value.sensorBounds.width() *
+                udfpsOverlayInteractor.udfpsOverlayParams.value.scaleFactor)
+            .toInt()
+    val fingerprintAffordanceSize: Pair<Int, Int>? =
+        if (fingerprintSensorDiameter != 0)
+            Pair(fingerprintSensorDiameter, fingerprintSensorDiameter)
+        else null
+
     private val _accessibilityHint = MutableSharedFlow<String>()
 
     /** Hint for talkback directional guidance */
     val accessibilityHint: Flow<String> = _accessibilityHint.asSharedFlow()
+
+    val promptMargin: Int =
+        context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_border_padding)
 
     private val _isAuthenticating: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -134,6 +146,22 @@ constructor(
 
     /** Event fired to the view indicating a [HapticFeedbackConstants] to be played */
     val hapticsToPlay = _hapticsToPlay.asStateFlow()
+
+    /** The current position of the prompt */
+    val position: Flow<PromptPosition> =
+        combine(_forceLargeSize, modalities, displayStateInteractor.currentRotation) {
+                forceLarge,
+                modalities,
+                rotation ->
+                when {
+                    forceLarge || !modalities.hasUdfps -> PromptPosition.Bottom
+                    rotation == DisplayRotation.ROTATION_90 -> PromptPosition.Right
+                    rotation == DisplayRotation.ROTATION_270 -> PromptPosition.Left
+                    rotation == DisplayRotation.ROTATION_180 -> PromptPosition.Top
+                    else -> PromptPosition.Bottom
+                }
+            }
+            .distinctUntilChanged()
 
     /** The size of the prompt. */
     val size: Flow<PromptSize> =
@@ -195,7 +223,12 @@ constructor(
             .distinctUntilChanged()
 
     val iconViewModel: PromptIconViewModel =
-        PromptIconViewModel(this, displayStateInteractor, promptSelectorInteractor)
+        PromptIconViewModel(
+            this,
+            displayStateInteractor,
+            promptSelectorInteractor,
+            udfpsOverlayInteractor
+        )
 
     private val _isIconViewLoaded = MutableStateFlow(false)
 
