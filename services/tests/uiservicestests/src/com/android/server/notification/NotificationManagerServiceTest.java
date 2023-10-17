@@ -84,7 +84,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ENABLE_ATTENTION_HELPER_REFACTOR;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.FSI_FORCE_DEMOTE;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
@@ -207,6 +206,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.permission.PermissionManager;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -324,6 +324,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private TestableNotificationManagerService mService;
     private INotificationManager mBinderService;
@@ -611,7 +614,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 });
 
         // TODO (b/291907312): remove feature flag
-        mTestFlagResolver.setFlagOverride(ENABLE_ATTENTION_HELPER_REFACTOR, false);
+        mSetFlagsRule.disableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER,
+                Flags.FLAG_POLITE_NOTIFICATIONS);
         initNMS();
     }
 
@@ -652,7 +656,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mHistoryManager).onBootPhaseAppsCanStart();
 
         // TODO b/291907312: remove feature flag
-        if (mTestFlagResolver.isEnabled(ENABLE_ATTENTION_HELPER_REFACTOR)) {
+        if (Flags.refactorAttentionHelper()) {
             mService.mAttentionHelper.setAudioManager(mAudioManager);
         } else {
             mService.setAudioManager(mAudioManager);
@@ -1683,7 +1687,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testEnqueueNotificationWithTag_WritesExpectedLogs_NAHRefactor() throws Exception {
         // TODO b/291907312: remove feature flag
-        mTestFlagResolver.setFlagOverride(ENABLE_ATTENTION_HELPER_REFACTOR, true);
+        mSetFlagsRule.enableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER);
         // Cleanup NMS before re-initializing
         if (mService != null) {
             try {
@@ -9078,7 +9082,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnBubbleMetadataChangedToSuppressNotification_soundStopped_NAHRefactor()
         throws Exception {
         // TODO b/291907312: remove feature flag
-        mTestFlagResolver.setFlagOverride(ENABLE_ATTENTION_HELPER_REFACTOR, true);
+        mSetFlagsRule.enableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER);
         // Cleanup NMS before re-initializing
         if (mService != null) {
             try {
