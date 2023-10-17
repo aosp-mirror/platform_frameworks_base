@@ -377,7 +377,7 @@ public final class MediaRouter2Manager {
     @Nullable
     public RoutingSessionInfo getSystemRoutingSession(@Nullable String packageName) {
         try {
-            return mMediaRouterService.getSystemSessionInfoForPackage(mClient, packageName);
+            return mMediaRouterService.getSystemSessionInfoForPackage(packageName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
