@@ -13,6 +13,7 @@
 // limitations under the License.
 
 aconfig_srcjars = [
+    ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
@@ -21,6 +22,7 @@ aconfig_srcjars = [
     ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
     ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
     ":com.android.text.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.net.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -145,6 +147,26 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+// Package Manager
+aconfig_declarations {
+    name: "android.content.pm.flags-aconfig",
+    package: "android.content.pm",
+    srcs: ["core/java/android/content/pm/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.content.pm.flags-aconfig-java",
+    aconfig_declarations: "android.content.pm.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.content.pm.flags-aconfig-java-host",
+    aconfig_declarations: "android.content.pm.flags-aconfig",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Biometrics
 aconfig_declarations {
     name: "android.hardware.biometrics.flags-aconfig",
@@ -155,5 +177,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.hardware.biometrics.flags-aconfig-java",
     aconfig_declarations: "android.hardware.biometrics.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// CoreNetworking
+java_aconfig_library {
+    name: "com.android.net.flags-aconfig-java",
+    aconfig_declarations: "com.android.net.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

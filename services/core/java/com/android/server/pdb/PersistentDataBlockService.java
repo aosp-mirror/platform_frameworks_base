@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.pdb;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 
@@ -37,6 +37,9 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.LocalServices;
+import com.android.server.SystemServerInitThreadPool;
+import com.android.server.SystemService;
 
 import libcore.io.IoUtils;
 

@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 
-import com.android.server.PersistentDataBlockManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -81,6 +81,11 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     @Override
     protected File getSyntheticPasswordDirectoryForUser(int userId) {
         return remapToStorageDir(super.getSyntheticPasswordDirectoryForUser(userId));
+    }
+
+    @Override
+    File getRepairModePersistentDataFile() {
+        return remapToStorageDir(super.getRepairModePersistentDataFile());
     }
 
     @Override
