@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
@@ -1272,8 +1271,9 @@ public class ViewConfiguration {
      * @see InputDevice#getMotionRanges()
      * @see InputDevice#getMotionRange(int)
      * @see InputDevice#getMotionRange(int, int)
+     *
+     * @hide
      */
-    @FlaggedApi(Flags.FLAG_SCROLL_FEEDBACK_API)
     public boolean isHapticScrollFeedbackEnabled(int inputDeviceId, int axis, int source) {
         if (!isInputDeviceInfoValid(inputDeviceId, axis, source)) return false;
 
@@ -1315,8 +1315,9 @@ public class ViewConfiguration {
      *      returns {@code Integer.MAX_VALUE}.
      *
      * @see #isHapticScrollFeedbackEnabled(int, int, int)
+     *
+     * @hide
      */
-    @FlaggedApi(Flags.FLAG_SCROLL_FEEDBACK_API)
     public int getHapticScrollFeedbackTickInterval(int inputDeviceId, int axis, int source) {
         if (!mRotaryEncoderHapticScrollFeedbackEnabled) {
             return NO_HAPTIC_SCROLL_TICK_INTERVAL;
