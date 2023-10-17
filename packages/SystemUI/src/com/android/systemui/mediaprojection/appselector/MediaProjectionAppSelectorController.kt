@@ -18,6 +18,8 @@ package com.android.systemui.mediaprojection.appselector
 
 import android.content.ComponentName
 import android.os.UserHandle
+import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED as STATE_APP_SELECTOR_DISPLAYED
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnailLoader
@@ -43,9 +45,17 @@ constructor(
     @MediaProjectionAppSelector private val appSelectorComponentName: ComponentName,
     @MediaProjectionAppSelector private val callerPackageName: String?,
     private val thumbnailLoader: RecentTaskThumbnailLoader,
+    @MediaProjectionAppSelector private val isFirstStart: Boolean,
+    private val logger: MediaProjectionMetricsLogger,
 ) {
 
     fun init() {
+        // Only log during the first start of the app selector.
+        // Don't log when the app selector restarts due to a config change.
+        if (isFirstStart) {
+            logger.notifyPermissionProgress(STATE_APP_SELECTOR_DISPLAYED)
+        }
+
         scope.launch {
             val recentTasks = recentTaskListProvider.loadRecentTasks()
 

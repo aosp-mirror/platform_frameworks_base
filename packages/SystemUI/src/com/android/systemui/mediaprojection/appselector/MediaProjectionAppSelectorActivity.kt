@@ -87,14 +87,15 @@ class MediaProjectionAppSelectorActivity(
 
     override fun getLayoutResource() = R.layout.media_projection_app_selector
 
-    public override fun onCreate(bundle: Bundle?) {
+    public override fun onCreate(savedInstanceState: Bundle?) {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         component =
             componentFactory.create(
                 hostUserHandle = hostUserHandle,
                 callingPackage = callingPackage,
                 view = this,
-                resultHandler = this
+                resultHandler = this,
+                isFirstStart = savedInstanceState == null
             )
         component.lifecycleObservers.forEach { lifecycle.addObserver(it) }
 
@@ -113,7 +114,7 @@ class MediaProjectionAppSelectorActivity(
         reviewGrantedConsentRequired =
             intent.getBooleanExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, false)
 
-        super.onCreate(bundle)
+        super.onCreate(savedInstanceState)
         controller.init()
         // we override AppList's AccessibilityDelegate set in ResolverActivity.onCreate because in
         // our case this delegate must extend RecyclerViewAccessibilityDelegate, otherwise
