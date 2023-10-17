@@ -263,8 +263,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 if (result.success) {
                     mCached = true;
                     mCache = result.bitmap;
-                    mMediaManager.updateMediaMetaData(
-                            true /* metaDataChanged */, true /* allowEnterAnimation */);
+                    mMediaManager.updateMediaMetaData(true /* metaDataChanged */);
                 }
                 mLoader = null;
             }

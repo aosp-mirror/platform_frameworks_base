@@ -498,8 +498,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             case MODE_WAKE_AND_UNLOCK:
                 if (mMode == MODE_WAKE_AND_UNLOCK_PULSING) {
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK_PULSING");
-                    mMediaManager.updateMediaMetaData(false /* metaDataChanged */,
-                            true /* allowEnterAnimation */);
+                    mMediaManager.updateMediaMetaData(false /* metaDataChanged */);
                 } else if (mMode == MODE_WAKE_AND_UNLOCK){
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK");
                 } else {

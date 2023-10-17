@@ -221,7 +221,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
 
     @Override
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
-        mMediaManager.updateMediaMetaData(metaDataChanged, allowEnterAnimation);
+        mMediaManager.updateMediaMetaData(metaDataChanged);
     }
 
     @Override
