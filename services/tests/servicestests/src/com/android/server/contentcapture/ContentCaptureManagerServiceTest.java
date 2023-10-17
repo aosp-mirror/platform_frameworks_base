@@ -59,6 +59,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -102,6 +103,10 @@ public class ContentCaptureManagerServiceTest {
     @Mock private ContentProtectionConsentManager mMockContentProtectionConsentManager;
 
     private boolean mDevCfgEnableContentProtectionReceiver;
+
+    private List<List<String>> mDevCfgContentProtectionRequiredGroups = List.of(List.of("a"));
+
+    private List<List<String>> mDevCfgContentProtectionOptionalGroups = Collections.emptyList();
 
     private int mContentProtectionBlocklistManagersCreated;
 
@@ -374,7 +379,21 @@ public class ContentCaptureManagerServiceTest {
     }
 
     @Test
-    public void isContentProtectionReceiverEnabled_withoutManagers() {
+    public void isContentProtectionReceiverEnabled_true() {
+        when(mMockContentProtectionConsentManager.isConsentGranted(USER_ID)).thenReturn(true);
+        when(mMockContentProtectionBlocklistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
+        mDevCfgEnableContentProtectionReceiver = true;
+        mContentCaptureManagerService = new TestContentCaptureManagerService();
+
+        boolean actual =
+                mContentCaptureManagerService.mGlobalContentCaptureOptions.isWhitelisted(
+                        USER_ID, PACKAGE_NAME);
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    public void isContentProtectionReceiverEnabled_false_withoutManagers() {
         boolean actual =
                 mContentCaptureManagerService.mGlobalContentCaptureOptions.isWhitelisted(
                         USER_ID, PACKAGE_NAME);
@@ -385,10 +404,26 @@ public class ContentCaptureManagerServiceTest {
     }
 
     @Test
-    public void isContentProtectionReceiverEnabled_disabledWithFlag() {
+    public void isContentProtectionReceiverEnabled_false_disabledWithFlag() {
         mDevCfgEnableContentProtectionReceiver = true;
         mContentCaptureManagerService = new TestContentCaptureManagerService();
         mContentCaptureManagerService.mDevCfgEnableContentProtectionReceiver = false;
+
+        boolean actual =
+                mContentCaptureManagerService.mGlobalContentCaptureOptions.isWhitelisted(
+                        USER_ID, PACKAGE_NAME);
+
+        assertThat(actual).isFalse();
+        verify(mMockContentProtectionConsentManager, never()).isConsentGranted(anyInt());
+        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+    }
+
+    @Test
+    public void isContentProtectionReceiverEnabled_false_emptyGroups() {
+        mDevCfgEnableContentProtectionReceiver = true;
+        mDevCfgContentProtectionRequiredGroups = Collections.emptyList();
+        mDevCfgContentProtectionOptionalGroups = Collections.emptyList();
+        mContentCaptureManagerService = new TestContentCaptureManagerService();
 
         boolean actual =
                 mContentCaptureManagerService.mGlobalContentCaptureOptions.isWhitelisted(
@@ -525,6 +560,10 @@ public class ContentCaptureManagerServiceTest {
             super(sContext);
             this.mDevCfgEnableContentProtectionReceiver =
                     ContentCaptureManagerServiceTest.this.mDevCfgEnableContentProtectionReceiver;
+            this.mDevCfgContentProtectionRequiredGroups =
+                    ContentCaptureManagerServiceTest.this.mDevCfgContentProtectionRequiredGroups;
+            this.mDevCfgContentProtectionOptionalGroups =
+                    ContentCaptureManagerServiceTest.this.mDevCfgContentProtectionOptionalGroups;
         }
 
         @Override

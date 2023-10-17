@@ -28,33 +28,39 @@ import android.view.contentcapture.ViewNode;
  */
 public final class ContentProtectionUtils {
 
-    /** Returns the text extracted directly from the {@link ContentCaptureEvent}, if set. */
+    /** Returns the lowercase text extracted from the {@link ContentCaptureEvent}, if set. */
     @Nullable
-    public static String getEventText(@NonNull ContentCaptureEvent event) {
+    public static String getEventTextLower(@NonNull ContentCaptureEvent event) {
         CharSequence text = event.getText();
         if (text == null) {
             return null;
         }
-        return text.toString();
+        return text.toString().toLowerCase();
     }
 
-    /** Returns the text extracted from the event's {@link ViewNode}, if set. */
+    /** Returns the lowercase text extracted from the {@link ViewNode}, if set. */
     @Nullable
-    public static String getViewNodeText(@NonNull ContentCaptureEvent event) {
-        ViewNode viewNode = event.getViewNode();
+    public static String getViewNodeTextLower(@Nullable ViewNode viewNode) {
         if (viewNode == null) {
             return null;
         }
-        return getViewNodeText(viewNode);
-    }
-
-    /** Returns the text extracted directly from the {@link ViewNode}, if set. */
-    @Nullable
-    public static String getViewNodeText(@NonNull ViewNode viewNode) {
         CharSequence text = viewNode.getText();
         if (text == null) {
             return null;
         }
-        return text.toString();
+        return text.toString().toLowerCase();
+    }
+
+    /** Returns the lowercase hint text extracted from the {@link ViewNode}, if set. */
+    @Nullable
+    public static String getHintTextLower(@Nullable ViewNode viewNode) {
+        if (viewNode == null) {
+            return null;
+        }
+        String text = viewNode.getHint();
+        if (text == null) {
+            return null;
+        }
+        return text.toLowerCase();
     }
 }
