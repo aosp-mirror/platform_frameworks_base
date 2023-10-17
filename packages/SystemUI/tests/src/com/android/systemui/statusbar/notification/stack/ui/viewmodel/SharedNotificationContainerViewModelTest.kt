@@ -192,9 +192,25 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             val isOnLockscreen by collectLastValue(underTest.isOnLockscreen)
 
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(to = KeyguardState.GONE, transitionState = TransitionState.FINISHED)
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                )
             )
             assertThat(isOnLockscreen).isFalse()
+
+            // While progressing from lockscreen, should still be true
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    value = 0.8f,
+                    transitionState = TransitionState.RUNNING
+                )
+            )
+            assertThat(isOnLockscreen).isTrue()
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
