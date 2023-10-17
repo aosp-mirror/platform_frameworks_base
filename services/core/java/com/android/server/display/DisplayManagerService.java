@@ -2974,7 +2974,7 @@ public final class DisplayManagerService extends SystemService {
 
     // Check if the target app is in cached mode
     private boolean isUidCached(int uid) {
-        if (mActivityManagerInternal == null) {
+        if (mActivityManagerInternal == null || uid < FIRST_APPLICATION_UID) {
             return false;
         }
         int procState = mActivityManagerInternal.getUidProcessState(uid);
