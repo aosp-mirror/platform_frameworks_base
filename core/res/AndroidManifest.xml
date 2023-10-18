@@ -7143,7 +7143,7 @@
          {@link ActivityOptions#makeRemoteAnimation}
          @hide <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|recents" />
 
     <!-- Allows an application to watch changes and/or active state of app ops.
          @hide <p>Not for use by third-party applications. -->
