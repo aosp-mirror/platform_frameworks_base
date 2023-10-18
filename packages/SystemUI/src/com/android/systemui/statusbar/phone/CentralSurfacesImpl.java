@@ -1525,6 +1525,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // regressions, we'll continue standing up the root view in CentralSurfaces.
         mNotificationShadeWindowController.fetchWindowRootView();
         getNotificationShadeWindowViewController().setupExpandedStatusBar();
+        getNotificationShadeWindowViewController().setupCommunalHubLayout();
         mShadeController.setNotificationShadeWindowViewController(
                 getNotificationShadeWindowViewController());
         mBackActionInteractor.setup(mQsController, mShadeSurface);
