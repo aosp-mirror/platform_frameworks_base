@@ -118,6 +118,7 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "accessibility",
         "android_core_networking",
         "angle",
         "arc_next",
