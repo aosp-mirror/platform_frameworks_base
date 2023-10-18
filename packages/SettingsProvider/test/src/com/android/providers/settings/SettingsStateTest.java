@@ -76,6 +76,14 @@ public class SettingsStateTest extends AndroidTestCase {
         mSettingsFile.delete();
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+        if (mSettingsFile != null) {
+            mSettingsFile.delete();
+        }
+        super.tearDown();
+    }
+
     public void testIsBinary() {
         assertFalse(SettingsState.isBinary(" abc 日本語"));
 
@@ -149,11 +157,10 @@ public class SettingsStateTest extends AndroidTestCase {
      * Make sure settings can be written to a file and also can be read.
      */
     public void testReadWrite() {
-        final File file = new File(getContext().getCacheDir(), "setting.xml");
-        file.delete();
         final Object lock = new Object();
 
-        final SettingsState ssWriter = new SettingsState(getContext(), lock, file, 1,
+        assertFalse(mSettingsFile.exists());
+        final SettingsState ssWriter = new SettingsState(getContext(), lock, mSettingsFile, 1,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         ssWriter.setVersionLocked(SettingsState.SETTINGS_VERSION_NEW_ENCODING);
 
@@ -162,11 +169,13 @@ public class SettingsStateTest extends AndroidTestCase {
         ssWriter.insertSettingLocked("k3", null, null, false, "p2");
         ssWriter.insertSettingLocked("k4", CRAZY_STRING, null, false, "p3");
         synchronized (lock) {
-            ssWriter.persistSyncLocked();
+            ssWriter.persistSettingsLocked();
         }
-
-        final SettingsState ssReader = new SettingsState(getContext(), lock, file, 1,
+        ssWriter.waitForHandler();
+        assertTrue(mSettingsFile.exists());
+        final SettingsState ssReader = new SettingsState(getContext(), lock, mSettingsFile, 1,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
         synchronized (lock) {
             assertEquals("\u0000", ssReader.getSettingLocked("k1").getValue());
             assertEquals("abc", ssReader.getSettingLocked("k2").getValue());
@@ -179,10 +188,8 @@ public class SettingsStateTest extends AndroidTestCase {
      * In version 120, value "null" meant {code NULL}.
      */
     public void testUpgrade() throws Exception {
-        final File file = new File(getContext().getCacheDir(), "setting.xml");
-        file.delete();
         final Object lock = new Object();
-        final PrintStream os = new PrintStream(new FileOutputStream(file));
+        final PrintStream os = new PrintStream(new FileOutputStream(mSettingsFile));
         os.print(
                 "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>" +
                         "<settings version=\"120\">" +
@@ -192,7 +199,7 @@ public class SettingsStateTest extends AndroidTestCase {
                         "</settings>");
         os.close();
 
-        final SettingsState ss = new SettingsState(getContext(), lock, file, 1,
+        final SettingsState ss = new SettingsState(getContext(), lock, mSettingsFile, 1,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         synchronized (lock) {
             SettingsState.Setting s;
@@ -213,7 +220,8 @@ public class SettingsStateTest extends AndroidTestCase {
     public void testInitializeSetting_preserveFlagNotSet() {
         SettingsState settingsWriter = getSettingStateObject();
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertFalse(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
@@ -223,7 +231,8 @@ public class SettingsStateTest extends AndroidTestCase {
         SettingsState settingsWriter = getSettingStateObject();
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, TEST_PACKAGE);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertTrue(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
@@ -234,7 +243,8 @@ public class SettingsStateTest extends AndroidTestCase {
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, false, TEST_PACKAGE,
                 /* overrideableByRestore */ true);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertFalse(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
@@ -250,7 +260,8 @@ public class SettingsStateTest extends AndroidTestCase {
         // already been set to true.
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, false, TEST_PACKAGE,
                 /* overrideableByRestore */ true);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertTrue(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
@@ -481,8 +492,11 @@ public class SettingsStateTest extends AndroidTestCase {
             settingsState.insertSettingLocked(
                     FLAG_NAME_1_STAGED, VALUE1, null, false, TEST_PACKAGE);
             settingsState.insertSettingLocked(FLAG_NAME_2, VALUE2, null, false, TEST_PACKAGE);
-            settingsState.persistSyncLocked();
+            settingsState.persistSettingsLocked();
+        }
+        settingsState.waitForHandler();
 
+        synchronized (lock) {
             assertEquals(VALUE1, settingsState.getSettingLocked(FLAG_NAME_1_STAGED).getValue());
             assertEquals(VALUE2, settingsState.getSettingLocked(FLAG_NAME_2).getValue());
         }
@@ -522,7 +536,10 @@ public class SettingsStateTest extends AndroidTestCase {
         synchronized (lock) {
             settingsState.insertSettingLocked(INVALID_STAGED_FLAG_1,
                     VALUE2, null, false, TEST_PACKAGE);
-            settingsState.persistSyncLocked();
+            settingsState.persistSettingsLocked();
+        }
+        settingsState.waitForHandler();
+        synchronized (lock) {
             assertEquals(VALUE2, settingsState.getSettingLocked(INVALID_STAGED_FLAG_1).getValue());
         }
 
