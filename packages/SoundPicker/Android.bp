@@ -7,40 +7,22 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_library {
-    name: "SoundPickerLib",
-    srcs: [
-        "src/**/*.java",
-    ],
-    resource_dirs: [
-        "res",
-    ],
-    static_libs: [
-        "androidx.appcompat_appcompat",
-        "hilt_android",
-        "guava",
-        "androidx.recyclerview_recyclerview",
-        "androidx-constraintlayout_constraintlayout",
-        "androidx.viewpager2_viewpager2",
-        "com.google.android.material_material",
-    ],
-}
-
 android_app {
     name: "SoundPicker",
     defaults: ["platform_app_defaults"],
     manifest: "AndroidManifest.xml",
-    static_libs: ["SoundPickerLib"],
+
+    static_libs: [
+        "androidx.appcompat_appcompat",
+    ],
+    resource_dirs: [
+        "res",
+    ],
+    srcs: [
+        "src/**/*.java",
+    ],
+
     platform_apis: true,
     certificate: "media",
     privileged: true,
-
-    optimize: {
-        enabled: true,
-        optimize: true,
-        shrink: true,
-        shrink_resources: true,
-        obfuscate: false,
-        proguard_compatibility: false,
-    },
 }

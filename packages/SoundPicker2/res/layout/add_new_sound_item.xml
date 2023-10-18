@@ -19,7 +19,9 @@
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:gravity="center_vertical"
-              android:background="?android:attr/selectableItemBackground">
+              android:background="?android:attr/selectableItemBackground"
+              android:focusable="true"
+              android:clickable="true">
 
     <ImageView
         android:layout_width="24dp"
@@ -29,19 +31,19 @@
         android:scaleType="centerCrop"
         android:layout_marginRight="24dp"
         android:layout_marginLeft="24dp"
-        android:src="@drawable/ic_add" />
+        android:src="@drawable/ic_add"/>
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/add_new_sound_text"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:minHeight="?android:attr/listPreferredItemHeightSmall"
-              android:text="@null"
-              android:textColor="?android:attr/colorAccent"
-              android:textAppearance="?android:attr/textAppearanceMedium"
-              android:maxLines="3"
-              android:gravity="center_vertical"
-              android:paddingEnd="?android:attr/dialogPreferredPadding"
-              android:drawablePadding="20dp"
-              android:ellipsize="marquee" />
+    <TextView
+        android:id="@+id/add_new_sound_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:text="@null"
+        android:textColor="?android:attr/colorAccent"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:maxLines="3"
+        android:gravity="center_vertical"
+        android:paddingEnd="?android:attr/dialogPreferredPadding"
+        android:drawablePadding="20dp"
+        android:ellipsize="marquee"/>
 </LinearLayout>

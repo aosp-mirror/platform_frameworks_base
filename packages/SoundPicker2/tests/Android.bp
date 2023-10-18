@@ -17,7 +17,7 @@ package {
 }
 
 android_test {
-    name: "SoundPickerTests",
+    name: "SoundPicker2Tests",
     certificate: "platform",
     libs: [
         "android.test.runner",
@@ -30,7 +30,7 @@ android_test {
         "androidx.test.ext.truth",
         "mockito-target-minus-junit4",
         "guava-android-testlib",
-        "SoundPickerLib",
+        "SoundPicker2Lib",
     ],
     srcs: [
         "src/**/*.java",
