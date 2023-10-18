@@ -16,6 +16,7 @@
 
 package com.android.systemui.settings.brightness;
 
+import static android.content.Intent.EXTRA_BRIGHTNESS_DIALOG_IS_FULL_WIDTH;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY;
@@ -83,7 +84,7 @@ public class BrightnessDialog extends Activity {
     private void setWindowAttributes() {
         final Window window = getWindow();
 
-        window.setGravity(Gravity.TOP | Gravity.LEFT);
+        window.setGravity(Gravity.TOP | Gravity.START);
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.requestFeature(Window.FEATURE_NO_TITLE);
 
@@ -130,13 +131,14 @@ public class BrightnessDialog extends Activity {
 
         Configuration configuration = getResources().getConfiguration();
         int orientation = configuration.orientation;
+        int screenWidth = getWindowManager().getDefaultDisplay().getWidth();
 
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.width = getWindowManager().getDefaultDisplay().getWidth() / 2
-                    - lp.leftMargin * 2;
+            boolean shouldBeFullWidth = getIntent()
+                    .getBooleanExtra(EXTRA_BRIGHTNESS_DIALOG_IS_FULL_WIDTH, false);
+            lp.width = (shouldBeFullWidth ? screenWidth : screenWidth / 2) - horizontalMargin * 2;
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            lp.width = getWindowManager().getDefaultDisplay().getWidth()
-                    - lp.leftMargin * 2;
+            lp.width = screenWidth - horizontalMargin * 2;
         }
 
         frame.setLayoutParams(lp);
