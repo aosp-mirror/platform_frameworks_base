@@ -15,6 +15,7 @@
  */
 package com.android.systemui.data
 
+import com.android.systemui.accessibility.data.FakeAccessibilityDataLayerModule
 import com.android.systemui.authentication.data.FakeAuthenticationDataLayerModule
 import com.android.systemui.bouncer.data.repository.FakeBouncerDataLayerModule
 import com.android.systemui.common.ui.data.FakeCommonDataLayerModule
@@ -30,6 +31,7 @@ import dagger.Module
 @Module(
     includes =
         [
+            FakeAccessibilityDataLayerModule::class,
             FakeAuthenticationDataLayerModule::class,
             FakeBouncerDataLayerModule::class,
             FakeCommonDataLayerModule::class,

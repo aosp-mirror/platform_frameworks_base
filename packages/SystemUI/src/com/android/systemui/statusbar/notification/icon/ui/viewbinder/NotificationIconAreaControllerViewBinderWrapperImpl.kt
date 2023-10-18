@@ -21,13 +21,10 @@ import android.view.View
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.RefactorFlag
 import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
@@ -53,15 +50,10 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val featureFlags: FeatureFlagsClassic,
     private val screenOffAnimationController: ScreenOffAnimationController,
-    private val shelfIconViewStore: ShelfNotificationIconViewStore,
-    private val shelfIconsViewModel: NotificationIconContainerShelfViewModel,
     private val aodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val aodIconsViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
 ) : NotificationIconAreaController {
 
-    private val shelfRefactor = RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR)
-
-    private var shelfIcons: NotificationIconContainer? = null
     private var aodIcons: NotificationIconContainer? = null
     private var aodBindJob: DisposableHandle? = null
 
@@ -91,21 +83,7 @@ constructor(
     override fun setupShelf(notificationShelfController: NotificationShelfController) =
         NotificationShelfViewBinderWrapperControllerImpl.unsupported
 
-    override fun setShelfIcons(icons: NotificationIconContainer) {
-        if (shelfRefactor.isUnexpectedlyInLegacyMode()) {
-            NotificationIconContainerViewBinder.bind(
-                icons,
-                shelfIconsViewModel,
-                configuration,
-                configurationController,
-                dozeParameters,
-                featureFlags,
-                screenOffAnimationController,
-                shelfIconViewStore,
-            )
-            shelfIcons = icons
-        }
-    }
+    override fun setShelfIcons(icons: NotificationIconContainer) = unsupported
 
     override fun onDensityOrFontScaleChanged(context: Context) = unsupported
 

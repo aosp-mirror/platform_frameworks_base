@@ -17,15 +17,20 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.keyguard.FaceAuthUiEvent
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
-class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
+@SysUISingleton
+class FakeDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceAuthRepository {
 
     override val isAuthenticated = MutableStateFlow(false)
     override val canRunFaceAuth = MutableStateFlow(false)
@@ -65,4 +70,9 @@ class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
         _isAuthRunning.value = false
         _runningAuthRequest.value = null
     }
+}
+
+@Module
+interface FakeDeviceEntryFaceAuthRepositoryModule {
+    @Binds fun bindFake(fake: FakeDeviceEntryFaceAuthRepository): DeviceEntryFaceAuthRepository
 }
