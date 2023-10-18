@@ -561,7 +561,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PROC_START_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     // How long we wait for a launched process to complete its app startup before we ANR.
-    static final int BIND_APPLICATION_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+    static final int BIND_APPLICATION_TIMEOUT = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     // How long we wait to kill an application zygote, after the last process using
     // it has gone away.
