@@ -40,6 +40,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_ALL_APPS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_SEARCH_RESULT;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNFOLD_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNLOCK_ENTRANCE_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_LAUNCH_CAMERA;
@@ -273,7 +274,9 @@ public class InteractionJankMonitor {
 
     public static final int CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER = 82;
 
-    private static final int LAST_CUJ = CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
+    public static final int CUJ_LAUNCHER_UNFOLD_ANIM = 83;
+
+    private static final int LAST_CUJ = CUJ_LAUNCHER_UNFOLD_ANIM;
     private static final int NO_STATSD_LOGGING = -1;
 
     // Used to convert CujType to InteractionType enum value for statsd logging.
@@ -366,6 +369,7 @@ public class InteractionJankMonitor {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_IME_INSETS_SHOW_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_SHOW_ANIMATION;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_IME_INSETS_HIDE_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_HIDE_ANIMATION;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_UNFOLD_ANIM] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNFOLD_ANIM;
     }
 
     private static class InstanceHolder {
@@ -468,6 +472,7 @@ public class InteractionJankMonitor {
             CUJ_IME_INSETS_SHOW_ANIMATION,
             CUJ_IME_INSETS_HIDE_ANIMATION,
             CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER,
+            CUJ_LAUNCHER_UNFOLD_ANIM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -1101,6 +1106,8 @@ public class InteractionJankMonitor {
                 return "IME_INSETS_HIDE_ANIMATION";
             case CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER:
                 return "SPLIT_SCREEN_DOUBLE_TAP_DIVIDER";
+            case CUJ_LAUNCHER_UNFOLD_ANIM:
+                return "LAUNCHER_UNFOLD_ANIM";
         }
         return "UNKNOWN";
     }
