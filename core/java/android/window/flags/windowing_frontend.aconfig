@@ -18,7 +18,7 @@ flag {
   name: "dimmer_refactor"
   namespace: "windowing_frontend"
   description: "Refactor dim to fix flickers"
-  bug: "281632483,295291019"
+  bug: "295291019"
   is_fixed_read_only: true
 }
 
