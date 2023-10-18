@@ -2880,7 +2880,9 @@ public final class DisplayManagerService extends SystemService {
             final DisplayPowerControllerInterface displayPowerController =
                     mDisplayPowerControllers.get(displayId);
             if (displayPowerController != null) {
-                displayPowerController.setAutomaticScreenBrightnessMode(enabled);
+                displayPowerController.setAutomaticScreenBrightnessMode(enabled
+                        ? AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE
+                        : AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT);
             }
         }
     }
