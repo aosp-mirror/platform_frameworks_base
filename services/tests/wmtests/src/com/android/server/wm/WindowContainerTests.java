@@ -293,6 +293,7 @@ public class WindowContainerTests extends WindowTestsBase {
     public void testRemoveImmediatelyClearsLeash() {
         final AnimationAdapter animAdapter = mock(AnimationAdapter.class);
         final WindowToken token = createTestWindowToken(TYPE_APPLICATION_OVERLAY, mDisplayContent);
+        mWm.mAnimator.ready();
         final SurfaceControl.Transaction t = token.getPendingTransaction();
         token.startAnimation(t, animAdapter, false /* hidden */,
                 SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
@@ -300,9 +301,14 @@ public class WindowContainerTests extends WindowTestsBase {
                 ArgumentCaptor.forClass(SurfaceControl.class);
         verify(animAdapter).startAnimation(leashCaptor.capture(), eq(t), anyInt(), any());
         assertTrue(token.mSurfaceAnimator.hasLeash());
+        waitUntilWindowAnimatorIdle();
+        verify(mDisplayContent).enableHighFrameRate(true);
+
         token.removeImmediately();
         assertFalse(token.mSurfaceAnimator.hasLeash());
         verify(t).remove(eq(leashCaptor.getValue()));
+        waitUntilWindowAnimatorIdle();
+        verify(mDisplayContent).enableHighFrameRate(false);
     }
 
     @Test

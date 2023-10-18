@@ -249,7 +249,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     private boolean mIsSeamlessRotation = false;
     private IContainerFreezer mContainerFreezer = null;
-    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
 
     /**
      * {@code true} if some other operation may have caused the originally-recorded state (in
@@ -628,11 +627,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         mLogger.mStartTimeNs = SystemClock.elapsedRealtimeNanos();
 
-        mController.updateAnimatingState(mTmpTransaction);
-        // merge into the next-time the global transaction is applied. This is too-early to set
-        // early-wake anyways, so we don't need to apply immediately (in fact applying right now
-        // can preempt more-important work).
-        SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
+        mController.updateAnimatingState();
     }
 
     /**
@@ -704,7 +699,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (dc == null || mTargetDisplays.contains(dc)) return;
         mTargetDisplays.add(dc);
         addOnTopTasks(dc, mOnTopTasksStart);
-        mController.startPerfHintForDisplay(dc.mDisplayId);
+        // Handle the case {transition.start(); applyTransaction(wct);} that the animating state
+        // is set before collecting participants.
+        if (mController.isAnimating()) {
+            dc.enableHighPerfTransition(true);
+        }
     }
 
     /**
@@ -1407,8 +1406,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     false /* forceRelayout */);
         }
         cleanUpInternal();
-        mController.updateAnimatingState(mTmpTransaction);
-        mTmpTransaction.apply();
+        mController.updateAnimatingState();
 
         // Handle back animation if it's already started.
         mController.mAtm.mBackNavigationController.onTransitionFinish(mTargets, this);
