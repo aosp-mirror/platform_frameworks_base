@@ -45,13 +45,13 @@
     <integer name="config_pipForceCloseDelay">5000</integer>
 
     <!-- Animation duration when exit starting window: fade out icon -->
-    <integer name="starting_window_app_reveal_icon_fade_out_duration">500</integer>
+    <integer name="starting_window_app_reveal_icon_fade_out_duration">200</integer>
 
     <!-- Animation delay when exit starting window: reveal app -->
-    <integer name="starting_window_app_reveal_anim_delay">0</integer>
+    <integer name="starting_window_app_reveal_anim_delay">200</integer>
 
     <!-- Animation duration when exit starting window: reveal app -->
-    <integer name="starting_window_app_reveal_anim_duration">500</integer>
+    <integer name="starting_window_app_reveal_anim_duration">300</integer>
 
     <!-- Default animation type when hiding the starting window. The possible values are:
           - 0 for radial vanish + slide up
