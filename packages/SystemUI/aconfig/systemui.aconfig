@@ -29,3 +29,10 @@ flag {
         "Notification Manager Service"
     bug: "299448097"
 }
+
+flag {
+    name: "scene_container"
+    namespace: "systemui"
+    description: "Enables the scene container framework go/flexiglass."
+    bug: "283121968"
+}
