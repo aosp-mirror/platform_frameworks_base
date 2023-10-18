@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.layout.ui.compose.config
 
+import android.util.SizeF
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -26,8 +27,11 @@ abstract class CommunalGridLayoutCard {
      *
      * To host non-Compose views, see
      * https://developer.android.com/jetpack/compose/migrate/interoperability-apis/views-in-compose.
+     *
+     * @param size The size given to the card. Content of the card should fill all this space, given
+     *   that margins and paddings have been taken care of by the layout.
      */
-    @Composable abstract fun Content(modifier: Modifier)
+    @Composable abstract fun Content(modifier: Modifier, size: SizeF)
 
     /**
      * Sizes supported by the card.

@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.data.model
+package com.android.systemui.communal.shared.model
 
-import com.android.systemui.communal.shared.model.CommunalContentSize
+import android.appwidget.AppWidgetProviderInfo
 
-/** Metadata for the default widgets */
-data class CommunalWidgetMetadata(
-    /* Widget provider component name */
-    val componentName: String,
-
-    /* Defines the order in which the widget will be rendered in the grid. */
+/** Encapsulates data for a communal widget. */
+data class CommunalWidgetContentModel(
+    val appWidgetId: Int,
+    val providerInfo: AppWidgetProviderInfo,
     val priority: Int,
-
-    /* Supported sizes */
-    val sizes: List<CommunalContentSize>
 )

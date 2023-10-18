@@ -20,7 +20,7 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.util.SizeF
-import com.android.systemui.communal.shared.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.communal.ui.view.CommunalWidgetWrapper
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
