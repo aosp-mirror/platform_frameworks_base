@@ -56,7 +56,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
@@ -241,7 +240,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to PRIMARY_BOUNCER should occur
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
@@ -268,7 +267,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
@@ -295,7 +294,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
@@ -325,7 +324,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DREAMING should occur
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
@@ -356,7 +355,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DREAMING_LOCKSCREEN_HOSTED should occur
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
@@ -383,7 +382,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
@@ -410,7 +409,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
@@ -443,7 +442,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to Lockscreen should occur
             assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
@@ -471,7 +470,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to Gone should occur
             assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
@@ -501,7 +500,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to PRIMARY_BOUNCER should occur
             assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
@@ -534,7 +533,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
@@ -566,7 +565,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to OCCLUDED should occur
             assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
@@ -590,7 +589,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromDozingTransitionInteractor")
@@ -622,7 +621,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             advanceUntilIdle()
 
             // THEN the transition is ignored
-            verify(transitionRepository, never()).startTransition(any(), anyBoolean())
+            verify(transitionRepository, never()).startTransition(any())
 
             coroutineContext.cancelChildren()
         }
@@ -639,7 +638,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromDozingTransitionInteractor")
@@ -666,7 +665,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
@@ -693,7 +692,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to AOD should occur
             assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
@@ -716,7 +715,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to AOD should occur
             assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
@@ -746,7 +745,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DREAMING should occur
             assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
@@ -777,7 +776,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DREAMING_LOCKSCREEN_HOSTED should occur
             assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
@@ -803,7 +802,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to PRIMARY_BOUNCER should occur
             assertThat(info.ownerName).isEqualTo("FromAlternateBouncerTransitionInteractor")
@@ -835,7 +834,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to AOD should occur
             assertThat(info.ownerName).isEqualTo("FromAlternateBouncerTransitionInteractor")
@@ -868,7 +867,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromAlternateBouncerTransitionInteractor")
@@ -898,7 +897,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to LOCKSCREEN should occur
             assertThat(info.ownerName).isEqualTo("FromAlternateBouncerTransitionInteractor")
@@ -926,7 +925,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to AOD should occur
             assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
@@ -954,7 +953,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to DOZING should occur
             assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
@@ -978,7 +977,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to LOCKSCREEN should occur
             assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
@@ -1008,7 +1007,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition back to DREAMING_LOCKSCREEN_HOSTED should occur
             assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
@@ -1039,7 +1038,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to GONE should occur
             assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
@@ -1068,7 +1067,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to LOCKSCREEN should occur
             assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
@@ -1093,7 +1092,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to AlternateBouncer should occur
             assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
@@ -1118,7 +1117,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to AlternateBouncer should occur
             assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
@@ -1144,7 +1143,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to OCCLUDED should occur
             assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
@@ -1169,7 +1168,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to OCCLUDED should occur
             assertThat(info.ownerName).isEqualTo("FromDozingTransitionInteractor")
@@ -1196,7 +1195,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to OCCLUDED should occur
             assertThat(info.ownerName).isEqualTo("FromDreamingTransitionInteractor")
@@ -1220,7 +1219,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to OCCLUDED should occur
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
@@ -1250,7 +1249,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             // THEN a transition to OCCLUDED should occur
             assertThat(info.ownerName).isEqualTo("FromAodTransitionInteractor")
@@ -1284,7 +1283,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition from LOCKSCREEN => OCCLUDED should occur
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
@@ -1315,7 +1314,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition from LOCKSCREEN => PRIMARY_BOUNCER should occur
             val info =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
@@ -1336,7 +1335,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition from PRIMARY_BOUNCER => LOCKSCREEN should occur
             val info2 =
                 withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                    verify(transitionRepository).startTransition(capture())
                 }
             assertThat(info2.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
             assertThat(info2.to).isEqualTo(KeyguardState.LOCKSCREEN)

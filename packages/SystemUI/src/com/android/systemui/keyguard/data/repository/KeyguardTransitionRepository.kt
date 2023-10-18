@@ -25,6 +25,7 @@ import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import java.util.UUID
@@ -48,8 +49,8 @@ import kotlinx.coroutines.flow.filter
  * [TransitionInteractor]. These interactors will call [startTransition] and [updateTransition] on
  * this repository.
  *
- * To print all transitions to logcat to help with debugging, run this command:
- * adb shell settings put global systemui/buffer/KeyguardLog VERBOSE
+ * To print all transitions to logcat to help with debugging, run this command: adb shell settings
+ * put global systemui/buffer/KeyguardLog VERBOSE
  *
  * This will print all keyguard transitions to logcat with the KeyguardTransitionAuditLogger tag.
  */
@@ -73,11 +74,8 @@ interface KeyguardTransitionRepository {
     /**
      * Begin a transition from one state to another. Transitions are interruptible, and will issue a
      * [TransitionStep] with state = [TransitionState.CANCELED] before beginning the next one.
-     *
-     * When canceled, there are two options: to continue from the current position of the prior
-     * transition, or to reset the position. When [resetIfCanceled] == true, it will do the latter.
      */
-    fun startTransition(info: TransitionInfo, resetIfCanceled: Boolean = false): UUID?
+    fun startTransition(info: TransitionInfo): UUID?
 
     /**
      * Allows manual control of a transition. When calling [startTransition], the consumer must pass
@@ -138,10 +136,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         )
     }
 
-    override fun startTransition(
-        info: TransitionInfo,
-        resetIfCanceled: Boolean,
-    ): UUID? {
+    override fun startTransition(info: TransitionInfo): UUID? {
         if (lastStep.from == info.from && lastStep.to == info.to) {
             Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
             return null
@@ -149,10 +144,10 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         val startingValue =
             if (lastStep.transitionState != TransitionState.FINISHED) {
                 Log.i(TAG, "Transition still active: $lastStep, canceling")
-                if (resetIfCanceled) {
-                    0f
-                } else {
-                    lastStep.value
+                when (info.modeOnCanceled) {
+                    TransitionModeOnCanceled.LAST_VALUE -> lastStep.value
+                    TransitionModeOnCanceled.RESET -> 0f
+                    TransitionModeOnCanceled.REVERSE -> 1f - lastStep.value
                 }
             } else {
                 0f

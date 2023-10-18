@@ -26,20 +26,21 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import com.android.wm.shell.animation.Interpolators
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 @SysUISingleton
 class FromPrimaryBouncerTransitionInteractor
@@ -132,7 +133,7 @@ constructor(
                 .collect {
                     (
                         isBouncerShowing,
-                            isAwake,
+                        isAwake,
                         lastStartedTransitionStep,
                         occluded,
                         isActiveDreamLockscreenHosted) ->
@@ -162,8 +163,7 @@ constructor(
                     ),
                     ::toQuad
                 )
-                .collect {
-                    (isBouncerShowing, isAsleep, lastStartedTransitionStep, isAodAvailable)
+                .collect { (isBouncerShowing, isAsleep, lastStartedTransitionStep, isAodAvailable)
                     ->
                     if (
                         !isBouncerShowing &&
@@ -181,25 +181,24 @@ constructor(
     private fun listenForPrimaryBouncerToDreamingLockscreenHosted() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                    .sample(
-                            combine(
-                                    keyguardInteractor.isActiveDreamLockscreenHosted,
-                                    transitionInteractor.startedKeyguardTransitionStep,
-                                    ::Pair
-                            ),
-                            ::toTriple
-                    )
-                    .collect { (isBouncerShowing,
-                                       isActiveDreamLockscreenHosted,
-                                       lastStartedTransitionStep) ->
-                        if (
-                                !isBouncerShowing &&
-                                isActiveDreamLockscreenHosted &&
-                                lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
-                        ) {
-                            startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
-                        }
+                .sample(
+                    combine(
+                        keyguardInteractor.isActiveDreamLockscreenHosted,
+                        transitionInteractor.startedKeyguardTransitionStep,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect {
+                    (isBouncerShowing, isActiveDreamLockscreenHosted, lastStartedTransitionStep) ->
+                    if (
+                        !isBouncerShowing &&
+                            isActiveDreamLockscreenHosted &&
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
+                    ) {
+                        startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
                     }
+                }
         }
     }
 
@@ -237,7 +236,7 @@ constructor(
                                 getDefaultAnimatorForTransitionsToState(KeyguardState.GONE).apply {
                                     this.duration = duration.inWholeMilliseconds
                                 },
-                            resetIfCancelled = true
+                            modeOnCanceled = TransitionModeOnCanceled.RESET,
                         )
                     }
                 }

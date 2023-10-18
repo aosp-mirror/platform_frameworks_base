@@ -22,7 +22,13 @@ data class TransitionInfo(
     val ownerName: String,
     val from: KeyguardState,
     val to: KeyguardState,
-    val animator: ValueAnimator?, // 'null' animator signal manual control
+    /** [null] animator signals manual control, otherwise transition run by the animator */
+    val animator: ValueAnimator?,
+    /**
+     * If the transition resets in the cancellation of another transition, use this mode to
+     * determine how to continue.
+     */
+    val modeOnCanceled: TransitionModeOnCanceled = TransitionModeOnCanceled.LAST_VALUE,
 ) {
     override fun toString(): String =
         "TransitionInfo(ownerName=$ownerName, from=$from, to=$to, " +

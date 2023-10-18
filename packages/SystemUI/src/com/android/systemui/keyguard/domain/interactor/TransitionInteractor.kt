@@ -21,6 +21,7 @@ import android.util.Log
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +50,7 @@ sealed class TransitionInteractor(
     fun startTransitionTo(
         toState: KeyguardState,
         animator: ValueAnimator? = getDefaultAnimatorForTransitionsToState(toState),
-        resetIfCancelled: Boolean = false,
+        modeOnCanceled: TransitionModeOnCanceled = TransitionModeOnCanceled.LAST_VALUE
     ): UUID? {
         if (
             fromState != transitionInteractor.startedKeyguardState.value &&
@@ -73,8 +74,8 @@ sealed class TransitionInteractor(
                 fromState,
                 toState,
                 animator,
-            ),
-            resetIfCancelled
+                modeOnCanceled,
+            )
         )
     }
 
@@ -91,8 +92,8 @@ sealed class TransitionInteractor(
                     // so use the last finishedKeyguardState to determine the overriding FROM state
                     if (finishedKeyguardState == fromState) {
                         startTransitionTo(
-                            KeyguardState.OCCLUDED,
-                            resetIfCancelled = true,
+                            toState = KeyguardState.OCCLUDED,
+                            modeOnCanceled = TransitionModeOnCanceled.RESET,
                         )
                     }
                 }
