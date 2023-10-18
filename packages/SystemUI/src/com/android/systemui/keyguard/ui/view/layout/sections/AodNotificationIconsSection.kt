@@ -26,23 +26,39 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.res.R
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
+import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
+import kotlinx.coroutines.DisposableHandle
 
 class AodNotificationIconsSection
 @Inject
 constructor(
     private val context: Context,
-    private val featureFlags: FeatureFlags,
+    private val configurationState: ConfigurationState,
+    private val configurationController: ConfigurationController,
+    private val dozeParameters: DozeParameters,
+    private val featureFlags: FeatureFlagsClassic,
+    private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
+    private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val notificationPanelView: NotificationPanelView,
     private val notificationIconAreaController: NotificationIconAreaController,
+    private val screenOffAnimationController: ScreenOffAnimationController,
 ) : KeyguardSection() {
+
+    private var nicBindingDisposable: DisposableHandle? = null
     private val nicId = R.id.aod_notification_icon_container
     private lateinit var nic: NotificationIconContainer
 
@@ -70,7 +86,23 @@ constructor(
             return
         }
 
-        notificationIconAreaController.setupAodIcons(nic)
+        if (featureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            nic.setOnLockScreen(true)
+            nicBindingDisposable?.dispose()
+            nicBindingDisposable =
+                NotificationIconContainerViewBinder.bind(
+                    nic,
+                    nicAodViewModel,
+                    configurationState,
+                    configurationController,
+                    dozeParameters,
+                    featureFlags,
+                    screenOffAnimationController,
+                    nicAodIconViewStore,
+                )
+        } else {
+            notificationIconAreaController.setupAodIcons(nic)
+        }
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
@@ -102,5 +134,6 @@ constructor(
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
         constraintLayout.removeView(nicId)
+        nicBindingDisposable?.dispose()
     }
 }

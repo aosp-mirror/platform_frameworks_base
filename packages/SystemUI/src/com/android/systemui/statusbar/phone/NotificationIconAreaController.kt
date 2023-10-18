@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
  */
 interface NotificationIconAreaController {
     /** Called by the Keyguard*ViewController whose view contains the aod icons. */
-    fun setupAodIcons(aodIcons: NotificationIconContainer)
+    fun setupAodIcons(aodIcons: NotificationIconContainer?)
     fun setupShelf(notificationShelfController: NotificationShelfController)
     fun setShelfIcons(icons: NotificationIconContainer)
     fun onDensityOrFontScaleChanged(context: Context)
