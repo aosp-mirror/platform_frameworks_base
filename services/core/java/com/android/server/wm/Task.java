@@ -4725,7 +4725,7 @@ class Task extends TaskFragment {
         }
         if (isAttached()) {
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
-            moveTaskToBackInner(this);
+            moveTaskToBackInner(this, null /* transition */);
         }
         if (top.isAttached()) {
             top.setWindowingMode(WINDOWING_MODE_UNDEFINED);
@@ -5728,24 +5728,27 @@ class Task extends TaskFragment {
                         mTransitionController.requestStartTransition(transition, tr,
                                 null /* remoteTransition */, null /* displayChange */);
                         mTransitionController.collect(tr);
-                        moveTaskToBackInner(tr);
+                        moveTaskToBackInner(tr, transition);
                     });
         } else {
             // Skip the transition for pinned task.
             if (!inPinnedWindowingMode()) {
                 mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
             }
-            moveTaskToBackInner(tr);
+            moveTaskToBackInner(tr, null /* transition */);
         }
         return true;
     }
 
-    private boolean moveTaskToBackInner(@NonNull Task task) {
-        if (mTransitionController.isShellTransitionsEnabled()) {
+    private boolean moveTaskToBackInner(@NonNull Task task, @Nullable Transition transition) {
+        final Transition.ReadyCondition movedToBack =
+                new Transition.ReadyCondition("moved-to-back", task);
+        if (transition != null) {
             // Preventing from update surface position for WindowState if configuration changed,
             // because the position is depends on WindowFrame, so update the position before
             // relayout will only update it to "old" position.
             mAtmService.deferWindowLayout();
+            transition.mReadyTracker.add(movedToBack);
         }
         try {
             moveToBack("moveTaskToBackInner", task);
@@ -5761,6 +5764,9 @@ class Task extends TaskFragment {
         } finally {
             if (mTransitionController.isShellTransitionsEnabled()) {
                 mAtmService.continueWindowLayout();
+            }
+            if (transition != null) {
+                movedToBack.meet();
             }
         }
         ActivityRecord topActivity = getDisplayArea().topRunningActivity();

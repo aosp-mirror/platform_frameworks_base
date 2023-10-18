@@ -237,6 +237,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     private @TransitionState int mState = STATE_PENDING;
     private final ReadyTrackerOld mReadyTrackerOld = new ReadyTrackerOld();
+    final ReadyTracker mReadyTracker = new ReadyTracker(this);
 
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
@@ -893,7 +894,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     private void applyReady() {
         if (mState < STATE_STARTED) return;
-        final boolean ready = mReadyTrackerOld.allReady();
+        final boolean ready;
+        if (mController.useFullReadyTracking()) {
+            ready = mReadyTracker.isReady();
+        } else {
+            ready = mReadyTrackerOld.allReady();
+        }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Set transition ready=%b %d", ready, mSyncId);
         boolean changed = mSyncEngine.setReady(mSyncId, ready);
@@ -1438,6 +1444,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Force Playing Transition: %d",
                 mSyncId);
         mForcePlaying = true;
+        // backwards since conditions are removed.
+        for (int i = mReadyTracker.mConditions.size() - 1; i >= 0; --i) {
+            mReadyTracker.mConditions.get(i).meetAlternate("play-now");
+        }
+        final ReadyCondition forcePlay = new ReadyCondition("force-play-now");
+        mReadyTracker.add(forcePlay);
+        forcePlay.meet();
         setAllReady();
         if (mState == STATE_COLLECTING) {
             start();
@@ -1481,6 +1494,21 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (syncId != mSyncId) {
             Slog.e(TAG, "Unexpected Sync ID " + syncId + ". Expected " + mSyncId);
             return;
+        }
+
+        if (mController.useFullReadyTracking()) {
+            if (mReadyTracker.mMet.isEmpty()) {
+                Slog.e(TAG, "#" + mSyncId + ": No conditions provided");
+            } else {
+                for (int i = 0; i < mReadyTracker.mConditions.size(); ++i) {
+                    Slog.e(TAG, "#" + mSyncId + ": unmet condition at ready: "
+                            + mReadyTracker.mConditions.get(i));
+                }
+            }
+            for (int i = 0; i < mReadyTracker.mMet.size(); ++i) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "#%d: Met condition: %s",
+                        mSyncId, mReadyTracker.mMet.get(i));
+            }
         }
 
         // Commit the visibility of visible activities before calculateTransitionInfo(), so the
@@ -3069,6 +3097,147 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         --mReadyTrackerOld.mDeferReadyDepth;
         // Apply ready in case it is waiting for the previous defer call.
         applyReady();
+    }
+
+    /**
+     * Represents a condition that must be met before an associated transition can be considered
+     * ready.
+     *
+     * Expected usage is that a ReadyCondition is created and then attached to a transition's
+     * ReadyTracker via {@link ReadyTracker#add}. After that, it is expected to monitor the state
+     * of the system and when the condition it represents is met, it will call
+     * {@link ReadyTracker#meet}.
+     *
+     * This base class is a simple explicit, named condition. A caller will create/attach the
+     * condition and then explicitly call {@link #meet} on it (which internally calls
+     * {@link ReadyTracker#meet}.
+     *
+     * Example:
+     * <pre>
+     *     ReadyCondition myCondition = new ReadyCondition("my condition");
+     *     transitionController.waitFor(myCondition);
+     *     ... Some operations ...
+     *     myCondition.meet();
+     * </pre>
+     */
+    static class ReadyCondition {
+        final String mName;
+
+        /** Just used for debugging */
+        final Object mDebugTarget;
+        ReadyTracker mTracker;
+        boolean mMet = false;
+
+        /** If set (non-null), then this is met by another reason besides state (eg. timeout). */
+        String mAlternate = null;
+
+        ReadyCondition(@NonNull String name) {
+            mName = name;
+            mDebugTarget = null;
+        }
+
+        ReadyCondition(@NonNull String name, @Nullable Object debugTarget) {
+            mName = name;
+            mDebugTarget = debugTarget;
+        }
+
+        protected String getDebugRep() {
+            if (mDebugTarget != null) {
+                return mName + ":" + mDebugTarget;
+            }
+            return mName;
+        }
+
+        @Override
+        public String toString() {
+            return "{" + getDebugRep() + (mAlternate != null ? " (" + mAlternate + ")" : "") + "}";
+        }
+
+        /**
+         * Instructs this condition to start tracking system state to detect when this is met.
+         * Don't call this directly; it is called when this object is attached to a transition's
+         * ready-tracker.
+         */
+        void startTracking() {
+        }
+
+        /**
+         * Immediately consider this condition met by an alternative reason (one which doesn't
+         * match the normal intent of this condition -- eg. a timeout).
+         */
+        void meetAlternate(@NonNull String reason) {
+            if (mMet) return;
+            mAlternate = reason;
+            meet();
+        }
+
+        /** Immediately consider this condition met. */
+        void meet() {
+            if (mMet) return;
+            if (mTracker == null) {
+                throw new IllegalStateException("Can't meet a condition before it is waited on");
+            }
+            mTracker.meet(this);
+        }
+    }
+
+    static class ReadyTracker {
+        /**
+         * Used as a place-holder in situations where the transition system isn't active (such as
+         * early-boot, mid shell crash/recovery, or when using legacy).
+         */
+        static final ReadyTracker NULL_TRACKER = new ReadyTracker(null);
+
+        private final Transition mTransition;
+
+        /** List of conditions that are still being waited on. */
+        final ArrayList<ReadyCondition> mConditions = new ArrayList<>();
+
+        /** List of already-met conditions. Fully-qualified for debugging. */
+        final ArrayList<ReadyCondition> mMet = new ArrayList<>();
+
+        ReadyTracker(Transition transition) {
+            mTransition = transition;
+        }
+
+        void add(@NonNull ReadyCondition condition) {
+            if (mTransition == null || !mTransition.mController.useFullReadyTracking()) {
+                condition.mTracker = NULL_TRACKER;
+                return;
+            }
+            mConditions.add(condition);
+            condition.mTracker = this;
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " Add condition %s for #%d",
+                    condition, mTransition.mSyncId);
+            condition.startTracking();
+        }
+
+        void meet(@NonNull ReadyCondition condition) {
+            if (mTransition == null || !mTransition.mController.useFullReadyTracking()) return;
+            if (mTransition.mState >= STATE_PLAYING) {
+                Slog.w(TAG, "#%d: Condition met too late, already in state=" + mTransition.mState
+                        + ": " + condition);
+                return;
+            }
+            if (!mConditions.remove(condition)) {
+                if (mMet.contains(condition)) {
+                    throw new IllegalStateException("Can't meet the same condition more than once: "
+                            + condition + " #" + mTransition.mSyncId);
+                } else {
+                    throw new IllegalArgumentException("Can't meet a condition that isn't being "
+                            + "waited on: " + condition + " in #" + mTransition.mSyncId);
+                }
+            }
+            condition.mMet = true;
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " Met condition %s for #%d (%d"
+                    + " left)", condition, mTransition.mSyncId, mConditions.size());
+            mMet.add(condition);
+            mTransition.applyReady();
+        }
+
+        boolean isReady() {
+            return mConditions.isEmpty() && !mMet.isEmpty();
+        }
     }
 
     /**

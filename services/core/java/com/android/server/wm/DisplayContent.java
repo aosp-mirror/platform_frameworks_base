@@ -1621,7 +1621,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
 
+        final Transition.ReadyCondition displayConfig = mTransitionController.isCollecting()
+                ? new Transition.ReadyCondition("displayConfig", this) : null;
+        if (displayConfig != null) {
+            mTransitionController.waitFor(displayConfig);
+        } else if (mTransitionController.isShellTransitionsEnabled()) {
+            Slog.e(TAG, "Display reconfigured outside of a transition: " + this);
+        }
         final boolean configUpdated = updateDisplayOverrideConfigurationLocked();
+        if (displayConfig != null) {
+            displayConfig.meet();
+        }
         if (configUpdated) {
             return;
         }
