@@ -17,6 +17,13 @@ flag {
 }
 
 flag {
+    namespace: "accessibility"
+    name: "collection_info_item_counts"
+    description: "Fields for total items and the number of important for accessibility items in a collection"
+    bug: "302376158"
+}
+
+flag {
     name: "deduplicate_accessibility_warning_dialog"
     namespace: "accessibility"
     description: "Removes duplicate definition of the accessibility warning dialog."
@@ -35,6 +42,13 @@ flag {
     name: "force_invert_color"
     description: "Enable force force-dark for smart inversion and dark theme everywhere"
     bug: "282821643"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "granular_scrolling"
+    description: "Allow the use of granular scrolling. This allows scrollable nodes to scroll by increments other than a full screen"
+    bug: "302376158"
 }
 
 flag {
