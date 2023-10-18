@@ -25,7 +25,6 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -103,18 +102,6 @@ public class LockIconView extends FrameLayout implements Dumpable {
         }
 
         mLockIcon.setImageTintList(ColorStateList.valueOf(mLockIconColor));
-    }
-
-    void setImageDrawable(Drawable drawable) {
-        mLockIcon.setImageDrawable(drawable);
-
-        if (!mUseBackground) return;
-
-        if (drawable == null) {
-            mBgView.setVisibility(View.INVISIBLE);
-        } else {
-            mBgView.setVisibility(View.VISIBLE);
-        }
     }
 
     /**
@@ -197,6 +184,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
         mLockIcon = new ImageView(context, attrs);
         mLockIcon.setId(R.id.lock_icon);
         mLockIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        mLockIcon.setImageDrawable(context.getDrawable(R.drawable.super_lock_icon));
         addView(mLockIcon);
         LayoutParams lp = (LayoutParams) mLockIcon.getLayoutParams();
         lp.height = MATCH_PARENT;
