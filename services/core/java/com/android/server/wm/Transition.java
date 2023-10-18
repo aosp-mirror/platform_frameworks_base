@@ -236,7 +236,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private IRemoteCallback mClientAnimationFinishCallback = null;
 
     private @TransitionState int mState = STATE_PENDING;
-    private final ReadyTracker mReadyTracker = new ReadyTracker();
+    private final ReadyTrackerOld mReadyTrackerOld = new ReadyTrackerOld();
 
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
@@ -656,7 +656,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             updateTransientFlags(info);
             mChanges.put(curr, info);
             if (isReadyGroup(curr)) {
-                mReadyTracker.addGroup(curr);
+                mReadyTrackerOld.addGroup(curr);
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " Creating Ready-group for"
                                 + " Transition %d with root=%s", mSyncId, curr);
             }
@@ -887,13 +887,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      */
     void setReady(WindowContainer wc, boolean ready) {
         if (!isCollecting() || mSyncId < 0) return;
-        mReadyTracker.setReadyFrom(wc, ready);
+        mReadyTrackerOld.setReadyFrom(wc, ready);
         applyReady();
     }
 
     private void applyReady() {
         if (mState < STATE_STARTED) return;
-        final boolean ready = mReadyTracker.allReady();
+        final boolean ready = mReadyTrackerOld.allReady();
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Set transition ready=%b %d", ready, mSyncId);
         boolean changed = mSyncEngine.setReady(mSyncId, ready);
@@ -909,22 +909,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     /**
      * Sets all possible ready groups to ready.
-     * @see ReadyTracker#setAllReady.
+     * @see ReadyTrackerOld#setAllReady
      */
     void setAllReady() {
         if (!isCollecting() || mSyncId < 0) return;
-        mReadyTracker.setAllReady();
+        mReadyTrackerOld.setAllReady();
         applyReady();
     }
 
     @VisibleForTesting
     boolean allReady() {
-        return mReadyTracker.allReady();
+        return mReadyTrackerOld.allReady();
     }
 
     /** This transition has all of its expected participants. */
     boolean isPopulated() {
-        return mState >= STATE_STARTED && mReadyTracker.allReady();
+        return mState >= STATE_STARTED && mReadyTrackerOld.allReady();
     }
 
     /**
@@ -2797,7 +2797,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // if an activity is pausing, it will call setReady(ar, false) and wait for the next
             // resumed activity. Then do not set to ready because the transition only contains
             // partial participants. Otherwise the transition may only handle HIDE and miss OPEN.
-            if (!mReadyTracker.mUsed) {
+            if (!mReadyTrackerOld.mUsed) {
                 setReady(dc, true);
             }
         }
@@ -3059,14 +3059,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * {@link #continueTransitionReady}
      */
     void deferTransitionReady() {
-        ++mReadyTracker.mDeferReadyDepth;
+        ++mReadyTrackerOld.mDeferReadyDepth;
         // Make sure it wait until #continueTransitionReady() is called.
         mSyncEngine.setReady(mSyncId, false);
     }
 
     /** This undoes one call to {@link #deferTransitionReady}. */
     void continueTransitionReady() {
-        --mReadyTracker.mDeferReadyDepth;
+        --mReadyTrackerOld.mDeferReadyDepth;
         // Apply ready in case it is waiting for the previous defer call.
         applyReady();
     }
@@ -3084,7 +3084,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * of readiness across the multiple groups. Currently, we assume that each display is a group
      * since that is how it has been until now.
      */
-    private static class ReadyTracker {
+    private static class ReadyTrackerOld {
         private final ArrayMap<WindowContainer, Boolean> mReadyGroups = new ArrayMap<>();
 
         /**
