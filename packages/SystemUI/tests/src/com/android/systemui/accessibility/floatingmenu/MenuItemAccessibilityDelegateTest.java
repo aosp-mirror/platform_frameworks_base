@@ -19,8 +19,7 @@ package com.android.systemui.accessibility.floatingmenu;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.ACTION_ACCESSIBILITY_FOCUS;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 
-import static com.android.systemui.Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG;
-import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -40,8 +39,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -75,7 +74,7 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        setFlagDefault(mSetFlagsRule, FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
+        setFlagDefaults(mSetFlagsRule);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
