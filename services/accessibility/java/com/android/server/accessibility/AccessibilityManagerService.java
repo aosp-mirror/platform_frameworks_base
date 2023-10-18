@@ -2693,8 +2693,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         AccessibilityInputFilter inputFilter = null;
         synchronized (mLock) {
             int flags = 0;
-            if (userState.isDisplayMagnificationEnabledLocked()) {
-                flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
+            if (userState.isMagnificationSingleFingerTripleTapEnabledLocked()) {
+                flags |= AccessibilityInputFilter
+                        .FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP;
             }
             if (userState.isShortcutMagnificationEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
@@ -3047,12 +3048,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private boolean readMagnificationEnabledSettingsLocked(AccessibilityUserState userState) {
-        final boolean displayMagnificationEnabled = Settings.Secure.getIntForUser(
+        final boolean magnificationSingleFingerTripleTapEnabled = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
                 0, userState.mUserId) == 1;
-        if ((displayMagnificationEnabled != userState.isDisplayMagnificationEnabledLocked())) {
-            userState.setDisplayMagnificationEnabledLocked(displayMagnificationEnabled);
+        if ((magnificationSingleFingerTripleTapEnabled
+                != userState.isMagnificationSingleFingerTripleTapEnabledLocked())) {
+            userState.setMagnificationSingleFingerTripleTapEnabledLocked(
+                    magnificationSingleFingerTripleTapEnabled);
             return true;
         }
         return false;
@@ -3292,7 +3295,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // We would skip overlay display because it uses overlay window to simulate secondary
         // displays in one display. It's not a real display and there's no input events for it.
         final ArrayList<Display> displays = getValidDisplayList();
-        if (userState.isDisplayMagnificationEnabledLocked()
+        if (userState.isMagnificationSingleFingerTripleTapEnabledLocked()
                 || userState.isShortcutMagnificationEnabledLocked()) {
             for (int i = 0; i < displays.size(); i++) {
                 final Display display = displays.get(i);
@@ -3321,7 +3324,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
         final boolean connect = (userState.isShortcutMagnificationEnabledLocked()
-                || userState.isDisplayMagnificationEnabledLocked())
+                || userState.isMagnificationSingleFingerTripleTapEnabledLocked())
                 && (userState.getMagnificationCapabilitiesLocked()
                 != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
                 || userHasMagnificationServicesLocked(userState);
@@ -5006,7 +5009,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         updateWindowMagnificationConnectionIfNeeded(userState);
         // Remove magnification button UI when the magnification capability is not all mode or
         // magnification is disabled.
-        if (!(userState.isDisplayMagnificationEnabledLocked()
+        if (!(userState.isMagnificationSingleFingerTripleTapEnabledLocked()
                 || userState.isShortcutMagnificationEnabledLocked())
                 || userState.getMagnificationCapabilitiesLocked()
                 != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
