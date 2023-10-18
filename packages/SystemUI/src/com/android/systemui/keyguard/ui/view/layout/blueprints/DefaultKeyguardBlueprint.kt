@@ -23,8 +23,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
@@ -44,7 +44,7 @@ class DefaultKeyguardBlueprint
 @Inject
 constructor(
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
-    defaultLockIconSection: DefaultLockIconSection,
+    defaultDeviceEntryIconSection: DefaultDeviceEntryIconSection,
     defaultShortcutsSection: DefaultShortcutsSection,
     defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
@@ -61,7 +61,7 @@ constructor(
     override val sections =
         setOf(
             defaultIndicationAreaSection,
-            defaultLockIconSection,
+            defaultDeviceEntryIconSection,
             defaultShortcutsSection,
             defaultAmbientIndicationAreaSection,
             defaultSettingsPopupMenuSection,

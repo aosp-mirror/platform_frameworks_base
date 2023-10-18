@@ -33,11 +33,18 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
+import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
+import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-class DefaultLockIconSection
+@ExperimentalCoroutinesApi
+class DefaultDeviceEntryIconSection
 @Inject
 constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -46,24 +53,47 @@ constructor(
     private val context: Context,
     private val notificationPanelView: NotificationPanelView,
     private val featureFlags: FeatureFlags,
-    private val lockIconViewController: LockIconViewController,
+    private val lockIconViewController: Lazy<LockIconViewController>,
+    private val deviceEntryIconViewModel: Lazy<DeviceEntryIconViewModel>,
+    private val falsingManager: Lazy<FalsingManager>,
 ) : KeyguardSection() {
-    private val lockIconViewId = R.id.lock_icon_view
+    private val deviceEntryIconViewId = R.id.device_entry_icon_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+        if (
+            !featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON) &&
+                !featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)
+        ) {
             return
         }
-        notificationPanelView.findViewById<View>(lockIconViewId).let {
+
+        notificationPanelView.findViewById<View>(R.id.lock_icon_view).let {
             notificationPanelView.removeView(it)
         }
-        val view = LockIconView(context, null).apply { id = lockIconViewId }
+
+        val view =
+            if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+                DeviceEntryIconView(context, null).apply { id = deviceEntryIconViewId }
+            } else {
+                // Flags.MIGRATE_LOCK_ICON
+                LockIconView(context, null).apply { id = deviceEntryIconViewId }
+            }
         constraintLayout.addView(view)
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        constraintLayout.findViewById<LockIconView?>(lockIconViewId)?.let {
-            lockIconViewController.setLockIconView(it)
+        if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+            constraintLayout.findViewById<DeviceEntryIconView?>(deviceEntryIconViewId)?.let {
+                DeviceEntryIconViewBinder.bind(
+                    it,
+                    deviceEntryIconViewModel.get(),
+                    falsingManager.get(),
+                )
+            }
+        } else {
+            constraintLayout.findViewById<LockIconView?>(deviceEntryIconViewId)?.let {
+                lockIconViewController.get().setLockIconView(it)
+            }
         }
     }
 
@@ -84,30 +114,30 @@ constructor(
         val defaultDensity =
             DisplayMetrics.DENSITY_DEVICE_STABLE.toFloat() /
                 DisplayMetrics.DENSITY_DEFAULT.toFloat()
-        val lockIconRadiusPx = (defaultDensity * 36).toInt()
+        val iconRadiusPx = (defaultDensity * 36).toInt()
 
         if (isUdfpsSupported) {
             authController.udfpsLocation?.let { udfpsLocation ->
-                centerLockIcon(udfpsLocation, authController.udfpsRadius, constraintSet)
+                centerIcon(udfpsLocation, authController.udfpsRadius, constraintSet)
             }
         } else {
-            centerLockIcon(
+            centerIcon(
                 Point(
                     (widthPixels / 2).toInt(),
-                    (heightPixels - ((mBottomPaddingPx + lockIconRadiusPx) * scaleFactor)).toInt()
+                    (heightPixels - ((mBottomPaddingPx + iconRadiusPx) * scaleFactor)).toInt()
                 ),
-                lockIconRadiusPx * scaleFactor,
+                iconRadiusPx * scaleFactor,
                 constraintSet,
             )
         }
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        constraintLayout.removeView(lockIconViewId)
+        constraintLayout.removeView(deviceEntryIconViewId)
     }
 
     @VisibleForTesting
-    internal fun centerLockIcon(center: Point, radius: Float, constraintSet: ConstraintSet) {
+    internal fun centerIcon(center: Point, radius: Float, constraintSet: ConstraintSet) {
         val sensorRect =
             Rect().apply {
                 set(
@@ -119,17 +149,17 @@ constructor(
             }
 
         constraintSet.apply {
-            constrainWidth(lockIconViewId, sensorRect.right - sensorRect.left)
-            constrainHeight(lockIconViewId, sensorRect.bottom - sensorRect.top)
+            constrainWidth(deviceEntryIconViewId, sensorRect.right - sensorRect.left)
+            constrainHeight(deviceEntryIconViewId, sensorRect.bottom - sensorRect.top)
             connect(
-                lockIconViewId,
+                deviceEntryIconViewId,
                 ConstraintSet.TOP,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.TOP,
                 sensorRect.top
             )
             connect(
-                lockIconViewId,
+                deviceEntryIconViewId,
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,

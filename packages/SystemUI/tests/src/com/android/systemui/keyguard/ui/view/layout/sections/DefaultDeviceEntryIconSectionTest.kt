@@ -24,14 +24,17 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
+import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,35 +43,54 @@ import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
+@ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
 @SmallTest
-class DefaultLockIconSectionTest : SysuiTestCase() {
+class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var authController: AuthController
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var windowManager: WindowManager
     @Mock private lateinit var notificationPanelView: NotificationPanelView
-    @Mock private lateinit var featureFlags: FeatureFlags
+    private lateinit var featureFlags: FakeFeatureFlags
     @Mock private lateinit var lockIconViewController: LockIconViewController
-    private lateinit var underTest: DefaultLockIconSection
+    @Mock private lateinit var falsingManager: FalsingManager
+    private lateinit var underTest: DefaultDeviceEntryIconSection
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        featureFlags =
+            FakeFeatureFlagsClassic().apply {
+                set(Flags.MIGRATE_LOCK_ICON, false)
+                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
+                set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
+            }
         underTest =
-            DefaultLockIconSection(
+            DefaultDeviceEntryIconSection(
                 keyguardUpdateMonitor,
                 authController,
                 windowManager,
                 context,
                 notificationPanelView,
                 featureFlags,
-                lockIconViewController
+                { lockIconViewController },
+                { DeviceEntryIconViewModel() },
+                { falsingManager },
             )
     }
 
     @Test
-    fun addViewsConditionally() {
-        whenever(featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)).thenReturn(true)
+    fun addViewsConditionally_migrateFlagOn() {
+        featureFlags.set(Flags.MIGRATE_LOCK_ICON, true)
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.addViews(constraintLayout)
+        assertThat(constraintLayout.childCount).isGreaterThan(0)
+    }
+
+    @Test
+    fun addViewsConditionally_migrateAndRefactorFlagsOn() {
+        featureFlags.set(Flags.MIGRATE_LOCK_ICON, true)
+        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isGreaterThan(0)
@@ -76,7 +98,8 @@ class DefaultLockIconSectionTest : SysuiTestCase() {
 
     @Test
     fun addViewsConditionally_migrateFlagOff() {
-        whenever(featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)).thenReturn(false)
+        featureFlags.set(Flags.MIGRATE_LOCK_ICON, false)
+        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isEqualTo(0)
@@ -87,18 +110,18 @@ class DefaultLockIconSectionTest : SysuiTestCase() {
         val cs = ConstraintSet()
         underTest.applyConstraints(cs)
 
-        val constraint = cs.getConstraint(R.id.lock_icon_view)
+        val constraint = cs.getConstraint(R.id.device_entry_icon_view)
 
         assertThat(constraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
         assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
     }
 
     @Test
-    fun testCenterLockIcon() {
+    fun testCenterIcon() {
         val cs = ConstraintSet()
-        underTest.centerLockIcon(Point(5, 6), 1F, cs)
+        underTest.centerIcon(Point(5, 6), 1F, cs)
 
-        val constraint = cs.getConstraint(R.id.lock_icon_view)
+        val constraint = cs.getConstraint(R.id.device_entry_icon_view)
 
         assertThat(constraint.layout.mWidth).isEqualTo(2)
         assertThat(constraint.layout.mHeight).isEqualTo(2)

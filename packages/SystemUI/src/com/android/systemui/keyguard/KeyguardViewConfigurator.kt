@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,7 +73,7 @@ constructor(
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
     private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
-    private val lockIconViewController: LockIconViewController,
+    private val lockIconViewController: Lazy<LockIconViewController>,
     private val shadeInteractor: ShadeInteractor,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
@@ -131,7 +132,9 @@ constructor(
         val indicationArea = KeyguardIndicationArea(context, null)
         keyguardIndicationController.setIndicationArea(indicationArea)
 
-        lockIconViewController.setLockIconView(LockIconView(context, null))
+        if (!featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+            lockIconViewController.get().setLockIconView(LockIconView(context, null))
+        }
     }
 
     private fun bindKeyguardRootView() {
