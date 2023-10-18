@@ -310,8 +310,11 @@ public final class MediaRouter2 {
                 IMediaRouterService.Stub.asInterface(
                         ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
 
+        mSystemController =
+                new SystemRoutingController(
+                        ProxyMediaRouter2Impl.getSystemSessionInfoImpl(
+                                mMediaRouterService, clientPackageName));
         mImpl = new ProxyMediaRouter2Impl(context, clientPackageName);
-        mSystemController = new SystemRoutingController(mImpl.getSystemSessionInfo());
     }
 
     /**
@@ -2057,13 +2060,7 @@ public final class MediaRouter2 {
 
         @Override
         public RoutingSessionInfo getSystemSessionInfo() {
-            RoutingSessionInfo result;
-            try {
-                result = mMediaRouterService.getSystemSessionInfoForPackage(mClientPackageName);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
-            return ensureClientPackageNameForSystemSession(result);
+            return getSystemSessionInfoImpl(mMediaRouterService, mClientPackageName);
         }
 
         /**
@@ -2425,6 +2422,23 @@ public final class MediaRouter2 {
                 boolean shouldNotifyStop,
                 RoutingController controller) {
             releaseSession(controller.getRoutingSessionInfo());
+        }
+
+        /**
+         * Retrieves the system session info for the given package.
+         *
+         * <p>The returned routing session is guaranteed to have a non-null {@link
+         * RoutingSessionInfo#getClientPackageName() client package name}.
+         *
+         * <p>Extracted into a static method to allow calling this from the constructor.
+         */
+        /* package */ static RoutingSessionInfo getSystemSessionInfoImpl(
+                @NonNull IMediaRouterService service, @NonNull String clientPackageName) {
+            try {
+                return service.getSystemSessionInfoForPackage(clientPackageName);
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
         }
 
         /**
