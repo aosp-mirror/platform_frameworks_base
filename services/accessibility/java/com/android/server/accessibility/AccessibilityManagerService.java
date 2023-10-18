@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER_CLIENT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT;
@@ -182,6 +183,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -650,6 +652,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    /**
+     * Returns the lock object for any synchronized test blocks.
+     * Should not be used outside of testing.
+     * @return lock object.
+     */
+    @VisibleForTesting
+    Object getLock() {
+        return mLock;
+    }
+
     AccessibilityUserState getCurrentUserState() {
         synchronized (mLock) {
             return getCurrentUserStateLocked();
@@ -744,6 +756,62 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState.mTouchExplorationGrantedServices, mCurrentUserId);
             onUserStateChangedLocked(userState);
         }
+    }
+
+    /**
+     * Handles a package or packages being force stopped.
+     * Will disable any relevant services,
+     * and remove any button targets of continuous services,
+     * denoted by {@link AccessibilityServiceInfo#FLAG_REQUEST_ACCESSIBILITY_BUTTON}.
+     * If the result is {@code true},
+     * then {@link AccessibilityManagerService#onUserStateChangedLocked(
+     * AccessibilityUserState, boolean)} should be called afterwards.
+     *
+     * @param packages list of packages that have stopped.
+     * @param userState user state to be read & modified.
+     * @return {@code true} if a service was enabled or a button target was removed,
+     * {@code false} otherwise.
+     */
+    @VisibleForTesting
+    boolean onPackagesForceStoppedLocked(
+            String[] packages, AccessibilityUserState userState) {
+        final List<String> continuousServicePackages =
+                userState.mInstalledServices.stream().filter(service ->
+                        (service.flags & FLAG_REQUEST_ACCESSIBILITY_BUTTON)
+                                == FLAG_REQUEST_ACCESSIBILITY_BUTTON
+                ).map(service -> service.getComponentName().flattenToString()).toList();
+
+        boolean enabledServicesChanged = false;
+        final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
+        while (it.hasNext()) {
+            final ComponentName comp = it.next();
+            final String compPkg = comp.getPackageName();
+            for (String pkg : packages) {
+                if (compPkg.equals(pkg)) {
+                    it.remove();
+                    userState.getBindingServicesLocked().remove(comp);
+                    userState.getCrashedServicesLocked().remove(comp);
+                    enabledServicesChanged = true;
+                }
+            }
+        }
+        if (enabledServicesChanged) {
+            persistComponentNamesToSettingLocked(
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                    userState.mEnabledServices, userState.mUserId);
+        }
+
+        boolean buttonTargetsChanged = userState.mAccessibilityButtonTargets.removeIf(
+                target -> continuousServicePackages.stream().anyMatch(
+                        pkg -> Objects.equals(target, pkg)));
+        if (buttonTargetsChanged) {
+            persistColonDelimitedSetToSettingLocked(
+                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                    userState.mUserId,
+                    userState.mAccessibilityButtonTargets, str -> str);
+        }
+
+        return enabledServicesChanged || buttonTargetsChanged;
     }
 
     @VisibleForTesting
@@ -850,6 +918,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
             }
 
+            /**
+             * Handles instances in which a package or packages have forcibly stopped.
+             *
+             * @param intent intent containing package event information.
+             * @param uid linux process user id (different from Android user id).
+             * @param packages array of package names that have stopped.
+             * @param doit whether to try and handle the stop or just log the trace.
+             *
+             * @return {@code true} if package should be restarted, {@code false} otherwise.
+             */
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages,
                     int uid, boolean doit) {
@@ -867,26 +945,36 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         return false;
                     }
                     final AccessibilityUserState userState = getUserStateLocked(userId);
-                    final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
-                    while (it.hasNext()) {
-                        final ComponentName comp = it.next();
-                        final String compPkg = comp.getPackageName();
-                        for (String pkg : packages) {
-                            if (compPkg.equals(pkg)) {
-                                if (!doit) {
-                                    return true;
+
+                    if (Flags.disableContinuousShortcutOnForceStop()) {
+                        if (doit && onPackagesForceStoppedLocked(packages, userState)) {
+                            onUserStateChangedLocked(userState);
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
+                        while (it.hasNext()) {
+                            final ComponentName comp = it.next();
+                            final String compPkg = comp.getPackageName();
+                            for (String pkg : packages) {
+                                if (compPkg.equals(pkg)) {
+                                    if (!doit) {
+                                        return true;
+                                    }
+                                    it.remove();
+                                    userState.getBindingServicesLocked().remove(comp);
+                                    userState.getCrashedServicesLocked().remove(comp);
+                                    persistComponentNamesToSettingLocked(
+                                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                                            userState.mEnabledServices, userId);
+                                    onUserStateChangedLocked(userState);
                                 }
-                                it.remove();
-                                userState.getBindingServicesLocked().remove(comp);
-                                userState.getCrashedServicesLocked().remove(comp);
-                                persistComponentNamesToSettingLocked(
-                                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                                        userState.mEnabledServices, userId);
-                                onUserStateChangedLocked(userState);
                             }
                         }
+                        return false;
                     }
-                    return false;
                 }
             }
         };
@@ -2452,7 +2540,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param userId The user id.
      * @param outComponentNames The output component names.
      */
-    private void readComponentNamesFromSettingLocked(String settingName, int userId,
+    @VisibleForTesting
+    void readComponentNamesFromSettingLocked(String settingName, int userId,
             Set<ComponentName> outComponentNames) {
         readColonDelimitedSettingToSet(settingName, userId,
                 str -> ComponentName.unflattenFromString(str), outComponentNames);
@@ -2481,7 +2570,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 componentName -> componentName.flattenToShortString());
     }
 
-    private <T> void readColonDelimitedSettingToSet(String settingName, int userId,
+    /**
+     * Reads a colon delimited setting,
+     * passes the values through a function,
+     * then stores the values in a provided set.
+     *
+     * @param settingName Name of setting.
+     * @param userId user id corresponding to setting.
+     * @param toItem function mapping values to the output set.
+     * @param outSet output set to write to.
+     * @param <T> type of output set.
+     */
+    @VisibleForTesting
+    <T> void readColonDelimitedSettingToSet(String settingName, int userId,
             Function<String, T> toItem, Set<T> outSet) {
         final String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 settingName, userId);
@@ -3475,7 +3576,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 return true;
             }
             final boolean requestA11yButton = (serviceInfo.flags
-                    & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
+                    & FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
             if (requestA11yButton && !userState.mEnabledServices.contains(componentName)) {
                 // An a11y service targeting sdk version > Q and request A11y button and is assigned
                 // to a11y btn should be in the enabled list.
@@ -3776,7 +3877,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int targetSdk = installedServiceInfo.getResolveInfo()
                     .serviceInfo.applicationInfo.targetSdkVersion;
             final boolean requestA11yButton = (installedServiceInfo.flags
-                    & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
+                    & FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
             // Turns on / off the accessibility service
             if ((targetSdk <= Build.VERSION_CODES.Q && shortcutType == ACCESSIBILITY_SHORTCUT_KEY)
                     || (targetSdk > Build.VERSION_CODES.Q && !requestA11yButton)) {
