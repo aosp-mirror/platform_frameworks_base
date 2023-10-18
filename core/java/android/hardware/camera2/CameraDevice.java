@@ -894,7 +894,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * supported sizes.
      * Camera clients that register a Jpeg/R output within a stream combination that doesn't fit
      * in the mandatory stream table above can call
-     * {@link CameraDevice#isSessionConfigurationSupported} to ensure that this particular
+     * {@link CameraManager#isSessionConfigurationWithParametersSupported} to ensure that this particular
      * configuration is supported.</p>
      *
      * <h5>STREAM_USE_CASE capability additional guaranteed configurations</h5>
@@ -967,8 +967,8 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support
      * target combinations with sizes outside of these guarantees, but this can only be tested for
-     * by calling {@link #isSessionConfigurationSupported} or attempting to create a session with
-     * such targets.</p>
+     * by calling {@link CameraManager#isSessionConfigurationWithParametersSupported} or attempting
+     * to create a session with such targets.</p>
      *
      * <p>Exception on 176x144 (QCIF) resolution:
      * Camera devices usually have a fixed capability for downscaling from larger resolution to
@@ -1403,7 +1403,10 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     * @deprecated Please use {@link CameraManager#isSessionConfigurationWithParametersSupported}
+     * to check whether a SessionConfiguration is supported by the device.
      */
+    @Deprecated
     public boolean isSessionConfigurationSupported(
             @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
         throw new UnsupportedOperationException("Subclasses must override this method");
