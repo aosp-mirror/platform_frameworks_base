@@ -45,6 +45,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -70,6 +71,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -1329,6 +1331,46 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         return false;
+    }
+
+    /**
+     * Check if the targetPkg can be granted permission to access uri by
+     * the callingUid using the given modeFlags. See {@link #checkGrantUriPermissionUnlocked}.
+     *
+     * @param callingUid The uid of the grantor app that has permissions to the uri.
+     * @param targetPkg The package name of the granted app that needs permissions to the uri.
+     * @param uri The uri for which permissions should be granted.
+     * @param modeFlags The modes to grant. See {@link Intent#FLAG_GRANT_READ_URI_PERMISSION}, etc.
+     * @param userId The userId in which the uri is to be resolved.
+     * @return uid of the target or -1 if permission grant not required. Returns -1 if the caller
+     *  does not hold INTERACT_ACROSS_USERS_FULL
+     * @throws SecurityException if the grant is not allowed.
+     */
+    @Override
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    public int checkGrantUriPermission_ignoreNonSystem(int callingUid, String targetPkg, Uri uri,
+            int modeFlags, int userId) {
+        if (!isCallerIsSystemOrPrivileged()) {
+            return Process.INVALID_UID;
+        }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return checkGrantUriPermissionUnlocked(callingUid, targetPkg, uri, modeFlags,
+                    userId);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private boolean isCallerIsSystemOrPrivileged() {
+        final int uid = Binder.getCallingUid();
+        if (uid == Process.SYSTEM_UID || uid == Process.ROOT_UID) {
+            return true;
+        }
+        return ActivityManager.checkComponentPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                uid, /* owningUid = */-1, /* exported = */ true)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     @GuardedBy("mLock")
