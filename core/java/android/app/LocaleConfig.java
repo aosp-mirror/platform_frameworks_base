@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -133,15 +132,14 @@ public class LocaleConfig implements Parcelable {
                 return;
             }
         }
-        int resId = 0;
         Resources res = context.getResources();
+        //Get the resource id
+        int resId = context.getApplicationInfo().getLocaleConfigRes();
+        if (resId == 0) {
+            mStatus = STATUS_NOT_SPECIFIED;
+            return;
+        }
         try {
-            //Get the resource id
-            resId = new ApplicationInfo(context.getApplicationInfo()).getLocaleConfigRes();
-            if (resId == 0) {
-                mStatus = STATUS_NOT_SPECIFIED;
-                return;
-            }
             //Get the parser to read XML data
             XmlResourceParser parser = res.getXml(resId);
             parseLocaleConfig(parser, res);
