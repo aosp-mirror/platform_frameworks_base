@@ -65,7 +65,7 @@ fun ActionButtons(actionButtons: List<ActionButton>) {
     Row(
         Modifier
             .padding(SettingsDimension.buttonPadding)
-            .clip(SettingsShape.CornerLarge)
+            .clip(SettingsShape.CornerExtraLarge)
             .height(IntrinsicSize.Min)
     ) {
         for ((index, actionButton) in actionButtons.withIndex()) {

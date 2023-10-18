@@ -39,7 +39,7 @@ fun MainSwitchPreference(model: SwitchPreferenceModel) {
                 true -> MaterialTheme.colorScheme.primaryContainer
                 else -> MaterialTheme.colorScheme.secondaryContainer
             },
-            shape = SettingsShape.CornerLarge,
+            shape = SettingsShape.CornerExtraLarge,
         ) {
             InternalSwitchPreference(
                 title = model.title,
