@@ -82,6 +82,7 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -89,7 +90,7 @@ import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
-import android.view.flags.FeatureFlags;
+import android.view.flags.Flags;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
@@ -155,6 +156,8 @@ public class VibratorManagerServiceTest {
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Mock
     private VibratorManagerService.NativeWrapper mNativeWrapperMock;
     @Mock
@@ -175,8 +178,6 @@ public class VibratorManagerServiceTest {
     private VirtualDeviceManagerInternal mVirtualDeviceManagerInternalMock;
     @Mock
     private AudioManager mAudioManagerMock;
-    @Mock
-    private FeatureFlags mViewFeatureFlags;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
 
@@ -326,8 +327,7 @@ public class VibratorManagerServiceTest {
                     HapticFeedbackVibrationProvider createHapticFeedbackVibrationProvider(
                             Resources resources, VibratorInfo vibratorInfo) {
                         return new HapticFeedbackVibrationProvider(
-                                resources, vibratorInfo, mHapticFeedbackVibrationMap,
-                                mViewFeatureFlags);
+                                resources, vibratorInfo, mHapticFeedbackVibrationMap);
                     }
                 });
         return mService;
@@ -1354,7 +1354,7 @@ public class VibratorManagerServiceTest {
         denyPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
         denyPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
         // Flag override to enable the scroll feedack constants to bypass interruption policies.
-        when(mViewFeatureFlags.scrollFeedbackApi()).thenReturn(true);
+        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
         mHapticFeedbackVibrationMap.put(
                 HapticFeedbackConstants.SCROLL_TICK,
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));

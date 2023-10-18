@@ -50,7 +50,6 @@ import android.os.vibrator.Flags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.AtomicFile;
 import android.util.SparseArray;
-import android.view.flags.FeatureFlags;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -86,9 +85,6 @@ public class HapticFeedbackVibrationProviderTest {
     private VibratorInfo mVibratorInfo = VibratorInfo.EMPTY_VIBRATOR_INFO;
 
     @Mock private Resources mResourcesMock;
-
-    // TODO(305618021): Clean up the FeatureFlags with SetFlagsRule
-    @Mock private FeatureFlags mViewFeatureFlags;
 
     @Test
     public void testNonExistentCustomization_useDefault() throws Exception {
@@ -306,7 +302,7 @@ public class HapticFeedbackVibrationProviderTest {
 
     @Test
     public void testVibrationAttribute_scrollFeedback_scrollApiFlagOn_bypassInterruptPolicy() {
-        when(mViewFeatureFlags.scrollFeedbackApi()).thenReturn(true);
+        mSetFlagsRule.enableFlags(android.view.flags.Flags.FLAG_SCROLL_FEEDBACK_API);
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         for (int effectId : SCROLL_FEEDBACK_CONSTANTS) {
@@ -319,7 +315,7 @@ public class HapticFeedbackVibrationProviderTest {
 
     @Test
     public void testVibrationAttribute_scrollFeedback_scrollApiFlagOff_noBypassInterruptPolicy() {
-        when(mViewFeatureFlags.scrollFeedbackApi()).thenReturn(false);
+        mSetFlagsRule.disableFlags(android.view.flags.Flags.FLAG_SCROLL_FEEDBACK_API);
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         for (int effectId : SCROLL_FEEDBACK_CONSTANTS) {
@@ -394,8 +390,7 @@ public class HapticFeedbackVibrationProviderTest {
 
     private HapticFeedbackVibrationProvider createProvider(
             SparseArray<VibrationEffect> customizations) {
-        return new HapticFeedbackVibrationProvider(
-            mResourcesMock, mVibratorInfo, customizations, mViewFeatureFlags);
+        return new HapticFeedbackVibrationProvider(mResourcesMock, mVibratorInfo, customizations);
     }
 
     private void mockVibratorPrimitiveSupport(int... supportedPrimitives) {
