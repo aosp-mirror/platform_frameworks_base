@@ -68,6 +68,7 @@ class InsetsSourceProvider {
     private final Rect mTmpRect = new Rect();
     private final InsetsStateController mStateController;
     private final InsetsSourceControl mFakeControl;
+    private final Consumer<Transaction> mSetLeashPositionConsumer;
     private @Nullable InsetsSourceControl mControl;
     private @Nullable InsetsControlTarget mControlTarget;
     private @Nullable InsetsControlTarget mPendingControlTarget;
@@ -85,16 +86,7 @@ class InsetsSourceProvider {
     private boolean mInsetsHintStale = true;
     private @Flags int mFlagsFromFrameProvider;
     private @Flags int mFlagsFromServer;
-
-    private final Consumer<Transaction> mSetLeashPositionConsumer = t -> {
-        if (mControl != null) {
-            final SurfaceControl leash = mControl.getLeash();
-            if (leash != null) {
-                final Point position = mControl.getSurfacePosition();
-                t.setPosition(leash, position.x, position.y);
-            }
-        }
-    };
+    private boolean mHasPendingPosition;
 
     /** The visibility override from the current controlling window. */
     private boolean mClientVisible;
@@ -129,6 +121,21 @@ class InsetsSourceProvider {
                 source.getId(), source.getType(), null /* leash */, false /* initialVisible */,
                 new Point(), Insets.NONE);
         mControllable = (InsetsPolicy.CONTROLLABLE_TYPES & source.getType()) != 0;
+        mSetLeashPositionConsumer = t -> {
+            if (mControl != null) {
+                final SurfaceControl leash = mControl.getLeash();
+                if (leash != null) {
+                    final Point position = mControl.getSurfacePosition();
+                    t.setPosition(leash, position.x, position.y);
+                }
+            }
+            if (mHasPendingPosition) {
+                mHasPendingPosition = false;
+                if (mPendingControlTarget != mControlTarget) {
+                    mStateController.notifyControlTargetChanged(mPendingControlTarget, this);
+                }
+            }
+        };
     }
 
     InsetsSource getSource() {
@@ -185,9 +192,8 @@ class InsetsSourceProvider {
             mWindowContainer.getInsetsSourceProviders().put(mSource.getId(), this);
             if (mControllable) {
                 mWindowContainer.setControllableInsetProvider(this);
-                if (mPendingControlTarget != null) {
+                if (mPendingControlTarget != mControlTarget) {
                     updateControlForTarget(mPendingControlTarget, true /* force */);
-                    mPendingControlTarget = null;
                 }
             }
         }
@@ -344,6 +350,7 @@ class InsetsSourceProvider {
                 changed = true;
                 if (windowState != null && windowState.getWindowFrames().didFrameSizeChange()
                         && windowState.mWinAnimator.getShown() && mWindowContainer.okToDisplay()) {
+                    mHasPendingPosition = true;
                     windowState.applyWithNextDraw(mSetLeashPositionConsumer);
                 } else {
                     Transaction t = mWindowContainer.getSyncTransaction();
@@ -465,16 +472,21 @@ class InsetsSourceProvider {
             // to control the window for now.
             return;
         }
+        mPendingControlTarget = target;
 
         if (mWindowContainer != null && mWindowContainer.getSurfaceControl() == null) {
             // if window doesn't have a surface, set it null and return.
             setWindowContainer(null, null, null);
         }
         if (mWindowContainer == null) {
-            mPendingControlTarget = target;
             return;
         }
         if (target == mControlTarget && !force) {
+            return;
+        }
+        if (mHasPendingPosition) {
+            // Don't create a new leash while having a pending position. Otherwise, the position
+            // will be changed earlier than expected, which can cause flicker.
             return;
         }
         if (target == null) {
@@ -618,6 +630,7 @@ class InsetsSourceProvider {
         }
         pw.print(prefix);
         pw.print("mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
+        pw.print("mHasPendingPosition="); pw.print(mHasPendingPosition);
         pw.println();
         if (mWindowContainer != null) {
             pw.print(prefix + "mWindowContainer=");
@@ -631,7 +644,7 @@ class InsetsSourceProvider {
             pw.print(prefix + "mControlTarget=");
             pw.println(mControlTarget);
         }
-        if (mPendingControlTarget != null) {
+        if (mPendingControlTarget != mControlTarget) {
             pw.print(prefix + "mPendingControlTarget=");
             pw.println(mPendingControlTarget);
         }
@@ -652,7 +665,8 @@ class InsetsSourceProvider {
         if (mControlTarget != null && mControlTarget.getWindow() != null) {
             mControlTarget.getWindow().dumpDebug(proto, CONTROL_TARGET, logLevel);
         }
-        if (mPendingControlTarget != null && mPendingControlTarget.getWindow() != null) {
+        if (mPendingControlTarget != null && mPendingControlTarget != mControlTarget
+                && mPendingControlTarget.getWindow() != null) {
             mPendingControlTarget.getWindow().dumpDebug(proto, PENDING_CONTROL_TARGET, logLevel);
         }
         if (mFakeControlTarget != null && mFakeControlTarget.getWindow() != null) {
