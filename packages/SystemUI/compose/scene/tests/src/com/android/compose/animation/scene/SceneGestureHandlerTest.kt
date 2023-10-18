@@ -47,7 +47,7 @@ class SceneGestureHandlerTest {
             scene(SceneC) { Text("SceneC") }
         }
 
-        private val sceneGestureHandler =
+        val sceneGestureHandler =
             SceneGestureHandler(
                 layoutImpl =
                     SceneTransitionLayoutImpl(
@@ -79,6 +79,10 @@ class SceneGestureHandlerTest {
 
         fun advanceUntilIdle() {
             coroutineScope.testScheduler.advanceUntilIdle()
+        }
+
+        fun runCurrent() {
+            coroutineScope.testScheduler.runCurrent()
         }
 
         fun assertScene(currentScene: SceneKey, isIdle: Boolean) {
@@ -162,6 +166,33 @@ class SceneGestureHandlerTest {
 
         draggable.onDragStopped(coroutineScope = coroutineScope, velocity = 0f)
         assertScene(currentScene = SceneA, isIdle = true)
+    }
+
+    @Test
+    fun startGestureDuringAnimatingOffset_shouldImmediatelyStopTheAnimation() = runGestureTest {
+        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        assertScene(currentScene = SceneA, isIdle = false)
+
+        draggable.onDelta(pixels = deltaInPixels10)
+        assertScene(currentScene = SceneA, isIdle = false)
+
+        draggable.onDragStopped(
+            coroutineScope = coroutineScope,
+            velocity = velocityThreshold,
+        )
+
+        // The stop animation is not started yet
+        assertThat(sceneGestureHandler.isAnimatingOffset).isFalse()
+
+        runCurrent()
+
+        assertThat(sceneGestureHandler.isAnimatingOffset).isTrue()
+        assertThat(sceneGestureHandler.isDrivingTransition).isTrue()
+        assertScene(currentScene = SceneC, isIdle = false)
+
+        // Start a new gesture while the offset is animating
+        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        assertThat(sceneGestureHandler.isAnimatingOffset).isFalse()
     }
 
     @Test

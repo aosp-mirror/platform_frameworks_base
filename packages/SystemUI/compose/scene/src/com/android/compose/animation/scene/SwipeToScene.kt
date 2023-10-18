@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -130,10 +131,12 @@ class SceneGestureHandler(
     internal val currentScene: Scene
         get() = layoutImpl.scene(transitionState.currentScene)
 
-    internal val isDrivingTransition
+    @VisibleForTesting
+    val isDrivingTransition
         get() = transitionState == swipeTransition
 
-    internal var isAnimatingOffset
+    @VisibleForTesting
+    var isAnimatingOffset
         get() = swipeTransition.isAnimatingOffset
         private set(value) {
             swipeTransition.isAnimatingOffset = value
@@ -157,17 +160,21 @@ class SceneGestureHandler(
     internal fun onDragStarted() {
         if (isDrivingTransition) {
             // This [transition] was already driving the animation: simply take over it.
-            if (isAnimatingOffset) {
-                // Stop animating and start from where the current offset. Setting the animation job
-                // to `null` will effectively cancel the animation.
-                swipeTransition.stopOffsetAnimation()
-                swipeTransition.dragOffset = swipeTransition.offsetAnimatable.value
-            }
-
+            // Stop animating and start from where the current offset.
+            swipeTransition.stopOffsetAnimation()
             return
         }
 
-        // TODO(b/290184746): Better handle interruptions here if state != idle.
+        val transition = transitionState
+        if (transition is TransitionState.Transition) {
+            // TODO(b/290184746): Better handle interruptions here if state != idle.
+            Log.w(
+                TAG,
+                "start from TransitionState.Transition is not fully supported: from" +
+                    " ${transition.fromScene} to ${transition.toScene} " +
+                    "(progress ${transition.progress})"
+            )
+        }
 
         val fromScene = currentScene
 
@@ -409,32 +416,32 @@ class SceneGestureHandler(
         targetScene: SceneKey,
     ) {
         swipeTransition.startOffsetAnimation {
-            coroutineScope
-                .launch {
-                    if (!isAnimatingOffset) {
-                        swipeTransition.offsetAnimatable.snapTo(swipeTransition.dragOffset)
-                    }
-                    isAnimatingOffset = true
-
-                    swipeTransition.offsetAnimatable.animateTo(
-                        targetOffset,
-                        // TODO(b/290184746): Make this spring spec configurable.
-                        spring(
-                            stiffness = Spring.StiffnessMediumLow,
-                            visibilityThreshold = OffsetVisibilityThreshold
-                        ),
-                        initialVelocity = initialVelocity,
-                    )
-
-                    // Now that the animation is done, the state should be idle. Note that if the
-                    // state was changed since this animation started, some external code changed it
-                    // and we shouldn't do anything here. Note also that this job will be cancelled
-                    // in the case where the user intercepts this swipe.
-                    if (isDrivingTransition) {
-                        transitionState = TransitionState.Idle(targetScene)
-                    }
+            coroutineScope.launch {
+                if (!isAnimatingOffset) {
+                    swipeTransition.offsetAnimatable.snapTo(swipeTransition.dragOffset)
                 }
-                .also { it.invokeOnCompletion { isAnimatingOffset = false } }
+                isAnimatingOffset = true
+
+                swipeTransition.offsetAnimatable.animateTo(
+                    targetOffset,
+                    // TODO(b/290184746): Make this spring spec configurable.
+                    spring(
+                        stiffness = Spring.StiffnessMediumLow,
+                        visibilityThreshold = OffsetVisibilityThreshold
+                    ),
+                    initialVelocity = initialVelocity,
+                )
+
+                isAnimatingOffset = false
+
+                // Now that the animation is done, the state should be idle. Note that if the state
+                // was changed since this animation started, some external code changed it and we
+                // shouldn't do anything here. Note also that this job will be cancelled in the case
+                // where the user intercepts this swipe.
+                if (isDrivingTransition) {
+                    transitionState = TransitionState.Idle(targetScene)
+                }
+            }
         }
     }
 
@@ -490,6 +497,11 @@ class SceneGestureHandler(
         /** Stops any ongoing offset animation. */
         fun stopOffsetAnimation() {
             offsetAnimationJob?.cancel()
+
+            if (isAnimatingOffset) {
+                isAnimatingOffset = false
+                dragOffset = offsetAnimatable.value
+            }
         }
 
         /** The absolute distance between [fromScene] and [toScene]. */
@@ -502,6 +514,10 @@ class SceneGestureHandler(
         var _distance by mutableFloatStateOf(0f)
         val distance: Float
             get() = _distance
+    }
+
+    companion object {
+        private const val TAG = "SceneGestureHandler"
     }
 }
 
