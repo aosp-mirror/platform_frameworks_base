@@ -280,7 +280,9 @@ public class AsyncProcessStartTest {
                 0, 0);
 
         // Sleep until timeout should have triggered
-        SystemClock.sleep(ActivityManagerService.PROC_START_TIMEOUT + 1000);
+        if (wedge) {
+            SystemClock.sleep(ActivityManagerService.PROC_START_TIMEOUT + 1000);
+        }
 
         return app;
     }

@@ -317,16 +317,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             }
         }
 
-        // Should not be possible for mComponentName to be null here but check anyway
-        if (mManager.mOptions.contentProtectionOptions.enableReceiver
-                && mManager.getContentProtectionEventBuffer() != null
-                && mComponentName != null) {
+        if (isContentProtectionEnabled()) {
             mContentProtectionEventProcessor =
                     new ContentProtectionEventProcessor(
                             mManager.getContentProtectionEventBuffer(),
                             mHandler,
                             mSystemServerInterface,
-                            mComponentName.getPackageName());
+                            mComponentName.getPackageName(),
+                            mManager.mOptions.contentProtectionOptions);
         } else {
             mContentProtectionEventProcessor = null;
         }
@@ -955,5 +953,16 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @UiThread
     private boolean isContentCaptureReceiverEnabled() {
         return mManager.mOptions.enableReceiver;
+    }
+
+    @UiThread
+    private boolean isContentProtectionEnabled() {
+        // Should not be possible for mComponentName to be null here but check anyway
+        // Should not be possible for groups to be empty if receiver is enabled but check anyway
+        return mManager.mOptions.contentProtectionOptions.enableReceiver
+                && mManager.getContentProtectionEventBuffer() != null
+                && mComponentName != null
+                && (!mManager.mOptions.contentProtectionOptions.requiredGroups.isEmpty()
+                        || !mManager.mOptions.contentProtectionOptions.optionalGroups.isEmpty());
     }
 }

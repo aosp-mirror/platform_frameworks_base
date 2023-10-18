@@ -8461,16 +8461,18 @@ public class WindowManagerService extends IWindowManager.Stub
                     return true;
                 }
                 // For a task session, find the activity identified by the launch cookie.
-                final WindowContainerToken wct = getTaskWindowContainerTokenForLaunchCookie(
+                final WindowContainerInfo wci = getTaskWindowContainerInfoForLaunchCookie(
                         incomingSession.getTokenToRecord());
-                if (wct == null) {
+                if (wci == null) {
                     Slog.w(TAG, "Handling a new recording session; unable to find the "
                             + "WindowContainerToken");
                     return false;
                 }
                 // Replace the launch cookie in the session details with the task's
                 // WindowContainerToken.
-                incomingSession.setTokenToRecord(wct.asBinder());
+                incomingSession.setTokenToRecord(wci.getToken().asBinder());
+                // Also replace the UNKNOWN target UID with the actual UID.
+                incomingSession.setTargetUid(wci.getUid());
                 mContentRecordingController.setContentRecordingSessionLocked(incomingSession,
                         WindowManagerService.this);
                 return true;
@@ -8798,21 +8800,41 @@ public class WindowManagerService extends IWindowManager.Stub
         mAtmService.setFocusedTask(task.mTaskId, touchedActivity);
     }
 
+    @VisibleForTesting
+    static class WindowContainerInfo {
+        private final int mUid;
+        @NonNull private final WindowContainerToken mToken;
+
+        private WindowContainerInfo(int uid, @NonNull WindowContainerToken token) {
+            this.mUid = uid;
+            this.mToken = token;
+        }
+
+        public int getUid() {
+            return mUid;
+        }
+
+        @NonNull
+        public WindowContainerToken getToken() {
+            return mToken;
+        }
+    }
+
     /**
-     * Retrieve the {@link WindowContainerToken} of the task that contains the activity started
-     * with the given launch cookie.
+     * Retrieve the {@link WindowContainerInfo} of the task that contains the activity started with
+     * the given launch cookie.
      *
      * @param launchCookie the launch cookie set on the {@link ActivityOptions} when starting an
-     *                     activity
+     *     activity
      * @return a token representing the task containing the activity started with the given launch
-     * cookie, or {@code null} if the token couldn't be found.
+     *     cookie, or {@code null} if the token couldn't be found.
      */
     @VisibleForTesting
     @Nullable
-    WindowContainerToken getTaskWindowContainerTokenForLaunchCookie(@NonNull IBinder launchCookie) {
+    WindowContainerInfo getTaskWindowContainerInfoForLaunchCookie(@NonNull IBinder launchCookie) {
         // Find the activity identified by the launch cookie.
-        final ActivityRecord targetActivity = mRoot.getActivity(
-                activity -> activity.mLaunchCookie == launchCookie);
+        final ActivityRecord targetActivity =
+                mRoot.getActivity(activity -> activity.mLaunchCookie == launchCookie);
         if (targetActivity == null) {
             Slog.w(TAG, "Unable to find the activity for this launch cookie");
             return null;
@@ -8827,7 +8849,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.w(TAG, "Unable to find the WindowContainerToken for " + targetActivity.getName());
             return null;
         }
-        return taskWindowContainerToken;
+        return new WindowContainerInfo(targetActivity.getUid(), taskWindowContainerToken);
     }
 
     /**

@@ -90,6 +90,8 @@ public class SystemSensorManager extends SensorManager {
     private static native void nativeGetRuntimeSensors(
             long nativeInstance, int deviceId, List<Sensor> list);
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
+    private static native boolean nativeIsReplayDataInjectionEnabled(long nativeInstance);
+    private static native boolean nativeIsHalBypassReplayDataInjectionEnabled(long nativeInstance);
 
     private static native int nativeCreateDirectChannel(
             long nativeInstance, int deviceId, long size, int channelType, int fd,
@@ -384,20 +386,41 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
-    protected boolean initDataInjectionImpl(boolean enable) {
+    protected boolean initDataInjectionImpl(boolean enable, @DataInjectionMode int mode) {
         synchronized (sLock) {
+            boolean isDataInjectionModeEnabled = false;
             if (enable) {
-                boolean isDataInjectionModeEnabled = nativeIsDataInjectionEnabled(mNativeInstance);
+                switch (mode) {
+                    case DATA_INJECTION:
+                        isDataInjectionModeEnabled = nativeIsDataInjectionEnabled(mNativeInstance);
+                        break;
+                    case REPLAY_DATA_INJECTION:
+                        isDataInjectionModeEnabled = nativeIsReplayDataInjectionEnabled(
+                                mNativeInstance);
+                        break;
+                    case HAL_BYPASS_REPLAY_DATA_INJECTION:
+                        isDataInjectionModeEnabled = nativeIsHalBypassReplayDataInjectionEnabled(
+                                mNativeInstance);
+                        break;
+                    default:
+                        break;
+                }
                 // The HAL does not support injection OR SensorService hasn't been set in DI mode.
                 if (!isDataInjectionModeEnabled) {
-                    Log.e(TAG, "Data Injection mode not enabled");
+                    Log.e(TAG, "The correct Data Injection mode has not been enabled");
                     return false;
+                }
+                if (sInjectEventQueue != null && sInjectEventQueue.getDataInjectionMode() != mode) {
+                    // The inject event queue has been initialized for a different type of DI
+                    // close it and create a new one
+                    sInjectEventQueue.dispose();
+                    sInjectEventQueue = null;
                 }
                 // Initialize a client for data_injection.
                 if (sInjectEventQueue == null) {
                     try {
                         sInjectEventQueue = new InjectEventQueue(
-                                mMainLooper, this, mContext.getPackageName());
+                                mMainLooper, this, mode, mContext.getPackageName());
                     } catch (RuntimeException e) {
                         Log.e(TAG, "Cannot create InjectEventQueue: " + e);
                     }
@@ -420,6 +443,12 @@ public class SystemSensorManager extends SensorManager {
             if (sInjectEventQueue == null) {
                 Log.e(TAG, "Data injection mode not activated before calling injectSensorData");
                 return false;
+            }
+            if (sInjectEventQueue.getDataInjectionMode() != HAL_BYPASS_REPLAY_DATA_INJECTION
+                    && !sensor.isDataInjectionSupported()) {
+                // DI mode and Replay DI mode require support from the sensor HAL
+                // HAL Bypass mode doesn't require this.
+                throw new IllegalArgumentException("sensor does not support data injection");
             }
             int ret = sInjectEventQueue.injectSensorData(sensor.getHandle(), values, accuracy,
                                                          timestamp);
@@ -825,6 +854,8 @@ public class SystemSensorManager extends SensorManager {
 
         protected static final int OPERATING_MODE_NORMAL = 0;
         protected static final int OPERATING_MODE_DATA_INJECTION = 1;
+        protected static final int OPERATING_MODE_REPLAY_DATA_INJECTION = 3;
+        protected static final int OPERATING_MODE_HAL_BYPASS_REPLAY_DATA_INJECTION = 4;
 
         BaseEventQueue(Looper looper, SystemSensorManager manager, int mode, String packageName) {
             if (packageName == null) packageName = "";
@@ -1134,8 +1165,12 @@ public class SystemSensorManager extends SensorManager {
     }
 
     final class InjectEventQueue extends BaseEventQueue {
-        public InjectEventQueue(Looper looper, SystemSensorManager manager, String packageName) {
-            super(looper, manager, OPERATING_MODE_DATA_INJECTION, packageName);
+
+        private int mMode;
+        public InjectEventQueue(Looper looper, SystemSensorManager manager,
+                @DataInjectionMode int mode, String packageName) {
+            super(looper, manager, mode, packageName);
+            mMode = mode;
         }
 
         int injectSensorData(int handle, float[] values, int accuracy, long timestamp) {
@@ -1160,6 +1195,10 @@ public class SystemSensorManager extends SensorManager {
         @SuppressWarnings("unused")
         protected void removeSensorEvent(Sensor sensor) {
 
+        }
+
+        int getDataInjectionMode() {
+            return mMode;
         }
     }
 

@@ -130,10 +130,10 @@ constructor(
                 view.width,
                 view.height
             )
-        activityOptions.setPendingIntentBackgroundActivityStartMode(
+        activityOptions.pendingIntentBackgroundActivityStartMode =
             MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-        )
         activityOptions.launchCookie = launchCookie
+        activityOptions.launchDisplayId = task.displayId
 
         activityTaskManager.startActivityFromRecents(task.taskId, activityOptions.toBundle())
         resultHandler.returnSelectedApp(launchCookie)

@@ -21,3 +21,10 @@ flag {
   bug: "281632483,295291019"
   is_fixed_read_only: true
 }
+
+flag {
+  name: "transit_ready_tracking"
+  namespace: "windowing_frontend"
+  description: "Enable accurate transition readiness tracking"
+  bug: "294925498"
+}

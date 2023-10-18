@@ -74,16 +74,15 @@ public class WearGestureInterceptionDetector {
         return windowSwipeToDismiss;
     }
 
-    private boolean isPointerIndexValid(MotionEvent ev) {
+    private int getIndexForValidPointer(MotionEvent ev) {
         int pointerIndex = ev.findPointerIndex(mActivePointerId);
         if (pointerIndex == -1) {
             if (DEBUG) {
                 Log.e(TAG, "Invalid pointer index: ignoring.");
             }
             mDiscardIntercept = true;
-            return false;
         }
-        return true;
+        return pointerIndex;
     }
 
     private void updateSwiping(MotionEvent ev) {
@@ -98,7 +97,7 @@ public class WearGestureInterceptionDetector {
         }
     }
 
-    private void updateDiscardIntercept(MotionEvent ev) {
+    private void updateDiscardIntercept(MotionEvent ev, int pointerIndex) {
         if (!mSwiping) {
             // Don't look at canScroll until we have passed the touch slop
             return;
@@ -107,8 +106,8 @@ public class WearGestureInterceptionDetector {
             return;
         }
         final boolean checkLeft = mDownX < ev.getRawX();
-        final float x = ev.getX(mActivePointerId);
-        final float y = ev.getY(mActivePointerId);
+        final float x = ev.getX(pointerIndex);
+        final float y = ev.getY(pointerIndex);
         if (canScroll(mInstalledDecorView, false, checkLeft, x, y)) {
             mDiscardIntercept = true;
         }
@@ -152,11 +151,12 @@ public class WearGestureInterceptionDetector {
                 if (mDiscardIntercept) {
                     break;
                 }
-                if (!isPointerIndexValid(ev)) {
+                final int pointerIndex = getIndexForValidPointer(ev);
+                if (pointerIndex == -1) {
                     break;
                 }
                 updateSwiping(ev);
-                updateDiscardIntercept(ev);
+                updateDiscardIntercept(ev, pointerIndex);
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:

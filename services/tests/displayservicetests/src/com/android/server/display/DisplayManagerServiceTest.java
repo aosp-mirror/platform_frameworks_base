@@ -117,7 +117,6 @@ import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.lights.LightsManager;
-import com.android.server.pm.UserManagerInternal;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -312,7 +311,6 @@ public class DisplayManagerServiceTest {
     @Mock SensorManager mSensorManager;
     @Mock DisplayDeviceConfig mMockDisplayDeviceConfig;
     @Mock PackageManagerInternal mMockPackageManagerInternal;
-    @Mock UserManagerInternal mMockUserManagerInternal;
 
 
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
@@ -336,8 +334,6 @@ public class DisplayManagerServiceTest {
                 VirtualDeviceManagerInternal.class, mMockVirtualDeviceManagerInternal);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
-        LocalServices.removeServiceForTest(UserManagerInternal.class);
-        LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
         // TODO: b/287945043
         mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mResources = Mockito.spy(mContext.getResources());

@@ -569,6 +569,7 @@ class WindowToken extends WindowContainer<WindowState> {
                 && asActivityRecord() != null && isVisible()) {
             // Trigger an activity level rotation transition.
             mTransitionController.requestTransitionIfNeeded(WindowManager.TRANSIT_CHANGE, this);
+            mTransitionController.collectVisibleChange(this);
             mTransitionController.setReady(this);
         }
         final int originalRotation = getWindowConfiguration().getRotation();

@@ -276,6 +276,10 @@ class BackNavigationController {
                 // activity, we won't close the activity.
                 backType = BackNavigationInfo.TYPE_DIALOG_CLOSE;
                 removedWindowContainer = window;
+            } else if (!currentActivity.occludesParent() || currentActivity.showWallpaper()) {
+                // skip if current activity is translucent
+                backType = BackNavigationInfo.TYPE_CALLBACK;
+                removedWindowContainer = window;
             } else if (prevActivity != null) {
                 if (!isOccluded || prevActivity.canShowWhenLocked()) {
                     // We have another Activity in the same currentTask to go to

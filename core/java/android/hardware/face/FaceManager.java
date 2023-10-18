@@ -1074,6 +1074,14 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     public interface FaceDetectionCallback {
         void onFaceDetected(int sensorId, int userId, boolean isStrongBiometric);
+
+        /**
+         * An error has occurred with face detection.
+         *
+         * This callback signifies that this operation has been completed, and
+         * no more callbacks should be expected.
+         */
+        default void onDetectionError(int errorMsgId) {}
     }
 
     /**
@@ -1373,6 +1381,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         } else if (mRemovalCallback != null) {
             mRemovalCallback.onRemovalError(mRemovalFace, clientErrMsgId,
                     getErrorString(mContext, errMsgId, vendorCode));
+        } else if (mFaceDetectionCallback != null) {
+            mFaceDetectionCallback.onDetectionError(errMsgId);
+            mFaceDetectionCallback = null;
         }
     }
 
