@@ -1034,20 +1034,15 @@ public class DisplayPolicy {
                 }
                 break;
             case TYPE_NAVIGATION_BAR:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
-                        "DisplayPolicy");
+                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                        callingPid, callingUid, "DisplayPolicy");
                 if (mNavigationBar != null && mNavigationBar.isAlive()) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
-                // Check for permission if the caller is not the recents component.
-                if (!mService.mAtmService.isCallerRecents(callingUid)) {
-                    mContext.enforcePermission(
-                            android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
-                            "DisplayPolicy");
-                }
+                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                        callingPid, callingUid, "DisplayPolicy");
                 break;
             case TYPE_STATUS_BAR_ADDITIONAL:
             case TYPE_STATUS_BAR_SUB_PANEL:
