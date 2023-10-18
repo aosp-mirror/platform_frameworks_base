@@ -15,7 +15,8 @@
   ~ limitations under the License
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false" android:color="?android:attr/colorAccent" android:alpha=".3" />
-    <item android:color="?android:attr/colorAccent" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <item android:state_enabled="false" android:color="?androidprv:attr/materialColorPrimary" android:alpha=".3" />
+    <item android:color="?androidprv:attr/materialColorPrimary" />
 </selector>

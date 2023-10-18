@@ -16,6 +16,7 @@
 
 <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:id="@+id/half_shelf_dialog"
         android:orientation="vertical"
         android:layout_width="wrap_content"
@@ -65,7 +66,7 @@
                     android:gravity="center_vertical|start"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:textColor="?androidprv:attr/materialColorOnSurface"
                     android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
                     android:textSize="16sp"
                 />
