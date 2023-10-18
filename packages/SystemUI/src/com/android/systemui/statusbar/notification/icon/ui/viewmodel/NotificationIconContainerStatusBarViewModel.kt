@@ -20,16 +20,23 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.icon.domain.interactor.StatusBarNotificationIconsInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.ColorLookup
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconColors
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconInfo
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconsViewData
 import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
+import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.util.kotlin.sample
+import com.android.systemui.util.ui.AnimatableEvent
 import com.android.systemui.util.ui.AnimatedValue
+import com.android.systemui.util.ui.toAnimatedValueFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
 /** View-model for the row of notification icons displayed in the status bar, */
@@ -38,6 +45,7 @@ class NotificationIconContainerStatusBarViewModel
 constructor(
     darkIconInteractor: DarkIconInteractor,
     iconsInteractor: StatusBarNotificationIconsInteractor,
+    headsUpIconInteractor: HeadsUpNotificationIconInteractor,
     keyguardInteractor: KeyguardInteractor,
     notificationsInteractor: ActiveNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
@@ -75,6 +83,30 @@ constructor(
                 visibleKeys = entries.mapNotNull { it.toIconInfo(it.statusBarIcon) },
             )
         }
+
+    override val isolatedIcon: Flow<AnimatedValue<IconInfo?>> =
+        headsUpIconInteractor.isolatedNotification
+            .pairwise(initialValue = null)
+            .sample(combine(iconsViewData, shadeInteractor.shadeExpansion, ::Pair)) {
+                (prev, isolatedNotif),
+                (iconsViewData, shadeExpansion),
+                ->
+                val iconInfo =
+                    isolatedNotif?.let {
+                        iconsViewData.visibleKeys.firstOrNull { it.notifKey == isolatedNotif }
+                    }
+                val animate =
+                    when {
+                        isolatedNotif == prev -> false
+                        isolatedNotif == null || prev == null -> shadeExpansion == 0f
+                        else -> false
+                    }
+                AnimatableEvent(iconInfo, animate)
+            }
+            .toAnimatedValueFlow()
+
+    override val isolatedIconLocation: Flow<Rect> =
+        headsUpIconInteractor.isolatedIconLocation.filterNotNull()
 
     private class IconColorsImpl(
         override val tint: Int,

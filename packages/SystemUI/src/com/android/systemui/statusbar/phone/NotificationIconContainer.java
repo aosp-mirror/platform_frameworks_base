@@ -50,9 +50,7 @@ import com.android.systemui.statusbar.notification.stack.ViewState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * A container for notification icons. It handles overflowing icons properly and positions them
@@ -175,6 +173,7 @@ public class NotificationIconContainer extends ViewGroup {
     private final int[] mAbsolutePosition = new int[2];
     private View mIsolatedIconForAnimation;
     private int mThemedTextColorPrimary;
+    private Runnable mIsolatedIconAnimationEndRunnable;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -705,10 +704,26 @@ public class NotificationIconContainer extends ViewGroup {
         mReplacingIcons = replacingIcons;
     }
 
+    @Deprecated
     public void showIconIsolated(StatusBarIconView icon, boolean animated) {
+        mIconContainerRefactorFlag.assertInLegacyMode();
         if (animated) {
-            mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
+            showIconIsolatedAnimated(icon, null);
+        } else {
+            showIconIsolated(icon);
         }
+    }
+
+    public void showIconIsolatedAnimated(StatusBarIconView icon,
+            @Nullable Runnable onAnimationEnd) {
+        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
+        mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
+        mIsolatedIconAnimationEndRunnable = onAnimationEnd;
+        showIconIsolated(icon);
+    }
+
+    public void showIconIsolated(StatusBarIconView icon) {
+        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
         mIsolatedIcon = icon;
         updateState();
     }
@@ -833,6 +848,11 @@ public class NotificationIconContainer extends ViewGroup {
                             animationProperties = UNISOLATION_PROPERTY;
                             animationProperties.setDelay(
                                     mIsolatedIcon != null ? CONTENT_FADE_DELAY : 0);
+                            Consumer<Property> endAction = getEndAction();
+                            if (endAction != null) {
+                                animationProperties.setAnimationEndAction(endAction);
+                                animationProperties.setAnimationCancelAction(endAction);
+                            }
                         } else {
                             animationProperties = UNISOLATION_PROPERTY_OTHERS;
                             animationProperties.setDelay(
@@ -854,6 +874,18 @@ public class NotificationIconContainer extends ViewGroup {
             justAdded = false;
             justReplaced = false;
             needsCannedAnimation = false;
+        }
+
+        @Nullable
+        private Consumer<Property> getEndAction() {
+            if (mIsolatedIconAnimationEndRunnable == null) return null;
+            final Runnable endRunnable = mIsolatedIconAnimationEndRunnable;
+            return prop -> {
+                endRunnable.run();
+                if (mIsolatedIconAnimationEndRunnable == endRunnable) {
+                    mIsolatedIconAnimationEndRunnable = null;
+                }
+            };
         }
 
         @Override

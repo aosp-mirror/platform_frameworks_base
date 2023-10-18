@@ -77,26 +77,8 @@ object NotificationIconContainerViewBinder {
         val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
         return view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch { viewModel.animationsEnabled.collect(view::setAnimationsEnabled) }
-                launch {
-                    viewModel.isDozing.collect { isDozing ->
-                        if (isDozing.isAnimating) {
-                            val animate = !dozeParameters.displayNeedsBlanking
-                            view.setDozing(
-                                /* dozing = */ isDozing.value,
-                                /* fade = */ animate,
-                                /* delay = */ 0,
-                                /* endRunnable = */ isDozing::stopAnimating,
-                            )
-                        } else {
-                            view.setDozing(
-                                /* dozing = */ isDozing.value,
-                                /* fade= */ false,
-                                /* delay= */ 0,
-                            )
-                        }
-                    }
-                }
+                launch { bindAnimationsEnabled(viewModel, view) }
+                launch { bindIsDozing(viewModel, view, dozeParameters) }
                 // TODO(b/278765923): this should live where AOD is bound, not inside of the NIC
                 //  view-binder
                 launch {
@@ -108,11 +90,7 @@ object NotificationIconContainerViewBinder {
                         screenOffAnimationController,
                     )
                 }
-                launch {
-                    viewModel.iconColors
-                        .mapNotNull { lookup -> lookup.iconColors(view.viewBounds) }
-                        .collect { iconLookup -> applyTint(view, iconLookup, contrastColorUtil) }
-                }
+                launch { bindIconColors(viewModel, view, contrastColorUtil) }
                 launch {
                     bindIconViewData(
                         viewModel,
@@ -121,6 +99,72 @@ object NotificationIconContainerViewBinder {
                         configurationController,
                         viewStore,
                     )
+                }
+                launch { bindIsolatedIcon(viewModel, view, viewStore) }
+            }
+        }
+    }
+
+    private suspend fun bindAnimationsEnabled(
+        viewModel: NotificationIconContainerViewModel,
+        view: NotificationIconContainer
+    ) {
+        viewModel.animationsEnabled.collect(view::setAnimationsEnabled)
+    }
+
+    private suspend fun bindIconColors(
+        viewModel: NotificationIconContainerViewModel,
+        view: NotificationIconContainer,
+        contrastColorUtil: ContrastColorUtil,
+    ) {
+        viewModel.iconColors
+            .mapNotNull { lookup -> lookup.iconColors(view.viewBounds) }
+            .collect { iconLookup -> applyTint(view, iconLookup, contrastColorUtil) }
+    }
+
+    private suspend fun bindIsDozing(
+        viewModel: NotificationIconContainerViewModel,
+        view: NotificationIconContainer,
+        dozeParameters: DozeParameters,
+    ) {
+        viewModel.isDozing.collect { isDozing ->
+            if (isDozing.isAnimating) {
+                val animate = !dozeParameters.displayNeedsBlanking
+                view.setDozing(
+                    /* dozing = */ isDozing.value,
+                    /* fade = */ animate,
+                    /* delay = */ 0,
+                    /* endRunnable = */ isDozing::stopAnimating,
+                )
+            } else {
+                view.setDozing(
+                    /* dozing = */ isDozing.value,
+                    /* fade= */ false,
+                    /* delay= */ 0,
+                )
+            }
+        }
+    }
+
+    private suspend fun bindIsolatedIcon(
+        viewModel: NotificationIconContainerViewModel,
+        view: NotificationIconContainer,
+        viewStore: IconViewStore,
+    ) {
+        coroutineScope {
+            launch {
+                viewModel.isolatedIconLocation.collect { location ->
+                    view.setIsolatedIconLocation(location, true)
+                }
+            }
+            launch {
+                viewModel.isolatedIcon.collect { iconInfo ->
+                    val iconView = iconInfo.value?.let { viewStore.iconView(it.notifKey) }
+                    if (iconInfo.isAnimating) {
+                        view.showIconIsolatedAnimated(iconView, iconInfo::stopAnimating)
+                    } else {
+                        view.showIconIsolated(iconView)
+                    }
                 }
             }
         }

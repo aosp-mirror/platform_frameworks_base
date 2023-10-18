@@ -136,13 +136,10 @@ constructor(
 
     override fun updateAodNotificationIcons() = unsupported
 
-    override fun showIconIsolated(icon: StatusBarIconView?, animated: Boolean) {
-        notificationIcons!!.showIconIsolated(icon, animated)
-    }
+    override fun showIconIsolated(icon: StatusBarIconView?, animated: Boolean) = unsupported
 
-    override fun setIsolatedIconLocation(iconDrawingRect: Rect, requireStateUpdate: Boolean) {
-        notificationIcons!!.setIsolatedIconLocation(iconDrawingRect, requireStateUpdate)
-    }
+    override fun setIsolatedIconLocation(iconDrawingRect: Rect, requireStateUpdate: Boolean) =
+        unsupported
 
     override fun setAnimationsEnabled(enabled: Boolean) = unsupported
 

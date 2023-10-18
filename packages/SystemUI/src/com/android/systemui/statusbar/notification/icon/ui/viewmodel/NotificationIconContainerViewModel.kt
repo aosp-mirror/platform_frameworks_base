@@ -45,6 +45,12 @@ interface NotificationIconContainerViewModel {
     /** [IconsViewData] indicating which icons to display in the view. */
     val iconsViewData: Flow<IconsViewData>
 
+    /** An Icon to show "isolated" in the IconContainer. */
+    val isolatedIcon: Flow<AnimatedValue<IconInfo?>>
+
+    /** Location to show an isolated icon, if there is one. */
+    val isolatedIconLocation: Flow<Rect>
+
     /**
      * Lookup the colors to use for the notification icons based on the bounds of the icon
      * container. A result of `null` indicates that no color changes should be applied.

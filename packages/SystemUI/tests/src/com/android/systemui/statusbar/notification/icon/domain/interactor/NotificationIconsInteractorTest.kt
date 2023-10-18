@@ -26,7 +26,7 @@ import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepositor
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardViewStateRepository
-import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.activeNotificationModel
 import com.android.systemui.statusbar.notification.shared.byIsAmbient
 import com.android.systemui.statusbar.notification.shared.byIsLastMessageFromReply
 import com.android.systemui.statusbar.notification.shared.byIsPulsing
@@ -388,30 +388,30 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
 
 private val testIcons =
     listOf(
-        ActiveNotificationModel(
+        activeNotificationModel(
             key = "notif1",
         ),
-        ActiveNotificationModel(
+        activeNotificationModel(
             key = "notif2",
             isAmbient = true,
         ),
-        ActiveNotificationModel(
+        activeNotificationModel(
             key = "notif3",
             isRowDismissed = true,
         ),
-        ActiveNotificationModel(
+        activeNotificationModel(
             key = "notif4",
             isSilent = true,
         ),
-        ActiveNotificationModel(
+        activeNotificationModel(
             key = "notif5",
             isLastMessageFromReply = true,
         ),
-        ActiveNotificationModel(
+        activeNotificationModel(
             key = "notif6",
             isSuppressedFromStatusBar = true,
         ),
-        ActiveNotificationModel(
+        activeNotificationModel(
             key = "notif7",
             isPulsing = true,
         ),
