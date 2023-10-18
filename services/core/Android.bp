@@ -96,11 +96,26 @@ genrule {
     out: ["com/android/server/location/contexthub/ContextHubStatsLog.java"],
 }
 
+/*
+ * This module is used to refer aconfig flag libraries that are
+ * added to the framework via static_libs.
+ * These libraries are referred here via libs prevent duplication of classes in both
+ * the framework and the system server.
+*/
+java_defaults {
+    name: "shared-framework-aconfig-libs",
+    libs: [
+        "display_flags_lib",
+        "camera_platform_flags_core_java_lib",
+    ],
+}
+
 java_library_static {
     name: "services.core.unboosted",
     defaults: [
         "platform_service_defaults",
         "android.hardware.power-java_static",
+        "shared-framework-aconfig-libs",
     ],
     srcs: [
         ":android.hardware.biometrics.face-V3-java-source",
@@ -181,7 +196,6 @@ java_library_static {
         "android.hardware.power.stats-V2-java",
         "android.hidl.manager-V1.2-java",
         "cbor-java",
-        "display_flags_lib",
         "icu4j_calendar_astronomer",
         "android.security.aaid_aidl-java",
         "netd-client",
@@ -193,7 +207,6 @@ java_library_static {
         "apache-commons-math",
         "backstage_power_flags_lib",
         "notification_flags_lib",
-        "camera_platform_flags_core_java_lib",
         "biometrics_flags_lib",
         "am_flags_lib",
     ],
