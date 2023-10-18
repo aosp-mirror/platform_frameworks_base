@@ -40,6 +40,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
@@ -309,6 +310,70 @@ public class MediaProjectionManagerServiceTest {
 
         // But this is a new projection.
         assertThat(secondProjection).isNotEqualTo(projection);
+    }
+
+    @Test
+    public void stop_noActiveProjections_doesNotLog() throws Exception {
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+
+        projection.stop();
+
+        verifyZeroInteractions(mMediaProjectionMetricsLogger);
+    }
+
+    @Test
+    public void stop_noSession_logsHostUidAndUnknownTargetUid() throws Exception {
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+
+        projection.stop();
+
+        verify(mMediaProjectionMetricsLogger)
+                .logStopped(UID, ContentRecordingSession.TARGET_UID_UNKNOWN);
+    }
+
+    @Test
+    public void stop_displaySession_logsHostUidAndUnknownTargetUidFullScreen() throws Exception {
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+        doReturn(true)
+                .when(mWindowManagerInternal)
+                .setContentRecordingSession(any(ContentRecordingSession.class));
+        service.setContentRecordingSession(DISPLAY_SESSION);
+
+        projection.stop();
+
+        verify(mMediaProjectionMetricsLogger)
+                .logStopped(UID, ContentRecordingSession.TARGET_UID_FULL_SCREEN);
+    }
+
+    @Test
+    public void stop_taskSession_logsHostUidAndTargetUid() throws Exception {
+        int targetUid = 1234;
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+        doReturn(true)
+                .when(mWindowManagerInternal)
+                .setContentRecordingSession(any(ContentRecordingSession.class));
+        ContentRecordingSession taskSession =
+                ContentRecordingSession.createTaskSession(mock(IBinder.class), targetUid);
+        service.setContentRecordingSession(taskSession);
+
+        projection.stop();
+
+        verify(mMediaProjectionMetricsLogger).logStopped(UID, targetUid);
     }
 
     @Test
@@ -762,8 +827,10 @@ public class MediaProjectionManagerServiceTest {
     public void setContentRecordingSession_success_logsCaptureInProgress()
             throws Exception {
         mService.addCallback(mWatcherCallback);
-        MediaProjectionManagerService service = new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
-        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
         projection.start(mIMediaProjectionCallback);
         doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(
                 any(ContentRecordingSession.class));

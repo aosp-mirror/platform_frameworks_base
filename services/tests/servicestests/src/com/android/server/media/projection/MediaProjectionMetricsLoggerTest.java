@@ -16,11 +16,14 @@
 
 package com.android.server.media.projection;
 
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +37,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -50,7 +54,8 @@ import java.time.Duration;
 public class MediaProjectionMetricsLoggerTest {
 
     private static final int TEST_HOST_UID = 123;
-    private static final int TEST_CREATION_SOURCE = 456;
+    private static final int TEST_TARGET_UID = 456;
+    private static final int TEST_CREATION_SOURCE = 789;
 
     @Mock private FrameworkStatsLogWrapper mFrameworkStatsLogWrapper;
     @Mock private MediaProjectionSessionIdGenerator mSessionIdGenerator;
@@ -140,6 +145,92 @@ public class MediaProjectionMetricsLoggerTest {
         mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
+    }
+
+    @Test
+    public void logStopped_logsStateChangedAtomId() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verifyStateChangedAtomIdLogged();
+    }
+
+    @Test
+    public void logStopped_logsCurrentSessionId() {
+        int currentSessionId = 987;
+        when(mSessionIdGenerator.getCurrentSessionId()).thenReturn(currentSessionId);
+
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verifySessionIdLogged(currentSessionId);
+    }
+
+    @Test
+    public void logStopped_logsStateStopped() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verifyStateLogged(MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
+    }
+
+    @Test
+    public void logStopped_logsHostUid() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verifyHostUidLogged(TEST_HOST_UID);
+    }
+
+    @Test
+    public void logStopped_logsTargetUid() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verifyTargetUidLogged(TEST_TARGET_UID);
+    }
+
+    @Test
+    public void logStopped_logsUnknownTimeSinceLastActive() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verifyTimeSinceLastActiveSessionLogged(-1);
+    }
+
+    @Test
+    public void logStopped_logsUnknownSessionCreationSource() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verifyCreationSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    @Test
+    public void logStopped_logsPreviousState() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN);
+
+        mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
+
+        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
+    }
+
+    @Test
+    public void logStopped_registersActiveSessionEnded_afterLogging() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        InOrder inOrder = inOrder(mFrameworkStatsLogWrapper, mTimestampStore);
+        inOrder.verify(mFrameworkStatsLogWrapper)
+                .write(
+                        /* code= */ anyInt(),
+                        /* sessionId= */ anyInt(),
+                        /* state= */ anyInt(),
+                        /* previousState= */ anyInt(),
+                        /* hostUid= */ anyInt(),
+                        /* targetUid= */ anyInt(),
+                        /* timeSinceLastActive= */ anyInt(),
+                        /* creationSource= */ anyInt());
+        inOrder.verify(mTimestampStore).registerActiveSessionEnded();
     }
 
     private void verifyStateChangedAtomIdLogged() {

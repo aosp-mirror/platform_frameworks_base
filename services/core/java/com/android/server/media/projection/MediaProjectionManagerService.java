@@ -293,6 +293,12 @@ public final class MediaProjectionManagerService extends SystemService
     private void stopProjectionLocked(final MediaProjection projection) {
         Slog.d(TAG, "Content Recording: Stopped active MediaProjection and "
                 + "dispatching stop to callbacks");
+        ContentRecordingSession session = projection.mSession;
+        int targetUid =
+                session != null
+                        ? session.getTargetUid()
+                        : ContentRecordingSession.TARGET_UID_UNKNOWN;
+        mMediaProjectionMetricsLogger.logStopped(projection.uid, targetUid);
         mProjectionToken = null;
         mProjectionGrant = null;
         dispatchStop(projection);

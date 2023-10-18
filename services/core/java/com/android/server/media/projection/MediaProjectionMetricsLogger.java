@@ -90,7 +90,21 @@ public class MediaProjectionMetricsLogger {
                 sessionCreationSource);
     }
 
-    void notifyProjectionStateChange(int hostUid, int state, int sessionCreationSource) {
+    /** Logs that the capturing stopped, either normally or because of error. */
+    public void logStopped(int hostUid, int targetUid) {
+        write(
+                mSessionIdGenerator.getCurrentSessionId(),
+                FrameworkStatsLog
+                        .MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED,
+                hostUid,
+                targetUid,
+                TIME_SINCE_LAST_ACTIVE_UNKNOWN,
+                FrameworkStatsLog
+                        .MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+        mTimestampStore.registerActiveSessionEnded();
+    }
+
+    public void notifyProjectionStateChange(int hostUid, int state, int sessionCreationSource) {
         write(hostUid, state, sessionCreationSource);
     }
 
