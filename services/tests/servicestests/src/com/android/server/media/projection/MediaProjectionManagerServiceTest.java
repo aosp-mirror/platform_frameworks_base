@@ -27,6 +27,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -133,7 +134,7 @@ public class MediaProjectionManagerServiceTest {
     private final MediaProjectionManagerService.Injector mMediaProjectionMetricsLoggerInjector =
             new MediaProjectionManagerService.Injector() {
                 @Override
-                MediaProjectionMetricsLogger mediaProjectionMetricsLogger() {
+                MediaProjectionMetricsLogger mediaProjectionMetricsLogger(Context context) {
                     return mMediaProjectionMetricsLogger;
                 }
             };
@@ -584,6 +585,18 @@ public class MediaProjectionManagerServiceTest {
             throws Exception {
         testSetUserReviewGrantedConsentResult_userCancelsSession(
                 /* isSetSessionSuccessful= */ false, RECORD_CANCEL);
+    }
+
+    @Test
+    public void notifyPermissionRequestInitiated_forwardsToLogger() {
+        int hostUid = 123;
+        int sessionCreationSource = 456;
+        mService =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+
+        mService.notifyPermissionRequestInitiated(hostUid, sessionCreationSource);
+
+        verify(mMediaProjectionMetricsLogger).logInitiated(hostUid, sessionCreationSource);
     }
 
     /**
