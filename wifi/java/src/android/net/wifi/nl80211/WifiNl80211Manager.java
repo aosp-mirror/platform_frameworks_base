@@ -113,6 +113,7 @@ public class WifiNl80211Manager {
     private HashMap<String, IPnoScanEvent> mPnoScanEventHandlers = new HashMap<>();
     private HashMap<String, IApInterfaceEventCallback> mApInterfaceListeners = new HashMap<>();
     private Runnable mDeathEventHandler;
+    private Object mLock = new Object();
     /**
      * Ensures that no more than one sendMgmtFrame operation runs concurrently.
      */
@@ -625,13 +626,15 @@ public class WifiNl80211Manager {
     @VisibleForTesting
     public void binderDied() {
         mEventHandler.post(() -> {
-            Log.e(TAG, "Wificond died!");
-            clearState();
-            // Invalidate the global wificond handle on death. Will be refreshed
-            // on the next setup call.
-            mWificond = null;
-            if (mDeathEventHandler != null) {
-                mDeathEventHandler.run();
+            synchronized (mLock) {
+                Log.e(TAG, "Wificond died!");
+                clearState();
+                // Invalidate the global wificond handle on death. Will be refreshed
+                // on the next setup call.
+                mWificond = null;
+                if (mDeathEventHandler != null) {
+                    mDeathEventHandler.run();
+                }
             }
         });
     }
@@ -867,26 +870,28 @@ public class WifiNl80211Manager {
     * @return Returns true on success.
     */
     public boolean tearDownInterfaces() {
-        Log.d(TAG, "tearing down interfaces in wificond");
-        // Explicitly refresh the wificodn handler because |tearDownInterfaces()|
-        // could be used to cleanup before we setup any interfaces.
-        if (!retrieveWificondAndRegisterForDeath()) {
+        synchronized (mLock) {
+            Log.d(TAG, "tearing down interfaces in wificond");
+            // Explicitly refresh the wificond handler because |tearDownInterfaces()|
+            // could be used to cleanup before we setup any interfaces.
+            if (!retrieveWificondAndRegisterForDeath()) {
+                return false;
+            }
+
+            try {
+                for (Map.Entry<String, IWifiScannerImpl> entry : mWificondScanners.entrySet()) {
+                    entry.getValue().unsubscribeScanEvents();
+                    entry.getValue().unsubscribePnoScanEvents();
+                }
+                mWificond.tearDownInterfaces();
+                clearState();
+                return true;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to tear down interfaces due to remote exception");
+            }
+
             return false;
         }
-
-        try {
-            for (Map.Entry<String, IWifiScannerImpl> entry : mWificondScanners.entrySet()) {
-                entry.getValue().unsubscribeScanEvents();
-                entry.getValue().unsubscribePnoScanEvents();
-            }
-            mWificond.tearDownInterfaces();
-            clearState();
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to tear down interfaces due to remote exception");
-        }
-
-        return false;
     }
 
     /** Helper function to look up the interface handle using name */
