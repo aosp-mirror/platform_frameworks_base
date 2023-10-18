@@ -515,8 +515,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public RoutingSessionInfo getSystemSessionInfoForPackage(IMediaRouter2Manager manager,
-            String packageName) {
+    public RoutingSessionInfo getSystemSessionInfoForPackage(@Nullable String packageName) {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
         boolean setDeviceRouteSelected = false;
