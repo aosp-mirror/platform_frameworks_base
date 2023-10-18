@@ -63,8 +63,9 @@ class SmoothDimmer extends Dimmer {
         boolean mAnimateExit = true;
 
         /**
-         * Used for Dims not associated with a WindowContainer. See {@link Dimmer#dimAbove} for
-         * details on Dim lifecycle.
+         * Used for Dims not associated with a WindowContainer.
+         * See {@link Dimmer#adjustRelativeLayer(WindowContainer, int)} for details on Dim
+         * lifecycle.
          */
         boolean mDontReset;
 
@@ -105,22 +106,34 @@ class SmoothDimmer extends Dimmer {
         }
 
         void setExitParameters(WindowContainer container) {
-            setRequestedParameters(container, -1, 0, 0);
+            setRequestedRelativeParent(container, -1 /* relativeLayer */);
+            setRequestedAppearance(0f /* alpha */, 0 /* blur */);
         }
+
         // Sets a requested change without applying it immediately
-        void setRequestedParameters(WindowContainer container, int relativeLayer, float alpha,
-                int blurRadius) {
-            mRequestedProperties.mDimmingContainer = container;
+        void setRequestedRelativeParent(WindowContainer relativeParent, int relativeLayer) {
+            mRequestedProperties.mDimmingContainer = relativeParent;
             mRequestedProperties.mRelativeLayer = relativeLayer;
+        }
+
+        // Sets a requested change without applying it immediately
+        void setRequestedAppearance(float alpha, int blurRadius) {
             mRequestedProperties.mAlpha = alpha;
             mRequestedProperties.mBlurRadius = blurRadius;
         }
 
         /**
          * Commit the last changes we received. Called after
-         * {@link Change#setRequestedParameters(WindowContainer, int, float, int)}
+         * {@link Change#setExitParameters(WindowContainer)},
+         * {@link Change#setRequestedRelativeParent(WindowContainer, int)}, or
+         * {@link Change#setRequestedAppearance(float, int)}
          */
         void applyChanges(SurfaceControl.Transaction t) {
+            if (mRequestedProperties.mDimmingContainer == null) {
+                Log.e(TAG, this + " does not have a dimming container. Have you forgotten to "
+                        + "call adjustRelativeLayer?");
+                return;
+            }
             if (mRequestedProperties.mDimmingContainer.mSurfaceControl == null) {
                 Log.w(TAG, "container " + mRequestedProperties.mDimmingContainer
                         + "does not have a surface");
@@ -276,12 +289,17 @@ class SmoothDimmer extends Dimmer {
     }
 
     @Override
-    protected void dim(WindowContainer container, int relativeLayer, float alpha, int blurRadius) {
+    protected void adjustAppearance(WindowContainer container, float alpha, int blurRadius) {
         final DimState d = obtainDimState(container);
-
-        mDimState.mRequestedProperties.mDimmingContainer = container;
-        mDimState.setRequestedParameters(container, relativeLayer, alpha, blurRadius);
+        mDimState.setRequestedAppearance(alpha, blurRadius);
         d.mDimming = true;
+    }
+
+    @Override
+    protected void adjustRelativeLayer(WindowContainer container, int relativeLayer) {
+        if (mDimState != null) {
+            mDimState.setRequestedRelativeParent(container, relativeLayer);
+        }
     }
 
     boolean updateDims(SurfaceControl.Transaction t) {
