@@ -240,6 +240,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String LSKF_LAST_CHANGED_TIME_KEY = "sp-handle-ts";
     private static final String USER_SERIAL_NUMBER_KEY = "serial-number";
 
+    private static final String MIGRATED_FRP2 = "migrated_frp2";
+    private static final String MIGRATED_KEYSTORE_NS = "migrated_keystore_namespace";
+    private static final String MIGRATED_SP_CE_ONLY = "migrated_all_users_to_sp_and_bound_ce";
+
     // Duration that LockSettingsService will store the gatekeeper password for. This allows
     // multiple biometric enrollments without prompting the user to enter their password via
     // ConfirmLockPassword/ConfirmLockPattern multiple times. This needs to be at least the duration
@@ -906,14 +910,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void migrateOldData() {
-        if (getString("migrated_keystore_namespace", null, 0) == null) {
+        if (getString(MIGRATED_KEYSTORE_NS, null, 0) == null) {
             boolean success = true;
             synchronized (mSpManager) {
                 success &= mSpManager.migrateKeyNamespace();
             }
             success &= migrateProfileLockKeys();
             if (success) {
-                setString("migrated_keystore_namespace", "true", 0);
+                setString(MIGRATED_KEYSTORE_NS, "true", 0);
                 Slog.i(TAG, "Migrated keys to LSS namespace");
             } else {
                 Slog.w(TAG, "Failed to migrate keys to LSS namespace");
@@ -933,9 +937,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         // "migrated_frp" to "migrated_frp2" to cause migrateFrpCredential() to run again on devices
         // where it had run before.
         if (LockPatternUtils.frpCredentialEnabled(mContext)
-                && !getBoolean("migrated_frp2", false, 0)) {
+                && !getBoolean(MIGRATED_FRP2, false, 0)) {
             migrateFrpCredential();
-            setBoolean("migrated_frp2", true, 0);
+            setBoolean(MIGRATED_FRP2, true, 0);
         }
     }
 
@@ -1025,14 +1029,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             // If this gets interrupted (e.g. by the device powering off), there shouldn't be a
             // problem since this will run again on the next boot, and setUserKeyProtection() is
             // okay with the key being already protected by the given secret.
-            if (getString("migrated_all_users_to_sp_and_bound_ce", null, 0) == null) {
+            if (getString(MIGRATED_SP_CE_ONLY, null, 0) == null) {
                 for (UserInfo user : mUserManager.getAliveUsers()) {
                     removeStateForReusedUserIdIfNecessary(user.id, user.serialNumber);
                     synchronized (mSpManager) {
                         migrateUserToSpWithBoundCeKeyLocked(user.id);
                     }
                 }
-                setString("migrated_all_users_to_sp_and_bound_ce", "true", 0);
+                setString(MIGRATED_SP_CE_ONLY, "true", 0);
             }
 
             mThirdPartyAppsStarted = true;
@@ -1059,7 +1063,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
                 return;
             }
-            setUserKeyProtection(userId, result.syntheticPassword.deriveFileBasedEncryptionKey());
+            setUserKeyProtection(userId, result.syntheticPassword);
         }
     }
 
@@ -1344,8 +1348,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         AndroidKeyStoreMaintenance.onUserPasswordChanged(userHandle, password);
     }
 
-    private void unlockKeystore(byte[] password, int userHandle) {
-        Authorization.onLockScreenEvent(false, userHandle, password, null);
+    private void unlockKeystore(int userId, SyntheticPassword sp) {
+        Authorization.onLockScreenEvent(false, userId, sp.deriveKeyStorePassword(), null);
     }
 
     @VisibleForTesting /** Note: this method is overridden in unit tests */
@@ -1998,7 +2002,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.writeChildProfileLock(profileUserId, ArrayUtils.concat(iv, ciphertext));
     }
 
-    private void setUserKeyProtection(@UserIdInt int userId, byte[] secret) {
+    private void setUserKeyProtection(@UserIdInt int userId, SyntheticPassword sp) {
+        final byte[] secret = sp.deriveFileBasedEncryptionKey();
         final long callingId = Binder.clearCallingIdentity();
         try {
             mStorageManager.setUserKeyProtection(userId, secret);
@@ -2765,7 +2770,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             final long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
                     LockscreenCredential.createNone(), sp, userId);
             setCurrentLskfBasedProtectorId(protectorId, userId);
-            setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
+            setUserKeyProtection(userId, sp);
             onSyntheticPasswordCreated(userId, sp);
             Slogf.i(TAG, "Successfully initialized synthetic password for user %d", userId);
             return sp;
@@ -2824,7 +2829,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
-        unlockKeystore(sp.deriveKeyStorePassword(), userId);
+        unlockKeystore(userId, sp);
 
         unlockUserKey(userId, sp);
 
@@ -2891,7 +2896,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             mSpManager.clearSidForUser(userId);
             gateKeeperClearSecureUserId(userId);
             unlockUserKey(userId, sp);
-            unlockKeystore(sp.deriveKeyStorePassword(), userId);
+            unlockKeystore(userId, sp);
             setKeystorePassword(null, userId);
             removeBiometricsForUser(userId);
         }
