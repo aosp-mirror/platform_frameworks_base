@@ -17,23 +17,17 @@ package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import android.content.Context
 import android.graphics.Rect
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.demomode.DemoMode
-import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.RefactorFlag
-import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
@@ -54,33 +48,22 @@ import kotlinx.coroutines.DisposableHandle
 class NotificationIconAreaControllerViewBinderWrapperImpl
 @Inject
 constructor(
-    context: Context,
     private val configuration: ConfigurationState,
     private val configurationController: ConfigurationController,
     private val dozeParameters: DozeParameters,
-    demoModeController: DemoModeController,
     private val featureFlags: FeatureFlagsClassic,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val shelfIconViewStore: ShelfNotificationIconViewStore,
     private val shelfIconsViewModel: NotificationIconContainerShelfViewModel,
     private val aodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val aodIconsViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
-    private val statusBarIconViewStore: StatusBarNotificationIconViewStore,
-    private val statusBarIconsViewModel: NotificationIconContainerStatusBarViewModel,
-) : NotificationIconAreaController, DemoMode {
+) : NotificationIconAreaController {
 
     private val shelfRefactor = RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR)
 
-    private var notificationIconArea: View? = null
-    private var notificationIcons: NotificationIconContainer? = null
     private var shelfIcons: NotificationIconContainer? = null
     private var aodIcons: NotificationIconContainer? = null
     private var aodBindJob: DisposableHandle? = null
-
-    init {
-        demoModeController.addCallback(this)
-        initializeNotificationAreaViews(context)
-    }
 
     /** Called by the Keyguard*ViewController whose view contains the aod icons. */
     override fun setupAodIcons(aodIcons: NotificationIconContainer) {
@@ -127,9 +110,7 @@ constructor(
     override fun onDensityOrFontScaleChanged(context: Context) = unsupported
 
     /** Returns the view that represents the notification area. */
-    override fun getNotificationInnerAreaView(): View? {
-        return notificationIconArea
-    }
+    override fun getNotificationInnerAreaView(): View? = unsupported
 
     /** Updates the notifications with the given list of notifications to display. */
     override fun updateNotificationIcons(entries: List<ListEntry>) = unsupported
@@ -147,47 +128,6 @@ constructor(
 
     override fun getHeight(): Int {
         return if (aodIcons == null) 0 else aodIcons!!.height
-    }
-
-    override fun demoCommands(): List<String> {
-        val commands = ArrayList<String>()
-        commands.add(DemoMode.COMMAND_NOTIFICATIONS)
-        return commands
-    }
-
-    override fun dispatchDemoCommand(command: String, args: Bundle) {
-        if (notificationIconArea != null) {
-            val visible = args.getString("visible")
-            val vis = if ("false" == visible) View.INVISIBLE else View.VISIBLE
-            notificationIconArea?.visibility = vis
-        }
-    }
-
-    override fun onDemoModeFinished() {
-        if (notificationIconArea != null) {
-            notificationIconArea?.visibility = View.VISIBLE
-        }
-    }
-
-    private fun inflateIconArea(inflater: LayoutInflater): View {
-        return inflater.inflate(R.layout.notification_icon_area, null)
-    }
-
-    /** Initializes the views that will represent the notification area. */
-    private fun initializeNotificationAreaViews(context: Context) {
-        val layoutInflater = LayoutInflater.from(context)
-        notificationIconArea = inflateIconArea(layoutInflater)
-        notificationIcons = notificationIconArea?.findViewById(R.id.notificationIcons)
-        NotificationIconContainerViewBinder.bind(
-            notificationIcons!!,
-            statusBarIconsViewModel,
-            configuration,
-            configurationController,
-            dozeParameters,
-            featureFlags,
-            screenOffAnimationController,
-            statusBarIconViewStore,
-        )
     }
 
     companion object {
