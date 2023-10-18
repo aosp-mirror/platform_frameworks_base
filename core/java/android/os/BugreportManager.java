@@ -26,6 +26,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserHandleAware;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -280,8 +281,8 @@ public final class BugreportManager {
      *
      * <p>{@link BugreportManager} takes ownership of {@code bugreportFd}.
      *
-     * <p>The caller may only request to retrieve a given bugreport once. Subsequent calls will fail
-     * with error code {@link BugreportCallback#BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE}.
+     * <p>The caller can reattempt to retrieve the bugreport multiple times if the user has not
+     * consented on previous attempts.
      *
      * @param bugreportFile the identifier for a bugreport that was previously generated for this
      *      caller using {@code startBugreport}.
@@ -294,6 +295,7 @@ public final class BugreportManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.DUMP)
     @WorkerThread
+    @UserHandleAware
     public void retrieveBugreport(
             @NonNull String bugreportFile,
             @NonNull ParcelFileDescriptor bugreportFd,
@@ -307,8 +309,10 @@ public final class BugreportManager {
             Preconditions.checkNotNull(callback);
             DumpstateListener dsListener = new DumpstateListener(executor, callback, false, false);
             mBinder.retrieveBugreport(Binder.getCallingUid(), mContext.getOpPackageName(),
+                    mContext.getUserId(),
                     bugreportFd.getFileDescriptor(),
                     bugreportFile,
+                    /* keepBugreportOnRetrieval = */ false,
                     dsListener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

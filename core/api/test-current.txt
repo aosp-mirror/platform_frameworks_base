@@ -2148,7 +2148,9 @@ package android.os {
   }
 
   public final class BugreportParams {
+    field @FlaggedApi("android.app.admin.flags.onboarding_bugreport_v2_enabled") public static final int BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL = 4; // 0x4
     field @FlaggedApi("android.os.bugreport_mode_max_value") public static final int BUGREPORT_MODE_MAX_VALUE = 7; // 0x7
+    field @FlaggedApi("android.app.admin.flags.onboarding_bugreport_v2_enabled") public static final int BUGREPORT_MODE_ONBOARDING = 7; // 0x7
   }
 
   public class Build {

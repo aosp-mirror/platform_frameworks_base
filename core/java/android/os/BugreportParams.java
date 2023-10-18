@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.admin.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -128,6 +129,8 @@ public final class BugreportParams {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
     public static final int BUGREPORT_MODE_ONBOARDING = IDumpstate.BUGREPORT_MODE_ONBOARDING;
 
     /**
@@ -145,7 +148,8 @@ public final class BugreportParams {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "BUGREPORT_FLAG_" }, value = {
             BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA,
-            BUGREPORT_FLAG_DEFER_CONSENT
+            BUGREPORT_FLAG_DEFER_CONSENT,
+            BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL
     })
     public @interface BugreportFlag {}
 
@@ -165,4 +169,20 @@ public final class BugreportParams {
      * String, ParcelFileDescriptor, Executor, BugreportManager.BugreportCallback)}.
      */
     public static final int BUGREPORT_FLAG_DEFER_CONSENT = IDumpstate.BUGREPORT_FLAG_DEFER_CONSENT;
+
+    /**
+     * Flag for keeping a bugreport stored even after it has been retrieved via
+     * {@link BugreportManager#retrieveBugreport}.
+     *
+     * <p>This flag can only be used when {@link #BUGREPORT_FLAG_DEFER_CONSENT} is set.
+     * The bugreport may be retrieved multiple times using
+     * {@link BugreportManager#retrieveBugreport(
+     * String, ParcelFileDescriptor, Executor, BugreportManager.BugreportCallback)}.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
+    public static final int BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL =
+            IDumpstate.BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL;
 }
