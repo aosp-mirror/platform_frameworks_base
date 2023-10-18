@@ -2,7 +2,7 @@ package: "com.android.graphics.flags"
 
 flag {
      name: "exact_compute_bounds"
-     namespace: "framework_graphics"
+     namespace: "core_graphics"
      description: "Add a function without unused exact param for computeBounds."
      bug: "304478551"
 }
