@@ -4565,6 +4565,12 @@
     <permission android:name="android.permission.SET_DEBUG_APP"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- Allows an application to access the data in Dropbox.
+    <p>Not for use by third-party applications.
+    @FlaggedApi("com.android.server.feature.flags.enable_read_dropbox_permission") -->
+    <permission android:name="android.permission.READ_DROPBOX_DATA"
+        android:protectionLevel="signature|privileged|development" />
+
     <!-- Allows an application to set the maximum number of (not needed)
          application processes that can be running.
          <p>Not for use by third-party applications. -->
