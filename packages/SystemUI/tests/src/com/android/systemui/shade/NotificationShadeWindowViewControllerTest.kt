@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -142,6 +143,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         Optional<UnfoldTransitionProgressProvider>
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock lateinit var dragDownHelper: DragDownHelper
+    @Mock lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock
     lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
     @Mock lateinit var sysUIKeyEventHandler: SysUIKeyEventHandler
@@ -200,8 +202,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 centralSurfaces,
                 dozeServiceHost,
                 dozeScrimController,
-                backActionInteractor,
-                powerInteractor,
                 notificationShadeWindowController,
                 unfoldTransitionProgressProvider,
                 keyguardUnlockAnimationController,
@@ -243,6 +243,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                             mock(KeyguardUpdateMonitor::class.java),
                             FakeTrustRepository(),
                             testScope.backgroundScope,
+                            mSelectedUserInteractor,
                         ),
                     facePropertyRepository = FakeFacePropertyRepository(),
                     deviceEntryFingerprintAuthRepository =
@@ -254,6 +255,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 sysUIKeyEventHandler,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
+                mSelectedUserInteractor,
             )
         underTest.setupExpandedStatusBar()
         underTest.setDragDownHelper(dragDownHelper)

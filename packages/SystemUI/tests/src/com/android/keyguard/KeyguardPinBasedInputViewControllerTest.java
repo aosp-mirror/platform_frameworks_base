@@ -34,10 +34,10 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
-import com.android.systemui.classifier.SingleTapClassifier;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,11 +76,11 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     private EmergencyButtonController mEmergencyButtonController;
     private FalsingCollector mFalsingCollector = new FalsingCollectorFake();
     @Mock
-    private SingleTapClassifier mSingleTapClassifier;
-    @Mock
     private View mDeleteButton;
     @Mock
     private View mOkButton;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
     private NumPadKey[] mButtons = new NumPadKey[]{};
 
     private KeyguardPinBasedInputViewController mKeyguardPinViewController;
@@ -108,7 +108,8 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
-                mEmergencyButtonController, mFalsingCollector, featureFlags) {
+                mEmergencyButtonController, mFalsingCollector, featureFlags,
+                mSelectedUserInteractor) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);

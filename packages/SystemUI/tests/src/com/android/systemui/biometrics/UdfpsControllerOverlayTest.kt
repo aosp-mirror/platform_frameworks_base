@@ -36,7 +36,6 @@ import android.view.accessibility.AccessibilityManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
@@ -46,12 +45,14 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -111,6 +112,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Mock private lateinit var udfpsUtils: UdfpsUtils
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var udfpsKeyguardAccessibilityDelegate:
             UdfpsKeyguardAccessibilityDelegate
     @Mock private lateinit var udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>
@@ -163,6 +165,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             isDebuggable,
             udfpsKeyguardAccessibilityDelegate,
             udfpsKeyguardViewModels,
+            mSelectedUserInteractor,
         )
         block()
     }

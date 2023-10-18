@@ -42,7 +42,7 @@ import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -243,9 +243,8 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(USER_0)
         }
         return StatusBarUserChipViewModel(
-            context = context,
             interactor =
-                UserInteractor(
+                UserSwitcherInteractor(
                     applicationContext = context,
                     repository = userRepository,
                     activityStarter = activityStarter,

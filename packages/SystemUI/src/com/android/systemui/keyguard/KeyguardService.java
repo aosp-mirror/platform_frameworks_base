@@ -35,6 +35,8 @@ import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionOldType;
 import static android.view.WindowManager.TransitionType;
 
+import static com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -76,13 +78,13 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.power.shared.model.ScreenPowerState;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
 import com.android.systemui.keyguard.ui.binder.WindowManagerLockscreenVisibilityViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSurfaceBehindViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.WindowManagerLockscreenVisibilityViewModel;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.shared.model.ScreenPowerState;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
@@ -599,11 +601,18 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.setSwitchingUser(switching);
         }
 
+        /**
+         * @deprecated This binder call is not listened to anymore. Instead the current user is
+         * tracked in SelectedUserInteractor.getSelectedUserId()
+         */
         @Override // Binder interface
+        @Deprecated
         public void setCurrentUser(int userId) {
-            trace("setCurrentUser userId=" + userId);
+            trace("Deprecated/NOT USED: setCurrentUser userId=" + userId);
             checkPermission();
-            mKeyguardViewMediator.setCurrentUser(userId);
+            if (!mFlags.isEnabled(REFACTOR_GETCURRENTUSER)) {
+                mKeyguardViewMediator.setCurrentUser(userId);
+            }
         }
 
         @Override // Binder interface

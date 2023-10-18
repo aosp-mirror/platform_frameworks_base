@@ -42,6 +42,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.model.ShadeModel
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
@@ -86,6 +87,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
     // Used to verify transition requests for test output
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
     private lateinit var fromDreamingTransitionInteractor: FromDreamingTransitionInteractor
@@ -158,6 +160,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     flags = featureFlags,
                     keyguardSecurityModel = keyguardSecurityModel,
                     powerInteractor = powerInteractor,
+                    selectedUserInteractor = mSelectedUserInteractor,
                 )
                 .apply { start() }
 

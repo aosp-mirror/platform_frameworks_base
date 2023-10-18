@@ -33,7 +33,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.user.UserSwitchFullscreenDialog
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.Lazy
@@ -53,7 +53,7 @@ constructor(
     private val falsingManager: Lazy<FalsingManager>,
     private val broadcastSender: Lazy<BroadcastSender>,
     private val dialogLaunchAnimator: Lazy<DialogLaunchAnimator>,
-    private val interactor: Lazy<UserInteractor>,
+    private val interactor: Lazy<UserSwitcherInteractor>,
     private val userDetailAdapterProvider: Provider<UserDetailView.Adapter>,
     private val eventLogger: Lazy<UiEventLogger>,
     private val activityStarter: Lazy<ActivityStarter>,

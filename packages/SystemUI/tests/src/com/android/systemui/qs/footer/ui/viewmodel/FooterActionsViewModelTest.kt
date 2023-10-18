@@ -36,7 +36,6 @@ import com.android.systemui.qs.footer.FooterActionsTestUtils
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
 import com.android.systemui.res.R
 import com.android.systemui.security.data.model.SecurityModel
-import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.statusbar.policy.FakeSecurityController
 import com.android.systemui.statusbar.policy.FakeUserInfoController
 import com.android.systemui.statusbar.policy.FakeUserInfoController.FakeInfo
@@ -130,7 +129,6 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         val userInfoController = FakeUserInfoController(FakeInfo(picture = picture))
         val settings = FakeGlobalSettings()
         val userId = 42
-        val userTracker = FakeUserTracker(userId)
         val userSwitcherControllerWrapper =
             MockUserSwitcherControllerWrapper(currentUserName = "foo")
 
@@ -148,7 +146,6 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     utils.footerActionsInteractor(
                         userSwitcherRepository =
                             utils.userSwitcherRepository(
-                                userTracker = userTracker,
                                 settings = settings,
                                 userManager = userManager,
                                 userInfoController = userInfoController,

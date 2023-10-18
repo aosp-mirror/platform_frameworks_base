@@ -63,7 +63,7 @@ import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.UserSwitcherController
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
@@ -136,7 +136,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var viewMediatorCallback: ViewMediatorCallback
     @Mock private lateinit var audioManager: AudioManager
-    @Mock private lateinit var userInteractor: UserInteractor
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var faceAuthAccessibilityDelegate: FaceAuthAccessibilityDelegate
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var postureController: DevicePostureController
@@ -215,10 +215,10 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 null,
                 keyguardViewController,
                 postureController,
-                featureFlags
+                featureFlags,
+                mSelectedUserInteractor,
             )
 
-        whenever(userInteractor.getSelectedUserId()).thenReturn(TARGET_USER_ID)
         sceneTestUtils = SceneTestUtils(this)
         sceneInteractor = sceneTestUtils.sceneInteractor()
         keyguardTransitionInteractor =
@@ -260,7 +260,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mock(),
                 mock(),
                 { JavaAdapter(sceneTestUtils.testScope.backgroundScope) },
-                userInteractor,
+                mSelectedUserInteractor,
                 deviceProvisionedController,
                 faceAuthAccessibilityDelegate,
                 keyguardTransitionInteractor,

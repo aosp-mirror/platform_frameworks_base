@@ -30,14 +30,10 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
-import com.android.systemui.keyguard.ScreenLifecycle
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.phone.BiometricUnlockController
-import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -47,7 +43,6 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -68,13 +63,10 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
-    @Mock private lateinit var screenLifecycle: ScreenLifecycle
-    @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var dozeTransitionListener: DozeTransitionListener
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
-    @Mock private lateinit var dozeParameters: DozeParameters
     private val mainDispatcher = StandardTestDispatcher()
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -89,12 +81,9 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         underTest =
             KeyguardRepositoryImpl(
                 statusBarStateController,
-                screenLifecycle,
-                biometricUnlockController,
                 keyguardStateController,
                 keyguardUpdateMonitor,
                 dozeTransitionListener,
-                dozeParameters,
                 authController,
                 dreamOverlayCallbackController,
                 mainDispatcher,
@@ -199,26 +188,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             job.cancel()
         }
-
-    @Test
-    fun isAodAvailable() = runTest {
-        val flow = underTest.isAodAvailable
-        val isAodAvailable = collectLastValue(flow)
-        runCurrent()
-
-        val callback =
-            withArgCaptor<DozeParameters.Callback> { verify(dozeParameters).addCallback(capture()) }
-
-        whenever(dozeParameters.getAlwaysOn()).thenReturn(false)
-        callback.onAlwaysOnChange()
-        assertThat(isAodAvailable()).isEqualTo(false)
-
-        whenever(dozeParameters.getAlwaysOn()).thenReturn(true)
-        callback.onAlwaysOnChange()
-        assertThat(isAodAvailable()).isEqualTo(true)
-
-        flow.onCompletion { verify(dozeParameters).removeCallback(callback) }
-    }
 
     @Test
     fun isKeyguardOccluded() =
@@ -383,53 +352,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             job.cancel()
-        }
-
-    @Test
-    fun biometricUnlockState() =
-        testScope.runTest {
-            val values = mutableListOf<BiometricUnlockModel>()
-            val job = underTest.biometricUnlockState.onEach(values::add).launchIn(this)
-
-            runCurrent()
-            val captor = argumentCaptor<BiometricUnlockController.BiometricUnlockEventsListener>()
-            verify(biometricUnlockController).addListener(captor.capture())
-
-            listOf(
-                    BiometricUnlockController.MODE_NONE,
-                    BiometricUnlockController.MODE_WAKE_AND_UNLOCK,
-                    BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING,
-                    BiometricUnlockController.MODE_SHOW_BOUNCER,
-                    BiometricUnlockController.MODE_ONLY_WAKE,
-                    BiometricUnlockController.MODE_UNLOCK_COLLAPSING,
-                    BiometricUnlockController.MODE_DISMISS_BOUNCER,
-                    BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM,
-                )
-                .forEach {
-                    whenever(biometricUnlockController.mode).thenReturn(it)
-                    captor.value.onModeChanged(it)
-                    runCurrent()
-                }
-
-            assertThat(values)
-                .isEqualTo(
-                    listOf(
-                        // Initial value will be NONE, followed by onModeChanged() call
-                        BiometricUnlockModel.NONE,
-                        BiometricUnlockModel.NONE,
-                        BiometricUnlockModel.WAKE_AND_UNLOCK,
-                        BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING,
-                        BiometricUnlockModel.SHOW_BOUNCER,
-                        BiometricUnlockModel.ONLY_WAKE,
-                        BiometricUnlockModel.UNLOCK_COLLAPSING,
-                        BiometricUnlockModel.DISMISS_BOUNCER,
-                        BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM,
-                    )
-                )
-
-            job.cancel()
-            runCurrent()
-            verify(biometricUnlockController).removeListener(captor.value)
         }
 
     @Test

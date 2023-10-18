@@ -16,11 +16,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.app.ActivityManager
 import android.content.Context
 import android.os.Handler
-import android.os.UserManager
-import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
@@ -28,7 +25,6 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
-import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -36,21 +32,13 @@ import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
-import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.domain.interactor.GuestUserInteractor
-import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
-import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.utils.UserRestrictionChecker
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.TestScope
 import org.mockito.Mockito.mock
 
@@ -64,8 +52,6 @@ object KeyguardDismissInteractorFactory {
     fun create(
         context: Context,
         testScope: TestScope,
-        broadcastDispatcher: FakeBroadcastDispatcher,
-        dispatcher: CoroutineDispatcher,
         trustRepository: FakeTrustRepository = FakeTrustRepository(),
         keyguardRepository: FakeKeyguardRepository = FakeKeyguardRepository(),
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
@@ -74,6 +60,7 @@ object KeyguardDismissInteractorFactory {
             FakeFeatureFlagsClassic().apply {
                 set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, true)
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+                set(Flags.REFACTOR_GETCURRENTUSER, true)
             },
         powerRepository: FakePowerRepository = FakePowerRepository(),
         userRepository: FakeUserRepository = FakeUserRepository(),
@@ -92,6 +79,7 @@ object KeyguardDismissInteractorFactory {
                 keyguardUpdateMonitor,
                 trustRepository,
                 testScope.backgroundScope,
+                mock(SelectedUserInteractor::class.java),
             )
         val alternateBouncerInteractor =
             AlternateBouncerInteractor(
@@ -103,38 +91,11 @@ object KeyguardDismissInteractorFactory {
                 keyguardUpdateMonitor,
             )
         val powerInteractorWithDeps =
-                PowerInteractorFactory.create(
-                        repository = powerRepository,
-                )
-        val userInteractor =
-            UserInteractor(
-                applicationContext = context,
-                repository = userRepository,
-                mock(ActivityStarter::class.java),
-                keyguardInteractor =
-                    KeyguardInteractorFactory.create(
-                            repository = keyguardRepository,
-                            bouncerRepository = bouncerRepository,
-                            featureFlags = featureFlags,
-                        )
-                        .keyguardInteractor,
-                featureFlags = featureFlags,
-                manager = mock(UserManager::class.java),
-                headlessSystemUserMode = mock(HeadlessSystemUserMode::class.java),
-                applicationScope = testScope.backgroundScope,
-                telephonyInteractor =
-                    TelephonyInteractor(
-                        repository = FakeTelephonyRepository(),
-                    ),
-                broadcastDispatcher = broadcastDispatcher,
-                keyguardUpdateMonitor = keyguardUpdateMonitor,
-                backgroundDispatcher = dispatcher,
-                activityManager = mock(ActivityManager::class.java),
-                refreshUsersScheduler = mock(RefreshUsersScheduler::class.java),
-                guestUserInteractor = mock(GuestUserInteractor::class.java),
-                uiEventLogger = mock(UiEventLogger::class.java),
-                userRestrictionChecker = mock(UserRestrictionChecker::class.java),
+            PowerInteractorFactory.create(
+                repository = powerRepository,
             )
+        val selectedUserInteractor =
+            SelectedUserInteractor(repository = userRepository, flags = featureFlags)
         return WithDependencies(
             trustRepository = trustRepository,
             keyguardRepository = keyguardRepository,
@@ -149,7 +110,7 @@ object KeyguardDismissInteractorFactory {
                     primaryBouncerInteractor,
                     alternateBouncerInteractor,
                     powerInteractorWithDeps.powerInteractor,
-                    userInteractor,
+                    selectedUserInteractor,
                 ),
         )
     }

@@ -47,7 +47,6 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -72,6 +71,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import dagger.Lazy;
 
@@ -112,6 +112,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final KeyguardBypassController mKeyguardBypassController;
     private final Executor mBackgroundExecutor;
     private final AuthController mAuthController;
+    private final Lazy<SelectedUserInteractor> mUserInteractor;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private ViewGroup mWindowRootView;
     private LayoutParams mLp;
@@ -157,7 +158,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             AuthController authController,
             ShadeExpansionStateManager shadeExpansionStateManager,
             Lazy<ShadeInteractor> shadeInteractorLazy,
-            ShadeWindowLogger logger) {
+            ShadeWindowLogger logger,
+            Lazy<SelectedUserInteractor> userInteractor) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
         mWindowManager = windowManager;
@@ -174,6 +176,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mScreenOffAnimationController = screenOffAnimationController;
         dumpManager.registerDumpable(this);
         mAuthController = authController;
+        mUserInteractor = userInteractor;
         mLastKeyguardRotationAllowed = mKeyguardStateController.isKeyguardScreenRotationAllowed();
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
@@ -348,7 +351,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             boolean onKeyguard = state.statusBarState == StatusBarState.KEYGUARD
                     && !state.keyguardFadingAway && !state.keyguardGoingAway;
             if (onKeyguard
-                    && mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
+                    && mAuthController.isUdfpsEnrolled(mUserInteractor.get().getSelectedUserId())) {
                 // both max and min display refresh rate must be set to take effect:
                 mLpChanged.preferredMaxDisplayRefreshRate = mKeyguardPreferredRefreshRate;
                 mLpChanged.preferredMinDisplayRefreshRate = mKeyguardPreferredRefreshRate;

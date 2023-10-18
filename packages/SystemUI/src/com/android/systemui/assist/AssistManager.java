@@ -28,17 +28,17 @@ import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.res.R;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Lazy;
@@ -144,6 +144,7 @@ public class AssistManager {
     private final UserTracker mUserTracker;
     private final DisplayTracker mDisplayTracker;
     private final SecureSettings mSecureSettings;
+    private final SelectedUserInteractor mSelectedUserInteractor;
 
     private final DeviceProvisionedController mDeviceProvisionedController;
 
@@ -152,16 +153,16 @@ public class AssistManager {
 
     private final IVisualQueryDetectionAttentionListener mVisualQueryDetectionAttentionListener =
             new IVisualQueryDetectionAttentionListener.Stub() {
-        @Override
-        public void onAttentionGained() {
-            handleVisualAttentionChanged(true);
-        }
+                @Override
+                public void onAttentionGained() {
+                    handleVisualAttentionChanged(true);
+                }
 
-        @Override
-        public void onAttentionLost() {
-            handleVisualAttentionChanged(false);
-        }
-    };
+                @Override
+                public void onAttentionLost() {
+                    handleVisualAttentionChanged(false);
+                }
+            };
 
     private final CommandQueue mCommandQueue;
     protected final AssistUtils mAssistUtils;
@@ -183,7 +184,8 @@ public class AssistManager {
             @Main Handler uiHandler,
             UserTracker userTracker,
             DisplayTracker displayTracker,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            SelectedUserInteractor selectedUserInteractor) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
@@ -195,6 +197,7 @@ public class AssistManager {
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mSecureSettings = secureSettings;
+        mSelectedUserInteractor = selectedUserInteractor;
 
         registerVoiceInteractionSessionListener();
         registerVisualQueryRecognitionStatusListener();
@@ -316,12 +319,13 @@ public class AssistManager {
     public boolean shouldOverrideAssist(int invocationType) {
         return mAssistOverrideInvocationTypes != null
                 && Arrays.stream(mAssistOverrideInvocationTypes).anyMatch(
-                        override -> override == invocationType);
+                    override -> override == invocationType);
     }
 
     /**
      * @param invocationTypes The invocation types that will henceforth be handled via
-     *         OverviewProxy (Launcher); other invocation types should be handled by this class.
+     *                        OverviewProxy (Launcher); other invocation types should be handled by
+     *                        this class.
      */
     public void setAssistantOverridesRequested(int[] invocationTypes) {
         mAssistOverrideInvocationTypes = invocationTypes;
@@ -478,7 +482,7 @@ public class AssistManager {
 
     @Nullable
     private ComponentName getAssistInfo() {
-        return getAssistInfoForUser(KeyguardUpdateMonitor.getCurrentUser());
+        return getAssistInfoForUser(mSelectedUserInteractor.getSelectedUserId());
     }
 
     public void showDisclosure() {

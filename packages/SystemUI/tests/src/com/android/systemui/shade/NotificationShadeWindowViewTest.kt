@@ -79,6 +79,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -144,6 +145,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock
     private lateinit var primaryBouncerToGoneTransitionViewModel:
         PrimaryBouncerToGoneTransitionViewModel
@@ -202,8 +204,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 centralSurfaces,
                 dozeServiceHost,
                 dozeScrimController,
-                backActionInteractor,
-                powerInteractor,
                 notificationShadeWindowController,
                 unfoldTransitionProgressProvider,
                 keyguardUnlockAnimationController,
@@ -245,6 +245,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                             Mockito.mock(KeyguardUpdateMonitor::class.java),
                             FakeTrustRepository(),
                             testScope.backgroundScope,
+                            mSelectedUserInteractor,
                         ),
                     facePropertyRepository = FakeFacePropertyRepository(),
                     deviceEntryFingerprintAuthRepository =
@@ -256,6 +257,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 Mockito.mock(SysUIKeyEventHandler::class.java),
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
+                mSelectedUserInteractor,
             )
 
         controller.setupExpandedStatusBar()

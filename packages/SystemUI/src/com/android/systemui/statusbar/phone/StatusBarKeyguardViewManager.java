@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import dagger.Lazy;
 
@@ -313,6 +314,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final KeyguardUpdateMonitor mKeyguardUpdateManager;
     private final LatencyTracker mLatencyTracker;
     private final KeyguardSecurityModel mKeyguardSecurityModel;
+    private final SelectedUserInteractor mSelectedUserInteractor;
     @Nullable private KeyguardBypassController mBypassController;
     @Nullable private OccludingAppBiometricUI mOccludingAppBiometricUI;
 
@@ -370,7 +372,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<WindowManagerLockscreenVisibilityInteractor> wmLockscreenVisibilityInteractor,
-            Lazy<KeyguardDismissActionInteractor> keyguardDismissActionInteractorLazy
+            Lazy<KeyguardDismissActionInteractor> keyguardDismissActionInteractorLazy,
+            SelectedUserInteractor selectedUserInteractor
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -403,6 +406,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mMainDispatcher = mainDispatcher;
         mWmLockscreenVisibilityInteractor = wmLockscreenVisibilityInteractor;
         mKeyguardDismissActionInteractor = keyguardDismissActionInteractorLazy;
+        mSelectedUserInteractor = selectedUserInteractor;
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -1142,7 +1146,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public boolean isSecure() {
         return mKeyguardSecurityModel.getSecurityMode(
-                KeyguardUpdateMonitor.getCurrentUser()) != KeyguardSecurityModel.SecurityMode.None;
+                mSelectedUserInteractor.getSelectedUserId())
+                != KeyguardSecurityModel.SecurityMode.None;
     }
 
     /**
@@ -1690,7 +1695,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public boolean needsFullscreenBouncer() {
         KeyguardSecurityModel.SecurityMode mode = mKeyguardSecurityModel.getSecurityMode(
-                KeyguardUpdateMonitor.getCurrentUser());
+                mSelectedUserInteractor.getSelectedUserId());
         return mode == KeyguardSecurityModel.SecurityMode.SimPin
                 || mode == KeyguardSecurityModel.SecurityMode.SimPuk;
     }

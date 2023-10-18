@@ -117,6 +117,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -187,6 +188,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
     private @Mock ShadeInteractor mShadeInteractor;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
+    private @Mock SelectedUserInteractor mSelectedUserInteractor;
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallback;
     private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
@@ -213,7 +215,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock SystemPropertiesHelper mSystemPropertiesHelper;
 
     private FakeFeatureFlags mFeatureFlags;
-    private int mInitialUserId;
+    private final int mDefaultUserId = 100;
 
     @Before
     public void setUp() throws Exception {
@@ -233,6 +235,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 .thenReturn(mock(Flow.class));
         when(mDreamingToLockscreenTransitionViewModel.getTransitionEnded())
                 .thenReturn(mock(Flow.class));
+        when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(mDefaultUserId);
+        when(mSelectedUserInteractor.getSelectedUserId(anyBoolean())).thenReturn(mDefaultUserId);
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
                 mContext,
                 new FakeWindowRootViewComponent.Factory(mock(WindowRootView.class)),
@@ -251,9 +255,11 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mAuthController,
                 mShadeExpansionStateManager,
                 () -> mShadeInteractor,
-                mShadeWindowLogger);
+                mShadeWindowLogger,
+                () -> mSelectedUserInteractor);
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
+        mFeatureFlags.set(Flags.REFACTOR_GETCURRENTUSER, true);
 
         DejankUtils.setImmediate(true);
 
@@ -266,12 +272,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         }).when(mKeyguardStateController).notifyKeyguardGoingAway(anyBoolean());
 
         createAndStartViewMediator();
-        mInitialUserId = KeyguardUpdateMonitor.getCurrentUser();
-    }
-
-    @After
-    public void teardown() {
-        KeyguardUpdateMonitor.setCurrentUser(mInitialUserId);
     }
 
     /**
@@ -451,7 +451,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.setKeyguardEnabled(false);
         TestableLooper.get(this).processAllMessages();
 
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mDefaultUserId);
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         final ArgumentCaptor<Runnable> animationRunnableCaptor =
                 ArgumentCaptor.forClass(Runnable.class);
@@ -617,8 +617,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     public void lockAfterScreenTimeoutUsesValueFromSettings() {
         int currentUserId = 99;
         int userSpecificTimeout = 5999;
-        KeyguardUpdateMonitor.setCurrentUser(currentUserId);
 
+        when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(currentUserId);
         when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(false);
         when(mDevicePolicyManager.getMaximumTimeToLock(null, currentUserId)).thenReturn(0L);
         when(mSecureSettings.getIntForUser(LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
@@ -718,7 +718,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         startMockKeyguardExitAnimation();
         assertTrue(mViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind());
 
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mDefaultUserId);
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         TestableLooper.get(this).processAllMessages();
         verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(false);
@@ -782,7 +782,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // Verify keyguard told of authentication
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mDefaultUserId);
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         final ArgumentCaptor<Runnable> animationRunnableCaptor =
                 ArgumentCaptor.forClass(Runnable.class);
@@ -814,7 +814,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // Verify keyguard told of authentication
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
         clearInvocations(mStatusBarKeyguardViewManager);
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mDefaultUserId);
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         final ArgumentCaptor<Runnable> animationRunnableCaptor =
                 ArgumentCaptor.forClass(Runnable.class);
@@ -844,7 +844,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // Verify keyguard told of authentication
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mDefaultUserId);
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         final ArgumentCaptor<Runnable> animationRunnableCaptor =
                 ArgumentCaptor.forClass(Runnable.class);
@@ -1111,7 +1111,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mDispatcher,
                 () -> mDreamingToLockscreenTransitionViewModel,
                 mSystemPropertiesHelper,
-                () -> mock(WindowManagerLockscreenVisibilityManager.class));
+                () -> mock(WindowManagerLockscreenVisibilityManager.class),
+                mSelectedUserInteractor);
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);

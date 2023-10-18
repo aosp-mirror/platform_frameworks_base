@@ -90,6 +90,7 @@ open class UserTrackerImpl internal constructor(
     private val isBackgroundUserSwitchEnabled: Boolean get() =
         featureFlagsProvider.get().isEnabled(Flags.USER_TRACKER_BACKGROUND_CALLBACKS)
 
+    @Deprecated("Use UserInteractor.getSelectedUserId()")
     override var userId: Int by SynchronizedDelegate(context.userId)
         protected set
 
