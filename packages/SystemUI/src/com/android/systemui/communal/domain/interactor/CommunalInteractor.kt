@@ -26,6 +26,7 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import javax.inject.Inject
@@ -49,6 +50,7 @@ constructor(
     smartspaceRepository: SmartspaceRepository,
     tutorialInteractor: CommunalTutorialInteractor,
     private val appWidgetHost: AppWidgetHost,
+    private val editWidgetsActivityStarter: EditWidgetsActivityStarter
 ) {
 
     /** Whether communal features are enabled. */
@@ -74,6 +76,11 @@ constructor(
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
     fun onSceneChanged(newScene: CommunalSceneKey) {
         communalRepository.setDesiredScene(newScene)
+    }
+
+    /** Show the widget editor Activity. */
+    fun showWidgetEditor() {
+        editWidgetsActivityStarter.startActivity()
     }
 
     /** Add a widget at the specified position. */

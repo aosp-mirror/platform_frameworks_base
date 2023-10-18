@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -86,11 +87,8 @@ fun CommunalHub(
                 )
             }
         }
-        IconButton(onClick = viewModel::onOpenWidgetPicker) {
-            Icon(
-                Icons.Default.Add,
-                LocalContext.current.getString(R.string.button_to_open_widget_picker)
-            )
+        IconButton(onClick = viewModel::onOpenWidgetEditor) {
+            Icon(Icons.Default.Add, stringResource(R.string.button_to_open_widget_editor))
         }
     }
 }

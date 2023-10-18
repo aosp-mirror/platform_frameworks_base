@@ -32,6 +32,7 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
@@ -47,6 +48,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -63,6 +65,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
+    private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
 
     private lateinit var underTest: CommunalInteractor
 
@@ -80,6 +83,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         widgetRepository = withDeps.widgetRepository
         smartspaceRepository = withDeps.smartspaceRepository
         keyguardRepository = withDeps.keyguardRepository
+        editWidgetsActivityStarter = withDeps.editWidgetsActivityStarter
 
         underTest = withDeps.communalInteractor
     }
@@ -337,5 +341,12 @@ class CommunalInteractorTest : SysuiTestCase() {
             isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
             runCurrent()
             assertThat(isCommunalShowing()).isEqualTo(true)
+        }
+
+    @Test
+    fun testShowWidgetEditorStartsActivity() =
+        testScope.runTest {
+            underTest.showWidgetEditor()
+            verify(editWidgetsActivityStarter).startActivity()
         }
 }
