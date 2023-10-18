@@ -4308,6 +4308,8 @@
   <java-symbol type="string" name="config_factoryResetPackage" />
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
   <java-symbol type="array" name="config_forceSlowJpegModeList" />
+  <java-symbol type="array" name="pause_wallpaper_render_when_state_change" />
+  <java-symbol type="bool" name="config_pauseWallpaperRenderWhenStateChangeEnabled" />
 
   <java-symbol type="array" name="config_smallAreaDetectionAllowlist" />
 

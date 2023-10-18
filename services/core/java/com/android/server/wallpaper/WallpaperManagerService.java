@@ -51,6 +51,7 @@ import android.app.ILocalWallpaperColorConsumer;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.UserSwitchObserver;
 import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
@@ -103,6 +104,7 @@ import android.service.wallpaper.WallpaperService;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -120,6 +122,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -1645,6 +1648,40 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mWallpaperDisplayHelper = new WallpaperDisplayHelper(dm, mWindowManagerInternal);
         mWallpaperCropper = new WallpaperCropper(mWallpaperDisplayHelper);
         mActivityManager = mContext.getSystemService(ActivityManager.class);
+
+        if (mContext.getResources().getBoolean(
+                R.bool.config_pauseWallpaperRenderWhenStateChangeEnabled)) {
+            // Pause wallpaper rendering engine as soon as a performance impacted app is launched.
+            final String[] pauseRenderList = mContext.getResources().getStringArray(
+                    R.array.pause_wallpaper_render_when_state_change);
+            final IntArray pauseRenderUids = new IntArray();
+            for (String pauseRenderApp : pauseRenderList) {
+                try {
+                    int uid = mContext.getPackageManager().getApplicationInfo(
+                            pauseRenderApp, 0).uid;
+                    pauseRenderUids.add(uid);
+                } catch (Exception e) {
+                    Slog.e(TAG, e.toString());
+                }
+            }
+            if (pauseRenderUids.size() > 0) {
+                try {
+                    ActivityManager.getService().registerUidObserverForUids(new UidObserver() {
+                        @Override
+                        public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                                int capability) {
+                            pauseOrResumeRenderingImmediately(
+                                    procState == ActivityManager.PROCESS_STATE_TOP);
+                        }
+                    }, ActivityManager.UID_OBSERVER_PROCSTATE,
+                            ActivityManager.PROCESS_STATE_TOP, "android",
+                            pauseRenderUids.toArray());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, e.toString());
+                }
+            }
+        }
+
         mMonitor = new MyPackageMonitor();
         mColorsChangedListeners = new SparseArray<>();
         mWallpaperDataParser = new WallpaperDataParser(mContext, mWallpaperDisplayHelper,
@@ -2621,6 +2658,35 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 engine.setInAmbientMode(inAmbientMode, animationDuration);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to set ambient mode", e);
+            }
+        }
+    }
+
+    private void pauseOrResumeRenderingImmediately(boolean pause) {
+        synchronized (mLock) {
+            final WallpaperData[] wallpapers = mIsLockscreenLiveWallpaperEnabled
+                    ? getActiveWallpapers() : new WallpaperData[] {
+                            mWallpaperMap.get(mCurrentUserId) };
+            for (WallpaperData data : wallpapers) {
+                if (data.connection == null || data.connection.mInfo == null) {
+                    continue;
+                }
+                if (pause || LocalServices.getService(ActivityTaskManagerInternal.class)
+                        .isUidForeground(data.connection.mInfo.getServiceInfo()
+                                .applicationInfo.uid)) {
+                    if (data.connection.containsDisplay(
+                            mWindowManagerInternal.getTopFocusedDisplayId())) {
+                        data.connection.forEachDisplayConnector(displayConnector -> {
+                            if (displayConnector.mEngine != null) {
+                                try {
+                                    displayConnector.mEngine.setVisibility(!pause);
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "Failed to set visibility", e);
+                                }
+                            }
+                        });
+                    }
+                }
             }
         }
     }
