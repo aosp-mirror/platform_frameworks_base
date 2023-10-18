@@ -202,6 +202,15 @@ public class JobSchedulerService extends com.android.server.SystemService
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     static final long REQUIRE_NETWORK_PERMISSIONS_FOR_CONNECTIVITY_JOBS = 271850009L;
 
+    /**
+     * Throw an exception when biases are set by an unsupported client.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long THROW_ON_UNSUPPORTED_BIAS_USAGE = 300477393L;
+
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static Clock sSystemClock = Clock.systemUTC();
 
@@ -4331,6 +4340,24 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         }
 
+        private JobInfo enforceBuilderApiPermissions(int uid, int pid, JobInfo job) {
+            if (job.getBias() != JobInfo.BIAS_DEFAULT
+                        && !hasPermission(uid, pid, Manifest.permission.UPDATE_DEVICE_STATS)) {
+                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)) {
+                    throw new SecurityException("Apps may not call setBias()");
+                } else {
+                    // We can't throw the exception. Log the issue and modify the job to remove
+                    // the invalid value.
+                    Slog.w(TAG, "Uid " + uid + " set bias on its job");
+                    return new JobInfo.Builder(job)
+                            .setBias(JobInfo.BIAS_DEFAULT)
+                            .build(false, false);
+                }
+            }
+
+            return job;
+        }
+
         private boolean canPersistJobs(int pid, int uid) {
             // Persisting jobs is tantamount to running at boot, so we permit
             // it when the app has declared that it uses the RECEIVE_BOOT_COMPLETED
@@ -4512,6 +4539,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             namespace = validateNamespace(namespace);
 
+            job = enforceBuilderApiPermissions(uid, pid, job);
+
             final long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.scheduleAsPackage(job, null, uid, null, userId,
@@ -4542,6 +4571,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             namespace = validateNamespace(namespace);
+
+            job = enforceBuilderApiPermissions(uid, pid, job);
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -4581,6 +4612,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             namespace = validateNamespace(namespace);
+
+            job = enforceBuilderApiPermissions(callerUid, callerPid, job);
 
             final long ident = Binder.clearCallingIdentity();
             try {
