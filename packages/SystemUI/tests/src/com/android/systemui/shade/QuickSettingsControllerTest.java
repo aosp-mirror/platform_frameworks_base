@@ -398,6 +398,12 @@ public class QuickSettingsControllerTest extends QuickSettingsControllerBaseTest
                 .isEqualTo(mQsController.getScrimCornerRadius());
     }
 
+    @Test
+    public void disallowTouches_nullQs_false() {
+        mQsController.setQs(null);
+        assertThat(mQsController.disallowTouches()).isFalse();
+    }
+
     private void lockScreen() {
         mQsController.setBarState(KEYGUARD);
     }
