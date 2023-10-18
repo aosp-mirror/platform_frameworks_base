@@ -312,4 +312,52 @@ class SceneGestureHandlerTest {
         advanceUntilIdle()
         assertScene(currentScene = SceneA, isIdle = true)
     }
+
+    @Test
+    fun beforeDraggableStart_drag_shouldBeIgnored() = runGestureTest {
+        draggable.onDelta(deltaInPixels10)
+        assertScene(currentScene = SceneA, isIdle = true)
+    }
+    @Test
+    fun beforeDraggableStart_stop_shouldBeIgnored() = runGestureTest {
+        draggable.onDragStopped(coroutineScope, velocityThreshold)
+        assertScene(currentScene = SceneA, isIdle = true)
+    }
+
+    @Test
+    fun beforeNestedScrollStart_stop_shouldBeIgnored() = runGestureTest {
+        nestedScroll.onPreFling(Velocity(0f, velocityThreshold))
+        assertScene(currentScene = SceneA, isIdle = true)
+    }
+
+    @Test
+    fun startNestedScrollWhileDragging() = runGestureTest {
+        draggable.onDragStarted(coroutineScope, Offset.Zero)
+        assertScene(currentScene = SceneA, isIdle = false)
+        val transition = transitionState as Transition
+
+        draggable.onDelta(deltaInPixels10)
+        assertThat(transition.progress).isEqualTo(0.1f)
+
+        // now we can intercept the scroll events
+        nestedScrollEvents(available = offsetY10)
+        assertThat(transition.progress).isEqualTo(0.2f)
+
+        // this should be ignored, we are scrolling now!
+        draggable.onDragStopped(coroutineScope, velocityThreshold)
+        assertScene(currentScene = SceneA, isIdle = false)
+
+        nestedScrollEvents(available = offsetY10)
+        assertThat(transition.progress).isEqualTo(0.3f)
+
+        nestedScrollEvents(available = offsetY10)
+        assertThat(transition.progress).isEqualTo(0.4f)
+
+        nestedScroll.onPreFling(available = Velocity(0f, velocityThreshold))
+        assertScene(currentScene = SceneC, isIdle = false)
+
+        // wait for the stop animation
+        advanceUntilIdle()
+        assertScene(currentScene = SceneC, isIdle = true)
+    }
 }

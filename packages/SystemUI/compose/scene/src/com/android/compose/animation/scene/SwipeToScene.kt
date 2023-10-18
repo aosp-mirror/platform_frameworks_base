@@ -157,6 +157,8 @@ class SceneGestureHandler(
      */
     private val positionalThreshold = with(layoutImpl.density) { 56.dp.toPx() }
 
+    internal var gestureWithPriority: Any? = null
+
     internal fun onDragStarted() {
         if (isDrivingTransition) {
             // This [transition] was already driving the animation: simply take over it.
@@ -525,15 +527,21 @@ private class SceneDraggableHandler(
     private val gestureHandler: SceneGestureHandler,
 ) : DraggableHandler {
     override suspend fun onDragStarted(coroutineScope: CoroutineScope, startedPosition: Offset) {
+        gestureHandler.gestureWithPriority = this
         gestureHandler.onDragStarted()
     }
 
     override fun onDelta(pixels: Float) {
-        gestureHandler.onDrag(delta = pixels)
+        if (gestureHandler.gestureWithPriority == this) {
+            gestureHandler.onDrag(delta = pixels)
+        }
     }
 
     override suspend fun onDragStopped(coroutineScope: CoroutineScope, velocity: Float) {
-        gestureHandler.onDragStopped(velocity = velocity, canChangeScene = true)
+        if (gestureHandler.gestureWithPriority == this) {
+            gestureHandler.gestureWithPriority = null
+            gestureHandler.onDragStopped(velocity = velocity, canChangeScene = true)
+        }
     }
 }
 
@@ -615,10 +623,15 @@ class SceneNestedScrollHandler(
             },
             canContinueScroll = { priorityScene == gestureHandler.swipeTransitionToScene.key },
             onStart = {
+                gestureHandler.gestureWithPriority = this
                 priorityScene = nextScene
                 gestureHandler.onDragStarted()
             },
             onScroll = { offsetAvailable ->
+                if (gestureHandler.gestureWithPriority != this) {
+                    return@PriorityNestedScrollConnection Offset.Zero
+                }
+
                 val amount = offsetAvailable.toAmount()
 
                 // TODO(b/297842071) We should handle the overscroll or slow drag if the gesture is
@@ -628,6 +641,10 @@ class SceneNestedScrollHandler(
                 amount.toOffset()
             },
             onStop = { velocityAvailable ->
+                if (gestureHandler.gestureWithPriority != this) {
+                    return@PriorityNestedScrollConnection Velocity.Zero
+                }
+
                 priorityScene = null
 
                 gestureHandler.onDragStopped(
