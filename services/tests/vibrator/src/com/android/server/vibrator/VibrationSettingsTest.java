@@ -69,7 +69,11 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
+import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.view.Display;
@@ -94,6 +98,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class VibrationSettingsTest {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int UID = 1;
     private static final int VIRTUAL_DISPLAY_ID = 1;
@@ -606,6 +613,47 @@ public class VibrationSettingsTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
+    public void shouldIgnoreVibration_withKeyboardSettingsOff_shouldIgnoreKeyboardVibration() {
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_MEDIUM);
+        setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 0);
+
+        // Keyboard touch ignored.
+        assertVibrationIgnoredForAttributes(
+                new VibrationAttributes.Builder()
+                        .setUsage(USAGE_TOUCH)
+                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .build(),
+                Vibration.Status.IGNORED_FOR_SETTINGS);
+
+        // General touch and keyboard touch with bypass flag not ignored.
+        assertVibrationNotIgnoredForUsage(USAGE_TOUCH);
+        assertVibrationNotIgnoredForAttributes(
+                new VibrationAttributes.Builder()
+                        .setUsage(USAGE_TOUCH)
+                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
+                        .build());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
+    public void shouldIgnoreVibration_withKeyboardSettingsOn_shouldNotIgnoreKeyboardVibration() {
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
+        setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1);
+
+        // General touch ignored.
+        assertVibrationIgnoredForUsage(USAGE_TOUCH, Vibration.Status.IGNORED_FOR_SETTINGS);
+
+        // Keyboard touch not ignored.
+        assertVibrationNotIgnoredForAttributes(
+                new VibrationAttributes.Builder()
+                        .setUsage(USAGE_TOUCH)
+                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .build());
+    }
+
+    @Test
     public void shouldIgnoreVibrationFromVirtualDisplays_displayNonVirtual_neverIgnored() {
         // Vibrations from the primary display is never ignored regardless of the creation and
         // removal of virtual displays and of the changes of apps running on virtual displays.
@@ -895,6 +943,14 @@ public class VibrationSettingsTest {
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
 
+    private void assertVibrationIgnoredForAttributes(VibrationAttributes attrs,
+            Vibration.Status expectedStatus) {
+        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(attrs, UID,
+                Display.DEFAULT_DISPLAY, null, null);
+        assertEquals(errorMessageForAttributes(attrs), expectedStatus,
+                mVibrationSettings.shouldIgnoreVibration(callerInfo));
+    }
+
     private void assertVibrationNotIgnoredForUsage(@VibrationAttributes.Usage int usage) {
         assertVibrationNotIgnoredForUsageAndFlags(usage, /* flags= */ 0);
     }
@@ -919,8 +975,19 @@ public class VibrationSettingsTest {
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
 
+    private void assertVibrationNotIgnoredForAttributes(VibrationAttributes attrs) {
+        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(attrs, UID,
+                Display.DEFAULT_DISPLAY, null, null);
+        assertNull(errorMessageForAttributes(attrs),
+                mVibrationSettings.shouldIgnoreVibration(callerInfo));
+    }
+
     private String errorMessageForUsage(int usage) {
         return "Error for usage " + VibrationAttributes.usageToString(usage);
+    }
+
+    private String errorMessageForAttributes(VibrationAttributes attrs) {
+        return "Error for attributes " + attrs;
     }
 
     private void setDefaultIntensity(@Vibrator.VibrationIntensity int intensity) {

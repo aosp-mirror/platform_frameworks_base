@@ -2053,6 +2053,8 @@
   <java-symbol type="integer" name="config_previousVibrationsDumpAggregationTimeMillisLimit" />
   <java-symbol type="integer" name="config_defaultVibrationAmplitude" />
   <java-symbol type="dimen" name="config_hapticChannelMaxVibrationAmplitude" />
+  <java-symbol type="dimen" name="config_keyboardHapticFeedbackFixedAmplitude" />
+  <java-symbol type="bool" name="config_defaultKeyboardVibrationEnabled" />
   <java-symbol type="integer" name="config_vibrationWaveformRampStepDuration" />
   <java-symbol type="bool" name="config_ignoreVibrationsOnWirelessCharger" />
   <java-symbol type="integer" name="config_vibrationWaveformRampDownDuration" />

@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import static android.os.VibrationAttributes.CATEGORY_KEYBOARD;
 import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
@@ -52,6 +53,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.Vibrator.VibrationIntensity;
+import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
@@ -188,6 +190,8 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     private boolean mVibrateOn;
     @GuardedBy("mLock")
+    private boolean mKeyboardVibrationOn;
+    @GuardedBy("mLock")
     private int mRingerMode;
     @GuardedBy("mLock")
     private boolean mOnWirelessCharger;
@@ -295,6 +299,8 @@ final class VibrationSettings {
                 Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY));
         registerSettingsObserver(
                 Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY));
+        registerSettingsObserver(
+                Settings.System.getUriFor(Settings.System.KEYBOARD_VIBRATION_ENABLED));
 
         if (mVibrationConfig.ignoreVibrationsOnWirelessCharger()) {
             Intent batteryStatus = mContext.registerReceiver(
@@ -418,14 +424,9 @@ final class VibrationSettings {
             }
 
             if (!callerInfo.attrs.isFlagSet(
-                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)) {
-                if (!mVibrateOn && (VIBRATE_ON_DISABLED_USAGE_ALLOWED != usage)) {
-                    return Vibration.Status.IGNORED_FOR_SETTINGS;
-                }
-
-                if (getCurrentIntensity(usage) == Vibrator.VIBRATION_INTENSITY_OFF) {
-                    return Vibration.Status.IGNORED_FOR_SETTINGS;
-                }
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
+                    && !shouldVibrateForUserSetting(callerInfo)) {
+                return Vibration.Status.IGNORED_FOR_SETTINGS;
             }
 
             if (!callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
@@ -497,6 +498,30 @@ final class VibrationSettings {
         return mRingerMode != AudioManager.RINGER_MODE_SILENT;
     }
 
+    /**
+     * Return {@code true} if the device should vibrate for user setting, and
+     * {@code false} to ignore the vibration.
+     */
+    @GuardedBy("mLock")
+    private boolean shouldVibrateForUserSetting(Vibration.CallerInfo callerInfo) {
+        final int usage = callerInfo.attrs.getUsage();
+        if (!mVibrateOn && (VIBRATE_ON_DISABLED_USAGE_ALLOWED != usage)) {
+            // Main setting disabled.
+            return false;
+        }
+
+        if (Flags.keyboardCategoryEnabled()) {
+            int category = callerInfo.attrs.getCategory();
+            if (usage == USAGE_TOUCH && category == CATEGORY_KEYBOARD) {
+                // Keyboard touch has a different user setting.
+                return mKeyboardVibrationOn;
+            }
+        }
+
+        // Apply individual user setting based on usage.
+        return getCurrentIntensity(usage) != Vibrator.VIBRATION_INTENSITY_OFF;
+    }
+
     /** Update all cached settings and triggers registered listeners. */
     void update() {
         updateSettings();
@@ -508,6 +533,8 @@ final class VibrationSettings {
         synchronized (mLock) {
             mVibrateInputDevices = loadSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0) > 0;
             mVibrateOn = loadSystemSetting(Settings.System.VIBRATE_ON, 1) > 0;
+            mKeyboardVibrationOn = loadSystemSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED,
+                    mVibrationConfig.isDefaultKeyboardVibrationEnabled() ? 1 : 0) > 0;
 
             int alarmIntensity = toIntensity(
                     loadSystemSetting(Settings.System.ALARM_VIBRATION_INTENSITY, -1),

@@ -35,6 +35,7 @@ android_test {
         "platform-test-annotations",
         "service-permission.stubs.system_server",
         "services.core",
+        "flag-junit",
     ],
 
     platform_apis: true,

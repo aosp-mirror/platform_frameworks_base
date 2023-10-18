@@ -37,3 +37,10 @@ flag {
     is_fixed_read_only: true
     bug: "291128479"
 }
+
+flag {
+    namespace: "haptics"
+    name: "keyboard_category_enabled"
+    description: "Enables the independent keyboard vibration settings feature"
+    bug: "289107579"
+}
