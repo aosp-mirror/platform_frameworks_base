@@ -50,8 +50,11 @@ constructor(
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
-            LayoutInflater.from(constraintLayout.context)
-                .inflate(R.layout.ambient_indication, constraintLayout, true)
+            val view =
+                LayoutInflater.from(constraintLayout.context)
+                    .inflate(R.layout.ambient_indication, constraintLayout, false)
+
+            constraintLayout.addView(view)
         }
     }
 
