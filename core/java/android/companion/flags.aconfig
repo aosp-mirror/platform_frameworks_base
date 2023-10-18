@@ -13,3 +13,10 @@ flag {
     description: "Grants access to the companion transport apis."
     bug: "288297505"
 }
+
+flag {
+    name: "association_tag"
+    namespace: "companion"
+    description: "Enable Association tag APIs "
+    bug: "289241123"
+}
