@@ -51,7 +51,6 @@ import java.util.List;
 public class KeyguardPasswordViewController
         extends KeyguardAbsKeyInputViewController<KeyguardPasswordView> {
 
-    private static final int DELAY_MILLIS_TO_REEVALUATE_IME_SWITCH_ICON = 500;  // 500ms
     private final KeyguardSecurityCallback mKeyguardSecurityCallback;
     private final DevicePostureController mPostureController;
     private final DevicePostureController.Callback mPostureCallback = posture ->
@@ -164,13 +163,6 @@ public class KeyguardPasswordViewController
 
         // If there's more than one IME, enable the IME switcher button
         updateSwitchImeButton();
-
-        // When we the current user is switching, InputMethodManagerService sometimes has not
-        // switched internal state yet here. As a quick workaround, we check the keyboard state
-        // again.
-        // TODO: Remove this workaround by ensuring such a race condition never happens.
-        mMainExecutor.executeDelayed(
-                this::updateSwitchImeButton, DELAY_MILLIS_TO_REEVALUATE_IME_SWITCH_ICON);
     }
 
     @Override

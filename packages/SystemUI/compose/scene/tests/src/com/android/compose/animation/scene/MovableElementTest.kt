@@ -144,7 +144,36 @@ class MovableElementTest {
         rule.testTransition(
             fromSceneContent = { MovableCounter(TestElements.Foo, Modifier.size(50.dp)) },
             toSceneContent = { MovableCounter(TestElements.Foo, Modifier.size(100.dp)) },
-            transition = { spec = tween(durationMillis = 16 * 4, easing = LinearEasing) },
+            transition = {
+                spec = tween(durationMillis = 16 * 4, easing = LinearEasing)
+                sharedElement(
+                    TestElements.Foo,
+                    scenePicker =
+                        object : SharedElementScenePicker {
+                            override fun sceneDuringTransition(
+                                element: ElementKey,
+                                fromScene: SceneKey,
+                                toScene: SceneKey,
+                                progress: () -> Float,
+                                fromSceneZIndex: Float,
+                                toSceneZIndex: Float
+                            ): SceneKey {
+                                assertThat(fromScene).isEqualTo(TestScenes.SceneA)
+                                assertThat(toScene).isEqualTo(TestScenes.SceneB)
+                                assertThat(fromSceneZIndex).isEqualTo(0)
+                                assertThat(toSceneZIndex).isEqualTo(1)
+
+                                // Compose Foo in Scene A if progress < 0.65f, otherwise compose it
+                                // in Scene B.
+                                return if (progress() < 0.65f) {
+                                    TestScenes.SceneA
+                                } else {
+                                    TestScenes.SceneB
+                                }
+                            }
+                        }
+                )
+            },
             fromScene = TestScenes.SceneA,
             toScene = TestScenes.SceneB,
         ) {
@@ -170,11 +199,34 @@ class MovableElementTest {
 
             at(32) {
                 // During the transition, there is a single counter that is moved, with the current
-                // value.
+                // value. Given that progress = 0.5f, it is currently composed in SceneA.
                 rule
-                    .onNode(hasText("count: 3"))
+                    .onNode(
+                        hasText("count: 3") and
+                            hasParent(isElement(TestElements.Foo, scene = TestScenes.SceneA))
+                    )
                     .assertIsDisplayed()
                     .assertSizeIsEqualTo(75.dp, 75.dp)
+
+                // There are no other counters.
+                assertThat(
+                        rule
+                            .onAllNodesWithText("count: ", substring = true)
+                            .fetchSemanticsNodes()
+                            .size
+                    )
+                    .isEqualTo(1)
+            }
+
+            at(48) {
+                // During the transition, there is a single counter that is moved, with the current
+                // value. Given that progress = 0.75f, it is currently composed in SceneB.
+                rule
+                    .onNode(
+                        hasText("count: 3") and
+                            hasParent(isElement(TestElements.Foo, scene = TestScenes.SceneB))
+                    )
+                    .assertIsDisplayed()
 
                 // There are no other counters.
                 assertThat(

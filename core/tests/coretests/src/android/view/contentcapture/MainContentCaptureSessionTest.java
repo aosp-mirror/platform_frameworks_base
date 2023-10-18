@@ -115,6 +115,26 @@ public class MainContentCaptureSessionTest {
                         new ContentCaptureOptions.ContentProtectionOptions(
                                 /* enableReceiver= */ true,
                                 -BUFFER_SIZE,
+                                /* requiredGroups= */ List.of(List.of("a")),
+                                /* optionalGroups= */ Collections.emptyList(),
+                                /* optionalGroupsThreshold= */ 0));
+        MainContentCaptureSession session = createSession(options);
+        session.mContentProtectionEventProcessor = mMockContentProtectionEventProcessor;
+
+        session.onSessionStarted(/* resultCode= */ 0, /* binder= */ null);
+
+        assertThat(session.mContentProtectionEventProcessor).isNull();
+        verifyZeroInteractions(mMockContentProtectionEventProcessor);
+    }
+
+    @Test
+    public void onSessionStarted_contentProtectionNoGroups_processorNotCreated() {
+        ContentCaptureOptions options =
+                createOptions(
+                        /* enableContentCaptureReceiver= */ true,
+                        new ContentCaptureOptions.ContentProtectionOptions(
+                                /* enableReceiver= */ true,
+                                BUFFER_SIZE,
                                 /* requiredGroups= */ Collections.emptyList(),
                                 /* optionalGroups= */ Collections.emptyList(),
                                 /* optionalGroupsThreshold= */ 0));
@@ -320,7 +340,7 @@ public class MainContentCaptureSessionTest {
                 new ContentCaptureOptions.ContentProtectionOptions(
                         enableContentProtectionReceiver,
                         BUFFER_SIZE,
-                        /* requiredGroups= */ Collections.emptyList(),
+                        /* requiredGroups= */ List.of(List.of("a")),
                         /* optionalGroups= */ Collections.emptyList(),
                         /* optionalGroupsThreshold= */ 0));
     }

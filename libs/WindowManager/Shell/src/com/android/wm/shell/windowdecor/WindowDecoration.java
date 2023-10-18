@@ -297,7 +297,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         // Task surface itself
-        float shadowRadius = loadDimension(resources, params.mShadowRadiusId);
+        float shadowRadius;
         final Point taskPosition = mTaskInfo.positionInParent;
         if (isFullscreen) {
             // Setting the task crop to the width/height stops input events from being sent to
@@ -308,9 +308,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             // drag-resized by the window decoration.
             startT.setWindowCrop(mTaskSurface, null);
             finishT.setWindowCrop(mTaskSurface, null);
+            // Shadow is not needed for fullscreen tasks
+            shadowRadius = 0;
         } else {
             startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
             finishT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
+            shadowRadius = loadDimension(resources, params.mShadowRadiusId);
         }
         startT.setShadowRadius(mTaskSurface, shadowRadius)
                 .show(mTaskSurface);

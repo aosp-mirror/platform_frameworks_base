@@ -228,7 +228,7 @@ public class BroadcastQueueTest {
         LocalServices.removeServiceForTest(AlarmManagerInternal.class);
         LocalServices.addService(AlarmManagerInternal.class, mAlarmManagerInt);
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
-        doNothing().when(mPackageManagerInt).setPackageStoppedState(any(), anyBoolean(), anyInt());
+        doNothing().when(mPackageManagerInt).notifyComponentUsed(any(), anyInt(), any(), any());
         doAnswer((invocation) -> {
             return getUidForPackage(invocation.getArgument(0));
         }).when(mPackageManagerInt).getPackageUid(any(), anyLong(), eq(UserHandle.USER_SYSTEM));
@@ -1014,8 +1014,9 @@ public class BroadcastQueueTest {
                     eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
 
             // Confirm that we unstopped manifest receivers
-            verify(mAms.mPackageManagerInt, atLeastOnce()).setPackageStoppedState(
-                    eq(receiverApp.info.packageName), eq(false), eq(UserHandle.USER_SYSTEM));
+            verify(mAms.mPackageManagerInt, atLeastOnce()).notifyComponentUsed(
+                    eq(receiverApp.info.packageName), eq(UserHandle.USER_SYSTEM),
+                    eq(callerApp.info.packageName), any());
         }
 
         // Confirm that we've reported expected usage events

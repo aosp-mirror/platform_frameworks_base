@@ -43,6 +43,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
@@ -873,12 +874,20 @@ public class PackageManagerSettingsTests {
                 .setUid(packageSetting.getAppId())
                 .hideAsFinal());
 
-        ArchiveState archiveState = new ArchiveState(
-                List.of(new ArchiveState.ArchiveActivityInfo("title1", Path.of("/path1"),
-                                Path.of("/monochromePath1")),
-                        new ArchiveState.ArchiveActivityInfo("title2", Path.of("/path2"),
-                                Path.of("/monochromePath2"))),
-                "installerTitle");
+        ArchiveState archiveState =
+                new ArchiveState(
+                        List.of(
+                                new ArchiveState.ArchiveActivityInfo(
+                                        "title1",
+                                        new ComponentName("pkg1", "class1"),
+                                        Path.of("/path1"),
+                                        Path.of("/monochromePath1")),
+                                new ArchiveState.ArchiveActivityInfo(
+                                        "title2",
+                                        new ComponentName("pkg2", "class2"),
+                                        Path.of("/path2"),
+                                        Path.of("/monochromePath2"))),
+                        "installerTitle");
         packageSetting.modifyUserState(UserHandle.SYSTEM.getIdentifier()).setArchiveState(
                 archiveState);
         settings.mPackages.put(PACKAGE_NAME_1, packageSetting);

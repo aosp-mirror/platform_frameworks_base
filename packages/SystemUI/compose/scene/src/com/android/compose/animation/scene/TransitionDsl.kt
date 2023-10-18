@@ -120,8 +120,14 @@ interface TransitionBuilder : PropertyTransformationBuilder {
      *
      * @param enabled whether the matched element(s) should actually be shared in this transition.
      *   Defaults to true.
+     * @param scenePicker the [SharedElementScenePicker] to use when deciding in which scene we
+     *   should draw or compose this shared element.
      */
-    fun sharedElement(matcher: ElementMatcher, enabled: Boolean = true)
+    fun sharedElement(
+        matcher: ElementMatcher,
+        enabled: Boolean = true,
+        scenePicker: SharedElementScenePicker = DefaultSharedElementScenePicker,
+    )
 
     /**
      * Punch a hole in the element(s) matching [matcher] that has the same bounds as [bounds] and
@@ -142,6 +148,44 @@ interface TransitionBuilder : PropertyTransformationBuilder {
      * of the transition from scene `Bar` to scene `Foo`.
      */
     fun reversed(builder: TransitionBuilder.() -> Unit)
+}
+
+interface SharedElementScenePicker {
+    /**
+     * Return the scene in which [element] should be drawn (when using `Modifier.element(key)`) or
+     * composed (when using `MovableElement(key)`) during the transition from [fromScene] to
+     * [toScene].
+     */
+    fun sceneDuringTransition(
+        element: ElementKey,
+        fromScene: SceneKey,
+        toScene: SceneKey,
+        progress: () -> Float,
+        fromSceneZIndex: Float,
+        toSceneZIndex: Float,
+    ): SceneKey
+}
+
+object DefaultSharedElementScenePicker : SharedElementScenePicker {
+    override fun sceneDuringTransition(
+        element: ElementKey,
+        fromScene: SceneKey,
+        toScene: SceneKey,
+        progress: () -> Float,
+        fromSceneZIndex: Float,
+        toSceneZIndex: Float
+    ): SceneKey {
+        // By default shared elements are drawn in the highest scene possible, unless it is a
+        // background.
+        return if (
+            (fromSceneZIndex > toSceneZIndex && !element.isBackground) ||
+                (fromSceneZIndex < toSceneZIndex && element.isBackground)
+        ) {
+            fromScene
+        } else {
+            toScene
+        }
+    }
 }
 
 @TransitionDsl

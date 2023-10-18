@@ -146,6 +146,9 @@ interface MediaProjectionAppSelectorComponent {
             @BindsInstance @MediaProjectionAppSelector callingPackage: String?,
             @BindsInstance view: MediaProjectionAppSelectorView,
             @BindsInstance resultHandler: MediaProjectionAppSelectorResultHandler,
+            // Whether the app selector is starting for the first time. False when it is re-starting
+            // due to a config change.
+            @BindsInstance @MediaProjectionAppSelector isFirstStart: Boolean,
         ): MediaProjectionAppSelectorComponent
     }
 

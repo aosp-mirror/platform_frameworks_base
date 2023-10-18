@@ -5635,6 +5635,8 @@ class Task extends TaskFragment {
             if (noAnimation) {
                 mDisplayContent.prepareAppTransition(TRANSIT_NONE);
                 mTaskSupervisor.mNoAnimActivities.add(top);
+                mTransitionController.collect(top);
+                mTransitionController.setNoAnimation(top);
                 ActivityOptions.abort(options);
             } else {
                 updateTransitLocked(TRANSIT_TO_FRONT, options);

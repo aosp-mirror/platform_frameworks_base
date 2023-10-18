@@ -191,7 +191,7 @@ public class AsyncSensorManager extends SensorManager
     }
 
     @Override
-    protected boolean initDataInjectionImpl(boolean enable) {
+    protected boolean initDataInjectionImpl(boolean enable, @DataInjectionMode int mode) {
         throw new UnsupportedOperationException("not implemented");
     }
 

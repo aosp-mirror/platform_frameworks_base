@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
@@ -60,7 +62,16 @@ internal fun MovableElement(
         // which case we still need to draw it.
         val picture = remember { Picture() }
 
-        if (shouldComposeMovableElement(layoutImpl, scene.key, element)) {
+        // Whether we should compose the movable element here. The scene picker logic to know in
+        // which scene we should compose/draw a movable element might depend on the current
+        // transition progress, so we put this in a derivedStateOf to prevent many recompositions
+        // during the transition.
+        val shouldComposeMovableElement by
+            remember(layoutImpl, scene.key, element) {
+                derivedStateOf { shouldComposeMovableElement(layoutImpl, scene.key, element) }
+            }
+
+        if (shouldComposeMovableElement) {
             Box(
                 Modifier.drawWithCache {
                     val width = size.width.toInt()
@@ -172,14 +183,13 @@ private fun shouldComposeMovableElement(
         return scene == fromScene
     }
 
-    // If we are ready in both scenes, then compose in the scene that has the highest zIndex (unless
-    // it is a background) given that this is the one that is going to be drawn.
-    val isHighestScene = layoutImpl.scene(scene).zIndex > layoutImpl.scene(otherScene).zIndex
-    return if (element.key.isBackground) {
-        !isHighestScene
-    } else {
-        isHighestScene
-    }
+    return shouldDrawOrComposeSharedElement(
+        layoutImpl,
+        transitionState,
+        scene,
+        element.key,
+        sharedElementTransformation(layoutImpl, transitionState, element.key),
+    )
 }
 
 private class MovableElementScopeImpl(

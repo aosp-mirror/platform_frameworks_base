@@ -38,6 +38,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
+import com.android.systemui.mediaprojection.SessionCreationSource;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
 import com.android.systemui.plugins.ActivityStarter;
@@ -45,12 +47,12 @@ import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.CallbackController;
 
+import dagger.Lazy;
+
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Helper class to initiate a screen recording
@@ -71,6 +73,7 @@ public class RecordingController
     private final FeatureFlags mFlags;
     private final UserContextProvider mUserContextProvider;
     private final UserTracker mUserTracker;
+    private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
 
     protected static final String INTENT_UPDATE_STATE =
             "com.android.systemui.screenrecord.UPDATE_STATE";
@@ -115,7 +118,8 @@ public class RecordingController
             FeatureFlags flags,
             UserContextProvider userContextProvider,
             Lazy<ScreenCaptureDevicePolicyResolver> devicePolicyResolver,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            MediaProjectionMetricsLogger mediaProjectionMetricsLogger) {
         mMainExecutor = mainExecutor;
         mContext = context;
         mFlags = flags;
@@ -123,6 +127,7 @@ public class RecordingController
         mBroadcastDispatcher = broadcastDispatcher;
         mUserContextProvider = userContextProvider;
         mUserTracker = userTracker;
+        mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
 
         BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setInteractive(true);
@@ -148,6 +153,9 @@ public class RecordingController
                         .isScreenCaptureCompletelyDisabled(getHostUserHandle())) {
             return new ScreenCaptureDisabledDialog(mContext);
         }
+
+        mMediaProjectionMetricsLogger.notifyProjectionInitiated(
+                SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
 
         return flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
                 ? new ScreenRecordPermissionDialog(context,  getHostUserHandle(), this,

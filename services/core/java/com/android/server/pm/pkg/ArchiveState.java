@@ -16,9 +16,11 @@
 
 package com.android.server.pm.pkg;
 
+import android.content.ComponentName;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.util.AnnotationValidations;
 import com.android.internal.util.DataClass;
 
 import java.nio.file.Path;
@@ -55,6 +57,10 @@ public class ArchiveState {
         /** Corresponds to the activity's android:label in the app's locale. */
         @NonNull
         private final String mTitle;
+
+        /** The component name of the original activity (pre-archival). */
+        @NonNull
+        private final ComponentName mOriginalComponentName;
 
         /**
          * The path to the stored icon of the activity in the app's locale. Null if the app does
@@ -96,11 +102,13 @@ public class ArchiveState {
         @DataClass.Generated.Member
         public ArchiveActivityInfo(
                 @NonNull String title,
+                @NonNull ComponentName originalComponentName,
                 @Nullable Path iconBitmap,
                 @Nullable Path monochromeIconBitmap) {
             this.mTitle = title;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mTitle);
+            this.mOriginalComponentName = originalComponentName;
+            AnnotationValidations.validate(NonNull.class, null, mTitle);
+            AnnotationValidations.validate(NonNull.class, null, mOriginalComponentName);
             this.mIconBitmap = iconBitmap;
             this.mMonochromeIconBitmap = monochromeIconBitmap;
 
@@ -113,6 +121,14 @@ public class ArchiveState {
         @DataClass.Generated.Member
         public @NonNull String getTitle() {
             return mTitle;
+        }
+
+        /**
+         * The component name of the original activity (pre-archival).
+            */
+        @DataClass.Generated.Member
+        public @NonNull ComponentName getOriginalComponentName() {
+            return mOriginalComponentName;
         }
 
         /**
@@ -140,6 +156,7 @@ public class ArchiveState {
 
             return "ArchiveActivityInfo { " +
                     "title = " + mTitle + ", " +
+                    "originalComponentName = " + mOriginalComponentName + ", " +
                     "iconBitmap = " + mIconBitmap + ", " +
                     "monochromeIconBitmap = " + mMonochromeIconBitmap +
             " }";
@@ -159,6 +176,7 @@ public class ArchiveState {
             //noinspection PointlessBooleanExpression
             return true
                     && java.util.Objects.equals(mTitle, that.mTitle)
+                    && java.util.Objects.equals(mOriginalComponentName, that.mOriginalComponentName)
                     && java.util.Objects.equals(mIconBitmap, that.mIconBitmap)
                     && java.util.Objects.equals(mMonochromeIconBitmap, that.mMonochromeIconBitmap);
         }
@@ -171,6 +189,7 @@ public class ArchiveState {
 
             int _hash = 1;
             _hash = 31 * _hash + java.util.Objects.hashCode(mTitle);
+            _hash = 31* _hash + java.util.Objects.hashCode(mOriginalComponentName);
             _hash = 31 * _hash + java.util.Objects.hashCode(mIconBitmap);
             _hash = 31 * _hash + java.util.Objects.hashCode(mMonochromeIconBitmap);
             return _hash;
@@ -180,7 +199,8 @@ public class ArchiveState {
                 time = 1693590309015L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/ArchiveState.java",
-                inputSignatures = "private final @android.annotation.NonNull java.lang.String mTitle\nprivate final @android.annotation.Nullable java.nio.file.Path mIconBitmap\nprivate final @android.annotation.Nullable java.nio.file.Path mMonochromeIconBitmap\nclass ArchiveActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")
+                inputSignatures =
+                        "private final @android.annotation.NonNull java.lang.String mTitle\nprivate final @android.annotation.NonNull android.content.ComponentName mOriginalComponentName\nprivate final @android.annotation.Nullable java.nio.file.Path mIconBitmap\nprivate final @android.annotation.Nullable java.nio.file.Path mMonochromeIconBitmap\nclass ArchiveActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")
         @Deprecated
         private void __metadata() {}
 
@@ -224,11 +244,9 @@ public class ArchiveState {
             @NonNull List<ArchiveActivityInfo> activityInfos,
             @NonNull String installerTitle) {
         this.mActivityInfos = activityInfos;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mActivityInfos);
+        AnnotationValidations.validate(NonNull.class, null, mActivityInfos);
         this.mInstallerTitle = installerTitle;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mInstallerTitle);
+        AnnotationValidations.validate(NonNull.class, null, mInstallerTitle);
 
         // onConstructed(); // You can define this method to get a callback
     }

@@ -175,5 +175,5 @@ interface IMediaProjectionManager {
     @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
-    void notifyPermissionRequestStateChange(int hostUid, int state, int sessionCreationSource);
+    oneway void notifyPermissionRequestStateChange(int hostUid, int state, int sessionCreationSource);
 }
