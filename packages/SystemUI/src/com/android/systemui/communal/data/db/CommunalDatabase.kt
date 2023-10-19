@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.data.model
+package com.android.systemui.communal.data.db
 
-import com.android.systemui.communal.shared.model.CommunalContentSize
+import androidx.room.Database
+import androidx.room.RoomDatabase
 
-/** Metadata for the default widgets */
-data class CommunalWidgetMetadata(
-    /* Widget provider component name */
-    val componentName: String,
-
-    /* Defines the order in which the widget will be rendered in the grid. */
-    val priority: Int,
-
-    /* Supported sizes */
-    val sizes: List<CommunalContentSize>
-)
+@Database(entities = [CommunalWidgetItem::class, CommunalItemRank::class], version = 1)
+abstract class CommunalDatabase : RoomDatabase() {
+    abstract fun communalWidgetDao(): CommunalWidgetDao
+}

@@ -1048,6 +1048,11 @@
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
 
+    <!-- Description for the button that opens the widget picker on click. [CHAR LIMIT=50] -->
+    <string name="button_to_open_widget_picker">Open the widget picker</string>
+    <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->
+    <string name="button_to_remove_widget">Remove a widget</string>
+
     <!-- Related to user switcher --><skip/>
 
     <!-- Accessibility label for the button that opens the user switcher. -->
