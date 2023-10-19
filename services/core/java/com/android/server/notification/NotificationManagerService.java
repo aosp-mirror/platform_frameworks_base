@@ -71,7 +71,6 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
-import static android.os.Flags.allowPrivateProfile;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.PowerWhitelistManager.REASON_NOTIFICATION_SERVICE;
@@ -1930,8 +1929,7 @@ public class NotificationManagerService extends SystemService {
                     cancelAllNotificationsInt(MY_UID, MY_PID, null, null, 0, 0, userHandle,
                             REASON_USER_STOPPED);
                 }
-            } else if (
-                    isProfileUnavailable(action)) {
+            } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userHandle >= 0 && !mDpm.isKeepProfilesRunningEnabled()) {
                     cancelAllNotificationsInt(MY_UID, MY_PID, null, null, 0, 0, userHandle,
@@ -1981,12 +1979,6 @@ public class NotificationManagerService extends SystemService {
                     mZenModeHelper.onUserUnlocked(userId);
                 }
             }
-        }
-
-        private boolean isProfileUnavailable(String action) {
-            return allowPrivateProfile() ?
-                    action.equals(Intent.ACTION_PROFILE_UNAVAILABLE) :
-                    action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         }
     };
 
@@ -2558,9 +2550,6 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        if (allowPrivateProfile()){
-            filter.addAction(Intent.ACTION_PROFILE_UNAVAILABLE);
-        }
         getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);
 
         IntentFilter pkgFilter = new IntentFilter();

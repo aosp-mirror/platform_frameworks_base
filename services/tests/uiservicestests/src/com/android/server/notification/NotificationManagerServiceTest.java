@@ -71,7 +71,6 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
-import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -207,7 +206,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.permission.PermissionManager;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -319,7 +317,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final int UID_HEADLESS = 1_000_000;
     private static final int TOAST_DURATION = 2_000;
     private static final int SECONDARY_DISPLAY_ID = 42;
-    private static final int TEST_PROFILE_USERHANDLE = 12;
 
     private final int mUid = Binder.getCallingUid();
     private final @UserIdInt int mUserId = UserHandle.getUserId(mUid);
@@ -450,7 +447,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     TestableNotificationManagerService.StrongAuthTrackerFake mStrongAuthTracker;
 
     TestableFlagResolver mTestFlagResolver = new TestableFlagResolver();
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
     @Mock
@@ -830,12 +827,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         intent.putExtras(extras);
 
         mPackageIntentReceiver.onReceive(getContext(), intent);
-    }
-
-    private void simulateProfileAvailabilityActions(String intentAction) {
-        final Intent intent = new Intent(intentAction);
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, TEST_PROFILE_USERHANDLE);
-        mUserSwitchIntentReceiver.onReceive(mContext, intent);
     }
 
     private ArrayMap<Boolean, ArrayList<ComponentName>> generateResetComponentValues() {
@@ -12761,23 +12752,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mConditionProviders, times(1)).resetDefaultFromConfig();
         verify(service, times(1)).allowDndPackages(user.id);
         verify(service, times(1)).setDNDMigrationDone(user.id);
-    }
-
-    @Test
-    public void testProfileUnavailableIntent() throws RemoteException {
-        mSetFlagsRule.enableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
-        simulateProfileAvailabilityActions(Intent.ACTION_PROFILE_UNAVAILABLE);
-        verify(mWorkerHandler).post(any(Runnable.class));
-        verify(mSnoozeHelper).clearData(anyInt());
-    }
-
-
-    @Test
-    public void testManagedProfileUnavailableIntent() throws RemoteException {
-        mSetFlagsRule.disableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
-        simulateProfileAvailabilityActions(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        verify(mWorkerHandler).post(any(Runnable.class));
-        verify(mSnoozeHelper).clearData(anyInt());
     }
 
     private NotificationRecord createAndPostNotification(Notification.Builder nb, String testName)
