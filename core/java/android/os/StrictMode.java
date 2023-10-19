@@ -2436,11 +2436,12 @@ public final class StrictMode {
 
     /** @hide */
     public static void onVmPolicyViolation(Violation violation, boolean forceDeath) {
-        final boolean penaltyDropbox = (sVmPolicy.mask & PENALTY_DROPBOX) != 0;
-        final boolean penaltyDeath = ((sVmPolicy.mask & PENALTY_DEATH) != 0) || forceDeath;
-        final boolean penaltyLog = (sVmPolicy.mask & PENALTY_LOG) != 0;
+        final VmPolicy vmPolicy = getVmPolicy();
+        final boolean penaltyDropbox = (vmPolicy.mask & PENALTY_DROPBOX) != 0;
+        final boolean penaltyDeath = ((vmPolicy.mask & PENALTY_DEATH) != 0) || forceDeath;
+        final boolean penaltyLog = (vmPolicy.mask & PENALTY_LOG) != 0;
 
-        final int penaltyMask = (sVmPolicy.mask & PENALTY_ALL);
+        final int penaltyMask = (vmPolicy.mask & PENALTY_ALL);
         final ViolationInfo info = new ViolationInfo(violation, penaltyMask);
 
         // Erase stuff not relevant for process-wide violations
@@ -2493,10 +2494,10 @@ public final class StrictMode {
 
         // If penaltyDeath, we can't guarantee this callback finishes before the process dies for
         // all executors. penaltyDeath supersedes penaltyCallback.
-        if (sVmPolicy.mListener != null && sVmPolicy.mCallbackExecutor != null) {
-            final OnVmViolationListener listener = sVmPolicy.mListener;
+        if (vmPolicy.mListener != null && vmPolicy.mCallbackExecutor != null) {
+            final OnVmViolationListener listener = vmPolicy.mListener;
             try {
-                sVmPolicy.mCallbackExecutor.execute(
+                vmPolicy.mCallbackExecutor.execute(
                         () -> {
                             // Lift violated policy to prevent infinite recursion.
                             VmPolicy oldPolicy = allowVmViolations();
