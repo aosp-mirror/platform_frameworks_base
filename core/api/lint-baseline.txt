@@ -1497,20 +1497,8 @@ UnflaggedApi: android.provider.Settings#ACTION_CREDENTIAL_PROVIDER:
     New API must be flagged with @FlaggedApi: field android.provider.Settings.ACTION_CREDENTIAL_PROVIDER
 UnflaggedApi: android.telecom.Call.Details#getId():
     New API must be flagged with @FlaggedApi: method android.telecom.Call.Details.getId()
-UnflaggedApi: android.telephony.CarrierConfigManager#KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE:
-    New API must be flagged with @FlaggedApi: field android.telephony.CarrierConfigManager.KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE
-UnflaggedApi: android.telephony.DisconnectCause#SATELLITE_ENABLED:
-    New API must be flagged with @FlaggedApi: field android.telephony.DisconnectCause.SATELLITE_ENABLED
-UnflaggedApi: android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_MMS:
-    New API must be flagged with @FlaggedApi: field android.telephony.NetworkRegistrationInfo.SERVICE_TYPE_MMS
-UnflaggedApi: android.telephony.NetworkRegistrationInfo#isNonTerrestrialNetwork():
-    New API must be flagged with @FlaggedApi: method android.telephony.NetworkRegistrationInfo.isNonTerrestrialNetwork()
 UnflaggedApi: android.telephony.PhoneNumberUtils#isWpsCallNumber(String):
     New API must be flagged with @FlaggedApi: method android.telephony.PhoneNumberUtils.isWpsCallNumber(String)
-UnflaggedApi: android.telephony.ServiceState#isUsingNonTerrestrialNetwork():
-    New API must be flagged with @FlaggedApi: method android.telephony.ServiceState.isUsingNonTerrestrialNetwork()
-UnflaggedApi: android.telephony.TelephonyManager#EVENT_DISPLAY_SOS_MESSAGE:
-    New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.EVENT_DISPLAY_SOS_MESSAGE
 UnflaggedApi: android.telephony.TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED:
     New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED
 UnflaggedApi: android.text.DynamicLayout.Builder#setLineBreakConfig(android.graphics.text.LineBreakConfig):
