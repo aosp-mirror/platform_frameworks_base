@@ -40,9 +40,9 @@ public class HdrBrightnessData {
     public final long mBrightnessIncreaseDebounceMillis;
 
     /**
-     * Brightness increase animation duration
+     * Brightness increase animation speed
      */
-    public final long mBrightnessIncreaseDurationMillis;
+    public final float mScreenBrightnessRampIncrease;
 
     /**
      * Debounce time for brightness decrease
@@ -50,19 +50,19 @@ public class HdrBrightnessData {
     public final long mBrightnessDecreaseDebounceMillis;
 
     /**
-     * Brightness decrease animation duration
+     * Brightness decrease animation speed
      */
-    public final long mBrightnessDecreaseDurationMillis;
+    public final float mScreenBrightnessRampDecrease;
 
     @VisibleForTesting
     public HdrBrightnessData(Map<Float, Float> maxBrightnessLimits,
-            long brightnessIncreaseDebounceMillis, long brightnessIncreaseDurationMillis,
-            long brightnessDecreaseDebounceMillis, long brightnessDecreaseDurationMillis) {
+            long brightnessIncreaseDebounceMillis, float screenBrightnessRampIncrease,
+            long brightnessDecreaseDebounceMillis, float screenBrightnessRampDecrease) {
         mMaxBrightnessLimits = maxBrightnessLimits;
         mBrightnessIncreaseDebounceMillis = brightnessIncreaseDebounceMillis;
-        mBrightnessIncreaseDurationMillis = brightnessIncreaseDurationMillis;
+        mScreenBrightnessRampIncrease = screenBrightnessRampIncrease;
         mBrightnessDecreaseDebounceMillis = brightnessDecreaseDebounceMillis;
-        mBrightnessDecreaseDurationMillis = brightnessDecreaseDurationMillis;
+        mScreenBrightnessRampDecrease = screenBrightnessRampDecrease;
     }
 
     @Override
@@ -70,9 +70,9 @@ public class HdrBrightnessData {
         return "HdrBrightnessData {"
                 + "mMaxBrightnessLimits: " + mMaxBrightnessLimits
                 + ", mBrightnessIncreaseDebounceMillis: " + mBrightnessIncreaseDebounceMillis
-                + ", mBrightnessIncreaseDurationMillis: " + mBrightnessIncreaseDurationMillis
+                + ", mScreenBrightnessRampIncrease: " + mScreenBrightnessRampIncrease
                 + ", mBrightnessDecreaseDebounceMillis: " + mBrightnessDecreaseDebounceMillis
-                + ", mBrightnessDecreaseDurationMillis: " + mBrightnessDecreaseDurationMillis
+                + ", mScreenBrightnessRampDecrease: " + mScreenBrightnessRampDecrease
                 + "} ";
     }
 
@@ -94,8 +94,8 @@ public class HdrBrightnessData {
 
         return new HdrBrightnessData(brightnessLimits,
                 hdrConfig.getBrightnessIncreaseDebounceMillis().longValue(),
-                hdrConfig.getBrightnessIncreaseDurationMillis().longValue(),
+                hdrConfig.getScreenBrightnessRampIncrease().floatValue(),
                 hdrConfig.getBrightnessDecreaseDebounceMillis().longValue(),
-                hdrConfig.getBrightnessDecreaseDurationMillis().longValue());
+                hdrConfig.getScreenBrightnessRampDecrease().floatValue());
     }
 }
