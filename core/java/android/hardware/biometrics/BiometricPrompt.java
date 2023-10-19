@@ -786,7 +786,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * Get {@link Signature} object.
          * @return {@link Signature} object or null if this doesn't contain one.
          */
-        public Signature getSignature() {
+        public @Nullable Signature getSignature() {
             return super.getSignature();
         }
 
@@ -794,7 +794,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * Get {@link Cipher} object.
          * @return {@link Cipher} object or null if this doesn't contain one.
          */
-        public Cipher getCipher() {
+        public @Nullable Cipher getCipher() {
             return super.getCipher();
         }
 
@@ -802,7 +802,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * Get {@link Mac} object.
          * @return {@link Mac} object or null if this doesn't contain one.
          */
-        public Mac getMac() {
+        public @Nullable Mac getMac() {
             return super.getMac();
         }
 
