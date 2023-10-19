@@ -44,6 +44,7 @@ abstract class AggregatedPowerStatsProcessor {
     private static final String TAG = "AggregatedPowerStatsProcessor";
 
     private static final int INDEX_DOES_NOT_EXIST = -1;
+    private static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;
 
     abstract void finish(PowerComponentAggregatedPowerStats stats);
 
@@ -339,5 +340,9 @@ abstract class AggregatedPowerStatsProcessor {
             combinations.add(Arrays.copyOf(stateValues, stateValues.length));
         });
         return combinations.toArray(new int[combinations.size()][0]);
+    }
+
+    public static double uCtoMah(long chargeUC) {
+        return chargeUC * MILLIAMPHOUR_PER_MICROCOULOMB;
     }
 }

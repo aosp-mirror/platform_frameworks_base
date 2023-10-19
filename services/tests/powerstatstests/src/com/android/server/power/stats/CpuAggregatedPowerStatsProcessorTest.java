@@ -71,23 +71,23 @@ public class CpuAggregatedPowerStatsProcessorTest {
             .setCpuPowerBracket(0, 1, 1)
             .setCpuPowerBracket(2, 0, 2);
 
+    private AggregatedPowerStatsConfig.PowerComponent mConfig;
     private CpuAggregatedPowerStatsProcessor mProcessor;
     private MockPowerComponentAggregatedPowerStats mStats;
 
     @Before
     public void setup() {
-        AggregatedPowerStatsConfig.PowerComponent powerComponent =
-                new AggregatedPowerStatsConfig.PowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
-                        .trackDeviceStates(STATE_POWER, STATE_SCREEN)
-                        .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE);
+        mConfig = new AggregatedPowerStatsConfig.PowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
+                .trackDeviceStates(STATE_POWER, STATE_SCREEN)
+                .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE);
 
         mProcessor = new CpuAggregatedPowerStatsProcessor(
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies());
-        mStats = new MockPowerComponentAggregatedPowerStats(powerComponent);
     }
 
     @Test
     public void powerProfileModel() {
+        mStats = new MockPowerComponentAggregatedPowerStats(mConfig, false);
         mStats.setDeviceStats(
                 states(POWER_STATE_BATTERY, SCREEN_STATE_ON),
                 concat(
@@ -127,6 +127,51 @@ public class CpuAggregatedPowerStatsProcessorTest {
         mStats.verifyPowerEstimates();
     }
 
+    @Test
+    public void energyConsumerModel() {
+        mStats = new MockPowerComponentAggregatedPowerStats(mConfig, true);
+        mStats.setDeviceStats(
+                states(POWER_STATE_BATTERY, SCREEN_STATE_ON),
+                concat(
+                        values(3500, 4500, 3000),           // scaling steps
+                        values(2000, 1000),                 // clusters
+                        values(5000),                       // uptime
+                        values(5_000_000L, 6_000_000L)),    // energy, uC
+                3.055555);
+        mStats.setDeviceStats(
+                states(POWER_STATE_OTHER, SCREEN_STATE_ON),
+                concat(
+                        values(6000, 6500, 4000),
+                        values(5000, 3000),
+                        values(7000),
+                        values(5_000_000L, 6_000_000L)),    // same as above
+                3.055555);                                  // same as above - WAI
+        mStats.setDeviceStats(
+                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER),
+                concat(
+                        values(9000, 10000, 7000),
+                        values(8000, 6000),
+                        values(20000),
+                        values(8_000_000L, 18_000_000L)),
+                7.222222);
+        mStats.setUidStats(24,
+                states(POWER_STATE_BATTERY, SCREEN_STATE_ON, PROCESS_STATE_FOREGROUND),
+                values(400, 1500, 2000),  1.449078);
+        mStats.setUidStats(42,
+                states(POWER_STATE_BATTERY, SCREEN_STATE_ON, PROCESS_STATE_FOREGROUND),
+                values(900, 1000, 1500), 1.161902);
+        mStats.setUidStats(42,
+                states(POWER_STATE_BATTERY, SCREEN_STATE_ON, PROCESS_STATE_BACKGROUND),
+                values(600, 500, 300), 0.355406);
+        mStats.setUidStats(42,
+                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED),
+                values(1500, 2000, 1000), 0.80773);
+
+        mProcessor.finish(mStats);
+
+        mStats.verifyPowerEstimates();
+    }
+
     private int[] states(int... states) {
         return states;
     }
@@ -145,7 +190,7 @@ public class CpuAggregatedPowerStatsProcessorTest {
         return all.toArray();
     }
 
-    private class MockPowerComponentAggregatedPowerStats extends
+    private static class MockPowerComponentAggregatedPowerStats extends
             PowerComponentAggregatedPowerStats {
         private final CpuPowerStatsCollector.StatsArrayLayout mStatsLayout;
         private final PowerStats.Descriptor mDescriptor;
@@ -155,12 +200,16 @@ public class CpuAggregatedPowerStatsProcessorTest {
         private HashMap<String, Double> mExpectedDevicePower = new HashMap<>();
         private HashMap<String, Double> mExpectedUidPower = new HashMap<>();
 
-        MockPowerComponentAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config) {
+        MockPowerComponentAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config,
+                boolean useEnergyConsumers) {
             super(config);
             mStatsLayout = new CpuPowerStatsCollector.StatsArrayLayout();
             mStatsLayout.addDeviceSectionCpuTimeByScalingStep(3);
             mStatsLayout.addDeviceSectionCpuTimeByCluster(2);
             mStatsLayout.addDeviceSectionUptime();
+            if (useEnergyConsumers) {
+                mStatsLayout.addDeviceSectionEnergyConsumers(2);
+            }
             mStatsLayout.addDeviceSectionPowerEstimate();
             mStatsLayout.addUidSectionCpuTimeByPowerBracket(new int[]{0, 1, 2});
             mStatsLayout.addUidSectionPowerEstimate();

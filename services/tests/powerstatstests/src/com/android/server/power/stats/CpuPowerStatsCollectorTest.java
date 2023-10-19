@@ -173,7 +173,7 @@ public class CpuPowerStatsCollectorTest {
         assertThat(layout.getCpuScalingStepCount()).isEqualTo(7);
         assertThat(layout.getTimeByScalingStep(deviceStats, 2)).isEqualTo(42);
 
-        assertThat(layout.getEnergyConsumerCount()).isEqualTo(2);
+        assertThat(layout.getCpuClusterEnergyConsumerCount()).isEqualTo(2);
         assertThat(layout.getConsumedEnergy(deviceStats, 1)).isEqualTo(43);
 
         assertThat(layout.getUptime(deviceStats)).isEqualTo(44);

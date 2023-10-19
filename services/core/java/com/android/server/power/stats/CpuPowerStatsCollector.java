@@ -120,6 +120,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
 
         private int mUidPowerBracketsPosition;
         private int mUidPowerBracketCount;
+        private int[][] mEnergyConsumerToPowerBucketMaps;
         private int mUidPowerEstimatePosition;
 
         private int[] mScalingStepToPowerBracketMap;
@@ -221,7 +222,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
             mDeviceStatsArrayLength += energyConsumerCount;
         }
 
-        public int getEnergyConsumerCount() {
+        public int getCpuClusterEnergyConsumerCount() {
             return mDeviceEnergyConsumerCount;
         }
 
@@ -492,9 +493,8 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
                         + mCpuScalingPolicies.getPolicies().length
                         + ") does not match the number of energy consumers ("
                         + mCpuEnergyConsumerIds.length + "). "
-                        + " Please specify power bracket assignment explicitly in"
-                        + " power_profile.xml");
-            return initPowerBracketsByCluster(1);
+                        + " Using default power bucket assignment.");
+            return initDefaultPowerBrackets(mDefaultCpuPowerBrackets);
         }
     }
 

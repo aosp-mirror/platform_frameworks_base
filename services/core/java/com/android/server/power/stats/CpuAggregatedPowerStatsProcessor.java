@@ -17,6 +17,7 @@
 package com.android.server.power.stats;
 
 import android.os.BatteryStats;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.os.CpuScalingPolicies;
@@ -24,6 +25,7 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +33,9 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
     private static final String TAG = "CpuAggregatedPowerStatsProcessor";
 
     private static final double HOUR_IN_MILLIS = TimeUnit.HOURS.toMillis(1);
+    private static final int UNKNOWN = -1;
 
+    private final CpuScalingPolicies mCpuScalingPolicies;
     // Number of CPU core clusters
     private final int mCpuClusterCount;
     // Total number of CPU scaling steps across all clusters
@@ -44,6 +48,17 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
     private final double[] mPowerMultipliersByCluster;
     // Average power consumed by each scaling step when running code (per power_profile.xml)
     private final double[] mPowerMultipliersByScalingStep;
+    // A map used to combine energy consumers into a smaller set, in case power brackets
+    // are defined in a way that does not allow an unambiguous mapping of energy consumers to
+    // brackets
+    private int[] mEnergyConsumerToCombinedEnergyConsumerMap;
+    // A map of combined energy consumers to the corresponding collections of power brackets.
+    // For example, if there are two CPU_CLUSTER rails and each maps to three brackets,
+    // this map will look like this:
+    //     0 : [0, 1, 2]
+    //     1 : [3, 4, 5]
+    private int[][] mCombinedEnergyConsumerToPowerBracketMap;
+
     // Cached reference to a PowerStats descriptor. Almost never changes in practice,
     // helping to avoid reparsing the descriptor for every PowerStats span.
     private PowerStats.Descriptor mLastUsedDescriptor;
@@ -60,6 +75,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
 
     public CpuAggregatedPowerStatsProcessor(PowerProfile powerProfile,
             CpuScalingPolicies scalingPolicies) {
+        mCpuScalingPolicies = scalingPolicies;
         mCpuScalingStepCount = scalingPolicies.getScalingStepCount();
         mScalingStepToCluster = new int[mCpuScalingStepCount];
         mPowerMultipliersByScalingStep = new double[mCpuScalingStepCount];
@@ -111,6 +127,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
         public long[] timeByScalingStep;
         public double[] powerByCluster;
         public double[] powerByScalingStep;
+        public long[] powerByEnergyConsumer;
     }
 
     /**
@@ -132,6 +149,9 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
 
         if (mPlan == null) {
             mPlan = new PowerEstimationPlan(stats.getConfig());
+            if (mStatsLayout.getCpuClusterEnergyConsumerCount() != 0) {
+                initEnergyConsumerToPowerBracketMaps();
+            }
         }
 
         Intermediates intermediates = new Intermediates();
@@ -169,6 +189,96 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
             }
         }
         mPlan.resetIntermediates();
+    }
+
+    /*
+     * Populate data structures (two maps) needed to use power rail data, aka energy consumers,
+     * to attribute power usage to apps.
+     *
+     * At this point, the algorithm covers only the most basic cases:
+     * - Each cluster is mapped to unique power brackets (possibly multiple for each cluster):
+     *          CL_0: [bracket0, bracket1]
+     *          CL_1: [bracket3]
+     *      In this case, the consumed energy is distributed  to the corresponding brackets
+     *      proportionally.
+     * - Brackets span multiple clusters:
+     *          CL_0: [bracket0, bracket1]
+     *          CL_1: [bracket1, bracket2]
+     *          CL_2: [bracket3, bracket4]
+     *      In this case, we combine energy consumers into groups unambiguously mapped to
+     *      brackets. In the above example, consumed energy for CL_0 and CL_1 will be combined
+     *      because they both map to the same power bracket (bracket1):
+     *          (CL_0+CL_1): [bracket0, bracket1, bracket2]
+     *          CL_2: [bracket3, bracket4]
+     */
+    private void initEnergyConsumerToPowerBracketMaps() {
+        int energyConsumerCount = mStatsLayout.getCpuClusterEnergyConsumerCount();
+        int powerBracketCount = mStatsLayout.getCpuPowerBracketCount();
+
+        mEnergyConsumerToCombinedEnergyConsumerMap = new int[energyConsumerCount];
+        mCombinedEnergyConsumerToPowerBracketMap = new int[energyConsumerCount][];
+
+        int[] policies = mCpuScalingPolicies.getPolicies();
+        if (energyConsumerCount == policies.length) {
+            int[] scalingStepToPowerBracketMap = mStatsLayout.getScalingStepToPowerBracketMap();
+            ArraySet<Integer>[] clusterToBrackets = new ArraySet[policies.length];
+            int step = 0;
+            for (int cluster = 0; cluster < policies.length; cluster++) {
+                int[] freqs = mCpuScalingPolicies.getFrequencies(policies[cluster]);
+                clusterToBrackets[cluster] = new ArraySet<>(freqs.length);
+                for (int j = 0; j < freqs.length; j++) {
+                    clusterToBrackets[cluster].add(scalingStepToPowerBracketMap[step++]);
+                }
+            }
+
+            ArraySet<Integer>[] combinedEnergyConsumers = new ArraySet[policies.length];
+            int combinedEnergyConsumersCount = 0;
+
+            for (int cluster = 0; cluster < clusterToBrackets.length; cluster++) {
+                int combineWith = UNKNOWN;
+                for (int i = 0; i < combinedEnergyConsumersCount; i++) {
+                    if (containsAny(combinedEnergyConsumers[i], clusterToBrackets[cluster])) {
+                        combineWith = i;
+                        break;
+                    }
+                }
+                if (combineWith != UNKNOWN) {
+                    mEnergyConsumerToCombinedEnergyConsumerMap[cluster] = combineWith;
+                    combinedEnergyConsumers[combineWith].addAll(clusterToBrackets[cluster]);
+                } else {
+                    mEnergyConsumerToCombinedEnergyConsumerMap[cluster] =
+                            combinedEnergyConsumersCount;
+                    combinedEnergyConsumers[combinedEnergyConsumersCount++] =
+                            clusterToBrackets[cluster];
+                }
+            }
+
+            for (int i = combinedEnergyConsumers.length - 1; i >= 0; i--) {
+                mCombinedEnergyConsumerToPowerBracketMap[i] =
+                        new int[combinedEnergyConsumers[i].size()];
+                for (int j = combinedEnergyConsumers[i].size() - 1; j >= 0; j--) {
+                    mCombinedEnergyConsumerToPowerBracketMap[i][j] =
+                            combinedEnergyConsumers[i].valueAt(j);
+                }
+            }
+        } else {
+            // All CPU cluster energy consumers are combined into one, which is
+            // distributed proportionally to all power brackets.
+            int[] map = new int[powerBracketCount];
+            for (int i = 0; i < map.length; i++) {
+                map[i] = i;
+            }
+            mCombinedEnergyConsumerToPowerBracketMap[0] = map;
+        }
+    }
+
+    private static boolean containsAny(ArraySet<Integer> set1, ArraySet<Integer> set2) {
+        for (int i = 0; i < set2.size(); i++) {
+            if (set1.contains(set2.valueAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void computeTotals(PowerComponentAggregatedPowerStats stats,
@@ -241,6 +351,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
         int cpuScalingStepCount = mStatsLayout.getCpuScalingStepCount();
         int powerBracketCount = mStatsLayout.getCpuPowerBracketCount();
         int[] scalingStepToBracketMap = mStatsLayout.getScalingStepToPowerBracketMap();
+        int energyConsumerCount = mStatsLayout.getCpuClusterEnergyConsumerCount();
         List<DeviceStateEstimation> deviceStateEstimations = mPlan.deviceStateEstimations;
         for (int dse = deviceStateEstimations.size() - 1; dse >= 0; dse--) {
             DeviceStateEstimation deviceStateEstimation = deviceStateEstimations.get(dse);
@@ -251,7 +362,6 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
             deviceStatsIntermediates.powerByBracket = new double[powerBracketCount];
 
             stats.getDeviceStats(mTmpDeviceStatsArray, deviceStateEstimation.stateValues);
-            double power = 0;
             for (int step = 0; step < cpuScalingStepCount; step++) {
                 if (intermediates.timeByScalingStep[step] == 0) {
                     continue;
@@ -260,11 +370,19 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
                 long timeInStep = mStatsLayout.getTimeByScalingStep(mTmpDeviceStatsArray, step);
                 double stepPower = intermediates.powerByScalingStep[step] * timeInStep
                                    / intermediates.timeByScalingStep[step];
-                power += stepPower;
 
                 int bracket = scalingStepToBracketMap[step];
                 deviceStatsIntermediates.timeByBracket[bracket] += timeInStep;
                 deviceStatsIntermediates.powerByBracket[bracket] += stepPower;
+            }
+
+            if (energyConsumerCount != 0) {
+                adjustEstimatesUsingEnergyConsumers(intermediates, deviceStatsIntermediates);
+            }
+
+            double power = 0;
+            for (int i = deviceStatsIntermediates.powerByBracket.length - 1; i >= 0; i--) {
+                power += deviceStatsIntermediates.powerByBracket[i];
             }
             deviceStatsIntermediates.power = power;
             mStatsLayout.setDevicePowerEstimate(mTmpDeviceStatsArray, power);
@@ -272,15 +390,57 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
         }
     }
 
+    private void adjustEstimatesUsingEnergyConsumers(
+            Intermediates intermediates, DeviceStatsIntermediates deviceStatsIntermediates) {
+        int energyConsumerCount = mStatsLayout.getCpuClusterEnergyConsumerCount();
+        if (energyConsumerCount == 0) {
+            return;
+        }
+
+        if (intermediates.powerByEnergyConsumer == null) {
+            intermediates.powerByEnergyConsumer = new long[energyConsumerCount];
+        } else {
+            Arrays.fill(intermediates.powerByEnergyConsumer, 0);
+        }
+        for (int i = 0; i < energyConsumerCount; i++) {
+            intermediates.powerByEnergyConsumer[mEnergyConsumerToCombinedEnergyConsumerMap[i]] +=
+                    mStatsLayout.getConsumedEnergy(mTmpDeviceStatsArray, i);
+        }
+
+        for (int combinedConsumer = mCombinedEnergyConsumerToPowerBracketMap.length - 1;
+                combinedConsumer >= 0; combinedConsumer--) {
+            int[] combinedEnergyConsumerToPowerBracketMap =
+                    mCombinedEnergyConsumerToPowerBracketMap[combinedConsumer];
+            if (combinedEnergyConsumerToPowerBracketMap == null) {
+                continue;
+            }
+
+            double consumedEnergy = uCtoMah(intermediates.powerByEnergyConsumer[combinedConsumer]);
+
+            double totalModeledPower = 0;
+            for (int bracket : combinedEnergyConsumerToPowerBracketMap) {
+                totalModeledPower += deviceStatsIntermediates.powerByBracket[bracket];
+            }
+            if (totalModeledPower == 0) {
+                continue;
+            }
+
+            for (int bracket : combinedEnergyConsumerToPowerBracketMap) {
+                deviceStatsIntermediates.powerByBracket[bracket] =
+                        consumedEnergy * deviceStatsIntermediates.powerByBracket[bracket]
+                        / totalModeledPower;
+            }
+        }
+    }
+
     private void combineDeviceStateEstimates() {
         for (int i = mPlan.combinedDeviceStateEstimations.size() - 1; i >= 0; i--) {
             CombinedDeviceStateEstimate cdse = mPlan.combinedDeviceStateEstimations.get(i);
-            DeviceStatsIntermediates cdseIntermediates =
-                    new DeviceStatsIntermediates();
+            DeviceStatsIntermediates cdseIntermediates = new DeviceStatsIntermediates();
+            cdse.intermediates = cdseIntermediates;
             int bracketCount = mStatsLayout.getCpuPowerBracketCount();
             cdseIntermediates.timeByBracket = new long[bracketCount];
             cdseIntermediates.powerByBracket = new double[bracketCount];
-            cdse.intermediates = cdseIntermediates;
             List<DeviceStateEstimation> deviceStateEstimations = cdse.deviceStateEstimations;
             for (int j = deviceStateEstimations.size() - 1; j >= 0; j--) {
                 DeviceStateEstimation dse = deviceStateEstimations.get(j);
@@ -350,7 +510,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
             sb.append(mStatsLayout.getTimeByCluster(stats, cluster));
         }
         sb.append("] uptime: ").append(mStatsLayout.getUptime(stats));
-        int energyConsumerCount = mStatsLayout.getEnergyConsumerCount();
+        int energyConsumerCount = mStatsLayout.getCpuClusterEnergyConsumerCount();
         if (energyConsumerCount > 0) {
             sb.append(" energy: [");
             for (int i = 0; i < energyConsumerCount; i++) {
