@@ -646,7 +646,7 @@ public class ClipboardService extends SystemService {
                             intendingUid,
                             intendingUserId,
                             intendingDeviceId)
-                    || isDeviceLocked(intendingUserId)) {
+                    || isDeviceLocked(intendingUserId, deviceId)) {
                 return null;
             }
             synchronized (mLock) {
@@ -686,7 +686,7 @@ public class ClipboardService extends SystemService {
                             intendingUserId,
                             intendingDeviceId,
                             false)
-                    || isDeviceLocked(intendingUserId)) {
+                    || isDeviceLocked(intendingUserId, deviceId)) {
                 return null;
             }
             synchronized (mLock) {
@@ -710,7 +710,7 @@ public class ClipboardService extends SystemService {
                             intendingUserId,
                             intendingDeviceId,
                             false)
-                    || isDeviceLocked(intendingUserId)) {
+                    || isDeviceLocked(intendingUserId, deviceId)) {
                 return false;
             }
             synchronized (mLock) {
@@ -785,7 +785,7 @@ public class ClipboardService extends SystemService {
                             intendingUserId,
                             intendingDeviceId,
                             false)
-                    || isDeviceLocked(intendingUserId)) {
+                    || isDeviceLocked(intendingUserId, deviceId)) {
                 return false;
             }
             synchronized (mLock) {
@@ -814,7 +814,7 @@ public class ClipboardService extends SystemService {
                             intendingUserId,
                             intendingDeviceId,
                             false)
-                    || isDeviceLocked(intendingUserId)) {
+                    || isDeviceLocked(intendingUserId, deviceId)) {
                 return null;
             }
             synchronized (mLock) {
@@ -1150,12 +1150,12 @@ public class ClipboardService extends SystemService {
                 && text.equals(clipboard.primaryClip.getItemAt(0).getText());
     }
 
-    private boolean isDeviceLocked(@UserIdInt int userId) {
+    private boolean isDeviceLocked(@UserIdInt int userId, int deviceId) {
         final long token = Binder.clearCallingIdentity();
         try {
             final KeyguardManager keyguardManager = getContext().getSystemService(
                     KeyguardManager.class);
-            return keyguardManager != null && keyguardManager.isDeviceLocked(userId);
+            return keyguardManager != null && keyguardManager.isDeviceLocked(userId, deviceId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
