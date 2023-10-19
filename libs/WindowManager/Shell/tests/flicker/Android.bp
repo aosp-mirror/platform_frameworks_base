@@ -39,7 +39,25 @@ filegroup {
 }
 
 filegroup {
-    name: "WMShellFlickerTestsPip-src",
+    name: "WMShellFlickerTestsPip1-src",
+    srcs: [
+        "src/com/android/wm/shell/flicker/pip/A*.kt",
+        "src/com/android/wm/shell/flicker/pip/B*.kt",
+        "src/com/android/wm/shell/flicker/pip/C*.kt",
+        "src/com/android/wm/shell/flicker/pip/D*.kt",
+        "src/com/android/wm/shell/flicker/pip/S*.kt",
+    ],
+}
+
+filegroup {
+    name: "WMShellFlickerTestsPip2-src",
+    srcs: [
+        "src/com/android/wm/shell/flicker/pip/E*.kt",
+    ],
+}
+
+filegroup {
+    name: "WMShellFlickerTestsPip3-src",
     srcs: ["src/com/android/wm/shell/flicker/pip/*.kt"],
 }
 
@@ -176,7 +194,9 @@ android_test {
     ],
     exclude_srcs: [
         ":WMShellFlickerTestsBubbles-src",
-        ":WMShellFlickerTestsPip-src",
+        ":WMShellFlickerTestsPip1-src",
+        ":WMShellFlickerTestsPip2-src",
+        ":WMShellFlickerTestsPip3-src",
         ":WMShellFlickerTestsPipCommon-src",
         ":WMShellFlickerTestsPipApps-src",
         ":WMShellFlickerTestsSplitScreenGroup1-src",
@@ -207,8 +227,51 @@ android_test {
     instrumentation_target_package: "com.android.wm.shell.flicker.pip",
     srcs: [
         ":WMShellFlickerTestsBase-src",
-        ":WMShellFlickerTestsPip-src",
+        ":WMShellFlickerTestsPip3-src",
         ":WMShellFlickerTestsPipCommon-src",
+    ],
+}
+
+android_test {
+    name: "WMShellFlickerTestsPip1",
+    defaults: ["WMShellFlickerTestsDefault"],
+    additional_manifests: ["manifests/AndroidManifestPip.xml"],
+    package_name: "com.android.wm.shell.flicker.pip",
+    instrumentation_target_package: "com.android.wm.shell.flicker.pip",
+    srcs: [
+        ":WMShellFlickerTestsBase-src",
+        ":WMShellFlickerTestsPip1-src",
+        ":WMShellFlickerTestsPipCommon-src",
+    ],
+}
+
+android_test {
+    name: "WMShellFlickerTestsPip2",
+    defaults: ["WMShellFlickerTestsDefault"],
+    additional_manifests: ["manifests/AndroidManifestPip.xml"],
+    package_name: "com.android.wm.shell.flicker.pip",
+    instrumentation_target_package: "com.android.wm.shell.flicker.pip",
+    srcs: [
+        ":WMShellFlickerTestsBase-src",
+        ":WMShellFlickerTestsPip2-src",
+        ":WMShellFlickerTestsPipCommon-src",
+    ],
+}
+
+android_test {
+    name: "WMShellFlickerTestsPip3",
+    defaults: ["WMShellFlickerTestsDefault"],
+    additional_manifests: ["manifests/AndroidManifestPip.xml"],
+    package_name: "com.android.wm.shell.flicker.pip",
+    instrumentation_target_package: "com.android.wm.shell.flicker.pip",
+    srcs: [
+        ":WMShellFlickerTestsBase-src",
+        ":WMShellFlickerTestsPip3-src",
+        ":WMShellFlickerTestsPipCommon-src",
+    ],
+    exclude_srcs: [
+        ":WMShellFlickerTestsPip1-src",
+        ":WMShellFlickerTestsPip2-src",
     ],
 }
 
