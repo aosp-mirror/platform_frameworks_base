@@ -120,9 +120,9 @@ public class ResourcesManager {
     private final ReferenceQueue<Resources> mResourcesReferencesQueue = new ReferenceQueue<>();
 
     /**
-     * The list of locales the app declares it supports.
+     * The localeConfig of the app.
      */
-    private LocaleList mLocaleList = LocaleList.getEmptyLocaleList();
+    private LocaleConfig mLocaleConfig = new LocaleConfig(LocaleList.getEmptyLocaleList());
 
     private static class ApkKey {
         public final String path;
@@ -1612,18 +1612,19 @@ public class ResourcesManager {
     }
 
     /**
-     * Returns the LocaleList current set
+     * Returns the LocaleConfig current set
      */
-    public LocaleList getLocaleList() {
-        return mLocaleList;
+    public LocaleConfig getLocaleConfig() {
+        return mLocaleConfig;
     }
 
     /**
-     * Sets the LocaleList of app's supported locales
+     * Sets the LocaleConfig of the app
      */
-    public void setLocaleList(LocaleList localeList) {
-        if ((localeList != null) && !localeList.isEmpty()) {
-            mLocaleList = localeList;
+    public void setLocaleConfig(LocaleConfig localeConfig) {
+        if ((localeConfig != null) && (localeConfig.getSupportedLocales() != null)
+                && !localeConfig.getSupportedLocales().isEmpty()) {
+            mLocaleConfig = localeConfig;
         }
     }
 

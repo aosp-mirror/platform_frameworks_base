@@ -153,21 +153,21 @@ public final class LocaleList implements Parcelable {
 
     /**
      * Find the intersection between this LocaleList and another
-     * @return a String array of the Locales in both LocaleLists
+     * @return an array of the Locales in both LocaleLists
      * {@hide}
      */
     @NonNull
-    public String[] getIntersection(@NonNull LocaleList other) {
-        List<String> intersection = new ArrayList<>();
+    public Locale[] getIntersection(@NonNull LocaleList other) {
+        List<Locale> intersection = new ArrayList<>();
         for (Locale l1 : mList) {
             for (Locale l2 : other.mList) {
                 if (matchesLanguageAndScript(l2, l1)) {
-                    intersection.add(l1.toLanguageTag());
+                    intersection.add(l1);
                     break;
                 }
             }
         }
-        return intersection.toArray(new String[0]);
+        return intersection.toArray(new Locale[0]);
     }
 
     /**
