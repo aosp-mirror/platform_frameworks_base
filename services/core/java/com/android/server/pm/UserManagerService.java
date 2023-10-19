@@ -4905,9 +4905,9 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
 
-            t.traceBegin("createUserKey");
+            t.traceBegin("createUserStorageKeys");
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
-            storage.createUserKey(userId, userInfo.serialNumber, userInfo.isEphemeral());
+            storage.createUserStorageKeys(userId, userInfo.serialNumber, userInfo.isEphemeral());
             t.traceEnd();
 
             // Only prepare DE storage here.  CE storage will be prepared later, when the user is
@@ -5731,17 +5731,18 @@ public class UserManagerService extends IUserManager.Stub {
     private void removeUserState(final @UserIdInt int userId) {
         Slog.i(LOG_TAG, "Removing user state of user " + userId);
 
-        // Cleanup lock settings.  This must happen before destroyUserKey(), since the user's DE
-        // storage must still be accessible for the lock settings state to be properly cleaned up.
+        // Cleanup lock settings.  This requires that the user's DE storage still be accessible, so
+        // this must happen before destroyUserStorageKeys().
         mLockPatternUtils.removeUser(userId);
 
         // Evict and destroy the user's CE and DE encryption keys.  At this point, the user's CE and
         // DE storage is made inaccessible, except to delete its contents.
         try {
-            mContext.getSystemService(StorageManager.class).destroyUserKey(userId);
+            mContext.getSystemService(StorageManager.class).destroyUserStorageKeys(userId);
         } catch (IllegalStateException e) {
             // This may be simply because the user was partially created.
-            Slog.i(LOG_TAG, "Destroying key for user " + userId + " failed, continuing anyway", e);
+            Slog.i(LOG_TAG, "Destroying storage keys for user " + userId
+                    + " failed, continuing anyway", e);
         }
 
         // Cleanup package manager settings

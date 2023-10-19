@@ -134,9 +134,9 @@ interface IStorageManager {
     @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void setDebugFlags(int flags, int mask) = 60;
     @EnforcePermission("STORAGE_INTERNAL")
-    void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
+    void createUserStorageKeys(int userId, int serialNumber, boolean ephemeral) = 61;
     @EnforcePermission("STORAGE_INTERNAL")
-    void destroyUserKey(int userId) = 62;
+    void destroyUserStorageKeys(int userId) = 62;
     @EnforcePermission("STORAGE_INTERNAL")
     void unlockCeStorage(int userId, int serialNumber, in byte[] secret) = 63;
     @EnforcePermission("STORAGE_INTERNAL")

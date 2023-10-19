@@ -3208,12 +3208,12 @@ class StorageManagerService extends IStorageManager.Stub
 
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
+    public void createUserStorageKeys(int userId, int serialNumber, boolean ephemeral) {
 
-        super.createUserKey_enforcePermission();
+        super.createUserStorageKeys_enforcePermission();
 
         try {
-            mVold.createUserKey(userId, serialNumber, ephemeral);
+            mVold.createUserStorageKeys(userId, serialNumber, ephemeral);
             // Since the user's CE key was just created, the user's CE storage is now unlocked.
             synchronized (mLock) {
                 mCeUnlockedUsers.append(userId);
@@ -3225,12 +3225,12 @@ class StorageManagerService extends IStorageManager.Stub
 
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void destroyUserKey(int userId) {
+    public void destroyUserStorageKeys(int userId) {
 
-        super.destroyUserKey_enforcePermission();
+        super.destroyUserStorageKeys_enforcePermission();
 
         try {
-            mVold.destroyUserKey(userId);
+            mVold.destroyUserStorageKeys(userId);
             // Since the user's CE key was just destroyed, the user's CE storage is now locked.
             synchronized (mLock) {
                 mCeUnlockedUsers.remove(userId);
