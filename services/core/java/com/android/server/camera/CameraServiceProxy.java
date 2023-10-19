@@ -53,6 +53,8 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.nfc.INfcAdapter;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -162,10 +164,6 @@ public class CameraServiceProxy extends SystemService
      * SCALER_ROTATE_AND_CROP_NONE  -> Always return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE
      */
 
-    // Flags arguments to NFC adapter to enable/disable NFC
-    public static final int DISABLE_POLLING_FLAGS = 0x1000;
-    public static final int ENABLE_POLLING_FLAGS = 0x0000;
-
     // Handler message codes
     private static final int MSG_SWITCH_USER = 1;
     private static final int MSG_NOTIFY_DEVICE_STATE = 2;
@@ -215,7 +213,6 @@ public class CameraServiceProxy extends SystemService
     private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
 
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
-    private static final String NFC_SERVICE_BINDER_NAME = "nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
 
     private final boolean mNotifyNfc;
@@ -1255,8 +1252,13 @@ public class CameraServiceProxy extends SystemService
         }
     }
 
-    private void notifyNfcService(boolean enablePolling) {
-
+    // TODO(b/303286040): Remove the raw INfcAdapter usage once |ENABLE_NFC_MAINLINE_FLAG| is
+    // rolled out.
+    private static final String NFC_SERVICE_BINDER_NAME = "nfc";
+    // Flags arguments to NFC adapter to enable/disable NFC
+    public static final int DISABLE_POLLING_FLAGS = 0x1000;
+    public static final int ENABLE_POLLING_FLAGS = 0x0000;
+    private void setNfcReaderModeUsingINfcAdapter(boolean enablePolling) {
         IBinder nfcServiceBinder = getBinderService(NFC_SERVICE_BINDER_NAME);
         if (nfcServiceBinder == null) {
             Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
@@ -1269,6 +1271,25 @@ public class CameraServiceProxy extends SystemService
             nfcAdapterRaw.setReaderMode(nfcInterfaceToken, null, flags, null);
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not notify NFC service, remote exception: " + e);
+        }
+    }
+
+    private void notifyNfcService(boolean enablePolling) {
+        if (android.nfc.Flags.enableNfcMainline()) {
+            NfcManager nfcManager = mContext.getSystemService(NfcManager.class);
+            if (nfcManager == null) {
+                Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
+                return;
+            }
+            NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
+            if (nfcAdapter == null) {
+                Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
+                return;
+            }
+            if (DEBUG) Slog.v(TAG, "Setting NFC reader mode. enablePolling: " + enablePolling);
+            nfcAdapter.setReaderMode(enablePolling);
+        } else {
+            setNfcReaderModeUsingINfcAdapter(enablePolling);
         }
     }
 
