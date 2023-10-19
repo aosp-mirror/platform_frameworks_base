@@ -190,17 +190,6 @@ public class LogModule {
         }
     }
 
-    /**
-     * Provides a logging buffer for all logs related to Quick Settings tiles. This LogBuffer is
-     * unique for each tile.
-     * go/qs-tile-refactor
-     */
-    @Provides
-    @QSTilesDefaultLog
-    public static LogBuffer provideQuickSettingsTilesLogBuffer(LogBufferFactory factory) {
-        return factory.create("QSTileLog", 25 /* maxSize */, false /* systrace */);
-    }
-
     @Provides
     @QSTilesLogBuffers
     public static Map<TileSpec, LogBuffer> provideQuickSettingsTilesLogBufferCache() {

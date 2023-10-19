@@ -23,11 +23,14 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dump.LogcatEchoTrackerAlways
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.interactor.StateUpdateTrigger
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -42,6 +45,7 @@ import org.mockito.MockitoAnnotations
 class QSTileLoggerTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarController: StatusBarStateController
+    @Mock private lateinit var logBufferFactory: LogBufferFactory
 
     private val chattyLogBuffer = LogBuffer("TestChatty", 5, LogcatEchoTrackerAlways())
     private val logBuffer = LogBuffer("Test", 1, LogcatEchoTrackerAlways())
@@ -51,10 +55,11 @@ class QSTileLoggerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        whenever(logBufferFactory.create(any(), any(), any())).thenReturn(logBuffer)
         underTest =
             QSTileLogger(
                 mapOf(TileSpec.create("chatty_tile") to chattyLogBuffer),
-                { logBuffer },
+                logBufferFactory,
                 statusBarController
             )
     }
