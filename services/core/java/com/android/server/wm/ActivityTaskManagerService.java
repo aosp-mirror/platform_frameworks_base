@@ -1412,7 +1412,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final long origId = Binder.clearCallingIdentity();
             // TODO(b/64750076): Check if calling pid should really be -1.
-            final int res = getActivityStartController()
+            try {
+                if (options == null) {
+                    options = new SafeActivityOptions(ActivityOptions.makeBasic());
+                }
+                options.getOptions(r).setAvoidMoveToFront();
+                final int res = getActivityStartController()
                     .obtainStarter(intent, "startNextMatchingActivity")
                     .setCaller(r.app.getThread())
                     .setResolvedType(r.resolvedType)
@@ -1428,13 +1433,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setRealCallingUid(r.launchedFromUid)
                     .setActivityOptions(options)
                     .execute();
-            Binder.restoreCallingIdentity(origId);
-
-            r.finishing = wasFinishing;
-            if (res != ActivityManager.START_SUCCESS) {
-                return false;
+                r.finishing = wasFinishing;
+                return res == ActivityManager.START_SUCCESS;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            return true;
         }
     }
 
