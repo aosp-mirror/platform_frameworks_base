@@ -26,7 +26,7 @@ import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecSettingsRepository
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractorImpl
-import com.android.systemui.qs.pipeline.prototyping.PrototypeCoreStartable
+import com.android.systemui.qs.pipeline.domain.startable.QSPipelineCoreStartable
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import dagger.Binds
 import dagger.Module
@@ -53,8 +53,8 @@ abstract class QSPipelineModule {
 
     @Binds
     @IntoMap
-    @ClassKey(PrototypeCoreStartable::class)
-    abstract fun providePrototypeCoreStartable(startable: PrototypeCoreStartable): CoreStartable
+    @ClassKey(QSPipelineCoreStartable::class)
+    abstract fun provideCoreStartable(startable: QSPipelineCoreStartable): CoreStartable
 
     companion object {
         /**

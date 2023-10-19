@@ -33,6 +33,8 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothUuid;
+import android.bluetooth.le.ScanFilter;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
@@ -147,7 +149,7 @@ public class HearingAidDeviceManagerTest {
                 HearingAidProfile.DeviceSide.SIDE_RIGHT);
 
         assertThat(mCachedDevice1.getHiSyncId()).isNotEqualTo(HISYNCID1);
-        mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1);
+        mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1, null);
 
         assertThat(mCachedDevice1.getHiSyncId()).isEqualTo(HISYNCID1);
         assertThat(mCachedDevice1.getDeviceMode()).isEqualTo(
@@ -164,9 +166,40 @@ public class HearingAidDeviceManagerTest {
         when(mHearingAidProfile.getHiSyncId(mDevice1)).thenReturn(
                 BluetoothHearingAid.HI_SYNC_ID_INVALID);
 
-        mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1);
+        mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1, null);
 
         verify(mCachedDevice1, never()).setHearingAidInfo(any(HearingAidInfo.class));
+    }
+
+    /**
+     * Test initHearingAidDeviceIfNeeded, an invalid HiSyncId and hearing aid scan filter, set an
+     * empty hearing aid info on the device.
+     */
+    @Test
+    public void initHearingAidDeviceIfNeeded_hearingAidScanFilter_setHearingAidInfo() {
+        when(mHearingAidProfile.getHiSyncId(mDevice1)).thenReturn(
+                BluetoothHearingAid.HI_SYNC_ID_INVALID);
+        final ScanFilter scanFilter = new ScanFilter.Builder()
+                .setServiceData(BluetoothUuid.HEARING_AID, new byte[]{0}).build();
+
+        mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1, List.of(scanFilter));
+
+        assertThat(mCachedDevice1.isHearingAidDevice()).isTrue();
+    }
+
+    /**
+     * Test initHearingAidDeviceIfNeeded, an invalid HiSyncId and random scan filter, not to set
+     * hearing aid info on the device.
+     */
+    @Test
+    public void initHearingAidDeviceIfNeeded_randomScanFilter_notToSetHearingAidInfo() {
+        when(mHearingAidProfile.getHiSyncId(mDevice1)).thenReturn(
+                BluetoothHearingAid.HI_SYNC_ID_INVALID);
+        final ScanFilter scanFilter = new ScanFilter.Builder().build();
+
+        mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1, List.of(scanFilter));
+
+        assertThat(mCachedDevice1.isHearingAidDevice()).isFalse();
     }
 
     /**

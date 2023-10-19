@@ -31,7 +31,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 
 import android.platform.test.annotations.Presubmit;
 import android.view.Surface;
@@ -79,8 +78,11 @@ public class DisplayRotationImmersiveAppCompatPolicyTests extends WindowTestsBas
         when(mDisplayContent.getIgnoreOrientationRequest()).thenReturn(true);
 
         mMockLetterboxConfiguration = mock(LetterboxConfiguration.class);
-        when(mMockLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled(
-                /* checkDeviceConfig */ anyBoolean())).thenReturn(true);
+        when(mMockLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled())
+                .thenReturn(true);
+        when(mMockLetterboxConfiguration
+                .isDisplayRotationImmersiveAppCompatPolicyEnabledAtBuildTime())
+                    .thenReturn(true);
 
         mPolicy = DisplayRotationImmersiveAppCompatPolicy.createIfNeeded(
                 mMockLetterboxConfiguration, createDisplayRotationMock(),
@@ -204,8 +206,8 @@ public class DisplayRotationImmersiveAppCompatPolicyTests extends WindowTestsBas
 
     @Test
     public void testRotationChoiceEnforcedOnly_featureFlagDisabled_lockNotEnforced() {
-        when(mMockLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled(
-                /* checkDeviceConfig */ true)).thenReturn(false);
+        when(mMockLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled())
+                .thenReturn(false);
 
         assertIsRotationLockEnforcedReturnsFalseForAllRotations();
     }

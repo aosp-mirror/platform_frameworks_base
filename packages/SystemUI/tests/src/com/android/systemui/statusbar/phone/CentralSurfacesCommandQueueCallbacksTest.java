@@ -18,9 +18,11 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -29,8 +31,10 @@ import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
+import android.view.HapticFeedbackConstants;
 import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
@@ -42,6 +46,7 @@ import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
@@ -98,6 +103,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private UserTracker mUserTracker;
     @Mock private QSHost mQSHost;
     @Mock private ActivityStarter mActivityStarter;
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -134,7 +140,8 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mCameraLauncherLazy,
                 mUserTracker,
                 mQSHost,
-                mActivityStarter);
+                mActivityStarter,
+                mFeatureFlags);
 
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
@@ -145,38 +152,33 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
     @Test
     public void testDisableNotificationShade() {
-        when(mCentralSurfaces.getDisabled1()).thenReturn(StatusBarManager.DISABLE_NONE);
-        when(mCentralSurfaces.getDisabled2()).thenReturn(StatusBarManager.DISABLE_NONE);
+        // Start with nothing disabled
+        mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
+                StatusBarManager.DISABLE2_NONE, false);
+
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
+        // WHEN the new disable flags have the shade disabled
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
 
-        verify(mCentralSurfaces).updateQsExpansionEnabled();
+        // THEN the shade is collapsed
         verify(mShadeController).animateCollapseShade();
-
-        // Trying to open it does nothing.
-        mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mShadeViewController, never()).expandToNotifications();
-        mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mShadeViewController, never()).expand(anyBoolean());
     }
 
     @Test
     public void testEnableNotificationShade() {
-        when(mCentralSurfaces.getDisabled1()).thenReturn(StatusBarManager.DISABLE_NONE);
-        when(mCentralSurfaces.getDisabled2())
-                .thenReturn(StatusBarManager.DISABLE2_NOTIFICATION_SHADE);
+        // Start with the shade disabled
+        mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
+                StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
+        reset(mShadeController);
+
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        // WHEN the new disable flags have the shade enabled
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NONE, false);
-        verify(mCentralSurfaces).updateQsExpansionEnabled();
-        verify(mShadeController, never()).animateCollapseShade();
 
-        // Can now be opened.
-        mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mShadeViewController).expandToNotifications();
-        mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mShadeViewController).expandToQs();
+        // THEN the shade is not collapsed
+        verify(mShadeController, never()).animateCollapseShade();
     }
 
     @Test
@@ -245,5 +247,25 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 letterboxDetails);
 
         verifyZeroInteractions(mSystemBarAttributesListener);
+    }
+
+    @Test
+    public void vibrateOnNavigationKeyDown_oneWayHapticsDisabled_usesVibrate() {
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
+
+        mSbcqCallbacks.vibrateOnNavigationKeyDown();
+
+        verify(mVibratorHelper).vibrate(VibrationEffect.EFFECT_TICK);
+    }
+
+    @Test
+    public void vibrateOnNavigationKeyDown_oneWayHapticsEnabled_usesPerformHapticFeedback() {
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
+
+        mSbcqCallbacks.vibrateOnNavigationKeyDown();
+
+        verify(mShadeViewController).performHapticFeedback(
+                HapticFeedbackConstants.GESTURE_START
+        );
     }
 }

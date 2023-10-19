@@ -38,4 +38,9 @@ public interface KeyguardTransitions {
             @NonNull IRemoteTransition occludeTransition,
             @NonNull IRemoteTransition occludeByDreamTransition,
             @NonNull IRemoteTransition unoccludeTransition) {}
+
+    /**
+     * Notify whether keyguard has created a remote animation runner for next app launch.
+     */
+    default void setLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {}
 }

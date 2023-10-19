@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.service.credentials.CredentialProviderInfoFactory;
 import android.util.Slog;
 
@@ -159,7 +160,7 @@ public class CredentialManagerUi {
                         CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY,
                         mEnabledProviders,
                         // Don't need primary providers here.
-                        new HashSet<String>());
+                        new HashSet<ComponentName>());
 
         List<DisabledProviderData> disabledProviderDataList = allProviders.stream()
                 .filter(provider -> !provider.isEnabled())
@@ -171,7 +172,9 @@ public class CredentialManagerUi {
                 .setAction(UUID.randomUUID().toString());
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending
         // intents
-        return PendingIntent.getActivity(
-                mContext, /*requestCode=*/0, intent, PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getActivityAsUser(
+                mContext, /*requestCode=*/0, intent,
+                PendingIntent.FLAG_IMMUTABLE, /*options=*/null,
+                UserHandle.of(mUserId));
     }
 }

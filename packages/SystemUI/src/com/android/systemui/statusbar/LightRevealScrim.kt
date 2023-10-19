@@ -14,9 +14,11 @@ import android.graphics.Shader
 import android.os.Trace
 import android.util.AttributeSet
 import android.util.MathUtils.lerp
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.PathInterpolator
 import com.android.app.animation.Interpolators
+import com.android.systemui.shade.TouchLogger
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
 import com.android.systemui.util.getColorWithAlpha
 import com.android.systemui.util.leak.RotationUtils
@@ -234,6 +236,8 @@ class PowerButtonReveal(
     }
 }
 
+private const val TAG = "LightRevealScrim"
+
 /**
  * Scrim view that partially reveals the content underneath it using a [RadialGradient] with a
  * transparent center. The center position, size, and stops of the gradient can be manipulated to
@@ -444,6 +448,10 @@ constructor(
 
         // Draw the gradient over the screen, then multiply the end color by it.
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), gradientPaint)
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        return TouchLogger.logDispatchTouch(TAG, event, super.dispatchTouchEvent(event))
     }
 
     private fun setPaintColorFilter() {

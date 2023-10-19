@@ -43,7 +43,7 @@ class SleepHandler implements Transitions.TransitionHandler {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         mSleepTransitions.remove(transition);
         startTransaction.apply();
-        finishCallback.onTransitionFinished(null, null);
+        finishCallback.onTransitionFinished(null);
         return true;
     }
 

@@ -18,9 +18,9 @@ package com.android.systemui.toast
 
 import com.android.systemui.log.dagger.ToastLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogMessage
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogMessage
 import javax.inject.Inject
 
 private const val TAG = "ToastLog"
@@ -55,6 +55,16 @@ class ToastLogger @Inject constructor(
             bool1 = isPortrait
         }, {
             "Orientation change for toast. msg=\'$str1\' isPortrait=$bool1"
+        })
+    }
+
+    fun logOnSkipToastForInvalidDisplay(packageName: String, token: String, displayId: Int) {
+        log(DEBUG, {
+            str1 = packageName
+            str2 = token
+            int1 = displayId
+        }, {
+            "[$str2] Skip toast for [$str1] scheduled on unavailable display #$int1"
         })
     }
 

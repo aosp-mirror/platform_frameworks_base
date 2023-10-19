@@ -44,7 +44,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
+import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 
 import junit.framework.Assert;
 

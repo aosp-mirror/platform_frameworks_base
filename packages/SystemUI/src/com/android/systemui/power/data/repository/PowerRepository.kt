@@ -26,6 +26,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -34,13 +36,18 @@ import kotlinx.coroutines.flow.Flow
 interface PowerRepository {
     /** Whether the device is interactive. Starts with the current state. */
     val isInteractive: Flow<Boolean>
+
+    /** Wakes up the device. */
+    fun wakeUp(why: String, @PowerManager.WakeReason wakeReason: Int)
 }
 
 @SysUISingleton
 class PowerRepositoryImpl
 @Inject
 constructor(
-    manager: PowerManager,
+    private val manager: PowerManager,
+    @Application private val applicationContext: Context,
+    private val systemClock: SystemClock,
     dispatcher: BroadcastDispatcher,
 ) : PowerRepository {
 
@@ -66,6 +73,14 @@ constructor(
         send()
 
         awaitClose { dispatcher.unregisterReceiver(receiver) }
+    }
+
+    override fun wakeUp(why: String, wakeReason: Int) {
+        manager.wakeUp(
+            systemClock.uptimeMillis(),
+            wakeReason,
+            "${applicationContext.packageName}:$why",
+        )
     }
 
     companion object {

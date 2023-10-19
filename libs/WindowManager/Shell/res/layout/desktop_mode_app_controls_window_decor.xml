@@ -78,6 +78,19 @@
         android:layout_weight="1"/>
 
     <ImageButton
+        android:id="@+id/maximize_window"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="9dp"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/maximize_button_text"
+        android:src="@drawable/decor_desktop_mode_maximize_button_dark"
+        android:scaleType="fitCenter"
+        android:gravity="end"
+        android:background="@null"
+        android:tint="@color/desktop_mode_caption_maximize_button_dark"/>
+
+    <ImageButton
         android:id="@+id/close_window"
         android:layout_width="40dp"
         android:layout_height="40dp"

@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.eq
@@ -65,6 +66,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var shadeViewController: ShadeViewController
     @Mock
+    private lateinit var notifShadeWindowController: NotificationShadeWindowController
+    @Mock
     private lateinit var lightRevealScrim: LightRevealScrim
     @Mock
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
@@ -89,13 +92,12 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 keyguardStateController,
                 dagger.Lazy<DozeParameters> { dozeParameters },
                 globalSettings,
+                dagger.Lazy<NotificationShadeWindowController> { notifShadeWindowController },
                 interactionJankMonitor,
                 powerManager,
                 handler = handler
         )
-        controller.initialize(centralSurfaces, lightRevealScrim)
-        `when`(centralSurfaces.shadeViewController).thenReturn(
-            shadeViewController)
+        controller.initialize(centralSurfaces, shadeViewController, lightRevealScrim)
 
         // Screen off does not run if the panel is expanded, so we should say it's collapsed to test
         // screen off.
@@ -130,6 +132,22 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         callbackCaptor.value.run()
 
         verify(shadeViewController, times(1)).showAodUi()
+    }
+
+    @Test
+    fun testAodUiShowNotInvokedIfWakingUp() {
+        `when`(dozeParameters.canControlUnlockedScreenOff()).thenReturn(true)
+        `when`(powerManager.isInteractive).thenReturn(false)
+
+        val callbackCaptor = ArgumentCaptor.forClass(Runnable::class.java)
+        controller.startAnimation()
+        controller.onStartedWakingUp()
+
+        verify(handler).postDelayed(callbackCaptor.capture(), anyLong())
+
+        callbackCaptor.value.run()
+
+        verify(shadeViewController, never()).showAodUi()
     }
 
     /**

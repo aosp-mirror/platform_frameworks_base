@@ -26,6 +26,7 @@ import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Dispatches events to {@link DarkReceiver}s about changes in darkness, tint area and dark
@@ -78,7 +79,7 @@ public interface DarkIconDispatcher {
      * @return the tint to apply to view depending on the desired tint color and
      *         the screen tintArea in which to apply that tint
      */
-    static int getTint(ArrayList<Rect> tintAreas, View view, int color) {
+    static int getTint(Collection<Rect> tintAreas, View view, int color) {
         if (isInAreas(tintAreas, view)) {
             return color;
         } else {
@@ -90,7 +91,7 @@ public interface DarkIconDispatcher {
      * @return true if more than half of the view area are in any of the given
      *         areas, false otherwise
      */
-    static boolean isInAreas(ArrayList<Rect> areas, View view) {
+    static boolean isInAreas(Collection<Rect> areas, View view) {
         if (areas.isEmpty()) {
             return true;
         }

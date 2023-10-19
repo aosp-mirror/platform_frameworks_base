@@ -46,11 +46,11 @@ import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
 import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
@@ -67,14 +67,18 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.settings.SystemSettings;
+import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
+
+import java.util.concurrent.Executor;
 
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-
-import java.util.concurrent.Executor;
-
 import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
@@ -88,7 +92,6 @@ import kotlinx.coroutines.CoroutineDispatcher;
         includes = {
             FalsingModule.class,
             KeyguardDataQuickAffordanceModule.class,
-            KeyguardQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
             KeyguardFaceAuthModule.class,
             StartKeyguardTransitionModule.class,
@@ -129,14 +132,20 @@ public class KeyguardModule {
             KeyguardTransitions keyguardTransitions,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
+            JavaAdapter javaAdapter,
+            WallpaperRepository wallpaperRepository,
             Lazy<ShadeController> shadeController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
             Lazy<ScrimController> scrimControllerLazy,
             FeatureFlags featureFlags,
+            SecureSettings secureSettings,
+            SystemSettings systemSettings,
+            SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
-            SystemPropertiesHelper systemPropertiesHelper) {
+            SystemPropertiesHelper systemPropertiesHelper,
+            Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager) {
         return new KeyguardViewMediator(
                 context,
                 uiEventLogger,
@@ -166,14 +175,20 @@ public class KeyguardModule {
                 keyguardTransitions,
                 interactionJankMonitor,
                 dreamOverlayStateController,
+                javaAdapter,
+                wallpaperRepository,
                 shadeController,
                 notificationShadeWindowController,
                 activityLaunchAnimator,
                 scrimControllerLazy,
                 featureFlags,
+                secureSettings,
+                systemSettings,
+                systemClock,
                 mainDispatcher,
                 dreamingToLockscreenTransitionViewModel,
-                systemPropertiesHelper);
+                systemPropertiesHelper,
+                wmLockscreenVisibilityManager);
     }
 
     /** */

@@ -74,7 +74,8 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
 
         val decorationSupport = DisplayDecorationSupport()
         decorationSupport.format = PixelFormat.R_8
-        decorHwcLayer = Mockito.spy(ScreenDecorHwcLayer(mContext, decorationSupport))
+        decorHwcLayer =
+            Mockito.spy(ScreenDecorHwcLayer(mContext, decorationSupport, /* debug */ false))
         whenever(decorHwcLayer.width).thenReturn(displayWidth)
         whenever(decorHwcLayer.height).thenReturn(displayHeight)
         whenever(decorHwcLayer.context).thenReturn(mockContext)

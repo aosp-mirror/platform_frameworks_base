@@ -27,6 +27,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -58,6 +59,7 @@ public class TvSplitScreenController extends SplitScreenController {
     private final TransactionPool mTransactionPool;
     private final IconProvider mIconProvider;
     private final Optional<RecentTasksController> mRecentTasksOptional;
+    private final LaunchAdjacentController mLaunchAdjacentController;
 
     private final Handler mMainHandler;
     private final SystemWindows mSystemWindows;
@@ -77,13 +79,15 @@ public class TvSplitScreenController extends SplitScreenController {
             TransactionPool transactionPool,
             IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
+            LaunchAdjacentController launchAdjacentController,
             ShellExecutor mainExecutor,
             Handler mainHandler,
             SystemWindows systemWindows) {
         super(context, shellInit, shellCommandHandler, shellController, shellTaskOrganizer,
                 syncQueue, rootTDAOrganizer, displayController, displayImeController,
                 displayInsetsController, dragAndDropController, transitions, transactionPool,
-                iconProvider, recentTasks, mainExecutor);
+                iconProvider, recentTasks, launchAdjacentController, Optional.empty(),
+                Optional.empty(), mainExecutor);
 
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
@@ -96,6 +100,7 @@ public class TvSplitScreenController extends SplitScreenController {
         mTransactionPool = transactionPool;
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
+        mLaunchAdjacentController = launchAdjacentController;
 
         mMainHandler = mainHandler;
         mSystemWindows = systemWindows;
@@ -111,7 +116,7 @@ public class TvSplitScreenController extends SplitScreenController {
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool,
                 mIconProvider, mMainExecutor, mMainHandler,
-                mRecentTasksOptional, mSystemWindows);
+                mRecentTasksOptional, mLaunchAdjacentController, mSystemWindows);
     }
 
 }

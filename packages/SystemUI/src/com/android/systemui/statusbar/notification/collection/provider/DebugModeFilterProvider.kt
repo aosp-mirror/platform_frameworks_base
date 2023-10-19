@@ -26,7 +26,6 @@ import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.util.Assert
 import com.android.systemui.util.ListenerSet
-import com.android.systemui.util.isNotEmpty
 import java.io.PrintWriter
 import javax.inject.Inject
 

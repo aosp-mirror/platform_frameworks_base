@@ -317,7 +317,8 @@ public class AssistDataRequesterTest {
         assertEquals("Expected " + numPendingScreenshots + " pending screenshots, got "
                         + mDataRequester.getPendingScreenshotCount(),
                 numPendingScreenshots, mDataRequester.getPendingScreenshotCount());
-        assertFalse("Expected request NOT completed", mCallbacks.mRequestCompleted);
+        assertEquals("Expected request NOT completed, unless no pending data",
+                numPendingData == 0 && numPendingScreenshots == 0, mCallbacks.mRequestCompleted);
         mGate.countDown();
         waitForIdle(mHandler);
         assertEquals("Expected " + numReceivedData + " data, received "
@@ -376,14 +377,7 @@ public class AssistDataRequesterTest {
 
         @Override
         public void onAssistRequestCompleted() {
-            mHandler.post(() -> {
-                try {
-                    mGate.await(10, TimeUnit.SECONDS);
-                    mRequestCompleted = true;
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "Failed to wait", e);
-                }
-            });
+            mRequestCompleted = true;
         }
     }
 }

@@ -227,7 +227,8 @@ constructor(
                     )
                 }
                 try {
-                    WindowManagerGlobal.getWindowManagerService().lockNow(/* options= */ null)
+                    checkNotNull(WindowManagerGlobal.getWindowManagerService())
+                        .lockNow(/* options= */ null)
                 } catch (e: RemoteException) {
                     Log.e(
                         TAG,

@@ -37,6 +37,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
 import android.os.Handler;
@@ -71,6 +72,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.inputmethod.EditorInfo;
+import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1160,17 +1163,12 @@ public final class UiAutomation {
         Point displaySize = new Point();
         display.getRealSize(displaySize);
 
-        int rotation = display.getRotation();
-
         // Take the screenshot
-        Bitmap screenShot = null;
+        ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
+                ScreenCapture.createSyncCaptureListener();
         try {
-            // Calling out without a lock held.
-            screenShot = mUiAutomationConnection.takeScreenshot(
-                    new Rect(0, 0, displaySize.x, displaySize.y));
-            if (screenShot == null) {
-                Log.e(LOG_TAG, "mUiAutomationConnection.takeScreenshot() returned null for display "
-                        + mDisplayId);
+            if (!mUiAutomationConnection.takeScreenshot(
+                    new Rect(0, 0, displaySize.x, displaySize.y), syncScreenCapture)) {
                 return null;
             }
         } catch (RemoteException re) {
@@ -1178,10 +1176,23 @@ public final class UiAutomation {
             return null;
         }
 
-        // Optimization
-        screenShot.setHasAlpha(false);
+        final ScreenshotHardwareBuffer screenshotBuffer =
+                syncScreenCapture.getBuffer();
+        Bitmap screenShot = screenshotBuffer.asBitmap();
+        if (screenShot == null) {
+            Log.e(LOG_TAG, "mUiAutomationConnection.takeScreenshot() returned null for display "
+                    + mDisplayId);
+            return null;
+        }
+        Bitmap swBitmap;
+        try (HardwareBuffer buffer = screenshotBuffer.getHardwareBuffer()) {
+            swBitmap = screenShot.copy(Bitmap.Config.ARGB_8888, false);
+        }
+        screenShot.recycle();
 
-        return screenShot;
+        // Optimization
+        swBitmap.setHasAlpha(false);
+        return swBitmap;
     }
 
     /**
@@ -1218,12 +1229,27 @@ public final class UiAutomation {
         // Apply a sync transaction to ensure SurfaceFlinger is flushed before capturing a
         // screenshot.
         new SurfaceControl.Transaction().apply(true);
+        ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
+                ScreenCapture.createSyncCaptureListener();
         try {
-            return mUiAutomationConnection.takeSurfaceControlScreenshot(sc);
+            if (!mUiAutomationConnection.takeSurfaceControlScreenshot(sc, syncScreenCapture)) {
+                return null;
+            }
+
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while taking screenshot!", re);
             return null;
         }
+        ScreenCapture.ScreenshotHardwareBuffer captureBuffer =
+                syncScreenCapture.getBuffer();
+        Bitmap screenShot = captureBuffer.asBitmap();
+        Bitmap swBitmap;
+        try (HardwareBuffer buffer = captureBuffer.getHardwareBuffer()) {
+            swBitmap = screenShot.copy(Bitmap.Config.ARGB_8888, false);
+        }
+
+        screenShot.recycle();
+        return swBitmap;
     }
 
     /**

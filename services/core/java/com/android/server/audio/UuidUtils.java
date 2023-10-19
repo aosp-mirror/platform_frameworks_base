@@ -45,26 +45,24 @@ class UuidUtils {
      *  Generate a headtracking UUID from AudioDeviceAttributes
      */
     public static UUID uuidFromAudioDeviceAttributes(AudioDeviceAttributes device) {
-        switch (device.getInternalType()) {
-            case AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP:
-                String address = device.getAddress().replace(":", "");
-                if (address.length() != 12) {
-                    return null;
-                }
-                address = "0x" + address;
-                long lsb = LSB_PREFIX_BT;
-                try {
-                    lsb |= Long.decode(address).longValue();
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-                if (AudioService.DEBUG_DEVICES) {
-                    Slog.i(TAG, "uuidFromAudioDeviceAttributes lsb: " + Long.toHexString(lsb));
-                }
-                return new UUID(0, lsb);
-            default:
-                // Handle other device types here
-                return null;
+        if (!AudioSystem.isBluetoothA2dpOutDevice(device.getInternalType())
+                && !AudioSystem.isBluetoothLeOutDevice(device.getInternalType())) {
+            return null;
         }
+        String address = device.getAddress().replace(":", "");
+        if (address.length() != 12) {
+            return null;
+        }
+        address = "0x" + address;
+        long lsb = LSB_PREFIX_BT;
+        try {
+            lsb |= Long.decode(address).longValue();
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        if (AudioService.DEBUG_DEVICES) {
+            Slog.i(TAG, "uuidFromAudioDeviceAttributes lsb: " + Long.toHexString(lsb));
+        }
+        return new UUID(0, lsb);
     }
 }

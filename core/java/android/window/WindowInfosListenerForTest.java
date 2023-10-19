@@ -21,11 +21,13 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.InputWindowHandle;
 
 import java.util.ArrayList;
@@ -87,6 +89,14 @@ public class WindowInfosListenerForTest {
             this.isTrustedOverlay = (inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
             this.isVisible = (inputConfig & InputConfig.NOT_VISIBLE) == 0;
         }
+
+        @Override
+        public String toString() {
+            return name + ", frame=" + bounds
+                    + ", isVisible=" + isVisible
+                    + ", isTrustedOverlay=" + isTrustedOverlay
+                    + ", token=" + windowToken;
+        }
     }
 
     private static final String TAG = "WindowInfosListenerForTest";
@@ -119,13 +129,13 @@ public class WindowInfosListenerForTest {
                             "Exception thrown while waiting for listener to be called with "
                                     + "initial state");
                 }
-                consumer.accept(buildWindowInfos(windowHandles));
+                consumer.accept(buildWindowInfos(windowHandles, displayInfos));
             }
         };
         mListeners.put(consumer, listener);
         Pair<InputWindowHandle[], WindowInfosListener.DisplayInfo[]> initialState =
                 listener.register();
-        consumer.accept(buildWindowInfos(initialState.first));
+        consumer.accept(buildWindowInfos(initialState.first, initialState.second));
         calledWithInitialState.countDown();
     }
 
@@ -140,11 +150,28 @@ public class WindowInfosListenerForTest {
         listener.unregister();
     }
 
-    private static List<WindowInfo> buildWindowInfos(InputWindowHandle[] windowHandles) {
+    private static List<WindowInfo> buildWindowInfos(
+            InputWindowHandle[] windowHandles, WindowInfosListener.DisplayInfo[] displayInfos) {
         var windowInfos = new ArrayList<WindowInfo>(windowHandles.length);
+
+        var displayInfoById = new SparseArray<WindowInfosListener.DisplayInfo>(displayInfos.length);
+        for (var displayInfo : displayInfos) {
+            displayInfoById.put(displayInfo.mDisplayId, displayInfo);
+        }
+
+        var tmp = new RectF();
         for (var handle : windowHandles) {
             var bounds = new Rect(handle.frameLeft, handle.frameTop, handle.frameRight,
                     handle.frameBottom);
+
+            // Transform bounds from physical display coordinates to logical display coordinates.
+            var display = displayInfoById.get(handle.displayId);
+            if (display != null) {
+                tmp.set(bounds);
+                display.mTransform.mapRect(tmp);
+                tmp.round(bounds);
+            }
+
             windowInfos.add(new WindowInfo(handle.getWindowToken(), handle.name, handle.displayId,
                     bounds, handle.inputConfig));
         }

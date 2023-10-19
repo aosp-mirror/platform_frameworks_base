@@ -485,9 +485,6 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Implement this method to learn when notifications are removed.
      * <p>
-     * This might occur because the user has dismissed the notification using system UI (or another
-     * notification listener) or because the app has withdrawn the notification.
-     * <p>
      * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
      * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
      * fields such as {@link android.app.Notification#contentView} and
@@ -505,9 +502,6 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Implement this method to learn when notifications are removed.
-     * <p>
-     * This might occur because the user has dismissed the notification using system UI (or another
-     * notification listener) or because the app has withdrawn the notification.
      * <p>
      * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
      * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
@@ -531,9 +525,6 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Implement this method to learn when notifications are removed and why.
      * <p>
-     * This might occur because the user has dismissed the notification using system UI (or another
-     * notification listener) or because the app has withdrawn the notification.
-     * <p>
      * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
      * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
      * fields such as {@link android.app.Notification#contentView} and
@@ -546,10 +537,9 @@ public abstract class NotificationListenerService extends Service {
      *            was just removed.
      * @param rankingMap The current ranking map that can be used to retrieve ranking information
      *                   for active notifications.
-     * @param reason see {@link #REASON_LISTENER_CANCEL}, etc.
      */
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
-            int reason) {
+            @NotificationCancelReason int reason) {
         onNotificationRemoved(sbn, rankingMap);
     }
 

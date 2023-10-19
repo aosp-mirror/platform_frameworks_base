@@ -57,6 +57,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
@@ -96,6 +97,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     /** The delay time for retrying to request DirectActions. */
     private static final long REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS = 200;
+    private static final boolean SYSPROP_VISUAL_QUERY_SERVICE_ENABLED =
+            SystemProperties.getBoolean("ro.hotword.visual_query_service_enabled", false);
 
     final boolean mValid;
 
@@ -715,7 +718,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         } else {
             verifyDetectorForVisualQueryDetectionLocked(sharedMemory);
         }
-        if (!verifyProcessSharingLocked()) {
+        if (SYSPROP_VISUAL_QUERY_SERVICE_ENABLED && !verifyProcessSharingLocked()) {
             Slog.w(TAG, "Sandboxed detection service not in shared isolated process");
             throw new IllegalStateException("VisualQueryDetectionService or HotworDetectionService "
                     + "not in a shared isolated process. Please make sure to set "
@@ -784,30 +787,30 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mHotwordDetectionConnection.setVisualQueryDetectionAttentionListenerLocked(listener);
     }
 
-    public void startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
+    public boolean startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
         if (DEBUG) {
             Slog.d(TAG, "startPerceivingLocked");
         }
 
         if (mHotwordDetectionConnection == null) {
             // TODO: callback.onError();
-            return;
+            return false;
         }
 
-        mHotwordDetectionConnection.startPerceivingLocked(callback);
+        return mHotwordDetectionConnection.startPerceivingLocked(callback);
     }
 
-    public void stopPerceivingLocked() {
+    public boolean stopPerceivingLocked() {
         if (DEBUG) {
             Slog.d(TAG, "stopPerceivingLocked");
         }
 
         if (mHotwordDetectionConnection == null) {
             Slog.w(TAG, "stopPerceivingLocked() called but connection isn't established");
-            return;
+            return false;
         }
 
-        mHotwordDetectionConnection.stopPerceivingLocked();
+        return mHotwordDetectionConnection.stopPerceivingLocked();
     }
 
     public void startListeningFromMicLocked(
@@ -877,12 +880,13 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     }
 
     public IRecognitionStatusCallback createSoundTriggerCallbackLocked(
-            IHotwordRecognitionStatusCallback callback) {
+            Context context, IHotwordRecognitionStatusCallback callback,
+            Identity voiceInteractorIdentity) {
         if (DEBUG) {
             Slog.d(TAG, "createSoundTriggerCallbackLocked");
         }
-        return new HotwordDetectionConnection.SoundTriggerCallback(callback,
-                mHotwordDetectionConnection, mInfo.getServiceInfo().applicationInfo.uid);
+        return new HotwordDetectionConnection.SoundTriggerCallback(context, callback,
+                mHotwordDetectionConnection, voiceInteractorIdentity);
     }
 
     private static ServiceInfo getServiceInfoLocked(@NonNull ComponentName componentName,
@@ -913,6 +917,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (hotwordInfo == null || visualQueryInfo == null) {
             return true;
         }
+        // Enforce shared isolated option is used when VisualQueryDetectionservice is enabled
         return (hotwordInfo.flags & ServiceInfo.FLAG_ALLOW_SHARED_ISOLATED_PROCESS) != 0
                 && (visualQueryInfo.flags & ServiceInfo.FLAG_ALLOW_SHARED_ISOLATED_PROCESS) != 0;
     }

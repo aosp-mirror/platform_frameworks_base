@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.BrightnessInfo;
-import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IThermalEventListener;
@@ -38,17 +37,25 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel;
+import com.android.server.display.feature.DeviceConfigParameterProvider;
+import com.android.server.display.utils.DeviceConfigParsingUtils;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * This class monitors various conditions, such as skin temperature throttling status, and limits
  * the allowed brightness range accordingly.
+ *
+ * @deprecated will be replaced by
+ * {@link com.android.server.display.brightness.clamper.BrightnessThermalClamper}
  */
+@Deprecated
 class BrightnessThrottler {
     private static final String TAG = "BrightnessThrottler";
     private static final boolean DEBUG = false;
@@ -63,7 +70,7 @@ class BrightnessThrottler {
     private final Runnable mThrottlingChangeCallback;
     private final SkinThermalStatusObserver mSkinThermalStatusObserver;
     private final DeviceConfigListener mDeviceConfigListener;
-    private final DeviceConfigInterface mDeviceConfig;
+    private final DeviceConfigParameterProvider mConfigParameterProvider;
 
     private int mThrottlingStatus;
 
@@ -93,8 +100,21 @@ class BrightnessThrottler {
     // time the underlying display device changes.
     // This map is indexed by uniqueDisplayId, to provide maps for throttlingId -> throttlingData.
     // HashMap< uniqueDisplayId, HashMap< throttlingDataId, ThermalBrightnessThrottlingData >>
-    private final HashMap<String, HashMap<String, ThermalBrightnessThrottlingData>>
-            mThermalBrightnessThrottlingDataOverride = new HashMap<>(1);
+    private final Map<String, Map<String, ThermalBrightnessThrottlingData>>
+            mThermalBrightnessThrottlingDataOverride = new HashMap<>();
+
+    private final BiFunction<String, String, ThrottlingLevel> mDataPointMapper = (key, value) -> {
+        try {
+            int status = DeviceConfigParsingUtils.parseThermalStatus(key);
+            float brightnessPoint = DeviceConfigParsingUtils.parseBrightness(value);
+            return new ThrottlingLevel(status, brightnessPoint);
+        } catch (IllegalArgumentException iae) {
+            return null;
+        }
+    };
+
+    private final Function<List<ThrottlingLevel>, ThermalBrightnessThrottlingData>
+            mDataSetMapper = ThermalBrightnessThrottlingData::create;
 
     BrightnessThrottler(Handler handler, Runnable throttlingChangeCallback, String uniqueDisplayId,
             String throttlingDataId,
@@ -118,7 +138,7 @@ class BrightnessThrottler {
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(mInjector, mHandler);
 
         mUniqueDisplayId = uniqueDisplayId;
-        mDeviceConfig = injector.getDeviceConfig();
+        mConfigParameterProvider = new DeviceConfigParameterProvider(injector.getDeviceConfig());
         mDeviceConfigListener = new DeviceConfigListener();
         mThermalBrightnessThrottlingDataId = throttlingDataId;
         mDdcThermalThrottlingDataMap = thermalBrightnessThrottlingDataMap;
@@ -145,7 +165,7 @@ class BrightnessThrottler {
 
     void stop() {
         mSkinThermalStatusObserver.stopObserving();
-        mDeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListener);
+        mConfigParameterProvider.removeOnPropertiesChangedListener(mDeviceConfigListener);
         // We're asked to stop throttling, so reset brightness restrictions.
         mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
         mBrightnessMaxReason = BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
@@ -248,12 +268,6 @@ class BrightnessThrottler {
         mSkinThermalStatusObserver.dump(pw);
     }
 
-    private String getThermalBrightnessThrottlingDataString() {
-        return mDeviceConfig.getString(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                DisplayManager.DeviceConfig.KEY_BRIGHTNESS_THROTTLING_DATA,
-                /* defaultValue= */ null);
-    }
-
     // The brightness throttling data id may or may not be specified in the string that is passed
     // in, if there is none specified, we assume it is for the default case. Each string passed in
     // here must be for one display and one throttling id.
@@ -263,78 +277,15 @@ class BrightnessThrottler {
     // 456,2,moderate,0.9,critical,0.7,id_2
     // displayId, number, <state, val> * number
     // displayId, <number, <state, val> * number>, throttlingId
-    private boolean parseAndAddData(@NonNull String strArray,
-            @NonNull HashMap<String, HashMap<String, ThermalBrightnessThrottlingData>>
-                    displayIdToThrottlingIdToBtd) {
-        boolean validConfig = true;
-        String[] items = strArray.split(",");
-        int i = 0;
-
-        try {
-            String uniqueDisplayId = items[i++];
-
-            // number of throttling points
-            int noOfThrottlingPoints = Integer.parseInt(items[i++]);
-            List<ThrottlingLevel> throttlingLevels = new ArrayList<>(noOfThrottlingPoints);
-
-            // throttling level and point
-            for (int j = 0; j < noOfThrottlingPoints; j++) {
-                String severity = items[i++];
-                int status = parseThermalStatus(severity);
-                float brightnessPoint = parseBrightness(items[i++]);
-                throttlingLevels.add(new ThrottlingLevel(status, brightnessPoint));
-            }
-
-            String throttlingDataId = (i < items.length) ? items[i++] : DEFAULT_ID;
-            ThermalBrightnessThrottlingData throttlingLevelsData =
-                    DisplayDeviceConfig.ThermalBrightnessThrottlingData.create(throttlingLevels);
-
-            // Add throttlingLevelsData to inner map where necessary.
-            HashMap<String, ThermalBrightnessThrottlingData> throttlingMapForDisplay =
-                    displayIdToThrottlingIdToBtd.get(uniqueDisplayId);
-            if (throttlingMapForDisplay == null) {
-                throttlingMapForDisplay = new HashMap<>();
-                throttlingMapForDisplay.put(throttlingDataId, throttlingLevelsData);
-                displayIdToThrottlingIdToBtd.put(uniqueDisplayId, throttlingMapForDisplay);
-            } else if (throttlingMapForDisplay.containsKey(throttlingDataId)) {
-                Slog.e(TAG, "Throttling data for display " + uniqueDisplayId
-                        + "contains duplicate throttling ids: '" + throttlingDataId + "'");
-                return false;
-            } else {
-                throttlingMapForDisplay.put(throttlingDataId, throttlingLevelsData);
-            }
-        } catch (NumberFormatException | IndexOutOfBoundsException
-                | UnknownThermalStatusException e) {
-            Slog.e(TAG, "Throttling data is invalid array: '" + strArray + "'", e);
-            validConfig = false;
-        }
-
-        if (i != items.length) {
-            validConfig = false;
-        }
-        return validConfig;
-    }
-
     private void loadThermalBrightnessThrottlingDataFromDeviceConfig() {
-        HashMap<String, HashMap<String, ThermalBrightnessThrottlingData>> tempThrottlingData =
-                new HashMap<>(1);
-        mThermalBrightnessThrottlingDataString = getThermalBrightnessThrottlingDataString();
-        boolean validConfig = true;
+        mThermalBrightnessThrottlingDataString =
+                mConfigParameterProvider.getBrightnessThrottlingData();
         mThermalBrightnessThrottlingDataOverride.clear();
         if (mThermalBrightnessThrottlingDataString != null) {
-            String[] throttlingDataSplits = mThermalBrightnessThrottlingDataString.split(";");
-            for (String s : throttlingDataSplits) {
-                if (!parseAndAddData(s, tempThrottlingData)) {
-                    validConfig = false;
-                    break;
-                }
-            }
-
-            if (validConfig) {
-                mThermalBrightnessThrottlingDataOverride.putAll(tempThrottlingData);
-                tempThrottlingData.clear();
-            }
-
+            Map<String, Map<String, ThermalBrightnessThrottlingData>> tempThrottlingData =
+                    DeviceConfigParsingUtils.parseDeviceConfigMap(
+                    mThermalBrightnessThrottlingDataString, mDataPointMapper, mDataSetMapper);
+            mThermalBrightnessThrottlingDataOverride.putAll(tempThrottlingData);
         } else {
             Slog.w(TAG, "DeviceConfig ThermalBrightnessThrottlingData is null");
         }
@@ -390,50 +341,13 @@ class BrightnessThrottler {
         public Executor mExecutor = new HandlerExecutor(mDeviceConfigHandler);
 
         public void startListening() {
-            mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                    mExecutor, this);
+            mConfigParameterProvider.addOnPropertiesChangedListener(mExecutor, this);
         }
 
         @Override
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
             loadThermalBrightnessThrottlingDataFromDeviceConfig();
             resetThermalThrottlingData();
-        }
-    }
-
-    private float parseBrightness(String intVal) throws NumberFormatException {
-        float value = Float.parseFloat(intVal);
-        if (value < PowerManager.BRIGHTNESS_MIN || value > PowerManager.BRIGHTNESS_MAX) {
-            throw new NumberFormatException("Brightness constraint value out of bounds.");
-        }
-        return value;
-    }
-
-    @PowerManager.ThermalStatus private int parseThermalStatus(@NonNull String value)
-            throws UnknownThermalStatusException {
-        switch (value) {
-            case "none":
-                return PowerManager.THERMAL_STATUS_NONE;
-            case "light":
-                return PowerManager.THERMAL_STATUS_LIGHT;
-            case "moderate":
-                return PowerManager.THERMAL_STATUS_MODERATE;
-            case "severe":
-                return PowerManager.THERMAL_STATUS_SEVERE;
-            case "critical":
-                return PowerManager.THERMAL_STATUS_CRITICAL;
-            case "emergency":
-                return PowerManager.THERMAL_STATUS_EMERGENCY;
-            case "shutdown":
-                return PowerManager.THERMAL_STATUS_SHUTDOWN;
-            default:
-                throw new UnknownThermalStatusException("Invalid Thermal Status: " + value);
-        }
-    }
-
-    private static class UnknownThermalStatusException extends Exception {
-        UnknownThermalStatusException(String message) {
-            super(message);
         }
     }
 

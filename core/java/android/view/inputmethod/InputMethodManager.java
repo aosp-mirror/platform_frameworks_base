@@ -39,6 +39,7 @@ import android.Manifest;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
 import android.annotation.DurationMillisLong;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -50,6 +51,7 @@ import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -121,6 +123,8 @@ import com.android.internal.view.IInputMethodManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -536,6 +540,13 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
 
+    /** Cached value for {@link #isStylusHandwritingAvailable} for userId. */
+    @GuardedBy("mH")
+    private PropertyInvalidatedCache<Integer, Boolean> mStylusHandwritingAvailableCache;
+
+    private static final String CACHE_KEY_STYLUS_HANDWRITING_PROPERTY =
+            "cache_key.system_server.stylus_handwriting";
+
     @GuardedBy("mH")
     private int mCursorSelStart;
     @GuardedBy("mH")
@@ -661,6 +672,15 @@ public final class InputMethodManager {
     private static final int MSG_SET_INTERACTIVE = 13;
     private static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
+
+    /**
+     * Calling this will invalidate Local stylus handwriting availability Cache which
+     * forces the next query in any process to recompute the cache.
+     * @hide
+     */
+    public static void invalidateLocalStylusHandwritingAvailabilityCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STYLUS_HANDWRITING_PROPERTY);
+    }
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -1577,8 +1597,21 @@ public final class InputMethodManager {
         if (fallbackContext == null) {
             return false;
         }
-
-        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(userId);
+        boolean isAvailable;
+        synchronized (mH) {
+            if (mStylusHandwritingAvailableCache == null) {
+                mStylusHandwritingAvailableCache = new PropertyInvalidatedCache<>(
+                        4 /* maxEntries */, CACHE_KEY_STYLUS_HANDWRITING_PROPERTY) {
+                    @Override
+                    public Boolean recompute(Integer userId) {
+                        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(
+                                userId);
+                    }
+                };
+            }
+            isAvailable = mStylusHandwritingAvailableCache.query(userId);
+        }
+        return isAvailable;
     }
 
     /**
@@ -2004,6 +2037,14 @@ public final class InputMethodManager {
         }
     }
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "SHOW_" }, value = {
+            SHOW_IMPLICIT,
+            SHOW_FORCED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ShowFlags {}
+
     /**
      * Flag for {@link #showSoftInput} to indicate that this is an implicit
      * request to show the input window, not as the result of a direct request
@@ -2035,10 +2076,8 @@ public final class InputMethodManager {
      *             {@link View#isFocused view focus}, and its containing window has
      *             {@link View#hasWindowFocus window focus}. Otherwise the call fails and
      *             returns {@code false}.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #SHOW_IMPLICIT} bit set.
      */
-    public boolean showSoftInput(View view, int flags) {
+    public boolean showSoftInput(View view, @ShowFlags int flags) {
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
@@ -2101,21 +2140,20 @@ public final class InputMethodManager {
      *             {@link View#isFocused view focus}, and its containing window has
      *             {@link View#hasWindowFocus window focus}. Otherwise the call fails and
      *             returns {@code false}.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #SHOW_IMPLICIT} bit set.
      * @param resultReceiver If non-null, this will be called by the IME when
      * it has processed your request to tell you what it has done.  The result
      * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
      * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
      * {@link #RESULT_HIDDEN}.
      */
-    public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
+    public boolean showSoftInput(View view, @ShowFlags int flags, ResultReceiver resultReceiver) {
         return showSoftInput(view, null /* statsToken */, flags, resultReceiver,
                 SoftInputShowHideReason.SHOW_SOFT_INPUT);
     }
 
-    private boolean showSoftInput(View view, @Nullable ImeTracker.Token statsToken, int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+    private boolean showSoftInput(View view, @Nullable ImeTracker.Token statsToken,
+            @ShowFlags int flags, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         if (statsToken == null) {
             statsToken = ImeTracker.forLogging().onRequestShow(null /* component */,
                     Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT, reason);
@@ -2127,7 +2165,7 @@ public final class InputMethodManager {
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
-            return fallbackImm.showSoftInput(view, flags, resultReceiver);
+            return fallbackImm.showSoftInput(view, statsToken, flags, resultReceiver, reason);
         }
 
         checkFocus();
@@ -2169,7 +2207,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768499)
-    public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
+    public void showSoftInputUnchecked(@ShowFlags int flags, ResultReceiver resultReceiver) {
         synchronized (mH) {
             final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestShow(
                     null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
@@ -2200,6 +2238,14 @@ public final class InputMethodManager {
         }
     }
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "HIDE_" }, value = {
+            HIDE_IMPLICIT_ONLY,
+            HIDE_NOT_ALWAYS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HideFlags {}
+
     /**
      * Flag for {@link #hideSoftInputFromWindow} and {@link InputMethodService#requestHideSelf(int)}
      * to indicate that the soft input window should only be hidden if it was not explicitly shown
@@ -2221,10 +2267,8 @@ public final class InputMethodManager {
      *
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
      */
-    public boolean hideSoftInputFromWindow(IBinder windowToken, int flags) {
+    public boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags) {
         return hideSoftInputFromWindow(windowToken, flags, null);
     }
 
@@ -2246,21 +2290,19 @@ public final class InputMethodManager {
      *
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
      * @param resultReceiver If non-null, this will be called by the IME when
      * it has processed your request to tell you what it has done.  The result
      * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
      * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
      * {@link #RESULT_HIDDEN}.
      */
-    public boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
+    public boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
             ResultReceiver resultReceiver) {
         return hideSoftInputFromWindow(windowToken, flags, resultReceiver,
                 SoftInputShowHideReason.HIDE_SOFT_INPUT);
     }
 
-    private boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
+    private boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
                 null /* component */, Process.myUid(),
@@ -2463,12 +2505,6 @@ public final class InputMethodManager {
      * If not the input window will be displayed.
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
-     * @param showFlags Provides additional operating flags.  May be
-     * 0 or have the {@link #SHOW_IMPLICIT},
-     * {@link #SHOW_FORCED} bit set.
-     * @param hideFlags Provides additional operating flags.  May be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
-     * {@link #HIDE_NOT_ALWAYS} bit set.
      *
      * @deprecated Use {@link #showSoftInput(View, int)} or
      * {@link #hideSoftInputFromWindow(IBinder, int)} explicitly instead.
@@ -2477,7 +2513,8 @@ public final class InputMethodManager {
      * has an effect if the calling app is the current IME focus.
      */
     @Deprecated
-    public void toggleSoftInputFromWindow(IBinder windowToken, int showFlags, int hideFlags) {
+    public void toggleSoftInputFromWindow(IBinder windowToken, @ShowFlags int showFlags,
+            @HideFlags int hideFlags) {
         ImeTracing.getInstance().triggerClientDump(
                 "InputMethodManager#toggleSoftInputFromWindow", InputMethodManager.this,
                 null /* icProto */);
@@ -2495,12 +2532,6 @@ public final class InputMethodManager {
      *
      * If the input window is already displayed, it gets hidden.
      * If not the input window will be displayed.
-     * @param showFlags Provides additional operating flags.  May be
-     * 0 or have the {@link #SHOW_IMPLICIT},
-     * {@link #SHOW_FORCED} bit set.
-     * @param hideFlags Provides additional operating flags.  May be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
-     * {@link #HIDE_NOT_ALWAYS} bit set.
      *
      * @deprecated Use {@link #showSoftInput(View, int)} or
      * {@link #hideSoftInputFromWindow(IBinder, int)} explicitly instead.
@@ -2509,7 +2540,7 @@ public final class InputMethodManager {
      * has an effect if the calling app is the current IME focus.
      */
     @Deprecated
-    public void toggleSoftInput(int showFlags, int hideFlags) {
+    public void toggleSoftInput(@ShowFlags int showFlags, @HideFlags int hideFlags) {
         ImeTracing.getInstance().triggerClientDump(
                 "InputMethodManager#toggleSoftInput", InputMethodManager.this,
                 null /* icProto */);
@@ -3522,15 +3553,12 @@ public final class InputMethodManager {
      * @param token Supplies the identifying token given to an input method
      * when it was started, which allows it to perform this operation on
      * itself.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
-     * {@link #HIDE_NOT_ALWAYS} bit set.
      * @deprecated Use {@link InputMethodService#requestHideSelf(int)} instead. This method was
      * intended for IME developers who should be accessing APIs through the service. APIs in this
      * class are intended for app developers interacting with the IME.
      */
     @Deprecated
-    public void hideSoftInputFromInputMethod(IBinder token, int flags) {
+    public void hideSoftInputFromInputMethod(IBinder token, @HideFlags int flags) {
         InputMethodPrivilegedOperationsRegistry.get(token).hideMySoftInput(
                 flags, SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION);
     }
@@ -3544,15 +3572,12 @@ public final class InputMethodManager {
      * @param token Supplies the identifying token given to an input method
      * when it was started, which allows it to perform this operation on
      * itself.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #SHOW_IMPLICIT} or
-     * {@link #SHOW_FORCED} bit set.
      * @deprecated Use {@link InputMethodService#requestShowSelf(int)} instead. This method was
      * intended for IME developers who should be accessing APIs through the service. APIs in this
      * class are intended for app developers interacting with the IME.
      */
     @Deprecated
-    public void showSoftInputFromInputMethod(IBinder token, int flags) {
+    public void showSoftInputFromInputMethod(IBinder token, @ShowFlags int flags) {
         InputMethodPrivilegedOperationsRegistry.get(token).showMySoftInput(flags);
     }
 
@@ -4361,15 +4386,14 @@ public final class InputMethodManager {
      * @param icProto {@link InputConnection} call data in proto format.
      * @hide
      */
-    @GuardedBy("mH")
     public void dumpDebug(ProtoOutputStream proto, @Nullable byte[] icProto) {
-        if (!isImeSessionAvailableLocked()) {
-            return;
-        }
-
-        proto.write(DISPLAY_ID, mDisplayId);
-        final long token = proto.start(INPUT_METHOD_MANAGER);
         synchronized (mH) {
+            if (!isImeSessionAvailableLocked()) {
+                return;
+            }
+
+            proto.write(DISPLAY_ID, mDisplayId);
+            final long token = proto.start(INPUT_METHOD_MANAGER);
             proto.write(CUR_ID, mCurBindState.mImeId);
             proto.write(FULLSCREEN_MODE, mFullscreenMode);
             proto.write(ACTIVE, mActive);

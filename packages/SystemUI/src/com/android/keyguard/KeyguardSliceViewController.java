@@ -131,7 +131,7 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
             mLiveData.observeForever(mObserver);
         }
         mConfigurationController.addCallback(mConfigurationListener);
-        mDumpManager.registerDumpable(
+        mDumpManager.registerNormalDumpable(
                 TAG + "@" + Integer.toHexString(
                         KeyguardSliceViewController.this.hashCode()),
                 KeyguardSliceViewController.this);

@@ -31,13 +31,20 @@ class FakePromptRepository : PromptRepository {
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
-        requireConfirmation: Boolean,
+    ) = setPrompt(promptInfo, userId, gatekeeperChallenge, kind, forceConfirmation = false)
+
+    fun setPrompt(
+        promptInfo: PromptInfo,
+        userId: Int,
+        gatekeeperChallenge: Long?,
+        kind: PromptKind,
+        forceConfirmation: Boolean = false,
     ) {
         _promptInfo.value = promptInfo
         _userId.value = userId
         _challenge.value = gatekeeperChallenge
         _kind.value = kind
-        _isConfirmationRequired.value = requireConfirmation
+        _isConfirmationRequired.value = promptInfo.isConfirmationRequested || forceConfirmation
     }
 
     override fun unsetPrompt() {

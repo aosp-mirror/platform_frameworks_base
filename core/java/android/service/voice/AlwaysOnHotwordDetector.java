@@ -67,6 +67,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
+import com.android.internal.infra.AndroidFuture;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -1701,6 +1702,11 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         public void onProcessRestarted() {
             Slog.i(TAG, "onProcessRestarted");
             mHandler.sendEmptyMessage(MSG_PROCESS_RESTARTED);
+        }
+
+        @Override
+        public void onOpenFile(String filename, AndroidFuture future) throws RemoteException {
+            throw new UnsupportedOperationException("Hotword cannot access files from the disk.");
         }
     }
 

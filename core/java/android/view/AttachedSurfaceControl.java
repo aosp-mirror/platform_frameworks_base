@@ -23,6 +23,9 @@ import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.window.SurfaceSyncGroup;
 
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+
 /**
  * Provides an interface to the root-Surface of a View Hierarchy or Window. This
  * is used in combination with the {@link android.view.SurfaceControl} API to enable
@@ -166,5 +169,41 @@ public interface AttachedSurfaceControl {
      * @throws IllegalArgumentException If negative insets are provided.
      */
     default void setChildBoundingInsets(@NonNull Rect insets) {
+    }
+
+    /**
+     * Add a trusted presentation listener on the SurfaceControl associated with this window.
+     *
+     * @param t          Transaction that the trusted presentation listener is added on. This should
+     *                   be applied by the caller.
+     * @param thresholds The {@link SurfaceControl.TrustedPresentationThresholds} that will specify
+     *                   when the to invoke the callback.
+     * @param executor   The {@link Executor} where the callback will be invoked on.
+     * @param listener   The {@link Consumer} that will receive the callbacks when entered or
+     *                   exited the threshold.
+     *
+     * @see SurfaceControl.Transaction#setTrustedPresentationCallback(SurfaceControl,
+     * SurfaceControl.TrustedPresentationThresholds, Executor, Consumer)
+     *
+     * @hide b/287076178 un-hide with API bump
+     */
+    default void addTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.TrustedPresentationThresholds thresholds,
+            @NonNull Executor executor, @NonNull Consumer<Boolean> listener) {
+    }
+
+    /**
+     * Remove a trusted presentation listener on the SurfaceControl associated with this window.
+     *
+     * @param t          Transaction that the trusted presentation listener removed on. This should
+     *                   be applied by the caller.
+     * @param listener   The {@link Consumer} that was previously registered with
+     *                   addTrustedPresentationCallback that should be removed.
+     *
+     * @see SurfaceControl.Transaction#clearTrustedPresentationCallback(SurfaceControl)
+     * @hide b/287076178 un-hide with API bump
+     */
+    default void removeTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
+            @NonNull Consumer<Boolean> listener) {
     }
 }

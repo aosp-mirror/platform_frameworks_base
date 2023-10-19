@@ -24,8 +24,6 @@ import androidx.lifecycle.Observer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -59,8 +57,6 @@ import org.mockito.MockitoAnnotations
 class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var featureFlags: FeatureFlags
-    @Mock
     private lateinit var userTracker: UserTracker
     @Mock
     private lateinit var ringerModeTracker: RingerModeTracker
@@ -78,8 +74,6 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        whenever(featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)).thenReturn(true)
-
         val config: KeyguardQuickAffordanceConfig = mock()
         whenever(config.key).thenReturn(BuiltInKeyguardQuickAffordanceKeys.MUTE)
 
@@ -90,7 +84,6 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
         testScope = TestScope(testDispatcher)
 
         underTest = MuteQuickAffordanceCoreStartable(
-            featureFlags,
             userTracker,
             ringerModeTracker,
             userFileManager,
@@ -101,20 +94,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun featureFlagIsOFF_doNothingWithKeyguardQuickAffordanceRepository() = testScope.runTest {
-        //given
-        whenever(featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)).thenReturn(false)
-
-        //when
-        underTest.start()
-
-        //then
-        verifyZeroInteractions(keyguardQuickAffordanceRepository)
-        coroutineContext.cancelChildren()
-    }
-
-    @Test
-    fun featureFlagIsON_callToKeyguardQuickAffordanceRepository() = testScope.runTest {
+    fun callToKeyguardQuickAffordanceRepository() = testScope.runTest {
         //given
         val ringerModeInternal = mock<MutableLiveData<Int>>()
         whenever(ringerModeTracker.ringerModeInternal).thenReturn(ringerModeInternal)

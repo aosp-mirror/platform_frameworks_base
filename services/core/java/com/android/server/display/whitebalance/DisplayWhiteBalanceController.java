@@ -37,8 +37,11 @@ import java.util.Objects;
  * - Uses the AmbientColorTemperatureSensor to detect changes in the ambient color temperature;
  * - Uses the AmbientColorTemperatureFilter to average these changes over time, filter out the
  *   noise, and arrive at an estimate of the actual ambient color temperature;
- * - Uses the DisplayWhiteBalanceThrottler to decide whether the display color tempearture should
+ * - Uses the DisplayWhiteBalanceThrottler to decide whether the display color temperature should
  *   be updated, suppressing changes that are too frequent or too minor.
+ *
+ *   Calls to this class must happen on the DisplayPowerController(2) handler, to ensure
+ *   values do not get out of sync.
  */
 public class DisplayWhiteBalanceController implements
         AmbientSensor.AmbientBrightnessSensor.Callbacks,

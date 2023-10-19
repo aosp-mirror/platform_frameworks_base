@@ -108,7 +108,7 @@ class AppListRepositoryTest {
 
         val appList = repository.loadApps(
             userId = ADMIN_USER_ID,
-            showInstantApps = false,
+            loadInstantApps = false,
         )
 
         assertThat(appList).containsExactly(NORMAL_APP)
@@ -120,7 +120,7 @@ class AppListRepositoryTest {
 
         val appList = repository.loadApps(
             userId = ADMIN_USER_ID,
-            showInstantApps = true,
+            loadInstantApps = true,
         )
 
         assertThat(appList).containsExactly(NORMAL_APP, INSTANT_APP)
@@ -323,6 +323,21 @@ class AppListRepositoryTest {
         )
 
         assertThat(systemPackageNames).containsExactly(SYSTEM_APP.packageName)
+    }
+
+    @Test
+    fun loadAndFilterApps_loadNonSystemApp_returnExpectedValues() = runTest {
+        mockInstalledApplications(
+            apps = listOf(
+                NORMAL_APP, INSTANT_APP, SYSTEM_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP
+            ),
+            userId = ADMIN_USER_ID,
+        )
+
+        val appList = repository.loadAndFilterApps(userId = ADMIN_USER_ID, isSystemApp = false)
+
+        assertThat(appList)
+            .containsExactly(NORMAL_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP)
     }
 
     private suspend fun getShowSystemPredicate(showSystem: Boolean) =

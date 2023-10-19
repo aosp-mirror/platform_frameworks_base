@@ -17,9 +17,11 @@
 package com.android.keyguard
 
 import android.testing.AndroidTestingRunner
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.keyguard.LockIconView.ICON_LOCK
 import com.android.systemui.doze.util.getBurnInOffset
+import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
@@ -115,6 +117,33 @@ class LockIconViewControllerWithCoroutinesTest : LockIconViewControllerBaseTest(
             // THEN the view is updated to NO translation (no burn-in offsets anymore)
             verify(mLockIconView).setTranslationY(0f)
             verify(mLockIconView).setTranslationX(0f)
+        }
+
+    @Test
+    fun testHideLockIconView_onLockscreenHostedDreamStateChanged() =
+        runBlocking(IMMEDIATE) {
+            // GIVEN starting state for the lock icon (keyguard) and wallpaper dream enabled
+            mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, true)
+            setupShowLockIcon()
+            init(/* useMigrationFlag= */ true)
+            reset(mLockIconView)
+
+            // WHEN dream starts
+            mUnderTest.mIsActiveDreamLockscreenHostedCallback.accept(
+                true /* isActiveDreamLockscreenHosted */
+            )
+
+            // THEN the lock icon is hidden
+            verify(mLockIconView).visibility = View.INVISIBLE
+            reset(mLockIconView)
+
+            // WHEN the device is no longer dreaming
+            mUnderTest.mIsActiveDreamLockscreenHostedCallback.accept(
+                false /* isActiveDreamLockscreenHosted */
+            )
+
+            // THEN lock icon is visible
+            verify(mLockIconView).visibility = View.VISIBLE
         }
 
     companion object {

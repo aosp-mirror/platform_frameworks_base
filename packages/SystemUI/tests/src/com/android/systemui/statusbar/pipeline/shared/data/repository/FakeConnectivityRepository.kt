@@ -27,12 +27,51 @@ class FakeConnectivityRepository : ConnectivityRepository {
         MutableStateFlow(emptySet())
     override val forceHiddenSlots: StateFlow<Set<ConnectivitySlot>> = _forceHiddenIcons
 
-    override val defaultConnections: StateFlow<DefaultConnectionModel> =
+    override val defaultConnections: MutableStateFlow<DefaultConnectionModel> =
         MutableStateFlow(DefaultConnectionModel())
 
     override val vcnSubId: MutableStateFlow<Int?> = MutableStateFlow(null)
 
     fun setForceHiddenIcons(hiddenIcons: Set<ConnectivitySlot>) {
         _forceHiddenIcons.value = hiddenIcons
+    }
+
+    /**
+     * Convenience for setting mobile data connected, disconnected, or validated. Defaults to
+     * setting mobile connected && validated, since the default state is disconnected && not
+     * validated
+     */
+    fun setMobileConnected(
+        default: Boolean = true,
+        validated: Boolean = true,
+    ) {
+        defaultConnections.value =
+            DefaultConnectionModel(
+                mobile = DefaultConnectionModel.Mobile(default),
+                isValidated = validated,
+            )
+    }
+
+    /** Similar convenience method for ethernet */
+    fun setEthernetConnected(
+        default: Boolean = true,
+        validated: Boolean = true,
+    ) {
+        defaultConnections.value =
+            DefaultConnectionModel(
+                ethernet = DefaultConnectionModel.Ethernet(default),
+                isValidated = validated,
+            )
+    }
+
+    fun setWifiConnected(
+        default: Boolean = true,
+        validated: Boolean = true,
+    ) {
+        defaultConnections.value =
+            DefaultConnectionModel(
+                wifi = DefaultConnectionModel.Wifi(default),
+                isValidated = validated,
+            )
     }
 }

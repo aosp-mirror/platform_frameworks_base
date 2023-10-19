@@ -18,7 +18,12 @@
       "name": "CtsCompilationTestCases"
     },
     {
-      "name": "CtsAppEnumerationTestCases"
+      "name": "CtsAppEnumerationTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        }
+      ]
     },
     {
       "name": "CtsMatchFlagTestCases"
@@ -90,7 +95,7 @@
       ]
     }
   ],
-  "presubmit-large": [
+  "postsubmit": [
     {
       "name": "CtsContentTestCases",
       "options": [
@@ -104,9 +109,7 @@
           "include-filter": "android.content.pm.cts"
         }
       ]
-    }
-  ],
-  "postsubmit": [
+    },
     {
       "name": "CtsPermissionTestCases",
       "options": [
@@ -120,6 +123,9 @@
     },
     {
       "name": "PackageManagerServiceHostTests"
+    },
+    {
+      "name": "CtsAppEnumerationTestCases"
     }
   ],
   "imports": [

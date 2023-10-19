@@ -81,7 +81,7 @@ class WallpaperCropper {
         if (DEBUG) {
             Slog.v(TAG, "Generating crop for new wallpaper(s): 0x"
                     + Integer.toHexString(wallpaper.mWhich)
-                    + " to " + wallpaper.cropFile.getName()
+                    + " to " + wallpaper.getCropFile().getName()
                     + " crop=(" + cropHint.width() + 'x' + cropHint.height()
                     + ") dim=(" + wpData.mWidth + 'x' + wpData.mHeight + ')');
         }
@@ -89,7 +89,7 @@ class WallpaperCropper {
         // Analyse the source; needed in multiple cases
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(wallpaper.wallpaperFile.getAbsolutePath(), options);
+        BitmapFactory.decodeFile(wallpaper.getWallpaperFile().getAbsolutePath(), options);
         if (options.outWidth <= 0 || options.outHeight <= 0) {
             Slog.w(TAG, "Invalid wallpaper data");
             success = false;
@@ -154,11 +154,10 @@ class WallpaperCropper {
                 //  may be we can try to remove this optimized way in the future,
                 //  that means, we will always go into the 'else' block.
 
-                success = FileUtils.copyFile(wallpaper.wallpaperFile, wallpaper.cropFile);
+                success = FileUtils.copyFile(wallpaper.getWallpaperFile(), wallpaper.getCropFile());
 
                 if (!success) {
-                    wallpaper.cropFile.delete();
-                    // TODO: fall back to default wallpaper in this case
+                    wallpaper.getCropFile().delete();
                 }
 
                 if (DEBUG) {
@@ -226,7 +225,7 @@ class WallpaperCropper {
 
                     //Create a record file and will delete if ImageDecoder work well.
                     final String recordName =
-                            (wallpaper.wallpaperFile.getName().equals(WALLPAPER)
+                            (wallpaper.getWallpaperFile().getName().equals(WALLPAPER)
                                     ? RECORD_FILE : RECORD_LOCK_FILE);
                     final File record = new File(getWallpaperDir(wallpaper.userId), recordName);
                     record.createNewFile();
@@ -234,7 +233,7 @@ class WallpaperCropper {
                             + ", record name =" + record.getName());
 
                     final ImageDecoder.Source srcData =
-                            ImageDecoder.createSource(wallpaper.wallpaperFile);
+                            ImageDecoder.createSource(wallpaper.getWallpaperFile());
                     final int sampleSize = scale;
                     Bitmap cropped = ImageDecoder.decodeBitmap(srcData, (decoder, info, src) -> {
                         decoder.setTargetSampleSize(sampleSize);
@@ -257,7 +256,7 @@ class WallpaperCropper {
                                     + " h=" + finalCrop.getHeight());
                         }
 
-                        f = new FileOutputStream(wallpaper.cropFile);
+                        f = new FileOutputStream(wallpaper.getCropFile());
                         bos = new BufferedOutputStream(f, 32 * 1024);
                         finalCrop.compress(Bitmap.CompressFormat.PNG, 100, bos);
                         // don't rely on the implicit flush-at-close when noting success
@@ -277,11 +276,11 @@ class WallpaperCropper {
 
         if (!success) {
             Slog.e(TAG, "Unable to apply new wallpaper");
-            wallpaper.cropFile.delete();
+            wallpaper.getCropFile().delete();
         }
 
-        if (wallpaper.cropFile.exists()) {
-            boolean didRestorecon = SELinux.restorecon(wallpaper.cropFile.getAbsoluteFile());
+        if (wallpaper.getCropFile().exists()) {
+            boolean didRestorecon = SELinux.restorecon(wallpaper.getCropFile().getAbsoluteFile());
             if (DEBUG) {
                 Slog.v(TAG, "restorecon() of crop file returned " + didRestorecon);
             }

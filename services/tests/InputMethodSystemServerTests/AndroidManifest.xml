@@ -17,7 +17,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.frameworks.inputmethodtests">
 
-    <uses-sdk android:targetSdkVersion="31" />
     <queries>
         <intent>
             <action android:name="android.view.InputMethod" />

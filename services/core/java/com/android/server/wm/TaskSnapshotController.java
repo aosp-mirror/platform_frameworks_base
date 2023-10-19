@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.SnapshotController.TASK_CLOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -77,13 +76,6 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         setSnapshotEnabled(snapshotEnabled);
     }
 
-    void systemReady() {
-        if (!shouldDisableSnapshots()) {
-            mService.mSnapshotController.registerTransitionStateConsumer(TASK_CLOSE,
-                    this::handleTaskClose);
-        }
-    }
-
     static PersistInfoProvider createPersistInfoProvider(WindowManagerService service,
             BaseAppSnapshotPersister.DirectoryResolver resolver) {
         final float highResTaskSnapshotScale = service.mContext.getResources().getFloat(
@@ -116,20 +108,23 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
                 enableLowResSnapshots, lowResScaleFactor, use16BitFormat);
     }
 
-    void handleTaskClose(SnapshotController.TransitionState<Task> closeTaskTransitionRecord) {
+    // Still needed for legacy transition.(AppTransitionControllerTest)
+    void handleClosingApps(ArraySet<ActivityRecord> closingApps) {
         if (shouldDisableSnapshots()) {
             return;
         }
+        // We need to take a snapshot of the task if and only if all activities of the task are
+        // either closing or hidden.
         mTmpTasks.clear();
-        final ArraySet<Task> tasks = closeTaskTransitionRecord.getParticipant(false /* open */);
-        if (mService.mAtmService.getTransitionController().isShellTransitionsEnabled()) {
-            mTmpTasks.addAll(tasks);
-        } else {
-            for (Task task : tasks) {
-                getClosingTasksInner(task, mTmpTasks);
-            }
+        for (int i = closingApps.size() - 1; i >= 0; i--) {
+            final ActivityRecord activity = closingApps.valueAt(i);
+            final Task task = activity.getTask();
+            if (task == null) continue;
+
+            getClosingTasksInner(task, mTmpTasks);
         }
         snapshotTasks(mTmpTasks);
+        mTmpTasks.clear();
         mSkipClosingAppSnapshotTasks.clear();
     }
 

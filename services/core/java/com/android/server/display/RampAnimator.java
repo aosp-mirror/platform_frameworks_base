@@ -31,7 +31,12 @@ class RampAnimator<T> {
     private final FloatProperty<T> mProperty;
 
     private float mCurrentValue;
-    private float mTargetValue;
+
+    // target in HLG space
+    private float mTargetHlgValue;
+
+    // target in linear space
+    private float mTargetLinearValue;
     private float mRate;
     private float mAnimationIncreaseMaxTimeSecs;
     private float mAnimationDecreaseMaxTimeSecs;
@@ -78,7 +83,8 @@ class RampAnimator<T> {
             if (mFirstTime || target != mCurrentValue) {
                 mFirstTime = false;
                 mRate = 0;
-                mTargetValue = target;
+                mTargetHlgValue = target;
+                mTargetLinearValue = targetLinear;
                 mCurrentValue = target;
                 setPropertyValue(target);
                 mAnimating = false;
@@ -105,13 +111,14 @@ class RampAnimator<T> {
         // Otherwise, continue at the previous rate.
         if (!mAnimating
                 || rate > mRate
-                || (target <= mCurrentValue && mCurrentValue <= mTargetValue)
-                || (mTargetValue <= mCurrentValue && mCurrentValue <= target)) {
+                || (target <= mCurrentValue && mCurrentValue <= mTargetHlgValue)
+                || (mTargetHlgValue <= mCurrentValue && mCurrentValue <= target)) {
             mRate = rate;
         }
 
-        final boolean changed = (mTargetValue != target);
-        mTargetValue = target;
+        final boolean changed = (mTargetHlgValue != target);
+        mTargetHlgValue = target;
+        mTargetLinearValue = targetLinear;
 
         // Start animating.
         if (!mAnimating && target != mCurrentValue) {
@@ -135,7 +142,11 @@ class RampAnimator<T> {
      * into linear space.
      */
     private void setPropertyValue(float val) {
-        final float linearVal = BrightnessUtils.convertGammaToLinear(val);
+        // To avoid linearVal inconsistency when converting to HLG and back to linear space
+        // used original target linear value for final animation step
+        float linearVal =
+                val == mTargetHlgValue ? mTargetLinearValue : BrightnessUtils.convertGammaToLinear(
+                        val);
         mProperty.setValue(mObject, linearVal);
     }
 
@@ -150,13 +161,13 @@ class RampAnimator<T> {
         final float scale = ValueAnimator.getDurationScale();
         if (scale == 0) {
             // Animation off.
-            mAnimatedValue = mTargetValue;
+            mAnimatedValue = mTargetHlgValue;
         } else {
             final float amount = timeDelta * mRate / scale;
-            if (mTargetValue > mCurrentValue) {
-                mAnimatedValue = Math.min(mAnimatedValue + amount, mTargetValue);
+            if (mTargetHlgValue > mCurrentValue) {
+                mAnimatedValue = Math.min(mAnimatedValue + amount, mTargetHlgValue);
             } else {
-                mAnimatedValue = Math.max(mAnimatedValue - amount, mTargetValue);
+                mAnimatedValue = Math.max(mAnimatedValue - amount, mTargetHlgValue);
             }
         }
         final float oldCurrentValue = mCurrentValue;
@@ -164,7 +175,7 @@ class RampAnimator<T> {
         if (oldCurrentValue != mCurrentValue) {
             setPropertyValue(mCurrentValue);
         }
-        if (mTargetValue == mCurrentValue) {
+        if (mTargetHlgValue == mCurrentValue) {
             mAnimating = false;
         }
     }

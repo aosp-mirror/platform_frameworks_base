@@ -983,8 +983,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
 
         if (virtualDisplayWrapper == null) {
-            throw new IllegalStateException(
-                    "Virtual device doesn't have a virtual display with ID " + displayId);
+            Slog.w(TAG, "Virtual device " + mDeviceId + " doesn't have a virtual display with ID "
+                    + displayId);
+            return;
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -1094,8 +1095,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     void onEnteringPipBlocked(int uid) {
-        showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_pip_blocked,
-                Toast.LENGTH_LONG, mContext.getMainLooper());
+        // Do nothing. ActivityRecord#checkEnterPictureInPictureState logs that the display does not
+        // support PiP.
     }
 
     void playSoundEffect(int effectType) {

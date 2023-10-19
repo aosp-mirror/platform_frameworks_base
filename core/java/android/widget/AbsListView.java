@@ -4703,7 +4703,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
-        if (mFastScroll != null) {
+        if (mFastScroll != null && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             PointerIcon pointerIcon = mFastScroll.onResolvePointerIcon(event, pointerIndex);
             if (pointerIcon != null) {
                 return pointerIcon;

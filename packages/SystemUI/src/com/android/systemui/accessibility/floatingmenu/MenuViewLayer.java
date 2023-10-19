@@ -61,7 +61,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.wm.shell.bubbles.DismissView;
+import com.android.wm.shell.bubbles.DismissViewUtils;
+import com.android.wm.shell.common.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import java.lang.annotation.Retention;
@@ -184,6 +185,7 @@ class MenuViewLayer extends FrameLayout implements
         mMenuAnimationController.setDismissCallback(this::hideMenuAndShowMessage);
         mMenuAnimationController.setSpringAnimationsEndAction(this::onSpringAnimationsEndAction);
         mDismissView = new DismissView(context);
+        DismissViewUtils.setup(mDismissView);
         mDismissAnimationController = new DismissAnimationController(mDismissView, mMenuView);
         mDismissAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override

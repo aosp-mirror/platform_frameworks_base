@@ -51,11 +51,11 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.modules.expresslog.Counter;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.anr.AnrLatencyTracker;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Counter;
 import com.android.server.ResourcePressureUtil;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
@@ -297,6 +297,7 @@ class ProcessErrorStateRecord {
 
         ArrayList<Integer> firstPids = new ArrayList<>(5);
         SparseBooleanArray lastPids = new SparseBooleanArray(20);
+        ActivityManagerService.VolatileDropboxEntryStates volatileDropboxEntriyStates = null;
 
         mApp.getWindowProcessController().appEarlyNotResponding(annotation, () -> {
             latencyTracker.waitingOnAMSLockStarted();
@@ -341,6 +342,9 @@ class ProcessErrorStateRecord {
             synchronized (mProcLock) {
                 latencyTracker.waitingOnProcLockEnded();
                 setNotResponding(true);
+                volatileDropboxEntriyStates =
+                        ActivityManagerService.VolatileDropboxEntryStates
+                                .withProcessFrozenState(mApp.mOptRecord.isFrozen());
             }
 
             // Log the ANR to the event log.
@@ -456,6 +460,11 @@ class ProcessErrorStateRecord {
         String currentPsiState = ResourcePressureUtil.currentPsiState();
         latencyTracker.currentPsiStateReturned();
         report.append(currentPsiState);
+        // The 'processCpuTracker' variable is a shared resource that might be initialized and
+        // updated in a different thread. In order to prevent thread visibility issues, which
+        // can occur when one thread does not immediately see the changes made to
+        // 'processCpuTracker' by another thread, it is necessary to use synchronization whenever
+        // 'processCpuTracker' is accessed or modified.
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
         // We push the native pids collection task to the helper thread through
@@ -517,12 +526,16 @@ class ProcessErrorStateRecord {
             }
             mService.updateCpuStatsNow();
             mService.mAppProfiler.printCurrentCpuState(report, anrTime);
-            info.append(processCpuTracker.printCurrentLoad());
+            synchronized (processCpuTracker) {
+                info.append(processCpuTracker.printCurrentLoad());
+            }
             info.append(report);
         }
         report.append(tracesFileException.getBuffer());
 
-        info.append(processCpuTracker.printCurrentState(anrTime));
+        synchronized (processCpuTracker) {
+            info.append(processCpuTracker.printCurrentState(anrTime));
+        }
 
         Slog.e(TAG, info.toString());
         if (tracesFile == null) {
@@ -609,7 +622,8 @@ class ProcessErrorStateRecord {
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", mApp, mApp.processName, activityShortComponentName,
                 parentShortComponentName, parentPr, null, report.toString(), tracesFile,
-                null, new Float(loadingProgress), incrementalMetrics, errorId);
+                null, new Float(loadingProgress), incrementalMetrics, errorId,
+                volatileDropboxEntriyStates);
 
         if (mApp.getWindowProcessController().appNotResponding(info.toString(),
                 () -> {

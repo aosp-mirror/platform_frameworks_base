@@ -38,6 +38,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
@@ -935,7 +936,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
-        if (getPointerIcon() == null && isClickable() && isEnabled()) {
+        if (getPointerIcon() == null && isClickable() && isEnabled()
+                && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
         }
         return super.onResolvePointerIcon(event, pointerIndex);

@@ -2,7 +2,8 @@ package com.android.systemui.biometrics.domain.interactor
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.unfold.updates.FoldProvider
@@ -34,7 +35,7 @@ class DisplayStateInteractorImplTest : SysuiTestCase() {
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope(StandardTestDispatcher())
-    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val displayStateRepository = FakeDisplayStateRepository()
 
     @Mock private lateinit var screenSizeFoldProvider: ScreenSizeFoldProvider
     private lateinit var interactor: DisplayStateInteractorImpl
@@ -46,7 +47,7 @@ class DisplayStateInteractorImplTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mContext,
                 fakeExecutor,
-                rearDisplayStateRepository
+                displayStateRepository
             )
         interactor.setScreenSizeFoldProvider(screenSizeFoldProvider)
     }
@@ -56,11 +57,23 @@ class DisplayStateInteractorImplTest : SysuiTestCase() {
         testScope.runTest {
             val isInRearDisplayMode = collectLastValue(interactor.isInRearDisplayMode)
 
-            rearDisplayStateRepository.setIsInRearDisplayMode(false)
+            displayStateRepository.setIsInRearDisplayMode(false)
             assertThat(isInRearDisplayMode()).isFalse()
 
-            rearDisplayStateRepository.setIsInRearDisplayMode(true)
+            displayStateRepository.setIsInRearDisplayMode(true)
             assertThat(isInRearDisplayMode()).isTrue()
+        }
+
+    @Test
+    fun currentRotationChanges() =
+        testScope.runTest {
+            val currentRotation = collectLastValue(interactor.currentRotation)
+
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+            assertThat(currentRotation()).isEqualTo(DisplayRotation.ROTATION_180)
+
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+            assertThat(currentRotation()).isEqualTo(DisplayRotation.ROTATION_90)
         }
 
     @Test

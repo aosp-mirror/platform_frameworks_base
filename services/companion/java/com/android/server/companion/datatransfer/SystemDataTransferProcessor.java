@@ -20,10 +20,10 @@ import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME;
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE;
 import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.Utils.prepareForIpc;
-import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PERMISSION_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -38,6 +38,7 @@ import android.companion.datatransfer.SystemDataTransferRequest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,6 +51,7 @@ import android.util.Slog;
 
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionDeviceManagerService;
+import com.android.server.companion.PackageUtils;
 import com.android.server.companion.PermissionsUtils;
 import com.android.server.companion.transport.CompanionTransportManager;
 
@@ -80,6 +82,7 @@ public class SystemDataTransferProcessor {
                     ".CompanionDeviceDataTransferActivity");
 
     private final Context mContext;
+    private final PackageManagerInternal mPackageManager;
     private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private final CompanionTransportManager mTransportManager;
@@ -87,10 +90,12 @@ public class SystemDataTransferProcessor {
     private final ExecutorService mExecutor;
 
     public SystemDataTransferProcessor(CompanionDeviceManagerService service,
+            PackageManagerInternal packageManager,
             AssociationStore associationStore,
             SystemDataTransferRequestStore systemDataTransferRequestStore,
             CompanionTransportManager transportManager) {
         mContext = service.getContext();
+        mPackageManager = packageManager;
         mAssociationStore = associationStore;
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
         mTransportManager = transportManager;
@@ -131,6 +136,18 @@ public class SystemDataTransferProcessor {
      */
     public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
             @UserIdInt int userId, int associationId) {
+        if (PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName)) {
+            Slog.i(LOG_TAG, "User consent Intent should be skipped. Returning null.");
+            // Auto enable perm sync for the allowlisted packages, but don't override user decision
+            PermissionSyncRequest request = getPermissionSyncRequest(associationId);
+            if (request == null) {
+                PermissionSyncRequest newRequest = new PermissionSyncRequest(associationId);
+                newRequest.setUserConsented(true);
+                mSystemDataTransferRequestStore.writeRequest(userId, newRequest);
+            }
+            return null;
+        }
+
         final AssociationInfo association = resolveAssociation(packageName, userId, associationId);
 
         Slog.i(LOG_TAG, "Creating permission sync intent for userId [" + userId
@@ -174,22 +191,16 @@ public class SystemDataTransferProcessor {
         final AssociationInfo association = resolveAssociation(packageName, userId, associationId);
 
         // Check if the request has been consented by the user.
-        List<SystemDataTransferRequest> storedRequests =
-                mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
-                        associationId);
-        boolean hasConsented = false;
-        for (SystemDataTransferRequest storedRequest : storedRequests) {
-            if (storedRequest instanceof PermissionSyncRequest && storedRequest.isUserConsented()) {
-                hasConsented = true;
-                break;
-            }
-        }
-        if (!hasConsented) {
-            String message = "User " + userId + " hasn't consented permission sync.";
+        PermissionSyncRequest request = getPermissionSyncRequest(associationId);
+        if (request == null || !request.isUserConsented()) {
+            String message =
+                    "User " + userId + " hasn't consented permission sync for associationId ["
+                            + associationId + ".";
             Slog.e(LOG_TAG, message);
             try {
                 callback.onError(message);
-            } catch (RemoteException ignored) { }
+            } catch (RemoteException ignored) {
+            }
             return;
         }
 
@@ -206,6 +217,66 @@ public class SystemDataTransferProcessor {
         } finally {
             Binder.restoreCallingIdentity(callingIdentityToken);
         }
+    }
+
+    /**
+     * Enable perm sync for the association
+     */
+    public void enablePermissionsSync(int associationId) {
+        final long callingIdentityToken = Binder.clearCallingIdentity();
+        try {
+            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+            PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+            request.setUserConsented(true);
+            mSystemDataTransferRequestStore.writeRequest(userId, request);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentityToken);
+        }
+    }
+
+    /**
+     * Disable perm sync for the association
+     */
+    public void disablePermissionsSync(int associationId) {
+        final long callingIdentityToken = Binder.clearCallingIdentity();
+        try {
+            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+            PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+            request.setUserConsented(false);
+            mSystemDataTransferRequestStore.writeRequest(userId, request);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentityToken);
+        }
+    }
+
+    /**
+     * Get perm sync request for the association.
+     */
+    @Nullable
+    public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
+        final long callingIdentityToken = Binder.clearCallingIdentity();
+        try {
+            int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+            List<SystemDataTransferRequest> requests =
+                    mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
+                            associationId);
+            for (SystemDataTransferRequest request : requests) {
+                if (request instanceof PermissionSyncRequest) {
+                    return (PermissionSyncRequest) request;
+                }
+            }
+            return null;
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentityToken);
+        }
+    }
+
+    /**
+     * Remove perm sync request for the association.
+     */
+    public void removePermissionSyncRequest(int associationId) {
+        int userId = mAssociationStore.getAssociationById(associationId).getUserId();
+        mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, associationId);
     }
 
     private void onReceivePermissionRestore(byte[] message) {

@@ -44,7 +44,7 @@ final class DisplayRotationImmersiveAppCompatPolicy {
             @NonNull final DisplayRotation displayRotation,
             @NonNull final DisplayContent displayContent) {
         if (!letterboxConfiguration
-                .isDisplayRotationImmersiveAppCompatPolicyEnabled(/* checkDeviceConfig */ false)) {
+                .isDisplayRotationImmersiveAppCompatPolicyEnabledAtBuildTime()) {
             return null;
         }
 
@@ -87,8 +87,7 @@ final class DisplayRotationImmersiveAppCompatPolicy {
      * @return {@code true}, if there is a need to lock screen rotation, {@code false} otherwise.
      */
     boolean isRotationLockEnforced(@Surface.Rotation final int proposedRotation) {
-        if (!mLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled(
-                /* checkDeviceConfig */ true)) {
+        if (!mLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled()) {
             return false;
         }
         synchronized (mDisplayContent.mWmService.mGlobalLock) {

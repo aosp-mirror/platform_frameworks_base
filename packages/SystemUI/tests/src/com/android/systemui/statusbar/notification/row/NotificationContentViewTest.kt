@@ -250,6 +250,9 @@ class NotificationContentViewTest : SysuiTestCase() {
             .thenReturn(actionListMarginTarget)
         view.setContainingNotification(mockContainingNotification)
 
+        // Given: controller says bubbles are enabled for the user
+        view.setBubblesEnabledForUser(true);
+
         // When: call NotificationContentView.setExpandedChild() to set the expandedChild
         view.expandedChild = mockExpandedChild
 
@@ -304,6 +307,12 @@ class NotificationContentViewTest : SysuiTestCase() {
         // When: call NotificationContentView.onNotificationUpdated() to update the
         // NotificationEntry, which should show bubble button
         view.onNotificationUpdated(createMockNotificationEntry(true))
+
+        // Then: no bubble yet
+        assertEquals(notificationContentMargin, getMarginBottom(actionListMarginTarget))
+
+        // Given: controller says bubbles are enabled for the user
+        view.setBubblesEnabledForUser(true);
 
         // Then: bottom margin of actionListMarginTarget should not change, still be 20
         assertEquals(0, getMarginBottom(actionListMarginTarget))
@@ -405,7 +414,6 @@ class NotificationContentViewTest : SysuiTestCase() {
             val userMock: UserHandle = mock()
             whenever(this.sbn).thenReturn(sbnMock)
             whenever(sbnMock.user).thenReturn(userMock)
-            doReturn(showButton).whenever(view).shouldShowBubbleButton(this)
         }
 
     private fun createLinearLayoutWithBottomMargin(bottomMargin: Int): LinearLayout {

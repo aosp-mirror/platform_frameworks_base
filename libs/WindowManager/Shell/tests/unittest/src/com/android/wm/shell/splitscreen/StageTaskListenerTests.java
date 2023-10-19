@@ -43,6 +43,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +52,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 /**
  * Tests for {@link StageTaskListener}
@@ -71,6 +74,8 @@ public final class StageTaskListenerTests extends ShellTestCase {
     private SyncTransactionQueue mSyncQueue;
     @Mock
     private IconProvider mIconProvider;
+    @Mock
+    private WindowDecorViewModel mWindowDecorViewModel;
     @Captor
     private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
     private SurfaceSession mSurfaceSession = new SurfaceSession();
@@ -89,7 +94,8 @@ public final class StageTaskListenerTests extends ShellTestCase {
                 mCallbacks,
                 mSyncQueue,
                 mSurfaceSession,
-                mIconProvider);
+                mIconProvider,
+                Optional.of(mWindowDecorViewModel));
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
         mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
@@ -155,7 +161,7 @@ public final class StageTaskListenerTests extends ShellTestCase {
         childTask.supportsMultiWindow = false;
 
         mStageTaskListener.onTaskInfoChanged(childTask);
-        verify(mCallbacks).onNoLongerSupportMultiWindow();
+        verify(mCallbacks).onNoLongerSupportMultiWindow(childTask);
     }
 
     @Test

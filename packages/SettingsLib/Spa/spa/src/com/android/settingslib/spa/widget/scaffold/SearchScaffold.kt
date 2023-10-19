@@ -18,6 +18,7 @@ package com.android.settingslib.spa.widget.scaffold
 
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.R
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -96,7 +97,8 @@ fun SearchScaffold(
             Modifier
                 .padding(paddingValues.horizontalValues())
                 .padding(top = paddingValues.calculateTopPadding())
-                .fillMaxSize(),
+                .focusable()
+                .fillMaxSize()
         ) {
             content(
                 bottomPadding = paddingValues.calculateBottomPadding(),
@@ -163,7 +165,6 @@ private fun SearchTopAppBar(
     BackHandler { onClose() }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
     val focusRequester = remember { FocusRequester() }
@@ -186,8 +187,9 @@ private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> 
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { hideKeyboardAction() }),
         singleLine = true,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.Transparent,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         ),

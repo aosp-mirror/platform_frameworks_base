@@ -22,8 +22,6 @@ import android.os.LocaleList
 import android.view.View.LAYOUT_DIRECTION_RTL
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.policy.ConfigurationController
-
-import java.util.ArrayList
 import javax.inject.Inject
 
 @SysUISingleton
@@ -40,6 +38,7 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
     private var localeList: LocaleList? = null
     private val context: Context
     private var layoutDirection: Int
+    private var orientation = Configuration.ORIENTATION_UNDEFINED
 
     init {
         val currentConfig = context.resources.configuration
@@ -134,7 +133,17 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
                 it.onThemeChanged()
             }
         }
+
+        val newOrientation = newConfig.orientation
+        if (orientation != newOrientation) {
+            orientation = newOrientation
+            listeners.filterForEach({ this.listeners.contains(it) }) {
+                it.onOrientationChanged(orientation)
+            }
+        }
     }
+
+
 
     override fun addCallback(listener: ConfigurationController.ConfigurationListener) {
         listeners.add(listener)

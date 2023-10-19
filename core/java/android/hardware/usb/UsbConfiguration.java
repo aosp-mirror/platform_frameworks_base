@@ -172,7 +172,8 @@ public class UsbConfiguration implements Parcelable {
             String name = in.readString();
             int attributes = in.readInt();
             int maxPower = in.readInt();
-            Parcelable[] interfaces = in.readParcelableArray(UsbInterface.class.getClassLoader());
+            Parcelable[] interfaces = in.readParcelableArray(
+                    UsbInterface.class.getClassLoader(), UsbInterface.class);
             UsbConfiguration configuration = new UsbConfiguration(id, name, attributes, maxPower);
             configuration.setInterfaces(interfaces);
             return configuration;

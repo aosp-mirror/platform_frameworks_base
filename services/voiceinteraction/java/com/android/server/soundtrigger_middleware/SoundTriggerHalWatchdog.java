@@ -23,7 +23,7 @@ import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.SoundModel;
 import android.os.IBinder;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.Objects;
 
@@ -172,7 +172,7 @@ public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
 
         Watchdog() {
             mTask = mTimer.createTask(() -> {
-                Log.e(TAG, "HAL deadline expired. Rebooting.", mException);
+                Slog.e(TAG, "HAL deadline expired. Rebooting.", mException);
                 reboot();
             }, TIMEOUT_MS);
         }

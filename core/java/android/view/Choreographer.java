@@ -1155,9 +1155,15 @@ public final class Choreographer {
         }
 
         private void allocateFrameTimelines(int length) {
-            mFrameTimelines = new FrameTimeline[length];
-            for (int i = 0; i < mFrameTimelines.length; i++) {
-                mFrameTimelines[i] = new FrameTimeline();
+            // Maintain one default frame timeline for API (such as getFrameTimelines and
+            // getPreferredFrameTimeline) consistency. It should have default data when accessed.
+            length = Math.max(1, length);
+
+            if (mFrameTimelines == null || mFrameTimelines.length != length) {
+                mFrameTimelines = new FrameTimeline[length];
+                for (int i = 0; i < mFrameTimelines.length; i++) {
+                    mFrameTimelines[i] = new FrameTimeline();
+                }
             }
         }
 
@@ -1167,13 +1173,7 @@ public final class Choreographer {
          */
         FrameTimeline update(
                 long frameTimeNanos, DisplayEventReceiver.VsyncEventData vsyncEventData) {
-            if (vsyncEventData.frameTimelinesLength == 0) {
-                throw new IllegalArgumentException(
-                        "Vsync event timelines length must be greater than 0");
-            }
-            if (mFrameTimelines.length != vsyncEventData.frameTimelinesLength) {
-                allocateFrameTimelines(vsyncEventData.frameTimelinesLength);
-            }
+            allocateFrameTimelines(vsyncEventData.frameTimelinesLength);
             mFrameTimeNanos = frameTimeNanos;
             mPreferredFrameTimelineIndex = vsyncEventData.preferredFrameTimelineIndex;
             for (int i = 0; i < mFrameTimelines.length; i++) {
@@ -1207,7 +1207,11 @@ public final class Choreographer {
             if (newPreferredDeadline < minimumDeadline) {
                 DisplayEventReceiver.VsyncEventData latestVsyncEventData =
                         displayEventReceiver.getLatestVsyncEventData();
-                update(frameTimeNanos, latestVsyncEventData);
+                if (latestVsyncEventData == null) {
+                    Log.w(TAG, "Could not get latest VsyncEventData. Did SurfaceFlinger crash?");
+                } else {
+                    update(frameTimeNanos, latestVsyncEventData);
+                }
             } else {
                 update(frameTimeNanos, newPreferredIndex);
             }

@@ -187,4 +187,11 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         when(mFalsingDataProvider.isUnfolded()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
     }
+
+    @Test
+    public void testTrackpadGesture() {
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        when(mFalsingDataProvider.isFromTrackpad()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
+    }
 }

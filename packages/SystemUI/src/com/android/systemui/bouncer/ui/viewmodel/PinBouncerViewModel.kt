@@ -16,21 +16,21 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
-import androidx.annotation.VisibleForTesting
+import android.content.Context
+import com.android.keyguard.PinShapeAdapter
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
-import com.android.systemui.util.kotlin.pairwise
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the PIN code bouncer UI. */
 class PinBouncerViewModel(
+    applicationContext: Context,
     private val applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
@@ -39,21 +39,49 @@ class PinBouncerViewModel(
         isInputEnabled = isInputEnabled,
     ) {
 
-    private val entered = MutableStateFlow<List<Int>>(emptyList())
-    /**
-     * The length of the PIN digits that were input so far, two values are supplied the previous and
-     * the current.
-     */
-    val pinLengths: StateFlow<Pair<Int, Int>> =
-        entered
-            .pairwise()
-            .map { it.previousValue.size to it.newValue.size }
+    val pinShapes = PinShapeAdapter(applicationContext)
+    private val mutablePinInput = MutableStateFlow(PinInputViewModel.empty())
+
+    /** Currently entered pin keys. */
+    val pinInput: StateFlow<PinInputViewModel> = mutablePinInput
+
+    /** The length of the PIN for which we should show a hint. */
+    val hintedPinLength: StateFlow<Int?> = interactor.hintedPinLength
+
+    /** Appearance of the backspace button. */
+    val backspaceButtonAppearance: StateFlow<ActionButtonAppearance> =
+        combine(
+                mutablePinInput,
+                interactor.isAutoConfirmEnabled,
+            ) { mutablePinEntries, isAutoConfirmEnabled ->
+                computeBackspaceButtonAppearance(
+                    pinInput = mutablePinEntries,
+                    isAutoConfirmEnabled = isAutoConfirmEnabled,
+                )
+            }
             .stateIn(
                 scope = applicationScope,
+                // Make sure this is kept as WhileSubscribed or we can run into a bug where the
+                // downstream continues to receive old/stale/cached values.
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = 0 to 0,
+                initialValue = ActionButtonAppearance.Hidden,
             )
-    private var resetPinJob: Job? = null
+
+    /** Appearance of the confirm button. */
+    val confirmButtonAppearance: StateFlow<ActionButtonAppearance> =
+        interactor.isAutoConfirmEnabled
+            .map {
+                if (it) {
+                    ActionButtonAppearance.Hidden
+                } else {
+                    ActionButtonAppearance.Shown
+                }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = ActionButtonAppearance.Hidden,
+            )
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
@@ -62,47 +90,66 @@ class PinBouncerViewModel(
 
     /** Notifies that the user clicked on a PIN button with the given digit value. */
     fun onPinButtonClicked(input: Int) {
-        resetPinJob?.cancel()
-        resetPinJob = null
-
-        if (entered.value.isEmpty()) {
+        val pinInput = mutablePinInput.value
+        if (pinInput.isEmpty()) {
             interactor.clearMessage()
         }
 
-        entered.value += input
+        mutablePinInput.value = pinInput.append(input)
+        tryAuthenticate(useAutoConfirm = true)
     }
 
     /** Notifies that the user clicked the backspace button. */
     fun onBackspaceButtonClicked() {
-        if (entered.value.isEmpty()) {
-            return
-        }
-
-        entered.value = entered.value.toMutableList().apply { removeLast() }
+        mutablePinInput.value = mutablePinInput.value.deleteLast()
     }
 
     /** Notifies that the user long-pressed the backspace button. */
     fun onBackspaceButtonLongPressed() {
-        resetPinJob?.cancel()
-        resetPinJob =
-            applicationScope.launch {
-                while (entered.value.isNotEmpty()) {
-                    onBackspaceButtonClicked()
-                    delay(BACKSPACE_LONG_PRESS_DELAY_MS)
-                }
-            }
+        mutablePinInput.value = mutablePinInput.value.clearAll()
     }
 
     /** Notifies that the user clicked the "enter" button. */
     fun onAuthenticateButtonClicked() {
-        if (!interactor.authenticate(entered.value)) {
-            showFailureAnimation()
+        tryAuthenticate(useAutoConfirm = false)
+    }
+
+    private fun tryAuthenticate(useAutoConfirm: Boolean) {
+        val pinCode = mutablePinInput.value.getPin()
+
+        applicationScope.launch {
+            val isSuccess = interactor.authenticate(pinCode, useAutoConfirm) ?: return@launch
+
+            if (!isSuccess) {
+                showFailureAnimation()
+            }
+
+            // TODO(b/291528545): this should not be cleared on success (at least until the view
+            // is animated away).
+            mutablePinInput.value = mutablePinInput.value.clearAll()
         }
-
-        entered.value = emptyList()
     }
 
-    companion object {
-        @VisibleForTesting const val BACKSPACE_LONG_PRESS_DELAY_MS = 80L
+    private fun computeBackspaceButtonAppearance(
+        pinInput: PinInputViewModel,
+        isAutoConfirmEnabled: Boolean,
+    ): ActionButtonAppearance {
+        val isEmpty = pinInput.isEmpty()
+
+        return when {
+            isAutoConfirmEnabled && isEmpty -> ActionButtonAppearance.Hidden
+            isAutoConfirmEnabled -> ActionButtonAppearance.Subtle
+            else -> ActionButtonAppearance.Shown
+        }
     }
+}
+
+/** Appearance of pin-pad action buttons. */
+enum class ActionButtonAppearance {
+    /** Button must not be shown. */
+    Hidden,
+    /** Button is shown, but with no background to make it less prominent. */
+    Subtle,
+    /** Button is shown. */
+    Shown,
 }

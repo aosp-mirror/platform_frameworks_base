@@ -75,6 +75,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private HeadsUpManagerPhone mHeadsUpManager;
     private View mOperatorNameView;
     private StatusBarStateController mStatusbarStateController;
+    private PhoneStatusBarTransitions mPhoneStatusBarTransitions;
     private KeyguardBypassController mBypassController;
     private NotificationWakeUpCoordinator mWakeUpCoordinator;
     private KeyguardStateController mKeyguardStateController;
@@ -95,6 +96,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mHeadsUpManager = mock(HeadsUpManagerPhone.class);
         mOperatorNameView = new View(mContext);
         mStatusbarStateController = mock(StatusBarStateController.class);
+        mPhoneStatusBarTransitions = mock(PhoneStatusBarTransitions.class);
         mBypassController = mock(KeyguardBypassController.class);
         mWakeUpCoordinator = mock(NotificationWakeUpCoordinator.class);
         mKeyguardStateController = mock(KeyguardStateController.class);
@@ -105,6 +107,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
                 mStatusbarStateController,
+                mPhoneStatusBarTransitions,
                 mBypassController,
                 mWakeUpCoordinator,
                 mDarkIconDispatcher,
@@ -188,6 +191,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
                 mStatusbarStateController,
+                mPhoneStatusBarTransitions,
                 mBypassController,
                 mWakeUpCoordinator,
                 mDarkIconDispatcher,
@@ -282,5 +286,19 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 /* actual = */ mRow.getTopRoundness(),
                 /* delta = */ 0.001
         );
+    }
+
+    @Test
+    public void onHeadsUpStateChanged_true_transitionsNotified() {
+        mHeadsUpAppearanceController.onHeadsUpStateChanged(mEntry, true);
+
+        verify(mPhoneStatusBarTransitions).onHeadsUpStateChanged(true);
+    }
+
+    @Test
+    public void onHeadsUpStateChanged_false_transitionsNotified() {
+        mHeadsUpAppearanceController.onHeadsUpStateChanged(mEntry, false);
+
+        verify(mPhoneStatusBarTransitions).onHeadsUpStateChanged(false);
     }
 }

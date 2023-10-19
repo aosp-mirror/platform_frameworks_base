@@ -43,6 +43,7 @@ import com.android.systemui.R;
  */
 public class DraggableConstraintLayout extends ConstraintLayout
         implements ViewTreeObserver.OnComputeInternalInsetsListener {
+    public static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
 
     private static final float VELOCITY_DP_PER_MS = 1;
     private static final int MAXIMUM_DISMISS_DISTANCE_DP = 400;
@@ -179,8 +180,13 @@ public class DraggableConstraintLayout extends ConstraintLayout
         Region r = new Region();
         Rect rect = new Rect();
         for (int i = 0; i < getChildCount(); i++) {
-            getChildAt(i).getGlobalVisibleRect(rect);
-            r.op(rect, Region.Op.UNION);
+            View child = getChildAt(i);
+            if (child.getVisibility() == View.VISIBLE) {
+                child.getGlobalVisibleRect(rect);
+                rect.inset((int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
+                        (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP));
+                r.op(rect, Region.Op.UNION);
+            }
         }
         inoutInfo.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
         inoutInfo.touchableRegion.set(r);

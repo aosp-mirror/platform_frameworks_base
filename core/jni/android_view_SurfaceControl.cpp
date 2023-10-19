@@ -257,6 +257,14 @@ static struct {
     jmethodID onTrustedPresentationChanged;
 } gTrustedPresentationCallbackClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+    jfieldID layerName;
+    jfieldID bufferId;
+    jfieldID frameNumber;
+} gStalledTransactionInfoClassInfo;
+
 constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
     switch (colorMode) {
         case ui::ColorMode::DISPLAY_P3:
@@ -2032,6 +2040,29 @@ static jlong getNativeTrustedPresentationCallbackFinalizer(JNIEnv* env, jclass c
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyNativeTpc));
 }
 
+static jobject nativeGetStalledTransactionInfo(JNIEnv* env, jclass clazz, jint pid) {
+    std::optional<gui::StalledTransactionInfo> stalledTransactionInfo =
+            SurfaceComposerClient::getStalledTransactionInfo(pid);
+    if (!stalledTransactionInfo) {
+        return nullptr;
+    }
+
+    jobject jStalledTransactionInfo = env->NewObject(gStalledTransactionInfoClassInfo.clazz,
+                                                     gStalledTransactionInfoClassInfo.ctor);
+    if (!jStalledTransactionInfo) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+
+    env->SetObjectField(jStalledTransactionInfo, gStalledTransactionInfoClassInfo.layerName,
+                        env->NewStringUTF(String8{stalledTransactionInfo->layerName}));
+    env->SetLongField(jStalledTransactionInfo, gStalledTransactionInfoClassInfo.bufferId,
+                      static_cast<jlong>(stalledTransactionInfo->bufferId));
+    env->SetLongField(jStalledTransactionInfo, gStalledTransactionInfoClassInfo.frameNumber,
+                      static_cast<jlong>(stalledTransactionInfo->frameNumber));
+    return jStalledTransactionInfo;
+}
+
 // ----------------------------------------------------------------------------
 
 SurfaceControl* android_view_SurfaceControl_getNativeSurfaceControl(JNIEnv* env,
@@ -2281,6 +2312,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeCreateTpc", "(Landroid/view/SurfaceControl$TrustedPresentationCallback;)J",
             (void*)nativeCreateTpc},
     {"getNativeTrustedPresentationCallbackFinalizer", "()J", (void*)getNativeTrustedPresentationCallbackFinalizer },
+    {"nativeGetStalledTransactionInfo", "(I)Landroid/gui/StalledTransactionInfo;",
+            (void*) nativeGetStalledTransactionInfo },
         // clang-format on
 };
 
@@ -2524,6 +2557,18 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gTrustedPresentationCallbackClassInfo.onTrustedPresentationChanged =
             GetMethodIDOrDie(env, trustedPresentationCallbackClazz, "onTrustedPresentationChanged",
                              "(Z)V");
+
+    jclass stalledTransactionInfoClazz = FindClassOrDie(env, "android/gui/StalledTransactionInfo");
+    gStalledTransactionInfoClassInfo.clazz = MakeGlobalRefOrDie(env, stalledTransactionInfoClazz);
+    gStalledTransactionInfoClassInfo.ctor =
+            GetMethodIDOrDie(env, stalledTransactionInfoClazz, "<init>", "()V");
+    gStalledTransactionInfoClassInfo.layerName =
+            GetFieldIDOrDie(env, stalledTransactionInfoClazz, "layerName", "Ljava/lang/String;");
+    gStalledTransactionInfoClassInfo.bufferId =
+            GetFieldIDOrDie(env, stalledTransactionInfoClazz, "bufferId", "J");
+    gStalledTransactionInfoClassInfo.frameNumber =
+            GetFieldIDOrDie(env, stalledTransactionInfoClazz, "frameNumber", "J");
+
     return err;
 }
 

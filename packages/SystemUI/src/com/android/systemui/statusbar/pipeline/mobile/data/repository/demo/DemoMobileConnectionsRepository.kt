@@ -92,9 +92,12 @@ constructor(
 
     private fun maybeCreateSubscription(subId: Int) {
         if (!subscriptionInfoCache.containsKey(subId)) {
-            SubscriptionModel(subscriptionId = subId, isOpportunistic = false).also {
-                subscriptionInfoCache[subId] = it
-            }
+            SubscriptionModel(
+                    subscriptionId = subId,
+                    isOpportunistic = false,
+                    carrierName = DEFAULT_CARRIER_NAME,
+                )
+                .also { subscriptionInfoCache[subId] = it }
 
             _subscriptions.value = subscriptionInfoCache.values.toList()
         }
@@ -327,6 +330,7 @@ constructor(
         private const val TAG = "DemoMobileConnectionsRepo"
 
         private const val DEFAULT_SUB_ID = 1
+        private const val DEFAULT_CARRIER_NAME = "demo carrier"
     }
 }
 

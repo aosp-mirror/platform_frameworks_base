@@ -15,7 +15,6 @@
   ~ limitations under the License.
   -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
        android:insetTop="@dimen/dialog_button_vertical_inset"
        android:insetBottom="@dimen/dialog_button_vertical_inset">
     <ripple android:color="?android:attr/colorControlHighlight">
@@ -28,7 +27,7 @@
         <item>
             <shape android:shape="rectangle">
                 <corners android:radius="?android:attr/buttonCornerRadius"/>
-                <solid android:color="?androidprv:attr/colorAccentPrimary"/>
+                <solid android:color="@color/qs_dialog_btn_filled_background"/>
                 <padding android:left="@dimen/dialog_button_horizontal_padding"
                          android:top="@dimen/dialog_button_vertical_padding"
                          android:right="@dimen/dialog_button_horizontal_padding"

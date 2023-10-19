@@ -3699,14 +3699,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             if (foregroundActivities) {
                 try {
                     int prcState = mIam.getUidProcessState(uid, "android");
-                    ProcessRecord topApp = mInternal.getTopApp();
-                    if (topApp == null) {
-                        mPw.println("No top app found");
+
+                    if (prcState == ProcessStateEnum.TOP) {
+                        mPw.println("New foreground process: " + pid);
                     } else {
-                        int topPid = topApp.getPid();
-                        if (prcState == ProcessStateEnum.TOP && topPid == pid) {
-                            mPw.println("New foreground process: " + pid);
-                        }
+                        mPw.println("No top app found");
                     }
                     mPw.flush();
                 } catch (RemoteException e) {

@@ -21,11 +21,12 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.entireScreenCovered
@@ -68,15 +69,13 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class EnterPipToOtherOrientation(flicker: FlickerTest) : PipTransition(flicker) {
+open class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     private val testApp = FixedOrientationAppHelper(instrumentation)
     private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
 
     override val thisTransition: FlickerBuilder.() -> Unit = {
-        teardown {
-            testApp.exit(wmHelper)
-        }
+        teardown { testApp.exit(wmHelper) }
         transitions {
             // Enter PiP, and assert that the PiP is within bounds now that the device is back
             // in portrait
@@ -95,14 +94,13 @@ open class EnterPipToOtherOrientation(flicker: FlickerTest) : PipTransition(flic
         setup {
             // Launch a portrait only app on the fullscreen stack
             testApp.launchViaIntent(
-                    wmHelper,
-                    stringExtras = mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_PORTRAIT.toString())
+                wmHelper,
+                stringExtras = mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_PORTRAIT.toString())
             )
             // Launch the PiP activity fixed as landscape, but don't enter PiP
             pipApp.launchViaIntent(
-                    wmHelper,
-                    stringExtras =
-                    mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString())
+                wmHelper,
+                stringExtras = mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString())
             )
         }
     }
@@ -207,13 +205,13 @@ open class EnterPipToOtherOrientation(flicker: FlickerTest) : PipTransition(flic
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
          * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+            return LegacyFlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }

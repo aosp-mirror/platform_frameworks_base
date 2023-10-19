@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.AccessPointControllerImpl;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.NetworkControllerImpl;
+import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
@@ -165,7 +166,7 @@ public interface StatusBarPolicyModule {
             UserManager userManager,
             UserTracker userTracker,
             @Main Executor mainExecutor,
-            AccessPointControllerImpl.WifiPickerTrackerFactory wifiPickerTrackerFactory
+            WifiPickerTrackerFactory wifiPickerTrackerFactory
     ) {
         AccessPointControllerImpl controller = new AccessPointControllerImpl(
                 userManager,

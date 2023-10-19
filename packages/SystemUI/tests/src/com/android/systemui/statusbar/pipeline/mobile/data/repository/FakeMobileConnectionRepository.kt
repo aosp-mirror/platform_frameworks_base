@@ -52,10 +52,41 @@ class FakeMobileConnectionRepository(
 
     override val cdmaRoaming = MutableStateFlow(false)
 
-    override val networkName =
-        MutableStateFlow<NetworkNameModel>(NetworkNameModel.Default("default"))
+    override val networkName: MutableStateFlow<NetworkNameModel> =
+        MutableStateFlow(NetworkNameModel.Default(DEFAULT_NETWORK_NAME))
+
+    override val carrierName: MutableStateFlow<NetworkNameModel> =
+        MutableStateFlow(NetworkNameModel.Default(DEFAULT_NETWORK_NAME))
+
+    override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
 
     fun setDataEnabled(enabled: Boolean) {
         _dataEnabled.value = enabled
+    }
+
+    /**
+     * Set [primaryLevel] and [cdmaLevel]. Convenient when you don't care about the connection type
+     */
+    fun setAllLevels(level: Int) {
+        cdmaLevel.value = level
+        primaryLevel.value = level
+    }
+
+    /**
+     * Set both [isRoaming] and [cdmaRoaming] properties, in the event that you don't care about the
+     * connection type
+     */
+    fun setAllRoaming(roaming: Boolean) {
+        isRoaming.value = roaming
+        cdmaRoaming.value = roaming
+    }
+
+    /** Set the correct [resolvedNetworkType] for the given group via its lookup key */
+    fun setNetworkTypeKey(key: String) {
+        resolvedNetworkType.value = ResolvedNetworkType.DefaultNetworkType(key)
+    }
+
+    companion object {
+        const val DEFAULT_NETWORK_NAME = "default name"
     }
 }

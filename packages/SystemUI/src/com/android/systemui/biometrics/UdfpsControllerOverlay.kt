@@ -46,15 +46,19 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.settingslib.udfps.UdfpsUtils
 import com.android.settingslib.udfps.UdfpsOverlayParams
+import com.android.settingslib.udfps.UdfpsUtils
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.biometrics.ui.controller.UdfpsKeyguardViewController
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.flags.Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS
+import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
+import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -64,6 +68,8 @@ import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.settings.SecureSettings
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import javax.inject.Provider
 
 private const val TAG = "UdfpsControllerOverlay"
 
@@ -75,6 +81,7 @@ const val SETTING_REMOVE_ENROLLMENT_UI = "udfps_overlay_remove_enrollment_ui"
  * request. This state can persist across configuration changes via the [show] and [hide]
  * methods.
  */
+@ExperimentalCoroutinesApi
 @UiThread
 class UdfpsControllerOverlay @JvmOverloads constructor(
         private val context: Context,
@@ -103,7 +110,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val primaryBouncerInteractor: PrimaryBouncerInteractor,
         private val alternateBouncerInteractor: AlternateBouncerInteractor,
         private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
-        private val udfpsUtils: UdfpsUtils
+        private val udfpsUtils: UdfpsUtils,
+        private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
+        private val udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>,
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -242,26 +251,40 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 )
             }
             REASON_AUTH_KEYGUARD -> {
-                UdfpsKeyguardViewControllerLegacy(
-                    view.addUdfpsView(R.layout.udfps_keyguard_view_legacy) {
-                        updateSensorLocation(sensorBounds)
-                    },
-                    statusBarStateController,
-                    shadeExpansionStateManager,
-                    statusBarKeyguardViewManager,
-                    keyguardUpdateMonitor,
-                    dumpManager,
-                    transitionController,
-                    configurationController,
-                    keyguardStateController,
-                    unlockedScreenOffAnimationController,
-                    dialogManager,
-                    controller,
-                    activityLaunchAnimator,
-                    featureFlags,
-                    primaryBouncerInteractor,
-                    alternateBouncerInteractor,
-                )
+                if (featureFlags.isEnabled(REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+                    udfpsKeyguardViewModels.get().setSensorBounds(sensorBounds)
+                    UdfpsKeyguardViewController(
+                        view.addUdfpsView(R.layout.udfps_keyguard_view),
+                        statusBarStateController,
+                        shadeExpansionStateManager,
+                        dialogManager,
+                        dumpManager,
+                        alternateBouncerInteractor,
+                        udfpsKeyguardViewModels.get(),
+                    )
+                } else {
+                    UdfpsKeyguardViewControllerLegacy(
+                        view.addUdfpsView(R.layout.udfps_keyguard_view_legacy) {
+                            updateSensorLocation(sensorBounds)
+                        },
+                        statusBarStateController,
+                        shadeExpansionStateManager,
+                        statusBarKeyguardViewManager,
+                        keyguardUpdateMonitor,
+                        dumpManager,
+                        transitionController,
+                        configurationController,
+                        keyguardStateController,
+                        unlockedScreenOffAnimationController,
+                        dialogManager,
+                        controller,
+                        activityLaunchAnimator,
+                        featureFlags,
+                        primaryBouncerInteractor,
+                        alternateBouncerInteractor,
+                        udfpsKeyguardAccessibilityDelegate,
+                    )
+                }
             }
             REASON_AUTH_BP -> {
                 // note: empty controller, currently shows no visual affordance
@@ -413,7 +436,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     }
 
     private fun shouldRotate(animation: UdfpsAnimationViewController<*>?): Boolean {
-        if (animation !is UdfpsKeyguardViewControllerLegacy) {
+        if (animation !is UdfpsKeyguardViewControllerAdapter) {
             // always rotate view if we're not on the keyguard
             return true
         }

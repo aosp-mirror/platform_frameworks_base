@@ -35,10 +35,9 @@ import javax.inject.Named;
  * Module for all components with corresponding dream layer complications registered in
  * {@link SystemUIBinder}.
  */
-@Module(includes = {
-                DreamClockTimeComplicationModule.class,
-        },
+@Module(
         subcomponents = {
+                DreamClockTimeComplicationComponent.class,
                 DreamHomeControlsComplicationComponent.class,
                 DreamMediaEntryComplicationComponent.class
         })

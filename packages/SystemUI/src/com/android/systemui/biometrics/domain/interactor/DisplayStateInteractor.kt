@@ -18,7 +18,8 @@ package com.android.systemui.biometrics.domain.interactor
 
 import android.content.Context
 import android.content.res.Configuration
-import com.android.systemui.biometrics.data.repository.RearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.DisplayStateRepository
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
@@ -43,6 +44,9 @@ interface DisplayStateInteractor {
     /** Whether the device is currently folded. */
     val isFolded: Flow<Boolean>
 
+    /** Current rotation of the display */
+    val currentRotation: StateFlow<DisplayRotation>
+
     /** Called on configuration changes, used to keep the display state in sync */
     fun onConfigurationChanged(newConfig: Configuration)
 }
@@ -54,7 +58,7 @@ constructor(
     @Application applicationScope: CoroutineScope,
     @Application context: Context,
     @Main mainExecutor: Executor,
-    rearDisplayStateRepository: RearDisplayStateRepository,
+    displayStateRepository: DisplayStateRepository,
 ) : DisplayStateInteractor {
     private var screenSizeFoldProvider: ScreenSizeFoldProvider = ScreenSizeFoldProvider(context)
 
@@ -90,7 +94,10 @@ constructor(
             )
 
     override val isInRearDisplayMode: StateFlow<Boolean> =
-        rearDisplayStateRepository.isInRearDisplayMode
+        displayStateRepository.isInRearDisplayMode
+
+    override val currentRotation: StateFlow<DisplayRotation> =
+        displayStateRepository.currentRotation
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         screenSizeFoldProvider.onConfigurationChange(newConfig)

@@ -78,16 +78,8 @@ constructor(
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
         return when {
-            !controller.isAvailableOnDevice ->
+            !isEnabledForPickerStateOption() ->
                 KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
-            !controller.isAbleToOpenCameraApp -> {
-                KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
-                    explanation =
-                        context.getString(
-                            R.string.qr_scanner_quick_affordance_unavailable_explanation
-                        ),
-                )
-            }
             else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default()
         }
     }
@@ -116,6 +108,11 @@ constructor(
         } else {
             KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         }
+    }
+
+    /** Returns whether QR scanner be shown as one of available lockscreen shortcut option. */
+    private fun isEnabledForPickerStateOption(): Boolean {
+        return controller.isAbleToLaunchScannerActivity && controller.isAllowedOnLockScreen
     }
 
     companion object {

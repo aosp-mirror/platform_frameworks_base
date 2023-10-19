@@ -496,7 +496,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private void loadDisplayDeviceConfig() {
             // Load display device config
             final Context context = getOverlayContext();
-            mDisplayDeviceConfig = DisplayDeviceConfig.create(context, mPhysicalDisplayId,
+            mDisplayDeviceConfig = mInjector.createDisplayDeviceConfig(context, mPhysicalDisplayId,
                     mIsFirstDisplay);
 
             // Load brightness HWC quirk
@@ -701,11 +701,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         maxDisplayMode == null ? mInfo.width : maxDisplayMode.getPhysicalWidth();
                 final int maxHeight =
                         maxDisplayMode == null ? mInfo.height : maxDisplayMode.getPhysicalHeight();
-                mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
-                        mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
 
-                mInfo.roundedCorners = RoundedCorners.fromResources(
-                        res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
+                // We cannot determine cutouts and rounded corners of external displays.
+                if (mStaticDisplayInfo.isInternal) {
+                    mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
+                            mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
+                    mInfo.roundedCorners = RoundedCorners.fromResources(
+                            res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
+                }
+
                 mInfo.installOrientation = mStaticDisplayInfo.installOrientation;
 
                 mInfo.displayShape = DisplayShape.fromResources(
@@ -1331,6 +1335,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
         public SurfaceControlProxy getSurfaceControlProxy() {
             return new SurfaceControlProxy();
+        }
+
+        public DisplayDeviceConfig createDisplayDeviceConfig(Context context,
+                long physicalDisplayId, boolean isFirstDisplay) {
+            return DisplayDeviceConfig.create(context, physicalDisplayId, isFirstDisplay);
         }
     }
 

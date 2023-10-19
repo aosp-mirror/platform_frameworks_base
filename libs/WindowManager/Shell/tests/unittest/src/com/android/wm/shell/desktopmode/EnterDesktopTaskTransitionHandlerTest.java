@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
@@ -41,6 +42,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.MoveToDesktopAnimator;
 
 import junit.framework.AssertionFailedError;
 
@@ -73,6 +75,10 @@ public class EnterDesktopTaskTransitionHandlerTest {
     ShellExecutor mExecutor;
     @Mock
     SurfaceControl mSurfaceControl;
+    @Mock
+    MoveToDesktopAnimator mMoveToDesktopAnimator;
+    @Mock
+    PointF mPosition;
 
     private EnterDesktopTaskTransitionHandler mEnterDesktopTaskTransitionHandler;
 
@@ -82,6 +88,7 @@ public class EnterDesktopTaskTransitionHandlerTest {
 
         doReturn(mExecutor).when(mTransitions).getMainExecutor();
         doReturn(mAnimationT).when(mTransactionFactory).get();
+        doReturn(mPosition).when(mMoveToDesktopAnimator).getPosition();
 
         mEnterDesktopTaskTransitionHandler = new EnterDesktopTaskTransitionHandler(mTransitions,
                 mTransactionFactory);
@@ -89,16 +96,20 @@ public class EnterDesktopTaskTransitionHandlerTest {
 
     @Test
     public void testEnterFreeformAnimation() {
-        final int transitionType = Transitions.TRANSIT_ENTER_FREEFORM;
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
-                .startTransition(transitionType, wct, mEnterDesktopTaskTransitionHandler);
-        mEnterDesktopTaskTransitionHandler.startTransition(transitionType, wct, null);
+                .startTransition(Transitions.TRANSIT_START_DRAG_TO_DESKTOP_MODE, wct,
+                        mEnterDesktopTaskTransitionHandler);
+        doReturn(taskId).when(mMoveToDesktopAnimator).getTaskId();
+
+        mEnterDesktopTaskTransitionHandler.startMoveToDesktop(wct,
+                mMoveToDesktopAnimator, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
-        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_ENTER_FREEFORM, change);
+        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_START_DRAG_TO_DESKTOP_MODE,
+                change);
 
 
         assertTrue(mEnterDesktopTaskTransitionHandler
@@ -110,17 +121,18 @@ public class EnterDesktopTaskTransitionHandlerTest {
 
     @Test
     public void testTransitEnterDesktopModeAnimation() throws Throwable {
-        final int transitionType = Transitions.TRANSIT_ENTER_DESKTOP_MODE;
+        final int transitionType = Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE;
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
                 .startTransition(transitionType, wct, mEnterDesktopTaskTransitionHandler);
-        mEnterDesktopTaskTransitionHandler.startTransition(transitionType, wct, null);
+        mEnterDesktopTaskTransitionHandler.finalizeMoveToDesktop(wct, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
         change.setEndAbsBounds(new Rect(0, 0, 1, 1));
-        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_ENTER_DESKTOP_MODE, change);
+        TransitionInfo info = createTransitionInfo(
+                Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE, change);
 
         runOnUiThread(() -> {
             try {

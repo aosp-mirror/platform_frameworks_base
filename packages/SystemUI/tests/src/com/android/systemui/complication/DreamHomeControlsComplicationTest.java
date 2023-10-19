@@ -234,9 +234,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
         verify(mHomeControlsView).setOnClickListener(clickListenerCaptor.capture());
 
         clickListenerCaptor.getValue().onClick(mHomeControlsView);
-        verify(mUiEventLogger).log(
-                DreamHomeControlsComplication.DreamHomeControlsChipViewController
-                        .DreamOverlayEvent.DREAM_HOME_CONTROLS_TAPPED);
+        verify(mUiEventLogger).log(DreamOverlayUiEvent.DREAM_HOME_CONTROLS_TAPPED);
     }
 
     private void setHaveFavorites(boolean value) {

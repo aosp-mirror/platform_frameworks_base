@@ -16,8 +16,9 @@
 
 package com.android.systemui.log
 
+import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.bouncer.shared.model.BouncerMessageModel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.BouncerLog
 import javax.inject.Inject
 

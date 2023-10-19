@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
@@ -83,11 +82,7 @@ constructor(
     }
 
     override fun shouldAddDefaultComponent(): Boolean =
-        if (featureFlags.isEnabled(Flags.APP_PANELS_REMOVE_APPS_ALLOWED)) {
-            sharedPreferences.getBoolean(SHOULD_ADD_DEFAULT_PANEL, true)
-        } else {
-            true
-        }
+        sharedPreferences.getBoolean(SHOULD_ADD_DEFAULT_PANEL, true)
 
     override fun setShouldAddDefaultComponent(shouldAdd: Boolean) {
         sharedPreferences.edit().putBoolean(SHOULD_ADD_DEFAULT_PANEL, shouldAdd).apply()

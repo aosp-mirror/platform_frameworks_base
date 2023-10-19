@@ -27,3 +27,15 @@ enum class FingerprintSensorType {
     POWER_BUTTON,
     HOME_BUTTON,
 }
+
+/** Convert [this] to corresponding [FingerprintSensorType] */
+fun Int.toSensorType(): FingerprintSensorType =
+    when (this) {
+        FingerprintSensorProperties.TYPE_UNKNOWN -> FingerprintSensorType.UNKNOWN
+        FingerprintSensorProperties.TYPE_REAR -> FingerprintSensorType.REAR
+        FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC -> FingerprintSensorType.UDFPS_ULTRASONIC
+        FingerprintSensorProperties.TYPE_UDFPS_OPTICAL -> FingerprintSensorType.UDFPS_OPTICAL
+        FingerprintSensorProperties.TYPE_POWER_BUTTON -> FingerprintSensorType.POWER_BUTTON
+        FingerprintSensorProperties.TYPE_HOME_BUTTON -> FingerprintSensorType.HOME_BUTTON
+        else -> throw IllegalArgumentException("Invalid SensorType value: $this")
+    }

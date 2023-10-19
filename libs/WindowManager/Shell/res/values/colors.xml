@@ -30,6 +30,9 @@
     <color name="bubbles_light">#FFFFFF</color>
     <color name="bubbles_dark">@color/GM2_grey_800</color>
     <color name="bubbles_icon_tint">@color/GM2_grey_700</color>
+    <color name="bubble_bar_expanded_view_handle_light">#EBffffff</color>
+    <color name="bubble_bar_expanded_view_handle_dark">#99000000</color>
+    <color name="bubble_bar_expanded_view_menu_close">#DC362E</color>
 
     <!-- PiP -->
     <color name="pip_custom_close_bg">#D93025</color>
@@ -61,6 +64,8 @@
     <color name="desktop_mode_caption_expand_button_dark">#48473A</color>
     <color name="desktop_mode_caption_close_button_light">#EFF1F2</color>
     <color name="desktop_mode_caption_close_button_dark">#1C1C17</color>
+    <color name="desktop_mode_caption_maximize_button_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_maximize_button_dark">#1C1C17</color>
     <color name="desktop_mode_caption_app_name_light">#EFF1F2</color>
     <color name="desktop_mode_caption_app_name_dark">#1C1C17</color>
     <color name="desktop_mode_caption_menu_text_color">#191C1D</color>

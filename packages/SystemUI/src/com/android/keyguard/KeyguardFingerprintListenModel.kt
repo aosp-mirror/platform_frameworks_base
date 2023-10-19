@@ -27,6 +27,7 @@ data class KeyguardFingerprintListenModel(
     override var userId: Int = 0,
     override var listening: Boolean = false,
     // keepSorted
+    var allowOnCurrentOccludingActivity: Boolean = false,
     var alternateBouncerShowing: Boolean = false,
     var biometricEnabledForUser: Boolean = false,
     var bouncerIsOrWillShow: Boolean = false,
@@ -58,6 +59,7 @@ data class KeyguardFingerprintListenModel(
             userId.toString(),
             listening.toString(),
             // keep sorted
+            allowOnCurrentOccludingActivity.toString(),
             alternateBouncerShowing.toString(),
             biometricEnabledForUser.toString(),
             bouncerIsOrWillShow.toString(),
@@ -98,6 +100,7 @@ data class KeyguardFingerprintListenModel(
                 userId = model.userId
                 listening = model.listening
                 // keep sorted
+                allowOnCurrentOccludingActivity = model.allowOnCurrentOccludingActivity
                 alternateBouncerShowing = model.alternateBouncerShowing
                 biometricEnabledForUser = model.biometricEnabledForUser
                 bouncerIsOrWillShow = model.bouncerIsOrWillShow
@@ -144,6 +147,7 @@ data class KeyguardFingerprintListenModel(
                 "userId",
                 "listening",
                 // keep sorted
+                "allowOnCurrentOccludingActivity",
                 "alternateBouncerShowing",
                 "biometricAllowedForUser",
                 "bouncerIsOrWillShow",

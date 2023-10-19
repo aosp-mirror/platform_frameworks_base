@@ -25,8 +25,8 @@ import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerBuilderProvider
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import androidx.test.filters.RequiresDevice
@@ -54,7 +54,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OverrideTaskTransitionTest(val flicker: FlickerTest) {
+class OverrideTaskTransitionTest(val flicker: LegacyFlickerTest) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = SimpleAppHelper(instrumentation)
@@ -121,8 +121,6 @@ class OverrideTaskTransitionTest(val flicker: FlickerTest) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests()
-        }
+        fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
     }
 }

@@ -20,6 +20,7 @@ import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.shade.carrier.ShadeCarrierGroup
 import javax.inject.Inject
 
 /** All flagging methods related to the new status bar pipeline (see b/238425913). */
@@ -33,36 +34,12 @@ constructor(
     private val mobileSlot = context.getString(com.android.internal.R.string.status_bar_mobile)
     private val wifiSlot = context.getString(com.android.internal.R.string.status_bar_wifi)
 
-    /** True if we should display the mobile icons using the new status bar data pipeline. */
-    fun useNewMobileIcons(): Boolean = featureFlags.isEnabled(Flags.NEW_STATUS_BAR_MOBILE_ICONS)
-
     /**
-     * True if we should run the new mobile icons backend to get the logging.
-     *
-     * Does *not* affect whether we render the mobile icons using the new backend data. See
-     * [useNewMobileIcons] for that.
+     * True if we should display the mobile icons in the [ShadeCarrierGroup] using the new status
+     * bar Data pipeline.
      */
-    fun runNewMobileIconsBackend(): Boolean =
-        featureFlags.isEnabled(Flags.NEW_STATUS_BAR_MOBILE_ICONS_BACKEND) || useNewMobileIcons()
-
-    /** True if we should display the wifi icon using the new status bar data pipeline. */
-    fun useNewWifiIcon(): Boolean = featureFlags.isEnabled(Flags.NEW_STATUS_BAR_WIFI_ICON)
-
-    /**
-     * True if we should run the new wifi icon backend to get the logging.
-     *
-     * Does *not* affect whether we render the wifi icon using the new backend data. See
-     * [useNewWifiIcon] for that.
-     */
-    fun runNewWifiIconBackend(): Boolean =
-        featureFlags.isEnabled(Flags.NEW_STATUS_BAR_WIFI_ICON_BACKEND) || useNewWifiIcon()
-
-    /**
-     * Returns true if we should apply some coloring to the icons that were rendered with the new
-     * pipeline to help with debugging.
-     */
-    fun useDebugColoring(): Boolean =
-        featureFlags.isEnabled(Flags.NEW_STATUS_BAR_ICONS_DEBUG_COLORING)
+    fun useNewShadeCarrierGroupMobileIcons(): Boolean =
+        featureFlags.isEnabled(Flags.NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS)
 
     /**
      * For convenience in the StatusBarIconController, we want to gate some actions based on slot
@@ -71,5 +48,5 @@ constructor(
      * @return true if this icon is controlled by any of the status bar pipeline flags
      */
     fun isIconControlledByFlags(slotName: String): Boolean =
-        slotName == wifiSlot && useNewWifiIcon() || slotName == mobileSlot && useNewMobileIcons()
+        slotName == wifiSlot || slotName == mobileSlot
 }

@@ -33,6 +33,7 @@ import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.function.Consumer;
@@ -93,15 +94,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     /** Whether the start transaction of the transition is committed (by shell). */
     private boolean mIsStartTransactionCommitted;
 
-    /** Whether all windows should wait for the start transaction. */
-    private boolean mAlwaysWaitForStartTransaction;
-
     /** Whether the target windows have been requested to sync their draw transactions. */
     private boolean mIsSyncDrawRequested;
 
     private SeamlessRotator mRotator;
 
-    private final int mOriginalRotation;
+    private int mOriginalRotation;
     private final boolean mHasScreenRotationAnimation;
 
     AsyncRotationController(DisplayContent displayContent) {
@@ -147,15 +145,6 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mTransitionOp == OP_LEGACY) {
             mIsStartTransactionCommitted = true;
         } else if (displayContent.mTransitionController.isCollecting(displayContent)) {
-            final Transition transition =
-                    mDisplayContent.mTransitionController.getCollectingTransition();
-            if (transition != null) {
-                final BLASTSyncEngine.SyncGroup syncGroup =
-                        mDisplayContent.mWmService.mSyncEngine.getSyncSet(transition.getSyncId());
-                if (syncGroup != null && syncGroup.mSyncMethod == BLASTSyncEngine.METHOD_BLAST) {
-                    mAlwaysWaitForStartTransaction = true;
-                }
-            }
             keepAppearanceInPreviousRotation();
         }
     }
@@ -183,10 +172,9 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 if (recents != null && recents.isNavigationBarAttachedToApp()) {
                     return;
                 }
-            } else if (navigationBarCanMove || mTransitionOp == OP_CHANGE_MAY_SEAMLESS) {
+            } else if (navigationBarCanMove || mTransitionOp == OP_CHANGE_MAY_SEAMLESS
+                    || mDisplayContent.mTransitionController.mNavigationBarAttachedToApp) {
                 action = Operation.ACTION_SEAMLESS;
-            } else if (mDisplayContent.mTransitionController.mNavigationBarAttachedToApp) {
-                return;
             }
             mTargetWindowTokens.put(w.mToken, new Operation(action));
             return;
@@ -236,7 +224,15 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * operation directly to avoid waiting until timeout.
      */
     void updateTargetWindows() {
-        if (mTransitionOp == OP_LEGACY || !mIsStartTransactionCommitted) return;
+        if (mTransitionOp == OP_LEGACY) return;
+        if (!mIsStartTransactionCommitted) {
+            if (mTimeoutRunnable == null && !mDisplayContent.hasTopFixedRotationLaunchingApp()
+                    && !mDisplayContent.isRotationChanging() && !mDisplayContent.inTransition()) {
+                Slog.d(TAG, "Cancel for no change");
+                mDisplayContent.finishAsyncRotationIfPossible();
+            }
+            return;
+        }
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
             final Operation op = mTargetWindowTokens.valueAt(i);
             if (op.mIsCompletionPending || op.mAction == Operation.ACTION_SEAMLESS) {
@@ -279,10 +275,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             // The previous animation leash will be dropped when preparing fade-in animation, so
             // simply apply new animation without restoring the transformation.
             fadeWindowToken(true /* show */, windowToken, ANIMATION_TYPE_TOKEN_TRANSFORM);
-        } else if (op.mAction == Operation.ACTION_SEAMLESS && mRotator != null
+        } else if (op.mAction == Operation.ACTION_SEAMLESS
                 && op.mLeash != null && op.mLeash.isValid()) {
             if (DEBUG) Slog.d(TAG, "finishOp undo seamless " + windowToken.getTopChild());
-            mRotator.setIdentityMatrix(windowToken.getSyncTransaction(), op.mLeash);
+            final SurfaceControl.Transaction t = windowToken.getSyncTransaction();
+            t.setMatrix(op.mLeash, 1, 0, 0, 1);
+            t.setPosition(op.mLeash, 0, 0);
         }
     }
 
@@ -295,6 +293,11 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             finishOp(mTargetWindowTokens.keyAt(i));
         }
         mTargetWindowTokens.clear();
+        onAllCompleted();
+    }
+
+    private void onAllCompleted() {
+        if (DEBUG) Slog.d(TAG, "onAllCompleted");
         if (mTimeoutRunnable != null) {
             mService.mH.removeCallbacks(mTimeoutRunnable);
         }
@@ -334,7 +337,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             if (DEBUG) Slog.d(TAG, "Complete directly " + token.getTopChild());
             finishOp(token);
             if (mTargetWindowTokens.isEmpty()) {
-                if (mTimeoutRunnable != null) mService.mH.removeCallbacks(mTimeoutRunnable);
+                onAllCompleted();
                 return true;
             }
         }
@@ -365,6 +368,32 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         }
     }
 
+    /**
+     * Re-initialize the states if the current display rotation has changed to a different rotation.
+     * This is mainly for seamless rotation to update the transform based on new rotation.
+     */
+    void updateRotation() {
+        if (mRotator == null) return;
+        final int currentRotation = mDisplayContent.getWindowConfiguration().getRotation();
+        if (mOriginalRotation == currentRotation) {
+            return;
+        }
+        Slog.d(TAG, "Update original rotation " + currentRotation);
+        mOriginalRotation = currentRotation;
+        mDisplayContent.forAllWindows(w -> {
+            if (w.mForceSeamlesslyRotate && w.mHasSurface
+                    && !mTargetWindowTokens.containsKey(w.mToken)) {
+                final Operation op = new Operation(Operation.ACTION_SEAMLESS);
+                op.mLeash = w.mToken.mSurfaceControl;
+                mTargetWindowTokens.put(w.mToken, op);
+            }
+        }, true /* traverseTopToBottom */);
+        mRotator = null;
+        mIsStartTransactionCommitted = false;
+        mIsSyncDrawRequested = false;
+        keepAppearanceInPreviousRotation();
+    }
+
     private void scheduleTimeout() {
         if (mTimeoutRunnable == null) {
             mTimeoutRunnable = () -> {
@@ -386,14 +415,18 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mDisplayContent.mInputMethodWindow == null) return;
         final WindowToken imeWindowToken = mDisplayContent.mInputMethodWindow.mToken;
         if (isTargetToken(imeWindowToken)) return;
+        hideImmediately(imeWindowToken, Operation.ACTION_TOGGLE_IME);
+        if (DEBUG) Slog.d(TAG, "hideImeImmediately " + imeWindowToken.getTopChild());
+    }
+
+    private void hideImmediately(WindowToken token, @Operation.Action int action) {
         final boolean original = mHideImmediately;
         mHideImmediately = true;
-        final Operation op = new Operation(Operation.ACTION_TOGGLE_IME);
-        mTargetWindowTokens.put(imeWindowToken, op);
-        fadeWindowToken(false /* show */, imeWindowToken, ANIMATION_TYPE_TOKEN_TRANSFORM);
-        op.mLeash = imeWindowToken.getAnimationLeash();
+        final Operation op = new Operation(action);
+        mTargetWindowTokens.put(token, op);
+        fadeWindowToken(false /* show */, token, ANIMATION_TYPE_TOKEN_TRANSFORM);
+        op.mLeash = token.getAnimationLeash();
         mHideImmediately = original;
-        if (DEBUG) Slog.d(TAG, "hideImeImmediately " + imeWindowToken.getTopChild());
     }
 
     /** Returns {@code true} if the window will rotate independently. */
@@ -403,9 +436,18 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 || isTargetToken(w.mToken);
     }
 
-    /** Returns {@code true} if the controller will run fade animations on the window. */
+    /**
+     * Returns {@code true} if the rotation transition appearance of the window is currently
+     * managed by this controller.
+     */
     boolean isTargetToken(WindowToken token) {
         return mTargetWindowTokens.containsKey(token);
+    }
+
+    /** Returns {@code true} if the controller will run fade animations on the window. */
+    boolean hasFadeOperation(WindowToken token) {
+        final Operation op = mTargetWindowTokens.get(token);
+        return op != null && op.mAction == Operation.ACTION_FADE;
     }
 
     /**
@@ -413,13 +455,11 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * or seamless transformation in a rotated display.
      */
     boolean shouldFreezeInsetsPosition(WindowState w) {
-        if (TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST) {
-            // Expect a screenshot layer has covered the screen, so it is fine to let client side
-            // insets animation runner update the position directly.
-            return false;
-        }
-        return mTransitionOp != OP_LEGACY && !mIsStartTransactionCommitted
-                && isTargetToken(w.mToken);
+        // Non-change transition (OP_APP_SWITCH) and METHOD_BLAST don't use screenshot so the
+        // insets should keep original position before the start transaction is applied.
+        return mTransitionOp != OP_LEGACY && (mTransitionOp == OP_APP_SWITCH
+                || TransitionController.SYNC_METHOD == BLASTSyncEngine.METHOD_BLAST)
+                && !mIsStartTransactionCommitted && canBeAsync(w.mToken) && isTargetToken(w.mToken);
     }
 
     /**
@@ -539,7 +579,18 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             return false;
         }
         final Operation op = mTargetWindowTokens.get(w.mToken);
-        if (op == null) return false;
+        if (op == null) {
+            // If a window becomes visible after the rotation transition is requested but before
+            // the transition is ready, hide it by an animation leash so it won't be flickering
+            // by drawing the rotated content before applying projection transaction of display.
+            // And it will fade in after the display transition is finished.
+            if (mTransitionOp == OP_APP_SWITCH && !mIsStartTransactionCommitted
+                    && canBeAsync(w.mToken)) {
+                hideImmediately(w.mToken, Operation.ACTION_FADE);
+                if (DEBUG) Slog.d(TAG, "Hide on finishDrawing " + w.mToken.getTopChild());
+            }
+            return false;
+        }
         if (DEBUG) Slog.d(TAG, "handleFinishDrawing " + w);
         if (postDrawTransaction == null || !mIsSyncDrawRequested
                 || canDrawBeforeStartTransaction(op)) {
@@ -589,7 +640,17 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * start transaction of rotation transition is applied.
      */
     private boolean canDrawBeforeStartTransaction(Operation op) {
-        return !mAlwaysWaitForStartTransaction && op.mAction != Operation.ACTION_SEAMLESS;
+        return op.mAction != Operation.ACTION_SEAMLESS;
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "AsyncRotationController");
+        prefix += "  ";
+        pw.println(prefix + "mTransitionOp=" + mTransitionOp);
+        pw.println(prefix + "mIsStartTransactionCommitted=" + mIsStartTransactionCommitted);
+        pw.println(prefix + "mIsSyncDrawRequested=" + mIsSyncDrawRequested);
+        pw.println(prefix + "mOriginalRotation=" + mOriginalRotation);
+        pw.println(prefix + "mTargetWindowTokens=" + mTargetWindowTokens);
     }
 
     /** The operation to control the rotation appearance associated with window token. */
@@ -618,6 +679,11 @@ class AsyncRotationController extends FadeAnimationController implements Consume
 
         Operation(@Action int action) {
             mAction = action;
+        }
+
+        @Override
+        public String toString() {
+            return "Operation{a=" + mAction + " pending=" + mIsCompletionPending + '}';
         }
     }
 }

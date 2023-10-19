@@ -20,6 +20,7 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.os.UserHandle
+import androidx.lifecycle.DefaultLifecycleObserver
 import com.android.launcher3.icons.IconFactory
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
@@ -46,6 +47,7 @@ import dagger.Provides
 import dagger.Subcomponent
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import dagger.multibindings.IntoSet
 import javax.inject.Qualifier
 import javax.inject.Scope
 import kotlinx.coroutines.CoroutineScope
@@ -99,6 +101,12 @@ interface MediaProjectionAppSelectorModule {
     @Binds
     @MediaProjectionAppSelectorScope
     fun bindAppIconLoader(impl: IconLoaderLibAppIconLoader): AppIconLoader
+
+    @Binds
+    @IntoSet
+    fun taskPreviewSizeProviderAsLifecycleObserver(
+        impl: TaskPreviewSizeProvider
+    ): DefaultLifecycleObserver
 
     companion object {
         @Provides
@@ -166,4 +174,5 @@ interface MediaProjectionAppSelectorComponent {
     @get:PersonalProfile val personalProfileUserHandle: UserHandle
 
     @MediaProjectionAppSelector val configurationController: ConfigurationController
+    val lifecycleObservers: Set<DefaultLifecycleObserver>
 }

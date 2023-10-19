@@ -99,6 +99,8 @@ public class OverlayActionChip extends FrameLayout {
             try {
                 BroadcastOptions options = BroadcastOptions.makeBasic();
                 options.setInteractive(true);
+                options.setPendingIntentBackgroundActivityStartMode(
+                        BroadcastOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
                 intent.send(options.toBundle());
                 finisher.run();
             } catch (PendingIntent.CanceledException e) {

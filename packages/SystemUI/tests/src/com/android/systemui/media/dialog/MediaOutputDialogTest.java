@@ -67,7 +67,6 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 @MediumTest
@@ -132,7 +131,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = makeTestDialog(mMediaOutputController);
@@ -254,6 +253,30 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         when(mMediaDevice.isBLEDevice()).thenReturn(false);
 
         assertThat(mMediaOutputDialog.isBroadcastSupported()).isTrue();
+    }
+
+    @Test
+    public void isBroadcastSupported_noBleDeviceAndEnabledBroadcast_returnsTrue() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(true);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isTrue();
+    }
+
+    @Test
+    public void isBroadcastSupported_noBleDeviceAndDisabledBroadcast_returnsFalse() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isFalse();
     }
 
     @Test

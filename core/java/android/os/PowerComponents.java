@@ -461,9 +461,11 @@ class PowerComponents {
         private static final byte POWER_MODEL_UNINITIALIZED = -1;
 
         private final BatteryConsumer.BatteryConsumerData mData;
+        private final double mMinConsumedPowerThreshold;
 
-        Builder(BatteryConsumer.BatteryConsumerData data) {
+        Builder(BatteryConsumer.BatteryConsumerData data, double minConsumedPowerThreshold) {
             mData = data;
+            mMinConsumedPowerThreshold = minConsumedPowerThreshold;
             for (BatteryConsumer.Key[] keys : mData.layout.keys) {
                 for (BatteryConsumer.Key key : keys) {
                     if (key.mPowerModelColumnIndex != -1) {
@@ -476,6 +478,9 @@ class PowerComponents {
         @NonNull
         public Builder setConsumedPower(BatteryConsumer.Key key, double componentPower,
                 int powerModel) {
+            if (Math.abs(componentPower) < mMinConsumedPowerThreshold) {
+                componentPower = 0;
+            }
             mData.putDouble(key.mPowerColumnIndex, componentPower);
             if (key.mPowerModelColumnIndex != -1) {
                 mData.putInt(key.mPowerModelColumnIndex, powerModel);
@@ -491,6 +496,9 @@ class PowerComponents {
          */
         @NonNull
         public Builder setConsumedPowerForCustomComponent(int componentId, double componentPower) {
+            if (Math.abs(componentPower) < mMinConsumedPowerThreshold) {
+                componentPower = 0;
+            }
             final int index = componentId - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
             if (index < 0 || index >= mData.layout.customPowerComponentCount) {
                 throw new IllegalArgumentException(

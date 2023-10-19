@@ -28,6 +28,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManagerGlobal;
@@ -71,6 +72,9 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
 
     private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
     private SysUiState mSysUiState;
+
+    @VisibleForTesting
+    SparseArray<SparseArray<Float>> mUsersScales = new SparseArray();
 
     private static class ControllerSupplier extends
             DisplayIdIndexSupplier<WindowMagnificationController> {
@@ -171,7 +175,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
 
         mModeSwitchesController.setClickListenerDelegate(
                 displayId -> mHandler.post(() -> {
-                    showMagnificationSettingsPanel(displayId);
+                    toggleSettingsPanelVisibility(displayId);
                 }));
     }
 
@@ -254,11 +258,11 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     }
 
     @MainThread
-    void showMagnificationSettingsPanel(int displayId) {
+    void toggleSettingsPanelVisibility(int displayId) {
         final MagnificationSettingsController magnificationSettingsController =
                 mMagnificationSettingsSupplier.get(displayId);
         if (magnificationSettingsController != null) {
-            magnificationSettingsController.showMagnificationSettings();
+            magnificationSettingsController.toggleSettingsPanelVisibility();
         }
     }
 
@@ -295,6 +299,23 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         mModeSwitchesController.removeButton(displayId);
     }
 
+    @MainThread
+    void setUserMagnificationScale(int userId, int displayId, float scale) {
+        SparseArray<Float> scales = mUsersScales.get(userId);
+        if (scales == null) {
+            scales = new SparseArray<>();
+            mUsersScales.put(userId, scales);
+        }
+        if (scales.contains(displayId) && scales.get(displayId) == scale) {
+            return;
+        }
+        scales.put(displayId, scale);
+
+        final MagnificationSettingsController magnificationSettingsController =
+                mMagnificationSettingsSupplier.get(displayId);
+        magnificationSettingsController.setMagnificationScale(scale);
+    }
+
     @VisibleForTesting
     final WindowMagnifierCallback mWindowMagnifierCallback = new WindowMagnifierCallback() {
         @Override
@@ -312,9 +333,10 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         }
 
         @Override
-        public void onPerformScaleAction(int displayId, float scale) {
+        public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
             if (mWindowMagnificationConnectionImpl != null) {
-                mWindowMagnificationConnectionImpl.onPerformScaleAction(displayId, scale);
+                mWindowMagnificationConnectionImpl.onPerformScaleAction(
+                        displayId, scale, updatePersistence);
             }
         }
 
@@ -335,7 +357,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         @Override
         public void onClickSettingsButton(int displayId) {
             mHandler.post(() -> {
-                showMagnificationSettingsPanel(displayId);
+                toggleSettingsPanelVisibility(displayId);
             });
         }
     };
@@ -363,9 +385,10 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         }
 
         @Override
-        public void onMagnifierScale(int displayId, float scale) {
+        public void onMagnifierScale(int displayId, float scale, boolean updatePersistence) {
             if (mWindowMagnificationConnectionImpl != null) {
-                mWindowMagnificationConnectionImpl.onPerformScaleAction(displayId, scale);
+                mWindowMagnificationConnectionImpl.onPerformScaleAction(
+                        displayId, scale, updatePersistence);
             }
         }
 

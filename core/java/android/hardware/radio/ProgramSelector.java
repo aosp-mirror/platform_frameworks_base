@@ -147,8 +147,8 @@ public final class ProgramSelector implements Parcelable {
      *
      * <p>Consists of (from the LSB):
      * <li>
-     *     <ul>132bit: Station ID number.
-     *     <ul>14bit: HD_SUBCHANNEL.
+     *     <ul>32bit: Station ID number.
+     *     <ul>4bit: HD_SUBCHANNEL.
      *     <ul>18bit: AMFM_FREQUENCY.
      * </li>
      *

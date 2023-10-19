@@ -17,11 +17,10 @@ package com.android.systemui.shade
 
 import android.view.MotionEvent
 import android.view.ViewGroup
-import com.android.systemui.statusbar.RemoteInputController
+import android.view.ViewTreeObserver
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController
 import java.util.function.Consumer
@@ -60,7 +59,7 @@ interface ShadeViewController {
      * Returns whether the shade height is greater than zero or the shade is expecting a synthesized
      * down event.
      */
-    @get:Deprecated("use {@link #isExpanded()} instead") val isPanelExpanded: Boolean
+    val isPanelExpanded: Boolean
 
     /** Returns whether the shade is fully expanded in either QS or QQS. */
     val isShadeFullyExpanded: Boolean
@@ -77,6 +76,20 @@ interface ShadeViewController {
     /** Collapses the shade with an animation duration in milliseconds. */
     fun collapseWithDuration(animationDuration: Int)
 
+    /** Collapses the shade instantly without animation. */
+    fun instantCollapse()
+
+    /**
+     * Animate QS collapse by flinging it. If QS is expanded, it will collapse into QQS and stop. If
+     * in split shade, it will collapse the whole shade.
+     *
+     * @param fullyCollapse Do not stop when QS becomes QQS. Fling until QS isn't visible anymore.
+     */
+    fun animateCollapseQs(fullyCollapse: Boolean)
+
+    /** Returns whether the shade can be collapsed. */
+    fun canBeCollapsed(): Boolean
+
     /** Returns whether the shade is in the process of collapsing. */
     val isCollapsing: Boolean
 
@@ -89,6 +102,9 @@ interface ShadeViewController {
     /** Returns whether the shade's top level view is enabled. */
     val isViewEnabled: Boolean
 
+    /** Sets a listener to be notified when the shade starts opening or finishes closing. */
+    fun setOpenCloseListener(openCloseListener: OpenCloseListener)
+
     /** Returns whether status bar icons should be hidden when the shade is expanded. */
     fun shouldHideStatusBarIconsWhenExpanded(): Boolean
 
@@ -97,6 +113,9 @@ interface ShadeViewController {
      * necessary to avoid shade expansion while/after the bouncer is dismissed.
      */
     fun blockExpansionForCurrentTouch()
+
+    /** Sets a listener to be notified when touch tracking begins. */
+    fun setTrackingStartedListener(trackingStartedListener: TrackingStartedListener)
 
     /**
      * Disables the shade header.
@@ -120,18 +139,21 @@ interface ShadeViewController {
     /** Returns the StatusBarState. */
     val barState: Int
 
-    /**
-     * Returns the bottom part of the keyguard, which contains quick affordances.
-     *
-     * TODO(b/275550429): this should be removed.
-     */
-    val keyguardBottomAreaView: KeyguardBottomAreaView?
-
-    /** Returns the NSSL controller. */
-    val notificationStackScrollLayoutController: NotificationStackScrollLayoutController
-
     /** Sets the amount of progress in the status bar launch animation. */
     fun applyLaunchAnimationProgress(linearProgress: Float)
+
+    /**
+     * Close the keyguard user switcher if it is open and capable of closing.
+     *
+     * Has no effect if user switcher isn't supported, if the user switcher is already closed, or if
+     * the user switcher uses "simple" mode. The simple user switcher cannot be closed.
+     *
+     * @return true if the keyguard user switcher was open, and is now closed
+     */
+    fun closeUserSwitcherIfOpen(): Boolean
+
+    /** Called when Back gesture has been committed (i.e. a back event has definitely occurred) */
+    fun onBackPressed()
 
     /** Sets whether the status bar launch animation is currently running. */
     fun setIsLaunchAnimationRunning(running: Boolean)
@@ -160,6 +182,15 @@ interface ShadeViewController {
 
     /** Ensures that the touchable region is updated. */
     fun updateTouchableRegion()
+
+    /** Adds a global layout listener. */
+    fun addOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener)
+
+    /** Removes a global layout listener. */
+    fun removeOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener)
+
+    /** Posts the given runnable to the view. */
+    fun postToView(action: Runnable): Boolean
 
     // ******* Begin Keyguard Section *********
     /** Animate to expanded shade after a delay in ms. Used for lockscreen to shade transition. */
@@ -214,6 +245,19 @@ interface ShadeViewController {
     /** Sends an external (e.g. Status Bar) touch event to the Shade touch handler. */
     fun handleExternalTouch(event: MotionEvent): Boolean
 
+    /** Starts tracking a shade expansion gesture that originated from the status bar. */
+    fun startTrackingExpansionFromStatusBar()
+
+    /**
+     * Performs haptic feedback from a view with a haptic feedback constant.
+     *
+     * The implementation of this method should use the [android.view.View.performHapticFeedback]
+     * method with the provided constant.
+     *
+     * @param[constant] One of [android.view.HapticFeedbackConstants]
+     */
+    fun performHapticFeedback(constant: Int)
+
     // ******* End Keyguard Section *********
 
     /** Returns the ShadeHeadsUpTracker. */
@@ -222,10 +266,17 @@ interface ShadeViewController {
     /** Returns the ShadeFoldAnimator. */
     val shadeFoldAnimator: ShadeFoldAnimator
 
-    /** Returns the ShadeNotificationPresenter. */
-    val shadeNotificationPresenter: ShadeNotificationPresenter
-
     companion object {
+        /**
+         * Returns a multiplicative factor to use when determining the falsing threshold for touches
+         * on the shade. The factor will be larger when the device is waking up due to a touch or
+         * gesture.
+         */
+        @JvmStatic
+        fun getFalsingThresholdFactor(wakefulness: WakefulnessModel): Float {
+            return if (wakefulness.isDeviceInteractiveFromTapOrGesture()) 1.5f else 1.0f
+        }
+
         const val WAKEUP_ANIMATION_DELAY_MS = 250
         const val FLING_MAX_LENGTH_SECONDS = 0.6f
         const val FLING_SPEED_UP_FACTOR = 0.6f
@@ -276,16 +327,7 @@ interface ShadeFoldAnimator {
     fun cancelFoldToAodAnimation()
 
     /** Returns the main view of the shade. */
-    val view: ViewGroup
-}
-
-/** Handles the shade's interactions with StatusBarNotificationPresenter. */
-interface ShadeNotificationPresenter {
-    /** Returns a new delegate for some view controller pieces of the remote input process. */
-    fun createRemoteInputDelegate(): RemoteInputController.Delegate
-
-    /** Returns whether the screen has temporarily woken up to display notifications. */
-    fun hasPulsingNotifications(): Boolean
+    val view: ViewGroup?
 }
 
 /**
@@ -306,4 +348,18 @@ interface ShadeViewStateProvider {
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */
     val lockscreenShadeDragProgress: Float
+}
+
+/** Listens for when touch tracking begins. */
+interface TrackingStartedListener {
+    fun onTrackingStarted()
+}
+
+/** Listens for when shade begins opening or finishes closing. */
+interface OpenCloseListener {
+    /** Called when the shade finishes closing. */
+    fun onClosingFinished()
+
+    /** Called when the shade starts opening. */
+    fun onOpenStarted()
 }

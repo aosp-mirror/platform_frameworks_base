@@ -16,8 +16,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.keyguard.shared.model.AuthenticationStatus
-import com.android.systemui.keyguard.shared.model.DetectionStatus
+import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -27,10 +27,10 @@ import kotlinx.coroutines.flow.Flow
 interface KeyguardFaceAuthInteractor {
 
     /** Current authentication status */
-    val authenticationStatus: Flow<AuthenticationStatus>
+    val authenticationStatus: Flow<FaceAuthenticationStatus>
 
     /** Current detection status */
-    val detectionStatus: Flow<DetectionStatus>
+    val detectionStatus: Flow<FaceDetectionStatus>
 
     /** Can face auth be run right now */
     fun canFaceAuthRun(): Boolean
@@ -60,6 +60,7 @@ interface KeyguardFaceAuthInteractor {
     fun onNotificationPanelClicked()
     fun onSwipeUpOnBouncer()
     fun onPrimaryBouncerUserInput()
+    fun onAccessibilityAction()
 }
 
 /**
@@ -72,8 +73,8 @@ interface KeyguardFaceAuthInteractor {
  */
 interface FaceAuthenticationListener {
     /** Receive face authentication status updates */
-    fun onAuthenticationStatusChanged(status: AuthenticationStatus)
+    fun onAuthenticationStatusChanged(status: FaceAuthenticationStatus)
 
     /** Receive status updates whenever face detection runs */
-    fun onDetectionStatusChanged(status: DetectionStatus)
+    fun onDetectionStatusChanged(status: FaceDetectionStatus)
 }

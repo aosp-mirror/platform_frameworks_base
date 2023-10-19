@@ -36,7 +36,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class NotifInflationErrorManager {
 
-    Set<NotificationEntry> mErroredNotifs = new ArraySet<>();
+    Set<String> mErroredNotifs = new ArraySet<>();
     List<NotifInflationErrorListener> mListeners = new ArrayList<>();
 
     @Inject
@@ -48,7 +48,7 @@ public class NotifInflationErrorManager {
      * @param e the exception encountered while inflating
      */
     public void setInflationError(NotificationEntry entry, Exception e) {
-        mErroredNotifs.add(entry);
+        mErroredNotifs.add(entry.getKey());
         for (int i = 0; i < mListeners.size(); i++) {
             mListeners.get(i).onNotifInflationError(entry, e);
         }
@@ -58,8 +58,8 @@ public class NotifInflationErrorManager {
      * Notification inflated successfully and is no longer errored out.
      */
     public void clearInflationError(NotificationEntry entry) {
-        if (mErroredNotifs.contains(entry)) {
-            mErroredNotifs.remove(entry);
+        if (mErroredNotifs.contains(entry.getKey())) {
+            mErroredNotifs.remove(entry.getKey());
             for (int i = 0; i < mListeners.size(); i++) {
                 mListeners.get(i).onNotifInflationErrorCleared(entry);
             }
@@ -70,7 +70,7 @@ public class NotifInflationErrorManager {
      * Whether or not the notification encountered an exception while inflating.
      */
     public boolean hasInflationError(@NonNull NotificationEntry entry) {
-        return mErroredNotifs.contains(entry);
+        return mErroredNotifs.contains(entry.getKey());
     }
 
     /**

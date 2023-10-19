@@ -184,7 +184,12 @@ class DemoMobileConnectionRepository(
 
     override val cdmaRoaming = MutableStateFlow(false)
 
-    override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived("demo network"))
+    override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived(DEMO_CARRIER_NAME))
+
+    override val carrierName =
+        MutableStateFlow(NetworkNameModel.SubscriptionDerived(DEMO_CARRIER_NAME))
+
+    override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
 
     /**
      * Process a new demo mobile event. Note that [resolvedNetworkType] must be passed in separately
@@ -198,6 +203,7 @@ class DemoMobileConnectionRepository(
         // This is always true here, because we split out disabled states at the data-source level
         dataEnabled.value = true
         networkName.value = NetworkNameModel.IntentDerived(event.name)
+        carrierName.value = NetworkNameModel.SubscriptionDerived("${event.name} ${event.subId}")
 
         _carrierId.value = event.carrierId ?: INVALID_SUBSCRIPTION_ID
 
@@ -217,12 +223,15 @@ class DemoMobileConnectionRepository(
             (event.activity ?: TelephonyManager.DATA_ACTIVITY_NONE).toMobileDataActivityModel()
         _carrierNetworkChangeActive.value = event.carrierNetworkChange
         _resolvedNetworkType.value = resolvedNetworkType
+
+        isAllowedDuringAirplaneMode.value = false
     }
 
     fun processCarrierMergedEvent(event: FakeWifiEventModel.CarrierMerged) {
         // This is always true here, because we split out disabled states at the data-source level
         dataEnabled.value = true
         networkName.value = NetworkNameModel.IntentDerived(CARRIER_MERGED_NAME)
+        carrierName.value = NetworkNameModel.SubscriptionDerived(CARRIER_MERGED_NAME)
         // TODO(b/276943904): is carrierId a thing with carrier merged networks?
         _carrierId.value = INVALID_SUBSCRIPTION_ID
         numberOfLevels.value = event.numberOfLevels
@@ -240,9 +249,11 @@ class DemoMobileConnectionRepository(
         _isInService.value = true
         _isGsm.value = false
         _carrierNetworkChangeActive.value = false
+        isAllowedDuringAirplaneMode.value = true
     }
 
     companion object {
+        private const val DEMO_CARRIER_NAME = "Demo Carrier"
         private const val CARRIER_MERGED_NAME = "Carrier Merged Network"
     }
 }

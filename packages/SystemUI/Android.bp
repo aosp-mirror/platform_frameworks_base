@@ -65,6 +65,7 @@ systemui_compose_java_defaults {
                 "androidx.compose.runtime_runtime",
                 "androidx.compose.material3_material3",
                 "androidx.activity_activity-compose",
+                "androidx.compose.animation_animation-graphics",
             ],
 
             // By default, Compose is disabled and we compile the ComposeFacade
@@ -122,6 +123,7 @@ android_library {
     ],
     static_libs: [
         "SystemUISharedLib",
+        "SystemUICustomizationLib",
         "SettingsLib",
         "androidx.leanback_leanback",
         "androidx.slice_slice-core",
@@ -192,6 +194,7 @@ android_library {
         "SystemUI-tags",
         "SystemUI-proto",
         "monet",
+        "libmonet",
         "dagger2",
         "jsr305",
         "jsr330",
@@ -227,6 +230,17 @@ filegroup {
 }
 
 filegroup {
+    name: "SystemUI-test-fakes",
+    srcs: [
+        /* Status bar fakes */
+        "tests/src/com/android/systemui/statusbar/pipeline/airplane/data/repository/FakeAirplaneModeRepository.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/shared/data/repository/FakeConnectivityRepository.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/FakeWifiRepository.kt",
+    ],
+    path: "tests/src",
+}
+
+filegroup {
     name: "SystemUI-tests-robolectric-pilots",
     srcs: [
         /* Keyguard converted tests */
@@ -251,17 +265,17 @@ filegroup {
         "tests/src/com/android/systemui/keyguard/data/repository/LightRevealScrimRepositoryTest.kt",
         "tests/src/com/android/systemui/keyguard/data/repository/TrustRepositoryTest.kt",
         // domain
-        "tests/src/com/android/systemui/keyguard/domain/interactor/AlternateBouncerInteractorTest.kt",
+        "tests/src/com/android/systemui/bouncer/domain/interactor/AlternateBouncerInteractorTest.kt",
+        "tests/src/com/android/systemui/bouncer/domain/interactor/PrimaryBouncerCallbackInteractorTest.kt",
+        "tests/src/com/android/systemui/bouncer/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardLongPressInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardTransitionInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/LightRevealScrimInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerCallbackInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
         // ui
+        "tests/src/com/android/systemui/bouncer/ui/viewmodel/KeyguardBouncerViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/DreamingToLockscreenTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/KeyguardBouncerViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/GoneToDreamingTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToDreamingTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToOccludedTransitionViewModelTest.kt",
@@ -272,7 +286,6 @@ filegroup {
         "tests/src/com/android/systemui/dock/DockManagerFake.java",
         "tests/src/com/android/systemui/dump/LogBufferHelper.kt",
         "tests/src/com/android/systemui/statusbar/phone/FakeKeyguardStateController.java",
-        "tests/src/com/android/systemui/keyguard/domain/quickaffordance/FakeKeyguardQuickAffordanceRegistry.kt",
 
         /* Biometric converted tests */
         "tests/src/com/android/systemui/biometrics/BiometricTestExtensions.kt",
@@ -291,6 +304,13 @@ filegroup {
         "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewLegacyControllerWithCoroutinesTest.kt",
         "tests/src/com/android/systemui/biometrics/UdfpsShellTest.kt",
         "tests/src/com/android/systemui/biometrics/UdfpsViewTest.kt",
+
+        /* Status bar wifi converted tests */
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/WifiRepositorySwitcherTest.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/DisabledWifiRepositoryTest.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/WifiRepositoryImplTest.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/domain/interactor/WifiInteractorImplTest.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/ui/viewmodel/WifiViewModelTest.kt",
     ],
     path: "tests/src",
 }
@@ -356,6 +376,7 @@ android_library {
         "testables",
         "truth",
         "monet",
+        "libmonet",
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
@@ -385,6 +406,7 @@ android_library {
     static_libs: [
         "SystemUI-tests-base",
         "androidx.test.uiautomator_uiautomator",
+        "androidx.core_core-animation-testing",
         "mockito-target-extended-minus-junit4",
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
@@ -450,10 +472,12 @@ android_robolectric_test {
         "tests/robolectric/src/**/*.kt",
         "tests/robolectric/src/**/*.java",
         ":SystemUI-tests-utils",
+        ":SystemUI-test-fakes",
         ":SystemUI-tests-robolectric-pilots",
     ],
     static_libs: [
         "androidx.test.uiautomator_uiautomator",
+        "androidx.core_core-animation-testing",
         "androidx.test.ext.junit",
         "inline-mockito-robolectric-prebuilt",
     ],

@@ -34,6 +34,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
@@ -82,6 +83,7 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
@@ -120,6 +122,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
@@ -168,6 +171,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     /** Volume dialog slider animation. */
     private static final String TYPE_UPDATE = "update";
 
+    /**
+     *  TODO(b/290612381): remove lingering animations or tolerate them
+     *  When false, this will cause this class to not listen to animator events and not record jank
+     *  events. This should never be false in production code, and only is false for unit tests for
+     *  this class. This flag should be true in Scenario/Integration tests.
+     */
+    private final boolean mShouldListenForJank;
     private final int mDialogShowAnimationDurationMs;
     private final int mDialogHideAnimationDurationMs;
     private int mDialogWidth;
@@ -293,6 +303,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final DevicePostureController mDevicePostureController;
     private @DevicePostureController.DevicePostureInt int mDevicePosture;
     private int mOrientation;
+    private final FeatureFlags mFeatureFlags;
 
     public VolumeDialogImpl(
             Context context,
@@ -304,13 +315,18 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             VolumePanelFactory volumePanelFactory,
             ActivityStarter activityStarter,
             InteractionJankMonitor interactionJankMonitor,
+            boolean shouldListenForJank,
             CsdWarningDialog.Factory csdWarningDialogFactory,
             DevicePostureController devicePostureController,
             Looper looper,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            FeatureFlags featureFlags) {
+        mFeatureFlags = featureFlags;
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mHandler = new H(looper);
+
+        mShouldListenForJank = shouldListenForJank;
         mController = volumeDialogController;
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -929,6 +945,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 showRingerDrawer();
             }
         });
+        updateSelectedRingerContainerDescription(mIsRingerDrawerOpen);
 
         mRingerDrawerVibrate.setOnClickListener(
                 new RingerDrawerItemClickListener(RINGER_MODE_VIBRATE));
@@ -989,6 +1006,19 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 : mode == RINGER_MODE_SILENT
                         ? -mRingerDrawerItemSize
                         : 0;
+    }
+
+    @VisibleForTesting String getSelectedRingerContainerDescription() {
+        return mSelectedRingerContainer == null ? null :
+                mSelectedRingerContainer.getContentDescription().toString();
+    }
+
+    @VisibleForTesting void toggleRingerDrawer(boolean show) {
+        if (show) {
+            showRingerDrawer();
+        } else {
+            hideRingerDrawer();
+        }
     }
 
     /** Animates in the ringer drawer. */
@@ -1068,12 +1098,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     .start();
         }
 
-        // When the ringer drawer is open, tapping the currently selected ringer will set the ringer
-        // to the current ringer mode. Change the content description to that, instead of the 'tap
-        // to change ringer mode' default.
-        mSelectedRingerContainer.setContentDescription(
-                mContext.getString(getStringDescriptionResourceForRingerMode(
-                        mState.ringerModeInternal)));
+        updateSelectedRingerContainerDescription(true);
 
         mIsRingerDrawerOpen = true;
     }
@@ -1119,12 +1144,36 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 .translationY(0f)
                 .start();
 
-        // When the drawer is closed, tapping the selected ringer drawer will open it, allowing the
-        // user to change the ringer.
-        mSelectedRingerContainer.setContentDescription(
-                mContext.getString(R.string.volume_ringer_change));
+        updateSelectedRingerContainerDescription(false);
 
         mIsRingerDrawerOpen = false;
+    }
+
+
+    /**
+     * @param open false to set the description when drawer is closed
+     */
+    private void updateSelectedRingerContainerDescription(boolean open) {
+        if (mState == null || mSelectedRingerContainer == null) return;
+
+        String currentMode = mContext.getString(getStringDescriptionResourceForRingerMode(
+                mState.ringerModeInternal));
+        String tapToSelect;
+
+        if (open) {
+            // When the ringer drawer is open, tapping the currently selected ringer will set the
+            // ringer to the current ringer mode. Change the content description to that, instead of
+            // the 'tap to change ringer mode' default.
+            tapToSelect = "";
+
+        } else {
+            // When the drawer is closed, tapping the selected ringer drawer will open it, allowing
+            // the user to change the ringer. The user needs to know that, and also the current mode
+            currentMode += ", ";
+            tapToSelect = mContext.getString(R.string.volume_ringer_change);
+        }
+
+        mSelectedRingerContainer.setContentDescription(currentMode + tapToSelect);
     }
 
     private void initSettingsH(int lockTaskModeState) {
@@ -1284,21 +1333,30 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
         if (!isServiceComponentEnabled) return;
 
-        updateCaptionsIcon();
+        checkEnabledStateForCaptionsIconUpdate();
         if (fromTooltip) showCaptionsTooltip();
     }
 
-    private void updateCaptionsIcon() {
-        boolean captionsEnabled = mController.areCaptionsEnabled();
-        if (mODICaptionsIcon.getCaptionsEnabled() != captionsEnabled) {
-            mHandler.post(mODICaptionsIcon.setCaptionsEnabled(captionsEnabled));
+    private void updateCaptionsEnabledH(boolean isCaptionsEnabled, boolean checkForSwitchState) {
+        if (checkForSwitchState) {
+            mController.setCaptionsEnabledState(!isCaptionsEnabled);
+        } else {
+            updateCaptionsIcon(isCaptionsEnabled);
+        }
+    }
+
+    private void checkEnabledStateForCaptionsIconUpdate() {
+        mController.getCaptionsEnabledState(false);
+    }
+
+    private void updateCaptionsIcon(boolean isCaptionsEnabled) {
+        if (mODICaptionsIcon.getCaptionsEnabled() != isCaptionsEnabled) {
+            mHandler.post(mODICaptionsIcon.setCaptionsEnabled(isCaptionsEnabled));
         }
     }
 
     private void onCaptionIconClicked() {
-        boolean isEnabled = mController.areCaptionsEnabled();
-        mController.setCaptionsEnabled(!isEnabled);
-        updateCaptionsIcon();
+        mController.getCaptionsEnabledState(true);
     }
 
     private void incrementManualToggleCount() {
@@ -1309,12 +1367,14 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
     private void provideTouchFeedbackH(int newRingerMode) {
         VibrationEffect effect = null;
+        int hapticConstant = HapticFeedbackConstants.NO_HAPTICS;
         switch (newRingerMode) {
             case RINGER_MODE_NORMAL:
                 mController.scheduleTouchFeedback();
                 break;
             case RINGER_MODE_SILENT:
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+                hapticConstant = HapticFeedbackConstants.TOGGLE_OFF;
                 break;
             case RINGER_MODE_VIBRATE:
                 // Feedback handled by onStateChange, for feedback both when user toggles
@@ -1322,8 +1382,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 break;
             default:
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+                hapticConstant = HapticFeedbackConstants.TOGGLE_ON;
         }
-        if (effect != null) {
+        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            mDialogView.performHapticFeedback(hapticConstant);
+        } else if (effect != null) {
             mController.vibrate(effect);
         }
     }
@@ -1368,7 +1431,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     private Animator.AnimatorListener getJankListener(View v, String type, long timeout) {
-        return new Animator.AnimatorListener() {
+        if (!mShouldListenForJank) {
+            // TODO(b/290612381): temporary fix to prevent null pointers on leftover JankMonitors
+            return null;
+        } else return new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
                 if (!v.isAttachedToWindow()) {
@@ -1702,7 +1768,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         });
     }
 
-    private int getStringDescriptionResourceForRingerMode(int mode) {
+    @VisibleForTesting int getStringDescriptionResourceForRingerMode(int mode) {
         switch (mode) {
             case RINGER_MODE_SILENT:
                 return R.string.volume_ringer_status_silent;
@@ -1757,7 +1823,22 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 && mState.ringerModeInternal != -1
                 && mState.ringerModeInternal != state.ringerModeInternal
                 && state.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
-            mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK));
+
+            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+                if (mShowing) {
+                    // The dialog view is responsible for triggering haptics in the oneway API
+                    mDialogView.performHapticFeedback(HapticFeedbackConstants.TOGGLE_ON);
+                }
+                /*
+                TODO(b/290642122): If the dialog is not showing, we have the case where haptics is
+                enabled by dragging the volume slider of Settings to a value of 0. This must be
+                handled by view Slices in Settings whilst using the performHapticFeedback API.
+                 */
+
+            } else {
+                // Old behavior only active if the oneway API is not used.
+                mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK));
+            }
         }
         mState = state;
         mDynamic.clear();
@@ -1786,6 +1867,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             updateVolumeRowH(row);
         }
         updateRingerH();
+        updateSelectedRingerContainerDescription(mIsRingerDrawerOpen);
         mWindow.setTitle(composeWindowTitle());
     }
 
@@ -2292,13 +2374,17 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             } else {
                 updateRowsH(activeRow);
             }
-
         }
 
         @Override
         public void onCaptionComponentStateChanged(
                 Boolean isComponentEnabled, Boolean fromTooltip) {
             updateODICaptionsH(isComponentEnabled, fromTooltip);
+        }
+
+        @Override
+        public void onCaptionEnabledStateChanged(Boolean isEnabled, Boolean checkForSwitchState) {
+            updateCaptionsEnabledH(isEnabled, checkForSwitchState);
         }
     };
 

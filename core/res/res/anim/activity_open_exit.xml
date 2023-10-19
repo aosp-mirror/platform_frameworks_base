@@ -31,7 +31,7 @@
 
     <translate
         android:fromXDelta="0"
-        android:toXDelta="-10%"
+        android:toXDelta="-96dp"
         android:fillEnabled="true"
         android:fillBefore="true"
         android:fillAfter="true"
@@ -42,11 +42,11 @@
     <extend
         android:fromExtendLeft="0"
         android:fromExtendTop="0"
-        android:fromExtendRight="10%"
+        android:fromExtendRight="96dp"
         android:fromExtendBottom="0"
         android:toExtendLeft="0"
         android:toExtendTop="0"
-        android:toExtendRight="10%"
+        android:toExtendRight="96dp"
         android:toExtendBottom="0"
         android:interpolator="@interpolator/fast_out_extra_slow_in"
         android:startOffset="0"

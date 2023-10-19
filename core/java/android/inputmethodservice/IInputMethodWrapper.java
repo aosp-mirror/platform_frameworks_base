@@ -433,7 +433,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void showSoftInput(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
-            int flags, ResultReceiver resultReceiver) {
+            @InputMethod.ShowFlags int flags, ResultReceiver resultReceiver) {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER);
         mCaller.executeOrSendMessage(mCaller.obtainMessageIOOO(DO_SHOW_SOFT_INPUT,
                 flags, showInputToken, resultReceiver, statsToken));

@@ -118,6 +118,7 @@ class UnfoldTransitionModule {
     @Singleton
     fun provideShellProgressProvider(
         config: UnfoldTransitionConfig,
+        foldProvider: FoldProvider,
         provider: Provider<Optional<UnfoldTransitionProgressProvider>>,
         @Named(UNFOLD_ONLY_PROVIDER)
         unfoldOnlyProvider: Provider<Optional<UnfoldTransitionProgressProvider>>
@@ -135,8 +136,9 @@ class UnfoldTransitionModule {
                 null
             }
 
-        return resultingProvider?.get()?.orElse(null)?.let(::UnfoldProgressProvider)
-            ?: ShellUnfoldProgressProvider.NO_PROVIDER
+        return resultingProvider?.get()?.orElse(null)?.let {
+            unfoldProgressProvider -> UnfoldProgressProvider(unfoldProgressProvider, foldProvider)
+        } ?: ShellUnfoldProgressProvider.NO_PROVIDER
     }
 
     @Provides

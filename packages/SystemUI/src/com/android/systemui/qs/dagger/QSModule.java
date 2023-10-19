@@ -19,9 +19,9 @@ package com.android.systemui.qs.dagger;
 import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
 
 import android.content.Context;
-import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 
+import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dagger.MediaModule;
@@ -41,13 +41,13 @@ import com.android.systemui.statusbar.policy.SafetyController;
 import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import dagger.Module;
-import dagger.Provides;
-import dagger.multibindings.Multibinds;
-
 import java.util.Map;
 
 import javax.inject.Named;
+
+import dagger.Module;
+import dagger.Provides;
+import dagger.multibindings.Multibinds;
 
 /**
  * Module for QS dependencies
@@ -79,7 +79,7 @@ public interface QSModule {
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
-            NightDisplayListener nightDisplayListener,
+            NightDisplayListenerModule.Builder nightDisplayListenerBuilder,
             CastController castController,
             ReduceBrightColorsController reduceBrightColorsController,
             DeviceControlsController deviceControlsController,
@@ -95,7 +95,7 @@ public interface QSModule {
                 hotspotController,
                 dataSaverController,
                 managedProfileController,
-                nightDisplayListener,
+                nightDisplayListenerBuilder,
                 castController,
                 reduceBrightColorsController,
                 deviceControlsController,

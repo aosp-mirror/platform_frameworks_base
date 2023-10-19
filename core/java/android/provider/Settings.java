@@ -2107,6 +2107,21 @@ public final class Settings {
             "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
 
     /**
+     * Activity Action: Show app screen size list settings for user to override app aspect
+     * ratio.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Can include the following extra {@link android.content.Intent#EXTRA_PACKAGE_NAME} specifying
+     * the name of the package to scroll to in the page.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_USER_ASPECT_RATIO_SETTINGS =
+            "android.settings.MANAGE_USER_ASPECT_RATIO_SETTINGS";
+
+    /**
      * Activity Action: Show notification settings.
      *
      * @hide
@@ -2184,6 +2199,16 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS
             = "android.settings.APP_NOTIFICATION_BUBBLE_SETTINGS";
+
+    /**
+     * Intent Extra: The value of {@link android.app.settings.SettingsEnums#EntryPointType} for
+     * settings metrics that logs the entry point about physical keyboard settings.
+     * <p>
+     * This must be passed as an extra field to the {@link #ACTION_HARD_KEYBOARD_SETTINGS}.
+     * @hide
+     */
+    public static final String EXTRA_ENTRYPOINT =
+            "com.android.settings.inputmethod.EXTRA_ENTRYPOINT";
 
     /**
      * Activity Extra: The package owner of the notification channel settings to display.
@@ -4699,6 +4724,15 @@ public final class Settings {
         public static final String PEAK_REFRESH_RATE = "peak_refresh_rate";
 
         /**
+         * Control lock behavior on fold
+         *
+         * If this isn't set, the system falls back to a device specific default.
+         * @hide
+         */
+        @Readable
+        public static final String FOLD_LOCK_BEHAVIOR = "fold_lock_behavior_setting";
+
+        /**
          * The amount of time in milliseconds before the device goes to sleep or begins
          * to dream after a period of inactivity.  This value is also known as the
          * user activity timeout period since the screen isn't necessarily turned off
@@ -5130,7 +5164,6 @@ public final class Settings {
         public static final Uri DEFAULT_RINGTONE_URI = getUriFor(RINGTONE);
 
         /** {@hide} */
-        @Readable
         public static final String RINGTONE_CACHE = "ringtone_cache";
         /** {@hide} */
         public static final Uri RINGTONE_CACHE_URI = getUriFor(RINGTONE_CACHE);
@@ -7484,6 +7517,14 @@ public final class Settings {
         @Readable
         @SuppressLint("NoSettingsProvider")
         public static final String STYLUS_BUTTONS_ENABLED = "stylus_buttons_enabled";
+
+        /**
+         * Preferred default user profile to use with the notes task button shortcut.
+         *
+         * @hide
+         */
+        @SuppressLint("NoSettingsProvider")
+        public static final String DEFAULT_NOTE_TASK_PROFILE = "default_note_task_profile";
 
         /**
          * Host name and port for global http proxy. Uses ':' seperator for
@@ -9926,6 +9967,20 @@ public final class Settings {
         public static final String SPATIAL_AUDIO_ENABLED = "spatial_audio_enabled";
 
         /**
+         * Internal collection of audio device inventory items
+         * The device item stored are {@link com.android.server.audio.AdiDeviceState}
+         * @hide
+         */
+        public static final String AUDIO_DEVICE_INVENTORY = "audio_device_inventory";
+
+        /**
+         * Stores a boolean that defines whether the CSD as a feature is enabled or not.
+         * @hide
+         */
+        public static final String AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED =
+                "audio_safe_csd_as_a_feature_enabled";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -10440,6 +10495,22 @@ public final class Settings {
          */
         public static final String ASSIST_LONG_PRESS_HOME_ENABLED =
                 "assist_long_press_home_enabled";
+
+        /**
+         * Whether press and hold on nav handle can trigger search.
+         *
+         * @hide
+         */
+        public static final String SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED =
+                "search_press_hold_nav_handle_enabled";
+
+        /**
+         * Whether long-pressing on the home button can trigger search.
+         *
+         * @hide
+         */
+        public static final String SEARCH_LONG_PRESS_HOME_ENABLED =
+                "search_long_press_home_enabled";
 
         /**
          * Control whether Night display is currently activated.
@@ -11049,6 +11120,19 @@ public final class Settings {
         @Readable
         public static final String NAVIGATION_MODE =
                 "navigation_mode";
+
+        /**
+         * The value is from another(source) device's {@link #NAVIGATION_MODE} during restore.
+         * It's supposed to be written only by
+         * {@link com.android.providers.settings.SettingsHelper}.
+         * This setting should not be added into backup array.
+         * <p>Value: -1 = Can't get value from restore(default),
+         *  0 = 3 button,
+         *  1 = 2 button,
+         *  2 = fully gestural.
+         * @hide
+         */
+        public static final String NAVIGATION_MODE_RESTORE = "navigation_mode_restore";
 
         /**
          * Scale factor for the back gesture inset size on the left side of the screen.
@@ -12589,6 +12673,26 @@ public final class Settings {
         */
         @Readable
         public static final String MOBILE_DATA_ALWAYS_ON = "mobile_data_always_on";
+
+        /**
+         * The duration in milliseconds of each action, separated by commas. Ex:
+         *
+         * "18000,18000,18000,18000,0"
+         *
+         * See com.android.internal.telephony.data.DataStallRecoveryManager for more info
+         * @hide
+         */
+        public static final String DSRM_DURATION_MILLIS = "dsrm_duration_millis";
+
+        /**
+         * The list of DSRM enabled actions, separated by commas. Ex:
+         *
+         * "true,true,false,true,true"
+         *
+         * See com.android.internal.telephony.data.DataStallRecoveryManager for more info
+         * @hide
+         */
+        public static final String DSRM_ENABLED_ACTIONS = "dsrm_enabled_actions";
 
         /**
          * Whether the wifi data connection should remain active even when higher

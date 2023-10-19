@@ -43,6 +43,7 @@ android_library {
     kotlincflags: [
         "-Xjvm-default=all",
     ],
+    sdk_version: "current",
     min_sdk_version: "31",
 }
 

@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import android.annotation.NonNull;
 import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -30,14 +32,18 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemProperties;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.IoThread;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -45,9 +51,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Manages warning dialogs shown during application lifecycle.
@@ -61,11 +65,12 @@ class AppWarnings {
     public static final int FLAG_HIDE_DEPRECATED_SDK = 0x04;
     public static final int FLAG_HIDE_DEPRECATED_ABI = 0x08;
 
-    private final HashMap<String, Integer> mPackageFlags = new HashMap<>();
+    @GuardedBy("mPackageFlags")
+    private final ArrayMap<String, Integer> mPackageFlags = new ArrayMap<>();
 
     private final ActivityTaskManagerService mAtm;
     private final Context mUiContext;
-    private final ConfigHandler mHandler;
+    private final WriteConfigTask mWriteConfigTask;
     private final UiHandler mUiHandler;
     private final AtomicFile mConfigFile;
 
@@ -75,30 +80,20 @@ class AppWarnings {
     private DeprecatedAbiDialog mDeprecatedAbiDialog;
 
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
-    private HashSet<ComponentName> mAlwaysShowUnsupportedCompileSdkWarningActivities =
-            new HashSet<>();
+    private final ArraySet<ComponentName> mAlwaysShowUnsupportedCompileSdkWarningActivities =
+            new ArraySet<>();
 
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
     void alwaysShowUnsupportedCompileSdkWarning(ComponentName activity) {
         mAlwaysShowUnsupportedCompileSdkWarningActivities.add(activity);
     }
 
-    /**
-     * Creates a new warning dialog manager.
-     * <p>
-     * <strong>Note:</strong> Must be called from the ActivityManagerService thread.
-     *
-     * @param atm
-     * @param uiContext
-     * @param handler
-     * @param uiHandler
-     * @param systemDir
-     */
+    /** Creates a new warning dialog manager. */
     public AppWarnings(ActivityTaskManagerService atm, Context uiContext, Handler handler,
             Handler uiHandler, File systemDir) {
         mAtm = atm;
         mUiContext = uiContext;
-        mHandler = new ConfigHandler(handler.getLooper());
+        mWriteConfigTask = new WriteConfigTask();
         mUiHandler = new UiHandler(uiHandler.getLooper());
         mConfigFile = new AtomicFile(new File(systemDir, CONFIG_FILE_NAME), "warnings-config");
 
@@ -256,8 +251,9 @@ class AppWarnings {
         mUiHandler.hideDialogsForPackage(name);
 
         synchronized (mPackageFlags) {
-            mPackageFlags.remove(name);
-            mHandler.scheduleWrite();
+            if (mPackageFlags.remove(name) != null) {
+                mWriteConfigTask.schedule();
+            }
         }
     }
 
@@ -425,7 +421,7 @@ class AppWarnings {
                 } else {
                     mPackageFlags.remove(name);
                 }
-                mHandler.scheduleWrite();
+                mWriteConfigTask.schedule();
             }
         }
     }
@@ -556,46 +552,30 @@ class AppWarnings {
         }
     }
 
-    /**
-     * Handles messages on the ActivityTaskManagerService thread.
-     */
-    private final class ConfigHandler extends Handler {
-        private static final int MSG_WRITE = 1;
-
-        private static final int DELAY_MSG_WRITE = 10000;
-
-        public ConfigHandler(Looper looper) {
-            super(looper, null, true);
-        }
+    private final class WriteConfigTask implements Runnable {
+        private static final long WRITE_CONFIG_DELAY_MS = 10000;
+        final AtomicReference<ArrayMap<String, Integer>> mPendingPackageFlags =
+                new AtomicReference<>();
 
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_WRITE:
-                    writeConfigToFileAmsThread();
-                    break;
+        public void run() {
+            final ArrayMap<String, Integer> packageFlags = mPendingPackageFlags.getAndSet(null);
+            if (packageFlags != null) {
+                writeConfigToFile(packageFlags);
             }
         }
 
-        public void scheduleWrite() {
-            removeMessages(MSG_WRITE);
-            sendEmptyMessageDelayed(MSG_WRITE, DELAY_MSG_WRITE);
+        @GuardedBy("mPackageFlags")
+        void schedule() {
+            if (mPendingPackageFlags.getAndSet(new ArrayMap<>(mPackageFlags)) == null) {
+                IoThread.getHandler().postDelayed(this, WRITE_CONFIG_DELAY_MS);
+            }
         }
     }
 
-    /**
-     * Writes the configuration file.
-     * <p>
-     * <strong>Note:</strong> Should be called from the ActivityManagerService thread unless you
-     * don't care where you're doing I/O operations. But you <i>do</i> care, don't you?
-     */
-    private void writeConfigToFileAmsThread() {
-        // Create a shallow copy so that we don't have to synchronize on config.
-        final HashMap<String, Integer> packageFlags;
-        synchronized (mPackageFlags) {
-            packageFlags = new HashMap<>(mPackageFlags);
-        }
-
+    /** Writes the configuration file. */
+    @WorkerThread
+    private void writeConfigToFile(@NonNull ArrayMap<String, Integer> packageFlags) {
         FileOutputStream fos = null;
         try {
             fos = mConfigFile.startWrite();
@@ -605,9 +585,9 @@ class AppWarnings {
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "packages");
 
-            for (Map.Entry<String, Integer> entry : packageFlags.entrySet()) {
-                String pkg = entry.getKey();
-                int mode = entry.getValue();
+            for (int i = 0; i < packageFlags.size(); i++) {
+                final String pkg = packageFlags.keyAt(i);
+                final int mode = packageFlags.valueAt(i);
                 if (mode == 0) {
                     continue;
                 }

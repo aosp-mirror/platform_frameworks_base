@@ -129,6 +129,11 @@ public class BubbleInfo implements Parcelable {
         return (mFlags & Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION) != 0;
     }
 
+    /** Sets the flags for this bubble. */
+    public void setFlags(int flags) {
+        mFlags = flags;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

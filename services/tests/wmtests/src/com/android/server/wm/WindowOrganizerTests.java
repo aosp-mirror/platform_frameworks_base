@@ -1247,6 +1247,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         // A drawn window can complete the sync state automatically.
         w1.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        makeLastConfigReportedToClient(w1, true /* visible */);
         mWm.mSyncEngine.onSurfacePlacement();
         verify(mockCallback).onTransactionReady(anyInt(), any());
         assertFalse(w1.useBLASTSync());

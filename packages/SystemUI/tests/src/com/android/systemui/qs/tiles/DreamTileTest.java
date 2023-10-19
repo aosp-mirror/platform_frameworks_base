@@ -226,6 +226,10 @@ public class DreamTileTest extends SysuiTestCase {
         assertTrue(supportedTileOnlySystemUser.isAvailable());
         when(mUserTracker.getUserInfo()).thenReturn(nonMainUserInfo);
         assertFalse(supportedTileOnlySystemUser.isAvailable());
+
+        destroyTile(unsupportedTile);
+        destroyTile(supportedTileAllUsers);
+        destroyTile(supportedTileOnlySystemUser);
     }
 
     @Test
@@ -250,11 +254,18 @@ public class DreamTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         assertEquals(QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_screen_saver_undocked),
                 dockedTile.getState().icon);
+
+        destroyTile(dockedTile);
     }
 
     private void setScreensaverEnabled(boolean enabled) {
         mSecureSettings.putIntForUser(Settings.Secure.SCREENSAVER_ENABLED, enabled ? 1 : 0,
                 DEFAULT_USER);
+    }
+
+    private void destroyTile(QSTileImpl<?> tile) {
+        tile.destroy();
+        mTestableLooper.processAllMessages();
     }
 
     private DreamTile constructTileForTest(boolean dreamSupported,

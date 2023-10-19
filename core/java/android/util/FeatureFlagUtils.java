@@ -86,9 +86,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST =
             "settings_need_connected_ble_device_for_broadcast";
 
-    /** @hide */
-    public static final String SETTINGS_AUTO_TEXT_WRAPPING = "settings_auto_text_wrapping";
-
     /**
      * Enable new language and keyboard settings UI
      * @hide
@@ -151,6 +148,13 @@ public class FeatureFlagUtils {
      * @hide
      */
     public static final String SETTINGS_BIOMETRICS2_ENROLLMENT = "settings_biometrics2_enrollment";
+
+    /**
+     * Flag to enable/disable FingerprintSettings v2
+     * @hide
+     */
+    public static final String SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS =
+            "settings_biometrics2_fingerprint";
 
     /** Flag to enable/disable entire page in Accessibility -> Hearing aids
      *  @hide
@@ -225,7 +229,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, "true");
-        DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "true");
@@ -243,6 +246,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API, "true");
         DEFAULT_FLAGS.put(SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, "true");
+        DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -253,7 +257,6 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
         PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
-        PERSISTENT_FLAGS.add(SETTINGS_AUTO_TEXT_WRAPPING);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_UI);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);

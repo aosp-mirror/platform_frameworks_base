@@ -27,26 +27,40 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.Spy
 
 @SmallTest
 @RoboPilotTest
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimInteractorTest : SysuiTestCase() {
     private val fakeKeyguardTransitionRepository = FakeKeyguardTransitionRepository()
-    private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
+
+    @Spy private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
+
+    private val testScope = TestScope()
 
     private val keyguardTransitionInteractor =
-        KeyguardTransitionInteractor(fakeKeyguardTransitionRepository, TestScope().backgroundScope)
+        KeyguardTransitionInteractorFactory.create(
+                scope = testScope.backgroundScope,
+                repository = fakeKeyguardTransitionRepository,
+            )
+            .keyguardTransitionInteractor
 
     private lateinit var underTest: LightRevealScrimInteractor
 
@@ -65,9 +79,9 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         underTest =
             LightRevealScrimInteractor(
-                fakeKeyguardTransitionRepository,
                 keyguardTransitionInteractor,
-                fakeLightRevealScrimRepository
+                fakeLightRevealScrimRepository,
+                testScope.backgroundScope
             )
     }
 
@@ -106,52 +120,36 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun revealAmount_invertedWhenAppropriate() =
-        runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
-            val job = underTest.revealAmount.onEach(values::add).launchIn(this)
-
+    fun lightRevealEffect_startsAnimationOnlyForDifferentStateTargets() =
+        testScope.runTest {
             fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.AOD,
-                    to = KeyguardState.LOCKSCREEN,
-                    value = 0.3f
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.OFF,
+                    to = KeyguardState.OFF
                 )
             )
-
-            assertEquals(values, listOf(0.3f))
+            runCurrent()
+            verify(fakeLightRevealScrimRepository, never()).startRevealAmountAnimator(anyBoolean())
 
             fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.LOCKSCREEN
+                )
+            )
+            runCurrent()
+            verify(fakeLightRevealScrimRepository).startRevealAmountAnimator(true)
+
+            fakeKeyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
                     from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.AOD,
-                    value = 0.3f
+                    to = KeyguardState.DOZING
                 )
             )
-
-            assertEquals(values, listOf(0.3f, 0.7f))
-
-            job.cancel()
-        }
-
-    @Test
-    fun revealAmount_ignoresTransitionsThatDoNotAffectRevealAmount() =
-        runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
-            val job = underTest.revealAmount.onEach(values::add).launchIn(this)
-
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.DOZING, to = KeyguardState.AOD, value = 0.3f)
-            )
-
-            assertEquals(values, emptyList<Float>())
-
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.AOD, to = KeyguardState.DOZING, value = 0.3f)
-            )
-
-            assertEquals(values, emptyList<Float>())
-
-            job.cancel()
+            runCurrent()
+            verify(fakeLightRevealScrimRepository).startRevealAmountAnimator(false)
         }
 }

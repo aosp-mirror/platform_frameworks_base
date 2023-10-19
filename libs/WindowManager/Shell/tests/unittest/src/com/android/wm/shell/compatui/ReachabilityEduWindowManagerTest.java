@@ -40,6 +40,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.BiConsumer;
+
 /**
  * Tests for {@link ReachabilityEduWindowManager}.
  *
@@ -57,6 +59,8 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
     private CompatUIConfiguration mCompatUIConfiguration;
     @Mock
     private DisplayLayout mDisplayLayout;
+    @Mock
+    private BiConsumer<TaskInfo, ShellTaskOrganizer.TaskListener> mOnDismissCallback;
     private TestShellExecutor mExecutor;
     private TaskInfo mTaskInfo;
     private ReachabilityEduWindowManager mWindowManager;
@@ -104,6 +108,7 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
 
     private ReachabilityEduWindowManager createReachabilityEduWindowManager(TaskInfo taskInfo) {
         return new ReachabilityEduWindowManager(mContext, taskInfo, mSyncTransactionQueue,
-                mTaskListener, mDisplayLayout, mCompatUIConfiguration, mExecutor);
+                mTaskListener, mDisplayLayout, mCompatUIConfiguration, mExecutor,
+                mOnDismissCallback, flags -> 0);
     }
 }

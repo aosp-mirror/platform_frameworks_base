@@ -51,12 +51,26 @@ class InstalledTilesComponentRepositoryImpl
 @Inject
 constructor(
     @Application private val applicationContext: Context,
-    private val packageManager: PackageManager,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : InstalledTilesComponentRepository {
 
-    override fun getInstalledTilesComponents(userId: Int): Flow<Set<ComponentName>> =
-        conflatedCallbackFlow {
+    override fun getInstalledTilesComponents(userId: Int): Flow<Set<ComponentName>> {
+        /*
+         * In order to query [PackageManager] for different users, this implementation will call
+         * [Context.createContextAsUser] and retrieve the [PackageManager] from that context.
+         */
+        val packageManager =
+            if (applicationContext.userId == userId) {
+                applicationContext.packageManager
+            } else {
+                applicationContext
+                    .createContextAsUser(
+                        UserHandle.of(userId),
+                        /* flags */ 0,
+                    )
+                    .packageManager
+            }
+        return conflatedCallbackFlow {
                 val receiver =
                     object : BroadcastReceiver() {
                         override fun onReceive(context: Context?, intent: Intent?) {
@@ -74,12 +88,13 @@ constructor(
                 awaitClose { applicationContext.unregisterReceiver(receiver) }
             }
             .onStart { emit(Unit) }
-            .map { reloadComponents(userId) }
+            .map { reloadComponents(userId, packageManager) }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
+    }
 
     @WorkerThread
-    private fun reloadComponents(userId: Int): Set<ComponentName> {
+    private fun reloadComponents(userId: Int, packageManager: PackageManager): Set<ComponentName> {
         return packageManager
             .queryIntentServicesAsUser(INTENT, FLAGS, userId)
             .mapNotNull { it.serviceInfo }

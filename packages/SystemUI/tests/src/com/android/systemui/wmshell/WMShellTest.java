@@ -34,7 +34,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
@@ -76,7 +75,6 @@ public class WMShellTest extends SysuiTestCase {
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
     @Mock WakefulnessLifecycle mWakefulnessLifecycle;
-    @Mock ProtoTracer mProtoTracer;
     @Mock UserTracker mUserTracker;
     @Mock ShellExecutor mSysUiMainExecutor;
     @Mock NoteTaskInitializer mNoteTaskInitializer;
@@ -99,7 +97,6 @@ public class WMShellTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mScreenLifecycle,
                 mSysUiState,
-                mProtoTracer,
                 mWakefulnessLifecycle,
                 mUserTracker,
                 displayTracker,

@@ -28,6 +28,7 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
 import androidx.core.animation.addListener
 import androidx.core.view.doOnLayout
+import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthDialog
@@ -78,9 +79,11 @@ object BiometricViewSizeBinder {
 
         // cache the original position of the icon view (as done in legacy view)
         // this must happen before any size changes can be made
-        var iconHolderOriginalY = 0f
         view.doOnLayout {
-            iconHolderOriginalY = iconHolderView.y
+            // TODO(b/251476085): this old way of positioning has proven itself unreliable
+            // remove this and associated thing like (UdfpsDialogMeasureAdapter) and
+            // pin to the physical sensor
+            val iconHolderOriginalY = iconHolderView.y
 
             // bind to prompt
             // TODO(b/251476085): migrate the legacy panel controller and simplify this
@@ -141,7 +144,11 @@ object BiometricViewSizeBinder {
                                         listOf(
                                             iconHolderView.asVerticalAnimator(
                                                 duration = duration.toLong(),
-                                                toY = iconHolderOriginalY,
+                                                toY =
+                                                    iconHolderOriginalY -
+                                                        viewsToHideWhenSmall
+                                                            .filter { it.isGone }
+                                                            .sumOf { it.height },
                                             ),
                                             viewsToFadeInOnSizeChange.asFadeInAnimator(
                                                 duration = duration.toLong(),

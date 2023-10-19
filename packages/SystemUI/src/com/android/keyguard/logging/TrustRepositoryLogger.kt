@@ -21,8 +21,8 @@ import com.android.systemui.keyguard.shared.model.ActiveUnlockModel
 import com.android.systemui.keyguard.shared.model.TrustManagedModel
 import com.android.systemui.keyguard.shared.model.TrustModel
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.KeyguardUpdateMonitorLog
 import javax.inject.Inject
 

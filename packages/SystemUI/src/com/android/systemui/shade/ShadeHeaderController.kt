@@ -54,13 +54,14 @@ import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_H
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
-import com.android.systemui.shade.ShadeModule.Companion.SHADE_HEADER
+import com.android.systemui.shade.ShadeViewProviderModule.Companion.SHADE_HEADER
 import com.android.systemui.shade.carrier.ShadeCarrierGroup
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
+import com.android.systemui.statusbar.phone.StatusOverlayHoverListenerFactory
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.NextAlarmController
@@ -99,6 +100,7 @@ constructor(
     private val qsBatteryModeController: QsBatteryModeController,
     private val nextAlarmController: NextAlarmController,
     private val activityStarter: ActivityStarter,
+    private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
 ) : ViewController<View>(header), Dumpable {
 
     companion object {
@@ -122,6 +124,8 @@ constructor(
             }
     }
 
+    var shadeCollapseAction: Runnable? = null
+
     private lateinit var iconManager: StatusBarIconController.TintedIconManager
     private lateinit var carrierIconSlots: List<String>
     private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
@@ -131,6 +135,7 @@ constructor(
     private val date: TextView = header.requireViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.requireViewById(R.id.statusIcons)
     private val mShadeCarrierGroup: ShadeCarrierGroup = header.requireViewById(R.id.carrier_group)
+    private val systemIcons: View = header.requireViewById(R.id.shade_header_system_icons)
 
     private var roundedCorners = 0
     private var cutout: DisplayCutout? = null
@@ -195,7 +200,9 @@ constructor(
         set(value) {
             if (visible && field != value) {
                 field = value
+                iconContainer.setQsExpansionTransitioning(value > 0f && value < 1.0f)
                 updatePosition()
+                updateIgnoredSlots()
             }
         }
 
@@ -215,6 +222,8 @@ constructor(
 
             view.onApplyWindowInsets(insets)
         }
+
+    private var singleCarrier = false
 
     private val demoModeReceiver =
         object : DemoMode {
@@ -250,6 +259,16 @@ constructor(
                     header.paddingRight,
                     header.paddingBottom
                 )
+                systemIcons.setPaddingRelative(
+                    resources.getDimensionPixelSize(
+                        R.dimen.shade_header_system_icons_padding_start
+                    ),
+                    resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_top),
+                    resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_end),
+                    resources.getDimensionPixelSize(
+                        R.dimen.shade_header_system_icons_padding_bottom
+                    )
+                )
             }
 
             override fun onDensityOrFontScaleChanged() {
@@ -262,6 +281,7 @@ constructor(
                 lastInsets?.let { updateConstraintsForInsets(header, it) }
                 updateResources()
                 updateCarrierGroupPadding()
+                clock.onDensityOrFontScaleChanged()
             }
         }
 
@@ -310,6 +330,9 @@ constructor(
         demoModeController.addCallback(demoModeReceiver)
         statusBarIconController.addIconGroup(iconManager)
         nextAlarmController.addCallback(nextAlarmCallback)
+        systemIcons.setOnHoverListener(
+            statusOverlayHoverListenerFactory.createListener(systemIcons)
+        )
     }
 
     override fun onViewDetached() {
@@ -320,6 +343,7 @@ constructor(
         demoModeController.removeCallback(demoModeReceiver)
         statusBarIconController.removeIconGroup(iconManager)
         nextAlarmController.removeCallback(nextAlarmCallback)
+        systemIcons.setOnHoverListener(null)
     }
 
     fun disable(state1: Int, state2: Int, animate: Boolean) {
@@ -455,9 +479,13 @@ constructor(
         if (largeScreenActive) {
             logInstantEvent("Large screen constraints set")
             header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
+            systemIcons.isClickable = true
+            systemIcons.setOnClickListener { shadeCollapseAction?.run() }
         } else {
             logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
+            systemIcons.setOnClickListener(null)
+            systemIcons.isClickable = false
         }
         header.jumpToState(header.startState)
         updatePosition()
@@ -479,17 +507,20 @@ constructor(
     private fun updateListeners() {
         mShadeCarrierGroupController.setListening(visible)
         if (visible) {
-            updateSingleCarrier(mShadeCarrierGroupController.isSingleCarrier)
+            singleCarrier = mShadeCarrierGroupController.isSingleCarrier
+            updateIgnoredSlots()
             mShadeCarrierGroupController.setOnSingleCarrierChangedListener {
-                updateSingleCarrier(it)
+                singleCarrier = it
+                updateIgnoredSlots()
             }
         } else {
             mShadeCarrierGroupController.setOnSingleCarrierChangedListener(null)
         }
     }
 
-    private fun updateSingleCarrier(singleCarrier: Boolean) {
-        if (singleCarrier) {
+    private fun updateIgnoredSlots() {
+        // switching from QQS to QS state halfway through the transition
+        if (singleCarrier || qsExpandedFraction < 0.5) {
             iconContainer.removeIgnoredSlots(carrierIconSlots)
         } else {
             iconContainer.addIgnoredSlots(carrierIconSlots)

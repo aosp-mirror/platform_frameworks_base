@@ -59,6 +59,8 @@ public class AssistUtils {
     public static final int INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS = 6;
     /** value for INVOCATION_TYPE_KEY: press on physcial assistant button */
     public static final int INVOCATION_TYPE_ASSIST_BUTTON = 7;
+    /** value for INVOCATION_TYPE_KEY: long press on nav handle */
+    public static final int INVOCATION_TYPE_NAV_HANDLE_LONG_PRESS = 8;
 
     private final Context mContext;
     private final IVoiceInteractionManagerService mVoiceInteractionManagerService;
@@ -228,6 +230,23 @@ public class AssistUtils {
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to register voice interaction listener", e);
+        }
+    }
+
+    /**
+     * Allows subscription to {@link android.service.voice.VisualQueryDetectionService} service
+     * status.
+     *
+     * @param listener to receive visual service start/stop events.
+     */
+    public void subscribeVisualQueryRecognitionStatus(IVisualQueryRecognitionStatusListener
+            listener) {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.subscribeVisualQueryRecognitionStatus(listener);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register visual query detection start listener", e);
         }
     }
 

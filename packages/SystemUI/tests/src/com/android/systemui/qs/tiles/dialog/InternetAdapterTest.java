@@ -5,14 +5,9 @@ import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,7 +20,6 @@ import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.wifitrackerlib.WifiEntry;
@@ -66,7 +60,7 @@ public class InternetAdapterTest extends SysuiTestCase {
     @Mock
     private InternetDialogController mInternetDialogController;
     @Mock
-    private WifiUtils.InternetIconInjector mWifiIconInjector;
+    private Drawable mWifiDrawable;
     @Mock
     private Drawable mGearIcon;
     @Mock
@@ -90,7 +84,6 @@ public class InternetAdapterTest extends SysuiTestCase {
         mInternetAdapter = new InternetAdapter(mInternetDialogController);
         mViewHolder = mInternetAdapter.onCreateViewHolder(new LinearLayout(mContext), 0);
         mInternetAdapter.setWifiEntries(Arrays.asList(mWifiEntry), 1 /* wifiEntriesCount */);
-        mViewHolder.mWifiIconInjector = mWifiIconInjector;
     }
 
     @Test
@@ -125,31 +118,21 @@ public class InternetAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void onBindViewHolder_wifiLevelUnreachable_shouldNotGetWifiIcon() {
-        reset(mWifiIconInjector);
-        when(mWifiEntry.getLevel()).thenReturn(WifiEntry.WIFI_LEVEL_UNREACHABLE);
+    public void onBindViewHolder_getWifiDrawableNull_noCrash() {
+        when(mInternetDialogController.getWifiDrawable(any())).thenReturn(null);
 
         mInternetAdapter.onBindViewHolder(mViewHolder, 0);
 
-        verify(mWifiIconInjector, never()).getIcon(anyBoolean(), anyInt());
+        assertThat(mViewHolder.mWifiIcon.getDrawable()).isNull();
     }
 
     @Test
-    public void onBindViewHolder_shouldNotShowXLevelIcon_getIconWithInternet() {
-        when(mWifiEntry.shouldShowXLevelIcon()).thenReturn(false);
+    public void onBindViewHolder_getWifiDrawableNotNull_setWifiIconDrawable() {
+        when(mInternetDialogController.getWifiDrawable(any())).thenReturn(mWifiDrawable);
 
         mInternetAdapter.onBindViewHolder(mViewHolder, 0);
 
-        verify(mWifiIconInjector).getIcon(eq(false) /* noInternet */, anyInt());
-    }
-
-    @Test
-    public void onBindViewHolder_shouldShowXLevelIcon_getIconWithNoInternet() {
-        when(mWifiEntry.shouldShowXLevelIcon()).thenReturn(true);
-
-        mInternetAdapter.onBindViewHolder(mViewHolder, 0);
-
-        verify(mWifiIconInjector).getIcon(eq(true) /* noInternet */, anyInt());
+        assertThat(mViewHolder.mWifiIcon.getDrawable()).isEqualTo(mWifiDrawable);
     }
 
     @Test

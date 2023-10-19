@@ -29,6 +29,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -36,11 +37,13 @@ import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
@@ -69,6 +72,7 @@ import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconList;
+import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
@@ -76,17 +80,16 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
-import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
-
-import java.util.Optional;
-import java.util.concurrent.Executor;
 
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
@@ -94,7 +97,7 @@ import dagger.Provides;
  * their own version of CentralSurfaces can include just dependencies, without injecting
  * CentralSurfaces itself.
  */
-@Module
+@Module(includes = {StatusBarNotificationPresenterModule.class})
 public interface CentralSurfacesDependenciesModule {
     /** */
     @SysUISingleton
@@ -105,7 +108,7 @@ public interface CentralSurfacesDependenciesModule {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            PowerInteractor powerInteractor,
             StatusBarStateController statusBarStateController,
             RemoteInputUriController remoteInputUriController,
             RemoteInputControllerLogger remoteInputControllerLogger,
@@ -118,7 +121,7 @@ public interface CentralSurfacesDependenciesModule {
                 lockscreenUserManager,
                 smartReplyController,
                 visibilityProvider,
-                centralSurfacesOptionalLazy,
+                powerInteractor,
                 statusBarStateController,
                 remoteInputUriController,
                 remoteInputControllerLogger,
@@ -195,11 +198,10 @@ public interface CentralSurfacesDependenciesModule {
     static CommandQueue provideCommandQueue(
             Context context,
             DisplayTracker displayTracker,
-            ProtoTracer protoTracer,
             CommandRegistry registry,
             DumpHandler dumpHandler
     ) {
-        return new CommandQueue(context, displayTracker, protoTracer, registry, dumpHandler);
+        return new CommandQueue(context, displayTracker, registry, dumpHandler);
     }
 
     /**
@@ -274,6 +276,21 @@ public interface CentralSurfacesDependenciesModule {
         ongoingCallController.init();
         return ongoingCallController;
     }
+
+    /**
+     * {@link NotificationPanelViewController} implements two interfaces:
+     *  - {@link com.android.systemui.shade.ShadeViewController}, which can be used by any class
+     *    needing access to the shade.
+     *  - {@link ShadeSurface}, which should *only* be used by {@link CentralSurfacesImpl}.
+     *
+     * Since {@link ShadeSurface} should only be accessible by {@link CentralSurfacesImpl}, it's
+     * *only* bound in this CentralSurfaces dependencies module.
+     * The {@link com.android.systemui.shade.ShadeViewController} interface is bound in
+     * {@link com.android.systemui.shade.ShadeModule} so others can access it.
+     */
+    @Binds
+    @SysUISingleton
+    ShadeSurface provideShadeSurface(NotificationPanelViewController impl);
 
     /** */
     @Binds

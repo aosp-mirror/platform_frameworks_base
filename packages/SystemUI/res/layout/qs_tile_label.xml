@@ -54,6 +54,6 @@
         android:focusable="false"
         android:importantForAccessibility="no"
         android:textAppearance="@style/TextAppearance.QS.TileLabel.Secondary"
-        android:textColor="?android:attr/textColorSecondary"/>
+        android:textColor="?attr/onShadeInactive"/>
 
 </com.android.systemui.qs.tileimpl.IgnorableChildLinearLayout>

@@ -40,6 +40,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.CommandQueue
@@ -111,6 +113,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     private lateinit var uiEventLogger: MediaTttSenderUiEventLogger
     private lateinit var tempViewUiEventLogger: TemporaryViewUiEventLogger
     private val defaultTimeout = context.resources.getInteger(R.integer.heads_up_notification_decay)
+    private val featureFlags = FakeFeatureFlags()
 
     @Before
     fun setUp() {
@@ -160,7 +163,9 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 fakeWakeLockBuilder,
                 fakeClock,
                 tempViewUiEventLogger,
+                featureFlags
             )
+        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
         chipbarCoordinator.start()
 
         underTest =

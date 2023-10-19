@@ -101,12 +101,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
         this.binding = bindingCreator.invoke()
     }
 
-    /**
-     * Creates a [StatusBarIconView] that is always in DOT mode and adds it to this view.
-     *
-     * Mostly duplicated from [com.android.systemui.statusbar.StatusBarWifiView] and
-     * [com.android.systemui.statusbar.StatusBarMobileView].
-     */
+    /** Creates a [StatusBarIconView] that is always in DOT mode and adds it to this view. */
     private fun initDotView() {
         // TODO(b/238425913): Could we just have this dot view be part of the layout with a dot
         //  drawable so we don't need to inflate it manually? Would that not work with animations?
@@ -118,7 +113,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
                 it.visibleState = STATE_DOT
             }
 
-        val width = mContext.resources.getDimensionPixelSize(R.dimen.status_bar_icon_size)
+        val width = mContext.resources.getDimensionPixelSize(R.dimen.status_bar_icon_size_sp)
         val lp = LayoutParams(width, width)
         lp.gravity = Gravity.CENTER_VERTICAL or Gravity.START
         addView(dotView, lp)

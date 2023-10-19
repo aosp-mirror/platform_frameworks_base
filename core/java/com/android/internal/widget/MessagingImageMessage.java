@@ -93,8 +93,9 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
     }
 
     @Override
-    public boolean setMessage(Notification.MessagingStyle.Message message) {
-        MessagingMessage.super.setMessage(message);
+    public boolean setMessage(Notification.MessagingStyle.Message message,
+            boolean usePrecomputedText) {
+        MessagingMessage.super.setMessage(message, usePrecomputedText);
         Drawable drawable;
         try {
             Uri uri = message.getDataUri();
@@ -114,30 +115,40 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
         }
         mDrawable = drawable;
         mAspectRatio = ((float) mDrawable.getIntrinsicWidth()) / intrinsicHeight;
-        setImageDrawable(drawable);
-        setContentDescription(message.getText());
+        if (!usePrecomputedText) {
+            finalizeInflate();
+        }
         return true;
     }
 
     static MessagingMessage createMessage(IMessagingLayout layout,
-            Notification.MessagingStyle.Message m, ImageResolver resolver) {
+            Notification.MessagingStyle.Message m, ImageResolver resolver,
+            boolean usePrecomputedText) {
         MessagingLinearLayout messagingLinearLayout = layout.getMessagingLinearLayout();
         MessagingImageMessage createdMessage = sInstancePool.acquire();
         if (createdMessage == null) {
             createdMessage = (MessagingImageMessage) LayoutInflater.from(
                     layout.getContext()).inflate(
-                            R.layout.notification_template_messaging_image_message,
-                            messagingLinearLayout,
-                            false);
+                    R.layout.notification_template_messaging_image_message,
+                    messagingLinearLayout,
+                    false);
             createdMessage.addOnLayoutChangeListener(MessagingLayout.MESSAGING_PROPERTY_ANIMATOR);
         }
         createdMessage.setImageResolver(resolver);
-        boolean created = createdMessage.setMessage(m);
-        if (!created) {
+        // MessagingImageMessage does not use usePrecomputedText.
+        boolean populated = createdMessage.setMessage(m, /* usePrecomputedText= */false);
+        if (!populated) {
             createdMessage.recycle();
-            return MessagingTextMessage.createMessage(layout, m);
+            return MessagingTextMessage.createMessage(layout, m, usePrecomputedText);
         }
         return createdMessage;
+    }
+
+
+    @Override
+    public void finalizeInflate() {
+        setImageDrawable(mDrawable);
+        setContentDescription(getMessage().getText());
     }
 
     private void setImageResolver(ImageResolver resolver) {

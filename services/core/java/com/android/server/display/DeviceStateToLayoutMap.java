@@ -22,7 +22,6 @@ import android.os.Environment;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.DisplayAddress;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -38,6 +37,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -115,13 +115,16 @@ class DeviceStateToLayoutMap {
                 Slog.i(TAG, "Display layout config not found: " + configFile);
                 return;
             }
-            int leadDisplayId = Display.DEFAULT_DISPLAY;
             for (com.android.server.display.config.layout.Layout l : layouts.getLayout()) {
                 final int state = l.getState().intValue();
                 final Layout layout = createLayout(state);
                 for (com.android.server.display.config.layout.Display d: l.getDisplay()) {
                     assert layout != null;
                     int position = getPosition(d.getPosition());
+                    BigInteger leadDisplayPhysicalId = d.getLeadDisplayAddress();
+                    DisplayAddress leadDisplayAddress = leadDisplayPhysicalId == null ? null
+                            : DisplayAddress.fromPhysicalDisplayId(
+                                    leadDisplayPhysicalId.longValue());
                     layout.createDisplayLocked(
                             DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
                             d.isDefaultDisplay(),
@@ -129,11 +132,12 @@ class DeviceStateToLayoutMap {
                             d.getDisplayGroup(),
                             mIdProducer,
                             position,
-                            leadDisplayId,
+                            leadDisplayAddress,
                             d.getBrightnessThrottlingMapId(),
                             d.getRefreshRateZoneId(),
                             d.getRefreshRateThermalThrottlingMapId());
                 }
+                layout.postProcessLocked();
             }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
             Slog.e(TAG, "Encountered an error while reading/parsing display layout config file: "

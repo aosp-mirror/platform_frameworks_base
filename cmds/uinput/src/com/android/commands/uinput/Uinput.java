@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Objects;
 
 /**
  * Uinput class encapsulates execution of "uinput" command. It parses the provided input stream
@@ -96,28 +97,27 @@ public class Uinput {
 
     private void process(Event e) {
         final int index = mDevices.indexOfKey(e.getId());
-        if (index >= 0) {
-            Device d = mDevices.valueAt(index);
-            if (Event.COMMAND_DELAY.equals(e.getCommand())) {
-                d.addDelay(e.getDuration());
-            } else if (Event.COMMAND_INJECT.equals(e.getCommand())) {
-                d.injectEvent(e.getInjections());
-            } else {
-                if (Event.COMMAND_REGISTER.equals(e.getCommand())) {
-                    error("Device id=" + e.getId() + " is already registered. Ignoring event.");
-                } else {
-                    error("Unknown command \"" + e.getCommand() + "\". Ignoring event.");
-                }
+        if (index < 0) {
+            if (e.getCommand() != Event.Command.REGISTER) {
+                Log.e(TAG, "Unknown device id specified. Ignoring event.");
+                return;
             }
-        } else if (Event.COMMAND_REGISTER.equals(e.getCommand())) {
             registerDevice(e);
-        } else {
-            Log.e(TAG, "Unknown device id specified. Ignoring event.");
+            return;
+        }
+
+        final Device d = mDevices.valueAt(index);
+        switch (Objects.requireNonNull(e.getCommand())) {
+            case REGISTER ->
+                    error("Device id=" + e.getId() + " is already registered. Ignoring event.");
+            case INJECT -> d.injectEvent(e.getInjections());
+            case DELAY -> d.addDelay(e.getDuration());
+            case SYNC -> d.syncEvent(e.getSyncToken());
         }
     }
 
     private void registerDevice(Event e) {
-        if (!Event.COMMAND_REGISTER.equals(e.getCommand())) {
+        if (!Event.Command.REGISTER.equals(e.getCommand())) {
             throw new IllegalStateException(
                     "Tried to send command \"" + e.getCommand() + "\" to an unregistered device!");
         }

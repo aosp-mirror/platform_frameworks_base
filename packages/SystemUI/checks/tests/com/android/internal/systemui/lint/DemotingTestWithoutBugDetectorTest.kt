@@ -98,7 +98,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:4: Warning: Please attach a bug id to track demoted test [DemotingTestWithoutBug]
+                src/test/pkg/TestClass.java:4: Warning: Please attach a bug id to track demoted test, e.g. @FlakyTest(bugId = 123) [DemotingTestWithoutBug]
                 @FlakyTest
                 ~~~~~~~~~~
                 0 errors, 1 warnings
@@ -126,7 +126,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:4: Warning: Please attach a bug id to track demoted test [DemotingTestWithoutBug]
+                src/test/pkg/TestClass.java:4: Warning: Please attach a bug id to track demoted test, e.g. @FlakyTest(bugId = 123) [DemotingTestWithoutBug]
                 @FlakyTest
                 ~~~~~~~~~~
                 0 errors, 1 warnings
@@ -181,7 +181,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:4: Warning: Please attach a bug id to track demoted test [DemotingTestWithoutBug]
+                src/test/pkg/TestClass.java:4: Warning: Please attach a bug id to track demoted test, e.g. @FlakyTest(bugId = 123) [DemotingTestWithoutBug]
                 @Platinum(devices = "foo,bar")
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
@@ -236,7 +236,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:4: Warning: Please attach a bug (e.g. b/123) to track demoted test [DemotingTestWithoutBug]
+                src/test/pkg/TestClass.java:4: Warning: Please attach a bug to track demoted test, e.g. @Ignore("b/123") [DemotingTestWithoutBug]
                 @Ignore
                 ~~~~~~~
                 0 errors, 1 warnings
@@ -264,7 +264,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:4: Warning: Please attach a bug (e.g. b/123) to track demoted test [DemotingTestWithoutBug]
+                src/test/pkg/TestClass.java:4: Warning: Please attach a bug to track demoted test, e.g. @Ignore("b/123") [DemotingTestWithoutBug]
                 @Ignore("Not ready")
                 ~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings

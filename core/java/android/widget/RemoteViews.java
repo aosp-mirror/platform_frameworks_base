@@ -33,16 +33,19 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.app.Application;
 import android.app.LoadedApk;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
@@ -65,10 +68,12 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.system.Os;
@@ -98,8 +103,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.android.internal.R;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.util.Preconditions;
+import com.android.internal.widget.IRemoteViewsFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -124,7 +131,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -232,6 +241,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int NIGHT_MODE_REFLECTION_ACTION_TAG = 30;
     private static final int SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG = 31;
     private static final int ATTRIBUTE_REFLECTION_ACTION_TAG = 32;
+    private static final int SET_REMOTE_ADAPTER_TAG = 33;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -323,6 +333,13 @@ public class RemoteViews implements Parcelable, Filter {
             (clazz) -> clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
 
     /**
+     * The maximum waiting time for remote adapter conversion in milliseconds
+     *
+     * @hide
+     */
+    private static final int MAX_ADAPTER_CONVERSION_WAITING_TIME_MS = 5000;
+
+    /**
      * Application that hosts the remote views.
      *
      * @hide
@@ -412,6 +429,13 @@ public class RemoteViews implements Parcelable, Filter {
     /** Class cookies of the Parcel this instance was read from. */
     private Map<Class, Object> mClassCookies;
 
+    /**
+     * {@link LayoutInflater.Factory2} which will be passed into a {@link LayoutInflater} instance
+     * used by this class.
+     */
+    @Nullable
+    private LayoutInflater.Factory2 mLayoutInflaterFactory2;
+
     private static final InteractionHandler DEFAULT_INTERACTION_HANDLER =
             (view, pendingIntent, response) ->
                     startPendingIntent(view, pendingIntent, response.getLaunchOptions(view));
@@ -428,6 +452,29 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setRemoteInputs(@IdRes int viewId, RemoteInput[] remoteInputs) {
         mActions.add(new SetRemoteInputsAction(viewId, remoteInputs));
+    }
+
+    /**
+     * Sets {@link LayoutInflater.Factory2} to be passed into {@link LayoutInflater} used
+     * by this class instance. It has to be set before the views are inflated to have any effect.
+     *
+     * The factory callbacks will be called on the background thread so the implementation needs
+     * to be thread safe.
+     *
+     * @hide
+     */
+    public void setLayoutInflaterFactory(@Nullable LayoutInflater.Factory2 factory) {
+        mLayoutInflaterFactory2 = factory;
+    }
+
+    /**
+     * Returns currently set {@link LayoutInflater.Factory2}.
+     *
+     * @hide
+     */
+    @Nullable
+    public LayoutInflater.Factory2 getLayoutInflaterFactory() {
+        return mLayoutInflaterFactory2;
     }
 
     /**
@@ -739,6 +786,83 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    /**
+     * @hide
+     * @return True if there is a change
+     */
+    public boolean replaceRemoteCollections(int viewId) {
+        boolean isActionReplaced = false;
+        if (mActions != null) {
+            for (int i = 0; i < mActions.size(); i++) {
+                Action action = mActions.get(i);
+                if (action instanceof SetRemoteCollectionItemListAdapterAction itemsAction
+                        && itemsAction.viewId == viewId
+                        && itemsAction.mServiceIntent != null) {
+                    mActions.set(i, new SetRemoteCollectionItemListAdapterAction(itemsAction.viewId,
+                            itemsAction.mServiceIntent));
+                    isActionReplaced = true;
+                } else if (action instanceof SetRemoteViewsAdapterIntent intentAction
+                        && intentAction.viewId == viewId) {
+                    mActions.set(i, new SetRemoteCollectionItemListAdapterAction(
+                            intentAction.viewId, intentAction.intent));
+                    isActionReplaced = true;
+                } else if (action instanceof ViewGroupActionAdd groupAction
+                        && groupAction.mNestedViews != null) {
+                    isActionReplaced |= groupAction.mNestedViews.replaceRemoteCollections(viewId);
+                }
+            }
+        }
+        if (mSizedRemoteViews != null) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                isActionReplaced |= mSizedRemoteViews.get(i).replaceRemoteCollections(viewId);
+            }
+        }
+        if (mLandscape != null) {
+            isActionReplaced |= mLandscape.replaceRemoteCollections(viewId);
+        }
+        if (mPortrait != null) {
+            isActionReplaced |= mPortrait.replaceRemoteCollections(viewId);
+        }
+
+        return isActionReplaced;
+    }
+
+    /**
+     * @return True if has set remote adapter using service intent
+     * @hide
+     */
+    public boolean hasLegacyLists() {
+        if (mActions != null) {
+            for (int i = 0; i < mActions.size(); i++) {
+                Action action = mActions.get(i);
+                if ((action instanceof SetRemoteCollectionItemListAdapterAction itemsAction
+                        && itemsAction.mServiceIntent != null)
+                        || (action instanceof SetRemoteViewsAdapterIntent intentAction
+                                && intentAction.intent != null)
+                        || (action instanceof ViewGroupActionAdd groupAction
+                                && groupAction.mNestedViews != null
+                                && groupAction.mNestedViews.hasLegacyLists())) {
+                    return true;
+                }
+            }
+        }
+        if (mSizedRemoteViews != null) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                if (mSizedRemoteViews.get(i).hasLegacyLists()) {
+                    return true;
+                }
+            }
+        }
+        if (mLandscape != null && mLandscape.hasLegacyLists()) {
+            return true;
+        }
+        if (mPortrait != null && mPortrait.hasLegacyLists()) {
+            return true;
+        }
+
+        return false;
+    }
+
     private static void visitIconUri(Icon icon, @NonNull Consumer<Uri> visitor) {
         if (icon != null && (icon.getType() == Icon.TYPE_URI
                 || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP)) {
@@ -960,6 +1084,11 @@ public class RemoteViews implements Parcelable, Filter {
             return SET_REMOTE_VIEW_ADAPTER_LIST_TAG;
         }
 
+        @Override
+        public String getUniqueKey() {
+            return (SET_REMOTE_ADAPTER_TAG + "_" + viewId);
+        }
+
         int viewTypeCount;
         ArrayList<RemoteViews> list;
     }
@@ -1006,28 +1135,101 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private class SetRemoteCollectionItemListAdapterAction extends Action {
-        private final RemoteCollectionItems mItems;
+        private @NonNull CompletableFuture<RemoteCollectionItems> mItemsFuture;
+        final Intent mServiceIntent;
 
-        SetRemoteCollectionItemListAdapterAction(@IdRes int id, RemoteCollectionItems items) {
+        SetRemoteCollectionItemListAdapterAction(@IdRes int id,
+                @NonNull RemoteCollectionItems items) {
             viewId = id;
-            mItems = items;
-            mItems.setHierarchyRootData(getHierarchyRootData());
+            items.setHierarchyRootData(getHierarchyRootData());
+            mItemsFuture = CompletableFuture.completedFuture(items);
+            mServiceIntent = null;
+        }
+
+        SetRemoteCollectionItemListAdapterAction(@IdRes int id, Intent intent) {
+            viewId = id;
+            mItemsFuture = getItemsFutureFromIntentWithTimeout(intent);
+            setHierarchyRootData(getHierarchyRootData());
+            mServiceIntent = intent;
+        }
+
+        private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
+                Intent intent) {
+            if (intent == null) {
+                Log.e(LOG_TAG, "Null intent received when generating adapter future");
+                return CompletableFuture.completedFuture(new RemoteCollectionItems
+                        .Builder().build());
+            }
+
+            final Context context = ActivityThread.currentApplication();
+            final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
+
+            context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
+                    result.defaultExecutor(), new ServiceConnection() {
+                        @Override
+                        public void onServiceConnected(ComponentName componentName,
+                                IBinder iBinder) {
+                            RemoteCollectionItems items;
+                            try {
+                                items = IRemoteViewsFactory.Stub.asInterface(iBinder)
+                                        .getRemoteCollectionItems();
+                            } catch (RemoteException re) {
+                                items = new RemoteCollectionItems.Builder().build();
+                                Log.e(LOG_TAG, "Error getting collection items from the factory",
+                                        re);
+                            } finally {
+                                context.unbindService(this);
+                            }
+
+                            result.complete(items);
+                        }
+
+                        @Override
+                        public void onServiceDisconnected(ComponentName componentName) { }
+                    });
+
+            result.completeOnTimeout(
+                    new RemoteCollectionItems.Builder().build(),
+                    MAX_ADAPTER_CONVERSION_WAITING_TIME_MS, TimeUnit.MILLISECONDS);
+
+            return result;
         }
 
         SetRemoteCollectionItemListAdapterAction(Parcel parcel) {
             viewId = parcel.readInt();
-            mItems = new RemoteCollectionItems(parcel, getHierarchyRootData());
+            mItemsFuture = CompletableFuture.completedFuture(
+                    new RemoteCollectionItems(parcel, getHierarchyRootData()));
+            mServiceIntent = parcel.readTypedObject(Intent.CREATOR);
         }
 
         @Override
         public void setHierarchyRootData(HierarchyRootData rootData) {
-            mItems.setHierarchyRootData(rootData);
+            mItemsFuture = mItemsFuture
+                    .thenApply(rc -> {
+                        rc.setHierarchyRootData(rootData);
+                        return rc;
+                    });
+        }
+
+        private static RemoteCollectionItems getCollectionItemsFromFuture(
+                CompletableFuture<RemoteCollectionItems> itemsFuture) {
+            RemoteCollectionItems items;
+            try {
+                items = itemsFuture.get();
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Error getting collection items from future", e);
+                items = new RemoteCollectionItems.Builder().build();
+            }
+
+            return items;
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
-            mItems.writeToParcel(dest, flags, /* attached= */ true);
+            RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
+            items.writeToParcel(dest, flags, /* attached= */ true);
+            dest.writeTypedObject(mServiceIntent, flags);
         }
 
         @Override
@@ -1035,6 +1237,8 @@ public class RemoteViews implements Parcelable, Filter {
                 throws ActionException {
             View target = root.findViewById(viewId);
             if (target == null) return;
+
+            RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
 
             // Ensure that we are applying to an AppWidget root
             if (!(rootParent instanceof AppWidgetHostView)) {
@@ -1056,10 +1260,10 @@ public class RemoteViews implements Parcelable, Filter {
             // recycling in setAdapter, so we must call setAdapter again if the number of view types
             // increases.
             if (adapter instanceof RemoteCollectionItemsAdapter
-                    && adapter.getViewTypeCount() >= mItems.getViewTypeCount()) {
+                    && adapter.getViewTypeCount() >= items.getViewTypeCount()) {
                 try {
                     ((RemoteCollectionItemsAdapter) adapter).setData(
-                            mItems, params.handler, params.colorResources);
+                            items, params.handler, params.colorResources);
                 } catch (Throwable throwable) {
                     // setData should never failed with the validation in the items builder, but if
                     // it does, catch and rethrow.
@@ -1069,7 +1273,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             try {
-                adapterView.setAdapter(new RemoteCollectionItemsAdapter(mItems,
+                adapterView.setAdapter(new RemoteCollectionItemsAdapter(items,
                         params.handler, params.colorResources));
             } catch (Throwable throwable) {
                 // This could throw if the AdapterView somehow doesn't accept BaseAdapter due to
@@ -1081,6 +1285,11 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG;
+        }
+
+        @Override
+        public String getUniqueKey() {
+            return (SET_REMOTE_ADAPTER_TAG + "_" + viewId);
         }
     }
 
@@ -4638,7 +4847,21 @@ public class RemoteViews implements Parcelable, Filter {
      *            providing data to the RemoteViewsAdapter
      */
     public void setRemoteAdapter(@IdRes int viewId, Intent intent) {
+        if (isAdapterConversionEnabled()) {
+            addAction(new SetRemoteCollectionItemListAdapterAction(viewId, intent));
+            return;
+        }
         addAction(new SetRemoteViewsAdapterIntent(viewId, intent));
+    }
+
+    /**
+     * @hide
+     * @return True if the remote adapter conversion is enabled
+     */
+    public static boolean isAdapterConversionEnabled() {
+        return AppGlobals.getIntCoreSetting(
+                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION,
+                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT ? 1 : 0) != 0;
     }
 
     /**
@@ -5648,6 +5871,9 @@ public class RemoteViews implements Parcelable, Filter {
         // we don't add a filter to the static version returned by getSystemService.
         inflater = inflater.cloneInContext(inflationContext);
         inflater.setFilter(shouldUseStaticFilter() ? INFLATER_FILTER : this);
+        if (mLayoutInflaterFactory2 != null) {
+            inflater.setFactory2(mLayoutInflaterFactory2);
+        }
         View v = inflater.inflate(rv.getLayoutId(), parent, false);
         if (mViewId != View.NO_ID) {
             v.setId(mViewId);
@@ -6760,6 +6986,7 @@ public class RemoteViews implements Parcelable, Filter {
             // something is going to start.
             opts.setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+            opts.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
             return Pair.create(intent, opts);
         }
     }

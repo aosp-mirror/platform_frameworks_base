@@ -117,18 +117,22 @@ public class CropView extends View {
 
     @Override
     protected Parcelable onSaveInstanceState() {
+        Log.d(TAG, "onSaveInstanceState");
         Parcelable superState = super.onSaveInstanceState();
 
         SavedState ss = new SavedState(superState);
         ss.mCrop = mCrop;
+        Log.d(TAG, "saving mCrop=" + mCrop);
+
         return ss;
     }
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
+        Log.d(TAG, "onRestoreInstanceState");
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
-
+        Log.d(TAG, "restoring mCrop=" + ss.mCrop + " (was " + mCrop + ")");
         mCrop = ss.mCrop;
     }
 
@@ -242,6 +246,7 @@ public class CropView extends View {
      * Set the given boundary to the given value without animation.
      */
     public void setBoundaryPosition(CropBoundary boundary, float position) {
+        Log.i(TAG, "setBoundaryPosition: " + boundary + ", position=" + position);
         position = (float) getAllowedValues(boundary).clamp(position);
         switch (boundary) {
             case TOP:
@@ -260,6 +265,7 @@ public class CropView extends View {
                 Log.w(TAG, "No boundary selected");
                 break;
         }
+        Log.i(TAG,  "Updated mCrop: " + mCrop);
 
         invalidate();
     }
@@ -350,26 +356,31 @@ public class CropView extends View {
         mCropInteractionListener = listener;
     }
 
-    private Range getAllowedValues(CropBoundary boundary) {
+    private Range<Float> getAllowedValues(CropBoundary boundary) {
+        float upper = 0f;
+        float lower = 1f;
         switch (boundary) {
             case TOP:
-                return new Range<>(0f,
-                        mCrop.bottom - pixelDistanceToFraction(mCropTouchMargin,
-                                CropBoundary.BOTTOM));
+                lower = 0f;
+                upper = mCrop.bottom - pixelDistanceToFraction(mCropTouchMargin,
+                        CropBoundary.BOTTOM);
+                break;
             case BOTTOM:
-                return new Range<>(
-                        mCrop.top + pixelDistanceToFraction(mCropTouchMargin,
-                                CropBoundary.TOP), 1f);
+                lower = mCrop.top + pixelDistanceToFraction(mCropTouchMargin, CropBoundary.TOP);
+                upper = 1;
+                break;
             case LEFT:
-                return new Range<>(0f,
-                        mCrop.right - pixelDistanceToFraction(mCropTouchMargin,
-                                CropBoundary.RIGHT));
+                lower = 0f;
+                upper = mCrop.right - pixelDistanceToFraction(mCropTouchMargin, CropBoundary.RIGHT);
+                break;
             case RIGHT:
-                return new Range<>(
-                        mCrop.left + pixelDistanceToFraction(mCropTouchMargin,
-                                CropBoundary.LEFT), 1f);
+                lower = mCrop.left + pixelDistanceToFraction(mCropTouchMargin, CropBoundary.LEFT);
+                upper = 1;
+                break;
         }
-        return null;
+        Log.i(TAG, "getAllowedValues: " + boundary + ", "
+                + "result=[lower=" + lower + ", upper=" + upper + "]");
+        return new Range<>(lower, upper);
     }
 
     /**

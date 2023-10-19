@@ -3,7 +3,11 @@ package com.android.systemui.statusbar.notification
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,8 +19,9 @@ import org.mockito.Mockito.verify
 @SmallTest
 @RunWith(JUnit4::class)
 class RoundableTest : SysuiTestCase() {
-    val targetView: View = mock()
-    val roundable = FakeRoundable(targetView)
+    private val targetView: View = mock()
+    private val featureFlags = FakeFeatureFlags()
+    private val roundable = FakeRoundable(targetView = targetView, featureFlags = featureFlags)
 
     @Test
     fun defaultConfig_shouldNotHaveRoundedCorner() {
@@ -144,16 +149,62 @@ class RoundableTest : SysuiTestCase() {
         assertEquals(0.2f, roundable.roundableState.bottomRoundness)
     }
 
+    @Test
+    fun getCornerRadii_radius_maxed_to_height() {
+        whenever(targetView.height).thenReturn(10)
+        featureFlags.set(Flags.IMPROVED_HUN_ANIMATIONS, true)
+        roundable.requestRoundness(1f, 1f, SOURCE1)
+
+        assertCornerRadiiEquals(5f, 5f)
+    }
+
+    @Test
+    fun getCornerRadii_topRadius_maxed_to_height() {
+        whenever(targetView.height).thenReturn(5)
+        featureFlags.set(Flags.IMPROVED_HUN_ANIMATIONS, true)
+        roundable.requestRoundness(1f, 0f, SOURCE1)
+
+        assertCornerRadiiEquals(5f, 0f)
+    }
+
+    @Test
+    fun getCornerRadii_bottomRadius_maxed_to_height() {
+        whenever(targetView.height).thenReturn(5)
+        featureFlags.set(Flags.IMPROVED_HUN_ANIMATIONS, true)
+        roundable.requestRoundness(0f, 1f, SOURCE1)
+
+        assertCornerRadiiEquals(0f, 5f)
+    }
+
+    @Test
+    fun getCornerRadii_radii_kept() {
+        whenever(targetView.height).thenReturn(100)
+        featureFlags.set(Flags.IMPROVED_HUN_ANIMATIONS, true)
+        roundable.requestRoundness(1f, 1f, SOURCE1)
+
+        assertCornerRadiiEquals(MAX_RADIUS, MAX_RADIUS)
+    }
+
+    private fun assertCornerRadiiEquals(top: Float, bottom: Float) {
+        assertEquals("topCornerRadius", top, roundable.topCornerRadius)
+        assertEquals("bottomCornerRadius", bottom, roundable.bottomCornerRadius)
+    }
+
     class FakeRoundable(
         targetView: View,
         radius: Float = MAX_RADIUS,
+        featureFlags: FeatureFlags
     ) : Roundable {
         override val roundableState =
             RoundableState(
                 targetView = targetView,
                 roundable = this,
                 maxRadius = radius,
+                featureFlags = featureFlags
             )
+
+        override val clipHeight: Int
+            get() = roundableState.targetView.height
     }
 
     companion object {

@@ -27,7 +27,10 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.fragments.FragmentService
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
@@ -35,6 +38,7 @@ import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.shared.system.QuickStepContract
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -45,6 +49,7 @@ import kotlin.reflect.KMutableProperty0
 @VisibleForTesting
 internal const val INSET_DEBOUNCE_MILLIS = 500L
 
+@SysUISingleton
 class NotificationsQSContainerController @Inject constructor(
         view: NotificationsQuickSettingsContainer,
         private val navigationModeController: NavigationModeController,
@@ -52,7 +57,10 @@ class NotificationsQSContainerController @Inject constructor(
         private val shadeHeaderController: ShadeHeaderController,
         private val shadeExpansionStateManager: ShadeExpansionStateManager,
         private val fragmentService: FragmentService,
-        @Main private val delayableExecutor: DelayableExecutor
+        @Main private val delayableExecutor: DelayableExecutor,
+        private val featureFlags: FeatureFlags,
+        private val
+            notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
     private var qsExpanded = false
@@ -116,6 +124,9 @@ class NotificationsQSContainerController @Inject constructor(
             isGestureNavigation = QuickStepContract.isGesturalMode(mode)
         }
         isGestureNavigation = QuickStepContract.isGesturalMode(currentMode)
+
+        mView.setStackScroller(notificationStackScrollLayoutController.getView())
+        mView.setMigratingNSSL(featureFlags.isEnabled(Flags.MIGRATE_NSSL))
     }
 
     public override fun onViewAttached() {
@@ -144,10 +155,8 @@ class NotificationsQSContainerController @Inject constructor(
         largeScreenShadeHeaderActive = LargeScreenUtils.shouldUseLargeScreenShadeHeader(resources)
         notificationsBottomMargin = resources.getDimensionPixelSize(
                 R.dimen.notification_panel_margin_bottom)
-        largeScreenShadeHeaderHeight =
-                resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
-        shadeHeaderHeight =
-                resources.getDimensionPixelSize(R.dimen.qs_header_height)
+        largeScreenShadeHeaderHeight = calculateLargeShadeHeaderHeight()
+        shadeHeaderHeight = calculateShadeHeaderHeight()
         panelMarginHorizontal = resources.getDimensionPixelSize(
                 R.dimen.notification_panel_margin_horizontal)
         topMargin = if (largeScreenShadeHeaderActive) {
@@ -169,6 +178,23 @@ class NotificationsQSContainerController @Inject constructor(
         if (splitShadeEnabledChanged || dimensChanged) {
             updateBottomSpacing()
         }
+    }
+
+    private fun calculateLargeShadeHeaderHeight(): Int {
+        return resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
+    }
+
+    private fun calculateShadeHeaderHeight(): Int {
+        val minHeight = resources.getDimensionPixelSize(R.dimen.qs_header_height)
+
+        // Following the constraints in xml/qs_header, the total needed height would be the sum of
+        // 1. privacy_container height (R.dimen.large_screen_shade_header_min_height)
+        // 2. carrier_group height (R.dimen.large_screen_shade_header_min_height)
+        // 3. date height (R.dimen.new_qs_header_non_clickable_element_height)
+        val estimatedHeight =
+                2 * resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height) +
+                resources.getDimensionPixelSize(R.dimen.new_qs_header_non_clickable_element_height)
+        return estimatedHeight.coerceAtLeast(minHeight)
     }
 
     override fun setCustomizerAnimating(animating: Boolean) {
@@ -252,14 +278,17 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     private fun setNotificationsConstraints(constraintSet: ConstraintSet) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+            return
+        }
         val startConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID
+        val nsslId = R.id.notification_stack_scroller
         constraintSet.apply {
-            connect(R.id.notification_stack_scroller, START, startConstraintId, START)
-            setMargin(R.id.notification_stack_scroller, START,
-                    if (splitShadeEnabled) 0 else panelMarginHorizontal)
-            setMargin(R.id.notification_stack_scroller, END, panelMarginHorizontal)
-            setMargin(R.id.notification_stack_scroller, TOP, topMargin)
-            setMargin(R.id.notification_stack_scroller, BOTTOM, notificationsBottomMargin)
+            connect(nsslId, START, startConstraintId, START)
+            setMargin(nsslId, START, if (splitShadeEnabled) 0 else panelMarginHorizontal)
+            setMargin(nsslId, END, panelMarginHorizontal)
+            setMargin(nsslId, TOP, topMargin)
+            setMargin(nsslId, BOTTOM, notificationsBottomMargin)
         }
     }
 

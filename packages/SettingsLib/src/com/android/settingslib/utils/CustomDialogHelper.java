@@ -193,6 +193,14 @@ public class CustomDialogHelper {
     }
 
     /**
+     * Sets message padding of the dialog.
+     */
+    public CustomDialogHelper setMessagePadding(int dp) {
+        mDialogMessage.setPadding(dp, dp, dp, dp);
+        return this;
+    }
+
+    /**
      * Sets icon of the dialog.
      */
     public CustomDialogHelper setIcon(Drawable icon) {

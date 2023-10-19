@@ -120,6 +120,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
     }
 
     @Override
+    public int getClipHeight() {
+        return mView.getHeight();
+    }
+
+    @Override
     public void applyRoundnessAndInvalidate() {
         if (mRoundnessChangedListener != null) {
             // We cannot apply the rounded corner to this View, so our parents (in drawChild()) will

@@ -48,6 +48,8 @@ import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -88,12 +90,13 @@ constructor(
     private val chipbarAnimator: ChipbarAnimator,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
-    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler?,
+    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler,
     private val viewUtil: ViewUtil,
     private val vibratorHelper: VibratorHelper,
     wakeLockBuilder: WakeLock.Builder,
     systemClock: SystemClock,
     tempViewUiEventLogger: TemporaryViewUiEventLogger,
+    private val featureFlags: FeatureFlags,
 ) :
     TemporaryViewDisplayController<ChipbarInfo, ChipbarLogger>(
         context,
@@ -231,14 +234,18 @@ constructor(
         maybeGetAccessibilityFocus(newInfo, currentView)
 
         // ---- Haptics ----
-        newInfo.vibrationEffect?.let {
-            vibratorHelper.vibrate(
-                Process.myUid(),
-                context.getApplicationContext().getPackageName(),
-                it,
-                newInfo.windowTitle,
-                VIBRATION_ATTRIBUTES,
-            )
+        if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            vibratorHelper.performHapticFeedback(parent, newInfo.vibrationConstant)
+        } else {
+            newInfo.vibrationEffect?.let {
+                vibratorHelper.vibrate(
+                    Process.myUid(),
+                    context.getApplicationContext().getPackageName(),
+                    it,
+                    newInfo.windowTitle,
+                    VIBRATION_ATTRIBUTES,
+                )
+            }
         }
     }
 
@@ -289,10 +296,6 @@ constructor(
     }
 
     private fun updateGestureListening() {
-        if (swipeChipbarAwayGestureHandler == null) {
-            return
-        }
-
         val currentDisplayInfo = getCurrentDisplayInfo()
         if (currentDisplayInfo != null && currentDisplayInfo.info.allowSwipeToDismiss) {
             swipeChipbarAwayGestureHandler.setViewFetcher { currentDisplayInfo.view }

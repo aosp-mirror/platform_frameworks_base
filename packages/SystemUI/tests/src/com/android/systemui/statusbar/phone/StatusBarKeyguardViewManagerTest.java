@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
-import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
+import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
+import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -34,6 +34,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.service.trust.TrustAgentService;
 import android.testing.AndroidTestingRunner;
@@ -63,16 +65,18 @@ import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.bouncer.ui.BouncerView;
+import com.android.systemui.bouncer.ui.BouncerViewDelegate;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyguard.data.BouncerView;
-import com.android.systemui.keyguard.data.BouncerViewDelegate;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter;
@@ -137,6 +141,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private BouncerView mBouncerView;
     @Mock private BouncerViewDelegate mBouncerViewDelegate;
     @Mock private OnBackAnimationCallback mBouncerViewDelegateBackCallback;
+    @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private WindowInsetsController mWindowInsetsController;
     @Mock private TaskbarDelegate mTaskbarDelegate;
@@ -170,7 +175,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM))
                 .thenReturn(true);
 
-        when(mCentralSurfaces.getNotificationShadeWindowView())
+        when(mNotificationShadeWindowController.getWindowRootView())
                 .thenReturn(mNotificationShadeWindowView);
         when(mNotificationShadeWindowView.getWindowInsetsController())
                 .thenReturn(mWindowInsetsController);
@@ -186,7 +191,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mDreamOverlayStateController,
                         mock(NavigationModeController.class),
                         mock(DockManager.class),
-                        mock(NotificationShadeWindowController.class),
+                        mNotificationShadeWindowController,
                         mKeyguardStateController,
                         mock(NotificationMediaManager.class),
                         mKeyguardMessageAreaFactory,
@@ -200,7 +205,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mBouncerView,
                         mAlternateBouncerInteractor,
                         mUdfpsOverlayInteractor,
-                        mActivityStarter) {
+                        mActivityStarter,
+                        mock(KeyguardTransitionInteractor.class),
+                        StandardTestDispatcher(null, null),
+                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -648,21 +656,21 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Test
     public void testReportBouncerOnDreamWhenVisible() {
         mBouncerExpansionCallback.onVisibilityChanged(true);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+        assertFalse(mStatusBarKeyguardViewManager.isBouncerShowingOverDream());
         Mockito.clearInvocations(mCentralSurfaces);
         when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
         mBouncerExpansionCallback.onVisibilityChanged(true);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(true);
+        assertTrue(mStatusBarKeyguardViewManager.isBouncerShowingOverDream());
     }
 
     @Test
     public void testReportBouncerOnDreamWhenNotVisible() {
         mBouncerExpansionCallback.onVisibilityChanged(false);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+        assertFalse(mStatusBarKeyguardViewManager.isBouncerShowingOverDream());
         Mockito.clearInvocations(mCentralSurfaces);
         when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
         mBouncerExpansionCallback.onVisibilityChanged(false);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+        assertFalse(mStatusBarKeyguardViewManager.isBouncerShowingOverDream());
     }
 
     @Test
@@ -700,7 +708,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mBouncerView,
                         mAlternateBouncerInteractor,
                         mUdfpsOverlayInteractor,
-                        mActivityStarter) {
+                        mActivityStarter,
+                        mock(KeyguardTransitionInteractor.class),
+                        StandardTestDispatcher(null, null),
+                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -735,6 +746,16 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         // THEN alternate bouncer is NOT hidden
         verify(mAlternateBouncerInteractor, never()).hide();
+    }
+
+    @Test
+    public void testResetBouncerAnimatingAway() {
+        reset(mPrimaryBouncerInteractor);
+        when(mPrimaryBouncerInteractor.isAnimatingAway()).thenReturn(true);
+
+        mStatusBarKeyguardViewManager.reset(true);
+
+        verify(mPrimaryBouncerInteractor, never()).hide();
     }
 
     @Test

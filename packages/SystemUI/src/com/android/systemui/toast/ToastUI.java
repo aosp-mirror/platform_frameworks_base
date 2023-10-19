@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.widget.ToastPresenter;
@@ -115,8 +116,14 @@ public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
             Context context = mContext.createContextAsUser(userHandle, 0);
 
             DisplayManager mDisplayManager = mContext.getSystemService(DisplayManager.class);
-            Context displayContext = context.createDisplayContext(
-                    mDisplayManager.getDisplay(displayId));
+            Display display = mDisplayManager.getDisplay(displayId);
+            if (display == null) {
+                // Display for which this toast was scheduled for is no longer available.
+                mToastLogger.logOnSkipToastForInvalidDisplay(packageName, token.toString(),
+                        displayId);
+                return;
+            }
+            Context displayContext = context.createDisplayContext(display);
             mToast = mToastFactory.createToast(mContext /* sysuiContext */, text, packageName,
                     userHandle.getIdentifier(), mOrientation);
 

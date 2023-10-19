@@ -75,6 +75,7 @@ import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
+import androidx.annotation.NonNull;
 import androidx.camera.extensions.impl.AutoImageCaptureExtenderImpl;
 import androidx.camera.extensions.impl.AutoPreviewExtenderImpl;
 import androidx.camera.extensions.impl.BeautyImageCaptureExtenderImpl;
@@ -204,7 +205,7 @@ public class CameraExtensionsProxyService extends Service {
      * A per-process global camera extension manager instance, to track and
      * initialize/release extensions depending on client activity.
      */
-    private static final class CameraExtensionManagerGlobal {
+    private static final class CameraExtensionManagerGlobal implements IBinder.DeathRecipient {
         private static final String TAG = "CameraExtensionManagerGlobal";
         private final int EXTENSION_DELAY_MS = 1000;
 
@@ -212,8 +213,9 @@ public class CameraExtensionsProxyService extends Service {
         private final HandlerThread mHandlerThread;
         private final Object mLock = new Object();
 
-        private long mCurrentClientCount = 0;
-        private ArraySet<Long> mActiveClients = new ArraySet<>();
+        private ArraySet<IBinder> mActiveClients = new ArraySet<>();
+        private HashMap<IBinder, ArraySet<IBinder.DeathRecipient>> mClientDeathRecipient =
+                new HashMap<>();
         private IInitializeSessionCallback mInitializeCb = null;
 
         // Singleton instance
@@ -314,8 +316,20 @@ public class CameraExtensionsProxyService extends Service {
             return GLOBAL_CAMERA_MANAGER;
         }
 
-        public long registerClient(Context ctx) {
+        public boolean registerClient(Context ctx, IBinder token) {
             synchronized (mLock) {
+                if (mActiveClients.contains(token)) {
+                    Log.e(TAG, "Failed to register existing client!");
+                    return false;
+                }
+
+                try {
+                    token.linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to link to binder token!");
+                    return false;
+                }
+
                 if (INIT_API_SUPPORTED) {
                     if (mActiveClients.isEmpty()) {
                         InitializerFuture status = new InitializerFuture();
@@ -327,43 +341,76 @@ public class CameraExtensionsProxyService extends Service {
                                     TimeUnit.MILLISECONDS);
                         } catch (TimeoutException e) {
                             Log.e(TAG, "Timed out while initializing camera extensions!");
-                            return -1;
+                            return false;
                         }
                         if (!initSuccess) {
                             Log.e(TAG, "Failed while initializing camera extensions!");
-                            return -1;
+                            return false;
                         }
                     }
                 }
 
-                long ret = mCurrentClientCount;
-                mCurrentClientCount++;
-                if (mCurrentClientCount < 0) {
-                    mCurrentClientCount = 0;
-                }
-                mActiveClients.add(ret);
+                mActiveClients.add(token);
+                mClientDeathRecipient.put(token, new ArraySet<>());
 
-                return ret;
+                return true;
             }
         }
 
-        public void unregisterClient(long clientId) {
+        public void unregisterClient(IBinder token) {
             synchronized (mLock) {
-                if (mActiveClients.remove(clientId) && mActiveClients.isEmpty() &&
-                        INIT_API_SUPPORTED) {
-                    InitializerFuture status = new InitializerFuture();
-                    InitializerImpl.deinit(new ReleaseHandler(status),
-                            new HandlerExecutor(mHandler));
-                    boolean releaseSuccess;
-                    try {
-                        releaseSuccess = status.get(EXTENSION_DELAY_MS, TimeUnit.MILLISECONDS);
-                    } catch (TimeoutException e) {
-                        Log.e(TAG, "Timed out while releasing camera extensions!");
-                        return;
+                if (mActiveClients.remove(token)) {
+                    token.unlinkToDeath(this, 0);
+                    mClientDeathRecipient.remove(token);
+                    if (mActiveClients.isEmpty() && INIT_API_SUPPORTED) {
+                        InitializerFuture status = new InitializerFuture();
+                        InitializerImpl.deinit(new ReleaseHandler(status),
+                                new HandlerExecutor(mHandler));
+                        boolean releaseSuccess;
+                        try {
+                            releaseSuccess = status.get(EXTENSION_DELAY_MS, TimeUnit.MILLISECONDS);
+                        } catch (TimeoutException e) {
+                            Log.e(TAG, "Timed out while releasing camera extensions!");
+                            return;
+                        }
+                        if (!releaseSuccess) {
+                            Log.e(TAG, "Failed while releasing camera extensions!");
+                        }
                     }
-                    if (!releaseSuccess) {
-                        Log.e(TAG, "Failed while releasing camera extensions!");
-                    }
+                }
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            // Do nothing, handled below
+        }
+
+        @Override
+        public void binderDied(@NonNull IBinder who) {
+            synchronized (mLock) {
+                if (mClientDeathRecipient.containsKey(who)) {
+                    mClientDeathRecipient.get(who).stream().forEach(
+                            recipient -> recipient.binderDied(who));
+                }
+                unregisterClient(who);
+            }
+        }
+
+        public void registerDeathRecipient(IBinder token, IBinder.DeathRecipient recipient) {
+            synchronized (mLock) {
+                if (mClientDeathRecipient.containsKey(token)) {
+                    ArraySet<IBinder.DeathRecipient> recipients = mClientDeathRecipient.get(token);
+                    recipients.add(recipient);
+                }
+            }
+        }
+
+        public void unregisterDeathRecipient(IBinder token, IBinder.DeathRecipient recipient) {
+            synchronized (mLock) {
+                if (mClientDeathRecipient.containsKey(token)) {
+                    ArraySet<IBinder.DeathRecipient> recipients = mClientDeathRecipient.get(token);
+                    recipients.remove(recipient);
                 }
             }
         }
@@ -406,21 +453,35 @@ public class CameraExtensionsProxyService extends Service {
     /**
      * @hide
      */
-    private static long registerClient(Context ctx) {
+    private static boolean registerClient(Context ctx, IBinder token) {
         if (!EXTENSIONS_PRESENT) {
-            return -1;
+            return false;
         }
-        return CameraExtensionManagerGlobal.get().registerClient(ctx);
+        return CameraExtensionManagerGlobal.get().registerClient(ctx, token);
     }
 
     /**
      * @hide
      */
-    public static void unregisterClient(long clientId) {
+    public static void unregisterClient(IBinder token) {
         if (!EXTENSIONS_PRESENT) {
             return;
         }
-        CameraExtensionManagerGlobal.get().unregisterClient(clientId);
+        CameraExtensionManagerGlobal.get().unregisterClient(token);
+    }
+
+    /**
+     * @hide
+     */
+    private static void registerDeathRecipient(IBinder token, IBinder.DeathRecipient recipient) {
+        CameraExtensionManagerGlobal.get().registerDeathRecipient(token, recipient);
+    }
+
+    /**
+     * @hide
+     */
+    private static void unregisterDeathRecipient(IBinder token, IBinder.DeathRecipient recipient) {
+        CameraExtensionManagerGlobal.get().unregisterDeathRecipient(token, recipient);
     }
 
     /**
@@ -649,13 +710,14 @@ public class CameraExtensionsProxyService extends Service {
 
     private class CameraExtensionsProxyServiceStub extends ICameraExtensionsProxyService.Stub {
         @Override
-        public long registerClient() {
-            return CameraExtensionsProxyService.registerClient(CameraExtensionsProxyService.this);
+        public boolean registerClient(IBinder token) {
+            return CameraExtensionsProxyService.registerClient(CameraExtensionsProxyService.this,
+                    token);
         }
 
         @Override
-        public void unregisterClient(long clientId) {
-            CameraExtensionsProxyService.unregisterClient(clientId);
+        public void unregisterClient(IBinder token) {
+            CameraExtensionsProxyService.unregisterClient(token);
         }
 
         private boolean checkCameraPermission() {
@@ -1192,16 +1254,18 @@ public class CameraExtensionsProxyService extends Service {
         }
     }
 
-    private class SessionProcessorImplStub extends ISessionProcessorImpl.Stub {
+    private class SessionProcessorImplStub extends ISessionProcessorImpl.Stub implements
+            IBinder.DeathRecipient {
         private final SessionProcessorImpl mSessionProcessor;
         private String mCameraId = null;
+        private IBinder mToken;
 
         public SessionProcessorImplStub(SessionProcessorImpl sessionProcessor) {
             mSessionProcessor = sessionProcessor;
         }
 
         @Override
-        public CameraSessionConfig initSession(String cameraId,
+        public CameraSessionConfig initSession(IBinder token, String cameraId,
                 Map<String, CameraMetadataNative> charsMapNative, OutputSurface previewSurface,
                 OutputSurface imageCaptureSurface, OutputSurface postviewSurface) {
             OutputSurfaceImplStub outputPreviewSurfaceImpl =
@@ -1253,12 +1317,14 @@ public class CameraExtensionsProxyService extends Service {
             ret.sessionParameter = initializeParcelableMetadata(
                     sessionConfig.getSessionParameters(), cameraId);
             mCameraId = cameraId;
-
+            mToken = token;
+            CameraExtensionsProxyService.registerDeathRecipient(mToken, this);
             return ret;
         }
 
         @Override
-        public void deInitSession() {
+        public void deInitSession(IBinder token) {
+            CameraExtensionsProxyService.unregisterDeathRecipient(mToken, this);
             mSessionProcessor.deInitSession();
         }
 
@@ -1330,6 +1396,11 @@ public class CameraExtensionsProxyService extends Service {
 
             return null;
         }
+
+        @Override
+        public void binderDied() {
+            mSessionProcessor.deInitSession();
+        }
     }
 
     private class OutputSurfaceConfigurationImplStub implements OutputSurfaceConfigurationImpl {
@@ -1395,24 +1466,31 @@ public class CameraExtensionsProxyService extends Service {
         }
     }
 
-    private class PreviewExtenderImplStub extends IPreviewExtenderImpl.Stub {
+    private class PreviewExtenderImplStub extends IPreviewExtenderImpl.Stub implements
+            IBinder.DeathRecipient {
         private final PreviewExtenderImpl mPreviewExtender;
         private String mCameraId = null;
+        private boolean mSessionEnabled;
+        private IBinder mToken;
 
         public PreviewExtenderImplStub(PreviewExtenderImpl previewExtender) {
             mPreviewExtender = previewExtender;
         }
 
         @Override
-        public void onInit(String cameraId, CameraMetadataNative cameraCharacteristics) {
+        public void onInit(IBinder token, String cameraId,
+                CameraMetadataNative cameraCharacteristics) {
             mCameraId = cameraId;
             CameraCharacteristics chars = new CameraCharacteristics(cameraCharacteristics);
             mCameraManager.registerDeviceStateListener(chars);
             mPreviewExtender.onInit(cameraId, chars, CameraExtensionsProxyService.this);
+            mToken = token;
+            CameraExtensionsProxyService.registerDeathRecipient(mToken, this);
         }
 
         @Override
-        public void onDeInit() {
+        public void onDeInit(IBinder token) {
+            CameraExtensionsProxyService.unregisterDeathRecipient(mToken, this);
             mPreviewExtender.onDeInit();
         }
 
@@ -1423,11 +1501,13 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public CaptureStageImpl onEnableSession() {
+            mSessionEnabled = true;
             return initializeParcelable(mPreviewExtender.onEnableSession(), mCameraId);
         }
 
         @Override
         public CaptureStageImpl onDisableSession() {
+            mSessionEnabled = false;
             return initializeParcelable(mPreviewExtender.onDisableSession(), mCameraId);
         }
 
@@ -1516,26 +1596,41 @@ public class CameraExtensionsProxyService extends Service {
             }
             return null;
         }
+
+        @Override
+        public void binderDied() {
+            if (mSessionEnabled) {
+                mPreviewExtender.onDisableSession();
+            }
+            mPreviewExtender.onDeInit();
+        }
     }
 
-    private class ImageCaptureExtenderImplStub extends IImageCaptureExtenderImpl.Stub {
+    private class ImageCaptureExtenderImplStub extends IImageCaptureExtenderImpl.Stub implements
+            IBinder.DeathRecipient {
         private final ImageCaptureExtenderImpl mImageExtender;
         private String mCameraId = null;
+        private boolean mSessionEnabled;
+        private IBinder mToken;
 
         public ImageCaptureExtenderImplStub(ImageCaptureExtenderImpl imageExtender) {
             mImageExtender = imageExtender;
         }
 
         @Override
-        public void onInit(String cameraId, CameraMetadataNative cameraCharacteristics) {
+        public void onInit(IBinder token, String cameraId,
+                CameraMetadataNative cameraCharacteristics) {
             CameraCharacteristics chars = new CameraCharacteristics(cameraCharacteristics);
             mCameraManager.registerDeviceStateListener(chars);
             mImageExtender.onInit(cameraId, chars, CameraExtensionsProxyService.this);
             mCameraId = cameraId;
+            mToken = token;
+            CameraExtensionsProxyService.registerDeathRecipient(mToken, this);
         }
 
         @Override
-        public void onDeInit() {
+        public void onDeInit(IBinder token) {
+            CameraExtensionsProxyService.unregisterDeathRecipient(mToken, this);
             mImageExtender.onDeInit();
         }
 
@@ -1564,11 +1659,13 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public CaptureStageImpl onEnableSession() {
+            mSessionEnabled = true;
             return initializeParcelable(mImageExtender.onEnableSession(), mCameraId);
         }
 
         @Override
         public CaptureStageImpl onDisableSession() {
+            mSessionEnabled = false;
             return initializeParcelable(mImageExtender.onDisableSession(), mCameraId);
         }
 
@@ -1736,6 +1833,14 @@ public class CameraExtensionsProxyService extends Service {
             }
 
             return null;
+        }
+
+        @Override
+        public void binderDied() {
+            if (mSessionEnabled) {
+                mImageExtender.onDisableSession();
+            }
+            mImageExtender.onDeInit();
         }
     }
 

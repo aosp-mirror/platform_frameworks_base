@@ -38,7 +38,7 @@ interface AuthBiometricViewAdapter {
 
     fun onHelp(@BiometricAuthenticator.Modality modality: Int, help: String)
 
-    fun startTransitionToCredentialUI()
+    fun startTransitionToCredentialUI(isError: Boolean)
 
     fun requestLayout()
 

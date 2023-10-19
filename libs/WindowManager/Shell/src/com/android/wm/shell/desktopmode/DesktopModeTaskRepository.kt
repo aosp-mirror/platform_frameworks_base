@@ -25,6 +25,7 @@ import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.util.KtProtoLog
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
@@ -43,6 +44,7 @@ class DesktopModeTaskRepository {
          */
         val activeTasks: ArraySet<Int> = ArraySet(),
         val visibleTasks: ArraySet<Int> = ArraySet(),
+        var stashed: Boolean = false
     )
 
     // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
@@ -85,8 +87,10 @@ class DesktopModeTaskRepository {
         visibleTasksListeners[visibleTasksListener] = executor
         displayData.keyIterator().forEach { displayId ->
             val visibleTasks = getVisibleTaskCount(displayId)
+            val stashed = isStashed(displayId)
             executor.execute {
                 visibleTasksListener.onVisibilityChanged(displayId, visibleTasks > 0)
+                visibleTasksListener.onStashedChanged(displayId, stashed)
             }
         }
     }
@@ -312,6 +316,52 @@ class DesktopModeTaskRepository {
     }
 
     /**
+     * Update stashed status on display with id [displayId]
+     */
+    fun setStashed(displayId: Int, stashed: Boolean) {
+        val data = displayData.getOrCreate(displayId)
+        val oldValue = data.stashed
+        data.stashed = stashed
+        if (oldValue != stashed) {
+            KtProtoLog.d(
+                    WM_SHELL_DESKTOP_MODE,
+                    "DesktopTaskRepo: mark stashed=%b displayId=%d",
+                    stashed,
+                    displayId
+            )
+            visibleTasksListeners.forEach { (listener, executor) ->
+                executor.execute { listener.onStashedChanged(displayId, stashed) }
+            }
+        }
+    }
+
+    /**
+     * Check if display with id [displayId] has desktop tasks stashed
+     */
+    fun isStashed(displayId: Int): Boolean {
+        return displayData[displayId]?.stashed ?: false
+    }
+
+    internal fun dump(pw: PrintWriter, prefix: String) {
+        val innerPrefix = "$prefix  "
+        pw.println("${prefix}DesktopModeTaskRepository")
+        dumpDisplayData(pw, innerPrefix)
+        pw.println("${innerPrefix}freeformTasksInZOrder=${freeformTasksInZOrder.toDumpString()}")
+        pw.println("${innerPrefix}activeTasksListeners=${activeTasksListeners.size}")
+        pw.println("${innerPrefix}visibleTasksListeners=${visibleTasksListeners.size}")
+    }
+
+    private fun dumpDisplayData(pw: PrintWriter, prefix: String) {
+        val innerPrefix = "$prefix  "
+        displayData.forEach { displayId, data ->
+            pw.println("${prefix}Display $displayId:")
+            pw.println("${innerPrefix}activeTasks=${data.activeTasks.toDumpString()}")
+            pw.println("${innerPrefix}visibleTasks=${data.visibleTasks.toDumpString()}")
+            pw.println("${innerPrefix}stashed=${data.stashed}")
+        }
+    }
+
+    /**
      * Defines interface for classes that can listen to changes for active tasks in desktop mode.
      */
     interface ActiveTasksListener {
@@ -329,5 +379,14 @@ class DesktopModeTaskRepository {
          * Called when the desktop starts or stops showing freeform tasks.
          */
         fun onVisibilityChanged(displayId: Int, hasVisibleFreeformTasks: Boolean) {}
+
+        /**
+         * Called when the desktop stashed status changes.
+         */
+        fun onStashedChanged(displayId: Int, stashed: Boolean) {}
     }
+}
+
+private fun <T> Iterable<T>.toDumpString(): String {
+    return joinToString(separator = ", ", prefix = "[", postfix = "]")
 }

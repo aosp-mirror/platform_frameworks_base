@@ -77,7 +77,12 @@ public class KeyguardPinViewController
             });
         }
         mPasswordEntry.setUserActivityListener(this::onUserInput);
+        mView.onDevicePostureChanged(mPostureController.getDevicePosture());
         mPostureController.addCallback(mPostureCallback);
+        if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
+            mPasswordEntry.setUsePinShapes(true);
+            updateAutoConfirmationState();
+        }
     }
 
     protected void onUserInput() {
@@ -99,10 +104,6 @@ public class KeyguardPinViewController
 
     @Override
     public void startAppearAnimation() {
-        if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
-            mPasswordEntry.setUsePinShapes(true);
-            updateAutoConfirmationState();
-        }
         super.startAppearAnimation();
     }
 
@@ -164,15 +165,18 @@ public class KeyguardPinViewController
      * Responsible for identifying if PIN hinting is to be enabled or not
      */
     private boolean isPinHinting() {
-        return mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser())
-                == DEFAULT_PIN_LENGTH;
+        return mPinLength == DEFAULT_PIN_LENGTH;
     }
 
     /**
-     * Responsible for identifying if auto confirm is enabled or not in Settings
+     * Responsible for identifying if auto confirm is enabled or not in Settings and
+     * a valid PIN_LENGTH is stored on the device (though the latter check is only to make it more
+     * robust since we only allow enabling PIN confirmation if the user has a valid PIN length
+     * saved on device)
      */
     private boolean isAutoPinConfirmEnabledInSettings() {
         //Checks if user has enabled the auto confirm in Settings
-        return mLockPatternUtils.isAutoPinConfirmEnabled(KeyguardUpdateMonitor.getCurrentUser());
+        return mLockPatternUtils.isAutoPinConfirmEnabled(KeyguardUpdateMonitor.getCurrentUser())
+                && mPinLength != LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
     }
 }

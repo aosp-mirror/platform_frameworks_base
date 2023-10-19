@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2023 The Android Open Source Project
   ~
@@ -13,30 +14,22 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="56dp"
-    android:height="24dp"
-    android:viewportWidth="56"
-    android:viewportHeight="24">
-    <path
-        android:pathData="M12,0L44,0A12,12 0,0 1,56 12L56,12A12,12 0,0 1,44 24L12,24A12,12 0,0 1,0 12L0,12A12,12 0,0 1,12 0z"
-        android:fillColor="#ffffff"/>
-    <group
-        android:scaleX="0.8"
-        android:scaleY="0.8"
-        android:translateY="2"
-        android:translateX="18">
-        <path
-            android:pathData="M21.5,9C22.3284,9 23,8.3284 23,7.5C23,6.6716 22.3284,6 21.5,6C20.6716,6 20,6.6716 20,7.5C20,8.3284 20.6716,9 21.5,9Z"
-            android:fillColor="#000000"/>
-        <path
-            android:pathData="M17,14C18.6569,14 20,12.6569 20,11C20,9.3432 18.6569,8 17,8C15.3431,8 14,9.3432 14,11C14,12.6569 15.3431,14 17,14Z"
-            android:fillColor="#000000"/>
-        <path
-            android:pathData="M17,22C18.933,22 20.5,20.433 20.5,18.5C20.5,16.567 18.933,15 17,15C15.067,15 13.5,16.567 13.5,18.5C13.5,20.433 15.067,22 17,22Z"
-            android:fillColor="#000000"/>
-        <path
-            android:pathData="M7,14C10.3137,14 13,11.3137 13,8C13,4.6863 10.3137,2 7,2C3.6863,2 1,4.6863 1,8C1,11.3137 3.6863,14 7,14Z"
-            android:fillColor="#000000"/>
-    </group>
-</vector>
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@id/background"
+        android:gravity="center">
+        <shape android:shape="oval">
+            <size
+                android:height="24px"
+                android:width="24px"
+                />
+            <solid android:color="#FFFFFFFF" />
+        </shape>
+    </item>
+    <item android:id="@id/icon"
+        android:gravity="center"
+        android:width="20px"
+        android:height="20px"
+        android:drawable="@drawable/ic_person_outline"
+        />
+</layer-list>

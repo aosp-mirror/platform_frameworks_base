@@ -40,9 +40,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.spy;
 
 import android.platform.test.annotations.Presubmit;
-import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
-import android.window.ClientWindowFrames;
 
 import androidx.test.filters.SmallTest;
 
@@ -333,8 +331,7 @@ public class SyncEngineTests extends WindowTestsBase {
         w.reparent(botChildWC, POSITION_TOP);
         parentWC.prepareSync();
         // Assume the window has drawn with the latest configuration.
-        w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
-                new MergedConfiguration(), true /* useLatestConfig */, true /* relayoutVisible */);
+        makeLastConfigReportedToClient(w, true /* visible */);
         assertTrue(w.onSyncFinishedDrawing());
         assertEquals(SYNC_STATE_READY, w.mSyncState);
         w.reparent(topChildWC, POSITION_TOP);

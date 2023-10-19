@@ -147,10 +147,12 @@
         android:id="@+id/magnifier_zoom_slider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:max="6"
         app:progress="0"
         app:iconStartContentDescription="@string/accessibility_control_zoom_out"
-        app:iconEndContentDescription="@string/accessibility_control_zoom_in"/>
+        app:iconEndContentDescription="@string/accessibility_control_zoom_in"
+        app:tickMark="@android:color/transparent"
+        app:seekBarChangeMagnitude="10"
+    />
 
     <Button
         android:id="@+id/magnifier_done_button"

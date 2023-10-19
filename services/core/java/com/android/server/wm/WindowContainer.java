@@ -81,7 +81,9 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Pools;
@@ -173,6 +175,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * The {@link InsetsSourceProvider}s provided by this window container.
      */
     protected SparseArray<InsetsSourceProvider> mInsetsSourceProviders = null;
+
+    @Nullable
+    private ArrayMap<IBinder, DeathRecipient> mInsetsOwnerDeathRecipientMap;
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
@@ -419,11 +424,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Adds an {@link InsetsFrameProvider} which describes what insets should be provided to
      * this {@link WindowContainer} and its children.
      *
-     * @param provider describes the insets types and the frames.
+     * @param provider describes the insets type and the frame.
+     * @param owner owns the insets source which only exists when the owner is alive.
      */
-    void addLocalInsetsFrameProvider(InsetsFrameProvider provider) {
-        if (provider == null) {
-            throw new IllegalArgumentException("Insets type not specified.");
+    void addLocalInsetsFrameProvider(InsetsFrameProvider provider, IBinder owner) {
+        if (provider == null || owner == null) {
+            throw new IllegalArgumentException("Insets provider or owner not specified.");
         }
         if (mDisplayContent == null) {
             // This is possible this container is detached when WM shell is responding to a previous
@@ -432,10 +438,26 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             Slog.w(TAG, "Can't add insets frame provider when detached. " + this);
             return;
         }
+
+        if (mInsetsOwnerDeathRecipientMap == null) {
+            mInsetsOwnerDeathRecipientMap = new ArrayMap<>();
+        }
+        DeathRecipient deathRecipient = mInsetsOwnerDeathRecipientMap.get(owner);
+        if (deathRecipient == null) {
+            deathRecipient = new DeathRecipient(owner);
+            try {
+                owner.linkToDeath(deathRecipient, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to add source for " + provider + " since the owner has died.");
+                return;
+            }
+            mInsetsOwnerDeathRecipientMap.put(owner, deathRecipient);
+        }
+        final int id = provider.getId();
+        deathRecipient.addSourceId(id);
         if (mLocalInsetsSources == null) {
             mLocalInsetsSources = new SparseArray<>();
         }
-        final int id = provider.getId();
         if (mLocalInsetsSources.get(id) != null) {
             if (DEBUG) {
                 Slog.d(TAG, "The local insets source for this " + provider
@@ -448,27 +470,77 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
     }
 
-    void removeLocalInsetsFrameProvider(InsetsFrameProvider provider) {
-        if (provider == null) {
-            throw new IllegalArgumentException("Insets type not specified.");
-        }
-        if (mLocalInsetsSources == null) {
-            return;
+    private class DeathRecipient implements IBinder.DeathRecipient {
+
+        private final IBinder mOwner;
+        private final ArraySet<Integer> mSourceIds = new ArraySet<>();
+
+        DeathRecipient(IBinder owner) {
+            mOwner = owner;
         }
 
-        final int id = provider.getId();
-        if (mLocalInsetsSources.get(id) == null) {
-            if (DEBUG) {
-                Slog.d(TAG, "Given " + provider + " doesn't have a local insets source.");
+        void addSourceId(int id) {
+            mSourceIds.add(id);
+        }
+
+        void removeSourceId(int id) {
+            mSourceIds.remove(id);
+        }
+
+        boolean hasSource() {
+            return !mSourceIds.isEmpty();
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mWmService.mGlobalLock) {
+                boolean changed = false;
+                for (int i = mSourceIds.size() - 1; i >= 0; i--) {
+                    changed |= removeLocalInsetsSource(mSourceIds.valueAt(i));
+                }
+                mSourceIds.clear();
+                mOwner.unlinkToDeath(this, 0);
+                mInsetsOwnerDeathRecipientMap.remove(mOwner);
+                if (changed && mDisplayContent != null) {
+                    mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
+                }
             }
-            return;
         }
-        mLocalInsetsSources.remove(id);
+    }
 
-        // Update insets if this window is attached.
-        if (mDisplayContent != null) {
+    void removeLocalInsetsFrameProvider(InsetsFrameProvider provider, IBinder owner) {
+        if (provider == null || owner == null) {
+            throw new IllegalArgumentException("Insets provider or owner not specified.");
+        }
+        final int id = provider.getId();
+        if (removeLocalInsetsSource(id) && mDisplayContent != null) {
             mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
         }
+        if (mInsetsOwnerDeathRecipientMap == null) {
+            return;
+        }
+        final DeathRecipient deathRecipient = mInsetsOwnerDeathRecipientMap.get(owner);
+        if (deathRecipient == null) {
+            return;
+        }
+        deathRecipient.removeSourceId(id);
+        if (!deathRecipient.hasSource()) {
+            owner.unlinkToDeath(deathRecipient, 0);
+            mInsetsOwnerDeathRecipientMap.remove(owner);
+        }
+    }
+
+    private boolean removeLocalInsetsSource(int id) {
+        if (mLocalInsetsSources == null) {
+            return false;
+        }
+        if (mLocalInsetsSources.removeReturnOld(id) == null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Given id " + Integer.toHexString(id) + " doesn't exist.");
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1071,6 +1143,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void onResize() {
+        if (mControllableInsetProvider != null) {
+            mControllableInsetProvider.onWindowContainerBoundsChanged();
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onParentResize();
@@ -1090,6 +1165,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void onMovedByResize() {
+        if (mControllableInsetProvider != null) {
+            mControllableInsetProvider.onWindowContainerBoundsChanged();
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onMovedByResize();
@@ -4141,7 +4219,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     getDisplayContent().getInsetsStateController().getSourceProviders();
             for (int i = providers.size(); i >= 0; i--) {
                 final InsetsSourceProvider insetProvider = providers.valueAt(i);
-                if (!insetProvider.getSource().insetsRoundedCornerFrame()) {
+                if (!insetProvider.getSource().hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
                     return;
                 }
 

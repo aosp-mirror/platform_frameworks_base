@@ -16,10 +16,12 @@
 
 package com.android.wm.shell.keyguard;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.view.WindowManager.TRANSIT_SLEEP;
@@ -28,6 +30,7 @@ import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -73,6 +76,10 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
     private IRemoteTransition mOccludeByDreamTransition = null;
     private IRemoteTransition mUnoccludeTransition = null;
 
+    // While set true, Keyguard has created a remote animation runner to handle the open app
+    // transition.
+    private boolean mIsLaunchingActivityOverLockscreen;
+
     private final class StartedTransition {
         final TransitionInfo mInfo;
         final SurfaceControl.Transaction mFinishT;
@@ -117,7 +124,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionFinishCallback finishCallback) {
-        if (!handles(info)) {
+        if (!handles(info) || mIsLaunchingActivityOverLockscreen) {
             return false;
         }
 
@@ -152,9 +159,15 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionFinishCallback finishCallback) {
+
+        if (remoteHandler == null) {
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "missing handler for keyguard %s transition", description);
+            return false;
+        }
+
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "start keyguard %s transition, info = %s", description, info);
-
         try {
             mStartedTransitions.put(transition,
                     new StartedTransition(info, finishTransaction, remoteHandler));
@@ -166,10 +179,16 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                             if (sct != null) {
                                 finishTransaction.merge(sct);
                             }
+                            final WindowContainerTransaction mergedWct =
+                                    new WindowContainerTransaction();
+                            if (wct != null) {
+                                mergedWct.merge(wct, true);
+                            }
+                            maybeDismissFreeformOccludingKeyguard(mergedWct, info);
                             // Post our finish callback to let startAnimation finish first.
                             mMainExecutor.executeDelayed(() -> {
                                 mStartedTransitions.remove(transition);
-                                finishCallback.onTransitionFinished(wct, null);
+                                finishCallback.onTransitionFinished(mergedWct);
                             }, 0);
                         }
                     });
@@ -206,7 +225,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                 // implementing an AIDL interface.
                 Log.wtf(TAG, "RemoteException thrown from KeyguardService transition", e);
             }
-            nextFinishCallback.onTransitionFinished(null, null);
+            nextFinishCallback.onTransitionFinished(null);
         } else if (nextInfo.getType() == TRANSIT_SLEEP) {
             // An empty SLEEP transition comes in as a signal to abort transitions whenever a sleep
             // token is held. In cases where keyguard is showing, we are running the animation for
@@ -261,6 +280,26 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
         }
     }
 
+    private void maybeDismissFreeformOccludingKeyguard(
+            WindowContainerTransaction wct, TransitionInfo info) {
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) == 0) {
+            return;
+        }
+        // There's a window occluding the Keyguard, find it and if it's in freeform mode, change it
+        // to fullscreen.
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            if (taskInfo != null && taskInfo.taskId != INVALID_TASK_ID
+                    && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    && taskInfo.isFocused && change.getContainer() != null) {
+                wct.setWindowingMode(change.getContainer(), WINDOWING_MODE_FULLSCREEN);
+                wct.setBounds(change.getContainer(), null);
+                return;
+            }
+        }
+    }
+
     private static class FakeFinishCallback extends IRemoteTransitionFinishedCallback.Stub {
         @Override
         public void onTransitionFinished(
@@ -283,6 +322,12 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                 mOccludeByDreamTransition = occludeByDreamTransition;
                 mUnoccludeTransition = unoccludeTransition;
             });
+        }
+
+        @Override
+        public void setLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
+            mMainExecutor.execute(() ->
+                    mIsLaunchingActivityOverLockscreen = isLaunchingActivityOverLockscreen);
         }
     }
 }

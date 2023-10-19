@@ -14,6 +14,4 @@ Copyright (C) 2015 The Android Open Source Project
     limitations under the License.
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="3dp"
-    android:insetRight="3dp"
     android:drawable="@drawable/ic_speaker_mute" />

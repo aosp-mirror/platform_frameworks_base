@@ -21,12 +21,15 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.PointF;
+import android.graphics.Point;
 import android.util.Log;
 import android.widget.FrameLayout;
 
+import androidx.annotation.Nullable;
+
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.animation.PhysicsAnimator;
+import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix;
@@ -110,7 +113,8 @@ public class BubbleBarAnimationHelper {
     /**
      * Animates the provided bubble's expanded view to the expanded state.
      */
-    public void animateExpansion(BubbleViewProvider expandedBubble) {
+    public void animateExpansion(BubbleViewProvider expandedBubble,
+            @Nullable Runnable afterAnimation) {
         mExpandedBubble = expandedBubble;
         if (mExpandedBubble == null) {
             return;
@@ -132,7 +136,7 @@ public class BubbleBarAnimationHelper {
         bev.setVisibility(VISIBLE);
 
         // Set the pivot point for the scale, so the view animates out from the bubble bar.
-        PointF bubbleBarPosition = mPositioner.getBubbleBarPosition();
+        Point bubbleBarPosition = mPositioner.getBubbleBarPosition();
         mExpandedViewContainerMatrix.setScale(
                 1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                 1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
@@ -159,6 +163,9 @@ public class BubbleBarAnimationHelper {
                     bev.setAnimationMatrix(null);
                     updateExpandedView();
                     bev.setSurfaceZOrderedOnTop(false);
+                    if (afterAnimation != null) {
+                        afterAnimation.run();
+                    }
                 })
                 .start();
     }
@@ -208,6 +215,14 @@ public class BubbleBarAnimationHelper {
         mExpandedViewAlphaAnimator.reverse();
     }
 
+    /**
+     * Cancel current animations
+     */
+    public void cancelAnimations() {
+        PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
+        mExpandedViewAlphaAnimator.cancel();
+    }
+
     private void updateExpandedView() {
         if (mExpandedBubble == null || mExpandedBubble.getBubbleBarExpandedView() == null) {
             Log.w(TAG, "Trying to update the expanded view without a bubble");
@@ -215,9 +230,10 @@ public class BubbleBarAnimationHelper {
         }
         BubbleBarExpandedView bbev = mExpandedBubble.getBubbleBarExpandedView();
 
+        boolean isOverflowExpanded = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
         final int padding = mPositioner.getBubbleBarExpandedViewPadding();
-        final int width = mPositioner.getExpandedViewWidthForBubbleBar();
-        final int height = mPositioner.getExpandedViewHeightForBubbleBar();
+        final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
+        final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) bbev.getLayoutParams();
         lp.width = width;
         lp.height = height;
@@ -227,7 +243,8 @@ public class BubbleBarAnimationHelper {
         } else {
             bbev.setX(mPositioner.getAvailableRect().width() - width - padding);
         }
-        bbev.setY(mPositioner.getInsets().top + padding);
+        bbev.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
         bbev.updateLocation();
+        bbev.maybeShowOverflow();
     }
 }

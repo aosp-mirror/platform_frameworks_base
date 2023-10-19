@@ -37,9 +37,11 @@ import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.settingslib.Utils;
@@ -143,6 +145,8 @@ public class Clock extends TextView implements
         }
         mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
         mUserTracker = Dependency.get(UserTracker.class);
+
+        setIncludeFontPadding(false);
     }
 
     @Override
@@ -374,6 +378,13 @@ public class Clock extends TextView implements
 
     @Override
     public void onDensityOrFontScaleChanged() {
+        reloadDimens();
+    }
+
+    private void reloadDimens() {
+        // reset mCachedWidth so the new width would be updated properly when next onMeasure
+        mCachedWidth = -1;
+
         FontSizeUtils.updateFontSize(this, R.dimen.status_bar_clock_size);
         setPaddingRelative(
                 mContext.getResources().getDimensionPixelSize(
@@ -382,6 +393,15 @@ public class Clock extends TextView implements
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.status_bar_clock_end_padding),
                 0);
+
+        float fontHeight = getPaint().getFontMetricsInt(null);
+        setLineHeight(TypedValue.COMPLEX_UNIT_PX, fontHeight);
+
+        ViewGroup.LayoutParams lp = getLayoutParams();
+        if (lp != null) {
+            lp.height = (int) Math.ceil(fontHeight);
+            setLayoutParams(lp);
+        }
     }
 
     private void updateShowSeconds() {

@@ -22,20 +22,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.RoboPilotTest
+import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
+import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
+import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
-import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
-import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
-import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
@@ -106,8 +105,8 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 mock(KeyguardStateController::class.java),
                 keyguardBouncerRepository,
                 mock(BiometricSettingsRepository::class.java),
-                mock(DeviceEntryFingerprintAuthRepository::class.java),
                 mock(SystemClock::class.java),
+                mKeyguardUpdateMonitor,
             )
         return createUdfpsKeyguardViewController(
             /* useModernBouncer */ true, /* useExpandedOverlay */

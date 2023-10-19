@@ -18,6 +18,8 @@
 package com.android.server.companion;
 
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
+import static android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE;
+import static android.Manifest.permission.USE_COMPANION_TRANSPORTS;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
@@ -44,6 +46,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -64,6 +67,7 @@ import android.companion.IOnAssociationsChangedListener;
 import android.companion.IOnMessageReceivedListener;
 import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
+import android.companion.datatransfer.PermissionSyncRequest;
 import android.companion.utils.FeatureUtils;
 import android.content.ComponentName;
 import android.content.Context;
@@ -144,6 +148,7 @@ public class CompanionDeviceManagerService extends SystemService {
             "debug.cdm.cdmservice.removal_time_window";
 
     private static final long ASSOCIATION_REMOVAL_TIME_WINDOW_DEFAULT = DAYS.toMillis(90);
+    private static final int MAX_CN_LENGTH = 500;
 
     private final ActivityManager mActivityManager;
     private final OnPackageVisibilityChangeListener mOnPackageVisibilityChangeListener;
@@ -244,7 +249,8 @@ public class CompanionDeviceManagerService extends SystemService {
         mCompanionAppController = new CompanionApplicationController(
                 context, mAssociationStore, mDevicePresenceMonitor);
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
-        mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
+        mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
+                mPackageManagerInternal, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
         // TODO(b/279663946): move context sync to a dedicated system service
         mCrossDeviceSyncController = new CrossDeviceSyncController(getContext(), mTransportManager);
@@ -632,29 +638,44 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void addOnTransportsChangedListener(IOnTransportsChangedListener listener) {
+            addOnTransportsChangedListener_enforcePermission();
+
             mTransportManager.addListener(listener);
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void removeOnTransportsChangedListener(IOnTransportsChangedListener listener) {
+            removeOnTransportsChangedListener_enforcePermission();
+
             mTransportManager.removeListener(listener);
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void sendMessage(int messageType, byte[] data, int[] associationIds) {
+            sendMessage_enforcePermission();
+
             mTransportManager.sendMessage(messageType, data, associationIds);
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void addOnMessageReceivedListener(int messageType,
                 IOnMessageReceivedListener listener) {
+            addOnMessageReceivedListener_enforcePermission();
+
             mTransportManager.addListener(messageType, listener);
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void removeOnMessageReceivedListener(int messageType,
                 IOnMessageReceivedListener listener) {
+            removeOnMessageReceivedListener_enforcePermission();
+
             mTransportManager.removeListener(messageType, listener);
         }
 
@@ -686,6 +707,9 @@ public class CompanionDeviceManagerService extends SystemService {
             String callingPackage = component.getPackageName();
             checkCanCallNotificationApi(callingPackage);
             // TODO: check userId.
+            if (component.flattenToString().length() > MAX_CN_LENGTH) {
+                throw new IllegalArgumentException("Component name is too long.");
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(getContext(),
@@ -793,6 +817,24 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public void enablePermissionsSync(int associationId) {
+            getAssociationWithCallerChecks(associationId);
+            mSystemDataTransferProcessor.enablePermissionsSync(associationId);
+        }
+
+        @Override
+        public void disablePermissionsSync(int associationId) {
+            getAssociationWithCallerChecks(associationId);
+            mSystemDataTransferProcessor.disablePermissionsSync(associationId);
+        }
+
+        @Override
+        public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
+            getAssociationWithCallerChecks(associationId);
+            return mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
+        }
+
+        @Override
         public void enableSecureTransport(boolean enabled) {
             mTransportManager.enableSecureTransport(enabled);
         }
@@ -809,7 +851,7 @@ public class CompanionDeviceManagerService extends SystemService {
             }
             // AssociationInfo class is immutable: create a new AssociationInfo object with updated
             // timestamp.
-            association = AssociationInfo.builder(association)
+            association = (new AssociationInfo.Builder(association))
                     .setLastTimeConnected(System.currentTimeMillis())
                     .build();
             mAssociationStore.updateAssociation(association);
@@ -867,7 +909,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
             // AssociationInfo class is immutable: create a new AssociationInfo object with updated
             // flag.
-            association = AssociationInfo.builder(association)
+            association = (new AssociationInfo.Builder(association))
                     .setNotifyOnDeviceNearby(active)
                     .build();
             // Do not need to call {@link BleCompanionDeviceScanner#restartScan()} since it will
@@ -933,7 +975,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
             new CompanionDeviceShellCommand(CompanionDeviceManagerService.this, mAssociationStore,
-                    mDevicePresenceMonitor, mTransportManager, mSystemDataTransferRequestStore,
+                    mDevicePresenceMonitor, mTransportManager, mSystemDataTransferProcessor,
                     mAssociationRequestsProcessor)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
@@ -1147,7 +1189,7 @@ public class CompanionDeviceManagerService extends SystemService {
      */
     private void addToPendingRoleHolderRemoval(@NonNull AssociationInfo association) {
         // First: set revoked flag.
-        association = AssociationInfo.builder(association)
+        association = (new AssociationInfo.Builder(association))
                 .setRevoked(true)
                 .build();
 

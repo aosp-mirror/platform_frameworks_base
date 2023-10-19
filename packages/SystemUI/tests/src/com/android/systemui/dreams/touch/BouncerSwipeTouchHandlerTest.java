@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
@@ -39,10 +40,12 @@ import android.view.VelocityTracker;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dreams.touch.scrim.ScrimController;
 import com.android.systemui.dreams.touch.scrim.ScrimManager;
-import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
+import com.android.systemui.settings.FakeUserTracker;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -57,6 +60,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Collections;
 import java.util.Optional;
 
 @SmallTest
@@ -100,21 +104,34 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Mock
     UiEventLogger mUiEventLogger;
 
+    @Mock
+    LockPatternUtils mLockPatternUtils;
+
+    FakeUserTracker mUserTracker;
+
     private static final float TOUCH_REGION = .3f;
     private static final int SCREEN_WIDTH_PX = 1024;
     private static final int SCREEN_HEIGHT_PX = 100;
 
     private static final Rect SCREEN_BOUNDS = new Rect(0, 0, 1024, 100);
+    private static final UserInfo CURRENT_USER_INFO = new UserInfo(
+            10,
+            /* name= */ "user10",
+            /* flags= */ 0
+    );
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mUserTracker = new FakeUserTracker();
         mTouchHandler = new BouncerSwipeTouchHandler(
                 mScrimManager,
                 Optional.of(mCentralSurfaces),
                 mNotificationShadeWindowController,
                 mValueAnimatorCreator,
                 mVelocityTrackerFactory,
+                mLockPatternUtils,
+                mUserTracker,
                 mFlingAnimationUtils,
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION,
@@ -126,6 +143,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
         when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn(Float.MAX_VALUE);
         when(mTouchSession.getBounds()).thenReturn(SCREEN_BOUNDS);
+        when(mLockPatternUtils.isSecure(CURRENT_USER_INFO.id)).thenReturn(true);
+
+        mUserTracker.set(Collections.singletonList(CURRENT_USER_INFO), 0);
     }
 
     /**
@@ -263,6 +283,32 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         // changes.
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         verifyScroll(.7f, Direction.DOWN, true, gestureListener);
+    }
+
+    /**
+     * Makes sure the expansion amount is proportional to (1 - scroll).
+     */
+    @Test
+    public void testSwipeUp_keyguardNotSecure_doesNotExpand() {
+        when(mLockPatternUtils.isSecure(CURRENT_USER_INFO.id)).thenReturn(false);
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+
+        final float distanceY = SCREEN_HEIGHT_PX * 0.3f;
+        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
+
+        reset(mScrimController);
+        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
+                .isTrue();
+        // We should not expand since the keyguard is not secure
+        verify(mScrimController, never()).expand(any());
     }
 
     private void verifyScroll(float percent, Direction direction,

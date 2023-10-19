@@ -201,6 +201,22 @@ class WindowMagnificationConnectionWrapper {
         return true;
     }
 
+    boolean onUserMagnificationScaleChanged(int userId, int displayId, float scale) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".onMagnificationScaleUpdated",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION, "displayId=" + displayId);
+        }
+        try {
+            mConnection.onUserMagnificationScaleChanged(userId, displayId, scale);
+        } catch (RemoteException e) {
+            if (DBG) {
+                Slog.e(TAG, "Error calling onMagnificationScaleUpdated()", e);
+            }
+            return false;
+        }
+        return true;
+    }
+
     boolean setConnectionCallback(IWindowMagnificationConnectionCallback connectionCallback) {
         if (mTrace.isA11yTracingEnabledForTypes(
                 FLAGS_WINDOW_MAGNIFICATION_CONNECTION

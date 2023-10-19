@@ -21,10 +21,11 @@ import android.content.Context
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
-import com.android.systemui.multishade.ui.viewmodel.MultiShadeViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 
 /** The Compose facade, when Compose is *not* available. */
 object ComposeFacade : BaseComposeFacade {
@@ -50,10 +51,10 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
-    override fun createMultiShadeView(
+    override fun createSceneContainerView(
         context: Context,
-        viewModel: MultiShadeViewModel,
-        clock: SystemClock,
+        viewModel: SceneContainerViewModel,
+        sceneByKey: Map<SceneKey, Scene>,
     ): View {
         throwComposeUnavailableError()
     }

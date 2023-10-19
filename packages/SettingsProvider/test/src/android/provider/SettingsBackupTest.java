@@ -345,6 +345,8 @@ public class SettingsBackupTest {
                     Settings.Global.MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS,
                     Settings.Global.MOBILE_DATA, // Candidate for backup?
                     Settings.Global.MOBILE_DATA_ALWAYS_ON,
+                    Settings.Global.DSRM_DURATION_MILLIS,
+                    Settings.Global.DSRM_ENABLED_ACTIONS,
                     Settings.Global.MODE_RINGER,
                     Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION,
                     Settings.Global.MULTI_SIM_SMS_PROMPT,
@@ -701,6 +703,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
                  Settings.Secure.ATTENTIVE_TIMEOUT,
+                 Settings.Secure.AUDIO_DEVICE_INVENTORY, // not controllable by user
+                 Settings.Secure.AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED, // not controllable by user
                  Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
@@ -725,6 +729,7 @@ public class SettingsBackupTest {
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                  Settings.Secure.CONTENT_CAPTURE_ENABLED,
                  Settings.Secure.DEFAULT_INPUT_METHOD,
+                 Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
@@ -844,7 +849,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                  Settings.Secure.UI_TRANSLATION_ENABLED,
                  Settings.Secure.CREDENTIAL_SERVICE,
-                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY);
+                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                 Settings.Secure.NAVIGATION_MODE_RESTORE);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {

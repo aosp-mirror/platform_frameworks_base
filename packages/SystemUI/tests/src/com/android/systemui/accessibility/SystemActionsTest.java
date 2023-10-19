@@ -39,6 +39,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -65,6 +66,8 @@ public class SystemActionsTest extends SysuiTestCase {
     @Mock
     private ShadeController mShadeController;
     @Mock
+    private ShadeViewController mShadeViewController;
+    @Mock
     private Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     @Mock
     private Optional<Recents> mRecentsOptional;
@@ -82,7 +85,8 @@ public class SystemActionsTest extends SysuiTestCase {
         mContext.addMockSystemService(TelecomManager.class, mTelecomManager);
         mContext.addMockSystemService(InputManager.class, mInputManager);
         mSystemActions = new SystemActions(mContext, mUserTracker, mNotificationShadeController,
-                mShadeController, mCentralSurfacesOptionalLazy, mRecentsOptional, mDisplayTracker);
+                mShadeController, () -> mShadeViewController, mCentralSurfacesOptionalLazy,
+                mRecentsOptional, mDisplayTracker);
     }
 
     @Test

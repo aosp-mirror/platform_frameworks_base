@@ -140,6 +140,20 @@ public interface StatusBarManagerInternal {
     boolean showShutdownUi(boolean isReboot, String requestString);
 
     /**
+     * Notify system UI the immersive prompt should be dismissed as confirmed, and the confirmed
+     * status should be saved without user clicking on the button. This could happen when a user
+     * swipe on the edge with the confirmation prompt showing.
+     */
+    void confirmImmersivePrompt();
+
+    /**
+     * Notify System UI that the system get into or exit immersive mode.
+     * @param rootDisplayAreaId The changed display area Id.
+     * @param isImmersiveMode {@code true} if the display area get into immersive mode.
+     */
+    void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode);
+
+    /**
      * Show a rotation suggestion that a user may approve to rotate the screen.
      *
      * @param rotation rotation suggestion

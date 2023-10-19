@@ -40,7 +40,7 @@
         android:fontFamily="@string/config_headlineFontFamily"/>
 
     <TextView
-        android:id="@+id/text2"
+        android:id="@id/text2"
         android:layout_width="wrap_content"
         android:layout_height="32sp"
         android:text="@string/shutdown_progress"

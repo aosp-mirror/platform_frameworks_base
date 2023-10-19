@@ -15,19 +15,25 @@
  */
 
 function testGetRequestedCapability() {
-    let capability = SlicePurchaseWebInterface.getRequestedCapability();
+    let capability = DataBoostWebServiceFlow.getRequestedCapability();
     document.getElementById("requested_capability").innerHTML =
             "Premium capability requested: " + capability;
 }
 
-function testNotifyPurchaseSuccessful(duration_ms_long = 0) {
-    SlicePurchaseWebInterface.notifyPurchaseSuccessful(duration_ms_long);
+function testNotifyPurchaseSuccessful() {
+    DataBoostWebServiceFlow.notifyPurchaseSuccessful();
     document.getElementById("purchase_successful").innerHTML =
-            "Notified purchase success for duration: " + duration_ms_long;
+            "Notified purchase successful.";
 }
 
 function testNotifyPurchaseFailed(failure_code = 0, failure_reason = "unknown") {
-    SlicePurchaseWebInterface.notifyPurchaseFailed(failure_code, failure_reason);
+    DataBoostWebServiceFlow.notifyPurchaseFailed(failure_code, failure_reason);
     document.getElementById("purchase_failed").innerHTML =
             "Notified purchase failed.";
+}
+
+function testDismissFlow() {
+    DataBoostWebServiceFlow.dismissFlow();
+    document.getElementById("dismiss_flow").innerHTML =
+            "Called dismiss flow.";
 }

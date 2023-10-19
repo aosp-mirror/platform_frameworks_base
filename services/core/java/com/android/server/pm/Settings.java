@@ -351,6 +351,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String ATTR_VIRTUAL_PRELOAD = "virtual-preload";
     private static final String ATTR_HARMFUL_APP_WARNING = "harmful-app-warning";
     private static final String ATTR_SPLASH_SCREEN_THEME = "splash-screen-theme";
+    private static final String ATTR_MIN_ASPECT_RATIO = "min-aspect-ratio";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_BUILD_FINGERPRINT = "buildFingerprint";
@@ -516,9 +517,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private final WatchedArrayMap<String, String> mRenamedPackages =
             new WatchedArrayMap<String, String>();
 
-    // For every user, it is used to find the package name of the default Browser App.
+    // For every user, it is used to find the package name of the default browser app pending to be
+    // applied, either on first boot after upgrade, or after backup & restore but before app is
+    // installed.
     @Watched
-    final WatchedSparseArray<String> mDefaultBrowserApp = new WatchedSparseArray<String>();
+    final WatchedSparseArray<String> mPendingDefaultBrowser = new WatchedSparseArray<>();
 
     // TODO(b/161161364): This seems unused, and is probably not relevant in the new API, but should
     //  verify.
@@ -591,7 +594,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
         mNextAppLinkGeneration.registerObserver(mObserver);
-        mDefaultBrowserApp.registerObserver(mObserver);
+        mPendingDefaultBrowser.registerObserver(mObserver);
         mPendingPackages.registerObserver(mObserver);
         mPastSignatures.registerObserver(mObserver);
         mKeySetRefs.registerObserver(mObserver);
@@ -786,7 +789,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
         mRenamedPackages.snapshot(r.mRenamedPackages);
         mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
-        mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
+        mPendingDefaultBrowser.snapshot(r.mPendingDefaultBrowser);
         // mReadMessages
         mPendingPackages = r.mPendingPackagesSnapshot.snapshot();
         mPendingPackagesSnapshot = new SnapshotCache.Sealed<>();
@@ -1122,7 +1125,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/,
                                 null /*splashscreenTheme*/,
-                                0 /*firstInstallTime*/
+                                0 /*firstInstallTime*/,
+                                PackageManager.USER_MIN_ASPECT_RATIO_UNSET
                         );
                     }
                 }
@@ -1502,8 +1506,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         return cpir;
     }
 
-    String removeDefaultBrowserPackageNameLPw(int userId) {
-        return (userId == UserHandle.USER_ALL) ? null : mDefaultBrowserApp.removeReturnOld(userId);
+    String getPendingDefaultBrowserLPr(int userId) {
+        return mPendingDefaultBrowser.get(userId);
+    }
+
+    void setPendingDefaultBrowserLPw(String defaultBrowser, int userId) {
+        mPendingDefaultBrowser.put(userId, defaultBrowser);
+    }
+
+    String removePendingDefaultBrowserLPw(int userId) {
+        return mPendingDefaultBrowser.removeReturnOld(userId);
     }
 
     private File getUserSystemDirectory(int userId) {
@@ -1686,6 +1698,19 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
     void readDefaultAppsLPw(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
+        String defaultBrowser = readDefaultApps(parser);
+        if (defaultBrowser != null) {
+            mPendingDefaultBrowser.put(userId, defaultBrowser);
+        }
+    }
+
+    /**
+     * @return the package name for the default browser app, or {@code null} if none.
+     */
+    @Nullable
+    static String readDefaultApps(@NonNull XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        String defaultBrowser = null;
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -1695,8 +1720,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             }
             String tagName = parser.getName();
             if (tagName.equals(TAG_DEFAULT_BROWSER)) {
-                String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                mDefaultBrowserApp.put(userId, packageName);
+                defaultBrowser = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
             } else if (tagName.equals(TAG_DEFAULT_DIALER)) {
                 // Ignored.
             } else {
@@ -1706,6 +1730,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 XmlUtils.skipCurrentTag(parser);
             }
         }
+        return defaultBrowser;
     }
 
     void readBlockUninstallPackagesLPw(TypedXmlPullParser parser, int userId)
@@ -1776,7 +1801,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                     PackageManager.UNINSTALL_REASON_UNKNOWN,
                                     null /*harmfulAppWarning*/,
                                     null /* splashScreenTheme*/,
-                                    0 /*firstInstallTime*/
+                                    0 /*firstInstallTime*/,
+                                    PackageManager.USER_MIN_ASPECT_RATIO_UNSET
                             );
                         }
                         return;
@@ -1871,6 +1897,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 ATTR_SPLASH_SCREEN_THEME);
                         final long firstInstallTime = parser.getAttributeLongHex(null,
                                 ATTR_FIRST_INSTALL_TIME, 0);
+                        final int minAspectRatio = parser.getAttributeInt(null,
+                                ATTR_MIN_ASPECT_RATIO,
+                                PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
 
                         ArraySet<String> enabledComponents = null;
                         ArraySet<String> disabledComponents = null;
@@ -1947,7 +1976,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 enabledCaller, enabledComponents, disabledComponents, installReason,
                                 uninstallReason, harmfulAppWarning, splashScreenTheme,
                                 firstInstallTime != 0 ? firstInstallTime :
-                                        origFirstInstallTimes.getOrDefault(name, 0L));
+                                        origFirstInstallTimes.getOrDefault(name, 0L),
+                                minAspectRatio);
 
                         mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                     } else if (tagName.equals("preferred-activities")) {
@@ -2080,8 +2110,13 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
     void writeDefaultAppsLPr(XmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
+        String defaultBrowser = mPendingDefaultBrowser.get(userId);
+        writeDefaultApps(serializer, defaultBrowser);
+    }
+
+    static void writeDefaultApps(@NonNull XmlSerializer serializer, @Nullable String defaultBrowser)
+            throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, TAG_DEFAULT_APPS);
-        String defaultBrowser = mDefaultBrowserApp.get(userId);
         if (!TextUtils.isEmpty(defaultBrowser)) {
             serializer.startTag(null, TAG_DEFAULT_BROWSER);
             serializer.attribute(null, ATTR_PACKAGE_NAME, defaultBrowser);
@@ -2241,6 +2276,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         if (ustate.getSplashScreenTheme() != null) {
                             serializer.attribute(null, ATTR_SPLASH_SCREEN_THEME,
                                     ustate.getSplashScreenTheme());
+                        }
+                        if (ustate.getMinAspectRatio()
+                                != PackageManager.USER_MIN_ASPECT_RATIO_UNSET) {
+                            serializer.attributeInt(null, ATTR_MIN_ASPECT_RATIO,
+                                    ustate.getMinAspectRatio());
                         }
                         if (ustate.isSuspended()) {
                             for (int i = 0; i < ustate.getSuspendParams().size(); i++) {

@@ -771,7 +771,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConfig = null; // will evaluate config to zen mode off
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelper.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenModeLocked("test", true);
         }
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelper.TAG);
@@ -798,7 +798,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelper.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenModeLocked("test", true);
         }
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelper.TAG);
@@ -825,7 +825,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelper.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenModeLocked("test", true);
         }
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelper.TAG);
@@ -2269,7 +2269,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Artificially turn zen mode "on". Re-evaluating zen mode should cause it to turn back off
         // given that we don't have any zen rules active.
         mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelper.evaluateZenMode("test", true);
+        mZenModeHelper.evaluateZenModeLocked("test", true);
 
         // Check that the change actually took: zen mode should be off now
         assertEquals(Global.ZEN_MODE_OFF, mZenModeHelper.mZenMode);
@@ -2437,6 +2437,143 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 mZenModeEventLogger.getEventId(4));
         assertFalse(mZenModeEventLogger.getIsUserAction(4));
         assertEquals(12345, mZenModeEventLogger.getPackageUid(4));
+    }
+
+    @Test
+    public void testUpdateConsolidatedPolicy_defaultRulesOnly() {
+        setupZenConfig();
+
+        // When there's one automatic rule active and it doesn't specify a policy, test that the
+        // resulting consolidated policy is one that matches the default rule settings.
+        AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "ScheduleConditionProvider"),
+                ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                null,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), zenRule, "test",
+                Process.SYSTEM_UID, true);
+
+        // enable the rule
+        mZenModeHelper.setAutomaticZenRuleState(id,
+                new Condition(zenRule.getConditionId(), "", STATE_TRUE),
+                Process.SYSTEM_UID, true);
+
+        // inspect the consolidated policy. Based on setupZenConfig() values.
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowAlarms());
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowMedia());
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowSystem());
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowReminders());
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowCalls());
+        assertEquals(PRIORITY_SENDERS_STARRED, mZenModeHelper.mConsolidatedPolicy.allowCallsFrom());
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowMessages());
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowConversations());
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowRepeatCallers());
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.showBadges());
+    }
+
+    @Test
+    public void testUpdateConsolidatedPolicy_customPolicyOnly() {
+        setupZenConfig();
+
+        // when there's only one automatic rule active and it has a custom policy, make sure that's
+        // what the consolidated policy reflects whether or not it's stricter than what the default
+        // would specify.
+        ZenPolicy customPolicy = new ZenPolicy.Builder()
+                .allowAlarms(true)  // more lenient than default
+                .allowMedia(true)  // more lenient than default
+                .allowRepeatCallers(false)  // more restrictive than default
+                .allowCalls(ZenPolicy.PEOPLE_TYPE_NONE)  // more restrictive than default
+                .showBadges(true)  // more lenient
+                .showPeeking(false)  // more restrictive
+                .build();
+
+        AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "ScheduleConditionProvider"),
+                ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                customPolicy,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), zenRule, "test",
+                Process.SYSTEM_UID, true);
+
+        // enable the rule; this will update the consolidated policy
+        mZenModeHelper.setAutomaticZenRuleState(id,
+                new Condition(zenRule.getConditionId(), "", STATE_TRUE),
+                Process.SYSTEM_UID, true);
+
+        // since this is the only active rule, the consolidated policy should match the custom
+        // policy for every field specified, and take default values for unspecified things
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowAlarms());  // custom
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowMedia());  // custom
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowSystem());  // default
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowReminders());  // default
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowCalls());  // custom
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowMessages()); // default
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowConversations());  // default
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowRepeatCallers());  // custom
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.showBadges());  // custom
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.showPeeking());  // custom
+    }
+
+    @Test
+    public void testUpdateConsolidatedPolicy_defaultAndCustomActive() {
+        setupZenConfig();
+
+        // when there are two rules active, one inheriting the default policy and one setting its
+        // own custom policy, they should be merged to form the most restrictive combination.
+
+        // rule 1: no custom policy
+        AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "ScheduleConditionProvider"),
+                ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                null,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), zenRule, "test",
+                Process.SYSTEM_UID, true);
+
+        // enable rule 1
+        mZenModeHelper.setAutomaticZenRuleState(id,
+                new Condition(zenRule.getConditionId(), "", STATE_TRUE),
+                Process.SYSTEM_UID, true);
+
+        // custom policy for rule 2
+        ZenPolicy customPolicy = new ZenPolicy.Builder()
+                .allowAlarms(true)  // more lenient than default
+                .allowMedia(true)  // more lenient than default
+                .allowRepeatCallers(false)  // more restrictive than default
+                .allowCalls(ZenPolicy.PEOPLE_TYPE_NONE)  // more restrictive than default
+                .showBadges(true)  // more lenient
+                .showPeeking(false)  // more restrictive
+                .build();
+
+        AutomaticZenRule zenRule2 = new AutomaticZenRule("name2",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "ScheduleConditionProvider"),
+                ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                customPolicy,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id2 = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), zenRule2,
+                "test", Process.SYSTEM_UID, true);
+
+        // enable rule 2; this will update the consolidated policy
+        mZenModeHelper.setAutomaticZenRuleState(id2,
+                new Condition(zenRule2.getConditionId(), "", STATE_TRUE),
+                Process.SYSTEM_UID, true);
+
+        // now both rules should be on, and the consolidated policy should reflect the most
+        // restrictive option of each of the two
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowAlarms());  // default stricter
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowMedia());  // default stricter
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowSystem());  // default, unset in custom
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowReminders());  // default
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowCalls());  // custom stricter
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowMessages()); // default, unset in custom
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowConversations());  // default
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowRepeatCallers());  // custom stricter
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.showBadges());  // default stricter
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.showPeeking());  // custom stricter
     }
 
     private void setupZenConfig() {

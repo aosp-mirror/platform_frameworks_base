@@ -39,18 +39,19 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
-import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -99,6 +100,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
     lateinit var windowToken: IBinder
     @Mock
     lateinit var interactionJankMonitor: InteractionJankMonitor
+    @Mock
+    lateinit var vibrator: VibratorHelper
 
     // TODO(b/278622168): remove with flag
     open val useNewBiometricPrompt = false
@@ -106,7 +109,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val biometricPromptRepository = FakePromptRepository()
-    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val fingerprintRepository = FakeFingerprintPropertyRepository()
+    private val displayStateRepository = FakeDisplayStateRepository()
     private val credentialInteractor = FakeCredentialInteractor()
     private val bpCredentialInteractor = PromptCredentialInteractor(
         Dispatchers.Main.immediate,
@@ -115,20 +119,20 @@ open class AuthContainerViewTest : SysuiTestCase() {
     )
     private val promptSelectorInteractor by lazy {
         PromptSelectorInteractorImpl(
+            fingerprintRepository,
             biometricPromptRepository,
             lockPatternUtils,
         )
     }
+
     private val displayStateInteractor = DisplayStateInteractorImpl(
         testScope.backgroundScope,
         mContext,
         fakeExecutor,
-        rearDisplayStateRepository
+        displayStateRepository
     )
 
-    private val authBiometricFingerprintViewModel = AuthBiometricFingerprintViewModel(
-        displayStateInteractor
-    )
+
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
 
     private var authContainer: TestAuthContainerView? = null
@@ -136,6 +140,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Before
     fun setup() {
         featureFlags.set(Flags.BIOMETRIC_BP_STRONG, useNewBiometricPrompt)
+        featureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 
     @After
@@ -148,7 +153,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testNotifiesAnimatedIn() {
         initializeFingerprintContainer()
-        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
+        verify(callback).onDialogAnimatedIn(
+            authContainer?.requestId ?: 0L,
+            true /* startFingerprintNow */
+        )
     }
 
     @Test
@@ -193,7 +201,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
         waitForIdleSync()
 
         // attaching the view resets the state and allows this to happen again
-        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
+        verify(callback).onDialogAnimatedIn(
+            authContainer?.requestId ?: 0L,
+            true /* startFingerprintNow */
+        )
     }
 
     @Test
@@ -208,7 +219,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
         // the first time is triggered by initializeFingerprintContainer()
         // the second time was triggered by dismissWithoutCallback()
-        verify(callback, times(2)).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
+        verify(callback, times(2)).onDialogAnimatedIn(
+            authContainer?.requestId ?: 0L,
+            true /* startFingerprintNow */
+        )
     }
 
     @Test
@@ -325,7 +339,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK or
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
-        container.animateToCredentialUI()
+        container.animateToCredentialUI(false)
         waitForIdleSync()
 
         assertThat(container.hasCredentialView()).isTrue()
@@ -511,13 +525,19 @@ open class AuthContainerViewTest : SysuiTestCase() {
         userManager,
         lockPatternUtils,
         interactionJankMonitor,
-        { authBiometricFingerprintViewModel },
         { promptSelectorInteractor },
         { bpCredentialInteractor },
-        PromptViewModel(promptSelectorInteractor),
+        PromptViewModel(
+            displayStateInteractor,
+            promptSelectorInteractor,
+            vibrator,
+            context,
+            featureFlags
+        ),
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),
-        fakeExecutor
+        fakeExecutor,
+        vibrator
     ) {
         override fun postOnAnimation(runnable: Runnable) {
             runnable.run()

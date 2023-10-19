@@ -29,7 +29,7 @@ import java.io.PrintWriter;
  * An interface to manage the display's power state and brightness
  */
 public interface DisplayPowerControllerInterface {
-
+    int DEFAULT_USER_SERIAL = -1;
     /**
      * Notified when the display is changed.
      *
@@ -98,7 +98,17 @@ public interface DisplayPowerControllerInterface {
      * Set the screen brightness of the associated display
      * @param brightness The value to which the brightness is to be set
      */
-    void setBrightness(float brightness);
+    default void setBrightness(float brightness) {
+        setBrightness(brightness, DEFAULT_USER_SERIAL);
+    }
+
+    /**
+     * Set the screen brightness of the associated display
+     * @param brightness The value to which the brightness is to be set
+     * @param userSerial The user for which the brightness value is to be set. Use userSerial = -1,
+     * if brightness needs to be updated for the current user.
+     */
+    void setBrightness(float brightness, int userSerial);
 
     /**
      * Checks if the proximity sensor is available
@@ -191,8 +201,10 @@ public interface DisplayPowerControllerInterface {
      * @param nits The brightness value in nits if the device supports nits. Set to a negative
      *             number otherwise.
      * @param ambientLux The lux value that will be passed to {@link HighBrightnessModeController}
+     * @param slowChange Indicates whether we should slowly animate to the given brightness value.
      */
-    void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux);
+    void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux,
+            boolean slowChange);
 
     /**
      * Add an additional display that will copy the brightness value from this display. This is used

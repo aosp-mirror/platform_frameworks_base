@@ -38,7 +38,6 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.shared.model.KeyguardPickerFlag
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
@@ -49,6 +48,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.TraceUtils.Companion.traceAsync
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -67,7 +67,6 @@ class KeyguardQuickAffordanceInteractor
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
-    private val registry: KeyguardQuickAffordanceRegistry<out KeyguardQuickAffordanceConfig>,
     private val lockPatternUtils: LockPatternUtils,
     private val keyguardStateController: KeyguardStateController,
     private val userTracker: UserTracker,
@@ -82,20 +81,13 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Application private val appContext: Context,
 ) {
-    private val isUsingRepository: Boolean
-        get() = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)
 
     /**
      * Whether the UI should use the long press gesture to activate quick affordances.
      *
      * If `false`, the UI goes back to using single taps.
      */
-    fun useLongPress(): Flow<Boolean> =
-        if (featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)) {
-            dockManager.retrieveIsDocked().map { !it }
-        } else {
-            flowOf(false)
-        }
+    fun useLongPress(): Flow<Boolean> = dockManager.retrieveIsDocked().map { !it }
 
     /** Returns an observable for the quick affordance at the given position. */
     suspend fun quickAffordance(
@@ -109,10 +101,9 @@ constructor(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
-            keyguardInteractor.isQuickSettingsVisible,
             biometricSettingsRepository.isCurrentUserInLockdown,
-        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
-            if (!isDozing && isKeyguardShowing && !isQuickSettingsVisible && !isUserInLockdown) {
+        ) { affordance, isDozing, isKeyguardShowing, isUserInLockdown ->
+            if (!isDozing && isKeyguardShowing && !isUserInLockdown) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden
@@ -146,14 +137,9 @@ constructor(
         expandable: Expandable?,
         slotId: String,
     ) {
-        @Suppress("UNCHECKED_CAST")
+        val (decodedSlotId, decodedConfigKey) = configKey.decode()
         val config =
-            if (isUsingRepository) {
-                val (slotId, decodedConfigKey) = configKey.decode()
-                repository.get().selections.value[slotId]?.find { it.key == decodedConfigKey }
-            } else {
-                registry.get(configKey)
-            }
+            repository.get().selections.value[decodedSlotId]?.find { it.key == decodedConfigKey }
         if (config == null) {
             Log.e(TAG, "Affordance config with key of \"$configKey\" not found!")
             return
@@ -182,7 +168,6 @@ constructor(
      * @return `true` if the affordance was selected successfully; `false` otherwise.
      */
     suspend fun select(slotId: String, affordanceId: String): Boolean {
-        check(isUsingRepository)
         if (isFeatureDisabledByDevicePolicy()) {
             return false
         }
@@ -225,7 +210,6 @@ constructor(
      *   the affordance was not on the slot to begin with).
      */
     suspend fun unselect(slotId: String, affordanceId: String?): Boolean {
-        check(isUsingRepository)
         if (isFeatureDisabledByDevicePolicy()) {
             return false
         }
@@ -285,17 +269,12 @@ constructor(
 
     private fun quickAffordanceInternal(
         position: KeyguardQuickAffordancePosition
-    ): Flow<KeyguardQuickAffordanceModel> {
-        return if (isUsingRepository) {
-            repository
-                .get()
-                .selections
-                .map { it[position.toSlotId()] ?: emptyList() }
-                .flatMapLatest { configs -> combinedConfigs(position, configs) }
-        } else {
-            combinedConfigs(position, registry.getAll(position))
-        }
-    }
+    ): Flow<KeyguardQuickAffordanceModel> =
+        repository
+            .get()
+            .selections
+            .map { it[position.toSlotId()] ?: emptyList() }
+            .flatMapLatest { configs -> combinedConfigs(position, configs) }
 
     private fun combinedConfigs(
         position: KeyguardQuickAffordancePosition,
@@ -325,12 +304,7 @@ constructor(
                     states[index] as KeyguardQuickAffordanceConfig.LockScreenState.Visible
                 val configKey = configs[index].key
                 KeyguardQuickAffordanceModel.Visible(
-                    configKey =
-                        if (isUsingRepository) {
-                            configKey.encode(position.toSlotId())
-                        } else {
-                            configKey
-                        },
+                    configKey = configKey.encode(position.toSlotId()),
                     icon = visibleState.icon,
                     activationState = visibleState.activationState,
                 )
@@ -396,8 +370,6 @@ constructor(
     }
 
     suspend fun getSlotPickerRepresentations(): List<KeyguardSlotPickerRepresentation> {
-        check(isUsingRepository)
-
         if (isFeatureDisabledByDevicePolicy()) {
             return emptyList()
         }
@@ -415,7 +387,6 @@ constructor(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value =
                     !isFeatureDisabledByDevicePolicy() &&
-                        featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES) &&
                         appContext.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled),
             ),
             KeyguardPickerFlag(
@@ -433,13 +404,27 @@ constructor(
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_PICKER_UI_FOR_AIWP,
                 value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_UI_FOR_AIWP)
-            )
+            ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_TRANSIT_CLOCK,
+                value = featureFlags.isEnabled(Flags.TRANSIT_CLOCK)
+            ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_PAGE_TRANSITIONS,
+                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PAGE_TRANSITIONS)
+            ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_PICKER_PREVIEW_ANIMATION,
+                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PREVIEW_ANIMATION)
+            ),
         )
     }
 
     private suspend fun isFeatureDisabledByDevicePolicy(): Boolean =
-        withContext(backgroundDispatcher) {
-            devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
+        traceAsync(TAG, "isFeatureDisabledByDevicePolicy") {
+            withContext(backgroundDispatcher) {
+                devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
+            }
         }
 
     companion object {

@@ -33,10 +33,10 @@ class FlagCommandTest : SysuiTestCase() {
     @Mock private lateinit var featureFlags: FeatureFlagsDebug
     @Mock private lateinit var pw: PrintWriter
     private val flagMap = mutableMapOf<String, Flag<*>>()
-    private val flagA = UnreleasedFlag(500, "500", "test")
-    private val flagB = ReleasedFlag(501, "501", "test")
-    private val stringFlag = StringFlag(502, "502", "test", "abracadabra")
-    private val intFlag = IntFlag(503, "503", "test", 12)
+    private val flagA = UnreleasedFlag("500", "test")
+    private val flagB = ReleasedFlag("501", "test")
+    private val stringFlag = StringFlag("502", "test", "abracadabra")
+    private val intFlag = IntFlag("503", "test", 12)
 
     private lateinit var cmd: FlagCommand
 

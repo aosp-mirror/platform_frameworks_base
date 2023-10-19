@@ -78,6 +78,7 @@ constructor(
             component.getControlsListingController().getOrNull()?.getCurrentServices()
         val hasFavorites =
             component.getControlsController().getOrNull()?.getFavorites()?.isNotEmpty() == true
+        val hasPanels = currentServices?.any { it.panelActivity != null } == true
         val componentPackageName = component.getPackageName()
         when {
             currentServices.isNullOrEmpty() && !componentPackageName.isNullOrEmpty() -> {
@@ -100,8 +101,8 @@ constructor(
                         ),
                 )
             }
-            !hasFavorites -> {
-                // Home app installed but no favorites selected.
+            !hasFavorites && !hasPanels -> {
+                // Home app installed but no favorites selected or panel activities available.
                 val activityClass = component.getControlsUiController().get().resolveActivity()
                 return disabledPickerState(
                     explanation =
