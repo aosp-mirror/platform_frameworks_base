@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
 import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
@@ -340,8 +341,20 @@ constructor(
                 )
                 .collect { (isAsleep, lastStartedStep, isAodAvailable) ->
                     if (lastStartedStep.to == KeyguardState.LOCKSCREEN && isAsleep) {
-                        startTransitionTo(
+                        val toState =
                             if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
+                        val modeOnCanceled =
+                            if (
+                                toState == KeyguardState.AOD &&
+                                    lastStartedStep.from == KeyguardState.AOD
+                            ) {
+                                TransitionModeOnCanceled.REVERSE
+                            } else {
+                                TransitionModeOnCanceled.LAST_VALUE
+                            }
+                        startTransitionTo(
+                            toState = toState,
+                            modeOnCanceled = modeOnCanceled,
                         )
                     }
                 }

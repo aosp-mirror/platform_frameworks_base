@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -65,8 +66,21 @@ constructor(
                 )
                 .collect { (_, lastStartedStep, occluded) ->
                     if (lastStartedStep.to == KeyguardState.AOD) {
-                        startTransitionTo(
+                        val toState =
                             if (occluded) KeyguardState.OCCLUDED else KeyguardState.LOCKSCREEN
+                        val modeOnCanceled =
+                            if (
+                                toState == KeyguardState.LOCKSCREEN &&
+                                    lastStartedStep.from == KeyguardState.LOCKSCREEN
+                            ) {
+                                TransitionModeOnCanceled.REVERSE
+                            } else {
+                                TransitionModeOnCanceled.LAST_VALUE
+                            }
+
+                        startTransitionTo(
+                            toState = toState,
+                            modeOnCanceled = modeOnCanceled,
                         )
                     }
                 }

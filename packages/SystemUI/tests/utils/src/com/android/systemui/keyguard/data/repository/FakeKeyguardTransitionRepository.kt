@@ -42,7 +42,7 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
         _transitions.emit(step)
     }
 
-    override fun startTransition(info: TransitionInfo, resetIfCanceled: Boolean): UUID? {
+    override fun startTransition(info: TransitionInfo): UUID? {
         return if (info.animator == null) UUID.randomUUID() else null
     }
 
