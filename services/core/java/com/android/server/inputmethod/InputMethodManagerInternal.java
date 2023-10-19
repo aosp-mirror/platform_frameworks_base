@@ -155,9 +155,12 @@ public abstract class InputMethodManagerInternal {
     /**
      * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
      * TODO(b/189923292): Making SystemUI to be true IME icon controller vs. presenter that
-     *     controlled by IMMS.
+     * controlled by IMMS.
+     *
+     * @param disableImeIcon indicates whether IME icon should be enabled or not
+     * @param displayId      the display for which to update the IME window status
      */
-    public abstract void updateImeWindowStatus(boolean disableImeIcon);
+    public abstract void updateImeWindowStatus(boolean disableImeIcon, int displayId);
 
     /**
      * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
@@ -264,7 +267,7 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void updateImeWindowStatus(boolean disableImeIcon) {
+                public void updateImeWindowStatus(boolean disableImeIcon, int displayId) {
                 }
 
                 @Override
