@@ -238,34 +238,16 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public PackageSetting(String name, String realName, @NonNull File path,
-            String legacyNativeLibraryPath, String primaryCpuAbi,
-            String secondaryCpuAbi, String cpuAbiOverride,
-            long longVersionCode, int pkgFlags, int pkgPrivateFlags,
-            int sharedUserAppId,
-            String[] usesSdkLibraries, long[] usesSdkLibrariesVersionsMajor,
-            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
-            Map<String, Set<String>> mimeGroups,
-            @NonNull UUID domainSetId) {
+    public PackageSetting(@NonNull String name, @Nullable String realName, @NonNull File path,
+                          int pkgFlags, int pkgPrivateFlags, @NonNull UUID domainSetId) {
         super(pkgFlags, pkgPrivateFlags);
         this.mName = name;
         this.mRealName = realName;
-        this.usesSdkLibraries = usesSdkLibraries;
-        this.usesSdkLibrariesVersionsMajor = usesSdkLibrariesVersionsMajor;
-        this.usesStaticLibraries = usesStaticLibraries;
-        this.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
         this.mPath = path;
         this.mPathString = path.toString();
-        this.legacyNativeLibraryPath = legacyNativeLibraryPath;
-        this.mPrimaryCpuAbi = primaryCpuAbi;
-        this.mSecondaryCpuAbi = secondaryCpuAbi;
-        this.mCpuAbiOverride = cpuAbiOverride;
-        this.versionCode = longVersionCode;
         this.signatures = new PackageSignatures();
         this.installSource = InstallSource.EMPTY;
-        this.mSharedUserAppId = sharedUserAppId;
-        mDomainSetId = domainSetId;
-        copyMimeGroups(mimeGroups);
+        this.mDomainSetId = domainSetId;
         mSnapshot = makeCache();
     }
 
@@ -536,9 +518,10 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return this;
     }
 
-    public void setSharedUserAppId(int sharedUserAppId) {
+    public PackageSetting setSharedUserAppId(int sharedUserAppId) {
         mSharedUserAppId = sharedUserAppId;
         onChanged();
+        return this;
     }
 
     public PackageSetting setIsPersistent(boolean isPersistent) {
@@ -576,7 +559,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 + " " + mName + "/" + mAppId + "}";
     }
 
-    protected void copyMimeGroups(@Nullable Map<String, Set<String>> newMimeGroups) {
+    private void copyMimeGroups(@Nullable Map<String, Set<String>> newMimeGroups) {
         if (newMimeGroups == null) {
             mimeGroups = null;
             return;
@@ -1250,7 +1233,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     /**
      * @see #mPath
      */
-    PackageSetting setPath(@NonNull File path) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public PackageSetting setPath(@NonNull File path) {
         this.mPath = path;
         this.mPathString = path.toString();
         onChanged();
@@ -1451,9 +1435,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return this;
     }
 
-    public PackageSetting setMimeGroups(@NonNull Map<String, Set<String>> mimeGroups) {
-        this.mimeGroups = mimeGroups;
-        onChanged();
+    public PackageSetting setMimeGroups(@Nullable Map<String, Set<String>> mimeGroups) {
+        if (mimeGroups != null) {
+            copyMimeGroups(mimeGroups);
+            onChanged();
+        }
         return this;
     }
 
