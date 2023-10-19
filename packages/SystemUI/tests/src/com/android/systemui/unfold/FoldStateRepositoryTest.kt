@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.unfold.updates
+package com.android.systemui.unfold
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.unfold.updates.FoldStateRepository.FoldUpdate
+import com.android.systemui.unfold.data.repository.FoldStateRepository.FoldUpdate
+import com.android.systemui.unfold.data.repository.FoldStateRepositoryImpl
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
+import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
+import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock

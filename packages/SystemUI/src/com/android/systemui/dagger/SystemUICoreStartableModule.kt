@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener
 import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.theme.ThemeOverlayController
+import com.android.systemui.unfold.DisplaySwitchLatencyTracker
 import com.android.systemui.usb.StorageNotification
 import com.android.systemui.util.NotificationChannels
 import com.android.systemui.util.StartBinderLoggerModule
@@ -140,6 +141,12 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(LatencyTester::class)
     abstract fun bindLatencyTester(sysui: LatencyTester): CoreStartable
+
+    /** Inject into DisplaySwitchLatencyTracker.  */
+    @Binds
+    @IntoMap
+    @ClassKey(DisplaySwitchLatencyTracker::class)
+    abstract fun bindDisplaySwitchLatencyTracker(sysui: DisplaySwitchLatencyTracker): CoreStartable
 
     /** Inject into NotificationChannels.  */
     @Binds

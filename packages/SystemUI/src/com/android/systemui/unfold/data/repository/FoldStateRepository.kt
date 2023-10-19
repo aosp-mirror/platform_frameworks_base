@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.unfold.updates
+package com.android.systemui.unfold.data.repository
 
-import com.android.systemui.unfold.updates.FoldStateRepository.FoldUpdate
+import com.android.systemui.unfold.data.repository.FoldStateRepository.FoldUpdate
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
+import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
+import com.android.systemui.unfold.updates.FoldStateProvider
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
@@ -50,7 +56,7 @@ interface FoldStateRepository {
                     FOLD_UPDATE_FINISH_HALF_OPEN -> FINISH_HALF_OPEN
                     FOLD_UPDATE_FINISH_FULL_OPEN -> FINISH_FULL_OPEN
                     FOLD_UPDATE_FINISH_CLOSED -> FINISH_CLOSED
-                    else -> error("FoldUpdateNotFound")
+                    else -> error("Fold update with id $oldId is not supported")
                 }
             }
         }
