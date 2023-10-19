@@ -155,7 +155,7 @@ public class AccessibilityUserStateTest {
         mUserState.mAccessibilityButtonTargets.add(COMPONENT_NAME.flattenToString());
         mUserState.setTargetAssignedToAccessibilityButton(COMPONENT_NAME.flattenToString());
         mUserState.setTouchExplorationEnabledLocked(true);
-        mUserState.setDisplayMagnificationEnabledLocked(true);
+        mUserState.setMagnificationSingleFingerTripleTapEnabledLocked(true);
         mUserState.setAutoclickEnabledLocked(true);
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
@@ -177,7 +177,7 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.mAccessibilityButtonTargets.isEmpty());
         assertNull(mUserState.getTargetAssignedToAccessibilityButton());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
-        assertFalse(mUserState.isDisplayMagnificationEnabledLocked());
+        assertFalse(mUserState.isMagnificationSingleFingerTripleTapEnabledLocked());
         assertFalse(mUserState.isAutoclickEnabledLocked());
         assertEquals(0, mUserState.getUserNonInteractiveUiTimeoutLocked());
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());

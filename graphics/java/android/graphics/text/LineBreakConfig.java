@@ -39,12 +39,14 @@ public final class LineBreakConfig {
     /**
      * No hyphenation preference is specified.
      *
+     * <p>
      * This is a special value of hyphenation preference indicating no hyphenation preference is
      * specified. When overriding a {@link LineBreakConfig} with another {@link LineBreakConfig}
      * with {@link Builder#merge(LineBreakConfig)} function, the hyphenation preference of
      * overridden config will be kept if the hyphenation preference of overriding config is
      * {@link #HYPHENATION_UNSPECIFIED}.
      *
+     * <p>
      * <pre>
      *     val override = LineBreakConfig.Builder()
      *          .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
@@ -57,6 +59,7 @@ public final class LineBreakConfig {
      *     // LINE_BREAK_WORD_STYLE_PHRASE for line break word style.
      * </pre>
      *
+     * <p>
      * This value is resolved to {@link #HYPHENATION_ENABLED} if this value is used for text
      * layout/rendering.
      */
@@ -89,6 +92,7 @@ public final class LineBreakConfig {
     /**
      * No line break style is specified.
      *
+     * <p>
      * This is a special value of line break style indicating no style value is specified.
      * When overriding a {@link LineBreakConfig} with another {@link LineBreakConfig} with
      * {@link Builder#merge(LineBreakConfig)} function, the line break style of overridden config
@@ -107,6 +111,7 @@ public final class LineBreakConfig {
      *     // LINE_BREAK_WORD_STYLE_PHRASE for line break word style.
      * </pre>
      *
+     * <p>
      * This value is resolved to {@link #LINE_BREAK_STYLE_NONE} if this value is used for text
      * layout/rendering.
      */
@@ -270,6 +275,8 @@ public final class LineBreakConfig {
         /**
          * Resets this builder to the given config state.
          *
+         * @param config a config value used for resetting. {@code null} is allowed. If {@code null}
+         *              is passed, all configs are reset to unspecified.
          * @return This {@code Builder}.
          * @hide
          */

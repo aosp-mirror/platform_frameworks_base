@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Choice in the ringtone picker.  If chosen, the default ringtone will be used. -->
+    <string name="ringtone_default">Default ringtone</string>
+
+    <!-- Choice in the notification sound picker.  If chosen, the default notification sound will be
+         used. -->
+    <string name="notification_sound_default">Default notification sound</string>
+
+    <!-- Choice in the alarm sound picker.  If chosen, the default alarm sound will be used. -->
+    <string name="alarm_sound_default">Default alarm sound</string>
+
+    <!-- Text for the RingtonePicker item that allows adding a new ringtone. -->
+    <string name="add_ringtone_text">Add ringtone</string>
+    <!-- Text for the RingtonePicker item that allows adding a new alarm. -->
+    <string name="add_alarm_text">Add alarm</string>
+    <!-- Text for the RingtonePicker item that allows adding a new notification. -->
+    <string name="add_notification_text">Add notification</string>
+    <!-- Text for the RingtonePicker item ContextMenu that allows deleting a custom ringtone. -->
+    <string name="delete_ringtone_text">Delete</string>
+    <!-- Text for the Toast displayed when adding a custom ringtone fails. -->
+    <string name="unable_to_add_ringtone">Unable to add custom ringtone</string>
+    <!-- Text for the Toast displayed when deleting a custom ringtone fails. -->
+    <string name="unable_to_delete_ringtone">Unable to delete custom ringtone</string>
+
+    <!-- Text for the name of the app. [CHAR LIMIT=12] -->
+    <string name="app_label">Sounds</string>
+
+    <string name="empty_list">The list is empty</string>
+    <string name="sound_page_title">Sound</string>
+    <string name="vibration_page_title">Vibration</string>
+</resources>

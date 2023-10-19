@@ -117,7 +117,8 @@ class WallpaperWindowToken extends WindowToken {
         final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
-            if (wallpaperController.updateWallpaperOffset(wallpaper, sync)) {
+            if (wallpaperController.updateWallpaperOffset(wallpaper,
+                    sync && !mWmService.mFlags.mWallpaperOffsetAsync)) {
                 // We only want to be synchronous with one wallpaper.
                 sync = false;
             }

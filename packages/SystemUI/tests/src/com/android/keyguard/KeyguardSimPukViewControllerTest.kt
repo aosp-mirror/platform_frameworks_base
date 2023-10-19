@@ -24,11 +24,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.res.R
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import org.junit.Before
 import org.junit.Test
@@ -54,6 +55,7 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var emergencyButtonController: EmergencyButtonController
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock
     private lateinit var keyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
@@ -89,6 +91,7 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
                 falsingCollector,
                 emergencyButtonController,
                 fakeFeatureFlags,
+                mSelectedUserInteractor,
             )
         underTest.init()
     }

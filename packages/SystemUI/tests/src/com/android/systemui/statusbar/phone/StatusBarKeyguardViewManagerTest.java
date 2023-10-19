@@ -93,6 +93,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import com.google.common.truth.Truth;
 
@@ -147,6 +148,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private WindowInsetsController mWindowInsetsController;
     @Mock private TaskbarDelegate mTaskbarDelegate;
     @Mock private StatusBarKeyguardViewManager.KeyguardViewManagerCallback mCallback;
+    @Mock private SelectedUserInteractor mSelectedUserInteractor;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
@@ -212,7 +214,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(KeyguardTransitionInteractor.class),
                         StandardTestDispatcher(null, null),
                         () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
-                        () -> mock(KeyguardDismissActionInteractor.class)) {
+                        () -> mock(KeyguardDismissActionInteractor.class),
+                        mSelectedUserInteractor) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -715,7 +718,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(KeyguardTransitionInteractor.class),
                         StandardTestDispatcher(null, null),
                         () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
-                        () -> mock(KeyguardDismissActionInteractor.class)) {
+                        () -> mock(KeyguardDismissActionInteractor.class),
+                        mSelectedUserInteractor) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

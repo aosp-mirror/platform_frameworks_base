@@ -42,7 +42,7 @@ import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.util.mockito.any
@@ -157,8 +157,8 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
 
         underTest =
             UserSwitcherViewModel(
-                userInteractor =
-                    UserInteractor(
+                userSwitcherInteractor =
+                    UserSwitcherInteractor(
                         applicationContext = context,
                         repository = userRepository,
                         activityStarter = activityStarter,

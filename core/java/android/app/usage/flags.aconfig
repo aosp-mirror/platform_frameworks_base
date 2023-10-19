@@ -2,7 +2,7 @@ package: "android.app.usage"
 
 flag {
     name: "user_interaction_type_api"
-    namespace: "power_optimization"
+    namespace: "backstage_power"
     description: "Feature flag for user interaction event report/query API"
     bug: "296061232"
 }

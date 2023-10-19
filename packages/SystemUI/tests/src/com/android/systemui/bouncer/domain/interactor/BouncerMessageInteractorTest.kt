@@ -48,6 +48,7 @@ import com.android.systemui.res.R.string.kg_too_many_failed_attempts_countdown
 import com.android.systemui.res.R.string.kg_trust_agent_disabled
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -86,6 +87,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
     @Mock private lateinit var countDownTimerUtil: CountDownTimerUtil
     @Mock private lateinit var systemPropertiesHelper: SystemPropertiesHelper
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     private lateinit var testScope: TestScope
@@ -119,6 +121,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 keyguardUpdateMonitor,
                 fakeTrustRepository,
                 testScope.backgroundScope,
+                mSelectedUserInteractor,
             )
         underTest =
             BouncerMessageInteractor(

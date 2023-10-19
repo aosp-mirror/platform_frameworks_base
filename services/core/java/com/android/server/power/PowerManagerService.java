@@ -3347,8 +3347,6 @@ public final class PowerManagerService extends SystemService
             } else {
                 startDreaming = false;
             }
-            Slog.i(TAG, "handleSandman powerGroup=" + groupId + " startDreaming=" + startDreaming
-                    + " wakefulness=" + wakefulnessToString(wakefulness));
         }
 
         // Start dreaming if needed.
@@ -3383,23 +3381,19 @@ public final class PowerManagerService extends SystemService
             if (startDreaming && isDreaming) {
                 mDreamsBatteryLevelDrain = 0;
                 if (wakefulness == WAKEFULNESS_DOZING) {
-                    Slog.i(TAG, "Dozing powerGroup " + groupId);
+                    Slog.i(TAG, "Dozing...");
                 } else {
-                    Slog.i(TAG, "Dreaming powerGroup " + groupId);
+                    Slog.i(TAG, "Dreaming...");
                 }
             }
 
             // If preconditions changed, wait for the next iteration to determine
             // whether the dream should continue (or be restarted).
             final PowerGroup powerGroup = mPowerGroups.get(groupId);
-            final int newWakefulness = powerGroup.getWakefulnessLocked();
             if (powerGroup.isSandmanSummonedLocked()
-                    || newWakefulness != wakefulness) {
+                    || powerGroup.getWakefulnessLocked() != wakefulness) {
                 return; // wait for next cycle
             }
-            Slog.i(TAG, "handleSandman powerGroup=" + groupId + " isDreaming=" + isDreaming
-                    + " wakefulness=" + newWakefulness);
-
 
             // Determine whether the dream should continue.
             long now = mClock.uptimeMillis();

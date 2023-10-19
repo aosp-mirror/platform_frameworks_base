@@ -35,7 +35,9 @@ import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyFrameworkInitializer;
+import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
@@ -77,6 +79,8 @@ public final class SatelliteManager {
     private static final ConcurrentHashMap<SatelliteTransmissionUpdateCallback,
             ISatelliteTransmissionUpdateCallback> sSatelliteTransmissionUpdateCallbackMap =
             new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<NtnSignalStrengthCallback, INtnSignalStrengthCallback>
+            sNtnSignalStrengthCallbackMap = new ConcurrentHashMap<>();
 
     private final int mSubId;
 
@@ -190,6 +194,14 @@ public final class SatelliteManager {
      */
 
     public static final String KEY_SATELLITE_NEXT_VISIBILITY = "satellite_next_visibility";
+
+    /**
+     * Bundle key to get the response from
+     * {@link #requestNtnSignalStrength(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+
+    public static final String KEY_NTN_SIGNAL_STRENGTH = "ntn_signal_strength";
 
     /**
      * The request was successfully processed.
@@ -1865,6 +1877,165 @@ public final class SatelliteManager {
         }
         return new HashSet<>();
     }
+
+    /**
+     * Request to get the signal strength of the satellite connection.
+     *
+     * <p>
+     * Note: This API is specifically designed for OEM enabled satellite connectivity only.
+     * For satellite connectivity enabled using carrier roaming, please refer to
+     * {@link android.telephony.TelephonyCallback.SignalStrengthsListener}, and
+     * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
+     * </p>
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered. If the request is
+     * successful, {@link OutcomeReceiver#onResult(Object)} will return an instance of
+     * {@link NtnSignalStrength} with a value of {@link NtnSignalStrength.NtnSignalStrengthLevel}
+     * The {@link NtnSignalStrength#NTN_SIGNAL_STRENGTH_NONE} will be returned if there is no
+     * signal strength data available.
+     * If the request is not successful, {@link OutcomeReceiver#onError(Throwable)} will return a
+     * {@link SatelliteException} with the {@link SatelliteResult}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available or
+     * satellite is not supported.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @NonNull
+    public void requestNtnSignalStrength(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<NtnSignalStrength, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_NTN_SIGNAL_STRENGTH)) {
+                                NtnSignalStrength ntnSignalStrength =
+                                        resultData.getParcelable(KEY_NTN_SIGNAL_STRENGTH,
+                                                NtnSignalStrength.class);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(ntnSignalStrength)));
+                            } else {
+                                loge("KEY_NTN_SIGNAL_STRENGTH does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestNtnSignalStrength(mSubId, receiver);
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("requestNtnSignalStrength() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers for NTN signal strength changed from satellite modem.
+     *
+     * <p>
+     * Note: This API is specifically designed for OEM enabled satellite connectivity only.
+     * For satellite connectivity enabled using carrier roaming, please refer to
+     * {@link android.telephony.TelephonyCallback.SignalStrengthsListener}, and
+     * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
+     * </p>
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle the NTN signal strength changed event.
+     *
+     * @return The {@link SatelliteResult} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SatelliteResult public int registerForNtnSignalStrengthChanged(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull NtnSignalStrengthCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                INtnSignalStrengthCallback internalCallback =
+                        new INtnSignalStrengthCallback.Stub() {
+                            @Override
+                            public void onNtnSignalStrengthChanged(
+                                    NtnSignalStrength ntnSignalStrength) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onNtnSignalStrengthChanged(
+                                                ntnSignalStrength)));
+                            }
+                        };
+                sNtnSignalStrengthCallbackMap.put(callback, internalCallback);
+                return telephony.registerForNtnSignalStrengthChanged(mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForNtnSignalStrengthChanged() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_RESULT_REQUEST_FAILED;
+    }
+
+    /**
+     * Unregisters for NTN signal strength changed from satellite modem.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * <p>
+     * Note: This API is specifically designed for OEM enabled satellite connectivity only.
+     * For satellite connectivity enabled using carrier roaming, please refer to
+     * {@link TelephonyManager#unregisterTelephonyCallback(TelephonyCallback)}..
+     * </p>
+     *
+     * @param callback The callback that was passed to
+     * {@link #registerForNtnSignalStrengthChanged(Executor, NtnSignalStrengthCallback)}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void unregisterForNtnSignalStrengthChanged(@NonNull NtnSignalStrengthCallback callback) {
+        Objects.requireNonNull(callback);
+        INtnSignalStrengthCallback internalCallback =
+                sNtnSignalStrengthCallbackMap.remove(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (internalCallback != null) {
+                    telephony.unregisterForNtnSignalStrengthChanged(mSubId, internalCallback);
+                } else {
+                    loge("unregisterForNtnSignalStrengthChanged: No internal callback.");
+                }
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForNtnSignalStrengthChanged() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+
+    }
+
 
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(TelephonyFrameworkInitializer

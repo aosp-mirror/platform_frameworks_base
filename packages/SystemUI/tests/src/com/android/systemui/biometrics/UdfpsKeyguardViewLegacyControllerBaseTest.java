@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.junit.Before;
@@ -69,6 +70,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     protected @Mock AlternateBouncerInteractor mAlternateBouncerInteractor;
     protected @Mock UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
+    protected @Mock SelectedUserInteractor mSelectedUserInteractor;
 
     protected FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
@@ -142,7 +144,8 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
                 mFeatureFlags,
                 mPrimaryBouncerInteractor,
                 mAlternateBouncerInteractor,
-                mUdfpsKeyguardAccessibilityDelegate);
+                mUdfpsKeyguardAccessibilityDelegate,
+                mSelectedUserInteractor);
         return controller;
     }
 }

@@ -15,3 +15,11 @@ flag {
     bug: "293898187"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "imm_userhandle_hostsidetests"
+    namespace: "input_method"
+    description: "Feature flag for replacing UserIdInt with UserHandle in some helper IMM functions"
+    bug: "301713309"
+    is_fixed_read_only: true
+}

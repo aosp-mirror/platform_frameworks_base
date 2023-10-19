@@ -241,6 +241,30 @@ public class SatelliteImplBase extends SatelliteService {
                     "requestIsSatelliteEnabledForCarrier");
         }
 
+        @Override
+        public void requestSignalStrength(IIntegerConsumer resultCallback,
+                INtnSignalStrengthConsumer callback) throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this.requestSignalStrength(resultCallback, callback),
+                    "requestSignalStrength");
+        }
+
+        @Override
+        public void startSendingNtnSignalStrength(IIntegerConsumer resultCallback)
+                throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this.startSendingNtnSignalStrength(resultCallback),
+                    "startSendingNtnSignalStrength");
+        }
+
+        @Override
+        public void stopSendingNtnSignalStrength(IIntegerConsumer resultCallback)
+                throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this.stopSendingNtnSignalStrength(resultCallback),
+                    "stopSendingNtnSignalStrength");
+        }
+
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
         private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
@@ -726,6 +750,37 @@ public class SatelliteImplBase extends SatelliteService {
      */
     public void requestIsSatelliteEnabledForCarrier(@NonNull int simLogicalSlotIndex,
             @NonNull IIntegerConsumer resultCallback, @NonNull IBooleanConsumer callback) {
+        // stub implementation
+    }
+
+    /**
+     * Request to get the signal strength of the satellite connection.
+     *
+     * @param resultCallback The {@link SatelliteError} result of the operation.
+     * @param callback The callback to handle the NTN signal strength changed event.
+     */
+    public void requestSignalStrength(@NonNull IIntegerConsumer resultCallback,
+            INtnSignalStrengthConsumer callback) {
+        // stub implementation
+    }
+
+    /**
+     * Requests to deliver signal strength changed events through the
+     * {@link ISatelliteListener#onNtnSignalStrengthChanged(NtnSignalStrength ntnSignalStrength)}
+     * callback.
+     *
+     * @param resultCallback The {@link SatelliteError} result of the operation.
+     */
+    public void startSendingNtnSignalStrength(@NonNull IIntegerConsumer resultCallback) {
+        // stub implementation
+    }
+
+    /**
+     * Requests to stop signal strength changed events
+     *
+     * @param resultCallback The {@link SatelliteError} result of the operation.
+     */
+    public void stopSendingNtnSignalStrength(@NonNull IIntegerConsumer resultCallback){
         // stub implementation
     }
 }

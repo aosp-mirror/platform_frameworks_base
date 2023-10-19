@@ -1,5 +1,5 @@
 aconfig_declarations {
-    name: "power_optimization_flags",
+    name: "backstage_power_flags",
     package: "com.android.server.power.optimization",
     srcs: [
         "stats/*.aconfig",
@@ -7,6 +7,6 @@ aconfig_declarations {
 }
 
 java_aconfig_library {
-    name: "power_optimization_flags_lib",
-    aconfig_declarations: "power_optimization_flags",
+    name: "backstage_power_flags_lib",
+    aconfig_declarations: "backstage_power_flags",
 }

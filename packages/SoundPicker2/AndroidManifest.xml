@@ -1,0 +1,43 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.soundpicker"
+        android:sharedUserId="android.media">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+
+    <application
+            android:name=".RingtonePickerApplication"
+            android:allowBackup="false"
+            android:label="@string/app_label"
+            android:theme="@style/Theme.AppCompat"
+            android:supportsRtl="true">
+        <receiver android:name="RingtoneReceiver"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY"/>
+            </intent-filter>
+        </receiver>
+
+        <service android:name="RingtoneOverlayService" />
+
+        <activity android:name="RingtonePickerActivity"
+                android:theme="@style/Theme.AppCompat.Dialog"
+                android:enabled="@*android:bool/config_defaultRingtonePickerEnabled"
+                android:excludeFromRecents="true"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.RINGTONE_PICKER" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.RINGTONE_PICKER_SOUND" />
+                <category android:name="android.intent.category.RINGTONE_PICKER_VIBRATION" />
+                <category android:name="android.intent.category.RINGTONE_PICKER_RINGTONE" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

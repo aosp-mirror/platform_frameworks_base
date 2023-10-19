@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +83,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-/** Encapsulates business logic to interact with user data and systems. */
+/** Encapsulates business logic to for the user switcher. */
 @SysUISingleton
-class UserInteractor
+class UserSwitcherInteractor
 @Inject
 constructor(
     @Application private val applicationContext: Context,
@@ -383,10 +383,6 @@ constructor(
         pw.println("isGuestUserAutoCreated=$isGuestUserAutoCreated")
     }
 
-    fun onDeviceBootCompleted() {
-        guestUserInteractor.onDeviceBootCompleted()
-    }
-
     /** Switches to the user or executes the action represented by the given record. */
     fun onRecordSelected(
         record: UserRecord,
@@ -535,12 +531,6 @@ constructor(
         }
     }
 
-    /** Returns the ID of the currently-selected user. */
-    @UserIdInt
-    fun getSelectedUserId(): Int {
-        return repository.getSelectedUserInfo().id
-    }
-
     private fun showDialog(request: ShowDialogRequestModel) {
         _dialogShowRequests.value = request
     }
@@ -664,7 +654,6 @@ constructor(
 
         // Connect to the new secondary user's service (purely to ensure that a persistent
         // SystemUI application is created for that user)
-
         if (userId != Process.myUserHandle().identifier) {
             applicationContext.startServiceAsUser(
                 intent,
@@ -826,6 +815,6 @@ constructor(
     }
 
     companion object {
-        private const val TAG = "UserInteractor"
+        private const val TAG = "UserSwitcherInteractor"
     }
 }

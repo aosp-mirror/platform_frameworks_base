@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
@@ -45,6 +46,7 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
     private final int mDisallowedAreaForEndBoundsHeight;
     private boolean mHasDragResized;
     private int mCtrlType;
+    @Surface.Rotation private int mRotation;
 
     FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
             DisplayController displayController, int disallowedAreaForEndBoundsHeight) {
@@ -78,7 +80,10 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
             mTaskOrganizer.applyTransaction(wct);
         }
         mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
-        if (mStableBounds.isEmpty()) {
+        int rotation = mWindowDecoration
+                .mTaskInfo.configuration.windowConfiguration.getDisplayRotation();
+        if (mStableBounds.isEmpty() || mRotation != rotation) {
+            mRotation = rotation;
             mDisplayController.getDisplayLayout(mWindowDecoration.mDisplay.getDisplayId())
                     .getStableBounds(mStableBounds);
         }

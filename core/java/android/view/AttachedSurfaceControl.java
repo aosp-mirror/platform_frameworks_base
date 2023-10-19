@@ -92,6 +92,12 @@ public interface AttachedSurfaceControl {
      * SurfaceView Surface, the buffer producer will already have access to the transform hint and
      * no additional work is needed.
      *
+     * If the root surface is not available, the API will return {@code BUFFER_TRANSFORM_IDENTITY}.
+     * The caller should register a listener to listen for any changes. @see
+     * {@link #addOnBufferTransformHintChangedListener(OnBufferTransformHintChangedListener)}.
+     * Warning: Calling this API in Android 14 (API Level 34) or earlier will crash if the root
+     * surface is not available.
+     *
      * @see HardwareBuffer
      */
     default @SurfaceControl.BufferTransform int getBufferTransformHint() {

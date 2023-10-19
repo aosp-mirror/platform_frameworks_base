@@ -156,7 +156,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
-import com.android.systemui.user.domain.interactor.UserInteractor;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
@@ -324,6 +325,8 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private ShadeWindowLogger mShadeWindowLogger;
     @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
     private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
     private Icon mAppBubbleIcon;
@@ -433,6 +436,7 @@ public class BubblesTest extends SysuiTestCase {
                 keyguardInteractor,
                 featureFlags,
                 mock(KeyguardSecurityModel.class),
+                mSelectedUserInteractor,
                 powerInteractor);
 
         ResourcesSplitShadeStateController splitShadeStateController =
@@ -450,7 +454,7 @@ public class BubblesTest extends SysuiTestCase {
                         keyguardTransitionInteractor,
                         powerInteractor,
                         new FakeUserSetupRepository(),
-                        mock(UserInteractor.class),
+                        mock(UserSwitcherInteractor.class),
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
@@ -476,7 +480,8 @@ public class BubblesTest extends SysuiTestCase {
                 mAuthController,
                 mShadeExpansionStateManager,
                 () -> mShadeInteractor,
-                mShadeWindowLogger
+                mShadeWindowLogger,
+                () -> mSelectedUserInteractor
         );
         mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();

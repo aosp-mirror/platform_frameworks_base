@@ -88,7 +88,7 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
-class UserInteractorTest : SysuiTestCase() {
+class UserSwitcherInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var manager: UserManager
@@ -102,7 +102,7 @@ class UserInteractorTest : SysuiTestCase() {
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
-    private lateinit var underTest: UserInteractor
+    private lateinit var underTest: UserSwitcherInteractor
 
     private lateinit var spyContext: Context
     private lateinit var testScope: TestScope
@@ -665,8 +665,8 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
-            val callback1: UserInteractor.UserCallback = mock()
-            val callback2: UserInteractor.UserCallback = mock()
+            val callback1: UserSwitcherInteractor.UserCallback = mock()
+            val callback2: UserSwitcherInteractor.UserCallback = mock()
             underTest.addCallback(callback1)
             underTest.addCallback(callback2)
             runCurrent()
@@ -1117,7 +1117,7 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(userInfo)
         }
         underTest =
-            UserInteractor(
+            UserSwitcherInteractor(
                 applicationContext = spyContext,
                 repository = userRepository,
                 activityStarter = activityStarter,

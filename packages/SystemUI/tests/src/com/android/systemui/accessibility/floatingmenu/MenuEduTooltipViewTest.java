@@ -16,8 +16,7 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static com.android.systemui.Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG;
-import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,8 +28,8 @@ import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +45,7 @@ public class MenuEduTooltipViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        setFlagDefault(mSetFlagsRule, FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
+        setFlagDefaults(mSetFlagsRule);
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         mMenuViewAppearance = new MenuViewAppearance(mContext, windowManager);
         mMenuEduTooltipView = new MenuEduTooltipView(mContext, mMenuViewAppearance);

@@ -40,8 +40,18 @@ object SettingsDimension {
     /** The size when app icon is displayed in App info page. */
     val appIconInfoSize = 48.dp
 
+    /** The vertical padding for buttons. */
+    val buttonPaddingVertical = 12.dp
+
     /** The [PaddingValues] for buttons. */
-    val buttonPadding = PaddingValues(horizontal = itemPaddingEnd, vertical = 12.dp)
+    val buttonPadding = PaddingValues(horizontal = itemPaddingEnd, vertical = buttonPaddingVertical)
+
+    /** The horizontal padding for dialog items. */
+    val dialogItemPaddingHorizontal = itemPaddingStart
+
+    /** The [PaddingValues] for dialog items. */
+    val dialogItemPadding =
+        PaddingValues(horizontal = dialogItemPaddingHorizontal, vertical = buttonPaddingVertical)
 
     /** The sizes info of illustration widget. */
     val illustrationMaxWidth = 412.dp

@@ -16,7 +16,10 @@
 
 package android.content;
 
+import static android.permission.flags.Flags.FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE;
+
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -102,6 +105,7 @@ public final class ContextParams {
      * registered.
      */
     @NonNull
+    @FlaggedApi(FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE)
     public boolean shouldRegisterAttributionSource() {
         return mShouldRegisterAttributionSource;
     }
@@ -179,6 +183,7 @@ public final class ContextParams {
          *                       created should be registered.
          */
         @NonNull
+        @FlaggedApi(FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE)
         public Builder setShouldRegisterAttributionSource(boolean shouldRegister) {
             mShouldRegisterAttributionSource = shouldRegister;
             return this;

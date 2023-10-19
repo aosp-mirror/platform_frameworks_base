@@ -134,8 +134,9 @@ public class LegacyDimmer extends Dimmer {
         boolean mAnimateExit = true;
 
         /**
-         * Used for Dims not associated with a WindowContainer. See {@link Dimmer#dimAbove} for
-         * details on Dim lifecycle.
+         * Used for Dims not associated with a WindowContainer.
+         * See {@link Dimmer#adjustRelativeLayer(WindowContainer, int)} for details on Dim
+         * lifecycle.
          */
         boolean mDontReset;
         SurfaceAnimator mSurfaceAnimator;
@@ -218,9 +219,8 @@ public class LegacyDimmer extends Dimmer {
     }
 
     @Override
-    protected void dim(WindowContainer container, int relativeLayer, float alpha, int blurRadius) {
+    protected void adjustAppearance(WindowContainer container, float alpha, int blurRadius) {
         final DimState d = obtainDimState(container);
-
         if (d == null) {
             return;
         }
@@ -229,11 +229,18 @@ public class LegacyDimmer extends Dimmer {
         // in the correct Z from lowest Z to highest. This ensures that the dim layer is always
         // relative to the highest Z layer with a dim.
         SurfaceControl.Transaction t = mHost.getPendingTransaction();
-        t.setRelativeLayer(d.mDimLayer, container.getSurfaceControl(), relativeLayer);
         t.setAlpha(d.mDimLayer, alpha);
         t.setBackgroundBlurRadius(d.mDimLayer, blurRadius);
-
         d.mDimming = true;
+    }
+
+    @Override
+    protected void adjustRelativeLayer(WindowContainer container, int relativeLayer) {
+        final DimState d = mDimState;
+        if (d != null) {
+            SurfaceControl.Transaction t = mHost.getPendingTransaction();
+            t.setRelativeLayer(d.mDimLayer, container.getSurfaceControl(), relativeLayer);
+        }
     }
 
     @Override

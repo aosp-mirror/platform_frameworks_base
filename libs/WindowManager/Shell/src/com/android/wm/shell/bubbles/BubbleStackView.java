@@ -1784,12 +1784,13 @@ public class BubbleStackView extends FrameLayout
             mStackOnLeftOrWillBe = mPositioner.isStackOnLeft(startPosition);
             mStackAnimationController.setStackPosition(startPosition);
             mExpandedAnimationController.setCollapsePoint(startPosition);
-            // Set the translation x so that this bubble will animate in from the same side they
-            // expand / collapse on.
-            bubble.getIconView().setTranslationX(startPosition.x);
         } else if (firstBubble) {
             mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
         }
+
+        // Set the view translation x so that this bubble will animate in from the same side they
+        // expand / collapse on.
+        bubble.getIconView().setTranslationX(mStackAnimationController.getStackPosition().x);
 
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),

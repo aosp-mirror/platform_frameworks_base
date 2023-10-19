@@ -3243,7 +3243,7 @@ public class SettingsProvider extends ContentProvider {
             }
 
             if (success && criticalSettings != null && criticalSettings.contains(name)) {
-                settingsState.persistSyncLocked();
+                settingsState.persistSettingsLocked();
             }
 
             if (forceNotify || success) {
@@ -3294,7 +3294,7 @@ public class SettingsProvider extends ContentProvider {
             }
 
             if (success && criticalSettings != null && criticalSettings.contains(name)) {
-                settingsState.persistSyncLocked();
+                settingsState.persistSettingsLocked();
             }
 
             if (forceNotify || success) {
@@ -3319,7 +3319,7 @@ public class SettingsProvider extends ContentProvider {
             }
 
             if (success && criticalSettings != null && criticalSettings.contains(name)) {
-                settingsState.persistSyncLocked();
+                settingsState.persistSettingsLocked();
             }
 
             if (forceNotify || success) {
@@ -3385,7 +3385,7 @@ public class SettingsProvider extends ContentProvider {
                             }
                         }
                         if (someSettingChanged) {
-                            settingsState.persistSyncLocked();
+                            settingsState.persistSettingsLocked();
                             success = true;
                         }
                     }
@@ -3407,7 +3407,7 @@ public class SettingsProvider extends ContentProvider {
                             }
                         }
                         if (someSettingChanged) {
-                            settingsState.persistSyncLocked();
+                            settingsState.persistSettingsLocked();
                             success = true;
                         }
                     }
@@ -3435,7 +3435,7 @@ public class SettingsProvider extends ContentProvider {
                             }
                         }
                         if (someSettingChanged) {
-                            settingsState.persistSyncLocked();
+                            settingsState.persistSettingsLocked();
                             success = true;
                         }
                     }
@@ -3460,7 +3460,7 @@ public class SettingsProvider extends ContentProvider {
                             logSettingChanged(userId, name, type, CHANGE_TYPE_DELETE);
                         }
                         if (someSettingChanged) {
-                            settingsState.persistSyncLocked();
+                            settingsState.persistSettingsLocked();
                             success = true;
                         }
                     }
@@ -3559,7 +3559,7 @@ public class SettingsProvider extends ContentProvider {
             ensureSettingsStateLocked(systemKey);
             SettingsState systemSettings = mSettingsStates.get(systemKey);
             migrateLegacySettingsLocked(systemSettings, database, TABLE_SYSTEM);
-            systemSettings.persistSyncLocked();
+            systemSettings.persistSettingsLocked();
 
             // Move over the secure settings.
             // Do this after System settings, since this is the first thing we check when deciding
@@ -3569,7 +3569,7 @@ public class SettingsProvider extends ContentProvider {
             SettingsState secureSettings = mSettingsStates.get(secureKey);
             migrateLegacySettingsLocked(secureSettings, database, TABLE_SECURE);
             ensureSecureSettingAndroidIdSetLocked(secureSettings);
-            secureSettings.persistSyncLocked();
+            secureSettings.persistSettingsLocked();
 
             // Move over the global settings if owner.
             // Do this last, since this is the first thing we check when deciding
@@ -3585,7 +3585,7 @@ public class SettingsProvider extends ContentProvider {
                             mSettingsCreationBuildId, null, true,
                             SettingsState.SYSTEM_PACKAGE_NAME);
                 }
-                globalSettings.persistSyncLocked();
+                globalSettings.persistSettingsLocked();
             }
 
             // Drop the database as now all is moved and persisted.
@@ -4404,16 +4404,16 @@ public class SettingsProvider extends ContentProvider {
                     if (userId == UserHandle.USER_SYSTEM) {
                         SettingsState globalSettings = getGlobalSettingsLocked();
                         ensureLegacyDefaultValueAndSystemSetUpdatedLocked(globalSettings, userId);
-                        globalSettings.persistSyncLocked();
+                        globalSettings.persistSettingsLocked();
                     }
 
                     SettingsState secureSettings = getSecureSettingsLocked(mUserId);
                     ensureLegacyDefaultValueAndSystemSetUpdatedLocked(secureSettings, userId);
-                    secureSettings.persistSyncLocked();
+                    secureSettings.persistSettingsLocked();
 
                     SettingsState systemSettings = getSystemSettingsLocked(mUserId);
                     ensureLegacyDefaultValueAndSystemSetUpdatedLocked(systemSettings, userId);
-                    systemSettings.persistSyncLocked();
+                    systemSettings.persistSettingsLocked();
 
                     currentVersion = 146;
                 }

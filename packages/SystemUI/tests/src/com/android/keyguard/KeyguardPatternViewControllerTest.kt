@@ -24,15 +24,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -75,6 +76,9 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
         KeyguardMessageAreaController.Factory
 
     @Mock
+    private lateinit var mSelectedUserInteractor: SelectedUserInteractor
+
+    @Mock
     private lateinit var mKeyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
 
@@ -108,7 +112,8 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
                 mEmergencyButtonController,
                 mKeyguardMessageAreaControllerFactory,
                 mPostureController,
-                fakeFeatureFlags
+                fakeFeatureFlags,
+                mSelectedUserInteractor
             )
         mKeyguardPatternView.onAttachedToWindow()
     }

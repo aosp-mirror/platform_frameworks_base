@@ -29,12 +29,12 @@ import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityStat
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import dagger.Binds
 import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
 
 /** Fake implementation of [KeyguardRepository] */
 @SysUISingleton
@@ -182,8 +182,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _lastDozeTapToWakePosition.value = position
     }
 
-    fun setAodAvailable(isAodAvailable: Boolean) {
-        _isAodAvailable.value = isAodAvailable
+    override fun setAodAvailable(value: Boolean) {
+        _isAodAvailable.value = value
     }
 
     fun setDreaming(isDreaming: Boolean) {
@@ -202,8 +202,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _dozeAmount.value = dozeAmount
     }
 
-    fun setBiometricUnlockState(state: BiometricUnlockModel) {
-        _biometricUnlockState.tryEmit(state)
+    override fun setBiometricUnlockState(value: BiometricUnlockModel) {
+        _biometricUnlockState.tryEmit(value)
     }
 
     fun setBiometricUnlockSource(source: BiometricUnlockSource?) {

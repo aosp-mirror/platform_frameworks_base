@@ -46,6 +46,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -90,6 +91,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var mockedContext: Context
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     @Before
     fun setup() {
@@ -145,6 +147,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     keyguardUpdateMonitor,
                     trustRepository,
                     testScope.backgroundScope,
+                    mSelectedUserInteractor
                 ),
                 AlternateBouncerInteractor(
                     statusBarStateController = mock(),

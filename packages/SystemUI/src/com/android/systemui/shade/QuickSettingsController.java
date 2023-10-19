@@ -736,7 +736,11 @@ public class QuickSettingsController implements Dumpable {
 
     /** Returns whether touches from the notification panel should be disallowed */
     public boolean disallowTouches() {
-        return mQs.disallowPanelTouches();
+        if (mQs != null) {
+            return mQs.disallowPanelTouches();
+        } else {
+            return false;
+        }
     }
 
     void setListening(boolean listening) {

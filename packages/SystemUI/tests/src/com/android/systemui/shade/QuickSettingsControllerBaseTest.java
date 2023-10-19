@@ -95,15 +95,17 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
-import com.android.systemui.user.domain.interactor.UserInteractor;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
+
+import dagger.Lazy;
 
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import dagger.Lazy;
 import kotlinx.coroutines.test.TestScope;
 
 public class QuickSettingsControllerBaseTest extends SysuiTestCase {
@@ -162,7 +164,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected DumpManager mDumpManager;
     @Mock protected UiEventLogger mUiEventLogger;
     @Mock protected CastController mCastController;
-    @Mock protected UserInteractor mUserInteractor;
+    @Mock protected UserSwitcherInteractor mUserSwitcherInteractor;
+    @Mock protected SelectedUserInteractor mSelectedUserInteractor;
     protected FakeDisableFlagsRepository mDisableFlagsRepository =
             new FakeDisableFlagsRepository();
     protected FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
@@ -249,6 +252,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 keyguardInteractor,
                 featureFlags,
                 mock(KeyguardSecurityModel.class),
+                mSelectedUserInteractor,
                 powerInteractor);
 
         ResourcesSplitShadeStateController splitShadeStateController =
@@ -266,7 +270,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                         keyguardTransitionInteractor,
                         powerInteractor,
                         new FakeUserSetupRepository(),
-                        mUserInteractor,
+                        mUserSwitcherInteractor,
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
