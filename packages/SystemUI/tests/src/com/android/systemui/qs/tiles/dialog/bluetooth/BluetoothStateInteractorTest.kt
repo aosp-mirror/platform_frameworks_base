@@ -47,11 +47,12 @@ class BluetoothStateInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var bluetoothAdapter: LocalBluetoothAdapter
     @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
+    @Mock private lateinit var logger: BluetoothTileDialogLogger
 
     @Before
     fun setUp() {
         bluetoothStateInteractor =
-            BluetoothStateInteractor(localBluetoothManager, testScope.backgroundScope)
+            BluetoothStateInteractor(localBluetoothManager, logger, testScope.backgroundScope)
         `when`(localBluetoothManager.bluetoothAdapter).thenReturn(bluetoothAdapter)
     }
 
@@ -80,6 +81,8 @@ class BluetoothStateInteractorTest : SysuiTestCase() {
 
             bluetoothStateInteractor.isBluetoothEnabled = true
             verify(bluetoothAdapter).enable()
+            verify(logger)
+                .logBluetoothState(BluetoothStateStage.BLUETOOTH_STATE_VALUE_SET, true.toString())
         }
     }
 

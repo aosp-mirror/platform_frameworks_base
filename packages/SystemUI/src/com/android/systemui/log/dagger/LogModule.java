@@ -552,4 +552,12 @@ public class LogModule {
     public static LogBuffer provideSceneFrameworkLogBuffer(LogBufferFactory factory) {
         return factory.create("SceneFramework", 50);
     }
+
+    /** Provides a {@link LogBuffer} for the bluetooth QS tile dialog. */
+    @Provides
+    @SysUISingleton
+    @BluetoothTileDialogLog
+    public static LogBuffer provideQBluetoothTileDialogLogBuffer(LogBufferFactory factory) {
+        return factory.create("BluetoothTileDialogLog", 50);
+    }
 }

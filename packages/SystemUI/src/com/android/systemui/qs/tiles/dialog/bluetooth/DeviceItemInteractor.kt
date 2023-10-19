@@ -22,7 +22,6 @@ import android.content.Context
 import android.media.AudioManager
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.BluetoothCallback
-import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -30,6 +29,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
 /** Holds business logic for the Bluetooth Dialog after clicking on the Bluetooth QS tile. */
@@ -50,7 +51,9 @@ constructor(
     private val audioManager: AudioManager,
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter(),
     private val localBluetoothManager: LocalBluetoothManager?,
+    private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger,
+    private val logger: BluetoothTileDialogLogger,
     @Application private val coroutineScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
@@ -69,20 +72,8 @@ constructor(
                             bluetoothProfile: Int
                         ) {
                             super.onActiveDeviceChanged(activeDevice, bluetoothProfile)
+                            logger.logActiveDeviceChanged(activeDevice?.address, bluetoothProfile)
                             trySendWithFailureLogging(Unit, TAG, "onActiveDeviceChanged")
-                        }
-
-                        override fun onConnectionStateChanged(
-                            cachedDevice: CachedBluetoothDevice?,
-                            state: Int
-                        ) {
-                            super.onConnectionStateChanged(cachedDevice, state)
-                            trySendWithFailureLogging(Unit, TAG, "onConnectionStateChanged")
-                        }
-
-                        override fun onDeviceAdded(cachedDevice: CachedBluetoothDevice) {
-                            super.onDeviceAdded(cachedDevice)
-                            trySendWithFailureLogging(Unit, TAG, "onDeviceAdded")
                         }
 
                         override fun onProfileConnectionStateChanged(
@@ -95,7 +86,23 @@ constructor(
                                 state,
                                 bluetoothProfile
                             )
+                            logger.logProfileConnectionStateChanged(
+                                cachedDevice.address,
+                                state.toString(),
+                                bluetoothProfile
+                            )
                             trySendWithFailureLogging(Unit, TAG, "onProfileConnectionStateChanged")
+                        }
+
+                        override fun onAclConnectionStateChanged(
+                            cachedDevice: CachedBluetoothDevice,
+                            state: Int
+                        ) {
+                            super.onAclConnectionStateChanged(cachedDevice, state)
+                            // Listen only when a device is disconnecting
+                            if (state == 0) {
+                                trySendWithFailureLogging(Unit, TAG, "onAclConnectionStateChanged")
+                            }
                         }
                     }
                 localBluetoothManager?.eventManager?.registerCallback(listener)
@@ -105,6 +112,7 @@ constructor(
 
     private var deviceItemFactoryList: List<DeviceItemFactory> =
         listOf(
+            ActiveMediaDeviceItemFactory(),
             AvailableMediaDeviceItemFactory(),
             ConnectedDeviceItemFactory(),
             SavedDeviceItemFactory()
@@ -112,14 +120,16 @@ constructor(
 
     private var displayPriority: List<DeviceItemType> =
         listOf(
+            DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
             DeviceItemType.SAVED_BLUETOOTH_DEVICE,
         )
 
-    internal suspend fun updateDeviceItems(context: Context) {
+    internal suspend fun updateDeviceItems(context: Context, trigger: DeviceFetchTrigger) {
         withContext(backgroundDispatcher) {
-            mutableDeviceItemUpdate.tryEmit(
+            val start = systemClock.elapsedRealtime()
+            val deviceItems =
                 bluetoothTileDialogRepository.cachedDevices
                     .mapNotNull { cachedDevice ->
                         deviceItemFactoryList
@@ -127,7 +137,22 @@ constructor(
                             ?.create(context, cachedDevice)
                     }
                     .sort(displayPriority, bluetoothAdapter?.mostRecentlyConnectedDevices)
-            )
+
+            // Only emit when the job is not cancelled
+            if (isActive) {
+                mutableDeviceItemUpdate.tryEmit(deviceItems)
+                logger.logDeviceFetch(
+                    JobStatus.FINISHED,
+                    trigger,
+                    systemClock.elapsedRealtime() - start
+                )
+            } else {
+                logger.logDeviceFetch(
+                    JobStatus.CANCELLED,
+                    trigger,
+                    systemClock.elapsedRealtime() - start
+                )
+            }
         }
     }
 
@@ -144,17 +169,26 @@ constructor(
     }
 
     internal fun updateDeviceItemOnClick(deviceItem: DeviceItem) {
-        when (deviceItem.type) {
-            DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
-                if (!BluetoothUtils.isActiveMediaDevice(deviceItem.cachedBluetoothDevice)) {
-                    deviceItem.cachedBluetoothDevice.setActive()
+        logger.logDeviceClick(deviceItem.cachedBluetoothDevice.address, deviceItem.type)
+
+        deviceItem.cachedBluetoothDevice.apply {
+            when (deviceItem.type) {
+                DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE -> {
+                    disconnect()
+                    uiEventLogger.log(BluetoothTileDialogUiEvent.ACTIVE_DEVICE_DISCONNECT)
+                }
+                DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
+                    setActive()
                     uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_DEVICE_SET_ACTIVE)
                 }
-            }
-            DeviceItemType.CONNECTED_BLUETOOTH_DEVICE -> {}
-            DeviceItemType.SAVED_BLUETOOTH_DEVICE -> {
-                deviceItem.cachedBluetoothDevice.connect()
-                uiEventLogger.log(BluetoothTileDialogUiEvent.SAVED_DEVICE_CONNECT)
+                DeviceItemType.CONNECTED_BLUETOOTH_DEVICE -> {
+                    disconnect()
+                    uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_OTHER_DEVICE_DISCONNECT)
+                }
+                DeviceItemType.SAVED_BLUETOOTH_DEVICE -> {
+                    connect()
+                    uiEventLogger.log(BluetoothTileDialogUiEvent.SAVED_DEVICE_CONNECT)
+                }
             }
         }
     }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothAdapter.STATE_OFF
 import android.bluetooth.BluetoothAdapter.STATE_ON
 import com.android.settingslib.bluetooth.BluetoothCallback
@@ -37,6 +38,7 @@ internal class BluetoothStateInteractor
 @Inject
 constructor(
     private val localBluetoothManager: LocalBluetoothManager?,
+    private val logger: BluetoothTileDialogLogger,
     @Application private val coroutineScope: CoroutineScope,
 ) {
 
@@ -47,6 +49,10 @@ constructor(
                         override fun onBluetoothStateChanged(bluetoothState: Int) {
                             if (bluetoothState == STATE_ON || bluetoothState == STATE_OFF) {
                                 super.onBluetoothStateChanged(bluetoothState)
+                                logger.logBluetoothState(
+                                    BluetoothStateStage.BLUETOOTH_STATE_CHANGE_RECEIVED,
+                                    BluetoothAdapter.nameForState(bluetoothState)
+                                )
                                 trySendWithFailureLogging(
                                     bluetoothState == STATE_ON,
                                     TAG,
@@ -70,6 +76,10 @@ constructor(
             if (isBluetoothEnabled != value) {
                 localBluetoothManager?.bluetoothAdapter?.apply {
                     if (value) enable() else disable()
+                    logger.logBluetoothState(
+                        BluetoothStateStage.BLUETOOTH_STATE_VALUE_SET,
+                        value.toString()
+                    )
                 }
             }
         }

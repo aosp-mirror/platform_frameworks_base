@@ -28,6 +28,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -38,6 +39,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
@@ -71,6 +73,10 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
+    @Mock private lateinit var logger: BluetoothTileDialogLogger
+
+    private val fakeSystemClock = FakeSystemClock()
+
     private lateinit var interactor: DeviceItemInteractor
 
     private lateinit var dispatcher: CoroutineDispatcher
@@ -87,13 +93,16 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                 audioManager,
                 adapter,
                 localBluetoothManager,
+                fakeSystemClock,
                 uiEventLogger,
+                logger,
                 testScope.backgroundScope,
                 dispatcher
             )
 
         `when`(deviceItem1.cachedBluetoothDevice).thenReturn(cachedDevice1)
         `when`(deviceItem2.cachedBluetoothDevice).thenReturn(cachedDevice2)
+        `when`(cachedDevice1.address).thenReturn("ADDRESS")
         `when`(cachedDevice1.device).thenReturn(device1)
         `when`(cachedDevice2.device).thenReturn(device2)
         `when`(bluetoothTileDialogRepository.cachedDevices)
@@ -109,7 +118,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
-            interactor.updateDeviceItems(mContext)
+            interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(emptyList<DeviceItem>())
         }
@@ -124,7 +133,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
-            interactor.updateDeviceItems(mContext)
+            interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(emptyList<DeviceItem>())
         }
@@ -139,7 +148,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
-            interactor.updateDeviceItems(mContext)
+            interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem1))
         }
@@ -154,7 +163,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
-            interactor.updateDeviceItems(mContext)
+            interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem2))
         }
@@ -180,7 +189,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             `when`(deviceItem2.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
-            interactor.updateDeviceItems(mContext)
+            interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem1))
         }
@@ -203,10 +212,53 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             `when`(deviceItem2.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
-            interactor.updateDeviceItems(mContext)
+            interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem1))
         }
+    }
+
+    @Test
+    fun testUpdateDeviceItemOnClick_connectedMedia_setActive() {
+        `when`(deviceItem1.type).thenReturn(DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
+
+        interactor.updateDeviceItemOnClick(deviceItem1)
+
+        verify(cachedDevice1).setActive()
+        verify(logger)
+            .logDeviceClick(cachedDevice1.address, DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
+    }
+
+    @Test
+    fun testUpdateDeviceItemOnClick_activeMedia_disconnect() {
+        `when`(deviceItem1.type).thenReturn(DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
+
+        interactor.updateDeviceItemOnClick(deviceItem1)
+
+        verify(cachedDevice1).disconnect()
+        verify(logger)
+            .logDeviceClick(cachedDevice1.address, DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
+    }
+
+    @Test
+    fun testUpdateDeviceItemOnClick_connectedOtherDevice_disconnect() {
+        `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+
+        interactor.updateDeviceItemOnClick(deviceItem1)
+
+        verify(cachedDevice1).disconnect()
+        verify(logger)
+            .logDeviceClick(cachedDevice1.address, DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+    }
+
+    @Test
+    fun testUpdateDeviceItemOnClick_saved_connect() {
+        `when`(deviceItem1.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
+
+        interactor.updateDeviceItemOnClick(deviceItem1)
+
+        verify(cachedDevice1).connect()
+        verify(logger).logDeviceClick(cachedDevice1.address, DeviceItemType.SAVED_BLUETOOTH_DEVICE)
     }
 
     private fun createFactory(
