@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -133,6 +134,7 @@ public final class BugreportParams {
      * The maximum value of supported bugreport mode.
      * @hide
      */
+    @FlaggedApi(android.os.Flags.FLAG_BUGREPORT_MODE_MAX_VALUE)
     @TestApi
     public static final int BUGREPORT_MODE_MAX_VALUE = BUGREPORT_MODE_ONBOARDING;
 

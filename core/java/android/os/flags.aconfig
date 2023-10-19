@@ -27,3 +27,10 @@ flag {
     description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
     bug: "299069460"
 }
+
+flag {
+    name: "bugreport_mode_max_value"
+    namespace: "telephony"
+    description: "Introduce a constant as maximum value of bugreport mode."
+    bug: "305067125"
+}
