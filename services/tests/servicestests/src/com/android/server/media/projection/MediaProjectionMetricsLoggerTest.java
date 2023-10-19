@@ -19,6 +19,7 @@ package com.android.server.media.projection;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN;
 
@@ -303,6 +304,79 @@ public class MediaProjectionMetricsLoggerTest {
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS);
 
         mLogger.logInProgress(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
+    }
+
+    @Test
+    public void logPermissionRequestDisplayed_logsStateChangedAtomId() {
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+
+        verifyStateChangedAtomIdLogged();
+    }
+
+    @Test
+    public void logPermissionRequestDisplayed_logsCurrentSessionId() {
+        int currentSessionId = 765;
+        when(mSessionIdGenerator.getCurrentSessionId()).thenReturn(currentSessionId);
+
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+
+        verifySessionIdLogged(currentSessionId);
+    }
+
+    @Test
+    public void logPermissionRequestDisplayed_logsStateDisplayed() {
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+
+        verifyStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED);
+    }
+
+    @Test
+    public void logPermissionRequestDisplayed_logsHostUid() {
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+
+        verifyHostUidLogged(TEST_HOST_UID);
+    }
+
+    @Test
+    public void logPermissionRequestDisplayed_logsUnknownTargetUid() {
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+
+        verifyTargetUidLogged(-2);
+    }
+
+    @Test
+    public void logPermissionRequestDisplayed_logsUnknownTimeSinceLastActive() {
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+
+        verifyTimeSinceLastActiveSessionLogged(-1);
+    }
+
+    @Test
+    public void logPermissionRequestDisplayed_logsUnknownSessionCreationSource() {
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+
+        verifyCreationSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    @Test
+    public void logPermissionRequestDisplayed_logsPreviousState() {
+        mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN);
+
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
+
+        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED);
+
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
     }

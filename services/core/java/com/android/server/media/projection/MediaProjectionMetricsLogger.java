@@ -19,6 +19,7 @@ package com.android.server.media.projection;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED;
 
 import android.content.Context;
@@ -94,7 +95,28 @@ public class MediaProjectionMetricsLogger {
                 sessionCreationSource);
     }
 
-    /** Logs that the virtual display is created and capturing the selected region begins. */
+    /**
+     * Logs that the user entered the setup flow and permission dialog is displayed. This state is
+     * not sent when the permission is already granted and we skipped showing the permission dialog.
+     *
+     * @param hostUid UID of the package that initiates MediaProjection.
+     */
+    public void logPermissionRequestDisplayed(int hostUid) {
+        write(
+                mSessionIdGenerator.getCurrentSessionId(),
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED,
+                hostUid,
+                TARGET_UID_UNKNOWN,
+                TIME_SINCE_LAST_ACTIVE_UNKNOWN,
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    /**
+     * Logs that the virtual display is created and capturing the selected region begins.
+     *
+     * @param hostUid UID of the package that initiates MediaProjection.
+     * @param targetUid UID of the package that is captured if selected.
+     */
     public void logInProgress(int hostUid, int targetUid) {
         write(
                 mSessionIdGenerator.getCurrentSessionId(),
@@ -105,7 +127,12 @@ public class MediaProjectionMetricsLogger {
                 MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
     }
 
-    /** Logs that the capturing stopped, either normally or because of error. */
+    /**
+     * Logs that the capturing stopped, either normally or because of error.
+     *
+     * @param hostUid UID of the package that initiates MediaProjection.
+     * @param targetUid UID of the package that is captured if selected.
+     */
     public void logStopped(int hostUid, int targetUid) {
         write(
                 mSessionIdGenerator.getCurrentSessionId(),

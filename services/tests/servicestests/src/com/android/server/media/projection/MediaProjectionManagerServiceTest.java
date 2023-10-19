@@ -662,6 +662,17 @@ public class MediaProjectionManagerServiceTest {
         verify(mMediaProjectionMetricsLogger).logInitiated(hostUid, sessionCreationSource);
     }
 
+    @Test
+    public void notifyPermissionRequestDisplayed_forwardsToLogger() {
+        int hostUid = 123;
+        mService =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+
+        mService.notifyPermissionRequestDisplayed(hostUid);
+
+        verify(mMediaProjectionMetricsLogger).logPermissionRequestDisplayed(hostUid);
+    }
+
     /**
      * Executes and validates scenario where the consent result indicates the projection ends.
      */
