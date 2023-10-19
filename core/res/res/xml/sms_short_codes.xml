@@ -54,6 +54,9 @@
     <!-- Azerbaijan: 4-5 digits, known premium codes listed -->
     <shortcode country="az" pattern="\\d{4,5}" premium="330[12]|87744|901[234]|93(?:94|101)|9426|9525" />
 
+    <!-- Bangladesh: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="bd" pattern="\\d{1,5}" free="16672" />
+
     <!-- Belgium: 4 digits, plus EU: http://www.mobileweb.be/en/mobileweb/sms-numberplan.asp -->
     <shortcode country="be" premium="\\d{4}" free="8\\d{3}|116\\d{3}" />
 
@@ -145,7 +148,7 @@
     <shortcode country="in" pattern="\\d{1,5}" free="59336|53969" />
 
     <!-- Indonesia: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="id" pattern="\\d{1,5}" free="99477|6006|46645|363" />
+    <shortcode country="id" pattern="\\d{1,5}" free="99477|6006|46645|363|93457" />
 
     <!-- Ireland: 5 digits, 5xxxx (50xxx=free, 5[12]xxx=standard), plus EU:
          http://www.comreg.ie/_fileupload/publications/ComReg1117.pdf -->
@@ -190,7 +193,7 @@
     <shortcode country="mk" pattern="\\d{1,6}" free="129005|122" />
 
     <!-- Mexico: 4-5 digits (not confirmed), known premium codes listed -->
-    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963|91101" />
+    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963|91101|45453" />
 
     <!-- Malaysia: 5 digits: http://www.skmm.gov.my/attachment/Consumer_Regulation/Mobile_Content_Services_FAQs.pdf -->
     <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099|28288|66668" />
@@ -205,7 +208,7 @@
     <shortcode country="no" pattern="\\d{4,5}" premium="2201|222[67]" free="2171" />
 
     <!-- New Zealand: 3-4 digits, known premium codes listed -->
-    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|176|2141|3067|3068|3110|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
+    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|176|2141|3067|3068|3110|3876|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
 
     <!-- Peru: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="pe" pattern="\\d{4,5}" free="9963|40778" />
