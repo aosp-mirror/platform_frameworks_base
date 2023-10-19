@@ -1348,7 +1348,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             final boolean needToShowConfirmCredential = !dontAskCredential
                     && mLockPatternUtils.isSecure(userId)
-                    && (!hasUnifiedChallenge || !StorageManager.isUserKeyUnlocked(userId));
+                    && (!hasUnifiedChallenge || !StorageManager.isCeStorageUnlocked(userId));
             if (needToShowConfirmCredential) {
                 if (onlyIfCredentialNotRequired) {
                     return false;
@@ -6992,9 +6992,9 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUserStates) {
                 state = mUserStates.get(userId, -1);
             }
-            // Special case, in the stopping/shutdown state user key can still be unlocked
+            // Special case: in the stopping/shutdown state, CE storage can still be unlocked.
             if (state == UserState.STATE_STOPPING || state == UserState.STATE_SHUTDOWN) {
-                return StorageManager.isUserKeyUnlocked(userId);
+                return StorageManager.isCeStorageUnlocked(userId);
             }
             return (state == UserState.STATE_RUNNING_UNLOCKING)
                     || (state == UserState.STATE_RUNNING_UNLOCKED);
@@ -7011,9 +7011,9 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUserStates) {
                 state = mUserStates.get(userId, -1);
             }
-            // Special case, in the stopping/shutdown state user key can still be unlocked
+            // Special case: in the stopping/shutdown state, CE storage can still be unlocked.
             if (state == UserState.STATE_STOPPING || state == UserState.STATE_SHUTDOWN) {
-                return StorageManager.isUserKeyUnlocked(userId);
+                return StorageManager.isCeStorageUnlocked(userId);
             }
             return state == UserState.STATE_RUNNING_UNLOCKED;
         }

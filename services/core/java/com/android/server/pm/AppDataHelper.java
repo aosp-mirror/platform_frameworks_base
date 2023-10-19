@@ -122,7 +122,7 @@ public class AppDataHelper {
                 StorageManagerInternal.class);
         for (UserInfo user : umInternal.getUsers(false /*excludeDying*/)) {
             final int flags;
-            if (StorageManager.isUserKeyUnlocked(user.id)
+            if (StorageManager.isCeStorageUnlocked(user.id)
                     && smInternal.isCeStoragePrepared(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
@@ -404,7 +404,7 @@ public class AppDataHelper {
         // First look for stale data that doesn't belong, and check if things
         // have changed since we did our last restorecon
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-            if (StorageManager.isFileEncrypted() && !StorageManager.isUserKeyUnlocked(userId)) {
+            if (StorageManager.isFileEncrypted() && !StorageManager.isCeStorageUnlocked(userId)) {
                 throw new RuntimeException(
                         "Yikes, someone asked us to reconcile CE storage while " + userId
                                 + " was still locked; this would have caused massive data loss!");
