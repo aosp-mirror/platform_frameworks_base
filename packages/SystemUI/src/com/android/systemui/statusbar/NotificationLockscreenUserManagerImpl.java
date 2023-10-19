@@ -21,7 +21,6 @@ import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_
 import static android.os.UserHandle.USER_NULL;
 import static android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
 import static android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS;
-import static android.os.Flags.allowPrivateProfile;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
@@ -80,7 +79,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -179,50 +177,57 @@ public class NotificationLockscreenUserManagerImpl implements
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Objects.equals(action, Intent.ACTION_USER_REMOVED)) {
-                int removedUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                if (removedUserId != -1) {
-                    for (UserChangedListener listener : mListeners) {
-                        listener.onUserRemoved(removedUserId);
+            switch (action) {
+                case Intent.ACTION_USER_REMOVED:
+                    int removedUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (removedUserId != -1) {
+                        for (UserChangedListener listener : mListeners) {
+                            listener.onUserRemoved(removedUserId);
+                        }
                     }
-                }
-                updateCurrentProfilesCache();
-            } else if (Objects.equals(action, Intent.ACTION_USER_ADDED)){
-                updateCurrentProfilesCache();
-                if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
-                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
-                    mBackgroundHandler.post(() -> {
-                        initValuesForUser(userId);
-                    });
-                }
-            } else if (profileAvailabilityActions(action)) {
-                updateCurrentProfilesCache();
-            } else if (Objects.equals(action, Intent.ACTION_USER_UNLOCKED)) {
-                // Start the overview connection to the launcher service
-                // Connect if user hasn't connected yet
-                if (mOverviewProxyServiceLazy.get().getProxy() == null) {
-                    mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
-                }
-            } else if (Objects.equals(action, NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION)) {
-                final IntentSender intentSender = intent.getParcelableExtra(
-                        Intent.EXTRA_INTENT);
-                final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
-                if (intentSender != null) {
-                    try {
-                        ActivityOptions options = ActivityOptions.makeBasic();
-                        options.setPendingIntentBackgroundActivityStartMode(
-                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-                        mContext.startIntentSender(intentSender, null, 0, 0, 0,
-                                options.toBundle());
-                    } catch (IntentSender.SendIntentException e) {
-                        /* ignore */
+                    updateCurrentProfilesCache();
+                    break;
+                case Intent.ACTION_USER_ADDED:
+                    updateCurrentProfilesCache();
+                    if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
+                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
+                        mBackgroundHandler.post(() -> {
+                            initValuesForUser(userId);
+                        });
                     }
-                }
-                if (notificationKey != null) {
-                    final NotificationVisibility nv = mVisibilityProviderLazy.get()
-                            .obtain(notificationKey, true);
-                    mClickNotifier.onNotificationClick(notificationKey, nv);
-                }
+                    break;
+                case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
+                case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+                    updateCurrentProfilesCache();
+                    break;
+                case Intent.ACTION_USER_UNLOCKED:
+                    // Start the overview connection to the launcher service
+                    // Connect if user hasn't connected yet
+                    if (mOverviewProxyServiceLazy.get().getProxy() == null) {
+                        mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                    }
+                    break;
+                case NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION:
+                    final IntentSender intentSender = intent.getParcelableExtra(
+                            Intent.EXTRA_INTENT);
+                    final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
+                    if (intentSender != null) {
+                        try {
+                            ActivityOptions options = ActivityOptions.makeBasic();
+                            options.setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                            mContext.startIntentSender(intentSender, null, 0, 0, 0,
+                                    options.toBundle());
+                        } catch (IntentSender.SendIntentException e) {
+                            /* ignore */
+                        }
+                    }
+                    if (notificationKey != null) {
+                        final NotificationVisibility nv = mVisibilityProviderLazy.get()
+                                .obtain(notificationKey, true);
+                        mClickNotifier.onNotificationClick(notificationKey, nv);
+                    }
+                    break;
             }
         }
     };
@@ -398,10 +403,6 @@ public class NotificationLockscreenUserManagerImpl implements
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        if (allowPrivateProfile()){
-            filter.addAction(Intent.ACTION_PROFILE_AVAILABLE);
-            filter.addAction(Intent.ACTION_PROFILE_UNAVAILABLE);
-        }
         mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter,
                 null /* executor */, UserHandle.ALL);
 
@@ -811,14 +812,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 listener.onNotificationStateChanged();
             }
         }
-    }
-
-    private boolean profileAvailabilityActions(String action){
-        return allowPrivateProfile()?
-                Objects.equals(action,Intent.ACTION_PROFILE_AVAILABLE)||
-                        Objects.equals(action,Intent.ACTION_PROFILE_UNAVAILABLE):
-                Objects.equals(action,Intent.ACTION_MANAGED_PROFILE_AVAILABLE)||
-                        Objects.equals(action,Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
     }
 
     @Override
