@@ -27,6 +27,8 @@ import java.util.Objects;
  * the DisplayBrightnessModeStrategies when updating the brightness.
  */
 public final class DisplayBrightnessState {
+    public static final float CUSTOM_ANIMATION_RATE_NOT_SET = -1f;
+
     private final float mBrightness;
     private final float mSdrBrightness;
 
@@ -37,6 +39,8 @@ public final class DisplayBrightnessState {
 
     private final boolean mIsSlowChange;
 
+    private final float mCustomAnimationRate;
+
     private DisplayBrightnessState(Builder builder) {
         mBrightness = builder.getBrightness();
         mSdrBrightness = builder.getSdrBrightness();
@@ -45,6 +49,7 @@ public final class DisplayBrightnessState {
         mShouldUseAutoBrightness = builder.getShouldUseAutoBrightness();
         mIsSlowChange = builder.isSlowChange();
         mMaxBrightness = builder.getMaxBrightness();
+        mCustomAnimationRate = builder.getCustomAnimationRate();
     }
 
     /**
@@ -97,7 +102,12 @@ public final class DisplayBrightnessState {
         return mMaxBrightness;
     }
 
-
+    /**
+     * @return custom animation rate
+     */
+    public float getCustomAnimationRate() {
+        return mCustomAnimationRate;
+    }
 
     @Override
     public String toString() {
@@ -112,6 +122,7 @@ public final class DisplayBrightnessState {
         stringBuilder.append(getShouldUseAutoBrightness());
         stringBuilder.append("\n    isSlowChange:").append(mIsSlowChange);
         stringBuilder.append("\n    maxBrightness:").append(mMaxBrightness);
+        stringBuilder.append("\n    customAnimationRate:").append(mCustomAnimationRate);
         return stringBuilder.toString();
     }
 
@@ -137,13 +148,14 @@ public final class DisplayBrightnessState {
                         otherState.getDisplayBrightnessStrategyName())
                 && mShouldUseAutoBrightness == otherState.getShouldUseAutoBrightness()
                 && mIsSlowChange == otherState.isSlowChange()
-                && mMaxBrightness == otherState.getMaxBrightness();
+                && mMaxBrightness == otherState.getMaxBrightness()
+                && mCustomAnimationRate == otherState.getCustomAnimationRate();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
-                mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness);
+                mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mCustomAnimationRate);
     }
 
     /**
@@ -164,6 +176,7 @@ public final class DisplayBrightnessState {
         private boolean mShouldUseAutoBrightness;
         private boolean mIsSlowChange;
         private float mMaxBrightness;
+        private float mCustomAnimationRate = CUSTOM_ANIMATION_RATE_NOT_SET;
 
         /**
          * Create a builder starting with the values from the specified {@link
@@ -180,6 +193,7 @@ public final class DisplayBrightnessState {
             builder.setShouldUseAutoBrightness(state.getShouldUseAutoBrightness());
             builder.setIsSlowChange(state.isSlowChange());
             builder.setMaxBrightness(state.getMaxBrightness());
+            builder.setCustomAnimationRate(state.getCustomAnimationRate());
             return builder;
         }
 
@@ -301,6 +315,22 @@ public final class DisplayBrightnessState {
          */
         public float getMaxBrightness() {
             return mMaxBrightness;
+        }
+
+
+        /**
+         * See {@link DisplayBrightnessState#getCustomAnimationRate()}.
+         */
+        public Builder setCustomAnimationRate(float animationRate) {
+            this.mCustomAnimationRate = animationRate;
+            return this;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#getCustomAnimationRate()}.
+         */
+        public float getCustomAnimationRate() {
+            return mCustomAnimationRate;
         }
 
         /**
