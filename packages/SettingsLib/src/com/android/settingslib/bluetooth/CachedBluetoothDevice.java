@@ -49,6 +49,10 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -708,7 +712,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
 
     void refresh() {
-        ThreadUtils.postOnBackgroundThread(() -> {
+        ListenableFuture<Void> future = ThreadUtils.getBackgroundExecutor().submit(() -> {
             if (BluetoothUtils.isAdvancedDetailsHeader(mDevice)) {
                 Uri uri = BluetoothUtils.getUriMetaData(getDevice(),
                         BluetoothDevice.METADATA_MAIN_ICON);
@@ -718,11 +722,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                                     mContext, this).first);
                 }
             }
-
-            ThreadUtils.postOnMainThread(() -> {
-                dispatchAttributesChanged();
-            });
+            return null;
         });
+        Futures.addCallback(future, new FutureCallback<>() {
+            @Override
+            public void onSuccess(Void result) {
+                dispatchAttributesChanged();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {}
+        }, mContext.getMainExecutor());
     }
 
     public void setJustDiscovered(boolean justDiscovered) {

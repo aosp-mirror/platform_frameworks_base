@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.UserIcons;
@@ -42,6 +43,10 @@ import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.settingslib.utils.CustomDialogHelper;
 import com.android.settingslib.utils.ThreadUtils;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -291,12 +296,22 @@ public class CreateUserDialogController {
 
     private void setUserIcon(Drawable defaultUserIcon, ImageView userPhotoView) {
         if (mCachedDrawablePath != null) {
-            ThreadUtils.postOnBackgroundThread(() -> {
-                mSavedPhoto = EditUserPhotoController.loadNewUserPhotoBitmap(
-                        new File(mCachedDrawablePath));
-                mSavedDrawable = CircleFramedDrawable.getInstance(mActivity, mSavedPhoto);
-                ThreadUtils.postOnMainThread(() -> userPhotoView.setImageDrawable(mSavedDrawable));
-            });
+            ListenableFuture<Drawable> future = ThreadUtils.getBackgroundExecutor()
+                    .submit(() -> {
+                        mSavedPhoto = EditUserPhotoController.loadNewUserPhotoBitmap(
+                                new File(mCachedDrawablePath));
+                        mSavedDrawable = CircleFramedDrawable.getInstance(mActivity, mSavedPhoto);
+                        return mSavedDrawable;
+                    });
+            Futures.addCallback(future, new FutureCallback<>() {
+                @Override
+                public void onSuccess(@NonNull Drawable result) {
+                    userPhotoView.setImageDrawable(result);
+                }
+
+                @Override
+                public void onFailure(Throwable t) {}
+            }, mActivity.getMainExecutor());
         } else {
             userPhotoView.setImageDrawable(defaultUserIcon);
         }
