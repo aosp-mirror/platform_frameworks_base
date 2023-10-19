@@ -8532,6 +8532,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         fromOrientations, toOrientations);
             }
         }
+
+        @Override
+        public @Nullable IBinder getTargetWindowTokenFromInputToken(IBinder inputToken) {
+            InputTarget inputTarget = WindowManagerService.this.getInputTargetFromToken(inputToken);
+            return inputTarget == null ? null : inputTarget.getWindowToken();
+        }
     }
 
     private final class ImeTargetVisibilityPolicyImpl extends ImeTargetVisibilityPolicy {
