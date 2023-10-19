@@ -251,10 +251,6 @@ UnflaggedApi: android.media.audiopolicy.AudioMixingRule#writeToParcel(android.os
     New API must be flagged with @FlaggedApi: method android.media.audiopolicy.AudioMixingRule.writeToParcel(android.os.Parcel,int)
 UnflaggedApi: android.media.audiopolicy.AudioPolicy#updateMixingRules(java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>):
     New API must be flagged with @FlaggedApi: method android.media.audiopolicy.AudioPolicy.updateMixingRules(java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>)
-UnflaggedApi: android.net.wifi.sharedconnectivity.app.NetworkProviderInfo#isBatteryCharging():
-    New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.isBatteryCharging()
-UnflaggedApi: android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder#setBatteryCharging(boolean):
-    New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder.setBatteryCharging(boolean)
 UnflaggedApi: android.nfc.cardemulation.AidGroup#CONTENTS_FILE_DESCRIPTOR:
     New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.AidGroup.CONTENTS_FILE_DESCRIPTOR
 UnflaggedApi: android.nfc.cardemulation.AidGroup#PARCELABLE_WRITE_RETURN_VALUE:
