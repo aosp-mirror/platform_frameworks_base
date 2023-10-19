@@ -71,7 +71,7 @@ import java.util.Objects;
  *
  * @see <a href="http://sqlite.org/c3ref/stmt.html">sqlite3_stmt</a>
  */
-@FlaggedApi(Flags.FLAG_SQLITE_APIS_15)
+@FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
 public final class SQLiteRawStatement implements Closeable {
 
     private static final String TAG = "SQLiteRawStatement";

@@ -701,7 +701,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *   }
      * </pre>
      */
-    @FlaggedApi(Flags.FLAG_SQLITE_APIS_15)
+    @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     public void beginTransactionReadOnly() {
         beginTransactionWithListenerReadOnly(null);
     }
@@ -785,7 +785,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *   }
      * </pre>
      */
-    @FlaggedApi(Flags.FLAG_SQLITE_APIS_15)
+    @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     public void beginTransactionWithListenerReadOnly(
             @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, SQLiteSession.TRANSACTION_MODE_DEFERRED);
@@ -2224,7 +2224,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @throws IllegalStateException if a transaction is not in progress.
      * @throws SQLiteException if the SQL cannot be compiled.
      */
-    @FlaggedApi(Flags.FLAG_SQLITE_APIS_15)
+    @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     @NonNull
     public SQLiteRawStatement createRawStatement(@NonNull String sql) {
         Objects.requireNonNull(sql);
@@ -2244,7 +2244,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @return The ROWID of the last row to be inserted under this connection.
      * @throws IllegalStateException if there is no current transaction.
      */
-    @FlaggedApi(Flags.FLAG_SQLITE_APIS_15)
+    @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     public long getLastInsertRowId() {
         return getThreadSession().getLastInsertRowId();
     }
@@ -2258,7 +2258,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @return The number of rows changed by the most recent sql statement
      * @throws IllegalStateException if there is no current transaction.
      */
-    @FlaggedApi(Flags.FLAG_SQLITE_APIS_15)
+    @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     public long getLastChangedRowCount() {
         return getThreadSession().getLastChangedRowCount();
     }
@@ -2286,7 +2286,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @return The number of rows changed on the current connection.
      * @throws IllegalStateException if there is no current transaction.
      */
-    @FlaggedApi(Flags.FLAG_SQLITE_APIS_15)
+    @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     public long getTotalChangedRowCount() {
         return getThreadSession().getTotalChangedRowCount();
     }
