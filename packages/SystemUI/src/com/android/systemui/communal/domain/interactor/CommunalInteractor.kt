@@ -18,7 +18,8 @@ package com.android.systemui.communal.domain.interactor
 
 import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
-import com.android.systemui.communal.shared.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -38,4 +39,12 @@ constructor(
 
     /** A flow of info about the widget to be displayed, or null if widget is unavailable. */
     val appWidgetInfo: Flow<CommunalAppWidgetInfo?> = widgetRepository.stopwatchAppWidgetInfo
+
+    /**
+     * A flow of information about widgets to be shown in communal hub.
+     *
+     * Currently only showing persistent widgets that have been bound to the app widget service
+     * (have an allocated id).
+     */
+    val widgetContent: Flow<List<CommunalWidgetContentModel>> = widgetRepository.communalWidgets
 }

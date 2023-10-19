@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.data.model
+package com.android.systemui.communal.shared.model
 
-import com.android.systemui.communal.shared.model.CommunalContentSize
+enum class CommunalContentCategory {
+    /** The content persists in the communal hub until removed by the user. */
+    PERSISTENT,
 
-/** Metadata for the default widgets */
-data class CommunalWidgetMetadata(
-    /* Widget provider component name */
-    val componentName: String,
-
-    /* Defines the order in which the widget will be rendered in the grid. */
-    val priority: Int,
-
-    /* Supported sizes */
-    val sizes: List<CommunalContentSize>
-)
+    /** The content temporarily shows up in the communal hub when certain conditions are met. */
+    TRANSIENT,
+}

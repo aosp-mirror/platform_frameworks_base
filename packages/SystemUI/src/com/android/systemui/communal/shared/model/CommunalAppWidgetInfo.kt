@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.communal.shared
+package com.android.systemui.communal.shared.model
 
 import android.appwidget.AppWidgetProviderInfo
 

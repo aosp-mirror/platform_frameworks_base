@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.data.model
+package com.android.systemui.communal.shared.model
 
-import com.android.systemui.communal.shared.model.CommunalContentSize
+/** Supported sizes for communal content in the layout grid. */
+enum class CommunalContentSize {
+    /** Content takes the full height of the column. */
+    FULL,
 
-/** Metadata for the default widgets */
-data class CommunalWidgetMetadata(
-    /* Widget provider component name */
-    val componentName: String,
+    /** Content takes half of the height of the column. */
+    HALF,
 
-    /* Defines the order in which the widget will be rendered in the grid. */
-    val priority: Int,
-
-    /* Supported sizes */
-    val sizes: List<CommunalContentSize>
-)
+    /** Content takes a third of the height of the column. */
+    THIRD,
+}

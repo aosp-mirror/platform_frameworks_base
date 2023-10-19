@@ -1,7 +1,8 @@
 package com.android.systemui.communal.data.repository
 
 import com.android.systemui.communal.data.model.CommunalWidgetMetadata
-import com.android.systemui.communal.shared.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -11,7 +12,14 @@ class FakeCommunalWidgetRepository : CommunalWidgetRepository {
     override val stopwatchAppWidgetInfo: Flow<CommunalAppWidgetInfo?> = _stopwatchAppWidgetInfo
     override var communalWidgetAllowlist: List<CommunalWidgetMetadata> = emptyList()
 
+    private val _communalWidgets = MutableStateFlow<List<CommunalWidgetContentModel>>(emptyList())
+    override val communalWidgets: Flow<List<CommunalWidgetContentModel>> = _communalWidgets
+
     fun setStopwatchAppWidgetInfo(appWidgetInfo: CommunalAppWidgetInfo) {
         _stopwatchAppWidgetInfo.value = appWidgetInfo
+    }
+
+    fun setCommunalWidgets(inventory: List<CommunalWidgetContentModel>) {
+        _communalWidgets.value = inventory
     }
 }
