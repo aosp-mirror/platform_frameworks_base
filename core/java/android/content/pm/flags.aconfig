@@ -15,9 +15,9 @@ flag {
 }
 
 flag {
-    name: "prevent_sdk_lib_app"
+    name: "disallow_sdk_libs_to_be_apps"
     namespace: "package_manager_service"
-    description: "Feature flag to enable the prevent sdk-library be an application."
+    description: "Feature flag to disallow a <sdk-library> to be an <application>."
     bug: "295843617"
     is_fixed_read_only: true
 }
