@@ -1435,6 +1435,7 @@ public final class CompanionDeviceManager {
      *                          of the companion device recorded by CompanionDeviceManager
      * @param tag the tag of this association
      */
+    @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
     @UserHandleAware
     public void setAssociationTag(int associationId, @NonNull String tag) {
         Objects.requireNonNull(tag, "tag cannot be null");
@@ -1459,6 +1460,7 @@ public final class CompanionDeviceManager {
      *                          of the companion device recorded by CompanionDeviceManager
      * @see CompanionDeviceManager#setAssociationTag(int, String)
      */
+    @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
     @UserHandleAware
     public void clearAssociationTag(int associationId) {
         try {

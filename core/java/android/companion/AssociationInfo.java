@@ -144,6 +144,7 @@ public final class AssociationInfo implements Parcelable {
      * @return the tag of this association.
      * @see CompanionDeviceManager#setAssociationTag(int, String)
      */
+    @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
     @Nullable
     public String getTag() {
         return mTag;
@@ -459,6 +460,7 @@ public final class AssociationInfo implements Parcelable {
         }
 
         /** @hide */
+        @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
         @TestApi
         @NonNull
         public Builder setTag(@Nullable String tag) {
