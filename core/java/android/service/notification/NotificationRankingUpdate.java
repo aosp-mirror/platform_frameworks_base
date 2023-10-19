@@ -28,8 +28,6 @@ import android.system.OsConstants;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +57,7 @@ public class NotificationRankingUpdate implements Parcelable {
      * @hide
      */
     public NotificationRankingUpdate(Parcel in) {
-        if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(
-                SystemUiSystemPropertiesFlags.NotificationFlags.RANKING_UPDATE_ASHMEM)) {
+        if (Flags.rankingUpdateAshmem()) {
             // Recover the ranking map from the SharedMemory and store it in mapParcel.
             final Parcel mapParcel = Parcel.obtain();
             ByteBuffer buffer = null;
@@ -176,8 +173,7 @@ public class NotificationRankingUpdate implements Parcelable {
      */
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(
-                SystemUiSystemPropertiesFlags.NotificationFlags.RANKING_UPDATE_ASHMEM)) {
+        if (Flags.rankingUpdateAshmem()) {
             final Parcel mapParcel = Parcel.obtain();
             ArrayList<NotificationListenerService.Ranking> marshalableRankings = new ArrayList<>();
             Bundle smartActionsBundle = new Bundle();
