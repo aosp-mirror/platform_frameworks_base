@@ -1598,10 +1598,14 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
-    public void lockUserKey(int userId) {
+    /**
+     * Locks the user's credential-encrypted (CE) storage.
+     *
+     * @hide
+     */
+    public void lockCeStorage(int userId) {
         try {
-            mStorageManager.lockUserKey(userId);
+            mStorageManager.lockCeStorage(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1628,17 +1632,26 @@ public class StorageManager {
     /** {@hide} */
     @TestApi
     public static boolean isUserKeyUnlocked(int userId) {
+        return isCeStorageUnlocked(userId);
+    }
+
+    /**
+     * Returns true if the user's credential-encrypted (CE) storage is unlocked.
+     *
+     * @hide
+     */
+    public static boolean isCeStorageUnlocked(int userId) {
         if (sStorageManager == null) {
             sStorageManager = IStorageManager.Stub
                     .asInterface(ServiceManager.getService("mount"));
         }
         if (sStorageManager == null) {
-            Slog.w(TAG, "Early during boot, assuming locked");
+            Slog.w(TAG, "Early during boot, assuming CE storage is locked");
             return false;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            return sStorageManager.isUserKeyUnlocked(userId);
+            return sStorageManager.isCeStorageUnlocked(userId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } finally {
