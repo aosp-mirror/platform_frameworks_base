@@ -139,6 +139,7 @@ CanvasContext::~CanvasContext() {
     mRenderNodes.clear();
     mRenderThread.cacheManager().unregisterCanvasContext(this);
     mRenderThread.renderState().removeContextCallback(this);
+    mHintSessionWrapper->destroy();
 }
 
 void CanvasContext::addRenderNode(RenderNode* node, bool placeFront) {

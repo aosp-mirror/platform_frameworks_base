@@ -158,7 +158,6 @@ void HintSessionWrapper::sendLoadResetHint() {
 void HintSessionWrapper::sendLoadIncreaseHint() {
     if (!init()) return;
     mBinding->sendHint(mHintSession, static_cast<int32_t>(SessionHint::CPU_LOAD_UP));
-    mLastFrameNotification = systemTime();
 }
 
 bool HintSessionWrapper::alive() {
