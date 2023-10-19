@@ -50,6 +50,7 @@ import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.splitscreen.StageCoordinator;
 import com.android.wm.shell.sysui.ShellInit;
@@ -511,8 +512,26 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             // make a new startTransaction because pip's startEnterAnimation "consumes" it so
             // we need a separate one to send over to launcher.
             SurfaceControl.Transaction otherStartT = new SurfaceControl.Transaction();
+            @SplitScreen.StageType int topStageToKeep = STAGE_TYPE_UNDEFINED;
+            if (mSplitHandler.isSplitScreenVisible()) {
+                // The non-going home case, we could be pip-ing one of the split stages and keep
+                // showing the other
+                for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                    TransitionInfo.Change change = info.getChanges().get(i);
+                    if (change == pipChange) {
+                        // Ignore the change/task that's going into Pip
+                        continue;
+                    }
+                    @SplitScreen.StageType int splitItemStage =
+                            mSplitHandler.getSplitItemStage(change.getLastParent());
+                    if (splitItemStage != STAGE_TYPE_UNDEFINED) {
+                        topStageToKeep = splitItemStage;
+                        break;
+                    }
+                }
+            }
             // Let split update internal state for dismiss.
-            mSplitHandler.prepareDismissAnimation(STAGE_TYPE_UNDEFINED,
+            mSplitHandler.prepareDismissAnimation(topStageToKeep,
                     EXIT_REASON_CHILD_TASK_ENTER_PIP, everythingElse, otherStartT,
                     finishTransaction);
 
