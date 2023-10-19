@@ -731,18 +731,24 @@ final class VibrationSettings {
         private final SparseArray<Integer> mProcStatesCache = new SparseArray<>();
 
         public boolean isUidForeground(int uid) {
-            return mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
-                    <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            synchronized (this) {
+                return mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
+                        <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            }
         }
 
         @Override
         public void onUidGone(int uid, boolean disabled) {
-            mProcStatesCache.delete(uid);
+            synchronized (this) {
+                mProcStatesCache.delete(uid);
+            }
         }
 
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
-            mProcStatesCache.put(uid, procState);
+            synchronized (this) {
+                mProcStatesCache.put(uid, procState);
+            }
         }
     }
 
