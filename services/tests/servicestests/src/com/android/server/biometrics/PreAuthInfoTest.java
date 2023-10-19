@@ -67,7 +67,7 @@ public class PreAuthInfoTest {
     @Mock
     BiometricService.SettingObserver mSettingObserver;
     @Mock
-    BiometricSensorPrivacy mBiometricSensorPrivacyUtil;
+    BiometricCameraManager mBiometricCameraManager;
 
     @Before
     public void setup() throws RemoteException {
@@ -79,11 +79,13 @@ public class PreAuthInfoTest {
         when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
         when(mFaceAuthenticator.getLockoutModeForUser(anyInt()))
                 .thenReturn(LOCKOUT_NONE);
+        when(mBiometricCameraManager.isCameraPrivacyEnabled()).thenReturn(false);
+        when(mBiometricCameraManager.isAnyCameraUnavailable()).thenReturn(false);
     }
 
     @Test
     public void testFaceAuthentication_whenCameraPrivacyIsEnabled() throws Exception {
-        when(mBiometricSensorPrivacyUtil.isCameraPrivacyEnabled()).thenReturn(true);
+        when(mBiometricCameraManager.isCameraPrivacyEnabled()).thenReturn(true);
 
         BiometricSensor sensor = new BiometricSensor(mContext, SENSOR_ID_FACE, TYPE_FACE,
                 BiometricManager.Authenticators.BIOMETRIC_STRONG, mFaceAuthenticator) {
@@ -104,15 +106,14 @@ public class PreAuthInfoTest {
         PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
                 mSettingObserver, List.of(sensor),
                 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricSensorPrivacyUtil);
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
 
         assertThat(preAuthInfo.eligibleSensors).isEmpty();
     }
 
     @Test
-    public void testFaceAuthentication_whenCameraPrivacyIsDisabled() throws Exception {
-        when(mBiometricSensorPrivacyUtil.isCameraPrivacyEnabled()).thenReturn(false);
-
+    public void testFaceAuthentication_whenCameraPrivacyIsDisabledAndCameraIsAvailable()
+            throws Exception {
         BiometricSensor sensor = new BiometricSensor(mContext, SENSOR_ID_FACE, TYPE_FACE,
                 BiometricManager.Authenticators.BIOMETRIC_STRONG, mFaceAuthenticator) {
             @Override
@@ -132,8 +133,35 @@ public class PreAuthInfoTest {
         PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
                 mSettingObserver, List.of(sensor),
                 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricSensorPrivacyUtil);
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(1);
+    }
+
+    @Test
+    public void testFaceAuthentication_whenCameraIsUnavailable() throws RemoteException {
+        when(mBiometricCameraManager.isAnyCameraUnavailable()).thenReturn(true);
+        BiometricSensor sensor = new BiometricSensor(mContext, SENSOR_ID_FACE, TYPE_FACE,
+                BiometricManager.Authenticators.BIOMETRIC_STRONG, mFaceAuthenticator) {
+            @Override
+            boolean confirmationAlwaysRequired(int userId) {
+                return false;
+            }
+
+            @Override
+            boolean confirmationSupported() {
+                return false;
+            }
+        };
+        PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setConfirmationRequested(false /* requireConfirmation */);
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
+        PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor),
+                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+
+        assertThat(preAuthInfo.eligibleSensors).hasSize(0);
     }
 }

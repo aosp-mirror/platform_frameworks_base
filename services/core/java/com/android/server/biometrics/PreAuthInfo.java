@@ -72,16 +72,16 @@ class PreAuthInfo {
     final Context context;
     private final boolean mBiometricRequested;
     private final int mBiometricStrengthRequested;
-    private final BiometricSensorPrivacy mBiometricSensorPrivacy;
+    private final BiometricCameraManager mBiometricCameraManager;
 
     private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
             boolean credentialRequested, List<BiometricSensor> eligibleSensors,
             List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
             boolean confirmationRequested, boolean ignoreEnrollmentState, int userId,
-            Context context, BiometricSensorPrivacy biometricSensorPrivacy) {
+            Context context, BiometricCameraManager biometricCameraManager) {
         mBiometricRequested = biometricRequested;
         mBiometricStrengthRequested = biometricStrengthRequested;
-        mBiometricSensorPrivacy = biometricSensorPrivacy;
+        mBiometricCameraManager = biometricCameraManager;
         this.credentialRequested = credentialRequested;
 
         this.eligibleSensors = eligibleSensors;
@@ -99,7 +99,7 @@ class PreAuthInfo {
             List<BiometricSensor> sensors,
             int userId, PromptInfo promptInfo, String opPackageName,
             boolean checkDevicePolicyManager, Context context,
-            BiometricSensorPrivacy biometricSensorPrivacy)
+            BiometricCameraManager biometricCameraManager)
             throws RemoteException {
 
         final boolean confirmationRequested = promptInfo.isConfirmationRequested();
@@ -127,7 +127,7 @@ class PreAuthInfo {
                         checkDevicePolicyManager, requestedStrength,
                         promptInfo.getAllowedSensorIds(),
                         promptInfo.isIgnoreEnrollmentState(),
-                        biometricSensorPrivacy);
+                        biometricCameraManager);
 
                 Slog.d(TAG, "Package: " + opPackageName
                         + " Sensor ID: " + sensor.id
@@ -151,7 +151,7 @@ class PreAuthInfo {
 
         return new PreAuthInfo(biometricRequested, requestedStrength, credentialRequested,
                 eligibleSensors, ineligibleSensors, credentialAvailable, confirmationRequested,
-                promptInfo.isIgnoreEnrollmentState(), userId, context, biometricSensorPrivacy);
+                promptInfo.isIgnoreEnrollmentState(), userId, context, biometricCameraManager);
     }
 
     /**
@@ -168,10 +168,14 @@ class PreAuthInfo {
             BiometricSensor sensor, int userId, String opPackageName,
             boolean checkDevicePolicyManager, int requestedStrength,
             @NonNull List<Integer> requestedSensorIds,
-            boolean ignoreEnrollmentState, BiometricSensorPrivacy biometricSensorPrivacy) {
+            boolean ignoreEnrollmentState, BiometricCameraManager biometricCameraManager) {
 
         if (!requestedSensorIds.isEmpty() && !requestedSensorIds.contains(sensor.id)) {
             return BIOMETRIC_NO_HARDWARE;
+        }
+
+        if (sensor.modality == TYPE_FACE && biometricCameraManager.isAnyCameraUnavailable()) {
+            return BIOMETRIC_HARDWARE_NOT_DETECTED;
         }
 
         final boolean wasStrongEnough =
@@ -195,8 +199,8 @@ class PreAuthInfo {
                 return BIOMETRIC_NOT_ENROLLED;
             }
 
-            if (biometricSensorPrivacy != null && sensor.modality == TYPE_FACE) {
-                if (biometricSensorPrivacy.isCameraPrivacyEnabled()) {
+            if (biometricCameraManager != null && sensor.modality == TYPE_FACE) {
+                if (biometricCameraManager.isCameraPrivacyEnabled()) {
                     //Camera privacy is enabled as the access is disabled
                     return BIOMETRIC_SENSOR_PRIVACY_ENABLED;
                 }
@@ -294,8 +298,8 @@ class PreAuthInfo {
         @BiometricAuthenticator.Modality int modality = TYPE_NONE;
 
         boolean cameraPrivacyEnabled = false;
-        if (mBiometricSensorPrivacy != null) {
-            cameraPrivacyEnabled = mBiometricSensorPrivacy.isCameraPrivacyEnabled();
+        if (mBiometricCameraManager != null) {
+            cameraPrivacyEnabled = mBiometricCameraManager.isCameraPrivacyEnabled();
         }
 
         if (mBiometricRequested && credentialRequested) {
