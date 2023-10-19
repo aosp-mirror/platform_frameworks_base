@@ -22,14 +22,18 @@ import static android.app.NotificationManager.VISIBILITY_NO_OVERRIDE;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.os.UserHandle.USER_ALL;
 import static android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
 import static android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -99,6 +103,7 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
+    private static final int TEST_PROFILE_USERHANDLE = 12;
     @Mock
     private NotificationPresenter mPresenter;
     @Mock
@@ -699,6 +704,60 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         assertTrue(mLockscreenUserManager.userAllowsNotificationsInPublic(newUserId));
         assertFalse(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(newUserId));
+    }
+
+    @Test
+    public void testProfileAvailabilityIntent() {
+        mSetFlagsRule.enableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
+        mLockscreenUserManager.mCurrentProfiles.clear();
+        assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
+        mLockscreenUserManager.mCurrentProfiles.append(0, mock(UserInfo.class));
+        simulateProfileAvailabilityActions(Intent.ACTION_PROFILE_AVAILABLE);
+        assertEquals(2, mLockscreenUserManager.mCurrentProfiles.size());
+    }
+
+    @Test
+    public void testProfileUnAvailabilityIntent() {
+        mSetFlagsRule.enableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
+        mLockscreenUserManager.mCurrentProfiles.clear();
+        assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
+        mLockscreenUserManager.mCurrentProfiles.append(0, mock(UserInfo.class));
+        simulateProfileAvailabilityActions(Intent.ACTION_PROFILE_UNAVAILABLE);
+        assertEquals(2, mLockscreenUserManager.mCurrentProfiles.size());
+    }
+
+    @Test
+    public void testManagedProfileAvailabilityIntent() {
+        mSetFlagsRule.disableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
+        mLockscreenUserManager.mCurrentProfiles.clear();
+        mLockscreenUserManager.mCurrentManagedProfiles.clear();
+        assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
+        assertEquals(0, mLockscreenUserManager.mCurrentManagedProfiles.size());
+        mLockscreenUserManager.mCurrentProfiles.append(0, mock(UserInfo.class));
+        simulateProfileAvailabilityActions(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        assertEquals(2, mLockscreenUserManager.mCurrentProfiles.size());
+        assertEquals(1, mLockscreenUserManager.mCurrentManagedProfiles.size());
+    }
+
+    @Test
+    public void testManagedProfileUnAvailabilityIntent() {
+        mSetFlagsRule.disableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
+        mLockscreenUserManager.mCurrentProfiles.clear();
+        mLockscreenUserManager.mCurrentManagedProfiles.clear();
+        assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
+        assertEquals(0, mLockscreenUserManager.mCurrentManagedProfiles.size());
+        mLockscreenUserManager.mCurrentProfiles.append(0, mock(UserInfo.class));
+        simulateProfileAvailabilityActions(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        assertEquals(2, mLockscreenUserManager.mCurrentProfiles.size());
+        assertEquals(1, mLockscreenUserManager.mCurrentManagedProfiles.size());
+    }
+
+    private void simulateProfileAvailabilityActions(String intentAction) {
+        BroadcastReceiver broadcastReceiver =
+                mLockscreenUserManager.getBaseBroadcastReceiverForTest();
+        final Intent intent = new Intent(intentAction);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, TEST_PROFILE_USERHANDLE);
+        broadcastReceiver.onReceive(mContext, intent);
     }
 
     private class TestNotificationLockscreenUserManager
