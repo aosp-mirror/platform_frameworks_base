@@ -15,3 +15,10 @@ flag {
      description: "Feature flag for the ANR timer service"
      bug: "282428924"
 }
+
+flag {
+    name: "fgs_abuse_detection"
+    namespace: "backstage_power"
+    description: "Detect abusive FGS behavior for certain types (camera, mic, media, location)."
+    bug: "295545575"
+}
