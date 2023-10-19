@@ -18,12 +18,15 @@ package com.android.systemui.flags
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -34,12 +37,13 @@ import org.mockito.MockitoAnnotations
 /**
  * Be careful with the {FeatureFlagsReleaseRestarter} in this test. It has a call to System.exit()!
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-class ScreenIdleConditionTest : SysuiTestCase() {
-    private lateinit var condition: ScreenIdleCondition
+class NotOccludedConditionTest : SysuiTestCase() {
+    private lateinit var condition: NotOccludedCondition
 
-    @Mock private lateinit var powerInteractor: PowerInteractor
-    private val isAsleep = MutableStateFlow(false)
+    @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    private val transitionValue = MutableStateFlow(0f)
 
     private val testDispatcher: TestDispatcher = StandardTestDispatcher()
     private val testScope: TestScope = TestScope(testDispatcher)
@@ -47,27 +51,27 @@ class ScreenIdleConditionTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        whenever(powerInteractor.isAsleep).thenReturn(isAsleep)
-        condition = ScreenIdleCondition({ powerInteractor })
+        whenever(keyguardTransitionInteractor.transitionValue(KeyguardState.OCCLUDED))
+            .thenReturn(transitionValue)
+        condition = NotOccludedCondition({ keyguardTransitionInteractor })
+        testScope.runCurrent()
     }
 
     @Test
-    fun testCondition_awake() =
+    fun testCondition_occluded() =
         testScope.runTest {
             val canRestart by collectLastValue(condition.canRestartNow)
 
-            isAsleep.emit(false)
-
+            transitionValue.emit(1f)
             assertThat(canRestart).isFalse()
         }
 
     @Test
-    fun testCondition_asleep() =
+    fun testCondition_notOccluded() =
         testScope.runTest {
             val canRestart by collectLastValue(condition.canRestartNow)
 
-            isAsleep.emit(true)
-
+            transitionValue.emit(0f)
             assertThat(canRestart).isTrue()
         }
 
@@ -76,11 +80,11 @@ class ScreenIdleConditionTest : SysuiTestCase() {
         testScope.runTest {
             val canRestart by collectLastValue(condition.canRestartNow)
 
-            isAsleep.emit(false)
+            transitionValue.emit(1f)
 
             assertThat(canRestart).isFalse()
 
-            isAsleep.emit(true)
+            transitionValue.emit(0f)
 
             assertThat(canRestart).isTrue()
         }

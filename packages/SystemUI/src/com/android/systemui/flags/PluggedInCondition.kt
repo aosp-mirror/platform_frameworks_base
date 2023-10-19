@@ -16,34 +16,34 @@
 
 package com.android.systemui.flags
 
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.statusbar.policy.BatteryController
+import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
 
 /** Returns true when the device is plugged in. */
 class PluggedInCondition
 @Inject
 constructor(
-    private val batteryController: BatteryController,
+    private val batteryControllerLazy: Lazy<BatteryController>,
 ) : ConditionalRestarter.Condition {
 
-    var listenersAdded = false
-    var retryFn: (() -> Unit)? = null
-
-    val batteryCallback =
-        object : BatteryController.BatteryStateChangeCallback {
-            override fun onBatteryLevelChanged(level: Int, pluggedIn: Boolean, charging: Boolean) {
-                retryFn?.invoke()
+    override val canRestartNow = conflatedCallbackFlow {
+        val batteryCallback =
+            object : BatteryController.BatteryStateChangeCallback {
+                override fun onBatteryLevelChanged(
+                    level: Int,
+                    pluggedIn: Boolean,
+                    charging: Boolean
+                ) {
+                    trySend(pluggedIn)
+                }
             }
-        }
+        batteryControllerLazy.get().addCallback(batteryCallback)
 
-    override fun canRestartNow(retryFn: () -> Unit): Boolean {
-        if (!listenersAdded) {
-            listenersAdded = true
-            batteryController.addCallback(batteryCallback)
-        }
+        trySend(batteryControllerLazy.get().isPluggedIn)
 
-        this.retryFn = retryFn
-
-        return batteryController.isPluggedIn
+        awaitClose { batteryControllerLazy.get().removeCallback(batteryCallback) }
     }
 }
