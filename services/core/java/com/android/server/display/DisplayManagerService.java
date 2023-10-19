@@ -487,7 +487,8 @@ public final class DisplayManagerService extends SystemService {
     private boolean mBootCompleted = false;
 
     // If we would like to keep a particular eye on a package, we can set the package name.
-    private boolean mExtraDisplayEventLogging;
+    private final boolean mExtraDisplayEventLogging;
+    private final String mExtraDisplayLoggingPackageName;
 
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
@@ -569,8 +570,9 @@ public final class DisplayManagerService extends SystemService {
         mOverlayProperties = SurfaceControl.getOverlaySupport();
         mSystemReady = false;
         mConfigParameterProvider = new DeviceConfigParameterProvider(DeviceConfigInterface.REAL);
-        final String name = DisplayProperties.debug_vri_package().orElse(null);
-        mExtraDisplayEventLogging = !TextUtils.isEmpty(name);
+        mExtraDisplayLoggingPackageName = DisplayProperties.debug_vri_package().orElse(null);
+        // TODO: b/306170135 - return TextUtils package name check instead
+        mExtraDisplayEventLogging = true;
     }
 
     public void setupSchedulerPolicies() {
@@ -2836,11 +2838,24 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void sendDisplayEventLocked(@NonNull LogicalDisplay display, @DisplayEvent int event) {
+
+        final boolean displayIsEnabled = display.isEnabledLocked();
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+            Trace.instant(Trace.TRACE_TAG_POWER,
+                    "sendDisplayEventLocked#event=" + event + ",displayEnabled="
+                            + displayIsEnabled);
+        }
+
         // Only send updates outside of DisplayManagerService for enabled displays
-        if (display.isEnabledLocked()) {
+        if (displayIsEnabled) {
+            if (mExtraDisplayEventLogging) {
+                Slog.i(TAG, "Deliver Display Event on Handler: " + event);
+            }
             int displayId = display.getDisplayIdLocked();
             Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_EVENT, displayId, event);
             mHandler.sendMessage(msg);
+        } else if (mExtraDisplayEventLogging) {
+            Slog.i(TAG, "Not Sending Display Event; display is not enabled: " + display);
         }
     }
 
@@ -2885,6 +2900,11 @@ public final class DisplayManagerService extends SystemService {
                     + displayId + ", event=" + event
                     + (uids != null ? ", uids=" + uids : ""));
         }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+            Trace.instant(Trace.TRACE_TAG_POWER,
+                    "deliverDisplayEvent#event=" + event + ",displayId="
+                            + displayId   + (uids != null ? ", uids=" + uids : ""));
+        }
 
         // Grab the lock and copy the callbacks.
         final int count;
@@ -2906,6 +2926,10 @@ public final class DisplayManagerService extends SystemService {
                 // For cached apps, save the pending event until it becomes non-cached
                 synchronized (mPendingCallbackSelfLocked) {
                     PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
+                    if (extraLogging(callbackRecord.mPackageName)) {
+                        Slog.i(TAG,
+                                "Uid is cached: " + uid + ", pendingCallback: " + pendingCallback);
+                    }
                     if (pendingCallback == null) {
                         mPendingCallbackSelfLocked.put(uid,
                                 new PendingCallback(callbackRecord, displayId, event));
@@ -2918,6 +2942,11 @@ public final class DisplayManagerService extends SystemService {
             }
         }
         mTempCallbacks.clear();
+    }
+
+    private boolean extraLogging(String packageName) {
+       // TODO: b/306170135 - return sExtraDisplayListenerLogging & package name check instead
+        return true;
     }
 
     // Runs on Handler thread.
@@ -3339,6 +3368,7 @@ public final class DisplayManagerService extends SystemService {
         public final int mUid;
         private final IDisplayManagerCallback mCallback;
         private @EventsMask AtomicLong mEventsMask;
+        private final String mPackageName;
 
         public boolean mWifiDisplayScanRequested;
 
@@ -3348,6 +3378,9 @@ public final class DisplayManagerService extends SystemService {
             mUid = uid;
             mCallback = callback;
             mEventsMask = new AtomicLong(eventsMask);
+
+            String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
+            mPackageName = packageNames == null ? null : packageNames[0];
         }
 
         public void updateEventsMask(@EventsMask long eventsMask) {
@@ -3356,8 +3389,12 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void binderDied() {
-            if (DEBUG) {
+            if (DEBUG || extraLogging(mPackageName)) {
                 Slog.d(TAG, "Display listener for pid " + mPid + " died.");
+            }
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+                Trace.instant(Trace.TRACE_TAG_POWER,
+                        "displayManagerBinderDied#mPid=" + mPid);
             }
             onCallbackDied(this);
         }
@@ -3367,6 +3404,15 @@ public final class DisplayManagerService extends SystemService {
          */
         public boolean notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
             if (!shouldSendEvent(event)) {
+                if (extraLogging(mPackageName)) {
+                    Slog.i(TAG,
+                            "Not sending displayEvent: " + event + " due to mask:" + mEventsMask);
+                }
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+                    Trace.instant(Trace.TRACE_TAG_POWER,
+                            "notifyDisplayEventAsync#notSendingEvent=" + event + ",mEventsMask="
+                                    + mEventsMask);
+                }
                 return true;
             }
 
