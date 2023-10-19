@@ -15,6 +15,13 @@ flag {
 }
 
 flag {
+  name: "high_contrast_text_luminance"
+  namespace: "accessibility"
+  description: "Use luminance to determine how to make text more high contrast, instead of RGB heuristic"
+  bug: "186567103"
+}
+
+flag {
   name: "hdr_10bit_plus"
   namespace: "core_graphics"
   description: "Use 10101010 and FP16 formats for HDR-UI when available"
