@@ -77,14 +77,6 @@ class FooterActionsViewModel(
      */
     val observeDeviceMonitoringDialogRequests: suspend (quickSettingsContext: Context) -> Unit,
 ) {
-    /**
-     * Whether the UI rendering this ViewModel should be visible. Note that even when this is false,
-     * the UI should still participate to the layout it is included in (i.e. in the View world it
-     * should be INVISIBLE, not GONE).
-     */
-    private val _isVisible = MutableStateFlow(false)
-    val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
-
     /** The alpha the UI rendering this ViewModel should have. */
     private val _alpha = MutableStateFlow(1f)
     val alpha: StateFlow<Float> = _alpha.asStateFlow()
@@ -92,10 +84,6 @@ class FooterActionsViewModel(
     /** The alpha the background of the UI rendering this ViewModel should have. */
     private val _backgroundAlpha = MutableStateFlow(1f)
     val backgroundAlpha: StateFlow<Float> = _backgroundAlpha.asStateFlow()
-
-    fun onVisibilityChangeRequested(visible: Boolean) {
-        _isVisible.value = visible
-    }
 
     /** Called when the expansion of the Quick Settings changed. */
     fun onQuickSettingsExpansionChanged(expansion: Float, isInSplitShade: Boolean) {
