@@ -268,7 +268,14 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             if (record.isSystemPriority()) {
                 if (DEBUG_KEY_EVENT) {
-                    Log.d(TAG, "Global priority session is updated, active=" + record.isActive());
+                    Log.d(
+                            TAG,
+                            "Global priority session updated - user id="
+                                    + record.getUserId()
+                                    + " package="
+                                    + record.getPackageName()
+                                    + " active="
+                                    + record.isActive());
                 }
                 user.pushAddressedPlayerChangedLocked();
             } else {
