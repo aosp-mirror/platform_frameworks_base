@@ -8770,7 +8770,9 @@ public class CarrierConfigManager {
          * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_NONE},
          * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_1024_BIT_MODP},
          * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_1536_BIT_MODP},
-         * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_2048_BIT_MODP}
+         * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_2048_BIT_MODP},
+         * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_3072_BIT_MODP},
+         * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_4096_BIT_MODP}
          */
         public static final String KEY_DIFFIE_HELLMAN_GROUPS_INT_ARRAY =
                 KEY_PREFIX + "diffie_hellman_groups_int_array";
@@ -8838,7 +8840,8 @@ public class CarrierConfigManager {
 
         /**
          * List of supported encryption algorithms for child session. Possible values are
-         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CBC}
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CBC},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CTR}
          */
         public static final String KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_child_session_encryption_algorithms_int_array";
