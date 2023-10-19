@@ -35,7 +35,7 @@ interface IPackageManagers {
     fun ApplicationInfo.hasGrantPermission(permission: String): Boolean
 
     suspend fun getAppOpPermissionPackages(userId: Int, permission: String): Set<String>
-    fun getPackageInfoAsUser(packageName: String, flags: Int, userId: Int): PackageInfo?
+    fun getPackageInfoAsUser(packageName: String, flags: Long, userId: Int): PackageInfo?
 }
 
 object PackageManagers : IPackageManagers by PackageManagersImpl(PackageManagerWrapperImpl)
@@ -72,14 +72,16 @@ internal class PackageManagersImpl(
             ?: false
 
     override fun ApplicationInfo.hasRequestPermission(permission: String): Boolean {
-        val packageInfo = getPackageInfoAsUser(packageName, PackageManager.GET_PERMISSIONS, userId)
+        val packageInfo =
+            getPackageInfoAsUser(packageName, PackageManager.GET_PERMISSIONS.toLong(), userId)
         return packageInfo?.requestedPermissions?.let {
             permission in it
         } ?: false
     }
 
     override fun ApplicationInfo.hasGrantPermission(permission: String): Boolean {
-        val packageInfo = getPackageInfoAsUser(packageName, PackageManager.GET_PERMISSIONS, userId)
+        val packageInfo =
+            getPackageInfoAsUser(packageName, PackageManager.GET_PERMISSIONS.toLong(), userId)
         val index = packageInfo?.requestedPermissions?.indexOf(permission) ?: return false
         return index >= 0 &&
             checkNotNull(packageInfo.requestedPermissionsFlags)[index]
@@ -91,8 +93,8 @@ internal class PackageManagersImpl(
             iPackageManager.isPackageAvailable(it, userId)
         }.toSet()
 
-    override fun getPackageInfoAsUser(packageName: String, flags: Int, userId: Int): PackageInfo? =
-        packageManagerWrapper.getPackageInfoAsUserCached(packageName, flags.toLong(), userId)
+    override fun getPackageInfoAsUser(packageName: String, flags: Long, userId: Int): PackageInfo? =
+        packageManagerWrapper.getPackageInfoAsUserCached(packageName, flags, userId)
 
     private fun Int.hasFlag(flag: Int) = (this and flag) > 0
 }
