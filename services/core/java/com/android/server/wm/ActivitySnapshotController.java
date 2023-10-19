@@ -539,7 +539,7 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         if (usf != null) {
             mUserSavedFiles.get(userId).remove(code);
             mSavedFilesInOrder.remove(usf);
-            mPersister.removeSnap(code, userId);
+            mPersister.removeSnapshot(code, userId);
         }
     }
 
