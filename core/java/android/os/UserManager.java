@@ -2857,6 +2857,23 @@ public class UserManager {
     }
 
     /**
+     * Used to check if the user currently running in the <b>foreground</b> is an
+     * {@link #isAdminUser() admin} user.
+     *
+     * @return whether the foreground user is an admin user.
+     * @see #isAdminUser()
+     * @see #isUserForeground()
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE_NEXTGEN)
+    public boolean isForegroundUserAdmin() {
+        try {
+            return mService.isForegroundUserAdmin();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns whether the context user is of the given user type.
      *
      * @param userType the name of the user's user type, e.g.
