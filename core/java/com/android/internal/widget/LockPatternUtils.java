@@ -1933,8 +1933,23 @@ public class LockPatternUtils {
         }
     }
 
+    /**
+     * Unlocks the credential-encrypted storage for the given user if the user is not secured, i.e.
+     * doesn't have an LSKF.
+     * <p>
+     * Whether the storage has been unlocked can be determined by
+     * {@link StorageManager#isUserKeyUnlocked()}.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
+     * @param userId the ID of the user whose storage to unlock
+     */
     public void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
-        getLockSettingsInternal().unlockUserKeyIfUnsecured(userId);
+        try {
+            getLockSettings().unlockUserKeyIfUnsecured(userId);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
     }
 
     public void createNewUser(@UserIdInt int userId, int userSerialNumber) {
