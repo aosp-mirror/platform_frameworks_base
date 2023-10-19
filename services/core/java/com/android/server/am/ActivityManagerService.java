@@ -5476,7 +5476,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + " Calling package: " + packageName + "; intent: " + intent
                             + "; options: " + options);
                 }
-                target.send(code, intent, resolvedType, allowlistToken, null,
+                target.send(code, intent, resolvedType, null, null,
                         requiredPermission, options);
             } catch (RemoteException e) {
             }
