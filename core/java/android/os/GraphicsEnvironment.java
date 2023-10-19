@@ -115,7 +115,6 @@ public class GraphicsEnvironment {
     private static final String ANGLE_GL_DRIVER_CHOICE_DEFAULT = "default";
     private static final String ANGLE_GL_DRIVER_CHOICE_ANGLE = "angle";
     private static final String ANGLE_GL_DRIVER_CHOICE_NATIVE = "native";
-    private static final String SYSTEM_ANGLE_STRING = "system";
 
     private static final String PROPERTY_RO_ANGLE_SUPPORTED = "ro.gfx.angle.supported";
 
@@ -196,16 +195,15 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Query to determine the ANGLE driver choice.
+     * Query to determine if ANGLE should be used
      */
-    private String queryAngleChoice(Context context, Bundle coreSettings,
-                                               String packageName) {
+    private boolean shouldUseAngle(Context context, Bundle coreSettings, String packageName) {
         if (TextUtils.isEmpty(packageName)) {
             Log.v(TAG, "No package name specified; use the system driver");
-            return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
+            return false;
         }
 
-        return queryAngleChoiceInternal(context, coreSettings, packageName);
+        return shouldUseAngleInternal(context, coreSettings, packageName);
     }
 
     private int getVulkanVersion(PackageManager pm) {
@@ -426,11 +424,10 @@ public class GraphicsEnvironment {
      *    forces a choice;
      * 3) Use ANGLE if isAngleEnabledByGameMode() returns true;
      */
-    private String queryAngleChoiceInternal(Context context, Bundle bundle,
-                                                       String packageName) {
+    private boolean shouldUseAngleInternal(Context context, Bundle bundle, String packageName) {
         // Make sure we have a good package name
         if (TextUtils.isEmpty(packageName)) {
-            return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
+            return false;
         }
 
         // Check the semi-global switch (i.e. once system has booted enough) for whether ANGLE
@@ -445,7 +442,7 @@ public class GraphicsEnvironment {
         }
         if (allUseAngle == ANGLE_GL_DRIVER_ALL_ANGLE_ON) {
             Log.v(TAG, "Turn on ANGLE for all applications.");
-            return ANGLE_GL_DRIVER_CHOICE_ANGLE;
+            return true;
         }
 
         // Get the per-application settings lists
@@ -468,8 +465,7 @@ public class GraphicsEnvironment {
                             + optInPackages.size() + ", "
                         + "number of values: "
                             + optInValues.size());
-            return mEnabledByGameMode ? ANGLE_GL_DRIVER_CHOICE_ANGLE
-                    : ANGLE_GL_DRIVER_CHOICE_DEFAULT;
+            return mEnabledByGameMode;
         }
 
         // See if this application is listed in the per-application settings list
@@ -477,8 +473,7 @@ public class GraphicsEnvironment {
 
         if (pkgIndex < 0) {
             Log.v(TAG, packageName + " is not listed in per-application setting");
-            return mEnabledByGameMode ? ANGLE_GL_DRIVER_CHOICE_ANGLE
-                    : ANGLE_GL_DRIVER_CHOICE_DEFAULT;
+            return mEnabledByGameMode;
         }
         mAngleOptInIndex = pkgIndex;
 
@@ -489,14 +484,13 @@ public class GraphicsEnvironment {
                 "ANGLE Developer option for '" + packageName + "' "
                         + "set to: '" + optInValue + "'");
         if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_ANGLE)) {
-            return ANGLE_GL_DRIVER_CHOICE_ANGLE;
+            return true;
         } else if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE)) {
-            return ANGLE_GL_DRIVER_CHOICE_NATIVE;
+            return false;
         } else {
             // The user either chose default or an invalid value; go with the default driver or what
             // the game mode indicates
-            return mEnabledByGameMode ? ANGLE_GL_DRIVER_CHOICE_ANGLE
-                    : ANGLE_GL_DRIVER_CHOICE_DEFAULT;
+            return mEnabledByGameMode;
         }
     }
 
@@ -563,12 +557,8 @@ public class GraphicsEnvironment {
      */
     private boolean setupAngle(Context context, Bundle bundle, PackageManager packageManager,
             String packageName) {
-        final String angleChoice = queryAngleChoice(context, bundle, packageName);
-        if (angleChoice.equals(ANGLE_GL_DRIVER_CHOICE_DEFAULT)) {
-            return false;
-        }
-        if (angleChoice.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE)) {
-            nativeSetAngleInfo("", true, packageName, null);
+
+        if (!shouldUseAngle(context, bundle, packageName)) {
             return false;
         }
 
@@ -637,10 +627,10 @@ public class GraphicsEnvironment {
             Log.d(TAG, "ANGLE package libs: " + paths);
         }
 
-        // If we make it to here, ANGLE apk will be used.  Call nativeSetAngleInfo() with the
-        // application package name and ANGLE features to use.
+        // If we make it to here, ANGLE will be used.  Call setAngleInfo() with the package name,
+        // and features to use.
         final String[] features = getAngleEglFeatures(context, bundle);
-        nativeSetAngleInfo(paths, false, packageName, features);
+        setAngleInfo(paths, false, packageName, features);
 
         return true;
     }
@@ -662,10 +652,10 @@ public class GraphicsEnvironment {
             return false;
         }
 
-        // If we make it to here, system ANGLE will be used.  Call nativeSetAngleInfo() with
-        // the application package name and ANGLE features to use.
+        // If we make it to here, ANGLE will be used.  Call setAngleInfo() with the package name,
+        // and features to use.
         final String[] features = getAngleEglFeatures(context, bundle);
-        nativeSetAngleInfo(SYSTEM_ANGLE_STRING, false, packageName, features);
+        setAngleInfo("", true, packageName, features);
         return true;
     }
 
@@ -946,8 +936,8 @@ public class GraphicsEnvironment {
     private static native void setDriverPathAndSphalLibraries(String path, String sphalLibraries);
     private static native void setGpuStats(String driverPackageName, String driverVersionName,
             long driverVersionCode, long driverBuildTime, String appPackageName, int vulkanVersion);
-    private static native void nativeSetAngleInfo(String path, boolean useNativeDriver,
-            String packageName, String[] features);
+    private static native void setAngleInfo(String path, boolean useSystemAngle, String packageName,
+            String[] features);
     private static native boolean setInjectLayersPrSetDumpable();
     private static native void nativeToggleAngleAsSystemDriver(boolean enabled);
 
