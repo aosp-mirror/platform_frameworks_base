@@ -114,6 +114,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.DataLoaderType;
+import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -167,6 +168,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.SystemConfig;
+import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.DexoptParams;
 import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
@@ -2534,8 +2536,15 @@ final class InstallPackageHelper {
                             LocalManagerRegistry.getManager(PackageManagerLocal.class);
                     try (PackageManagerLocal.FilteredSnapshot snapshot =
                                     packageManagerLocal.withFilteredSnapshot()) {
-                        DexoptParams params =
-                                dexoptOptions.convertToDexoptParams(0 /* extraFlags */);
+                        boolean ignoreDexoptProfile =
+                                (installRequest.getInstallFlags()
+                                        & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)
+                                != 0;
+                        /*@DexoptFlags*/ int extraFlags =
+                                ignoreDexoptProfile && Flags.useArtServiceV2()
+                                ? ArtFlags.FLAG_IGNORE_PROFILE
+                                : 0;
+                        DexoptParams params = dexoptOptions.convertToDexoptParams(extraFlags);
                         DexoptResult dexOptResult = DexOptHelper.getArtManagerLocal().dexoptPackage(
                                 snapshot, packageName, params);
                         installRequest.onDexoptFinished(dexOptResult);
