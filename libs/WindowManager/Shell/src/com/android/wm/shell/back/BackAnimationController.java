@@ -61,6 +61,7 @@ import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
@@ -99,6 +100,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * Max duration to wait for an animation to finish before triggering the real back.
      */
     private static final long MAX_ANIMATION_DURATION = 2000;
+    private final LatencyTracker mLatencyTracker;
 
     /** True when a back gesture is ongoing */
     private boolean mBackGestureStarted = false;
@@ -167,6 +169,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private final BackAnimationBackground mAnimationBackground;
     private StatusBarCustomizer mCustomizer;
+    private boolean mTrackingLatency;
 
     public BackAnimationController(
             @NonNull ShellInit shellInit,
@@ -213,6 +216,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 .setSpeedUpFactor(FLING_SPEED_UP_FACTOR)
                 .build();
         mShellBackAnimationRegistry = shellBackAnimationRegistry;
+        mLatencyTracker = LatencyTracker.getInstance(mContext);
     }
 
     private void onInit() {
@@ -438,6 +442,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private void startBackNavigation(@NonNull TouchTracker touchTracker) {
         try {
+            startLatencyTracking();
             mBackNavigationInfo = mActivityTaskManager.startBackNavigation(
                     mNavigationObserver, mEnableAnimations.get() ? mBackAnimationAdapter : null);
             onBackNavigationInfoReceived(mBackNavigationInfo, touchTracker);
@@ -452,6 +457,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Received backNavigationInfo:%s", backNavigationInfo);
         if (backNavigationInfo == null) {
             ProtoLog.e(WM_SHELL_BACK_PREVIEW, "Received BackNavigationInfo is null.");
+            cancelLatencyTracking();
             return;
         }
         final int backType = backNavigationInfo.getType();
@@ -462,6 +468,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
         } else {
             mActiveCallback = mBackNavigationInfo.getOnBackInvokedCallback();
+            // App is handling back animation. Cancel system animation latency tracking.
+            cancelLatencyTracking();
             dispatchOnBackStarted(mActiveCallback, touchTracker.createStartEvent(null));
         }
     }
@@ -808,12 +816,36 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishBackNavigation()");
         mActiveCallback = null;
         mShellBackAnimationRegistry.resetDefaultCrossActivity();
+        cancelLatencyTracking();
         if (mBackNavigationInfo != null) {
             mBackNavigationInfo.onBackNavigationFinished(triggerBack);
             mBackNavigationInfo = null;
         }
     }
 
+    private void startLatencyTracking() {
+        if (mTrackingLatency) {
+            cancelLatencyTracking();
+        }
+        mLatencyTracker.onActionStart(LatencyTracker.ACTION_BACK_SYSTEM_ANIMATION);
+        mTrackingLatency = true;
+    }
+
+    private void cancelLatencyTracking() {
+        if (!mTrackingLatency) {
+            return;
+        }
+        mLatencyTracker.onActionCancel(LatencyTracker.ACTION_BACK_SYSTEM_ANIMATION);
+        mTrackingLatency = false;
+    }
+
+    private void endLatencyTracking() {
+        if (!mTrackingLatency) {
+            return;
+        }
+        mLatencyTracker.onActionEnd(LatencyTracker.ACTION_BACK_SYSTEM_ANIMATION);
+        mTrackingLatency = false;
+    }
 
     private void createAdapter() {
         IBackAnimationRunner runner =
@@ -826,6 +858,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                             IBackAnimationFinishedCallback finishedCallback) {
                         mShellExecutor.execute(
                                 () -> {
+                                    endLatencyTracking();
                                     if (mBackNavigationInfo == null) {
                                         ProtoLog.e(WM_SHELL_BACK_PREVIEW,
                                                 "Lack of navigation info to start animation.");
