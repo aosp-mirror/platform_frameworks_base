@@ -30,11 +30,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.android.settingslib.spa.framework.common.LocalEntryDataProvider
-import com.android.settingslib.spa.framework.theme.SettingsTheme
 
 @Composable
-internal fun EntryHighlight(UiLayoutFn: @Composable () -> Unit) {
+internal fun EntryHighlight(content: @Composable () -> Unit) {
     val entryData = LocalEntryDataProvider.current
     val entryIsHighlighted = rememberSaveable { entryData.isHighlighted }
     var localHighlighted by rememberSaveable { mutableStateOf(false) }
@@ -45,15 +45,16 @@ internal fun EntryHighlight(UiLayoutFn: @Composable () -> Unit) {
     val backgroundColor by animateColorAsState(
         targetValue = when {
             localHighlighted -> MaterialTheme.colorScheme.surfaceVariant
-            else -> SettingsTheme.colorScheme.background
+            else -> Color.Transparent
         },
         animationSpec = repeatable(
             iterations = 3,
             animation = tween(durationMillis = 500),
             repeatMode = RepeatMode.Restart
-        )
+        ),
+        label = "BackgroundColorAnimation",
     )
     Box(modifier = Modifier.background(color = backgroundColor)) {
-        UiLayoutFn()
+        content()
     }
 }
