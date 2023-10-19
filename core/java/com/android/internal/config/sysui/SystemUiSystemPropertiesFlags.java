@@ -81,11 +81,6 @@ public class SystemUiSystemPropertiesFlags {
         public static final Flag PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS = releasedFlag(
                 "persist.sysui.notification.propagate_channel_updates_to_conversations");
 
-        // TODO: b/291907312 - remove feature flags
-        /** Gating the NMS->NotificationAttentionHelper buzzBeepBlink refactor */
-        public static final Flag ENABLE_ATTENTION_HELPER_REFACTOR = devFlag(
-                "persist.debug.sysui.notification.enable_attention_helper_refactor");
-
         // TODO b/291899544: for released flags, use resource config values
         /** Value used by polite notif. feature */
         public static final Flag NOTIF_COOLDOWN_T1 = devFlag(
