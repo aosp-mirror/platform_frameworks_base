@@ -220,7 +220,7 @@ public final class DisplayManagerGlobal {
 
         registerCallbackIfNeededLocked();
 
-        if (DEBUG || extraLogging()) {
+        if (DEBUG) {
             Log.d(TAG, "getDisplayInfo: displayId=" + displayId + ", info=" + info);
         }
         return info;
@@ -402,7 +402,7 @@ public final class DisplayManagerGlobal {
     }
 
     private void maybeLogAllDisplayListeners() {
-        if (!sExtraDisplayListenerLogging) {
+        if (!extraLogging()) {
             return;
         }
 
@@ -1222,7 +1222,7 @@ public final class DisplayManagerGlobal {
 
         private void handleMessage(Message msg) {
             if (extraLogging()) {
-                Slog.i(TAG, "DisplayListenerDelegate(" + eventToString(msg.what)
+                Slog.i(TAG, "DLD(" + eventToString(msg.what)
                         + ", display=" + msg.arg1
                         + ", mEventsMask=" + Long.toBinaryString(mEventsMask)
                         + ", mPackageName=" + mPackageName
@@ -1231,9 +1231,10 @@ public final class DisplayManagerGlobal {
             }
             if (DEBUG) {
                 Trace.beginSection(
-                        "DisplayListenerDelegate(" + eventToString(msg.what)
+                        TextUtils.trimToSize(
+                                "DLD(" + eventToString(msg.what)
                                 + ", display=" + msg.arg1
-                                + ", listener=" + mListener.getClass() + ")");
+                                + ", listener=" + mListener.getClass() + ")", 127));
             }
             switch (msg.what) {
                 case EVENT_DISPLAY_ADDED:
@@ -1422,11 +1423,12 @@ public final class DisplayManagerGlobal {
             sExtraDisplayListenerLogging = !TextUtils.isEmpty(EXTRA_LOGGING_PACKAGE_NAME)
                     && EXTRA_LOGGING_PACKAGE_NAME.equals(sCurrentPackageName);
         }
-        return sExtraDisplayListenerLogging;
+        // TODO: b/306170135 - return sExtraDisplayListenerLogging instead
+        return true;
     }
 
     private static boolean extraLogging() {
-        return sExtraDisplayListenerLogging && EXTRA_LOGGING_PACKAGE_NAME.equals(
-                sCurrentPackageName);
+        // TODO: b/306170135 - return sExtraDisplayListenerLogging & package name check instead
+        return true;
     }
 }
