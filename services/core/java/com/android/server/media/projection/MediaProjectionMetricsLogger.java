@@ -16,6 +16,11 @@
 
 package com.android.server.media.projection;
 
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED;
+
 import android.content.Context;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -82,25 +87,33 @@ public class MediaProjectionMetricsLogger {
                         : (int) durationSinceLastActiveSession.toSeconds();
         write(
                 mSessionIdGenerator.createAndGetNewSessionId(),
-                FrameworkStatsLog
-                        .MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED,
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED,
                 hostUid,
                 TARGET_UID_UNKNOWN,
                 timeSinceLastActiveInSeconds,
                 sessionCreationSource);
     }
 
+    /** Logs that the virtual display is created and capturing the selected region begins. */
+    public void logInProgress(int hostUid, int targetUid) {
+        write(
+                mSessionIdGenerator.getCurrentSessionId(),
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS,
+                hostUid,
+                targetUid,
+                TIME_SINCE_LAST_ACTIVE_UNKNOWN,
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
     /** Logs that the capturing stopped, either normally or because of error. */
     public void logStopped(int hostUid, int targetUid) {
         write(
                 mSessionIdGenerator.getCurrentSessionId(),
-                FrameworkStatsLog
-                        .MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED,
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED,
                 hostUid,
                 targetUid,
                 TIME_SINCE_LAST_ACTIVE_UNKNOWN,
-                FrameworkStatsLog
-                        .MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
         mTimestampStore.registerActiveSessionEnded();
     }
 

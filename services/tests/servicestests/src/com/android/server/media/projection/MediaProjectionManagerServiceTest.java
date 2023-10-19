@@ -26,11 +26,10 @@ import static android.media.projection.ReviewGrantedConsentResult.UNKNOWN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -69,7 +68,6 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.wm.WindowManagerInternal;
@@ -837,10 +835,69 @@ public class MediaProjectionManagerServiceTest {
 
         service.setContentRecordingSession(DISPLAY_SESSION);
 
-        verify(mMediaProjectionMetricsLogger).notifyProjectionStateChange(
+        verify(mMediaProjectionMetricsLogger).logInProgress(
                 projection.uid,
-                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS,
-                FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN
+                DISPLAY_SESSION.getTargetUid()
+        );
+    }
+
+    @Test
+    public void setContentRecordingSession_taskSession_logsCaptureInProgressWithTargetUid()
+            throws Exception {
+        mService.addCallback(mWatcherCallback);
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+        doReturn(true)
+                .when(mWindowManagerInternal)
+                .setContentRecordingSession(any(ContentRecordingSession.class));
+        int targetUid = 123455;
+
+        ContentRecordingSession taskSession =
+                ContentRecordingSession.createTaskSession(mock(IBinder.class), targetUid);
+        service.setContentRecordingSession(taskSession);
+
+        verify(mMediaProjectionMetricsLogger).logInProgress(projection.uid, targetUid);
+    }
+
+    @Test
+    public void setContentRecordingSession_failure_doesNotLogCaptureInProgress() throws Exception {
+        mService.addCallback(mWatcherCallback);
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+        doReturn(false).when(mWindowManagerInternal).setContentRecordingSession(
+                any(ContentRecordingSession.class));
+
+        service.setContentRecordingSession(DISPLAY_SESSION);
+
+        verify(mMediaProjectionMetricsLogger, never()).logInProgress(
+                anyInt(),
+                anyInt()
+        );
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionNull_doesNotLogCaptureInProgress()
+            throws Exception {
+        mService.addCallback(mWatcherCallback);
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+        doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(
+                any(ContentRecordingSession.class));
+
+        service.setContentRecordingSession(null);
+
+        verify(mMediaProjectionMetricsLogger, never()).logInProgress(
+                anyInt(),
+                anyInt()
         );
     }
 
