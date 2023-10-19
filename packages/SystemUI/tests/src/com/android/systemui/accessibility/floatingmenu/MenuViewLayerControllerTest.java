@@ -19,8 +19,7 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.systemBars;
 
-import static com.android.systemui.Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG;
-import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -76,7 +75,7 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        setFlagDefault(mSetFlagsRule, FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
+        setFlagDefaults(mSetFlagsRule);
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
         doAnswer(invocation -> wm.getMaximumWindowMetrics()).when(
                 mWindowManager).getMaximumWindowMetrics();

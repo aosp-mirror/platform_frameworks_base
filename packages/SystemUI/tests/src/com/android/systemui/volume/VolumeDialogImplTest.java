@@ -53,11 +53,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.test.core.view.MotionEventBuilder;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Prefs;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.dump.DumpManager;
@@ -66,6 +67,7 @@ import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
@@ -75,6 +77,8 @@ import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Lazy;
+
+import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -697,6 +701,60 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             assertNotSame(ringerDescription, ringerContainerDescription);
             assertTrue(ringerContainerDescription.startsWith(ringerDescription));
         }
+    }
+
+    /**
+     * The click should be a single tap, thus we inject a down and an up event.
+     */
+    @Test
+    public void clickCaptionsButton_logsUiEvent() {
+        UiEventLoggerFake logger = new UiEventLoggerFake();
+        Events.sUiEventLogger = logger;
+        MotionEvent down = MotionEventBuilder.newBuilder()
+                .setAction(MotionEvent.ACTION_DOWN).build();
+        MotionEvent up = MotionEventBuilder.newBuilder()
+                .setAction(MotionEvent.ACTION_UP).build();
+
+        mODICaptionsIcon.onTouchEvent(down);
+        mODICaptionsIcon.onTouchEvent(up);
+        mTestableLooper.moveTimeForward(300); // to confirm it was only a single tap
+        mTestableLooper.processAllMessages();
+
+        boolean foundCaptionLog = false;
+        for (UiEventLoggerFake.FakeUiEvent event : logger.getLogs()) {
+            if (event.eventId
+                    == Events.VolumeDialogEvent.VOLUME_DIALOG_ODI_CAPTIONS_CLICKED.getId()) {
+                foundCaptionLog = true;
+                break;
+            }
+        }
+        Assert.assertTrue("Did not log the captions button click.", foundCaptionLog);
+    }
+
+    /**
+     * Pressing the small x button at top right dismisses the captions tooltip.
+     */
+    @Test
+    public void dismissCaptionsTooltip_logsUiEvent() {
+        UiEventLoggerFake logger = new UiEventLoggerFake();
+        Events.sUiEventLogger = logger;
+        mDialog.showCaptionsTooltip();
+        assumeNotNull(mDialog.mODICaptionsTooltipView);
+        View dismissButton = mDialog.mODICaptionsTooltipView.findViewById(R.id.dismiss);
+
+        dismissButton.performClick();
+
+        boolean foundCaptionLog = false;
+        for (UiEventLoggerFake.FakeUiEvent event : logger.getLogs()) {
+            if (event.eventId
+                    == Events.VolumeDialogEvent.VOLUME_DIALOG_ODI_CAPTIONS_TOOLTIP_CLICKED.getId()
+            ) {
+                foundCaptionLog = true;
+                break;
+            }
+        }
+        Assert.assertTrue("Did not log the captions tooltip dismiss button click.",
+                foundCaptionLog);
     }
 
     @After

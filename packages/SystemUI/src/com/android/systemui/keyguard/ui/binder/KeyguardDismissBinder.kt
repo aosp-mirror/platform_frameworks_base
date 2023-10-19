@@ -25,20 +25,18 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
 /** Handles keyguard dismissal requests. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardDismissBinder
 @Inject
 constructor(
     private val interactor: KeyguardDismissInteractor,
-    private val userInteractor: UserInteractor,
+    private val selectedUserInteractor: SelectedUserInteractor,
     private val viewMediatorCallback: ViewMediatorCallback,
     @Application private val scope: CoroutineScope,
     private val keyguardLogger: KeyguardLogger,
@@ -55,11 +53,15 @@ constructor(
                 when (keyguardDoneTiming) {
                     KeyguardDone.LATER -> {
                         log("keyguardDonePending")
-                        viewMediatorCallback.keyguardDonePending(userInteractor.getSelectedUserId())
+                        viewMediatorCallback.keyguardDonePending(
+                            selectedUserInteractor.getSelectedUserId()
+                        )
                     }
                     else -> {
                         log("keyguardDone")
-                        viewMediatorCallback.keyguardDone(userInteractor.getSelectedUserId())
+                        viewMediatorCallback.keyguardDone(
+                            selectedUserInteractor.getSelectedUserId()
+                        )
                     }
                 }
             }

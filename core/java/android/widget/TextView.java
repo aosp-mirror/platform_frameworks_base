@@ -15555,6 +15555,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private void ensureIterableTextForAccessibilitySelectable() {
         if (!(mText instanceof Spannable)) {
             setText(mText, BufferType.SPANNABLE);
+            if (getLayout() == null) {
+                assumeLayout();
+            }
         }
     }
 

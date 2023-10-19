@@ -11527,7 +11527,11 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public @SurfaceControl.BufferTransform int getBufferTransformHint() {
-        return mSurfaceControl.getTransformHint();
+        if (mSurfaceControl.isValid()) {
+            return mSurfaceControl.getTransformHint();
+        } else {
+            return SurfaceControl.BUFFER_TRANSFORM_IDENTITY;
+        }
     }
 
     @Override

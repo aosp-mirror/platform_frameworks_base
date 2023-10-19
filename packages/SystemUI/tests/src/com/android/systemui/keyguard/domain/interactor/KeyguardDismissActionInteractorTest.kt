@@ -64,8 +64,6 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
             KeyguardDismissInteractorFactory.create(
                 context = context,
                 testScope = testScope,
-                broadcastDispatcher = fakeBroadcastDispatcher,
-                dispatcher = dispatcher,
             )
         keyguardRepository = dismissInteractorWithDependencies.keyguardRepository
         transitionRepository = FakeKeyguardTransitionRepository()

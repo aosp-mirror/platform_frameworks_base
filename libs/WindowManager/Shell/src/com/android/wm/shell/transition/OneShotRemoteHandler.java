@@ -63,7 +63,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (mTransition != transition) return false;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Using registered One-shot remote"
-                + " transition %s for #%d.", mRemote, info.getDebugId());
+                + " transition %s for (#%d).", mRemote, info.getDebugId());
 
         final IBinder.DeathRecipient remoteDied = () -> {
             Log.e(Transitions.TAG, "Remote transition died, finishing");

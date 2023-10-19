@@ -40,6 +40,7 @@ import com.android.settingslib.spa.gallery.page.LoadingBarPageProvider
 import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
 import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
+import com.android.settingslib.spa.gallery.preference.ListPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
@@ -74,6 +75,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 PreferencePageProvider,
                 SwitchPreferencePageProvider,
                 MainSwitchPreferencePageProvider,
+                ListPreferencePageProvider,
                 TwoTargetSwitchPreferencePageProvider,
                 ArgumentPageProvider,
                 SliderPageProvider,

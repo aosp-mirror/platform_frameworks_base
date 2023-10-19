@@ -126,7 +126,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
         }
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Delegate animation for #%d to %s",
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Delegate animation for (#%d) to %s",
                 info.getDebugId(), pendingRemote);
 
         if (pendingRemote == null) return false;
@@ -241,7 +241,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         if (remote == null) return null;
         mRequestedRemotes.put(transition, remote);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
-                + " for %s: %s", transition, remote);
+                + " for (#%d) %s: %s", request.getDebugId(), transition, remote);
         return new WindowContainerTransaction();
     }
 

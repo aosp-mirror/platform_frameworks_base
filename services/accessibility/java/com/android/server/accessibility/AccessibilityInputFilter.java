@@ -68,7 +68,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      *
      * @see #setUserAndEnabledFeatures(int, int)
      */
-    static final int FLAG_FEATURE_SCREEN_MAGNIFIER = 0x00000001;
+    static final int FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP = 0x00000001;
 
     /**
      * Flag for enabling the touch exploration feature.
@@ -100,7 +100,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     /**
      * Flag for enabling the feature to control the screen magnifier. If
-     * {@link #FLAG_FEATURE_SCREEN_MAGNIFIER} is set this flag is ignored
+     * {@link #FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP} is set this flag is ignored
      * as the screen magnifier feature performs a super set of the work
      * performed by this feature.
      *
@@ -149,7 +149,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             FLAG_FEATURE_INJECT_MOTION_EVENTS
                     | FLAG_FEATURE_AUTOCLICK
                     | FLAG_FEATURE_TOUCH_EXPLORATION
-                    | FLAG_FEATURE_SCREEN_MAGNIFIER
+                    | FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP
                     | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER
                     | FLAG_SERVICE_HANDLES_DOUBLE_TAP
                     | FLAG_REQUEST_MULTI_FINGER_GESTURES
@@ -530,7 +530,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
-                || ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0)
+                || ((mEnabledFeatures & FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP) != 0)
                 || ((mEnabledFeatures & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0)) {
             final MagnificationGestureHandler magnificationGestureHandler =
                     createMagnificationGestureHandler(displayId,
@@ -648,7 +648,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private MagnificationGestureHandler createMagnificationGestureHandler(
             int displayId, Context displayContext) {
         final boolean detectControlGestures = (mEnabledFeatures
-                & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0;
+                & FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP) != 0;
         final boolean triggerable = (mEnabledFeatures
                 & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
         MagnificationGestureHandler magnificationGestureHandler;

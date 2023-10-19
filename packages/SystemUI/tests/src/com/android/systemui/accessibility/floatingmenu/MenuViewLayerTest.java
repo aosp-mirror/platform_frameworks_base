@@ -22,9 +22,8 @@ import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 
-import static com.android.systemui.Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG;
 import static com.android.systemui.accessibility.floatingmenu.MenuViewLayer.LayerIndex;
-import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -113,7 +112,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        setFlagDefault(mSetFlagsRule, FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
+        setFlagDefaults(mSetFlagsRule);
         final Rect mDisplayBounds = new Rect();
         mDisplayBounds.set(/* left= */ 0, /* top= */ 0, DISPLAY_WINDOW_WIDTH,
                 DISPLAY_WINDOW_HEIGHT);

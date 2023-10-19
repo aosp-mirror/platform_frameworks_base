@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * This class contains the state for one type of settings. It is responsible
@@ -589,9 +590,10 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    public void persistSyncLocked() {
+    public void persistSettingsLocked() {
         mHandler.removeMessages(MyHandler.MSG_PERSIST_SETTINGS);
-        doWriteState();
+        // schedule a write operation right away
+        mHandler.obtainMessage(MyHandler.MSG_PERSIST_SETTINGS).sendToTarget();
     }
 
     // The settings provider must hold its lock when calling here.
@@ -1723,6 +1725,22 @@ final class SettingsState {
     public int getMemoryUsage(String packageName) {
         synchronized (mLock) {
             return mPackageToMemoryUsage.getOrDefault(packageName, 0);
+        }
+    }
+
+    /**
+     * Allow tests to wait for the handler to finish handling all the remaining messages
+     */
+    @VisibleForTesting
+    public void waitForHandler() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        synchronized (mLock) {
+            mHandler.post(latch::countDown);
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            // ignored
         }
     }
 }

@@ -20,6 +20,8 @@ import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.LOG_COMPAT_CHANGE;
 import static android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.service.attention.AttentionService.PROXIMITY_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
 import static android.service.voice.HotwordDetectionService.ENABLE_PROXIMITY_RESULT;
@@ -753,11 +755,21 @@ abstract class DetectorSession {
                                 "Failed to obtain permission RECORD_AUDIO for identity "
                                         + mVoiceInteractorIdentity);
                     }
-                    mAppOpsManager.noteOpNoThrow(
-                            AppOpsPolicy.getVoiceActivationOp(),
-                            mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                            mVoiceInteractorIdentity.attributionTag,
-                                    HOTWORD_DETECTION_OP_MESSAGE);
+                    int opMode = mAppOpsManager.unsafeCheckOpNoThrow(
+                            AppOpsManager.opToPublicName(AppOpsPolicy.getVoiceActivationOp()),
+                            mVoiceInteractorIdentity.uid,
+                            mVoiceInteractorIdentity.packageName);
+                    if (opMode == MODE_DEFAULT || opMode == MODE_ALLOWED) {
+                        mAppOpsManager.noteOpNoThrow(
+                                AppOpsPolicy.getVoiceActivationOp(),
+                                mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
+                                mVoiceInteractorIdentity.attributionTag,
+                                HOTWORD_DETECTION_OP_MESSAGE);
+                    } else {
+                        throw new SecurityException(
+                                "The app op OP_RECEIVE_SANDBOX_TRIGGER_AUDIO is denied for "
+                                        + "identity" + mVoiceInteractorIdentity);
+                    }
                 } else {
                     enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
                             RECORD_AUDIO, HOTWORD_DETECTION_OP_MESSAGE);

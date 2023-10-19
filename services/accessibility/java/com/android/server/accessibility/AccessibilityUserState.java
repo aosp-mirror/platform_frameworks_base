@@ -109,7 +109,7 @@ class AccessibilityUserState {
     private boolean mBindInstantServiceAllowed;
     private boolean mIsAudioDescriptionByDefaultRequested;
     private boolean mIsAutoclickEnabled;
-    private boolean mIsDisplayMagnificationEnabled;
+    private boolean mIsMagnificationSingleFingerTripleTapEnabled;
     private boolean mIsFilterKeyEventsEnabled;
     private boolean mIsPerformGesturesEnabled;
     private boolean mAccessibilityFocusOnlyInActiveWindow;
@@ -211,7 +211,7 @@ class AccessibilityUserState {
         mRequestMultiFingerGestures = false;
         mRequestTwoFingerPassthrough = false;
         mSendMotionEventsEnabled = false;
-        mIsDisplayMagnificationEnabled = false;
+        mIsMagnificationSingleFingerTripleTapEnabled = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
@@ -520,7 +520,7 @@ class AccessibilityUserState {
                 .append(String.valueOf(mRequestTwoFingerPassthrough));
         pw.append(", sendMotionEventsEnabled").append(String.valueOf(mSendMotionEventsEnabled));
         pw.append(", displayMagnificationEnabled=").append(String.valueOf(
-                mIsDisplayMagnificationEnabled));
+                mIsMagnificationSingleFingerTripleTapEnabled));
         pw.append(", autoclickEnabled=").append(String.valueOf(mIsAutoclickEnabled));
         pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveUiTimeout));
         pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveUiTimeout));
@@ -625,12 +625,12 @@ class AccessibilityUserState {
         mIsAutoclickEnabled = enabled;
     }
 
-    public boolean isDisplayMagnificationEnabledLocked() {
-        return mIsDisplayMagnificationEnabled;
+    public boolean isMagnificationSingleFingerTripleTapEnabledLocked() {
+        return mIsMagnificationSingleFingerTripleTapEnabled;
     }
 
-    public void setDisplayMagnificationEnabledLocked(boolean enabled) {
-        mIsDisplayMagnificationEnabled = enabled;
+    public void setMagnificationSingleFingerTripleTapEnabledLocked(boolean enabled) {
+        mIsMagnificationSingleFingerTripleTapEnabled = enabled;
     }
 
     public boolean isFilterKeyEventsEnabledLocked() {

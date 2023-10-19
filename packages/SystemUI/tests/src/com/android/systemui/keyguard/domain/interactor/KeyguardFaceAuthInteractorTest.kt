@@ -62,6 +62,7 @@ import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -99,6 +100,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     @Before
     fun setup() {
@@ -145,6 +147,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                     keyguardUpdateMonitor,
                     FakeTrustRepository(),
                     testScope.backgroundScope,
+                    mSelectedUserInteractor,
                 ),
                 AlternateBouncerInteractor(
                     mock(StatusBarStateController::class.java),

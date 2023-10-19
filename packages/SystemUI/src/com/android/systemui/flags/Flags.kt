@@ -180,6 +180,10 @@ object Flags {
     @JvmField
     val NEW_AOD_TRANSITION = unreleasedFlag("new_aod_transition", teamfood = true)
 
+    // TODO(b/305984787):
+    @JvmField
+    val REFACTOR_GETCURRENTUSER = unreleasedFlag("refactor_getcurrentuser", teamfood = true)
+
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
     @JvmField val FACE_AUTH_REFACTOR = releasedFlag("face_auth_refactor")
@@ -769,8 +773,7 @@ object Flags {
 
     // TODO(b/283740863): Tracking Bug
     @JvmField
-    val ENABLE_NEW_PRIVACY_DIALOG =
-        unreleasedFlag("enable_new_privacy_dialog", teamfood = true)
+    val ENABLE_NEW_PRIVACY_DIALOG = releasedFlag("enable_new_privacy_dialog")
 
     // TODO(b/289573946): Tracking Bug
     @JvmField val PRECOMPUTED_TEXT = unreleasedFlag("precomputed_text", teamfood = true)
@@ -796,8 +799,7 @@ object Flags {
 
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField
-    val ENABLE_CLOCK_KEYGUARD_PRESENTATION =
-        unreleasedFlag("enable_clock_keyguard_presentation", teamfood = true)
+    val ENABLE_CLOCK_KEYGUARD_PRESENTATION = releasedFlag("enable_clock_keyguard_presentation")
 
     /** Enable the Compose implementation of the PeopleSpaceActivity. */
     @JvmField
@@ -817,8 +819,7 @@ object Flags {
 
     // TODO(b/287205379): Tracking bug
     @JvmField
-    val QS_CONTAINER_GRAPH_OPTIMIZER = unreleasedFlag( "qs_container_graph_optimizer",
-            teamfood = true)
+    val QS_CONTAINER_GRAPH_OPTIMIZER = releasedFlag( "qs_container_graph_optimizer")
 
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField

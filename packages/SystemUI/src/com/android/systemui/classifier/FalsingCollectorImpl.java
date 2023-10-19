@@ -37,11 +37,14 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 import com.android.systemui.util.sensors.ThresholdSensorEvent;
 import com.android.systemui.util.time.SystemClock;
+
+import dagger.Lazy;
 
 import java.util.Collections;
 
@@ -66,6 +69,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final DockManager mDockManager;
     private final DelayableExecutor mMainExecutor;
     private final SystemClock mSystemClock;
+    private final Lazy<SelectedUserInteractor> mUserInteractor;
 
     private int mState;
     private boolean mShowingAod;
@@ -93,7 +97,7 @@ class FalsingCollectorImpl implements FalsingCollector {
                 public void onBiometricAuthenticated(int userId,
                         BiometricSourceType biometricSourceType,
                         boolean isStrongBiometric) {
-                    if (userId == KeyguardUpdateMonitor.getCurrentUser()
+                    if (userId == mUserInteractor.get().getSelectedUserId()
                             && biometricSourceType == BiometricSourceType.FACE) {
                         mFalsingDataProvider.setJustUnlockedWithFace(true);
                     }
@@ -136,7 +140,8 @@ class FalsingCollectorImpl implements FalsingCollector {
             BatteryController batteryController,
             DockManager dockManager,
             @Main DelayableExecutor mainExecutor,
-            SystemClock systemClock) {
+            SystemClock systemClock,
+            Lazy<SelectedUserInteractor> userInteractor) {
         mFalsingDataProvider = falsingDataProvider;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -148,6 +153,7 @@ class FalsingCollectorImpl implements FalsingCollector {
         mDockManager = dockManager;
         mMainExecutor = mainExecutor;
         mSystemClock = systemClock;
+        mUserInteractor = userInteractor;
 
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
         mProximitySensor.setDelay(SensorManager.SENSOR_DELAY_GAME);

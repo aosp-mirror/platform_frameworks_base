@@ -43,6 +43,13 @@ flag {
 }
 
 flag {
+    name: "disable_continuous_shortcut_on_force_stop"
+    namespace: "accessibility"
+    description: "When a package is force stopped, remove the button shortcuts of any continuously-running shortcuts."
+    bug: "198018180"
+}
+
+flag {
     name: "deprecate_package_list_observer"
     namespace: "accessibility"
     description: "Stops using the deprecated PackageListObserver."

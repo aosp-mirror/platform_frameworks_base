@@ -29,6 +29,7 @@ import com.android.keyguard.KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEv
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.SessionTracker
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -42,7 +43,8 @@ import javax.inject.Inject
 class KeyguardBiometricLockoutLogger @Inject constructor(
     private val uiEventLogger: UiEventLogger,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val sessionTracker: SessionTracker
+    private val sessionTracker: SessionTracker,
+    private val selectedUserInteractor: SelectedUserInteractor
 ) : CoreStartable {
     private var fingerprintLockedOut = false
     private var faceLockedOut = false
@@ -52,7 +54,7 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
 
     override fun start() {
         mKeyguardUpdateMonitorCallback.onStrongAuthStateChanged(
-                KeyguardUpdateMonitor.getCurrentUser())
+                selectedUserInteractor.getSelectedUserId())
         keyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback)
     }
 
@@ -79,7 +81,7 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
         }
 
         override fun onStrongAuthStateChanged(userId: Int) {
-            if (userId != KeyguardUpdateMonitor.getCurrentUser()) {
+            if (userId != selectedUserInteractor.getSelectedUserId()) {
                 return
             }
             val strongAuthFlags = keyguardUpdateMonitor.strongAuthTracker

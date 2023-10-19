@@ -44,7 +44,6 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.res.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.ui.controller.UdfpsKeyguardViewController
@@ -56,12 +55,14 @@ import com.android.systemui.flags.Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Provider
 
@@ -78,31 +79,32 @@ const val SETTING_REMOVE_ENROLLMENT_UI = "udfps_overlay_remove_enrollment_ui"
 @ExperimentalCoroutinesApi
 @UiThread
 class UdfpsControllerOverlay @JvmOverloads constructor(
-        private val context: Context,
-        private val inflater: LayoutInflater,
-        private val windowManager: WindowManager,
-        private val accessibilityManager: AccessibilityManager,
-        private val statusBarStateController: StatusBarStateController,
-        private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
-        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-        private val dialogManager: SystemUIDialogManager,
-        private val dumpManager: DumpManager,
-        private val transitionController: LockscreenShadeTransitionController,
-        private val configurationController: ConfigurationController,
-        private val keyguardStateController: KeyguardStateController,
-        private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
-        private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
-        val requestId: Long,
-        @ShowReason val requestReason: Int,
-        private val controllerCallback: IUdfpsOverlayControllerCallback,
-        private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
-        private val activityLaunchAnimator: ActivityLaunchAnimator,
-        private val featureFlags: FeatureFlags,
-        private val primaryBouncerInteractor: PrimaryBouncerInteractor,
-        private val alternateBouncerInteractor: AlternateBouncerInteractor,
-        private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
-        private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
-        private val udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>,
+    private val context: Context,
+    private val inflater: LayoutInflater,
+    private val windowManager: WindowManager,
+    private val accessibilityManager: AccessibilityManager,
+    private val statusBarStateController: StatusBarStateController,
+    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val dialogManager: SystemUIDialogManager,
+    private val dumpManager: DumpManager,
+    private val transitionController: LockscreenShadeTransitionController,
+    private val configurationController: ConfigurationController,
+    private val keyguardStateController: KeyguardStateController,
+    private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
+    private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
+    val requestId: Long,
+    @ShowReason val requestReason: Int,
+    private val controllerCallback: IUdfpsOverlayControllerCallback,
+    private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
+    private val activityLaunchAnimator: ActivityLaunchAnimator,
+    private val featureFlags: FeatureFlags,
+    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
+    private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
+    private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
+    private val udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>,
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -268,6 +270,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         primaryBouncerInteractor,
                         alternateBouncerInteractor,
                         udfpsKeyguardAccessibilityDelegate,
+                        selectedUserInteractor,
                     )
                 }
             }

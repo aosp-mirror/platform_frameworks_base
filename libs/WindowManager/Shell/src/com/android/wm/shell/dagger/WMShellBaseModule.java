@@ -605,6 +605,7 @@ public abstract class WMShellBaseModule {
     @Provides
     static Transitions provideTransitions(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             ShellTaskOrganizer organizer,
             TransactionPool pool,
@@ -612,14 +613,13 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor,
-            ShellCommandHandler shellCommandHandler,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
-        return new Transitions(context, shellInit, shellController, organizer, pool,
-                displayController, mainExecutor, mainHandler, animExecutor, shellCommandHandler,
+        return new Transitions(context, shellInit, shellCommandHandler, shellController, organizer,
+                pool, displayController, mainExecutor, mainHandler, animExecutor,
                 rootTaskDisplayAreaOrganizer);
     }
 

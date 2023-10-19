@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /** View-model for the shared notification container, used by both the shade and keyguard spaces */
 class SharedNotificationContainerViewModel
@@ -45,8 +46,8 @@ constructor(
 ) {
     private val statesForConstrainedNotifications =
         setOf(
-            KeyguardState.LOCKSCREEN,
             KeyguardState.AOD,
+            KeyguardState.LOCKSCREEN,
             KeyguardState.DOZING,
             KeyguardState.ALTERNATE_BOUNCER,
             KeyguardState.PRIMARY_BOUNCER
@@ -68,8 +69,17 @@ constructor(
 
     /** If the user is visually on one of the unoccluded lockscreen states. */
     val isOnLockscreen: Flow<Boolean> =
-        keyguardTransitionInteractor.finishedKeyguardState
-            .map { statesForConstrainedNotifications.contains(it) }
+        combine(
+                keyguardTransitionInteractor.finishedKeyguardState.map {
+                    statesForConstrainedNotifications.contains(it)
+                },
+                keyguardTransitionInteractor
+                    .transitionValue(KeyguardState.LOCKSCREEN)
+                    .onStart { emit(0f) }
+                    .map { it > 0 }
+            ) { constrainedNotificationState, transitioningToOrFromLockscreen ->
+                constrainedNotificationState || transitioningToOrFromLockscreen
+            }
             .distinctUntilChanged()
 
     /** Are we purely on the keyguard without the shade/qs? */

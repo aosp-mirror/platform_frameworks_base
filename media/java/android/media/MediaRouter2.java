@@ -2059,9 +2059,7 @@ public final class MediaRouter2 {
         public RoutingSessionInfo getSystemSessionInfo() {
             RoutingSessionInfo result;
             try {
-                result =
-                        mMediaRouterService.getSystemSessionInfoForPackage(
-                                mClient, mClientPackageName);
+                result = mMediaRouterService.getSystemSessionInfoForPackage(mClientPackageName);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }

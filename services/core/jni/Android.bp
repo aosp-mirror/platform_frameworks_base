@@ -189,7 +189,7 @@ cc_defaults {
         "android.hardware.thermal@1.0",
         "android.hardware.thermal-V1-ndk",
         "android.hardware.tv.input@1.0",
-        "android.hardware.tv.input-V1-ndk",
+        "android.hardware.tv.input-V2-ndk",
         "android.hardware.vibrator-V2-cpp",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
@@ -244,5 +244,5 @@ filegroup {
 
 filegroup {
     name: "lib_oomConnection_native",
-    srcs: ["com_android_server_am_OomConnection.cpp",],
+    srcs: ["com_android_server_am_OomConnection.cpp"],
 }

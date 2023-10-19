@@ -125,7 +125,7 @@ public final class SystemUpdatePolicy implements Parcelable {
      *
      * <p>The system limits each update to one 30-day postponement. The period begins when the
      * system first postpones the update and setting new {@code TYPE_POSTPONE} policies won’t extend
-     * the period. If, after 30 days the update isn’t installed (through policy changes), the system
+     * the period. If, after 30 days the update isn't installed (through policy changes), the system
      * prompts the user to install the update.
      *
      * <p><strong>Note</strong>: Device manufacturers or carriers might choose to exempt important

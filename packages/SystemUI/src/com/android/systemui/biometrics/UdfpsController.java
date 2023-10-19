@@ -97,6 +97,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.time.SystemClock;
@@ -167,6 +168,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     @NonNull private final InputManager mInputManager;
     @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
+    @NonNull private final SelectedUserInteractor mSelectedUserInteractor;
     private final boolean mIgnoreRefreshRate;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
@@ -281,7 +283,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         mPrimaryBouncerInteractor,
                         mAlternateBouncerInteractor,
                         mUdfpsKeyguardAccessibilityDelegate,
-                        mUdfpsKeyguardViewModels
+                        mUdfpsKeyguardViewModels,
+                            mSelectedUserInteractor
                     )));
         }
 
@@ -644,7 +647,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull InputManager inputManager,
             @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
-            @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider) {
+            @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider,
+            @NonNull SelectedUserInteractor selectedUserInteractor) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -687,6 +691,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mInputManager = inputManager;
         mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
+        mSelectedUserInteractor = selectedUserInteractor;
 
         mTouchProcessor = singlePointerTouchProcessor;
         mSessionTracker = sessionTracker;

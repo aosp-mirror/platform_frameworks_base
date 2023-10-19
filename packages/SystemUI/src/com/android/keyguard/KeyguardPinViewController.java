@@ -23,11 +23,12 @@ import android.view.View;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.res.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 public class KeyguardPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardPINView> {
@@ -55,17 +56,17 @@ public class KeyguardPinViewController
             EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector,
             DevicePostureController postureController,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                emergencyButtonController, falsingCollector, featureFlags);
+                emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPostureController = postureController;
         mLockPatternUtils = lockPatternUtils;
         mFeatureFlags = featureFlags;
         view.setIsLockScreenLandscapeEnabled(mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));
         mBackspaceKey = view.findViewById(R.id.delete_button);
-        mPinLength = mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser());
+        mPinLength = mLockPatternUtils.getPinLength(selectedUserInteractor.getSelectedUserId());
     }
 
     @Override
@@ -124,7 +125,7 @@ public class KeyguardPinViewController
 
     private void updateAutoConfirmationState() {
         mDisabledAutoConfirmation = mLockPatternUtils.getCurrentFailedPasswordAttempts(
-                KeyguardUpdateMonitor.getCurrentUser()) >= MIN_FAILED_PIN_ATTEMPTS;
+                mSelectedUserInteractor.getSelectedUserId()) >= MIN_FAILED_PIN_ATTEMPTS;
         updateOKButtonVisibility();
         updateBackSpaceVisibility();
         updatePinHinting();
@@ -179,7 +180,8 @@ public class KeyguardPinViewController
      */
     private boolean isAutoPinConfirmEnabledInSettings() {
         //Checks if user has enabled the auto confirm in Settings
-        return mLockPatternUtils.isAutoPinConfirmEnabled(KeyguardUpdateMonitor.getCurrentUser())
+        return mLockPatternUtils.isAutoPinConfirmEnabled(
+                mSelectedUserInteractor.getSelectedUserId())
                 && mPinLength != LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
     }
 }

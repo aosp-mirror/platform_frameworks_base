@@ -67,10 +67,12 @@ import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
+import android.telephony.satellite.INtnSignalStrengthCallback;
 import android.telephony.satellite.ISatelliteDatagramCallback;
 import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
 import android.telephony.satellite.ISatelliteProvisionStateCallback;
 import android.telephony.satellite.ISatelliteStateCallback;
+import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import com.android.ims.internal.IImsServiceFeatureCallback;
@@ -2837,7 +2839,6 @@ interface ITelephony {
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void deprovisionSatelliteService(int subId, in String token, in IIntegerConsumer callback);
 
-
     /**
      * Registers for provision state changed from satellite modem.
      *
@@ -3071,4 +3072,40 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     int[] getSatelliteAttachRestrictionReasonsForCarrier(int subId);
+
+    /**
+     * Request to get the signal strength of the satellite connection.
+     *
+     * @param subId The subId of the subscription to request for.
+     * @param receiver Result receiver to get the error code of the request and the current signal
+     * strength of the satellite connection.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestNtnSignalStrength(int subId, in ResultReceiver receiver);
+
+    /**
+     * Registers for NTN signal strength changed from satellite modem.
+     *
+     * @param subId The subId of the subscription to request for.
+     * @param callback The callback to handle the NTN signal strength changed event.
+     *
+     * @return The {@link SatelliteResult} result of the operation.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int registerForNtnSignalStrengthChanged(int subId, in INtnSignalStrengthCallback callback);
+
+    /**
+     * Unregisters for NTN signal strength changed from satellite modem.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param subId The subId of the subscription to unregister for provision state changed.
+     * @param callback The callback that was passed to
+     * {@link #registerForNtnSignalStrengthChanged(Executor, NtnSignalStrengthCallback)}.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void unregisterForNtnSignalStrengthChanged(int subId,
+            in INtnSignalStrengthCallback callback);
 }

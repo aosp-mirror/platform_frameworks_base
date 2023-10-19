@@ -5129,6 +5129,14 @@ public final class Settings {
                 "hardware_haptic_feedback_intensity";
 
         /**
+         * Whether keyboard vibration feedback is enabled. The value is boolean (1 or 0).
+         *
+         * @hide
+         */
+        @Readable
+        public static final String KEYBOARD_VIBRATION_ENABLED = "keyboard_vibration_enabled";
+
+        /**
          * Ringer volume. This is used internally, changing this value will not
          * change the volume. See AudioManager.
          *

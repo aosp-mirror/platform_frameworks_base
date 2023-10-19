@@ -116,9 +116,14 @@ private fun Grid(
 
         if (sizeCache.rowHeights.size != rows) {
             sizeCache.rowHeights = IntArray(rows) { 0 }
+        } else {
+            repeat(rows) { i -> sizeCache.rowHeights[i] = 0 }
         }
+
         if (sizeCache.columnWidths.size != columns) {
             sizeCache.columnWidths = IntArray(columns) { 0 }
+        } else {
+            repeat(columns) { i -> sizeCache.columnWidths[i] = 0 }
         }
 
         val totalHorizontalSpacingBetweenChildren =

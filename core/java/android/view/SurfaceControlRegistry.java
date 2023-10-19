@@ -78,6 +78,11 @@ public class SurfaceControlRegistry {
             for (int i = 0; i < size; i++) {
                 final Map.Entry<SurfaceControl, Long> entry = entries.get(i);
                 final SurfaceControl sc = entry.getKey();
+                if (sc == null) {
+                    // Just skip if the key has since been removed from the weak hash map
+                    continue;
+                }
+
                 final long timeRegistered = entry.getValue();
                 pw.print("  ");
                 pw.print(sc.getName());

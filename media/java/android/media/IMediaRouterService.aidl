@@ -74,8 +74,7 @@ interface IMediaRouterService {
 
     // Methods for MediaRouter2Manager
     List<RoutingSessionInfo> getRemoteSessions(IMediaRouter2Manager manager);
-    RoutingSessionInfo getSystemSessionInfoForPackage(
-            IMediaRouter2Manager manager, String packageName);
+    RoutingSessionInfo getSystemSessionInfoForPackage(String packageName);
     void registerManager(IMediaRouter2Manager manager, String packageName);
     void unregisterManager(IMediaRouter2Manager manager);
     void setRouteVolumeWithManager(IMediaRouter2Manager manager, int requestId,

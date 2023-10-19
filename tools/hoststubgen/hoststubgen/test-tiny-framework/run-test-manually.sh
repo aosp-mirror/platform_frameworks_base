@@ -36,7 +36,7 @@ mkdir -p $out
 HOSTSTUBGEN=hoststubgen
 
 # Rebuild the tool and the dependencies. These are the only things we build with the build system.
-run m $HOSTSTUBGEN hoststubgen-annotations hoststubgen-helper-runtime truth-prebuilt junit
+run m $HOSTSTUBGEN hoststubgen-annotations hoststubgen-helper-runtime truth junit
 
 
 # Build tiny-framework
@@ -55,7 +55,7 @@ framework_compile_classpaths=(
 
 test_compile_classpaths=(
   $SOONG_INT/external/junit/junit/android_common/combined/junit.jar
-  $ANDROID_HOST_OUT/framework/truth-prebuilt.jar
+  $SOONG_INT/external/truth/truth/android_common/combined/truth.jar
 )
 
 test_runtime_classpaths=(

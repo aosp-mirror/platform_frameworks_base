@@ -234,6 +234,10 @@ public class Events {
         VOLUME_DIALOG_SLIDER(150),
         @UiEvent(doc = "The audio stream was set to silent via slider")
         VOLUME_DIALOG_SLIDER_TO_ZERO(151),
+        @UiEvent(doc = "ODI captions was clicked")
+        VOLUME_DIALOG_ODI_CAPTIONS_CLICKED(1503),
+        @UiEvent(doc = "ODI captions tooltip dismiss was clicked")
+        VOLUME_DIALOG_ODI_CAPTIONS_TOOLTIP_CLICKED(1504),
         @UiEvent(doc = "The audio volume was adjusted to silent via key")
         VOLUME_KEY_TO_ZERO(152),
         @UiEvent(doc = "The audio volume was adjusted to non-silent via key")
@@ -362,6 +366,10 @@ public class Events {
             if (tag == EVENT_SETTINGS_CLICK) {
                 sLegacyLogger.action(MetricsEvent.ACTION_VOLUME_SETTINGS);
                 sUiEventLogger.log(VolumeDialogEvent.VOLUME_DIALOG_SETTINGS_CLICK);
+            } else if (tag == EVENT_ODI_CAPTIONS_CLICK) {
+                sUiEventLogger.log(VolumeDialogEvent.VOLUME_DIALOG_ODI_CAPTIONS_CLICKED);
+            } else if (tag == EVENT_ODI_CAPTIONS_TOOLTIP_CLICK) {
+                sUiEventLogger.log(VolumeDialogEvent.VOLUME_DIALOG_ODI_CAPTIONS_TOOLTIP_CLICKED);
             }
             return sb.toString();
         }

@@ -1,0 +1,46 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_library {
+    name: "SoundPicker2Lib",
+    srcs: [
+        "src/**/*.java",
+    ],
+    resource_dirs: [
+        "res",
+    ],
+    static_libs: [
+        "androidx.appcompat_appcompat",
+        "hilt_android",
+        "guava",
+        "androidx.recyclerview_recyclerview",
+        "androidx-constraintlayout_constraintlayout",
+        "androidx.viewpager2_viewpager2",
+        "com.google.android.material_material",
+    ],
+}
+
+android_app {
+    name: "SoundPicker2",
+    defaults: ["platform_app_defaults"],
+    manifest: "AndroidManifest.xml",
+    static_libs: ["SoundPicker2Lib"],
+    platform_apis: true,
+    certificate: "media",
+    privileged: true,
+
+    optimize: {
+        enabled: true,
+        optimize: true,
+        shrink: true,
+        shrink_resources: true,
+        obfuscate: false,
+        proguard_compatibility: false,
+    },
+}

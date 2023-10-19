@@ -36,7 +36,6 @@ import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
@@ -55,7 +54,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.log.BouncerLogger;
-import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -75,6 +73,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
@@ -128,8 +127,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final CentralSurfaces mService;
     private final DozeServiceHost mDozeServiceHost;
     private final DozeScrimController mDozeScrimController;
-    private final BackActionInteractor mBackActionInteractor;
-    private final PowerInteractor mPowerInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mExpandingBelowNotch;
@@ -164,8 +161,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
             CentralSurfaces centralSurfaces,
             DozeServiceHost dozeServiceHost,
             DozeScrimController dozeScrimController,
-            BackActionInteractor backActionInteractor,
-            PowerInteractor powerInteractor,
             NotificationShadeWindowController controller,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -187,7 +182,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
             BouncerLogger bouncerLogger,
             SysUIKeyEventHandler sysUIKeyEventHandler,
             PrimaryBouncerInteractor primaryBouncerInteractor,
-            AlternateBouncerInteractor alternateBouncerInteractor) {
+            AlternateBouncerInteractor alternateBouncerInteractor,
+            SelectedUserInteractor selectedUserInteractor) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -200,12 +196,10 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
-        mBackActionInteractor = backActionInteractor;
         mShadeLogger = shadeLogger;
         mService = centralSurfaces;
         mDozeServiceHost = dozeServiceHost;
         mDozeScrimController = dozeScrimController;
-        mPowerInteractor = powerInteractor;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mAmbientState = ambientState;
@@ -229,7 +223,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 messageAreaControllerFactory,
                 bouncerMessageInteractor,
                 bouncerLogger,
-                featureFlags);
+                featureFlags,
+                selectedUserInteractor);
 
         collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition);

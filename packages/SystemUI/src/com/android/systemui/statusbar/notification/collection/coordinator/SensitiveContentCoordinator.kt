@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
@@ -52,7 +53,8 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val statusBarStateController: StatusBarStateController,
-    private val keyguardStateController: KeyguardStateController
+    private val keyguardStateController: KeyguardStateController,
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) : Invalidator("SensitiveContentInvalidator"),
         SensitiveContentCoordinator,
         DynamicPrivacyController.Listener,
@@ -67,10 +69,10 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
     override fun onDynamicPrivacyChanged(): Unit = invalidateList("onDynamicPrivacyChanged")
 
     override fun onBeforeRenderList(entries: List<ListEntry>) {
-        if (keyguardStateController.isKeyguardGoingAway() ||
-                statusBarStateController.getState() == StatusBarState.KEYGUARD &&
+        if (keyguardStateController.isKeyguardGoingAway ||
+                statusBarStateController.state == StatusBarState.KEYGUARD &&
                 keyguardUpdateMonitor.getUserUnlockedWithBiometricAndIsBypassing(
-                        KeyguardUpdateMonitor.getCurrentUser())) {
+                        selectedUserInteractor.getSelectedUserId())) {
             // don't update yet if:
             // - the keyguard is currently going away
             // - LS is about to be dismissed by a biometric that bypasses LS (avoid notif flash)

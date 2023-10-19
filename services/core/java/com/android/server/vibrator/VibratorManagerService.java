@@ -97,7 +97,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             new VibrationAttributes.Builder().build();
     private static final int ATTRIBUTES_ALL_BYPASS_FLAGS =
             VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY
-                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
+                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
+                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
 
     /** Fixed large duration used to note repeating vibrations to {@link IBatteryStats}. */
     private static final long BATTERY_STATS_REPEATING_VIBRATION_DURATION = 5_000;
@@ -771,8 +772,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private Vibration.EndInfo startVibrationLocked(HalVibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationLocked");
         try {
-            // Scale effect before dispatching it to the input devices or the vibration thread.
-            vib.scaleEffects(mVibrationScaler::scale);
+            if (!vib.callerInfo.attrs.isFlagSet(
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)) {
+                // Scale effect before dispatching it to the input devices or the vibration thread.
+                vib.scaleEffects(mVibrationScaler::scale);
+            }
             boolean inputDevicesAvailable = mInputDeviceDelegate.vibrateIfAvailable(
                     vib.callerInfo, vib.getEffectToPlay());
             if (inputDevicesAvailable) {

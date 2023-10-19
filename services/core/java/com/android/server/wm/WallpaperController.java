@@ -536,7 +536,7 @@ class WallpaperController {
             window.mWallpaperY = y;
             window.mWallpaperXStep = xStep;
             window.mWallpaperYStep = yStep;
-            updateWallpaperOffsetLocked(window, true);
+            updateWallpaperOffsetLocked(window, !mService.mFlags.mWallpaperOffsetAsync);
         }
     }
 
@@ -561,7 +561,7 @@ class WallpaperController {
         if (window.mWallpaperDisplayOffsetX != x || window.mWallpaperDisplayOffsetY != y)  {
             window.mWallpaperDisplayOffsetX = x;
             window.mWallpaperDisplayOffsetY = y;
-            updateWallpaperOffsetLocked(window, true);
+            updateWallpaperOffsetLocked(window, !mService.mFlags.mWallpaperOffsetAsync);
         }
     }
 

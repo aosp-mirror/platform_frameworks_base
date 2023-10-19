@@ -102,6 +102,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -214,6 +215,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     @Mock
     private Provider<UdfpsKeyguardViewModels> mUdfpsKeyguardViewModels;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
 
     // Capture listeners so that they can be used to send events
     @Captor
@@ -326,7 +329,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mInputManager,
                 mock(KeyguardFaceAuthInteractor.class),
                 mUdfpsKeyguardAccessibilityDelegate,
-                mUdfpsKeyguardViewModels
+                mUdfpsKeyguardViewModels,
+                mSelectedUserInteractor
         );
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();

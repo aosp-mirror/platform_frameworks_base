@@ -47,5 +47,7 @@ class WindowManagerFlags {
 
     final boolean mWindowStateResizeItemFlag = Flags.windowStateResizeItemFlag();
 
+    final boolean mWallpaperOffsetAsync = Flags.wallpaperOffsetAsync();
+
     /* End Available Flags */
 }

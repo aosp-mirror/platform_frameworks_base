@@ -278,6 +278,12 @@ class InsetsStateController {
         notifyPendingInsetsControlChanged();
     }
 
+    void notifyControlTargetChanged(@Nullable InsetsControlTarget target,
+            InsetsSourceProvider provider) {
+        onControlTargetChanged(provider, target, false /* fake */);
+        notifyPendingInsetsControlChanged();
+    }
+
     void notifyControlRevoked(@NonNull InsetsControlTarget previousControlTarget,
             InsetsSourceProvider provider) {
         removeFromControlMaps(previousControlTarget, provider, false /* fake */);

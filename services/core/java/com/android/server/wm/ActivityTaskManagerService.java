@@ -3002,7 +3002,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 || mLastResumedActivity == null) {
             return;
         }
-        var userInfo = mUserManager.getUserInfo(mLastResumedActivity.mUserId);
+        var userInfo = getUserManager().getUserInfo(mLastResumedActivity.mUserId);
         if (userInfo == null || !userInfo.isManagedProfile()) {
             return;
         }

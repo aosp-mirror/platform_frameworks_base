@@ -35,7 +35,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Process;
@@ -120,9 +119,6 @@ public class LockIconViewController implements Dumpable {
     private boolean mUdfpsEnrolled;
     private Resources mResources;
     private Context mContext;
-
-    @NonNull private final AnimatedStateListDrawable mIcon;
-
     @NonNull private CharSequence mUnlockedLabel;
     @NonNull private CharSequence mLockedLabel;
     @NonNull private final VibratorHelper mVibrator;
@@ -147,7 +143,6 @@ public class LockIconViewController implements Dumpable {
     private boolean mCanDismissLockScreen;
     private int mStatusBarState;
     private boolean mIsKeyguardShowing;
-    private Runnable mOnGestureDetectedRunnable;
     private Runnable mLongPressCancelRunnable;
 
     private boolean mUdfpsSupported;
@@ -232,9 +227,6 @@ public class LockIconViewController implements Dumpable {
 
         mMaxBurnInOffsetX = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
         mMaxBurnInOffsetY = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
-
-        mIcon = (AnimatedStateListDrawable)
-                resources.getDrawable(R.drawable.super_lock_icon, context.getTheme());
         mUnlockedLabel = resources.getString(R.string.accessibility_unlock_button);
         mLockedLabel = resources.getString(R.string.accessibility_lock_icon);
         mLongPressTimeout = resources.getInteger(R.integer.config_lockIconLongPress);
@@ -270,7 +262,6 @@ public class LockIconViewController implements Dumpable {
     @SuppressLint("ClickableViewAccessibility")
     public void setLockIconView(LockIconView lockIconView) {
         mView = lockIconView;
-        mView.setImageDrawable(mIcon);
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
 
         if (mFeatureFlags.isEnabled(DOZING_MIGRATION_1)) {
@@ -492,10 +483,6 @@ public class LockIconViewController implements Dumpable {
         pw.println("mUdfpsSupported: " + mUdfpsSupported);
         pw.println("mUdfpsEnrolled: " + mUdfpsEnrolled);
         pw.println("mIsKeyguardShowing: " + mIsKeyguardShowing);
-        pw.println(" mIcon: ");
-        for (int state : mIcon.getState()) {
-            pw.print(" " + state);
-        }
         pw.println();
         pw.println(" mShowUnlockIcon: " + mShowUnlockIcon);
         pw.println(" mShowLockIcon: " + mShowLockIcon);

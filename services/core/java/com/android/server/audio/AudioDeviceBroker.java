@@ -68,6 +68,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -496,8 +497,9 @@ public class AudioDeviceBroker {
             AudioDeviceInfo.TYPE_AUX_LINE
     };
 
-    /*package */ static boolean isValidCommunicationDevice(AudioDeviceInfo device) {
-        return isValidCommunicationDeviceType(device.getType());
+    /*package */ static boolean isValidCommunicationDevice(@NonNull AudioDeviceInfo device) {
+        Objects.requireNonNull(device, "device must not be null");
+        return device.isSink() && isValidCommunicationDeviceType(device.getType());
     }
 
     private static boolean isValidCommunicationDeviceType(int deviceType) {

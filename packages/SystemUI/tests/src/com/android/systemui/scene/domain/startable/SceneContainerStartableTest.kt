@@ -42,6 +42,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assume.assumeTrue
@@ -292,6 +293,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 initialSceneKey = SceneKey.Lockscreen,
                 authenticationMethod = AuthenticationMethodModel.Pin,
                 isDeviceUnlocked = false,
+                startsAwake = false
             )
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
             underTest.start()
@@ -299,6 +301,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             utils.deviceEntryRepository.setUnlocked(true)
             runCurrent()
             powerInteractor.setAwakeForTest()
+            runCurrent()
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
         }
@@ -403,42 +406,43 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 initialSceneKey = SceneKey.Lockscreen,
                 authenticationMethod = AuthenticationMethodModel.Pin,
                 isDeviceUnlocked = false,
+                startsAwake = false,
             )
             underTest.start()
             runCurrent()
             verify(falsingCollector, never()).onScreenTurningOn()
             verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, never()).onScreenOff()
+            verify(falsingCollector, times(1)).onScreenOff()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
             runCurrent()
             verify(falsingCollector, times(1)).onScreenTurningOn()
             verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, never()).onScreenOff()
+            verify(falsingCollector, times(1)).onScreenOff()
 
             powerInteractor.setAsleepForTest()
             runCurrent()
             verify(falsingCollector, times(1)).onScreenTurningOn()
             verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, times(1)).onScreenOff()
+            verify(falsingCollector, times(2)).onScreenOff()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_TAP)
             runCurrent()
             verify(falsingCollector, times(1)).onScreenTurningOn()
             verify(falsingCollector, times(1)).onScreenOnFromTouch()
-            verify(falsingCollector, times(1)).onScreenOff()
+            verify(falsingCollector, times(2)).onScreenOff()
 
             powerInteractor.setAsleepForTest()
             runCurrent()
             verify(falsingCollector, times(1)).onScreenTurningOn()
             verify(falsingCollector, times(1)).onScreenOnFromTouch()
-            verify(falsingCollector, times(2)).onScreenOff()
+            verify(falsingCollector, times(3)).onScreenOff()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
             runCurrent()
             verify(falsingCollector, times(2)).onScreenTurningOn()
             verify(falsingCollector, times(1)).onScreenOnFromTouch()
-            verify(falsingCollector, times(2)).onScreenOff()
+            verify(falsingCollector, times(3)).onScreenOff()
         }
 
     @Test
@@ -509,11 +513,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
             verify(falsingCollector, times(2)).onBouncerHidden()
         }
 
-    private fun prepareState(
+    private fun TestScope.prepareState(
         isDeviceUnlocked: Boolean = false,
         isBypassEnabled: Boolean = false,
         initialSceneKey: SceneKey? = null,
         authenticationMethod: AuthenticationMethodModel? = null,
+        startsAwake: Boolean = true,
     ): MutableStateFlow<ObservableTransitionState> {
         assumeTrue(Flags.SCENE_CONTAINER_ENABLED)
         sceneContainerFlags.enabled = true
@@ -537,6 +542,13 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 authenticationMethod != AuthenticationMethodModel.None
             )
         }
+        if (startsAwake) {
+            powerInteractor.setAwakeForTest()
+        } else {
+            powerInteractor.setAsleepForTest()
+        }
+        runCurrent()
+
         return transitionStateFlow
     }
 }
