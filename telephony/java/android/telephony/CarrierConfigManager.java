@@ -4765,12 +4765,51 @@ public class CarrierConfigManager {
          */
         public static final String KEY_FCM_SENDER_ID_STRING = KEY_PREFIX + "fcm_sender_id_string";
 
+        /**
+         * Indicates the supported protocol version in the parameter entitlement_version.
+         * The default value is 2. The possible value is 2 and 8.
+         *
+         * Reference: GSMA TS.43-v8 section 2.5 Protocol version control and
+         * Table 3. GET Parameters for Entitlement Configuration in section 2.3
+         * HTTP GET method Parameters.
+         * @hide
+         */
+        public static final String KEY_ENTITLEMENT_VERSION_INT =
+                KEY_PREFIX + "entitlement_version_int";
+
+        /**
+         * Controls the service entitlement status when receiving the VERS characteristic
+         * with both version and validity set to -1 or -2.
+         * If {@code true}, default service entitlement status is enabled.
+         * If {@code false}, default service entitlement status is disabled.
+         *
+         * Reference: GSMA TS.14-v8 section 2.1, overview
+         * @hide
+         */
+        public static final String KEY_DEFAULT_SERVICE_ENTITLEMENT_STATUS_BOOL =
+                KEY_PREFIX + "default_service_entitlement_status_bool";
+
+        /**
+         * Indicates if UE can skip service entitlement check when the user turns on Wi-Fi Calling.
+         * UE still shows Wi-Fi Calling emergency address update web view when the user clicks
+         * "Update Emergency Address" on the WiFi calling setting.
+         *
+         * Note: this is effective only if the {@link #KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING}
+         * is set to this app.
+         * @hide
+         */
+        public static final String KEY_SKIP_WFC_ACTIVATION_BOOL =
+                KEY_PREFIX + "skip_wfc_activation_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putString(KEY_ENTITLEMENT_SERVER_URL_STRING, "");
             defaults.putString(KEY_FCM_SENDER_ID_STRING, "");
             defaults.putBoolean(KEY_SHOW_VOWIFI_WEBVIEW_BOOL, false);
             defaults.putBoolean(KEY_IMS_PROVISIONING_BOOL, false);
+            defaults.putBoolean(KEY_DEFAULT_SERVICE_ENTITLEMENT_STATUS_BOOL, false);
+            defaults.putBoolean(KEY_SKIP_WFC_ACTIVATION_BOOL, false);
+            defaults.putInt(KEY_ENTITLEMENT_VERSION_INT, 2);
             return defaults;
         }
     }
