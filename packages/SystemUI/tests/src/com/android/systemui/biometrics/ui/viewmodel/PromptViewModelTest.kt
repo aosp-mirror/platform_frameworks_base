@@ -16,8 +16,10 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.content.res.Configuration
 import android.hardware.biometrics.PromptInfo
 import android.hardware.face.FaceSensorPropertiesInternal
+import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -36,12 +38,15 @@ import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
-import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
+import com.android.systemui.biometrics.shared.model.DisplayRotation
+import com.android.systemui.biometrics.shared.model.toSensorStrength
+import com.android.systemui.biometrics.shared.model.toSensorType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -66,6 +71,7 @@ import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 4
 private const val CHALLENGE = 2L
+private const val DELAY = 1000L
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -88,11 +94,22 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
+    private lateinit var iconViewModel: PromptIconViewModel
     private val featureFlags = FakeFeatureFlags()
 
     @Before
     fun setup() {
         fingerprintRepository = FakeFingerprintPropertyRepository()
+        testCase.fingerprint?.let {
+            fingerprintRepository.setProperties(
+                it.sensorId,
+                it.sensorStrength.toSensorStrength(),
+                it.sensorType.toSensorType(),
+                it.allLocations.associateBy { sensorLocationInternal ->
+                    sensorLocationInternal.displayId
+                }
+            )
+        }
         promptRepository = FakePromptRepository()
         displayStateRepository = FakeDisplayStateRepository()
         displayRepository = FakeDisplayRepository()
@@ -110,6 +127,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         viewModel =
             PromptViewModel(displayStateInteractor, selector, vibrator, mContext, featureFlags)
+        iconViewModel = viewModel.iconViewModel
         featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 
@@ -123,7 +141,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             val modalities by collectLastValue(viewModel.modalities)
             val message by collectLastValue(viewModel.message)
             val size by collectLastValue(viewModel.size)
-            val legacyState by collectLastValue(viewModel.legacyState)
 
             assertThat(authenticating).isFalse()
             assertThat(authenticated?.isNotAuthenticated).isTrue()
@@ -133,7 +150,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             }
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertThat(size).isEqualTo(expectedSize)
-            assertThat(legacyState).isEqualTo(BiometricState.STATE_IDLE)
 
             val startMessage = "here we go"
             viewModel.showAuthenticating(startMessage, isRetry = false)
@@ -143,7 +159,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(authenticated?.isNotAuthenticated).isTrue()
             assertThat(size).isEqualTo(expectedSize)
             assertButtonsVisible(negative = expectedSize != PromptSize.SMALL)
-            assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATING)
         }
 
     @Test
@@ -205,6 +220,472 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(currentConstant).isEqualTo(HapticFeedbackConstants.REJECT)
     }
 
+    @Test
+    fun start_idle_and_show_authenticating_iconUpdate() =
+        runGenericTest(doNotStart = true) {
+            val currentRotation by collectLastValue(displayStateInteractor.currentRotation)
+            val iconAsset by collectLastValue(iconViewModel.iconAsset)
+            val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
+            val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
+
+            val forceExplicitFlow = testCase.isCoex && testCase.authenticatedByFingerprint
+            if (forceExplicitFlow) {
+                viewModel.ensureFingerprintHasStarted(isDelayed = true)
+            }
+
+            val startMessage = "here we go"
+            viewModel.showAuthenticating(startMessage, isRetry = false)
+
+            if (testCase.isFingerprintOnly) {
+                val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
+                val shouldAnimateIconOverlay by
+                    collectLastValue(iconViewModel.shouldAnimateIconOverlay)
+
+                if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                    val expectedOverlayAsset =
+                        when (currentRotation) {
+                            DisplayRotation.ROTATION_0 ->
+                                R.raw.biometricprompt_fingerprint_to_error_landscape
+                            DisplayRotation.ROTATION_90 ->
+                                R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft
+                            DisplayRotation.ROTATION_180 ->
+                                R.raw.biometricprompt_fingerprint_to_error_landscape
+                            DisplayRotation.ROTATION_270 ->
+                                R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright
+                            else -> throw Exception("invalid rotation")
+                        }
+                    assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                } else {
+                    assertThat(iconAsset)
+                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
+                    assertThat(iconOverlayAsset).isEqualTo(-1)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                    assertThat(shouldAnimateIconView).isEqualTo(false)
+                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                }
+            }
+
+            if (testCase.isFaceOnly) {
+                val shouldRepeatAnimation by collectLastValue(iconViewModel.shouldRepeatAnimation)
+                val shouldPulseAnimation by collectLastValue(iconViewModel.shouldPulseAnimation)
+                val lastPulseLightToDark by collectLastValue(iconViewModel.lastPulseLightToDark)
+
+                val expectedIconAsset =
+                    if (shouldPulseAnimation!!) {
+                        if (lastPulseLightToDark!!) {
+                            R.drawable.face_dialog_pulse_dark_to_light
+                        } else {
+                            R.drawable.face_dialog_pulse_light_to_dark
+                        }
+                    } else {
+                        R.drawable.face_dialog_pulse_dark_to_light
+                    }
+                assertThat(iconAsset).isEqualTo(expectedIconAsset)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticating)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+                assertThat(shouldRepeatAnimation).isEqualTo(true)
+            }
+
+            if (testCase.isCoex) {
+                if (testCase.confirmationRequested || forceExplicitFlow) {
+                    // explicit flow
+                    val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
+                    val shouldAnimateIconOverlay by
+                        collectLastValue(iconViewModel.shouldAnimateIconOverlay)
+
+                    // TODO: Update when SFPS co-ex is implemented
+                    if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
+                        assertThat(iconOverlayAsset).isEqualTo(-1)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(false)
+                        assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                    }
+                } else {
+                    // implicit flow
+                    val shouldRepeatAnimation by
+                        collectLastValue(iconViewModel.shouldRepeatAnimation)
+                    val shouldPulseAnimation by collectLastValue(iconViewModel.shouldPulseAnimation)
+                    val lastPulseLightToDark by collectLastValue(iconViewModel.lastPulseLightToDark)
+
+                    val expectedIconAsset =
+                        if (shouldPulseAnimation!!) {
+                            if (lastPulseLightToDark!!) {
+                                R.drawable.face_dialog_pulse_dark_to_light
+                            } else {
+                                R.drawable.face_dialog_pulse_light_to_dark
+                            }
+                        } else {
+                            R.drawable.face_dialog_pulse_dark_to_light
+                        }
+                    assertThat(iconAsset).isEqualTo(expectedIconAsset)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticating)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                    assertThat(shouldRepeatAnimation).isEqualTo(true)
+                }
+            }
+        }
+
+    @Test
+    fun start_authenticating_show_and_clear_error_iconUpdate() = runGenericTest {
+        val currentRotation by collectLastValue(displayStateInteractor.currentRotation)
+
+        val iconAsset by collectLastValue(iconViewModel.iconAsset)
+        val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
+        val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
+
+        val forceExplicitFlow = testCase.isCoex && testCase.authenticatedByFingerprint
+        if (forceExplicitFlow) {
+            viewModel.ensureFingerprintHasStarted(isDelayed = true)
+        }
+
+        val errorJob = launch {
+            viewModel.showTemporaryError(
+                "so sad",
+                messageAfterError = "",
+                authenticateAfterError = testCase.isFingerprintOnly || testCase.isCoex,
+            )
+            // Usually done by binder
+            iconViewModel.setPreviousIconWasError(true)
+            iconViewModel.setPreviousIconOverlayWasError(true)
+        }
+
+        if (testCase.isFingerprintOnly) {
+            val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
+            val shouldAnimateIconOverlay by collectLastValue(iconViewModel.shouldAnimateIconOverlay)
+
+            if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                val expectedOverlayAsset =
+                    when (currentRotation) {
+                        DisplayRotation.ROTATION_0 ->
+                            R.raw.biometricprompt_fingerprint_to_error_landscape
+                        DisplayRotation.ROTATION_90 ->
+                            R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft
+                        DisplayRotation.ROTATION_180 ->
+                            R.raw.biometricprompt_fingerprint_to_error_landscape
+                        DisplayRotation.ROTATION_270 ->
+                            R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright
+                        else -> throw Exception("invalid rotation")
+                    }
+                assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
+                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
+                assertThat(shouldAnimateIconOverlay).isEqualTo(true)
+            } else {
+                assertThat(iconAsset)
+                    .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
+                assertThat(iconOverlayAsset).isEqualTo(-1)
+                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+            }
+
+            // Clear error, restart authenticating
+            errorJob.join()
+
+            if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                val expectedOverlayAsset =
+                    when (currentRotation) {
+                        DisplayRotation.ROTATION_0 ->
+                            R.raw.biometricprompt_symbol_error_to_fingerprint_landscape
+                        DisplayRotation.ROTATION_90 ->
+                            R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_topleft
+                        DisplayRotation.ROTATION_180 ->
+                            R.raw.biometricprompt_symbol_error_to_fingerprint_landscape
+                        DisplayRotation.ROTATION_270 ->
+                            R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_bottomright
+                        else -> throw Exception("invalid rotation")
+                    }
+                assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                assertThat(shouldAnimateIconOverlay).isEqualTo(true)
+            } else {
+                assertThat(iconAsset)
+                    .isEqualTo(R.raw.fingerprint_dialogue_error_to_fingerprint_lottie)
+                assertThat(iconOverlayAsset).isEqualTo(-1)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+            }
+        }
+
+        if (testCase.isFaceOnly) {
+            val shouldRepeatAnimation by collectLastValue(iconViewModel.shouldRepeatAnimation)
+            val shouldPulseAnimation by collectLastValue(iconViewModel.shouldPulseAnimation)
+
+            assertThat(shouldPulseAnimation!!).isEqualTo(false)
+            assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_error)
+            assertThat(iconContentDescriptionId).isEqualTo(R.string.keyguard_face_failed)
+            assertThat(shouldAnimateIconView).isEqualTo(true)
+            assertThat(shouldRepeatAnimation).isEqualTo(false)
+
+            // Clear error, go to idle
+            errorJob.join()
+
+            assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_error_to_idle)
+            assertThat(iconContentDescriptionId)
+                .isEqualTo(R.string.biometric_dialog_face_icon_description_idle)
+            assertThat(shouldAnimateIconView).isEqualTo(true)
+            assertThat(shouldRepeatAnimation).isEqualTo(false)
+        }
+
+        if (testCase.isCoex) {
+            val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
+            val shouldAnimateIconOverlay by collectLastValue(iconViewModel.shouldAnimateIconOverlay)
+
+            // TODO: Update when SFPS co-ex is implemented
+            if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                assertThat(iconAsset)
+                    .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
+                assertThat(iconOverlayAsset).isEqualTo(-1)
+                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+            }
+
+            // Clear error, restart authenticating
+            errorJob.join()
+
+            if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                assertThat(iconAsset)
+                    .isEqualTo(R.raw.fingerprint_dialogue_error_to_fingerprint_lottie)
+                assertThat(iconOverlayAsset).isEqualTo(-1)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+            }
+        }
+    }
+
+    @Test
+    fun shows_authenticated_no_errors_no_confirmation_required_iconUpdate() = runGenericTest {
+        if (!testCase.confirmationRequested) {
+            val currentRotation by collectLastValue(displayStateInteractor.currentRotation)
+
+            val iconAsset by collectLastValue(iconViewModel.iconAsset)
+            val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
+            val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
+
+            viewModel.showAuthenticated(
+                modality = testCase.authenticatedModality,
+                dismissAfterDelay = DELAY
+            )
+
+            if (testCase.isFingerprintOnly) {
+                val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
+                val shouldAnimateIconOverlay by
+                    collectLastValue(iconViewModel.shouldAnimateIconOverlay)
+
+                if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                    val expectedOverlayAsset =
+                        when (currentRotation) {
+                            DisplayRotation.ROTATION_0 ->
+                                R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
+                            DisplayRotation.ROTATION_90 ->
+                                R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_topleft
+                            DisplayRotation.ROTATION_180 ->
+                                R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
+                            DisplayRotation.ROTATION_270 ->
+                                R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_bottomright
+                            else -> throw Exception("invalid rotation")
+                        }
+                    assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                    assertThat(shouldAnimateIconOverlay).isEqualTo(true)
+                } else {
+                    val isAuthenticated by collectLastValue(viewModel.isAuthenticated)
+                    assertThat(iconAsset)
+                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_success_lottie)
+                    assertThat(iconOverlayAsset).isEqualTo(-1)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                }
+            }
+
+            // If co-ex, using implicit flow (explicit flow always requires confirmation)
+            if (testCase.isFaceOnly || testCase.isCoex) {
+                val shouldRepeatAnimation by collectLastValue(iconViewModel.shouldRepeatAnimation)
+                val shouldPulseAnimation by collectLastValue(iconViewModel.shouldPulseAnimation)
+
+                assertThat(shouldPulseAnimation!!).isEqualTo(false)
+                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_checkmark)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+                assertThat(shouldRepeatAnimation).isEqualTo(false)
+            }
+        }
+    }
+
+    @Test
+    fun shows_pending_confirmation_iconUpdate() = runGenericTest {
+        if (
+            (testCase.isFaceOnly || testCase.isCoex) &&
+                testCase.authenticatedByFace &&
+                testCase.confirmationRequested
+        ) {
+            val iconAsset by collectLastValue(iconViewModel.iconAsset)
+            val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
+            val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
+
+            viewModel.showAuthenticated(
+                modality = testCase.authenticatedModality,
+                dismissAfterDelay = DELAY
+            )
+
+            if (testCase.isFaceOnly) {
+                val shouldRepeatAnimation by collectLastValue(iconViewModel.shouldRepeatAnimation)
+                val shouldPulseAnimation by collectLastValue(iconViewModel.shouldPulseAnimation)
+
+                assertThat(shouldPulseAnimation!!).isEqualTo(false)
+                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_wink_from_dark)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+                assertThat(shouldRepeatAnimation).isEqualTo(false)
+            }
+
+            // explicit flow because confirmation requested
+            if (testCase.isCoex) {
+                val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
+                val shouldAnimateIconOverlay by
+                    collectLastValue(iconViewModel.shouldAnimateIconOverlay)
+
+                // TODO: Update when SFPS co-ex is implemented
+                if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                    assertThat(iconAsset)
+                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie)
+                    assertThat(iconOverlayAsset).isEqualTo(-1)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun shows_authenticated_explicitly_confirmed_iconUpdate() = runGenericTest {
+        if (
+            (testCase.isFaceOnly || testCase.isCoex) &&
+                testCase.authenticatedByFace &&
+                testCase.confirmationRequested
+        ) {
+            val iconAsset by collectLastValue(iconViewModel.iconAsset)
+            val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
+            val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
+
+            viewModel.showAuthenticated(
+                modality = testCase.authenticatedModality,
+                dismissAfterDelay = DELAY
+            )
+
+            viewModel.confirmAuthenticated()
+
+            if (testCase.isFaceOnly) {
+                val shouldRepeatAnimation by collectLastValue(iconViewModel.shouldRepeatAnimation)
+                val shouldPulseAnimation by collectLastValue(iconViewModel.shouldPulseAnimation)
+
+                assertThat(shouldPulseAnimation!!).isEqualTo(false)
+                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_checkmark)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.biometric_dialog_face_icon_description_confirmed)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+                assertThat(shouldRepeatAnimation).isEqualTo(false)
+            }
+
+            // explicit flow because confirmation requested
+            if (testCase.isCoex) {
+                val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
+                val shouldAnimateIconOverlay by
+                    collectLastValue(iconViewModel.shouldAnimateIconOverlay)
+
+                // TODO: Update when SFPS co-ex is implemented
+                if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                    assertThat(iconAsset)
+                        .isEqualTo(R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie)
+                    assertThat(iconOverlayAsset).isEqualTo(-1)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun sfpsIconUpdates_onConfigurationChanged() = runGenericTest {
+        if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+            val testConfig = Configuration()
+            val folded = INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP - 1
+            val unfolded = INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP + 1
+            val currentIcon by collectLastValue(iconViewModel.iconAsset)
+
+            testConfig.smallestScreenWidthDp = folded
+            iconViewModel.onConfigurationChanged(testConfig)
+            val foldedIcon = currentIcon
+
+            testConfig.smallestScreenWidthDp = unfolded
+            iconViewModel.onConfigurationChanged(testConfig)
+            val unfoldedIcon = currentIcon
+
+            assertThat(foldedIcon).isNotEqualTo(unfoldedIcon)
+        }
+    }
+
+    @Test
+    fun sfpsIconUpdates_onRotation() = runGenericTest {
+        if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+            val currentIcon by collectLastValue(iconViewModel.iconAsset)
+
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
+            val iconRotation0 = currentIcon
+
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+            val iconRotation90 = currentIcon
+
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+            val iconRotation180 = currentIcon
+
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+            val iconRotation270 = currentIcon
+
+            assertThat(iconRotation0).isEqualTo(iconRotation180)
+            assertThat(iconRotation0).isNotEqualTo(iconRotation90)
+            assertThat(iconRotation0).isNotEqualTo(iconRotation270)
+        }
+    }
+
+    @Test
+    fun sfpsIconUpdates_onRearDisplayMode() = runGenericTest {
+        if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+            val currentIcon by collectLastValue(iconViewModel.iconAsset)
+
+            displayStateRepository.setIsInRearDisplayMode(false)
+            val iconNotRearDisplayMode = currentIcon
+
+            displayStateRepository.setIsInRearDisplayMode(true)
+            val iconRearDisplayMode = currentIcon
+
+            assertThat(iconNotRearDisplayMode).isNotEqualTo(iconRearDisplayMode)
+        }
+    }
+
     private suspend fun TestScope.showAuthenticated(
         authenticatedModality: BiometricModality,
         expectConfirmation: Boolean,
@@ -213,7 +694,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val authenticated by collectLastValue(viewModel.isAuthenticated)
         val fpStartMode by collectLastValue(viewModel.fingerprintStartMode)
         val size by collectLastValue(viewModel.size)
-        val legacyState by collectLastValue(viewModel.legacyState)
 
         val authWithSmallPrompt =
             testCase.shouldStartAsImplicitFlow &&
@@ -221,14 +701,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(authenticating).isTrue()
         assertThat(authenticated?.isNotAuthenticated).isTrue()
         assertThat(size).isEqualTo(if (authWithSmallPrompt) PromptSize.SMALL else PromptSize.MEDIUM)
-        assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATING)
         assertButtonsVisible(negative = !authWithSmallPrompt)
 
-        val delay = 1000L
-        viewModel.showAuthenticated(authenticatedModality, delay)
+        viewModel.showAuthenticated(authenticatedModality, DELAY)
 
         assertThat(authenticated?.isAuthenticated).isTrue()
-        assertThat(authenticated?.delay).isEqualTo(delay)
+        assertThat(authenticated?.delay).isEqualTo(DELAY)
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
         assertThat(size)
             .isEqualTo(
@@ -238,14 +716,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     PromptSize.SMALL
                 }
             )
-        assertThat(legacyState)
-            .isEqualTo(
-                if (expectConfirmation) {
-                    BiometricState.STATE_PENDING_CONFIRMATION
-                } else {
-                    BiometricState.STATE_AUTHENTICATED
-                }
-            )
+
         assertButtonsVisible(
             cancel = expectConfirmation,
             confirm = expectConfirmation,
@@ -298,7 +769,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val message by collectLastValue(viewModel.message)
         val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
         val size by collectLastValue(viewModel.size)
-        val legacyState by collectLastValue(viewModel.legacyState)
         val canTryAgainNow by collectLastValue(viewModel.canTryAgainNow)
 
         val errorJob = launch {
@@ -312,7 +782,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
         assertThat(message).isEqualTo(PromptMessage.Error(errorMessage))
         assertThat(messageVisible).isTrue()
-        assertThat(legacyState).isEqualTo(BiometricState.STATE_ERROR)
 
         // temporary error should disappear after a delay
         errorJob.join()
@@ -323,17 +792,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertThat(messageVisible).isFalse()
         }
-        val clearIconError = !restart
-        assertThat(legacyState)
-            .isEqualTo(
-                if (restart) {
-                    BiometricState.STATE_AUTHENTICATING
-                } else if (clearIconError) {
-                    BiometricState.STATE_IDLE
-                } else {
-                    BiometricState.STATE_HELP
-                }
-            )
 
         assertThat(authenticating).isEqualTo(restart)
         assertThat(authenticated?.isNotAuthenticated).isTrue()
@@ -488,7 +946,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val authenticated by collectLastValue(viewModel.isAuthenticated)
         val message by collectLastValue(viewModel.message)
         val size by collectLastValue(viewModel.size)
-        val legacyState by collectLastValue(viewModel.legacyState)
         val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
 
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
@@ -506,7 +963,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
-        assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATED)
         assertThat(canTryAgain).isFalse()
     }
 
@@ -524,7 +980,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val authenticated by collectLastValue(viewModel.isAuthenticated)
         val message by collectLastValue(viewModel.message)
         val size by collectLastValue(viewModel.size)
-        val legacyState by collectLastValue(viewModel.legacyState)
         val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
 
         assertThat(authenticating).isFalse()
@@ -532,8 +987,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(authenticated?.isAuthenticated).isTrue()
 
         if (testCase.isFaceOnly && expectConfirmation) {
-            assertThat(legacyState).isEqualTo(BiometricState.STATE_PENDING_CONFIRMATION)
-
             assertThat(size).isEqualTo(PromptSize.MEDIUM)
             assertButtonsVisible(
                 cancel = true,
@@ -543,8 +996,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             viewModel.confirmAuthenticated()
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertButtonsVisible()
-        } else {
-            assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATED)
         }
     }
 
@@ -563,7 +1014,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val authenticated by collectLastValue(viewModel.isAuthenticated)
         val message by collectLastValue(viewModel.message)
         val size by collectLastValue(viewModel.size)
-        val legacyState by collectLastValue(viewModel.legacyState)
         val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
 
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
@@ -581,7 +1031,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
-        assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATED)
         assertThat(canTryAgain).isFalse()
     }
 
@@ -610,12 +1059,10 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val message by collectLastValue(viewModel.message)
         val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
         val size by collectLastValue(viewModel.size)
-        val legacyState by collectLastValue(viewModel.legacyState)
 
         viewModel.showHelp(helpMessage)
 
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
-        assertThat(legacyState).isEqualTo(BiometricState.STATE_HELP)
         assertThat(message).isEqualTo(PromptMessage.Help(helpMessage))
         assertThat(messageVisible).isTrue()
 
@@ -632,7 +1079,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val message by collectLastValue(viewModel.message)
         val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
         val size by collectLastValue(viewModel.size)
-        val legacyState by collectLastValue(viewModel.legacyState)
         val confirmationRequired by collectLastValue(viewModel.isConfirmationRequired)
 
         if (testCase.isCoex && testCase.authenticatedByFingerprint) {
@@ -642,11 +1088,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         viewModel.showHelp(helpMessage)
 
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
-        if (confirmationRequired == true) {
-            assertThat(legacyState).isEqualTo(BiometricState.STATE_PENDING_CONFIRMATION)
-        } else {
-            assertThat(legacyState).isEqualTo(BiometricState.STATE_AUTHENTICATED)
-        }
+
         assertThat(message).isEqualTo(PromptMessage.Help(helpMessage))
         assertThat(messageVisible).isTrue()
         assertThat(authenticating).isFalse()
@@ -785,12 +1227,31 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     authenticatedModality = BiometricModality.Fingerprint,
                 ),
                 TestCase(
+                    fingerprint =
+                        fingerprintSensorPropertiesInternal(
+                                strong = true,
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                            )
+                            .first(),
+                    authenticatedModality = BiometricModality.Fingerprint,
+                ),
+                TestCase(
                     face = faceSensorPropertiesInternal(strong = true).first(),
                     authenticatedModality = BiometricModality.Face,
                     confirmationRequested = true,
                 ),
                 TestCase(
                     fingerprint = fingerprintSensorPropertiesInternal(strong = true).first(),
+                    authenticatedModality = BiometricModality.Fingerprint,
+                    confirmationRequested = true,
+                ),
+                TestCase(
+                    fingerprint =
+                        fingerprintSensorPropertiesInternal(
+                                strong = true,
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                            )
+                            .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
                     confirmationRequested = true,
                 ),
@@ -834,7 +1295,9 @@ internal data class TestCase(
         val modality =
             when {
                 fingerprint != null && face != null -> "coex"
-                fingerprint != null -> "fingerprint only"
+                fingerprint != null && fingerprint.isAnySidefpsType -> "fingerprint only, sideFps"
+                fingerprint != null && !fingerprint.isAnySidefpsType ->
+                    "fingerprint only, non-sideFps"
                 face != null -> "face only"
                 else -> "?"
             }
@@ -864,6 +1327,8 @@ internal data class TestCase(
     val isCoex: Boolean
         get() = face != null && fingerprint != null
 
+    @FingerprintSensorProperties.SensorType val sensorType: Int? = fingerprint?.sensorType
+
     val shouldStartAsImplicitFlow: Boolean
         get() = (isFaceOnly || isCoex) && !confirmationRequested
 }
@@ -890,3 +1355,5 @@ private fun PromptSelectorInteractor.initializePrompt(
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
     )
 }
+
+internal const val INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP = 600
