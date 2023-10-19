@@ -249,6 +249,10 @@ public class MediaProjectionPermissionActivity extends Activity
 
         setUpDialog(mDialog);
         mDialog.show();
+
+        if (savedInstanceState == null) {
+            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed();
+        }
     }
 
     @Override

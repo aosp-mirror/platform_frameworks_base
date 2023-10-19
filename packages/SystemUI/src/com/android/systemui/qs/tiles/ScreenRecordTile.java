@@ -30,12 +30,12 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
@@ -45,6 +45,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -69,6 +70,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final FeatureFlags mFlags;
     private final PanelInteractor mPanelInteractor;
+    private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
 
     private long mMillisUntilFinished = 0;
 
@@ -88,7 +90,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             KeyguardDismissUtil keyguardDismissUtil,
             KeyguardStateController keyguardStateController,
             DialogLaunchAnimator dialogLaunchAnimator,
-            PanelInteractor panelInteractor
+            PanelInteractor panelInteractor,
+            MediaProjectionMetricsLogger mediaProjectionMetricsLogger
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -99,6 +102,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         mKeyguardStateController = keyguardStateController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mPanelInteractor = panelInteractor;
+        mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
     }
 
     @Override
@@ -190,6 +194,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             } else {
                 dialog.show();
             }
+
+            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed();
+
             return false;
         };
 

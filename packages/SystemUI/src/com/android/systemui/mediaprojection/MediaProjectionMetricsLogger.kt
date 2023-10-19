@@ -24,6 +24,7 @@ import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGE
 import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_SYSTEM_UI_SCREEN_RECORDER as METRICS_CREATION_SOURCE_SYSTEM_UI_SCREEN_RECORDER
 import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN as METRICS_CREATION_SOURCE_UNKNOWN
 import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED
+import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED as METRICS_STATE_PERMISSION_REQUEST_DISPLAYED
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
@@ -45,6 +46,10 @@ constructor(private val service: IMediaProjectionManager) {
             MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED,
             sessionCreationSource
         )
+    }
+
+    fun notifyPermissionRequestDisplayed() {
+        notifyToServer(METRICS_STATE_PERMISSION_REQUEST_DISPLAYED, SessionCreationSource.UNKNOWN)
     }
 
     /**
