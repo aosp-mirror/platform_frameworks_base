@@ -779,6 +779,10 @@ public final class ViewRootImpl implements ViewParent,
      */
     private boolean mCheckIfCanDraw = false;
 
+    private boolean mWasLastDrawCanceled;
+    private boolean mLastTraversalWasVisible = true;
+    private boolean mLastDrawScreenOff;
+
     private boolean mDrewOnceForSync = false;
 
     int mSyncSeqId = 0;
@@ -2007,12 +2011,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void handleAppVisibility(boolean visible) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.instant(Trace.TRACE_TAG_VIEW, TextUtils.formatSimple(
+                    "%s visibilityChanged oldVisibility=%b newVisibility=%b", mTag,
+                    mAppVisible, visible));
+        }
         if (mAppVisible != visible) {
             final boolean previousVisible = getHostVisibility() == View.VISIBLE;
             mAppVisible = visible;
             final boolean currentVisible = getHostVisibility() == View.VISIBLE;
             // Root view only cares about whether it is visible or not.
             if (previousVisible != currentVisible) {
+                Log.d(mTag, "visibilityChanged oldVisibility=" + previousVisible + " newVisibility="
+                        + currentVisible);
                 mAppVisibilityChanged = true;
                 scheduleTraversals();
             }
@@ -3377,8 +3388,8 @@ public final class ViewRootImpl implements ViewParent,
                 || mForceNextWindowRelayout) {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW,
-                        TextUtils.formatSimple("relayoutWindow#"
-                                        + "first=%b/resize=%b/vis=%b/params=%b/force=%b",
+                        TextUtils.formatSimple("%s-relayoutWindow#"
+                                        + "first=%b/resize=%b/vis=%b/params=%b/force=%b", mTag,
                                 mFirst, windowShouldResize, viewVisibilityChanged, params != null,
                                 mForceNextWindowRelayout));
             }
@@ -3962,11 +3973,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean cancelDueToPreDrawListener = mAttachInfo.mTreeObserver.dispatchOnPreDraw();
         boolean cancelAndRedraw = cancelDueToPreDrawListener
                  || (cancelDraw && mDrewOnceForSync);
-        if (cancelAndRedraw) {
-            Log.d(mTag, "Cancelling draw."
-                    + " cancelDueToPreDrawListener=" + cancelDueToPreDrawListener
-                    + " cancelDueToSync=" + (cancelDraw && mDrewOnceForSync));
-        }
+
         if (!cancelAndRedraw) {
             // A sync was already requested before the WMS requested sync. This means we need to
             // sync the buffer, regardless if WMS wants to sync the buffer.
@@ -3990,6 +3997,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (!isViewVisible) {
+            if (mLastTraversalWasVisible) {
+                logAndTrace("Not drawing due to not visible");
+            }
             mLastPerformTraversalsSkipDrawReason = "view_not_visible";
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
                 for (int i = 0; i < mPendingTransitions.size(); ++i) {
@@ -4002,12 +4012,21 @@ public final class ViewRootImpl implements ViewParent,
                 mActiveSurfaceSyncGroup.markSyncReady();
             }
         } else if (cancelAndRedraw) {
+            logAndTrace("Canceling draw."
+                    + " cancelDueToPreDrawListener=" + cancelDueToPreDrawListener
+                    + " cancelDueToSync=" + (cancelDraw && mDrewOnceForSync));
             mLastPerformTraversalsSkipDrawReason = cancelDueToPreDrawListener
                 ? "predraw_" + mAttachInfo.mTreeObserver.getLastDispatchOnPreDrawCanceledReason()
                 : "cancel_" + cancelReason;
             // Try again
             scheduleTraversals();
         } else {
+            if (mWasLastDrawCanceled) {
+                logAndTrace("Draw frame after cancel");
+            }
+            if (!mLastTraversalWasVisible) {
+                logAndTrace("Start draw after previous draw not visible");
+            }
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
                 for (int i = 0; i < mPendingTransitions.size(); ++i) {
                     mPendingTransitions.get(i).startChangingAnimations();
@@ -4018,6 +4037,8 @@ public final class ViewRootImpl implements ViewParent,
                 mActiveSurfaceSyncGroup.markSyncReady();
             }
         }
+        mWasLastDrawCanceled = cancelAndRedraw;
+        mLastTraversalWasVisible = isViewVisible;
 
         if (mAttachInfo.mContentCaptureEvents != null) {
             notifyContentCaptureEvents();
@@ -4821,17 +4842,26 @@ public final class ViewRootImpl implements ViewParent,
         mLastPerformDrawSkippedReason = null;
         if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
             mLastPerformDrawSkippedReason = "screen_off";
+            if (!mLastDrawScreenOff) {
+                logAndTrace("Not drawing due to screen off");
+            }
+            mLastDrawScreenOff = true;
             return false;
         } else if (mView == null) {
             mLastPerformDrawSkippedReason = "no_root_view";
             return false;
         }
 
+        if (mLastDrawScreenOff) {
+            logAndTrace("Resumed drawing after screen turned on");
+            mLastDrawScreenOff = false;
+        }
+
         final boolean fullRedrawNeeded = mFullRedrawNeeded || surfaceSyncGroup != null;
         mFullRedrawNeeded = false;
 
         mIsDrawing = true;
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, mTag + "-draw");
 
         addFrameCommitCallbackIfNeeded();
 
@@ -11793,5 +11823,12 @@ public final class ViewRootImpl implements ViewParent,
     public void removeTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
             @NonNull Consumer<Boolean> listener) {
         t.clearTrustedPresentationCallback(getSurfaceControl());
+    }
+
+    private void logAndTrace(String msg) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.instant(Trace.TRACE_TAG_VIEW, mTag + "-" + msg);
+        }
+        Log.d(mTag, msg);
     }
 }
