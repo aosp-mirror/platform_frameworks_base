@@ -28,6 +28,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
+import com.android.systemui.FakeFeatureFlagsImpl
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
@@ -42,6 +43,7 @@ import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
@@ -142,6 +144,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     private lateinit var unfoldTransitionProgressProvider:
         Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
+    @Mock private lateinit var mCommunalViewModel: CommunalViewModel
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
@@ -218,8 +221,10 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 Mockito.mock(KeyguardMessageAreaController.Factory::class.java),
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
+                mCommunalViewModel,
                 NotificationExpansionRepository(),
                 featureFlags,
+                FakeFeatureFlagsImpl(),
                 FakeSystemClock(),
                 BouncerMessageInteractor(
                     repository = BouncerMessageRepositoryImpl(),

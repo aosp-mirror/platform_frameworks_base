@@ -83,6 +83,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Placeholder for the communal UI that will be replaced if the feature is enabled. -->
+    <ViewStub
+        android:id="@+id/communal_ui_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <include layout="@layout/brightness_mirror_container" />
 
     <com.android.systemui.scrim.ScrimView

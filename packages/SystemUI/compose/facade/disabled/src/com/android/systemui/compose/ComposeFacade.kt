@@ -72,6 +72,10 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
+    override fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View {
+        throwComposeUnavailableError()
+    }
+
     private fun throwComposeUnavailableError(): Nothing {
         error(
             "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
