@@ -146,6 +146,16 @@ constructor(
     /** Show the bouncer if necessary and set the relevant states. */
     @JvmOverloads
     fun show(isScrimmed: Boolean) {
+        if (primaryBouncerView.delegate == null) {
+            Log.d(
+                TAG,
+                "PrimaryBouncerInteractor#show is being called before the " +
+                    "primaryBouncerDelegate is set. Let's exit early so we don't set the wrong " +
+                    "primaryBouncer state."
+            )
+            return
+        }
+
         // Reset some states as we show the bouncer.
         repository.setKeyguardAuthenticatedBiometrics(null)
         repository.setPrimaryStartingToHide(false)
