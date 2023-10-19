@@ -19,6 +19,7 @@ package com.android.wm.shell.bubbles.animation;
 import static android.view.View.LAYOUT_DIRECTION_RTL;
 
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.bubbles.animation.FlingToDismissUtils.getFlingToDismissTargetWidth;
 
 import android.content.res.Resources;
 import android.graphics.Path;
@@ -375,6 +376,9 @@ public class ExpandedAnimationController
         mMagnetizedBubbleDraggingOut.setMagnetListener(listener);
         mMagnetizedBubbleDraggingOut.setHapticsEnabled(true);
         mMagnetizedBubbleDraggingOut.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
+        int screenWidthPx = mLayout.getContext().getResources().getDisplayMetrics().widthPixels;
+        mMagnetizedBubbleDraggingOut.setFlingToTargetWidthPercent(
+                getFlingToDismissTargetWidth(screenWidthPx));
     }
 
     private void springBubbleTo(View bubble, float x, float y) {
