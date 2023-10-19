@@ -38,6 +38,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
 import static com.android.media.audio.Flags.bluetoothMacAddressAnonymization;
+import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
 import static com.android.server.utils.EventLogger.Event.ALOGE;
 import static com.android.server.utils.EventLogger.Event.ALOGI;
@@ -1371,19 +1372,21 @@ public class AudioService extends IAudioService.Stub
                 sRingerAndZenModeMutedStreams, "onInitStreamsAndVolumes"));
         setRingerModeInt(getRingerModeInternal(), false);
 
-        final float[] preScale = new float[3];
-        preScale[0] = mContext.getResources().getFraction(
-                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index1,
-                1, 1);
-        preScale[1] = mContext.getResources().getFraction(
-                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index2,
-                1, 1);
-        preScale[2] = mContext.getResources().getFraction(
-                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index3,
-                1, 1);
-        for (int i = 0; i < preScale.length; i++) {
-            if (0.0f <= preScale[i] && preScale[i] <= 1.0f) {
-                mPrescaleAbsoluteVolume[i] = preScale[i];
+        if (!disablePrescaleAbsoluteVolume()) {
+            final float[] preScale = new float[3];
+            preScale[0] = mContext.getResources().getFraction(
+                    com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index1,
+                    1, 1);
+            preScale[1] = mContext.getResources().getFraction(
+                    com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index2,
+                    1, 1);
+            preScale[2] = mContext.getResources().getFraction(
+                    com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index3,
+                    1, 1);
+            for (int i = 0; i < preScale.length; i++) {
+                if (0.0f <= preScale[i] && preScale[i] <= 1.0f) {
+                    mPrescaleAbsoluteVolume[i] = preScale[i];
+                }
             }
         }
 
@@ -8618,7 +8621,7 @@ public class AudioService extends IAudioService.Stub
             if (index == 0) {
                 // 0% for volume 0
                 index = 0;
-            } else if (index > 0 && index <= 3) {
+            } else if (!disablePrescaleAbsoluteVolume() && index > 0 && index <= 3) {
                 // Pre-scale for volume steps 1 2 and 3
                 index = (int) (mIndexMax * mPrescaleAbsoluteVolume[index - 1]) / 10;
             } else {
@@ -11448,6 +11451,14 @@ public class AudioService extends IAudioService.Stub
         pw.print("  adjust-only absolute volume devices="); pw.println(dumpDeviceTypes(
                 getAbsoluteVolumeDevicesWithBehavior(
                         AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY)));
+        pw.print("  pre-scale for bluetooth absolute volume ");
+        if (disablePrescaleAbsoluteVolume()) {
+            pw.println("= disabled");
+        } else {
+            pw.println("=" + mPrescaleAbsoluteVolume[0]
+                    + ", " + mPrescaleAbsoluteVolume[1]
+                    + ", " + mPrescaleAbsoluteVolume[2]);
+        }
         pw.print("  mExtVolumeController="); pw.println(mExtVolumeController);
         pw.print("  mHdmiAudioSystemClient="); pw.println(mHdmiAudioSystemClient);
         pw.print("  mHdmiPlaybackClient="); pw.println(mHdmiPlaybackClient);
