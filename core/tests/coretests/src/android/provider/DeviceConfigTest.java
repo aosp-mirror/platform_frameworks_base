@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -734,6 +735,7 @@ public class DeviceConfigTest {
     }
 
     @Test
+    @FlakyTest(bugId = 299483542)
     public void onPropertiesChangedListener_setPropertiesCallback() {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
