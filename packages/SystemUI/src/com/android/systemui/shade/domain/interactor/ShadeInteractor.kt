@@ -35,7 +35,6 @@ import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
-import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
@@ -139,13 +138,6 @@ constructor(
 
     /** Whether either the shade or QS is fully expanded. */
     val isAnyFullyExpanded: Flow<Boolean> = anyExpansion.map { it >= 1f }.distinctUntilChanged()
-
-    /** Whether either the shade or QS is expanding from a fully collapsed state. */
-    val isAnyExpanding: Flow<Boolean> =
-        anyExpansion
-            .pairwise(1f)
-            .map { (prev, curr) -> curr > 0f && curr < 1f && prev < 1f }
-            .distinctUntilChanged()
 
     /**
      * Whether either the shade or QS is partially or fully expanded, i.e. not fully collapsed. At
