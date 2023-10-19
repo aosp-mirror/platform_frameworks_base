@@ -18,54 +18,56 @@ package com.android.systemui.settings.brightness;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY;
 
 import android.app.Activity;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.settings.DisplayTracker;
-import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
 /** A dialog that provides controls for adjusting the screen brightness. */
 public class BrightnessDialog extends Activity {
 
+    @VisibleForTesting
+    static final int DIALOG_TIMEOUT_MILLIS = 3000;
+
     private BrightnessController mBrightnessController;
     private final BrightnessSliderController.Factory mToggleSliderFactory;
-    private final UserTracker mUserTracker;
-    private final DisplayTracker mDisplayTracker;
-    private final Executor mMainExecutor;
-    private final Handler mBackgroundHandler;
+    private final BrightnessController.Factory mBrightnessControllerFactory;
+    private final DelayableExecutor mMainExecutor;
+    private final AccessibilityManagerWrapper mAccessibilityMgr;
+    private Runnable mCancelTimeoutRunnable;
 
     @Inject
     public BrightnessDialog(
-            UserTracker userTracker,
-            DisplayTracker displayTracker,
-            BrightnessSliderController.Factory factory,
-            @Main Executor mainExecutor,
-            @Background Handler bgHandler) {
-        mUserTracker = userTracker;
-        mDisplayTracker = displayTracker;
-        mToggleSliderFactory = factory;
+            BrightnessSliderController.Factory brightnessSliderfactory,
+            BrightnessController.Factory brightnessControllerFactory,
+            @Main DelayableExecutor mainExecutor,
+            AccessibilityManagerWrapper accessibilityMgr
+    ) {
+        mToggleSliderFactory = brightnessSliderfactory;
+        mBrightnessControllerFactory = brightnessControllerFactory;
         mMainExecutor = mainExecutor;
-        mBackgroundHandler = bgHandler;
+        mAccessibilityMgr = accessibilityMgr;
     }
 
 
@@ -84,6 +86,7 @@ public class BrightnessDialog extends Activity {
         window.getDecorView();
         window.setLayout(
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        getTheme().applyStyle(R.style.Theme_SystemUI_QuickSettings, false);
 
         setContentView(R.layout.brightness_mirror_container);
         FrameLayout frame = findViewById(R.id.brightness_mirror_container);
@@ -109,8 +112,7 @@ public class BrightnessDialog extends Activity {
         controller.init();
         frame.addView(controller.getRootView(), MATCH_PARENT, WRAP_CONTENT);
 
-        mBrightnessController = new BrightnessController(
-                this, controller, mUserTracker, mDisplayTracker, mMainExecutor, mBackgroundHandler);
+        mBrightnessController = mBrightnessControllerFactory.create(controller);
     }
 
     @Override
@@ -118,6 +120,14 @@ public class BrightnessDialog extends Activity {
         super.onStart();
         mBrightnessController.registerCallbacks();
         MetricsLogger.visible(this, MetricsEvent.BRIGHTNESS_DIALOG);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (triggeredByBrightnessKey()) {
+            scheduleTimeout();
+        }
     }
 
     @Override
@@ -138,9 +148,25 @@ public class BrightnessDialog extends Activity {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
                 || keyCode == KeyEvent.KEYCODE_VOLUME_UP
                 || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+            if (mCancelTimeoutRunnable != null) {
+                mCancelTimeoutRunnable.run();
+            }
             finish();
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    private boolean triggeredByBrightnessKey() {
+        return getIntent().getBooleanExtra(EXTRA_FROM_BRIGHTNESS_KEY, false);
+    }
+
+    private void scheduleTimeout() {
+        if (mCancelTimeoutRunnable != null) {
+            mCancelTimeoutRunnable.run();
+        }
+        final int timeout = mAccessibilityMgr.getRecommendedTimeoutMillis(DIALOG_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS);
+        mCancelTimeoutRunnable = mMainExecutor.executeDelayed(this::finish, timeout);
     }
 }

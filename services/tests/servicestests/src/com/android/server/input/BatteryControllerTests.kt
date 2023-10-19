@@ -40,8 +40,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.android.server.input.BatteryController.BluetoothBatteryManager
 import com.android.server.input.BatteryController.BluetoothBatteryManager.BluetoothBatteryListener
 import com.android.server.input.BatteryController.POLLING_PERIOD_MILLIS
-import com.android.server.input.BatteryController.UEventManager
-import com.android.server.input.BatteryController.UEventManager.UEventBatteryListener
+import com.android.server.input.BatteryController.UEventBatteryListener
 import com.android.server.input.BatteryController.USI_BATTERY_VALIDITY_DURATION_MILLIS
 import org.hamcrest.Description
 import org.hamcrest.Matcher

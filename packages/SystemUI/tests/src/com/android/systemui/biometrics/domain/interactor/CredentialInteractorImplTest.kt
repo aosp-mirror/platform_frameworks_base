@@ -11,8 +11,8 @@ import com.android.internal.widget.VerifyCredentialResponse
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
-import com.android.systemui.biometrics.domain.model.BiometricUserInfo
 import com.android.systemui.biometrics.promptInfo
+import com.android.systemui.biometrics.shared.model.BiometricUserInfo
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever

@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -95,7 +96,7 @@ class IconManager @Inject constructor(
      * @throws InflationException Exception if required icons are not valid or specified
      */
     @Throws(InflationException::class)
-    fun createIcons(entry: NotificationEntry) {
+    fun createIcons(entry: NotificationEntry) = traceSection("IconManager.createIcons") {
         // Construct the status bar icon view.
         val sbIcon = iconBuilder.createIconView(entry)
         sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
@@ -143,9 +144,9 @@ class IconManager @Inject constructor(
      * @throws InflationException Exception if required icons are not valid or specified
      */
     @Throws(InflationException::class)
-    fun updateIcons(entry: NotificationEntry) {
+    fun updateIcons(entry: NotificationEntry) = traceSection("IconManager.updateIcons") {
         if (!entry.icons.areIconsAvailable) {
-            return
+            return@traceSection
         }
         entry.icons.smallIconDescriptor = null
         entry.icons.peopleAvatarDescriptor = null

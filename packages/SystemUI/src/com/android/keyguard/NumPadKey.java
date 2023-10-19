@@ -15,7 +15,7 @@
  */
 package com.android.keyguard;
 
-import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
+import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -211,7 +211,9 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         left = centerX - mKlondikeText.getMeasuredWidth() / 2;
         mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
 
-        if (mAnimator != null) mAnimator.onLayout(b - t);
+        int width = r - l;
+        int height = b - t;
+        if (mAnimator != null) mAnimator.onLayout(width, height);
     }
 
     @Override

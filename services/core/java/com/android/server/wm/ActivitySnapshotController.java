@@ -16,16 +16,14 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.SnapshotController.ACTIVITY_CLOSE;
-import static com.android.server.wm.SnapshotController.ACTIVITY_OPEN;
-import static com.android.server.wm.SnapshotController.TASK_CLOSE;
-import static com.android.server.wm.SnapshotController.TASK_OPEN;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.os.Environment;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -35,7 +33,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
-import com.android.server.wm.SnapshotController.TransitionState;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,12 +59,6 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     static final String SNAPSHOTS_DIRNAME = "activity_snapshots";
 
     /**
-     * The pending activities which should capture snapshot when process transition finish.
-     */
-    @VisibleForTesting
-    final ArraySet<ActivityRecord> mPendingCaptureActivity = new ArraySet<>();
-
-    /**
      * The pending activities which should remove snapshot from memory when process transition
      * finish.
      */
@@ -86,6 +77,10 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     @VisibleForTesting
     final ArraySet<ActivityRecord> mPendingLoadActivity = new ArraySet<>();
 
+    private final ArraySet<ActivityRecord> mOnBackPressedActivities = new ArraySet<>();
+
+    private final ArrayList<ActivityRecord> mTmpBelowActivities = new ArrayList<>();
+    private final ArrayList<WindowContainer> mTmpTransitionParticipants = new ArrayList<>();
     private final SnapshotPersistQueue mSnapshotPersistQueue;
     private final PersistInfoProvider mPersistInfoProvider;
     private final AppSnapshotLoader mSnapshotLoader;
@@ -115,20 +110,6 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                 && isSnapshotEnabled()
                 && !ActivityManager.isLowRamDeviceStatic(); // Don't support Android Go
         setSnapshotEnabled(snapshotEnabled);
-    }
-
-    void systemReady() {
-        if (shouldDisableSnapshots()) {
-            return;
-        }
-        mService.mSnapshotController.registerTransitionStateConsumer(
-                ACTIVITY_OPEN, this::handleOpenActivityTransition);
-        mService.mSnapshotController.registerTransitionStateConsumer(
-                ACTIVITY_CLOSE, this::handleCloseActivityTransition);
-        mService.mSnapshotController.registerTransitionStateConsumer(
-                TASK_OPEN, this::handleOpenTaskTransition);
-        mService.mSnapshotController.registerTransitionStateConsumer(
-                TASK_CLOSE, this::handleCloseTaskTransition);
     }
 
     @Override
@@ -173,6 +154,7 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
 
                         @Override
                         void write() {
+                            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "cleanUpUserFiles");
                             final File file = mPersistInfoProvider.getDirectory(userId);
                             if (file.exists()) {
                                 final File[] contents = file.listFiles();
@@ -182,15 +164,30 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                                     }
                                 }
                             }
+                            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                         }
                     });
         }
     }
 
+    void addOnBackPressedActivity(ActivityRecord ar) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        mOnBackPressedActivities.add(ar);
+    }
+
+    void clearOnBackPressedActivities() {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        mOnBackPressedActivities.clear();
+    }
+
     /**
-     * Prepare to handle on transition start. Clear all temporary fields.
+     * Prepare to collect any change for snapshots processing. Clear all temporary fields.
      */
-    void preTransitionStart() {
+    void beginSnapshotProcess() {
         if (shouldDisableSnapshots()) {
             return;
         }
@@ -198,18 +195,22 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     }
 
     /**
-     * on transition start has notified, start process data.
+     * End collect any change for snapshots processing, start process data.
      */
-    void postTransitionStart() {
+    void endSnapshotProcess() {
         if (shouldDisableSnapshots()) {
             return;
         }
-        onCommitTransition();
+        for (int i = mOnBackPressedActivities.size() - 1; i >= 0; --i) {
+            handleActivityTransition(mOnBackPressedActivities.valueAt(i));
+        }
+        mOnBackPressedActivities.clear();
+        mTmpTransitionParticipants.clear();
+        postProcess();
     }
 
     @VisibleForTesting
     void resetTmpFields() {
-        mPendingCaptureActivity.clear();
         mPendingRemoveActivity.clear();
         mPendingDeleteActivity.clear();
         mPendingLoadActivity.clear();
@@ -218,30 +219,12 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     /**
      * Start process all pending activities for a transition.
      */
-    private void onCommitTransition() {
+    private void postProcess() {
         if (DEBUG) {
-            Slog.d(TAG, "ActivitySnapshotController#onCommitTransition result:"
-                    + " capture " + mPendingCaptureActivity
+            Slog.d(TAG, "ActivitySnapshotController#postProcess result:"
                     + " remove " + mPendingRemoveActivity
                     + " delete " + mPendingDeleteActivity
                     + " load " + mPendingLoadActivity);
-        }
-        // task snapshots
-        for (int i = mPendingCaptureActivity.size() - 1; i >= 0; i--) {
-            recordSnapshot(mPendingCaptureActivity.valueAt(i));
-        }
-        // clear mTmpRemoveActivity from cache
-        for (int i = mPendingRemoveActivity.size() - 1; i >= 0; i--) {
-            final ActivityRecord ar = mPendingRemoveActivity.valueAt(i);
-            final int code = getSystemHashCode(ar);
-            mCache.onIdRemoved(code);
-        }
-        // clear snapshot on cache and delete files
-        for (int i = mPendingDeleteActivity.size() - 1; i >= 0; i--) {
-            final ActivityRecord ar = mPendingDeleteActivity.valueAt(i);
-            final int code = getSystemHashCode(ar);
-            mCache.onIdRemoved(code);
-            removeIfUserSavedFileExist(code, ar.mUserId);
         }
         // load snapshot to cache
         for (int i = mPendingLoadActivity.size() - 1; i >= 0; i--) {
@@ -258,6 +241,8 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                             new SnapshotPersistQueue.WriteQueueItem(mPersistInfoProvider) {
                                 @Override
                                 void write() {
+                                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                                            "load_activity_snapshot");
                                     final TaskSnapshot snapshot = mSnapshotLoader.loadTask(code,
                                             userId, false /* loadLowResolutionBitmap */);
                                     synchronized (mService.getWindowManagerLock()) {
@@ -265,16 +250,36 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                                             mCache.putSnapshot(ar, snapshot);
                                         }
                                     }
+                                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                                 }
                             });
                 }
             }
         }
+        // clear mTmpRemoveActivity from cache
+        for (int i = mPendingRemoveActivity.size() - 1; i >= 0; i--) {
+            final ActivityRecord ar = mPendingRemoveActivity.valueAt(i);
+            final int code = getSystemHashCode(ar);
+            mCache.onIdRemoved(code);
+        }
+        // clear snapshot on cache and delete files
+        for (int i = mPendingDeleteActivity.size() - 1; i >= 0; i--) {
+            final ActivityRecord ar = mPendingDeleteActivity.valueAt(i);
+            final int code = getSystemHashCode(ar);
+            mCache.onIdRemoved(code);
+            removeIfUserSavedFileExist(code, ar.mUserId);
+        }
         // don't keep any reference
         resetTmpFields();
     }
 
-    private void recordSnapshot(ActivityRecord activity) {
+    void recordSnapshot(ActivityRecord activity) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "ActivitySnapshotController#recordSnapshot " + activity);
+        }
         final TaskSnapshot snapshot = recordSnapshotInner(activity, false /* allowSnapshotHome */);
         if (snapshot != null) {
             final int code = getSystemHashCode(activity);
@@ -285,15 +290,20 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     /**
      * Called when the visibility of an app changes outside the regular app transition flow.
      */
-    void notifyAppVisibilityChanged(ActivityRecord appWindowToken, boolean visible) {
+    void notifyAppVisibilityChanged(ActivityRecord ar, boolean visible) {
         if (shouldDisableSnapshots()) {
             return;
         }
+        final Task task = ar.getTask();
+        if (task == null) {
+            return;
+        }
+        // Doesn't need to capture activity snapshot when it converts from translucent.
         if (!visible) {
             resetTmpFields();
-            addBelowTopActivityIfExist(appWindowToken.getTask(), mPendingRemoveActivity,
+            addBelowActivityIfExist(ar, mPendingRemoveActivity, false,
                     "remove-snapshot");
-            onCommitTransition();
+            postProcess();
         }
     }
 
@@ -301,65 +311,146 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         return System.identityHashCode(activity);
     }
 
-    void handleOpenActivityTransition(TransitionState<ActivityRecord> transitionState) {
-        ArraySet<ActivityRecord> participant = transitionState.getParticipant(false /* open */);
-        for (ActivityRecord ar : participant) {
-            mPendingCaptureActivity.add(ar);
-            // remove the snapshot for the one below close
-            final ActivityRecord below = ar.getTask().getActivityBelow(ar);
-            if (below != null) {
-                mPendingRemoveActivity.add(below);
+    @VisibleForTesting
+    void handleTransitionFinish(@NonNull ArrayList<WindowContainer> windows) {
+        mTmpTransitionParticipants.clear();
+        mTmpTransitionParticipants.addAll(windows);
+        for (int i = mTmpTransitionParticipants.size() - 1; i >= 0; --i) {
+            final WindowContainer next = mTmpTransitionParticipants.get(i);
+            if (next.asTask() != null) {
+                handleTaskTransition(next.asTask());
+            } else if (next.asTaskFragment() != null) {
+                final TaskFragment tf = next.asTaskFragment();
+                final ActivityRecord ar = tf.getTopMostActivity();
+                if (ar != null) {
+                    handleActivityTransition(ar);
+                }
+            } else if (next.asActivityRecord() != null) {
+                handleActivityTransition(next.asActivityRecord());
             }
         }
     }
 
-    void handleCloseActivityTransition(TransitionState<ActivityRecord> transitionState) {
-        ArraySet<ActivityRecord> participant = transitionState.getParticipant(true /* open */);
-        for (ActivityRecord ar : participant) {
+    private void handleActivityTransition(@NonNull ActivityRecord ar) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        if (ar.isVisibleRequested()) {
             mPendingDeleteActivity.add(ar);
             // load next one if exists.
-            final ActivityRecord below = ar.getTask().getActivityBelow(ar);
-            if (below != null) {
-                mPendingLoadActivity.add(below);
-            }
+            addBelowActivityIfExist(ar, mPendingLoadActivity, true, "load-snapshot");
+        } else {
+            // remove the snapshot for the one below close
+            addBelowActivityIfExist(ar, mPendingRemoveActivity, true, "remove-snapshot");
         }
     }
 
-    void handleCloseTaskTransition(TransitionState<Task> closeTaskTransitionRecord) {
-        ArraySet<Task> participant = closeTaskTransitionRecord.getParticipant(false /* open */);
-        for (Task close : participant) {
-            // this is close task transition
-            // remove the N - 1 from cache
-            addBelowTopActivityIfExist(close, mPendingRemoveActivity, "remove-snapshot");
+    private void handleTaskTransition(Task task) {
+        if (shouldDisableSnapshots()) {
+            return;
         }
-    }
-
-    void handleOpenTaskTransition(TransitionState<Task> openTaskTransitionRecord) {
-        ArraySet<Task> participant = openTaskTransitionRecord.getParticipant(true /* open */);
-        for (Task open : participant) {
-            // this is close task transition
-            // remove the N - 1 from cache
-            addBelowTopActivityIfExist(open, mPendingLoadActivity, "load-snapshot");
+        final ActivityRecord topActivity = task.getTopMostActivity();
+        if (topActivity == null) {
+            return;
+        }
+        if (task.isVisibleRequested()) {
+            // this is open task transition
+            // load the N - 1 to cache
+            addBelowActivityIfExist(topActivity, mPendingLoadActivity, true, "load-snapshot");
             // Move the activities to top of mSavedFilesInOrder, so when purge happen, there
             // will trim the persisted files from the most non-accessed.
-            adjustSavedFileOrder(open);
+            adjustSavedFileOrder(task);
+        } else {
+            // this is close task transition
+            // remove the N - 1 from cache
+            addBelowActivityIfExist(topActivity, mPendingRemoveActivity, true, "remove-snapshot");
         }
     }
 
-    // Add the top -1 activity to a set if it exists.
-    private void addBelowTopActivityIfExist(Task task, ArraySet<ActivityRecord> set,
-            String debugMessage) {
-        final ActivityRecord topActivity = task.getTopMostActivity();
-        if (topActivity != null) {
-            final ActivityRecord below = task.getActivityBelow(topActivity);
-            if (below != null) {
-                set.add(below);
-                if (DEBUG) {
-                    Slog.d(TAG, "ActivitySnapshotController#addBelowTopActivityIfExist "
-                            + below + " from " + debugMessage);
-                }
+    /**
+     * Add the top -1 activity to a set if it exists.
+     * @param inTransition true if the activity must participant in transition.
+     */
+    private void addBelowActivityIfExist(ActivityRecord currentActivity,
+            ArraySet<ActivityRecord> set, boolean inTransition, String debugMessage) {
+        getActivityBelow(currentActivity, inTransition, mTmpBelowActivities);
+        for (int i = mTmpBelowActivities.size() - 1; i >= 0; --i) {
+            set.add(mTmpBelowActivities.get(i));
+            if (DEBUG) {
+                Slog.d(TAG, "ActivitySnapshotController#addBelowTopActivityIfExist "
+                        + mTmpBelowActivities.get(i) + " from " + debugMessage);
             }
         }
+        mTmpBelowActivities.clear();
+    }
+
+    private void getActivityBelow(ActivityRecord currentActivity, boolean inTransition,
+            ArrayList<ActivityRecord> result) {
+        final Task currentTask = currentActivity.getTask();
+        if (currentTask == null) {
+            return;
+        }
+        final ActivityRecord initPrev = currentTask.getActivityBelow(currentActivity);
+        if (initPrev == null) {
+            return;
+        }
+        final TaskFragment currTF = currentActivity.getTaskFragment();
+        final TaskFragment prevTF = initPrev.getTaskFragment();
+        final TaskFragment prevAdjacentTF = prevTF != null
+                ? prevTF.getAdjacentTaskFragment() : null;
+        if (currTF == prevTF && currTF != null || prevAdjacentTF == null) {
+            // Current activity and previous one is in the same task fragment, or
+            // previous activity is not in a task fragment, or
+            // previous activity's task fragment doesn't adjacent to any others.
+            if (!inTransition || isInParticipant(initPrev, mTmpTransitionParticipants)) {
+                result.add(initPrev);
+            }
+            return;
+        }
+
+        if (prevAdjacentTF == currTF) {
+            // previous activity A is adjacent to current activity B.
+            // Try to find anyone below previous activityA, which are C and D if exists.
+            // A | B
+            // C (| D)
+            getActivityBelow(initPrev, inTransition, result);
+        } else {
+            // previous activity C isn't adjacent to current activity A.
+            // A
+            // B | C
+            final Task prevAdjacentTask = prevAdjacentTF.getTask();
+            if (prevAdjacentTask == currentTask) {
+                final int currentIndex = currTF != null
+                        ? currentTask.mChildren.indexOf(currTF)
+                        : currentTask.mChildren.indexOf(currentActivity);
+                final int prevAdjacentIndex =
+                        prevAdjacentTask.mChildren.indexOf(prevAdjacentTF);
+                // prevAdjacentTF already above currentActivity
+                if (prevAdjacentIndex > currentIndex) {
+                    return;
+                }
+            }
+            if (!inTransition || isInParticipant(initPrev, mTmpTransitionParticipants)) {
+                result.add(initPrev);
+            }
+            // prevAdjacentTF is adjacent to another one
+            final ActivityRecord prevAdjacentActivity = prevAdjacentTF.getTopMostActivity();
+            if (prevAdjacentActivity != null && (!inTransition
+                    || isInParticipant(prevAdjacentActivity, mTmpTransitionParticipants))) {
+                result.add(prevAdjacentActivity);
+            }
+        }
+    }
+
+    static boolean isInParticipant(ActivityRecord ar,
+            ArrayList<WindowContainer> transitionParticipants) {
+        for (int i = transitionParticipants.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = transitionParticipants.get(i);
+            if (ar == wc || ar.isDescendantOf(wc)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void adjustSavedFileOrder(Task nextTopTask) {
@@ -376,6 +467,9 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
 
     @Override
     void onAppRemoved(ActivityRecord activity) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
         super.onAppRemoved(activity);
         final int code = getSystemHashCode(activity);
         removeIfUserSavedFileExist(code, activity.mUserId);
@@ -386,6 +480,9 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
 
     @Override
     void onAppDied(ActivityRecord activity) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
         super.onAppDied(activity);
         final int code = getSystemHashCode(activity);
         removeIfUserSavedFileExist(code, activity.mUserId);
@@ -440,7 +537,7 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     private void removeIfUserSavedFileExist(int code, int userId) {
         final UserSavedFile usf = getUserFiles(userId).get(code);
         if (usf != null) {
-            mUserSavedFiles.remove(code);
+            mUserSavedFiles.get(userId).remove(code);
             mSavedFilesInOrder.remove(usf);
             mPersister.removeSnap(code, userId);
         }
@@ -490,11 +587,13 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                     new SnapshotPersistQueue.WriteQueueItem(mPersistInfoProvider) {
                         @Override
                         void write() {
+                            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activity_remove_files");
                             for (int i = files.size() - 1; i >= 0; --i) {
                                 final UserSavedFile usf = files.get(i);
                                 mSnapshotPersistQueue.deleteSnapshot(
                                         usf.mFileId, usf.mUserId, mPersistInfoProvider);
                             }
+                            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                         }
                     });
         }

@@ -22,17 +22,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.app.AssistUtils;
-import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.assist.AssistManager.VisualQueryAttentionListener;
 import com.android.systemui.shared.condition.Condition;
 
 import org.junit.Before;
@@ -50,9 +47,7 @@ public class AssistantAttentionConditionTest extends SysuiTestCase {
     @Mock
     Condition.Callback mCallback;
     @Mock
-    AssistUtils mAssistUtils;
-    @Mock
-    DreamOverlayStateController mDreamOverlayStateController;
+    AssistManager mAssistManager;
     @Mock
     CoroutineScope mScope;
 
@@ -62,55 +57,34 @@ public class AssistantAttentionConditionTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mAssistantAttentionCondition =
-                new AssistantAttentionCondition(mScope, mDreamOverlayStateController, mAssistUtils);
+        mAssistantAttentionCondition = new AssistantAttentionCondition(mScope, mAssistManager);
         // Adding a callback also starts the condition.
         mAssistantAttentionCondition.addCallback(mCallback);
     }
 
     @Test
     public void testEnableVisualQueryDetection() {
-        final ArgumentCaptor<DreamOverlayStateController.Callback> argumentCaptor =
-                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
-        verify(mDreamOverlayStateController).addCallback(argumentCaptor.capture());
-
-        when(mDreamOverlayStateController.isDreamOverlayStatusBarVisible()).thenReturn(true);
-        argumentCaptor.getValue().onStateChanged();
-
-        verify(mAssistUtils).enableVisualQueryDetection(any());
+        verify(mAssistManager).addVisualQueryAttentionListener(
+                any(VisualQueryAttentionListener.class));
     }
 
     @Test
     public void testDisableVisualQueryDetection() {
-        final ArgumentCaptor<DreamOverlayStateController.Callback> argumentCaptor =
-                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
-        verify(mDreamOverlayStateController).addCallback(argumentCaptor.capture());
-
-        when(mDreamOverlayStateController.isDreamOverlayStatusBarVisible()).thenReturn(true);
-        argumentCaptor.getValue().onStateChanged();
-        when(mDreamOverlayStateController.isDreamOverlayStatusBarVisible()).thenReturn(false);
-        argumentCaptor.getValue().onStateChanged();
-
-        verify(mAssistUtils).disableVisualQueryDetection();
+        mAssistantAttentionCondition.stop();
+        verify(mAssistManager).removeVisualQueryAttentionListener(
+                any(VisualQueryAttentionListener.class));
     }
 
     @Test
-    public void testAttentionChangedTriggersCondition() throws RemoteException {
-        final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCaptor =
-                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
-        verify(mDreamOverlayStateController).addCallback(callbackCaptor.capture());
+    public void testAttentionChangedTriggersCondition() {
+        final ArgumentCaptor<VisualQueryAttentionListener> argumentCaptor =
+                ArgumentCaptor.forClass(VisualQueryAttentionListener.class);
+        verify(mAssistManager).addVisualQueryAttentionListener(argumentCaptor.capture());
 
-        when(mDreamOverlayStateController.isDreamOverlayStatusBarVisible()).thenReturn(true);
-        callbackCaptor.getValue().onStateChanged();
-
-        final ArgumentCaptor<IVisualQueryDetectionAttentionListener> listenerCaptor =
-                ArgumentCaptor.forClass(IVisualQueryDetectionAttentionListener.class);
-        verify(mAssistUtils).enableVisualQueryDetection(listenerCaptor.capture());
-
-        listenerCaptor.getValue().onAttentionGained();
+        argumentCaptor.getValue().onAttentionGained();
         assertThat(mAssistantAttentionCondition.isConditionMet()).isTrue();
 
-        listenerCaptor.getValue().onAttentionLost();
+        argumentCaptor.getValue().onAttentionLost();
         assertThat(mAssistantAttentionCondition.isConditionMet()).isFalse();
 
         verify(mCallback, times(2)).onConditionChanged(eq(mAssistantAttentionCondition));

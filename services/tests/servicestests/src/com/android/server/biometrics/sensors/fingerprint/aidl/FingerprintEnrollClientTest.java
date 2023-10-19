@@ -296,6 +296,6 @@ public class FingerprintEnrollClientTest {
         mClientMonitorCallbackConverter, 0 /* userId */,
         HAT, "owner", mBiometricUtils, 8 /* sensorId */,
         mBiometricLogger, mBiometricContext, mSensorProps, mUdfpsOverlayController,
-        mSideFpsController, null, 6 /* maxTemplatesPerUser */, FingerprintManager.ENROLL_ENROLL);
+        mSideFpsController, 6 /* maxTemplatesPerUser */, FingerprintManager.ENROLL_ENROLL);
     }
 }

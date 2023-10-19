@@ -80,6 +80,7 @@ public class IntentCreatorTest extends SysuiTestCase {
         assertEquals(Intent.ACTION_EDIT, intent.getAction());
         assertEquals("image/*", intent.getType());
         assertEquals(null, intent.getComponent());
+        assertEquals("clipboard", intent.getStringExtra("edit_source"));
         assertFlags(intent, EXTERNAL_INTENT_FLAGS);
 
         // try again with an editor component
@@ -126,7 +127,8 @@ public class IntentCreatorTest extends SysuiTestCase {
         assertEquals(Intent.ACTION_CHOOSER, intent.getAction());
         assertFlags(intent, EXTERNAL_INTENT_FLAGS);
         Intent target = intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent.class);
-        assertEquals(uri, target.getData());
+        assertEquals(uri, target.getParcelableExtra(Intent.EXTRA_STREAM, Uri.class));
+        assertEquals(uri, target.getClipData().getItemAt(0).getUri());
         assertEquals("image/png", target.getType());
     }
 

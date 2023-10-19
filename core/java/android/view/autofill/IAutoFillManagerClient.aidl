@@ -79,6 +79,11 @@ oneway interface IAutoFillManagerClient {
     void requestHideFillUi(int sessionId, in AutofillId id);
 
     /**
+     * Requests hiding the fill UI when it's destroyed
+     */
+    void requestHideFillUiWhenDestroyed(int sessionId, in AutofillId id);
+
+    /**
      * Notifies no fill UI will be shown, and also mark the state as finished if necessary (if
      * sessionFinishedState != 0).
      */

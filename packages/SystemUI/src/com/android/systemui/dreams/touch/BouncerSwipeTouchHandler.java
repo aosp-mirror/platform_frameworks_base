@@ -35,9 +35,11 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dreams.touch.scrim.ScrimController;
 import com.android.systemui.dreams.touch.scrim.ScrimManager;
-import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -76,6 +78,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private static final String TAG = "BouncerSwipeTouchHandler";
     private final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final LockPatternUtils mLockPatternUtils;
+    private final UserTracker mUserTracker;
     private final float mBouncerZoneScreenPercentage;
 
     private final ScrimManager mScrimManager;
@@ -151,6 +155,11 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         return true;
                     }
 
+                    // Don't set expansion if the user doesn't have a pin/password set.
+                    if (!mLockPatternUtils.isSecure(mUserTracker.getUserId())) {
+                        return true;
+                    }
+
                     // For consistency, we adopt the expansion definition found in the
                     // PanelViewController. In this case, expansion refers to the view above the
                     // bouncer. As that view's expansion shrinks, the bouncer appears. The bouncer
@@ -204,6 +213,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
             NotificationShadeWindowController notificationShadeWindowController,
             ValueAnimatorCreator valueAnimatorCreator,
             VelocityTrackerFactory velocityTrackerFactory,
+            LockPatternUtils lockPatternUtils,
+            UserTracker userTracker,
             @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING)
                     FlingAnimationUtils flingAnimationUtils,
             @Named(SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
@@ -213,6 +224,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         mCentralSurfaces = centralSurfaces;
         mScrimManager = scrimManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mLockPatternUtils = lockPatternUtils;
+        mUserTracker = userTracker;
         mBouncerZoneScreenPercentage = swipeRegionPercentage;
         mFlingAnimationUtils = flingAnimationUtils;
         mFlingAnimationUtilsClosing = flingAnimationUtilsClosing;
@@ -344,6 +357,11 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     protected void flingToExpansion(float velocity, float expansion) {
         if (!mCentralSurfaces.isPresent()) {
+            return;
+        }
+
+        // Don't set expansion if the user doesn't have a pin/password set.
+        if (!mLockPatternUtils.isSecure(mUserTracker.getUserId())) {
             return;
         }
 

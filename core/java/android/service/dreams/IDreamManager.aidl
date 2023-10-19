@@ -17,6 +17,7 @@
 package android.service.dreams;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.IBinder;
@@ -45,4 +46,5 @@ interface IDreamManager {
     void setDreamComponentsForUser(int userId, in ComponentName[] componentNames);
     void setSystemDreamComponent(in ComponentName componentName);
     void registerDreamOverlayService(in ComponentName componentName);
+    void startDreamActivity(in Intent intent);
 }

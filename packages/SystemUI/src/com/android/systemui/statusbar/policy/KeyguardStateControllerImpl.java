@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.hardware.biometrics.BiometricSourceType.FACE;
+
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
+
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,6 +40,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 
 import dagger.Lazy;
@@ -47,6 +52,7 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 /**
+ *
  */
 @SysUISingleton
 public class KeyguardStateControllerImpl implements KeyguardStateController, Dumpable {
@@ -101,7 +107,10 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
      */
     private boolean mSnappingKeyguardBackAfterSwipe = false;
 
+    private FeatureFlags mFeatureFlags;
+
     /**
+     *
      */
     @Inject
     public KeyguardStateControllerImpl(
@@ -110,13 +119,15 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
             LockPatternUtils lockPatternUtils,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
             KeyguardUpdateMonitorLogger logger,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            FeatureFlags featureFlags) {
         mContext = context;
         mLogger = logger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mUnlockAnimationControllerLazy = keyguardUnlockAnimationController;
+        mFeatureFlags = featureFlags;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
@@ -199,6 +210,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         Trace.endSection();
     }
 
+    private void notifyKeyguardFaceAuthEnabledChanged() {
+        // Copy the list to allow removal during callback.
+        new ArrayList<>(mCallbacks).forEach(Callback::onFaceAuthEnabledChanged);
+    }
+
     private void notifyUnlockedChanged() {
         Trace.beginSection("KeyguardStateController#notifyUnlockedChanged");
         // Copy the list to allow removal during callback.
@@ -265,7 +281,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     @Override
     public boolean isKeyguardScreenRotationAllowed() {
         return SystemProperties.getBoolean("lockscreen.rot_override", false)
-                || mContext.getResources().getBoolean(R.bool.config_enableLockScreenRotation);
+                || mContext.getResources().getBoolean(R.bool.config_enableLockScreenRotation)
+                || mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE);
     }
 
     @Override
@@ -416,6 +433,16 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         @Override
         public void onTrustManagedChanged(int userId) {
             update(false /* updateAlways */);
+        }
+
+        @Override
+        public void onBiometricEnrollmentStateChanged(BiometricSourceType biometricSourceType) {
+            if (biometricSourceType == FACE) {
+                // We only care about enrollment state here. Keyguard face auth enabled is just
+                // same as face auth enrolled
+                update(false);
+                notifyKeyguardFaceAuthEnabledChanged();
+            }
         }
 
         @Override

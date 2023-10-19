@@ -27,6 +27,8 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.decor.FaceScanningProviderFactory
 import com.android.systemui.dump.logcatLogBuffer
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.mockito.whenever
@@ -80,6 +82,8 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
             R.bool.config_fillMainBuiltInDisplayCutout,
             true
         )
+        val featureFlags = FakeFeatureFlags()
+        featureFlags.set(Flags.STOP_PULSING_FACE_SCANNING_ANIMATION, true)
         underTest =
             FaceScanningProviderFactory(
                 authController,
@@ -87,7 +91,8 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
                 statusBarStateController,
                 keyguardUpdateMonitor,
                 mock(Executor::class.java),
-                ScreenDecorationsLogger(logcatLogBuffer("FaceScanningProviderFactoryTest"))
+                ScreenDecorationsLogger(logcatLogBuffer("FaceScanningProviderFactoryTest")),
+                featureFlags,
             )
 
         whenever(authController.faceSensorLocation).thenReturn(Point(10, 10))

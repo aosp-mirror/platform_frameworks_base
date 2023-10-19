@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.view.inputmethod.ImeTracker;
+import android.view.inputmethod.InputMethod;
 
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 
@@ -34,13 +35,13 @@ interface ImeVisibilityApplier {
      *
      * @param showInputToken A token that represents the requester to show IME.
      * @param statsToken     A token that tracks the progress of an IME request.
-     * @param showFlags      Provides additional operating flags to show IME.
      * @param resultReceiver If non-null, this will be called back to the caller when
      *                       it has processed request to tell what it has done.
      * @param reason         The reason for requesting to show IME.
      */
     default void performShowIme(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
-            int showFlags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {}
+            @InputMethod.ShowFlags int showFlags, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {}
 
     /**
      * Performs hiding IME to the given window

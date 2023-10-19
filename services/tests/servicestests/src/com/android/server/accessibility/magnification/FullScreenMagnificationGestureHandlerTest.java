@@ -44,8 +44,10 @@ import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
+import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.testing.TestableContext;
 import android.util.DebugUtils;
 import android.view.InputDevice;
@@ -140,8 +142,6 @@ public class FullScreenMagnificationGestureHandlerTest {
     @Mock
     WindowMagnificationPromptController mWindowMagnificationPromptController;
     @Mock
-    AccessibilityManagerService mMockAccessibilityManagerService;
-    @Mock
     AccessibilityTraceManager mMockTraceManager;
 
     @Rule
@@ -152,6 +152,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     private TestHandler mHandler;
 
     private long mLastDownTime = Integer.MIN_VALUE;
+
+    private float mOriginalMagnificationPersistedScale;
 
     @Before
     public void setUp() {
@@ -166,6 +168,13 @@ public class FullScreenMagnificationGestureHandlerTest {
         when(mockController.newValueAnimator()).thenReturn(new ValueAnimator());
         when(mockController.getAnimationDuration()).thenReturn(1000L);
         when(mockWindowManager.setMagnificationCallbacks(eq(DISPLAY_0), any())).thenReturn(true);
+        mOriginalMagnificationPersistedScale = Settings.Secure.getFloatForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.0f,
+                UserHandle.USER_SYSTEM);
+        Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.0f,
+                UserHandle.USER_SYSTEM);
         mFullScreenMagnificationController = new FullScreenMagnificationController(
                 mockController,
                 new Object(),
@@ -192,6 +201,10 @@ public class FullScreenMagnificationGestureHandlerTest {
         mMgh.onDestroy();
         mFullScreenMagnificationController.unregister(DISPLAY_0);
         verify(mWindowMagnificationPromptController).onDestroy();
+        Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                mOriginalMagnificationPersistedScale,
+                UserHandle.USER_SYSTEM);
     }
 
     @NonNull
@@ -525,10 +538,9 @@ public class FullScreenMagnificationGestureHandlerTest {
         final float threshold = FullScreenMagnificationGestureHandler.PanningScalingState
                 .CHECK_DETECTING_PASS_PERSISTED_SCALE_THRESHOLD;
         final float persistedScale = (1.0f + threshold) * scale + 1.0f;
-        mFullScreenMagnificationController.setScale(DISPLAY_0, persistedScale, DEFAULT_X,
-                DEFAULT_Y, /* animate= */ false,
-                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-        mFullScreenMagnificationController.persistScale(DISPLAY_0);
+        Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, persistedScale,
+                UserHandle.USER_SYSTEM);
         mFullScreenMagnificationController.setScale(DISPLAY_0, scale, DEFAULT_X,
                 DEFAULT_Y, /* animate= */ false,
                 AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
@@ -547,10 +559,9 @@ public class FullScreenMagnificationGestureHandlerTest {
         final float threshold = FullScreenMagnificationGestureHandler.PanningScalingState
                 .CHECK_DETECTING_PASS_PERSISTED_SCALE_THRESHOLD;
         final float persistedScale = (1.0f + threshold) * scale - 0.1f;
-        mFullScreenMagnificationController.setScale(DISPLAY_0, persistedScale, DEFAULT_X,
-                DEFAULT_Y, /* animate= */ false,
-                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-        mFullScreenMagnificationController.persistScale(DISPLAY_0);
+        Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, persistedScale,
+                UserHandle.USER_SYSTEM);
         mFullScreenMagnificationController.setScale(DISPLAY_0, scale, DEFAULT_X,
                 DEFAULT_Y, /* animate= */ false,
                 AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);

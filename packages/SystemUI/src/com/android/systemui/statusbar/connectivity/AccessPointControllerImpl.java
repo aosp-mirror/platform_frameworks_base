@@ -16,13 +16,7 @@
 
 package com.android.systemui.statusbar.connectivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
-import android.os.Handler;
-import android.os.SimpleClock;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -35,24 +29,17 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 import com.android.wifitrackerlib.WifiPickerTracker;
 
 import java.io.PrintWriter;
-import java.time.Clock;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
-
-import javax.inject.Inject;
 
 /** */
 public class AccessPointControllerImpl implements AccessPointController,
@@ -272,77 +259,4 @@ public class AccessPointControllerImpl implements AccessPointController,
             }
         }
     };
-
-    /**
-     * Factory for creating {@link WifiPickerTracker}.
-     *
-     * Uses the same time intervals as the Settings page for Wifi.
-     */
-    @SysUISingleton
-    public static class WifiPickerTrackerFactory {
-
-        // Max age of tracked WifiEntries
-        private static final long MAX_SCAN_AGE_MILLIS = 15_000;
-        // Interval between initiating WifiPickerTracker scans
-        private static final long SCAN_INTERVAL_MILLIS = 10_000;
-
-        private final Context mContext;
-        private final @Nullable WifiManager mWifiManager;
-        private final ConnectivityManager mConnectivityManager;
-        private final Handler mMainHandler;
-        private final Handler mWorkerHandler;
-        private final Clock mClock = new SimpleClock(ZoneOffset.UTC) {
-            @Override
-            public long millis() {
-                return SystemClock.elapsedRealtime();
-            }
-        };
-
-        @Inject
-        public WifiPickerTrackerFactory(
-                Context context,
-                @Nullable WifiManager wifiManager,
-                ConnectivityManager connectivityManager,
-                @Main Handler mainHandler,
-                @Background Handler workerHandler
-        ) {
-            mContext = context;
-            mWifiManager = wifiManager;
-            mConnectivityManager = connectivityManager;
-            mMainHandler = mainHandler;
-            mWorkerHandler = workerHandler;
-        }
-
-        private boolean isSupported() {
-            return mWifiManager != null;
-        }
-
-        /**
-         * Create a {@link WifiPickerTracker}
-         *
-         * @param lifecycle
-         * @param listener
-         * @return a new {@link WifiPickerTracker} or {@code null} if {@link WifiManager} is null.
-         */
-        public @Nullable WifiPickerTracker create(
-                Lifecycle lifecycle,
-                WifiPickerTracker.WifiPickerTrackerCallback listener
-        ) {
-            if (mWifiManager == null) {
-                return null;
-            }
-            return new WifiPickerTracker(
-                    lifecycle,
-                    mContext,
-                    mWifiManager,
-                    mConnectivityManager,
-                    mMainHandler,
-                    mWorkerHandler,
-                    mClock,
-                    MAX_SCAN_AGE_MILLIS,
-                    SCAN_INTERVAL_MILLIS,
-                    listener
-            );
-        }
-    }
 }

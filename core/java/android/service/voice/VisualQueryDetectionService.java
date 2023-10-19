@@ -40,7 +40,12 @@ import android.util.Log;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
 
+import com.android.internal.infra.AndroidFuture;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.function.IntConsumer;
 
 /**
@@ -86,6 +91,8 @@ public abstract class VisualQueryDetectionService extends Service
     private ContentCaptureManager mContentCaptureManager;
     @Nullable
     private IRecognitionServiceManager mIRecognitionServiceManager;
+    @Nullable
+    private IDetectorSessionStorageService mDetectorSessionStorageService;
 
 
     private final ISandboxedDetectionService mInterface = new ISandboxedDetectionService.Stub() {
@@ -153,6 +160,12 @@ public abstract class VisualQueryDetectionService extends Service
         @Override
         public void updateRecognitionServiceManager(IRecognitionServiceManager manager) {
             mIRecognitionServiceManager = manager;
+        }
+
+        @Override
+        public void registerRemoteStorageService(IDetectorSessionStorageService
+                detectorSessionStorageService) {
+            mDetectorSessionStorageService = detectorSessionStorageService;
         }
     };
 
@@ -320,6 +333,25 @@ public abstract class VisualQueryDetectionService extends Service
         } catch (RemoteException e) {
             throw new IllegalStateException("#finishQuery must be only be triggered after "
                     + "calling #streamQuery to be in the query streaming state.");
+        }
+    }
+
+    /**
+     * Overrides {@link Context#openFileInput} to read files with the given file names under the
+     * internal app storage of the {@link VoiceInteractionService}, i.e., only files stored in
+     * {@link Context#getFilesDir()} can be opened.
+     */
+    @Override
+    public @Nullable FileInputStream openFileInput(@NonNull String filename) throws
+            FileNotFoundException {
+        try {
+            AndroidFuture<ParcelFileDescriptor> future = new AndroidFuture<>();
+            mDetectorSessionStorageService.openFile(filename, future);
+            ParcelFileDescriptor pfd = future.get();
+            return new FileInputStream(pfd.getFileDescriptor());
+        } catch (RemoteException | ExecutionException | InterruptedException e) {
+            Log.w(TAG, "Cannot open file due to remote service failure");
+            throw new FileNotFoundException(e.getMessage());
         }
     }
 

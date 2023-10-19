@@ -974,6 +974,10 @@ class UserUsageStatsService {
         mDatabase.dumpMappings(ipw);
     }
 
+    void deleteDataFor(String pkg) {
+        mDatabase.deleteDataFor(pkg);
+    }
+
     void dumpFile(IndentingPrintWriter ipw, String[] args) {
         if (args == null || args.length == 0) {
             // dump all files for every interval for specified user

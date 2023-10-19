@@ -18,8 +18,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.apps.inputmethod.simpleime">
 
-    <uses-sdk android:targetSdkVersion="31" />
-
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 
     <application android:debuggable="true"

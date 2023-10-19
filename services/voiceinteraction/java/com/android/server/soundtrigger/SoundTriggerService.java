@@ -365,7 +365,7 @@ public class SoundTriggerService extends SystemService {
             // Validate package name
             try {
                 int uid = mPackageManager.getPackageUid(mOriginatorIdentity.packageName,
-                        PackageManager.PackageInfoFlags.of(0));
+                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ANY_USER));
                 if (!UserHandle.isSameApp(uid, mOriginatorIdentity.uid)) {
                     throw new SecurityException("Uid " + mOriginatorIdentity.uid +
                             " attempted to spoof package name " +
@@ -407,7 +407,9 @@ public class SoundTriggerService extends SystemService {
                 var eventLogger = new EventLogger(SESSION_MAX_EVENT_SIZE,
                         "SoundTriggerSessionLogs for package: "
                         + Objects.requireNonNull(originatorIdentity.packageName)
-                        + "#" + sessionId);
+                        + "#" + sessionId
+                        + " - " + originatorIdentity.uid
+                        + "|" + originatorIdentity.pid);
                 return new SoundTriggerSessionStub(client,
                         newSoundTriggerHelper(moduleProperties, eventLogger), eventLogger);
             }
@@ -428,7 +430,9 @@ public class SoundTriggerService extends SystemService {
                 var eventLogger = new EventLogger(SESSION_MAX_EVENT_SIZE,
                         "SoundTriggerSessionLogs for package: "
                         + Objects.requireNonNull(originatorIdentity.packageName) + "#"
-                        + sessionId);
+                        + sessionId
+                        + " - " + originatorIdentity.uid
+                        + "|" + originatorIdentity.pid);
                 return new SoundTriggerSessionStub(client,
                         newSoundTriggerHelper(moduleProperties, eventLogger), eventLogger);
             }
@@ -1801,7 +1805,9 @@ public class SoundTriggerService extends SystemService {
                         ServiceEvent.Type.ATTACH, identity.packageName + "#" + sessionId));
             var eventLogger = new EventLogger(SESSION_MAX_EVENT_SIZE,
                     "LocalSoundTriggerEventLogger for package: " +
-                    identity.packageName + "#" + sessionId);
+                    identity.packageName + "#" + sessionId
+                        + " - " + identity.uid
+                        + "|" + identity.pid);
 
             return new SessionImpl(newSoundTriggerHelper(underlyingModule, eventLogger, isTrusted),
                     client, eventLogger, identity);

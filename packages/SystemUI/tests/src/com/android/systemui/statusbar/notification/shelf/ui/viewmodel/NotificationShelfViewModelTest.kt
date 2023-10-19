@@ -24,23 +24,26 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.data.repository.FakeAccessibilityRepository
 import com.android.systemui.accessibility.domain.interactor.AccessibilityInteractor
+import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModel
 import com.android.systemui.statusbar.notification.shelf.domain.interactor.NotificationShelfInteractor
-import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.util.mockito.any
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
@@ -54,14 +57,24 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
     @Rule @JvmField val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     // mocks
-    @Mock private lateinit var centralSurfaces: CentralSurfaces
     @Mock private lateinit var keyguardTransitionController: LockscreenShadeTransitionController
+    @Mock private lateinit var screenOffAnimationController: ScreenOffAnimationController
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
 
     // fakes
     private val keyguardRepository = FakeKeyguardRepository()
     private val deviceEntryFaceAuthRepository = FakeDeviceEntryFaceAuthRepository()
-    private val systemClock = FakeSystemClock()
     private val a11yRepo = FakeAccessibilityRepository()
+    private val powerRepository = FakePowerRepository()
+    private val powerInteractor by lazy {
+        PowerInteractor(
+            powerRepository,
+            keyguardRepository,
+            FalsingCollectorFake(),
+            screenOffAnimationController,
+            statusBarStateController,
+        )
+    }
 
     // real impls
     private val a11yInteractor = AccessibilityInteractor(a11yRepo)
@@ -70,12 +83,16 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
         NotificationShelfInteractor(
             keyguardRepository,
             deviceEntryFaceAuthRepository,
-            centralSurfaces,
-            systemClock,
+            powerInteractor,
             keyguardTransitionController,
         )
     }
     private val underTest by lazy { NotificationShelfViewModel(interactor, activatableViewModel) }
+
+    @Before
+    fun setUp() {
+        whenever(screenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true)
+    }
 
     @Test
     fun canModifyColorOfNotifications_whenKeyguardNotShowing() = runTest {
@@ -126,10 +143,12 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
 
     @Test
     fun onClicked_goesToLockedShade() {
+        whenever(statusBarStateController.isDozing).thenReturn(true)
+
         underTest.onShelfClicked()
 
-        verify(centralSurfaces)
-            .wakeUpIfDozing(ArgumentMatchers.anyLong(), any(), eq(PowerManager.WAKE_REASON_GESTURE))
+        assertThat(powerRepository.lastWakeReason).isNotNull()
+        assertThat(powerRepository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_GESTURE)
         verify(keyguardTransitionController).goToLockedShade(Mockito.isNull(), eq(true))
     }
 }

@@ -68,5 +68,6 @@ android_library {
     kotlincflags: ["-Xjvm-default=all"],
 
     // sdk_version must be specified, otherwise it compiles against private APIs.
+    min_sdk_version: "33",
     sdk_version: "current",
 }

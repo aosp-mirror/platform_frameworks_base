@@ -27,6 +27,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import com.android.server.backup.UserBackupManagerService;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowSlog;
 
@@ -46,10 +47,13 @@ public class KeyValueBackupReporterTest {
     @Mock private IBackupManagerMonitor mMonitor;
 
     private KeyValueBackupReporter mReporter;
+    private BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     @Before
     public void setUp() {
-        mReporter = new KeyValueBackupReporter(mBackupManagerService, mObserver, mMonitor);
+        mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(mMonitor);
+        mReporter = new KeyValueBackupReporter(
+                mBackupManagerService, mObserver, mBackupManagerMonitorEventSender);
     }
 
     @Test

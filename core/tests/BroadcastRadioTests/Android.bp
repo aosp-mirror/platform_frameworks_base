@@ -45,6 +45,7 @@ android_test {
     libs: ["android.test.base"],
     test_suites: [
         "general-tests",
+        "automotive-general-tests",
     ],
     // mockito-target-inline dependency
     jni_libs: [

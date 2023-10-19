@@ -26,6 +26,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -35,16 +36,16 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.AcquiredAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.AuthenticationStatus
-import com.android.systemui.keyguard.shared.model.DetectionStatus
-import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FailedAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.HelpAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.SuccessAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.AcquiredFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
+import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
@@ -58,6 +59,7 @@ import java.util.stream.Collectors
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -88,10 +90,10 @@ interface DeviceEntryFaceAuthRepository {
     val canRunFaceAuth: StateFlow<Boolean>
 
     /** Provide the current status of face authentication. */
-    val authenticationStatus: Flow<AuthenticationStatus>
+    val authenticationStatus: Flow<FaceAuthenticationStatus>
 
     /** Provide the current status of face detection. */
-    val detectionStatus: Flow<DetectionStatus>
+    val detectionStatus: Flow<FaceDetectionStatus>
 
     /** Current state of whether face authentication is locked out or not. */
     val isLockedOut: StateFlow<Boolean>
@@ -101,6 +103,21 @@ interface DeviceEntryFaceAuthRepository {
 
     /** Whether bypass is currently enabled */
     val isBypassEnabled: Flow<Boolean>
+
+    /** Set whether face authentication should be locked out or not */
+    fun lockoutFaceAuth()
+
+    /**
+     * Cancel current face authentication and prevent it from running until [resumeFaceAuth] is
+     * invoked.
+     */
+    fun pauseFaceAuth()
+
+    /**
+     * Allow face auth paused using [pauseFaceAuth] to run again. The next invocation to
+     * [authenticate] will run as long as other gating conditions don't stop it from running.
+     */
+    fun resumeFaceAuth()
 
     /**
      * Trigger face authentication.
@@ -117,6 +134,7 @@ interface DeviceEntryFaceAuthRepository {
     fun cancel()
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class DeviceEntryFaceAuthRepositoryImpl
 @Inject
@@ -151,13 +169,13 @@ constructor(
     private var cancelNotReceivedHandlerJob: Job? = null
     private var halErrorRetryJob: Job? = null
 
-    private val _authenticationStatus: MutableStateFlow<AuthenticationStatus?> =
+    private val _authenticationStatus: MutableStateFlow<FaceAuthenticationStatus?> =
         MutableStateFlow(null)
-    override val authenticationStatus: Flow<AuthenticationStatus>
+    override val authenticationStatus: Flow<FaceAuthenticationStatus>
         get() = _authenticationStatus.filterNotNull()
 
-    private val _detectionStatus = MutableStateFlow<DetectionStatus?>(null)
-    override val detectionStatus: Flow<DetectionStatus>
+    private val _detectionStatus = MutableStateFlow<FaceDetectionStatus?>(null)
+    override val detectionStatus: Flow<FaceDetectionStatus>
         get() = _detectionStatus.filterNotNull()
 
     private val _isLockedOut = MutableStateFlow(false)
@@ -169,6 +187,15 @@ constructor(
     private val _isAuthRunning = MutableStateFlow(false)
     override val isAuthRunning: StateFlow<Boolean>
         get() = _isAuthRunning
+
+    private val faceAuthPaused = MutableStateFlow(false)
+    override fun pauseFaceAuth() {
+        faceAuthPaused.value = true
+    }
+
+    override fun resumeFaceAuth() {
+        faceAuthPaused.value = false
+    }
 
     private val keyguardSessionId: InstanceId?
         get() = sessionTracker.getSessionId(StatusBarManager.SESSION_KEYGUARD)
@@ -198,6 +225,10 @@ constructor(
             }
         }
             ?: flowOf(false)
+
+    override fun lockoutFaceAuth() {
+        _isLockedOut.value = true
+    }
 
     private val faceLockoutResetCallback =
         object : FaceManager.LockoutResetCallback() {
@@ -245,8 +276,12 @@ constructor(
         // starts going to sleep.
         merge(
                 keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() },
-                keyguardRepository.isKeyguardGoingAway,
-                userRepository.userSwitchingInProgress
+                if (featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                    keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE)
+                } else {
+                    keyguardRepository.isKeyguardGoingAway
+                },
+                userRepository.userSwitchingInProgress,
             )
             .onEach { anyOfThemIsTrue ->
                 if (anyOfThemIsTrue) {
@@ -260,13 +295,17 @@ constructor(
 
     private fun observeFaceDetectGatingChecks() {
         // Face detection can run only when lockscreen bypass is enabled
-        // & detection is supported & biometric unlock is not allowed.
+        // & detection is supported
+        //   & biometric unlock is not allowed
+        //     or user is trusted by trust manager & we want to run face detect to dismiss keyguard
         listOf(
                 canFaceAuthOrDetectRun(faceDetectLog),
                 logAndObserve(isBypassEnabled, "isBypassEnabled", faceDetectLog),
                 logAndObserve(
-                    biometricSettingsRepository.isNonStrongBiometricAllowed.isFalse(),
-                    "nonStrongBiometricIsNotAllowed",
+                    biometricSettingsRepository.isFaceAuthCurrentlyAllowed
+                        .isFalse()
+                        .or(trustRepository.isCurrentUserTrusted),
+                    "faceAuthIsNotCurrentlyAllowedOrCurrentUserIsTrusted",
                     faceDetectLog
                 ),
                 // We don't want to run face detect if fingerprint can be used to unlock the device
@@ -298,38 +337,30 @@ constructor(
     private fun canFaceAuthOrDetectRun(tableLogBuffer: TableLogBuffer): Flow<Boolean> {
         return listOf(
                 logAndObserve(
-                    biometricSettingsRepository.isFaceEnrolled,
-                    "isFaceEnrolled",
+                    biometricSettingsRepository.isFaceAuthEnrolledAndEnabled,
+                    "isFaceAuthEnrolledAndEnabled",
                     tableLogBuffer
                 ),
-                logAndObserve(
-                    biometricSettingsRepository.isFaceAuthenticationEnabled,
-                    "isFaceAuthenticationEnabled",
-                    tableLogBuffer
-                ),
-                logAndObserve(
-                    userRepository.userSwitchingInProgress.isFalse(),
-                    "userSwitchingNotInProgress",
-                    tableLogBuffer
-                ),
+                logAndObserve(faceAuthPaused.isFalse(), "faceAuthIsNotPaused", tableLogBuffer),
                 logAndObserve(
                     keyguardRepository.isKeyguardGoingAway.isFalse(),
                     "keyguardNotGoingAway",
                     tableLogBuffer
                 ),
                 logAndObserve(
-                    keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() }.isFalse(),
-                    "deviceNotSleepingOrNotStartingToSleep",
+                    keyguardRepository.wakefulness.map { it.isStartingToSleep() }.isFalse(),
+                    "deviceNotStartingToSleep",
                     tableLogBuffer
                 ),
                 logAndObserve(
-                    combine(
-                        keyguardInteractor.isSecureCameraActive,
-                        alternateBouncerInteractor.isVisible
-                    ) { a, b ->
-                        !a || b
-                    },
-                    "secureCameraNotActiveOrAltBouncerIsShowing",
+                    keyguardInteractor.isSecureCameraActive
+                        .isFalse()
+                        .or(
+                            alternateBouncerInteractor.isVisible.or(
+                                keyguardInteractor.primaryBouncerShowing
+                            )
+                        ),
+                    "secureCameraNotActiveOrAnyBouncerIsShowing",
                     tableLogBuffer
                 ),
                 logAndObserve(
@@ -340,6 +371,11 @@ constructor(
                 logAndObserve(
                     biometricSettingsRepository.isCurrentUserInLockdown.isFalse(),
                     "userHasNotLockedDownDevice",
+                    tableLogBuffer
+                ),
+                logAndObserve(
+                    keyguardRepository.isKeyguardShowing,
+                    "isKeyguardShowing",
                     tableLogBuffer
                 )
             )
@@ -352,20 +388,16 @@ constructor(
                 canFaceAuthOrDetectRun(faceAuthLog),
                 logAndObserve(isLockedOut.isFalse(), "isNotInLockOutState", faceAuthLog),
                 logAndObserve(
-                    deviceEntryFingerprintAuthRepository.isLockedOut.isFalse(),
-                    "fpIsNotLockedOut",
-                    faceAuthLog
-                ),
-                logAndObserve(
                     trustRepository.isCurrentUserTrusted.isFalse(),
                     "currentUserIsNotTrusted",
                     faceAuthLog
                 ),
                 logAndObserve(
-                    biometricSettingsRepository.isNonStrongBiometricAllowed,
-                    "nonStrongBiometricIsAllowed",
+                    biometricSettingsRepository.isFaceAuthCurrentlyAllowed,
+                    "isFaceAuthCurrentlyAllowed",
                     faceAuthLog
                 ),
+                logAndObserve(isAuthenticated.isFalse(), "faceNotAuthenticated", faceAuthLog),
             )
             .reduce(::and)
             .distinctUntilChanged()
@@ -385,18 +417,18 @@ constructor(
     private val faceAuthCallback =
         object : FaceManager.AuthenticationCallback() {
             override fun onAuthenticationFailed() {
-                _authenticationStatus.value = FailedAuthenticationStatus
+                _authenticationStatus.value = FailedFaceAuthenticationStatus()
                 _isAuthenticated.value = false
                 faceAuthLogger.authenticationFailed()
                 onFaceAuthRequestCompleted()
             }
 
             override fun onAuthenticationAcquired(acquireInfo: Int) {
-                _authenticationStatus.value = AcquiredAuthenticationStatus(acquireInfo)
+                _authenticationStatus.value = AcquiredFaceAuthenticationStatus(acquireInfo)
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
-                val errorStatus = ErrorAuthenticationStatus(errorCode, errString.toString())
+                val errorStatus = ErrorFaceAuthenticationStatus(errorCode, errString.toString())
                 if (errorStatus.isLockoutError()) {
                     _isLockedOut.value = true
                 }
@@ -422,11 +454,11 @@ constructor(
                 if (faceAcquiredInfoIgnoreList.contains(code)) {
                     return
                 }
-                _authenticationStatus.value = HelpAuthenticationStatus(code, helpStr.toString())
+                _authenticationStatus.value = HelpFaceAuthenticationStatus(code, helpStr.toString())
             }
 
             override fun onAuthenticationSucceeded(result: FaceManager.AuthenticationResult) {
-                _authenticationStatus.value = SuccessAuthenticationStatus(result)
+                _authenticationStatus.value = SuccessFaceAuthenticationStatus(result)
                 _isAuthenticated.value = true
                 faceAuthLogger.faceAuthSuccess(result)
                 onFaceAuthRequestCompleted()
@@ -434,7 +466,6 @@ constructor(
         }
 
     private fun handleFaceCancellationError() {
-        cancelNotReceivedHandlerJob?.cancel()
         applicationScope.launch {
             faceAuthRequestedWhileCancellation?.let {
                 faceAuthLogger.launchingQueuedFaceAuthRequest(it)
@@ -463,6 +494,7 @@ constructor(
     }
 
     private fun onFaceAuthRequestCompleted() {
+        cancelNotReceivedHandlerJob?.cancel()
         cancellationInProgress = false
         _isAuthRunning.value = false
         authCancellationSignal = null
@@ -471,7 +503,7 @@ constructor(
     private val detectionCallback =
         FaceManager.FaceDetectionCallback { sensorId, userId, isStrong ->
             faceAuthLogger.faceDetected()
-            _detectionStatus.value = DetectionStatus(sensorId, userId, isStrong)
+            _detectionStatus.value = FaceDetectionStatus(sensorId, userId, isStrong)
         }
 
     private var cancellationInProgress = false
@@ -534,11 +566,11 @@ constructor(
             faceAuthLogger.detectionNotSupported(faceManager, faceManager?.sensorPropertiesInternal)
             return
         }
-        if (_isAuthRunning.value || detectCancellationSignal != null) {
+        if (_isAuthRunning.value) {
             faceAuthLogger.skippingDetection(_isAuthRunning.value, detectCancellationSignal != null)
             return
         }
-
+        detectCancellationSignal?.cancel()
         detectCancellationSignal = CancellationSignal()
         withContext(mainDispatcher) {
             // We always want to invoke face detect in the main thread.
@@ -563,6 +595,7 @@ constructor(
         if (authCancellationSignal == null) return
 
         authCancellationSignal?.cancel()
+        cancelNotReceivedHandlerJob?.cancel()
         cancelNotReceivedHandlerJob =
             applicationScope.launch {
                 delay(DEFAULT_CANCEL_SIGNAL_TIMEOUT)
@@ -572,6 +605,7 @@ constructor(
                     cancellationInProgress,
                     faceAuthRequestedWhileCancellation
                 )
+                _authenticationStatus.value = ErrorFaceAuthenticationStatus.cancelNotReceivedError()
                 onFaceAuthRequestCompleted()
             }
         cancellationInProgress = true
@@ -604,7 +638,7 @@ constructor(
         const val DEFAULT_CANCEL_SIGNAL_TIMEOUT = 3000L
 
         /** Number of allowed retries whenever there is a face hardware error */
-        const val HAL_ERROR_RETRY_MAX = 20
+        const val HAL_ERROR_RETRY_MAX = 5
 
         /** Timeout before retries whenever there is a HAL error. */
         const val HAL_ERROR_RETRY_TIMEOUT = 500L // ms
@@ -639,6 +673,10 @@ constructor(
 /** Combine two boolean flows by and-ing both of them */
 private fun and(flow: Flow<Boolean>, anotherFlow: Flow<Boolean>) =
     flow.combine(anotherFlow) { a, b -> a && b }
+
+/** Combine two boolean flows by or-ing both of them */
+private fun Flow<Boolean>.or(anotherFlow: Flow<Boolean>) =
+    this.combine(anotherFlow) { a, b -> a || b }
 
 /** "Not" the given flow. The return [Flow] will be true when [this] flow is false. */
 private fun Flow<Boolean>.isFalse(): Flow<Boolean> {

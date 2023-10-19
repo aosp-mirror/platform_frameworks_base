@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 
@@ -80,10 +81,24 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
     }
 
     @Test
-    public void testReturnsSkipIfTaskNotUsingActivityTypeStandard() {
+    public void testReturnsSkipIfTaskNotUsingActivityTypeStandardOrUndefined() {
         final Task task = new TaskBuilder(mSupervisor).setActivityType(
                 ACTIVITY_TYPE_ASSISTANT).build();
         assertEquals(RESULT_SKIP, new CalculateRequestBuilder().setTask(task).calculate());
+    }
+
+    @Test
+    public void testReturnsDoneIfTaskUsingActivityTypeStandard() {
+        final Task task = new TaskBuilder(mSupervisor).setActivityType(
+                ACTIVITY_TYPE_STANDARD).build();
+        assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
+    }
+
+    @Test
+    public void testReturnsDoneIfTaskUsingActivityTypeUndefined() {
+        final Task task = new TaskBuilder(mSupervisor).setActivityType(
+                ACTIVITY_TYPE_UNDEFINED).build();
+        assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
     }
 
     @Test

@@ -40,6 +40,7 @@ public class BrightnessSetting {
 
     private final LogicalDisplay mLogicalDisplay;
 
+    private int mUserSerial;
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -56,13 +57,15 @@ public class BrightnessSetting {
     @GuardedBy("mSyncRoot")
     private float mBrightness;
 
-    BrightnessSetting(@NonNull PersistentDataStore persistentDataStore,
+    BrightnessSetting(int userSerial,
+            @NonNull PersistentDataStore persistentDataStore,
             @NonNull LogicalDisplay logicalDisplay,
             DisplayManagerService.SyncRoot syncRoot) {
         mPersistentDataStore = persistentDataStore;
         mLogicalDisplay = logicalDisplay;
+        mUserSerial = userSerial;
         mBrightness = mPersistentDataStore.getBrightness(
-                mLogicalDisplay.getPrimaryDisplayDeviceLocked());
+                mLogicalDisplay.getPrimaryDisplayDeviceLocked(), userSerial);
         mSyncRoot = syncRoot;
     }
 
@@ -96,8 +99,13 @@ public class BrightnessSetting {
         mListeners.remove(l);
     }
 
+    /** Sets the user serial for the brightness setting */
+    public void setUserSerial(int userSerial) {
+        mUserSerial = userSerial;
+    }
+
     /**
-     * Sets the brigtness and broadcasts the change to the listeners.
+     * Sets the brightness and broadcasts the change to the listeners.
      * @param brightness The value to which the brightness is to be set.
      */
     public void setBrightness(float brightness) {
@@ -112,7 +120,8 @@ public class BrightnessSetting {
             // changed.
             if (brightness != mBrightness) {
                 mPersistentDataStore.setBrightness(mLogicalDisplay.getPrimaryDisplayDeviceLocked(),
-                        brightness);
+                        brightness, mUserSerial
+                );
             }
             mBrightness = brightness;
             int toSend = Float.floatToIntBits(mBrightness);

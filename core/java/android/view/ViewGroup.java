@@ -2043,7 +2043,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final float x = event.getXDispatchLocation(pointerIndex);
         final float y = event.getYDispatchLocation(pointerIndex);
         if (isOnScrollbarThumb(x, y) || isDraggingScrollBar()) {
-            return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_ARROW);
+            // Return null here so that it fallbacks to the default PointerIcon for the source
+            // device. For mouse, the default PointerIcon is PointerIcon.TYPE_ARROW.
+            // For stylus, the default PointerIcon is PointerIcon.TYPE_NULL.
+            return null;
         }
         // Check what the child under the pointer says about the pointer.
         final int childrenCount = mChildrenCount;
@@ -7356,6 +7359,126 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (parent != null) {
             parent.subtractObscuredTouchableRegion(touchableRegion, this);
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean getChildLocalHitRegion(@NonNull View child, @NonNull Region region,
+            @NonNull Matrix matrix, boolean isHover) {
+        if (!child.hasIdentityMatrix()) {
+            matrix.preConcat(child.getInverseMatrix());
+        }
+
+        final int dx = child.mLeft - mScrollX;
+        final int dy = child.mTop - mScrollY;
+        matrix.preTranslate(-dx, -dy);
+
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+
+        // Map the bounds of this view into the region's coordinates and clip the region.
+        final RectF rect = mAttachInfo != null ? mAttachInfo.mTmpTransformRect : new RectF();
+        rect.set(0, 0, width, height);
+        matrix.mapRect(rect);
+
+        boolean notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                Math.round(rect.right), Math.round(rect.bottom), Region.Op.INTERSECT);
+
+        if (isHover) {
+            HoverTarget target = mFirstHoverTarget;
+            boolean childIsHit = false;
+            while (target != null) {
+                final HoverTarget next = target.next;
+                if (target.child == child) {
+                    childIsHit = true;
+                    break;
+                }
+                target = next;
+            }
+            if (!childIsHit && mFirstHoverTarget != null) {
+                target = mFirstHoverTarget;
+                final ArrayList<View> preorderedList = buildTouchDispatchChildList();
+                while (notEmpty && target != null) {
+                    final HoverTarget next = target.next;
+                    final View hoveredView = target.child;
+
+                    if (!isOnTop(child, hoveredView, preorderedList)) {
+                        rect.set(hoveredView.mLeft, hoveredView.mTop, hoveredView.mRight,
+                                hoveredView.mBottom);
+                        matrix.mapRect(rect);
+                        notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                                Math.round(rect.right), Math.round(rect.bottom),
+                                Region.Op.DIFFERENCE);
+                    }
+                    target = next;
+                }
+                if (preorderedList != null) {
+                    preorderedList.clear();
+                }
+            }
+        } else {
+            TouchTarget target = mFirstTouchTarget;
+            boolean childIsHit = false;
+            while (target != null) {
+                final TouchTarget next = target.next;
+                if (target.child == child) {
+                    childIsHit = true;
+                    break;
+                }
+                target = next;
+            }
+            if (!childIsHit && mFirstTouchTarget != null) {
+                target = mFirstTouchTarget;
+                final ArrayList<View> preorderedList = buildOrderedChildList();
+                while (notEmpty && target != null) {
+                    final TouchTarget next = target.next;
+                    final View touchedView = target.child;
+
+                    if (!isOnTop(child, touchedView, preorderedList)) {
+                        rect.set(touchedView.mLeft, touchedView.mTop, touchedView.mRight,
+                                touchedView.mBottom);
+                        matrix.mapRect(rect);
+                        notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                                Math.round(rect.right), Math.round(rect.bottom),
+                                Region.Op.DIFFERENCE);
+                    }
+                    target = next;
+                }
+                if (preorderedList != null) {
+                    preorderedList.clear();
+                }
+            }
+        }
+
+        if (notEmpty && mParent != null) {
+            notEmpty = mParent.getChildLocalHitRegion(this, region, matrix, isHover);
+        }
+        return notEmpty;
+    }
+
+    /**
+     * Return true if the given {@code view} is drawn on top of the {@code otherView}.
+     * Both the {@code view} and {@code otherView} must be children of this ViewGroup.
+     * Otherwise, the returned value is meaningless.
+     */
+    private boolean isOnTop(View view, View otherView, ArrayList<View> preorderedList) {
+        final int childrenCount = mChildrenCount;
+        final boolean customOrder = preorderedList == null && isChildrenDrawingOrderEnabled();
+        final View[] children = mChildren;
+        for (int i = childrenCount - 1; i >= 0; i--) {
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
+            if (child == view) {
+                return true;
+            }
+            if (child == otherView) {
+                return false;
+            }
+        }
+        // Can't find the view and otherView in the children list. Return value is meaningless.
+        return false;
     }
 
     private static void applyOpToRegionByBounds(Region region, View view, Region.Op op) {

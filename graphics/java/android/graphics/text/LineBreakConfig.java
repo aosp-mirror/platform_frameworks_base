@@ -94,11 +94,6 @@ public final class LineBreakConfig {
         private @LineBreakWordStyle int mLineBreakWordStyle =
                 LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
 
-        // Whether or not enabling phrase breaking automatically.
-        // TODO(b/226012260): Remove this and add LINE_BREAK_WORD_STYLE_PHRASE_AUTO after
-        // the experiment.
-        private boolean mAutoPhraseBreaking = false;
-
         /**
          * Builder constructor.
          */
@@ -128,22 +123,12 @@ public final class LineBreakConfig {
         }
 
         /**
-         * Enables or disables the automation of {@link LINE_BREAK_WORD_STYLE_PHRASE}.
-         *
-         * @hide
-         */
-        public @NonNull Builder setAutoPhraseBreaking(boolean autoPhraseBreaking) {
-            mAutoPhraseBreaking = autoPhraseBreaking;
-            return this;
-        }
-
-        /**
          * Builds a {@link LineBreakConfig} instance.
          *
          * @return The {@code LineBreakConfig} instance.
          */
         public @NonNull LineBreakConfig build() {
-            return new LineBreakConfig(mLineBreakStyle, mLineBreakWordStyle, mAutoPhraseBreaking);
+            return new LineBreakConfig(mLineBreakStyle, mLineBreakWordStyle);
         }
     }
 
@@ -164,23 +149,6 @@ public final class LineBreakConfig {
                 .build();
     }
 
-    /**
-     * Create the LineBreakConfig instance.
-     *
-     * @param lineBreakStyle the line break style for text wrapping.
-     * @param lineBreakWordStyle the line break word style for text wrapping.
-     * @return the {@link LineBreakConfig} instance.     *
-     * @hide
-     */
-    public static @NonNull LineBreakConfig getLineBreakConfig(@LineBreakStyle int lineBreakStyle,
-            @LineBreakWordStyle int lineBreakWordStyle, boolean autoPhraseBreaking) {
-        LineBreakConfig.Builder builder = new LineBreakConfig.Builder();
-        return builder.setLineBreakStyle(lineBreakStyle)
-                .setLineBreakWordStyle(lineBreakWordStyle)
-                .setAutoPhraseBreaking(autoPhraseBreaking)
-                .build();
-    }
-
     /** @hide */
     public static final LineBreakConfig NONE =
             new Builder().setLineBreakStyle(LINE_BREAK_STYLE_NONE)
@@ -188,7 +156,6 @@ public final class LineBreakConfig {
 
     private final @LineBreakStyle int mLineBreakStyle;
     private final @LineBreakWordStyle int mLineBreakWordStyle;
-    private final boolean mAutoPhraseBreaking;
 
     /**
      * Constructor with line-break parameters.
@@ -197,10 +164,9 @@ public final class LineBreakConfig {
      * {@code LineBreakConfig} instance.
      */
     private LineBreakConfig(@LineBreakStyle int lineBreakStyle,
-            @LineBreakWordStyle int lineBreakWordStyle, boolean autoPhraseBreaking) {
+            @LineBreakWordStyle int lineBreakWordStyle) {
         mLineBreakStyle = lineBreakStyle;
         mLineBreakWordStyle = lineBreakWordStyle;
-        mAutoPhraseBreaking = autoPhraseBreaking;
     }
 
     /**
@@ -221,17 +187,6 @@ public final class LineBreakConfig {
         return mLineBreakWordStyle;
     }
 
-    /**
-     * Used to identify if the automation of {@link LINE_BREAK_WORD_STYLE_PHRASE} is enabled.
-     *
-     * @return The result that records whether or not the automation of
-     * {@link LINE_BREAK_WORD_STYLE_PHRASE} is enabled.
-     * @hide
-     */
-    public boolean getAutoPhraseBreaking() {
-        return mAutoPhraseBreaking;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;
@@ -239,8 +194,7 @@ public final class LineBreakConfig {
         if (!(o instanceof LineBreakConfig)) return false;
         LineBreakConfig that = (LineBreakConfig) o;
         return (mLineBreakStyle == that.mLineBreakStyle)
-                && (mLineBreakWordStyle == that.mLineBreakWordStyle)
-                && (mAutoPhraseBreaking == that.mAutoPhraseBreaking);
+                && (mLineBreakWordStyle == that.mLineBreakWordStyle);
     }
 
     @Override

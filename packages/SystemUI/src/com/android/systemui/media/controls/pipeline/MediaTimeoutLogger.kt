@@ -19,7 +19,7 @@ package com.android.systemui.media.controls.pipeline
 import android.media.session.PlaybackState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.MediaTimeoutListenerLog
 import javax.inject.Inject
 

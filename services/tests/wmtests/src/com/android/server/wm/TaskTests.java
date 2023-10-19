@@ -563,6 +563,38 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(freeformBounds, task.getBounds());
     }
 
+    @Test
+    public void testTopActivityEligibleForUserAspectRatioButton() {
+        DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
+        final Task task = rootTask.getBottomMostTask();
+        final ActivityRecord root = task.getTopNonFinishingActivity();
+        spyOn(mWm.mLetterboxConfiguration);
+        spyOn(root);
+        spyOn(root.mLetterboxUiController);
+
+        doReturn(true).when(root.mLetterboxUiController)
+                .shouldEnableUserAspectRatioSettings();
+        doReturn(false).when(root).inSizeCompatMode();
+        doReturn(task).when(root).getOrganizedTask();
+
+        // The button should be eligible to be displayed
+        assertTrue(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+
+        // When shouldApplyUserMinAspectRatioOverride is disable the button is not enabled
+        doReturn(false).when(root.mLetterboxUiController)
+                .shouldEnableUserAspectRatioSettings();
+        assertFalse(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+        doReturn(true).when(root.mLetterboxUiController)
+                .shouldEnableUserAspectRatioSettings();
+
+        // When in size compat mode the button is not enabled
+        doReturn(true).when(root).inSizeCompatMode();
+        assertFalse(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+        doReturn(false).when(root).inSizeCompatMode();
+    }
+
     /**
      * Tests that a task with forced orientation has orientation-consistent bounds within the
      * parent.

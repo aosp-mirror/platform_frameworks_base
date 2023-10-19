@@ -312,9 +312,13 @@ public class BubbleExpandedView extends LinearLayout {
                         + " bubble=" + getBubbleKey());
             }
             if (mBubble != null) {
-                // Must post because this is called from a binder thread.
-                post(() -> mController.removeBubble(
-                        mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED));
+                mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+            }
+            if (mTaskView != null) {
+                // Release the surface
+                mTaskView.release();
+                removeView(mTaskView);
+                mTaskView = null;
             }
         }
 
@@ -948,9 +952,9 @@ public class BubbleExpandedView extends LinearLayout {
             mTaskView.onLocationChanged();
         }
         if (mIsOverflow) {
-            post(() -> {
-                mOverflowView.show();
-            });
+            // post this to the looper so that the view has a chance to be laid out before it can
+            // calculate row and column sizes correctly.
+            post(() -> mOverflowView.show());
         }
     }
 
@@ -1058,8 +1062,10 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
-     * Cleans up anything related to the task and {@code TaskView}. If this view should be reused
-     * after this method is called, then
+     * Cleans up anything related to the task. The TaskView itself is released after the task
+     * has been removed.
+     *
+     * If this view should be reused after this method is called, then
      * {@link #initialize(BubbleController, BubbleStackView, boolean)} must be invoked first.
      */
     public void cleanUpExpandedState() {
@@ -1081,10 +1087,7 @@ public class BubbleExpandedView extends LinearLayout {
             }
         }
         if (mTaskView != null) {
-            // Release the surface & other task view related things
-            mTaskView.release();
-            removeView(mTaskView);
-            mTaskView = null;
+            mTaskView.setVisibility(GONE);
         }
     }
 

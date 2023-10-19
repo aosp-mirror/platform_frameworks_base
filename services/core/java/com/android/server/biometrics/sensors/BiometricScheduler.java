@@ -268,6 +268,14 @@ public class BiometricScheduler {
             return;
         }
 
+        if (mCurrentOperation.isAcquisitionOperation()) {
+            AcquisitionClient client = (AcquisitionClient) mCurrentOperation.getClientMonitor();
+            if (client.isAlreadyCancelled()) {
+                mCurrentOperation.cancel(mHandler, mInternalCallback);
+                return;
+            }
+        }
+
         if (mGestureAvailabilityDispatcher != null && mCurrentOperation.isAcquisitionOperation()) {
             mGestureAvailabilityDispatcher.markSensorActive(
                     mCurrentOperation.getSensorId(), true /* active */);
@@ -572,7 +580,7 @@ public class BiometricScheduler {
         }
         final BiometricSchedulerOperation operation = mCurrentOperation;
         mHandler.postDelayed(() -> {
-            if (operation == mCurrentOperation) {
+            if (operation == mCurrentOperation && !operation.isFinished()) {
                 Counter.logIncrement("biometric.value_scheduler_watchdog_triggered_count");
                 clearScheduler();
             }

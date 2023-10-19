@@ -33,11 +33,12 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.bubbles.DismissView;
-import com.android.wm.shell.common.DismissCircleView;
+import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.bubbles.DismissCircleView;
+import com.android.wm.shell.common.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
-import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 
 import kotlin.Unit;
 
@@ -106,6 +107,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         }
 
         mTargetViewContainer = new DismissView(mContext);
+        DismissViewUtils.setup(mTargetViewContainer);
         mTargetView = mTargetViewContainer.getCircle();
         mTargetViewContainer.setOnApplyWindowInsetsListener((view, windowInsets) -> {
             if (!windowInsets.equals(mWindowInsets)) {

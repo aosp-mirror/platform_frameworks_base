@@ -30,6 +30,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.CursorAnchorInfo;
+import android.view.inputmethod.EditorBoundsInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -54,8 +55,15 @@ public class EditTextCursorAnchorInfoTest {
     private static final int[] sLocationOnScreen = new int[2];
     private static Typeface sTypeface;
     private static final float TEXT_SIZE = 1f;
-    // The line height of the test font font is 1.2 * textSize.
+    // The line height of the test font is 1.2 * textSize.
     private static final int LINE_HEIGHT = 12;
+    private static final int HW_BOUNDS_OFFSET_LEFT = 10;
+    private static final int HW_BOUNDS_OFFSET_TOP = 20;
+    private static final int HW_BOUNDS_OFFSET_RIGHT = 30;
+    private static final int HW_BOUNDS_OFFSET_BOTTOM = 40;
+
+
+    // Default text has 5 lines of text. The needed width is 50px and the needed height is 60px.
     private static final CharSequence DEFAULT_TEXT = "X\nXX\nXXX\nXXXX\nXXXXX";
     private static final ImmutableList<RectF> DEFAULT_LINE_BOUNDS = ImmutableList.of(
             new RectF(0f, 0f, 10f, LINE_HEIGHT),
@@ -128,6 +136,55 @@ public class EditTextCursorAnchorInfoTest {
                 sLocationOnScreen[1] + translationY);
 
         assertThat(actualMatrix).isEqualTo(expectedMatrix);
+    }
+
+    @Test
+    public void testEditorBoundsInfo_allVisible() {
+        // The needed width and height of the DEFAULT_TEXT are 50 px and 60 px respectfully.
+        int width = 100;
+        int height = 200;
+        setupEditText(DEFAULT_TEXT, width, height);
+        CursorAnchorInfo cursorAnchorInfo =
+                mEditText.getCursorAnchorInfo(0, sCursorAnchorInfoBuilder, sMatrix);
+        EditorBoundsInfo editorBoundsInfo = cursorAnchorInfo.getEditorBoundsInfo();
+        assertThat(editorBoundsInfo).isNotNull();
+        assertThat(editorBoundsInfo.getEditorBounds()).isEqualTo(new RectF(0, 0, width, height));
+        assertThat(editorBoundsInfo.getHandwritingBounds())
+                .isEqualTo(new RectF(-HW_BOUNDS_OFFSET_LEFT, -HW_BOUNDS_OFFSET_TOP,
+                        width + HW_BOUNDS_OFFSET_RIGHT, height + HW_BOUNDS_OFFSET_BOTTOM));
+    }
+
+    @Test
+    public void testEditorBoundsInfo_scrolled() {
+        // The height of the editor will be 60 px.
+        int width = 100;
+        int visibleTop = 10;
+        int visibleBottom = 30;
+        setupVerticalClippedEditText(width, visibleTop, visibleBottom);
+        CursorAnchorInfo cursorAnchorInfo =
+                mEditText.getCursorAnchorInfo(0, sCursorAnchorInfoBuilder, sMatrix);
+        EditorBoundsInfo editorBoundsInfo = cursorAnchorInfo.getEditorBoundsInfo();
+        assertThat(editorBoundsInfo).isNotNull();
+        assertThat(editorBoundsInfo.getEditorBounds())
+                .isEqualTo(new RectF(0, visibleTop, width, visibleBottom));
+        assertThat(editorBoundsInfo.getHandwritingBounds())
+                .isEqualTo(new RectF(-HW_BOUNDS_OFFSET_LEFT, visibleTop - HW_BOUNDS_OFFSET_TOP,
+                        width + HW_BOUNDS_OFFSET_RIGHT, visibleBottom + HW_BOUNDS_OFFSET_BOTTOM));
+    }
+
+    @Test
+    public void testEditorBoundsInfo_invisible() {
+        // The height of the editor will be 60px. Scroll it to 70px will make it invisible.
+        int width = 100;
+        int visibleTop = 70;
+        int visibleBottom = 70;
+        setupVerticalClippedEditText(width, visibleTop, visibleBottom);
+        CursorAnchorInfo cursorAnchorInfo =
+                mEditText.getCursorAnchorInfo(0, sCursorAnchorInfoBuilder, sMatrix);
+        EditorBoundsInfo editorBoundsInfo = cursorAnchorInfo.getEditorBoundsInfo();
+        assertThat(editorBoundsInfo).isNotNull();
+        assertThat(editorBoundsInfo.getEditorBounds()).isEqualTo(new RectF(0, 0, 0, 0));
+        assertThat(editorBoundsInfo.getHandwritingBounds()).isEqualTo(new RectF(0, 0, 0, 0));
     }
 
     @Test
@@ -465,38 +522,37 @@ public class EditTextCursorAnchorInfoTest {
     }
 
     private void setupVerticalClippedEditText(int visibleTop, int visibleBottom) {
+        setupVerticalClippedEditText(1000, visibleTop, visibleBottom);
+    }
+
+    /**
+     * Helper method to create an EditText in a vertical ScrollView so that its visible bounds
+     * is Rect(0, visibleTop, width, visibleBottom) in the EditText's coordinates. Both ScrollView
+     * and EditText's width is set to the given width.
+     */
+    private void setupVerticalClippedEditText(int width, int visibleTop, int visibleBottom) {
         ScrollView scrollView = new ScrollView(mActivity);
-        mEditText = new EditText(mActivity);
-        mEditText.setTypeface(sTypeface);
-        mEditText.setText(DEFAULT_TEXT);
-        mEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, TEXT_SIZE);
-
-        mEditText.setPadding(0, 0, 0, 0);
-        mEditText.setCompoundDrawables(null, null, null, null);
-        mEditText.setCompoundDrawablePadding(0);
-
-        mEditText.scrollTo(0, 0);
-        mEditText.setLineSpacing(0f, 1f);
-
-        // Place the text layout top to the view's top.
-        mEditText.setGravity(Gravity.TOP);
-        int width = 1000;
-        int height = visibleBottom - visibleTop;
+        createEditText();
+        int scrollViewHeight = visibleBottom - visibleTop;
 
         scrollView.addView(mEditText, new FrameLayout.LayoutParams(
                 View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(5 * LINE_HEIGHT, View.MeasureSpec.EXACTLY)));
         scrollView.measure(
                 View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
-        scrollView.layout(0, 0, width, height);
-
+                View.MeasureSpec.makeMeasureSpec(scrollViewHeight, View.MeasureSpec.EXACTLY));
+        scrollView.layout(0, 0, width, scrollViewHeight);
         scrollView.scrollTo(0, visibleTop);
     }
 
     private void setupEditText(CharSequence text, int height) {
         createEditText(text);
         measureEditText(height);
+    }
+
+    private void setupEditText(CharSequence text, int width, int height) {
+        createEditText(text);
+        measureEditText(width, height);
     }
 
     private void setupEditText(CharSequence text, int height, float lineSpacing,
@@ -537,6 +593,8 @@ public class EditTextCursorAnchorInfoTest {
         mEditText.setTypeface(sTypeface);
         mEditText.setText(text);
         mEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, TEXT_SIZE);
+        mEditText.setHandwritingBoundsOffsets(HW_BOUNDS_OFFSET_LEFT, HW_BOUNDS_OFFSET_TOP,
+                HW_BOUNDS_OFFSET_RIGHT, HW_BOUNDS_OFFSET_BOTTOM);
 
         mEditText.setPadding(0, 0, 0, 0);
         mEditText.setCompoundDrawables(null, null, null, null);

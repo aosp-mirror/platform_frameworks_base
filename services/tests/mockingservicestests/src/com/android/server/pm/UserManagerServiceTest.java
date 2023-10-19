@@ -15,9 +15,12 @@
  */
 package com.android.server.pm;
 
+import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
@@ -323,6 +326,101 @@ public final class UserManagerServiceTest {
 
         assertThrows(UserManager.CheckedUserOperationException.class,
                 () -> mUmi.getBootUser(/* waitUntilSet= */ false));
+    }
+
+    @Test
+    public void testGetPreviousFullUserToEnterForeground() throws Exception {
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
+
+        assertWithMessage("getPreviousFullUserToEnterForeground")
+                .that(mUms.getPreviousFullUserToEnterForeground())
+                .isEqualTo(OTHER_USER_ID);
+    }
+
+    @Test
+    public void testGetPreviousFullUserToEnterForeground_SkipsCurrentUser() throws Exception {
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
+
+        mockCurrentUser(OTHER_USER_ID);
+        assertWithMessage("getPreviousFullUserToEnterForeground should skip current user")
+                .that(mUms.getPreviousFullUserToEnterForeground())
+                .isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetPreviousFullUserToEnterForeground_SkipsNonFullUsers() throws Exception {
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
+
+        mUsers.get(OTHER_USER_ID).info.flags &= ~UserInfo.FLAG_FULL;
+        assertWithMessage("getPreviousFullUserToEnterForeground should skip non-full users")
+                .that(mUms.getPreviousFullUserToEnterForeground())
+                .isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetPreviousFullUserToEnterForeground_SkipsPartialUsers() throws Exception {
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
+
+        mUsers.get(OTHER_USER_ID).info.partial = true;
+        assertWithMessage("getPreviousFullUserToEnterForeground should skip partial users")
+                .that(mUms.getPreviousFullUserToEnterForeground())
+                .isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetPreviousFullUserToEnterForeground_SkipsDisabledUsers() throws Exception {
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
+
+        mUsers.get(OTHER_USER_ID).info.flags |= UserInfo.FLAG_DISABLED;
+        assertWithMessage("getPreviousFullUserToEnterForeground should skip disabled users")
+                .that(mUms.getPreviousFullUserToEnterForeground())
+                .isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetPreviousFullUserToEnterForeground_SkipsRemovingUsers() throws Exception {
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
+
+        mUms.addRemovingUserId(OTHER_USER_ID);
+        assertWithMessage("getPreviousFullUserToEnterForeground should skip removing users")
+                .that(mUms.getPreviousFullUserToEnterForeground())
+                .isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testCreateUserWithLongName_TruncatesName() {
+        UserInfo user = mUms.createUserWithThrow(generateLongString(), USER_TYPE_FULL_SECONDARY, 0);
+        assertThat(user.name.length()).isEqualTo(500);
+        UserInfo user1 = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
+        assertThat(user1.name.length()).isEqualTo(4);
+    }
+
+    private String generateLongString() {
+        String partialString = "Test Name Test Name Test Name Test Name Test Name Test Name Test "
+                + "Name Test Name Test Name Test Name "; //String of length 100
+        StringBuilder resultString = new StringBuilder();
+        for (int i = 0; i < 660; i++) {
+            resultString.append(partialString);
+        }
+        return resultString.toString();
     }
 
     private void mockCurrentUser(@UserIdInt int userId) {

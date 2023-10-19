@@ -441,6 +441,9 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_ALWAYS_UNLOCKED;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_ROTATES_WITH_CONTENT;
+            }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_TOUCH_FEEDBACK_DISABLED;
             }

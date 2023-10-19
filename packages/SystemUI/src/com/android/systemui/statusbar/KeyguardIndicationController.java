@@ -29,6 +29,7 @@ import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.IMPORTANT_MSG_MIN_DURATION;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
@@ -41,8 +42,9 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
-import static com.android.systemui.log.LogLevel.ERROR;
+import static com.android.systemui.log.core.LogLevel.ERROR;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.AlarmManager;
 import android.app.admin.DevicePolicyManager;
@@ -56,7 +58,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -86,6 +87,8 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -95,8 +98,9 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
-import com.android.systemui.log.LogLevel;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.util.IndicationHelper;
+import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
@@ -113,6 +117,7 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -148,6 +153,7 @@ public class KeyguardIndicationController {
     private final AuthController mAuthController;
     private final KeyguardLogger mKeyguardLogger;
     private final UserTracker mUserTracker;
+    private final BouncerMessageInteractor mBouncerMessageInteractor;
     private ViewGroup mIndicationArea;
     private KeyguardIndicationTextView mTopIndicationView;
     private KeyguardIndicationTextView mLockScreenIndicationView;
@@ -169,7 +175,7 @@ public class KeyguardIndicationController {
     public KeyguardIndicationRotateTextViewController mRotateTextViewController;
     private BroadcastReceiver mBroadcastReceiver;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-
+    private KeyguardInteractor mKeyguardInteractor;
     private String mPersistentUnlockMessage;
     private String mAlignmentIndication;
     private CharSequence mTrustGrantedIndication;
@@ -203,7 +209,17 @@ public class KeyguardIndicationController {
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
 
     private boolean mDozing;
+    private boolean mIsActiveDreamLockscreenHosted;
     private final ScreenLifecycle mScreenLifecycle;
+    @VisibleForTesting
+    final Consumer<Boolean> mIsActiveDreamLockscreenHostedCallback =
+            (Boolean isLockscreenHosted) -> {
+                if (mIsActiveDreamLockscreenHosted == isLockscreenHosted) {
+                    return;
+                }
+                mIsActiveDreamLockscreenHosted = isLockscreenHosted;
+                updateDeviceEntryIndication(false);
+            };
     private final ScreenLifecycle.Observer mScreenObserver =
             new ScreenLifecycle.Observer() {
         @Override
@@ -225,7 +241,8 @@ public class KeyguardIndicationController {
     // triggered while the device is asleep
     private final AlarmTimeout mHideTransientMessageHandler;
     private final AlarmTimeout mHideBiometricMessageHandler;
-    private FeatureFlags mFeatureFlags;
+    private final FeatureFlags mFeatureFlags;
+    private final IndicationHelper mIndicationHelper;
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -256,7 +273,10 @@ public class KeyguardIndicationController {
             AlternateBouncerInteractor alternateBouncerInteractor,
             AlarmManager alarmManager,
             UserTracker userTracker,
-            FeatureFlags flags
+            BouncerMessageInteractor bouncerMessageInteractor,
+            FeatureFlags flags,
+            IndicationHelper indicationHelper,
+            KeyguardInteractor keyguardInteractor
     ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -281,7 +301,10 @@ public class KeyguardIndicationController {
         mScreenLifecycle.addObserver(mScreenObserver);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUserTracker = userTracker;
+        mBouncerMessageInteractor = bouncerMessageInteractor;
         mFeatureFlags = flags;
+        mIndicationHelper = indicationHelper;
+        mKeyguardInteractor = keyguardInteractor;
 
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
@@ -363,6 +386,10 @@ public class KeyguardIndicationController {
             intentFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
             intentFilter.addAction(Intent.ACTION_USER_REMOVED);
             mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, intentFilter);
+        }
+        if (mFeatureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
+            collectFlow(mIndicationArea, mKeyguardInteractor.isActiveDreamLockscreenHosted(),
+                    mIsActiveDreamLockscreenHostedCallback);
         }
     }
 
@@ -871,6 +898,12 @@ public class KeyguardIndicationController {
             return;
         }
 
+        // Device is dreaming and the dream is hosted in lockscreen
+        if (mIsActiveDreamLockscreenHosted) {
+            mIndicationArea.setVisibility(GONE);
+            return;
+        }
+
         // A few places might need to hide the indication, so always start by making it visible
         mIndicationArea.setVisibility(VISIBLE);
 
@@ -1002,7 +1035,13 @@ public class KeyguardIndicationController {
                 return; // udfps affordance is highlighted, no need to show action to unlock
             } else if (mKeyguardUpdateMonitor.isFaceEnrolled()
                     && !mKeyguardUpdateMonitor.getIsFaceAuthenticated()) {
-                String message = mContext.getString(R.string.keyguard_retry);
+                String message;
+                if (mAccessibilityManager.isEnabled()
+                        || mAccessibilityManager.isTouchExplorationEnabled()) {
+                    message = mContext.getString(R.string.accesssibility_keyguard_retry);
+                } else {
+                    message = mContext.getString(R.string.keyguard_retry);
+                }
                 mStatusBarKeyguardViewManager.setKeyguardMessage(message, mInitialTextColorState);
             }
         } else {
@@ -1062,6 +1101,7 @@ public class KeyguardIndicationController {
         pw.println("  mBiometricMessageFollowUp: " + mBiometricMessageFollowUp);
         pw.println("  mBatteryLevel: " + mBatteryLevel);
         pw.println("  mBatteryPresent: " + mBatteryPresent);
+        pw.println("  mIsActiveDreamLockscreenHosted: " + mIsActiveDreamLockscreenHosted);
         pw.println("  AOD text: " + (
                 mTopIndicationView == null ? null : mTopIndicationView.getText()));
         pw.println("  computePowerIndication(): " + computePowerIndication());
@@ -1156,6 +1196,11 @@ public class KeyguardIndicationController {
                         msgId,
                         helpString);
             } else if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
+                if (biometricSourceType == FINGERPRINT && !fpAuthFailed) {
+                    mBouncerMessageInteractor.setFingerprintAcquisitionMessage(helpString);
+                } else if (faceAuthSoftError) {
+                    mBouncerMessageInteractor.setFaceAcquisitionMessage(helpString);
+                }
                 mStatusBarKeyguardViewManager.setKeyguardMessage(helpString,
                         mInitialTextColorState);
             } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
@@ -1211,6 +1256,8 @@ public class KeyguardIndicationController {
             if (biometricSourceType == FACE) {
                 mFaceAcquiredMessageDeferral.reset();
             }
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
+            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         @Override
@@ -1231,18 +1278,20 @@ public class KeyguardIndicationController {
             } else if (biometricSourceType == FINGERPRINT) {
                 onFingerprintAuthError(msgId, errString);
             }
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
+            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         private void onFaceAuthError(int msgId, String errString) {
             CharSequence deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
             mFaceAcquiredMessageDeferral.reset();
-            if (shouldSuppressFaceError(msgId)) {
-                mKeyguardLogger.logBiometricMessage("suppressingFaceError", msgId, errString);
+            if (mIndicationHelper.shouldSuppressErrorMsg(FACE, msgId)) {
+                mKeyguardLogger.logBiometricMessage("KIC suppressingFaceError", msgId, errString);
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
                 handleFaceAuthTimeoutError(deferredFaceMessage);
-            } else if (isLockoutError(msgId)) {
+            } else if (mIndicationHelper.isFaceLockoutErrorMsg(msgId)) {
                 handleFaceLockoutError(errString);
             } else {
                 showErrorMessageNowOrLater(errString, null);
@@ -1250,26 +1299,13 @@ public class KeyguardIndicationController {
         }
 
         private void onFingerprintAuthError(int msgId, String errString) {
-            if (shouldSuppressFingerprintError(msgId)) {
-                mKeyguardLogger.logBiometricMessage("suppressingFingerprintError",
+            if (mIndicationHelper.shouldSuppressErrorMsg(FINGERPRINT, msgId)) {
+                mKeyguardLogger.logBiometricMessage("KIC suppressingFingerprintError",
                         msgId,
                         errString);
             } else {
                 showErrorMessageNowOrLater(errString, null);
             }
-        }
-
-        private boolean shouldSuppressFingerprintError(int msgId) {
-            return ((isPrimaryAuthRequired() && !isLockoutError(msgId))
-                    || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
-                    || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED
-                    || msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED);
-        }
-
-        private boolean shouldSuppressFaceError(int msgId) {
-            return ((isPrimaryAuthRequired() && msgId != FaceManager.FACE_ERROR_LOCKOUT_PERMANENT)
-                    || msgId == FaceManager.FACE_ERROR_CANCELED
-                    || msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS);
         }
 
         @Override
@@ -1315,6 +1351,8 @@ public class KeyguardIndicationController {
                     showActionToUnlock();
                 }
             }
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
+            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         @Override
@@ -1391,11 +1429,6 @@ public class KeyguardIndicationController {
         int followupMsgId = canUnlockWithFingerprint() ? R.string.keyguard_suggest_fingerprint
                 : R.string.keyguard_unlock;
         return mContext.getString(followupMsgId);
-    }
-
-    private static boolean isLockoutError(int msgId) {
-        return msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT
-                || msgId == FaceManager.FACE_ERROR_LOCKOUT;
     }
 
     private void handleFaceAuthTimeoutError(@Nullable CharSequence deferredFaceMessage) {

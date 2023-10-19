@@ -15,9 +15,11 @@
 package android.testing;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
 import android.util.SparseArray;
@@ -51,6 +53,16 @@ public class TestableResources {
      */
     public Resources getResources() {
         return mResources;
+    }
+
+    /**
+     * Sets a configuration for {@link #getResources()} to return to allow custom configs to
+     * be set and tested.
+     *
+     * @param configuration the configuration to return from resources.
+     */
+    public void overrideConfiguration(Configuration configuration) {
+        when(mResources.getConfiguration()).thenReturn(configuration);
     }
 
     /**

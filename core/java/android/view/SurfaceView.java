@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
@@ -40,6 +41,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -54,6 +56,8 @@ import com.android.internal.view.SurfaceCallbackHelper;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -301,6 +305,26 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private SurfaceControl mBlastSurfaceControl;
     private BLASTBufferQueue mBlastBufferQueue;
+
+    private final ConcurrentLinkedQueue<WindowManager.LayoutParams> mEmbeddedWindowParams =
+            new ConcurrentLinkedQueue<>();
+
+    private final ISurfaceControlViewHostParent mSurfaceControlViewHostParent =
+            new ISurfaceControlViewHostParent.Stub() {
+        @Override
+        public void updateParams(WindowManager.LayoutParams[] childAttrs) {
+            mEmbeddedWindowParams.clear();
+            mEmbeddedWindowParams.addAll(Arrays.asList(childAttrs));
+
+            if (isAttachedToWindow()) {
+                runOnUiThread(() -> {
+                    if (mParent != null) {
+                        mParent.recomputeViewAttributes(SurfaceView.this);
+                    }
+                });
+            }
+        }
+    };
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -801,9 +825,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mBlastSurfaceControl = null;
             }
 
-            if (releaseSurfacePackage && mSurfacePackage != null) {
-                mSurfacePackage.release();
-                mSurfacePackage = null;
+            if (mSurfacePackage != null) {
+                try {
+                    mSurfacePackage.getRemoteInterface().attachParentInterface(null);
+                    mEmbeddedWindowParams.clear();
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Failed to remove parent interface from SCVH. Likely SCVH is "
+                            + "already dead");
+                }
+                if (releaseSurfacePackage) {
+                    mSurfacePackage.release();
+                    mSurfacePackage = null;
+                }
             }
 
             applyTransactionOnVriDraw(transaction);
@@ -1307,7 +1340,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                     .setName(name)
                     .setLocalOwnerView(this)
-                    .setParent(viewRoot.getBoundsLayer())
+                    .setParent(viewRoot.updateAndGetBoundsLayer(surfaceUpdateTransaction))
                     .setCallsite("SurfaceView.updateSurface")
                     .setContainerLayer()
                     .build();
@@ -1854,6 +1887,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             applyTransactionOnVriDraw(transaction);
         }
         mSurfacePackage = p;
+        try {
+            mSurfacePackage.getRemoteInterface().attachParentInterface(
+                    mSurfaceControlViewHostParent);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Failed to attach parent interface to SCVH. Likely SCVH is already dead.");
+        }
 
         if (isFocused()) {
             requestEmbeddedFocus(true);
@@ -2012,6 +2051,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
             long frameNumber = mBlastBufferQueue.getLastAcquiredFrameNum() + 1;
             mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
+        }
+    }
+
+    @Override
+    void performCollectViewAttributes(AttachInfo attachInfo, int visibility) {
+        super.performCollectViewAttributes(attachInfo, visibility);
+        if (mEmbeddedWindowParams.isEmpty()) {
+            return;
+        }
+
+        for (WindowManager.LayoutParams embeddedWindowAttr : mEmbeddedWindowParams) {
+            if ((embeddedWindowAttr.flags & FLAG_KEEP_SCREEN_ON) == FLAG_KEEP_SCREEN_ON) {
+                attachInfo.mKeepScreenOn = true;
+                break;
+            }
         }
     }
 }

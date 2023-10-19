@@ -21,14 +21,12 @@ import com.android.settingslib.media.DeviceIconUtil
 import com.android.settingslib.media.LocalMediaManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.controls.util.MediaFlags
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /** Factory class to create [MediaMuteAwaitConnectionManager] instances. */
 @SysUISingleton
 class MediaMuteAwaitConnectionManagerFactory @Inject constructor(
-    private val mediaFlags: MediaFlags,
     private val context: Context,
     private val logger: MediaMuteAwaitLogger,
     @Main private val mainExecutor: Executor
@@ -36,10 +34,7 @@ class MediaMuteAwaitConnectionManagerFactory @Inject constructor(
     private val deviceIconUtil = DeviceIconUtil()
 
     /** Creates a [MediaMuteAwaitConnectionManager]. */
-    fun create(localMediaManager: LocalMediaManager): MediaMuteAwaitConnectionManager? {
-        if (!mediaFlags.areMuteAwaitConnectionsEnabled()) {
-            return null
-        }
+    fun create(localMediaManager: LocalMediaManager): MediaMuteAwaitConnectionManager {
         return MediaMuteAwaitConnectionManager(
                 mainExecutor, localMediaManager, context, deviceIconUtil, logger
         )

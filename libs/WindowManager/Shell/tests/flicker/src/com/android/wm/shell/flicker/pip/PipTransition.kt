@@ -22,7 +22,7 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import android.tools.device.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.PipAppHelper
@@ -32,7 +32,7 @@ import com.android.wm.shell.flicker.BaseTest
 import com.google.common.truth.Truth
 import org.junit.Test
 
-abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
+abstract class PipTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected val pipApp = PipAppHelper(instrumentation)
     protected val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
@@ -78,16 +78,16 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
     /** Defines the default method of entering PiP */
     protected open val defaultEnterPip: FlickerBuilder.() -> Unit = {
         setup {
-            pipApp.launchViaIntentAndWaitForPip(wmHelper,
-                    stringExtras = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true"))
+            pipApp.launchViaIntentAndWaitForPip(
+                wmHelper,
+                stringExtras = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true")
+            )
         }
     }
 
     /** Defines the default teardown required to clean up after the test */
     protected open val defaultTeardown: FlickerBuilder.() -> Unit = {
-        teardown {
-            pipApp.exit(wmHelper)
-        }
+        teardown { pipApp.exit(wmHelper) }
     }
 
     @Presubmit

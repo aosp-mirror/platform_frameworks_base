@@ -48,6 +48,7 @@ import static com.android.server.wm.WindowManagerService.MY_PID;
 import static java.util.Objects.requireNonNull;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -75,7 +76,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.IRemoteAnimationRunner;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -87,6 +87,8 @@ import com.android.server.wm.ActivityTaskManagerService.HotPath;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -249,11 +251,30 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @Nullable
     private ArrayMap<ActivityRecord, int[]> mRemoteActivities;
 
-    /** Whether our process is currently running a {@link RecentsAnimation} */
-    private boolean mRunningRecentsAnimation;
+    /**
+     * It can be set for a running transition player ({@link android.window.ITransitionPlayer}) or
+     * remote animators (running {@link android.window.IRemoteTransition}).
+     */
+    static final int ANIMATING_REASON_REMOTE_ANIMATION = 1;
+    /** It is set for wakefulness transition. */
+    static final int ANIMATING_REASON_WAKEFULNESS_CHANGE = 1 << 1;
+    /** Whether the legacy {@link RecentsAnimation} is running. */
+    static final int ANIMATING_REASON_LEGACY_RECENT_ANIMATION = 1 << 2;
 
-    /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
-    private boolean mRunningRemoteAnimation;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            ANIMATING_REASON_REMOTE_ANIMATION,
+            ANIMATING_REASON_WAKEFULNESS_CHANGE,
+            ANIMATING_REASON_LEGACY_RECENT_ANIMATION,
+    })
+    @interface AnimatingReason {}
+
+    /**
+     * Non-zero if this process is currently running an important animation. This should be never
+     * set for system server.
+     */
+    @AnimatingReason
+    private int mAnimatingReasons;
 
     // The bits used for mActivityStateFlags.
     private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
@@ -1847,30 +1868,45 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void setRunningRecentsAnimation(boolean running) {
-        if (mRunningRecentsAnimation == running) {
-            return;
+        if (running) {
+            addAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
+        } else {
+            removeAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
         }
-        mRunningRecentsAnimation = running;
-        updateRunningRemoteOrRecentsAnimation();
     }
 
     void setRunningRemoteAnimation(boolean running) {
-        if (mRunningRemoteAnimation == running) {
-            return;
+        if (running) {
+            addAnimatingReason(ANIMATING_REASON_REMOTE_ANIMATION);
+        } else {
+            removeAnimatingReason(ANIMATING_REASON_REMOTE_ANIMATION);
         }
-        mRunningRemoteAnimation = running;
-        updateRunningRemoteOrRecentsAnimation();
     }
 
-    void updateRunningRemoteOrRecentsAnimation() {
+    void addAnimatingReason(@AnimatingReason int reason) {
+        final int prevReasons = mAnimatingReasons;
+        mAnimatingReasons |= reason;
+        if (prevReasons == 0) {
+            setAnimating(true);
+        }
+    }
+
+    void removeAnimatingReason(@AnimatingReason int reason) {
+        final int prevReasons = mAnimatingReasons;
+        mAnimatingReasons &= ~reason;
+        if (prevReasons != 0 && mAnimatingReasons == 0) {
+            setAnimating(false);
+        }
+    }
+
+    /** Applies the animating state to activity manager for updating process priority. */
+    private void setAnimating(boolean animating) {
         // Posting on handler so WM lock isn't held when we call into AM.
-        mAtm.mH.sendMessage(PooledLambda.obtainMessage(
-                WindowProcessListener::setRunningRemoteAnimation, mListener,
-                isRunningRemoteTransition()));
+        mAtm.mH.post(() -> mListener.setRunningRemoteAnimation(animating));
     }
 
     boolean isRunningRemoteTransition() {
-        return mRunningRecentsAnimation || mRunningRemoteAnimation;
+        return (mAnimatingReasons & ANIMATING_REASON_REMOTE_ANIMATION) != 0;
     }
 
     /** Adjusts scheduling group for animation. This method MUST NOT be called inside WM lock. */
@@ -1923,6 +1959,21 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         pw.println(prefix + " OverrideConfiguration=" + getRequestedOverrideConfiguration());
         pw.println(prefix + " mLastReportedConfiguration=" + (mHasCachedConfiguration
                 ? ("(cached) " + mLastReportedConfiguration) : mLastReportedConfiguration));
+
+        final int animatingReasons = mAnimatingReasons;
+        if (animatingReasons != 0) {
+            pw.print(prefix + " mAnimatingReasons=");
+            if ((animatingReasons & ANIMATING_REASON_REMOTE_ANIMATION) != 0) {
+                pw.print("remote-animation|");
+            }
+            if ((animatingReasons & ANIMATING_REASON_WAKEFULNESS_CHANGE) != 0) {
+                pw.print("wakefulness|");
+            }
+            if ((animatingReasons & ANIMATING_REASON_LEGACY_RECENT_ANIMATION) != 0) {
+                pw.print("legacy-recents");
+            }
+            pw.println();
+        }
 
         final int stateFlags = mActivityStateFlags;
         if (stateFlags != ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER) {

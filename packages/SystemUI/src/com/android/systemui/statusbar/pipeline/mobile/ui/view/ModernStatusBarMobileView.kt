@@ -60,7 +60,9 @@ class ModernStatusBarMobileView(
                     as ModernStatusBarMobileView)
                 .also {
                     it.subId = viewModel.subscriptionId
-                    it.initView(slot) { MobileIconBinder.bind(it, viewModel, logger) }
+                    it.initView(slot) {
+                        MobileIconBinder.bind(view = it, viewModel = viewModel, logger = logger)
+                    }
                     logger.logNewViewBinding(it, viewModel)
                 }
         }

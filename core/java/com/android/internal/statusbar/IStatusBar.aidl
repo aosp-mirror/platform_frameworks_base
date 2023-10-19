@@ -63,6 +63,19 @@ oneway interface IStatusBar
     void cancelPreloadRecentApps();
     void showScreenPinningRequest(int taskId);
 
+    /**
+     * Notify system UI the immersive prompt should be dismissed as confirmed, and the confirmed
+     * status should be saved without user clicking on the button. This could happen when a user
+     * swipe on the edge with the confirmation prompt showing.
+     */
+    void confirmImmersivePrompt();
+
+    /**
+     * Notify system UI the immersive mode changed. This shall be removed when client immersive is
+     * enabled.
+     */
+    void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode);
+
     void dismissKeyboardShortcutsMenu();
     void toggleKeyboardShortcutsMenu(int deviceId);
 

@@ -621,13 +621,9 @@ public class BubblesManager {
     }
 
     private boolean isDismissableFromBubbles(NotificationEntry e) {
-        if (mNotifPipelineFlags.allowDismissOngoing()) {
-            // Bubbles are only accessible from the unlocked state,
-            // so we can calculate this from the Notification flags only.
-            return e.isDismissableForState(/*isLocked=*/ false);
-        } else {
-            return e.legacyIsDismissableRecursive();
-        }
+        // Bubbles are only accessible from the unlocked state,
+        // so we can calculate this from the Notification flags only.
+        return e.isDismissableForState(/*isLocked=*/ false);
     }
 
     private boolean shouldBubbleUp(NotificationEntry e) {

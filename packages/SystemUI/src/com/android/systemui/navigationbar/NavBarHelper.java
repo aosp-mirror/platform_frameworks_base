@@ -51,7 +51,6 @@ import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
@@ -69,9 +68,12 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -79,8 +81,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Extracts shared elements between navbar and taskbar delegate to de-dupe logic and help them
@@ -111,6 +111,7 @@ public final class NavBarHelper implements
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
     private final List<NavbarTaskbarStateUpdater> mStateListeners = new ArrayList<>();
     private final Context mContext;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final CommandQueue mCommandQueue;
     private final ContentResolver mContentResolver;
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
@@ -182,9 +183,11 @@ public final class NavBarHelper implements
             IWindowManager wm,
             UserTracker userTracker,
             DisplayTracker displayTracker,
+            NotificationShadeWindowController notificationShadeWindowController,
             DumpManager dumpManager,
             CommandQueue commandQueue) {
         mContext = context;
+        mNotificationShadeWindowController = notificationShadeWindowController;
         mCommandQueue = commandQueue;
         mContentResolver = mContext.getContentResolver();
         mAccessibilityManager = accessibilityManager;
@@ -228,6 +231,9 @@ public final class NavBarHelper implements
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED),
+                false, mAssistContentObserver, UserHandle.USER_ALL);
+        mContentResolver.registerContentObserver(
+                Settings.Secure.getUriFor(Secure.SEARCH_LONG_PRESS_HOME_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
@@ -419,11 +425,17 @@ public final class NavBarHelper implements
     private void updateAssistantAvailability() {
         boolean assistantAvailableForUser = mAssistManagerLazy.get()
                 .getAssistInfoForUser(mUserTracker.getUserId()) != null;
-        boolean longPressDefault = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
+
+        boolean overrideLongPressHome = mAssistManagerLazy.get()
+                .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
+        boolean longPressDefault = mContext.getResources().getBoolean(overrideLongPressHome
+                ? com.android.internal.R.bool.config_searchLongPressHomeEnabledDefault
+                : com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
-                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
+                overrideLongPressHome ? Secure.SEARCH_LONG_PRESS_HOME_ENABLED
+                        : Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
                 mUserTracker.getUserId()) != 0;
+
         boolean gestureDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistTouchGestureEnabledDefault);
         mAssistantTouchGestureEnabled = Settings.Secure.getIntForUser(mContentResolver,
@@ -450,6 +462,12 @@ public final class NavBarHelper implements
     }
 
     @Override
+    public void setAssistantOverridesRequested(int[] invocationTypes) {
+        mAssistManagerLazy.get().setAssistantOverridesRequested(invocationTypes);
+        updateAssistantAvailability();
+    }
+
+    @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
         updateAssistantAvailability();
@@ -460,11 +478,7 @@ public final class NavBarHelper implements
      * {@link InputMethodService} and the keyguard states.
      */
     public boolean isImeShown(int vis) {
-        View shadeWindowView = null;
-        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            shadeWindowView =
-                    mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
-        }
+        View shadeWindowView =  mNotificationShadeWindowController.getWindowRootView();
         boolean isKeyguardShowing = mKeyguardStateController.isShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
                 && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());

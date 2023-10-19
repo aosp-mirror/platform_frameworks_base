@@ -24,6 +24,9 @@ import static android.view.MotionEvent.ACTION_UP;
 
 import android.graphics.PointF;
 import android.view.MotionEvent;
+import android.view.View;
+
+import androidx.annotation.Nullable;
 
 /**
  * A detector for touch inputs that differentiates between drag and click inputs. It receives a flow
@@ -54,14 +57,24 @@ class DragDetector {
      *
      * @return the result returned by {@link #mEventHandler}, or the result when
      * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
-    */
+     */
     boolean onMotionEvent(MotionEvent ev) {
+        return onMotionEvent(null /* view */, ev);
+    }
+
+    /**
+     * The receiver of the {@link MotionEvent} flow.
+     *
+     * @return the result returned by {@link #mEventHandler}, or the result when
+     * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
+    */
+    boolean onMotionEvent(View v, MotionEvent ev) {
         final boolean isTouchScreen =
                 (ev.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
         if (!isTouchScreen) {
             // Only touches generate noisy moves, so mouse/trackpad events don't need to filtered
             // to take the slop threshold into consideration.
-            return mEventHandler.handleMotionEvent(ev);
+            return mEventHandler.handleMotionEvent(v, ev);
         }
         switch (ev.getActionMasked()) {
             case ACTION_DOWN: {
@@ -69,12 +82,15 @@ class DragDetector {
                 float rawX = ev.getRawX(0);
                 float rawY = ev.getRawY(0);
                 mInputDownPoint.set(rawX, rawY);
-                mResultOfDownAction = mEventHandler.handleMotionEvent(ev);
+                mResultOfDownAction = mEventHandler.handleMotionEvent(v, ev);
                 return mResultOfDownAction;
             }
             case ACTION_MOVE: {
+                if (ev.findPointerIndex(mDragPointerId) == -1) {
+                    mDragPointerId = ev.getPointerId(0);
+                }
+                final int dragPointerIndex = ev.findPointerIndex(mDragPointerId);
                 if (!mIsDragEvent) {
-                    int dragPointerIndex = ev.findPointerIndex(mDragPointerId);
                     float dx = ev.getRawX(dragPointerIndex) - mInputDownPoint.x;
                     float dy = ev.getRawY(dragPointerIndex) - mInputDownPoint.y;
                     // Touches generate noisy moves, so only once the move is past the touch
@@ -84,7 +100,7 @@ class DragDetector {
                 // The event handler should only be notified about 'move' events if a drag has been
                 // detected.
                 if (mIsDragEvent) {
-                    return mEventHandler.handleMotionEvent(ev);
+                    return mEventHandler.handleMotionEvent(v, ev);
                 } else {
                     return mResultOfDownAction;
                 }
@@ -92,10 +108,10 @@ class DragDetector {
             case ACTION_UP:
             case ACTION_CANCEL: {
                 resetState();
-                return mEventHandler.handleMotionEvent(ev);
+                return mEventHandler.handleMotionEvent(v, ev);
             }
             default:
-                return mEventHandler.handleMotionEvent(ev);
+                return mEventHandler.handleMotionEvent(v, ev);
         }
     }
 
@@ -111,6 +127,6 @@ class DragDetector {
     }
 
     interface MotionEventHandler {
-        boolean handleMotionEvent(MotionEvent ev);
+        boolean handleMotionEvent(@Nullable View v, MotionEvent ev);
     }
 }

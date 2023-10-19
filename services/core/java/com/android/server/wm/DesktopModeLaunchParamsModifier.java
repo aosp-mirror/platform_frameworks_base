@@ -39,10 +39,11 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             TAG_WITH_CLASS_NAME ? "DesktopModeLaunchParamsModifier" : TAG_ATM;
     private static final boolean DEBUG = false;
 
-    // Desktop mode feature flag.
-    static final boolean DESKTOP_MODE_SUPPORTED = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode", false) || SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode_2", false);
+    // Desktop mode feature flags.
+    private static final boolean DESKTOP_MODE_PROTO1_SUPPORTED =
+            SystemProperties.getBoolean("persist.wm.debug.desktop_mode", false);
+    private static final boolean DESKTOP_MODE_PROTO2_SUPPORTED =
+            SystemProperties.getBoolean("persist.wm.debug.desktop_mode_2", false);
     // Override default freeform task width when desktop mode is enabled. In dips.
     private static final int DESKTOP_MODE_DEFAULT_WIDTH_DP = SystemProperties.getInt(
             "persist.wm.debug.desktop_mode.default_width", 840);
@@ -76,21 +77,36 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             appendLog("task null, skipping");
             return RESULT_SKIP;
         }
-        if (phase != PHASE_BOUNDS) {
-            appendLog("not in bounds phase, skipping");
+        if (!task.isActivityTypeStandardOrUndefined()) {
+            appendLog("not standard or undefined activity type, skipping");
             return RESULT_SKIP;
         }
-        if (!task.isActivityTypeStandard()) {
-            appendLog("not standard activity type, skipping");
-            return RESULT_SKIP;
-        }
-        if (!currentParams.mBounds.isEmpty()) {
-            appendLog("currentParams has bounds set, not overriding");
+        if (phase < PHASE_WINDOWING_MODE) {
+            appendLog("not in windowing mode or bounds phase, skipping");
             return RESULT_SKIP;
         }
 
         // Copy over any values
         outParams.set(currentParams);
+
+        // In Proto2, trampoline task launches of an existing background task can result in the
+        // previous windowing mode to be restored even if the desktop mode state has changed.
+        // Let task launches inherit the windowing mode from the source task if available, which
+        // should have the desired windowing mode set by WM Shell. See b/286929122.
+        if (DESKTOP_MODE_PROTO2_SUPPORTED && source != null && source.getTask() != null) {
+            final Task sourceTask = source.getTask();
+            outParams.mWindowingMode = sourceTask.getWindowingMode();
+            appendLog("inherit-from-source=" + outParams.mWindowingMode);
+        }
+
+        if (phase == PHASE_WINDOWING_MODE) {
+            return RESULT_DONE;
+        }
+
+        if (!currentParams.mBounds.isEmpty()) {
+            appendLog("currentParams has bounds set, not overriding");
+            return RESULT_SKIP;
+        }
 
         // Update width and height with default desktop mode values
         float density = (float) task.getConfiguration().densityDpi / DENSITY_DEFAULT;
@@ -122,5 +138,10 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
     private void outputLog() {
         if (DEBUG) Slog.d(TAG, mLogBuilder.toString());
+    }
+
+    /** Whether desktop mode is supported. */
+    static boolean isDesktopModeSupported() {
+        return DESKTOP_MODE_PROTO1_SUPPORTED || DESKTOP_MODE_PROTO2_SUPPORTED;
     }
 }

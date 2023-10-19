@@ -56,7 +56,7 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
 
-    private final FillServiceCallbacks mCallbacks;
+    private FillServiceCallbacks mCallbacks;
     private final Object mLock = new Object();
     private CompletableFuture<FillResponse> mPendingFillRequest;
     private int mPendingFillRequestId = INVALID_REQUEST_ID;
@@ -128,9 +128,12 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
      */
     public int cancelCurrentRequest() {
         synchronized (mLock) {
-            return mPendingFillRequest != null && mPendingFillRequest.cancel(false)
+            int canceledRequestId = mPendingFillRequest != null && mPendingFillRequest.cancel(false)
                     ? mPendingFillRequestId
                     : INVALID_REQUEST_ID;
+            mPendingFillRequest = null;
+            mPendingFillRequestId = INVALID_REQUEST_ID;
+            return canceledRequestId;
         }
     }
 
@@ -184,6 +187,10 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                 mPendingFillRequest = null;
                 mPendingFillRequestId = INVALID_REQUEST_ID;
             }
+            if (mCallbacks == null) {
+                Slog.w(TAG, "Error calling RemoteFillService - service already unbound");
+                return;
+            }
             if (err == null) {
                 mCallbacks.onFillRequestSuccess(request.getId(), res,
                         mComponentName.getPackageName(), request.getFlags());
@@ -220,6 +227,10 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
             return save;
         }).orTimeout(TIMEOUT_REMOTE_REQUEST_MILLIS, TimeUnit.MILLISECONDS)
                 .whenComplete((res, err) -> Handler.getMain().post(() -> {
+                    if (mCallbacks == null) {
+                        Slog.w(TAG, "Error calling RemoteFillService - service already unbound");
+                        return;
+                    }
                     if (err == null) {
                         mCallbacks.onSaveRequestSuccess(mComponentName.getPackageName(), res);
                     } else {
@@ -234,6 +245,8 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
     }
 
     public void destroy() {
+        cancelCurrentRequest();
         unbind();
+        mCallbacks = null;
     }
 }

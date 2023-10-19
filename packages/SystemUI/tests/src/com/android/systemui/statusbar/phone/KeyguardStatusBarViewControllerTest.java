@@ -122,6 +122,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock private KeyguardLogger mLogger;
 
     @Mock private NotificationMediaManager mNotificationMediaManager;
+    @Mock private StatusOverlayHoverListenerFactory mStatusOverlayHoverListenerFactory;
 
     private TestShadeViewStateProvider mShadeViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
@@ -171,7 +172,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mCommandQueue,
                 mFakeExecutor,
                 mLogger,
-                mNotificationMediaManager
+                mNotificationMediaManager,
+                mStatusOverlayHoverListenerFactory
         );
     }
 

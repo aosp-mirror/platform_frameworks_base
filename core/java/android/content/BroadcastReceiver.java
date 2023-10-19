@@ -65,7 +65,7 @@ public abstract class BroadcastReceiver {
      * thread of your app.
      *
      * <p>Note on threading: the state inside of this class is not itself
-     * thread-safe, however you can use it from any thread if you properly
+     * thread-safe. However, you can use it from any thread if you make
      * sure that you do not have races.  Typically this means you will hand
      * the entire object to another thread, which will be solely responsible
      * for setting any results and finally calling {@link #finish()}.

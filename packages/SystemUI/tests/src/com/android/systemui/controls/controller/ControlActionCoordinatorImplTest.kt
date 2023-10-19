@@ -18,13 +18,14 @@ package com.android.systemui.controls.ui
 
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
+import android.view.HapticFeedbackConstants
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.controls.settings.FakeControlsSettingsRepository
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -34,9 +35,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
@@ -44,6 +45,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.Optional
 
@@ -69,8 +71,6 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
     @Mock
     private lateinit var metricsLogger: ControlsMetricsLogger
     @Mock
-    private lateinit var featureFlags: FeatureFlags
-    @Mock
     private lateinit var controlsSettingsDialogManager: ControlsSettingsDialogManager
 
     companion object {
@@ -82,6 +82,8 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
     private lateinit var coordinator: ControlActionCoordinatorImpl
     private lateinit var action: ControlActionCoordinatorImpl.Action
     private lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
+
+    private val featureFlags = FakeFeatureFlags()
 
     @Before
     fun setUp() {
@@ -102,14 +104,12 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
                 metricsLogger,
                 vibratorHelper,
                 controlsSettingsRepository,
-                controlsSettingsDialogManager,
                 featureFlags
         ))
         coordinator.activityContext = mContext
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)
         `when`(cvh.cws.control?.isAuthRequired()).thenReturn(true)
-        `when`(featureFlags.isEnabled(Flags.USE_APP_PANELS)).thenReturn(false)
 
         action = spy(coordinator.Action(ID, {}, false, true))
         doReturn(action).`when`(coordinator).createAction(any(), any(), anyBoolean(), anyBoolean())
@@ -155,13 +155,11 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         coordinator.toggle(cvh, "", true)
 
         verify(coordinator).bouncerOrRun(action)
-        verify(controlsSettingsDialogManager).maybeShowDialog(any(), any())
         verify(action).invoke()
     }
 
     @Test
     fun testToggleWhenLockedDoesNotTriggerDialog_featureFlagEnabled() {
-        `when`(featureFlags.isEnabled(Flags.USE_APP_PANELS)).thenReturn(true)
         action = spy(coordinator.Action(ID, {}, false, false))
         doReturn(action).`when`(coordinator).createAction(any(), any(), anyBoolean(), anyBoolean())
 
@@ -199,5 +197,51 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
 
         verify(coordinator).bouncerOrRun(action)
         verify(action, never()).invoke()
+    }
+
+    @Test
+    fun drag_isEdge_oneWayHapticsDisabled_usesVibrate() {
+        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
+
+        coordinator.drag(cvh, true)
+
+        verify(vibratorHelper).vibrate(
+            Vibrations.rangeEdgeEffect
+        )
+    }
+
+    @Test
+    fun drag_isNotEdge_oneWayHapticsDisabled_usesVibrate() {
+        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
+
+        coordinator.drag(cvh, false)
+
+        verify(vibratorHelper).vibrate(
+            Vibrations.rangeMiddleEffect
+        )
+    }
+
+    @Test
+    fun drag_isEdge_oneWayHapticsEnabled_usesPerformHapticFeedback() {
+        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
+
+        coordinator.drag(cvh, true)
+
+        verify(vibratorHelper).performHapticFeedback(
+            any(),
+            eq(HapticFeedbackConstants.SEGMENT_TICK)
+        )
+    }
+
+    @Test
+    fun drag_isNotEdge_oneWayHapticsEnabled_usesPerformHapticFeedback() {
+        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
+
+        coordinator.drag(cvh, false)
+
+        verify(vibratorHelper).performHapticFeedback(
+            any(),
+            eq(HapticFeedbackConstants.SEGMENT_FREQUENT_TICK)
+        )
     }
 }

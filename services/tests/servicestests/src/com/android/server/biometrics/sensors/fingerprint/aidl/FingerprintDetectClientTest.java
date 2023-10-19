@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -147,6 +148,24 @@ public class FingerprintDetectClientTest {
         verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
     }
 
+    @Test
+    public void testWhenListenerIsNull() {
+        final AidlSession aidl = new AidlSession(0, mHal, USER_ID, mHalSessionCallback);
+        final FingerprintDetectClient client =  new FingerprintDetectClient(mContext, () -> aidl,
+                mToken, 6 /* requestId */, null /* listener */,
+                new FingerprintAuthenticateOptions.Builder()
+                        .setUserId(2)
+                        .setSensorId(1)
+                        .setOpPackageName("a-test")
+                        .build(),
+                mBiometricLogger, mBiometricContext,
+                mUdfpsOverlayController, true /* isStrongBiometric */);
+        client.start(mCallback);
+        client.onInteractionDetected();
+
+        verify(mCallback).onClientFinished(eq(client), anyBoolean());
+    }
+
     private FingerprintDetectClient createClient() throws RemoteException {
         return createClient(200 /* version */);
     }
@@ -163,6 +182,6 @@ public class FingerprintDetectClientTest {
                         .setOpPackageName("a-test")
                         .build(),
                 mBiometricLogger, mBiometricContext,
-                mUdfpsOverlayController, null, true /* isStrongBiometric */);
+                mUdfpsOverlayController, true /* isStrongBiometric */);
     }
 }

@@ -28,7 +28,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.UriGrantsManager;
+import android.content.ContentProvider;
+import android.content.Intent;
 import android.graphics.RectF;
+import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.CancellationSignalBeamer;
@@ -37,6 +42,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
@@ -182,6 +188,8 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
 
     private CancellationSignalBeamer.Receiver mBeamer;
 
+    private ViewRootImpl.TypingHintNotifier mTypingHintNotifier;
+
     RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
@@ -190,6 +198,12 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         mH = new Handler(mLooper);
         mParentInputMethodManager = inputMethodManager;
         mServedView = new WeakReference<>(servedView);
+        if (servedView != null) {
+            final ViewRootImpl viewRoot = servedView.getViewRootImpl();
+            if (viewRoot != null) {
+                mTypingHintNotifier = viewRoot.createTypingHintNotifierIfSupported();
+            }
+        }
     }
 
     /**
@@ -364,6 +378,9 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             return;
         }
         dispatch(() -> {
+            // Deactivate the notifier when finishing typing.
+            notifyTypingHint(false /* isTyping */, true /* deactivate */);
+
             // Note that we do not need to worry about race condition here, because 1) mFinished is
             // updated only inside this block, and 2) the code here is running on a Handler hence we
             // assume multiple closeConnection() tasks will not be handled at the same time.
@@ -434,7 +451,9 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         if (mBeamer == null) {
             return;
         }
-        mBeamer.forget(token);
+        dispatch(() -> {
+            mBeamer.forget(token);
+        });
     }
 
     @Override
@@ -628,6 +647,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.commitText(text, newCursorPosition);
+            notifyTypingHint(true /* isTyping */, false /* deactivate */);
         });
     }
 
@@ -783,6 +803,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.setComposingText(text, newCursorPosition);
+            notifyTypingHint(true /* isTyping */, false /* deactivate */);
         });
     }
 
@@ -910,6 +931,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.deleteSurroundingText(beforeLength, afterLength);
+            notifyTypingHint(true /* isTyping */, false /* deactivate */);
         });
     }
 
@@ -1118,7 +1140,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             @InputConnection.CursorUpdateFilter int cursorUpdateFilter, int imeDisplayId) {
         final InputConnection ic = getInputConnection();
         if (ic == null || !isActive()) {
-            Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
+            Log.w(TAG, "requestCursorUpdates on inactive InputConnection");
             return false;
         }
         if (mParentInputMethodManager.mRequestCursorUpdateDisplayIdCheck.get()
@@ -1179,7 +1201,22 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     public void commitContent(InputConnectionCommandHeader header,
             InputContentInfo inputContentInfo, int flags, Bundle opts,
             AndroidFuture future /* T=Boolean */) {
+        final int imeUid = Binder.getCallingUid();
         dispatchWithTracing("commitContent", future, () -> {
+            // Check if the originator IME has the right permissions
+            try {
+                final int contentUriOwnerUserId = ContentProvider.getUserIdFromUri(
+                        inputContentInfo.getContentUri(), UserHandle.getUserId(imeUid));
+                final Uri contentUriWithoutUserId = ContentProvider.getUriWithoutUserId(
+                        inputContentInfo.getContentUri());
+                UriGrantsManager.getService().checkGrantUriPermission_ignoreNonSystem(imeUid, null,
+                        contentUriWithoutUserId, Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        contentUriOwnerUserId);
+            } catch (Exception e) {
+                Log.w(TAG, "commitContent with invalid Uri permission from IME:", e);
+                return false;
+            }
+
             if (header.mSessionId != mCurrentSessionId.get()) {
                 return false;  // cancelled
             }
@@ -1472,5 +1509,16 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
 
     private static boolean useImeTracing() {
         return ImeTracing.getInstance().isEnabled();
+    }
+
+    /**
+     * Dispatch the typing hint to {@link ViewRootImpl.TypingHintNotifier}.
+     * The input connection indicates that the user is typing when {@link #commitText} or
+     * {@link #setComposingText)} and the user finish typing when {@link #deactivate()}.
+     */
+    private void notifyTypingHint(boolean isTyping, boolean deactivate) {
+        if (mTypingHintNotifier != null) {
+            mTypingHintNotifier.onTypingHintChanged(isTyping, deactivate);
+        }
     }
 }

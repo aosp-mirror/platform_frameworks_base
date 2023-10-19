@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
@@ -33,11 +34,14 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.util.Slog;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -49,6 +53,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
@@ -107,9 +112,13 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
     private final QuickSettingsController mQsController;
     private final QSHost mQSHost;
+    private final FeatureFlags mFeatureFlags;
 
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
+
+    private int mDisabled1;
+    private int mDisabled2;
 
     @Inject
     CentralSurfacesCommandQueueCallbacks(
@@ -141,7 +150,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             Lazy<CameraLauncher> cameraLauncherLazy,
             UserTracker userTracker,
             QSHost qsHost,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            FeatureFlags featureFlags) {
         mCentralSurfaces = centralSurfaces;
         mQsController = quickSettingsController;
         mContext = context;
@@ -168,6 +178,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mCameraLauncherLazy = cameraLauncherLazy;
         mUserTracker = userTracker;
         mQSHost = qsHost;
+        mFeatureFlags = featureFlags;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
@@ -208,7 +219,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void animateCollapsePanels(int flags, boolean force) {
-        mShadeController.animateCollapsePanels(flags, force, false /* delayed */,
+        mShadeController.animateCollapseShade(flags, force, false /* delayed */,
                 1.0f /* speedUpFactor */);
     }
 
@@ -218,11 +229,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             Log.d(CentralSurfaces.TAG,
                     "animateExpand: mExpandedVisible=" + mShadeController.isExpandedVisible());
         }
-        if (!mCommandQueue.panelsEnabled()) {
-            return;
-        }
-
-        mShadeViewController.expandToNotifications();
+        mShadeController.animateExpandShade();
     }
 
     @Override
@@ -231,14 +238,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             Log.d(CentralSurfaces.TAG,
                     "animateExpand: mExpandedVisible=" + mShadeController.isExpandedVisible());
         }
-        if (!mCommandQueue.panelsEnabled()) {
-            return;
-        }
-
-        // Settings are not available in setup
-        if (!mDeviceProvisionedController.isCurrentUserSetup()) return;
-
-        mShadeViewController.expandToQs();
+        mShadeController.animateExpandQs();
     }
 
     @Override
@@ -255,31 +255,26 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
+     *
+     * @deprecated If you need to react to changes in disable flags, listen to
+     * {@link com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository}
+     * instead.
      */
     @Override
+    @Deprecated
     public void disable(int displayId, int state1, int state2, boolean animate) {
         if (displayId != mDisplayId) {
             return;
         }
 
-        int state2BeforeAdjustment = state2;
-        state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
-        Log.d(CentralSurfaces.TAG,
-                mDisableFlagsLogger.getDisableFlagsString(
-                        /* old= */ new DisableFlagsLogger.DisableState(
-                                mCentralSurfaces.getDisabled1(), mCentralSurfaces.getDisabled2()),
-                        /* new= */ new DisableFlagsLogger.DisableState(
-                                state1, state2BeforeAdjustment),
-                        /* newStateAfterLocalModification= */ new DisableFlagsLogger.DisableState(
-                                state1, state2)));
-
-        final int old1 = mCentralSurfaces.getDisabled1();
+        final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
-        mCentralSurfaces.setDisabled1(state1);
+        mDisabled1 = state1;
 
-        final int old2 = mCentralSurfaces.getDisabled2();
+        state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
+        final int old2 = mDisabled2;
         final int diff2 = state2 ^ old2;
-        mCentralSurfaces.setDisabled2(state2);
+        mDisabled2 = state2;
 
         if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {
@@ -288,17 +283,12 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         }
 
         if ((diff1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) {
-            if (mCentralSurfaces.areNotificationAlertsDisabled()) {
+            if ((state1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) {
                 mHeadsUpManager.releaseAllImmediately();
             }
         }
 
-        if ((diff2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) != 0) {
-            mCentralSurfaces.updateQsExpansionEnabled();
-        }
-
         if ((diff2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
-            mCentralSurfaces.updateQsExpansionEnabled();
             if ((state2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
                 mShadeController.animateCollapseShade();
             }
@@ -332,7 +322,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_DOWN);
             if (mShadeViewController.isFullyCollapsed()) {
                 if (mVibrateOnOpening) {
-                    mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+                    vibrateOnNavigationKeyDown();
                 }
                 mShadeViewController.expand(true /* animate */);
                 mNotificationStackScrollLayoutController.setWillExpand(true);
@@ -556,10 +546,10 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void togglePanel() {
-        if (mCentralSurfaces.isPanelExpanded()) {
+        if (mShadeViewController.isPanelExpanded()) {
             mShadeController.animateCollapseShade();
         } else {
-            animateExpandNotificationsPanel();
+            mShadeController.animateExpandShade();
         }
     }
 
@@ -604,5 +594,16 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             timings[i] = pattern[i];
         }
         return VibrationEffect.createWaveform(timings, /* repeat= */ -1);
+    }
+
+    @VisibleForTesting
+    void vibrateOnNavigationKeyDown() {
+        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            mShadeViewController.performHapticFeedback(
+                    HapticFeedbackConstants.GESTURE_START
+            );
+        } else {
+            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+        }
     }
 }

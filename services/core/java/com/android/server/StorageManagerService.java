@@ -73,8 +73,8 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.ObbInfo;
 import android.database.ContentObserver;
-import android.media.MediaCodecList;
 import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -218,6 +218,8 @@ class StorageManagerService extends IStorageManager.Stub
 
     @GuardedBy("mLock")
     private final Set<Integer> mCeStoragePreparedUsers = new ArraySet<>();
+
+    private volatile long mInternalStorageSize = 0;
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
@@ -2839,7 +2841,7 @@ class StorageManagerService extends IStorageManager.Stub
         return true;
     }
 
-    void runSmartIdleMaint(Runnable callback) {
+    synchronized void runSmartIdleMaint(Runnable callback) {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
@@ -3561,6 +3563,15 @@ class StorageManagerService extends IStorageManager.Stub
             return null;
         }
         return authority;
+    }
+
+    @Override
+    public long getInternalStorageBlockDeviceSize() throws RemoteException {
+        if (mInternalStorageSize == 0) {
+            mInternalStorageSize = mVold.getStorageSize();
+        }
+
+        return mInternalStorageSize;
     }
 
     /**

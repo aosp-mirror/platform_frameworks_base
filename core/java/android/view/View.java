@@ -5483,7 +5483,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 (TEXT_ALIGNMENT_DEFAULT << PFLAG2_TEXT_ALIGNMENT_MASK_SHIFT) |
                 (PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT) |
                 (IMPORTANT_FOR_ACCESSIBILITY_DEFAULT << PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT);
-        mPrivateFlags4 = PFLAG4_AUTO_HANDWRITING_ENABLED;
 
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
@@ -6208,7 +6207,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     setPreferKeepClear(a.getBoolean(attr, false));
                     break;
                 case R.styleable.View_autoHandwritingEnabled:
-                    setAutoHandwritingEnabled(a.getBoolean(attr, true));
+                    setAutoHandwritingEnabled(a.getBoolean(attr, false));
                     break;
                 case R.styleable.View_handwritingBoundsOffsetLeft:
                     mHandwritingBoundsOffsetLeft = a.getDimension(attr, 0);
@@ -9232,8 +9231,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             while (parentGroup != null && !parentGroup.isImportantForAutofill()) {
-                ignoredParentLeft += parentGroup.mLeft;
-                ignoredParentTop += parentGroup.mTop;
+                ignoredParentLeft += parentGroup.mLeft - parentGroup.mScrollX;
+                ignoredParentTop += parentGroup.mTop - parentGroup.mScrollY;
 
                 viewParent = parentGroup.getParent();
                 if (viewParent instanceof View) {
@@ -12077,7 +12076,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (getSystemGestureExclusionRects().isEmpty()
                 && collectPreferKeepClearRects().isEmpty()
                 && collectUnrestrictedPreferKeepClearRects().isEmpty()
-                && (info.mHandwritingArea == null || !isAutoHandwritingEnabled())) {
+                && (info.mHandwritingArea == null || !shouldInitiateHandwriting())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
                 info.mPositionUpdateListener = null;
@@ -12444,11 +12443,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     void updateHandwritingArea() {
         // If autoHandwritingArea is not enabled, do nothing.
-        if (!isAutoHandwritingEnabled()) return;
+        if (!shouldInitiateHandwriting()) return;
         final AttachInfo ai = mAttachInfo;
         if (ai != null) {
             ai.mViewRootImpl.getHandwritingInitiator().updateHandwritingAreasForView(this);
         }
+    }
+
+    /**
+     * Returns true if a stylus {@link MotionEvent} within this view's bounds should initiate
+     * handwriting mode, either for this view ({@link #isAutoHandwritingEnabled()} is {@code true})
+     * or for a handwriting delegate view ({@link #getHandwritingDelegatorCallback()} is not {@code
+     * null}).
+     */
+    boolean shouldInitiateHandwriting() {
+        return isAutoHandwritingEnabled() || getHandwritingDelegatorCallback() != null;
     }
 
     /**

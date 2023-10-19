@@ -57,8 +57,9 @@ import android.graphics.Rect;
      *
      * @param displayId The logical display id.
      * @param scale the target scale, or {@link Float#NaN} to leave unchanged
+     * @param updatePersistence whether the new scale should be persisted in Settings
      */
-    void onPerformScaleAction(int displayId, float scale);
+    void onPerformScaleAction(int displayId, float scale, boolean updatePersistence);
 
     /**
      * Called when the accessibility action is performed.

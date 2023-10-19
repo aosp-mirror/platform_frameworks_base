@@ -18,9 +18,10 @@ package com.android.systemui.scene.ui.composable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.scene.shared.model.Scene
 
 /** Compose-capable extension of [Scene]. */
 interface ComposableScene : Scene {
-    @Composable fun Content(containerName: String, modifier: Modifier)
+    @Composable fun SceneScope.Content(modifier: Modifier)
 }

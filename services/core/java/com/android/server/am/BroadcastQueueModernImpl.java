@@ -249,6 +249,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MSG_CHECK_HEALTH = 5;
     private static final int MSG_CHECK_PENDING_COLD_START_VALIDITY = 6;
     private static final int MSG_PROCESS_FREEZABLE_CHANGED = 7;
+    private static final int MSG_UID_STATE_CHANGED = 8;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -292,6 +293,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             case MSG_PROCESS_FREEZABLE_CHANGED: {
                 synchronized (mService) {
                     refreshProcessQueueLocked((ProcessRecord) msg.obj);
+                }
+                return true;
+            }
+            case MSG_UID_STATE_CHANGED: {
+                final int uid = (int) msg.obj;
+                final int procState = msg.arg1;
+                synchronized (mService) {
+                    if (procState == ActivityManager.PROCESS_STATE_TOP) {
+                        mUidForeground.put(uid, true);
+                    } else {
+                        mUidForeground.delete(uid);
+                    }
+                    refreshProcessQueuesLocked(uid);
                 }
                 return true;
             }
@@ -672,7 +686,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @Override
     public void onProcessFreezableChangedLocked(@NonNull ProcessRecord app) {
         mLocalHandler.removeMessages(MSG_PROCESS_FREEZABLE_CHANGED, app);
-        mLocalHandler.sendMessage(mHandler.obtainMessage(MSG_PROCESS_FREEZABLE_CHANGED, app));
+        mLocalHandler.obtainMessage(MSG_PROCESS_FREEZABLE_CHANGED, app).sendToTarget();
     }
 
     @Override
@@ -1601,14 +1615,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             @Override
             public void onUidStateChanged(int uid, int procState, long procStateSeq,
                     int capability) {
-                synchronized (mService) {
-                    if (procState == ActivityManager.PROCESS_STATE_TOP) {
-                        mUidForeground.put(uid, true);
-                    } else {
-                        mUidForeground.delete(uid);
-                    }
-                    refreshProcessQueuesLocked(uid);
-                }
+                mLocalHandler.removeMessages(MSG_UID_STATE_CHANGED, uid);
+                mLocalHandler.obtainMessage(MSG_UID_STATE_CHANGED, procState, 0, uid)
+                        .sendToTarget();
             }
         }, ActivityManager.UID_OBSERVER_PROCSTATE,
                 ActivityManager.PROCESS_STATE_TOP, "android");

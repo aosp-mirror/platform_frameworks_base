@@ -21,9 +21,11 @@ import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
 import static android.os.PowerExemptionManager.REASON_DENIED;
+import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.INVALID_UID;
 
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.server.am.ActiveServices.TAG_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -172,11 +174,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     private BackgroundStartPrivileges mBackgroundStartPrivilegesByStartMerged =
             BackgroundStartPrivileges.NONE;
 
-    // allow while-in-use permissions in foreground service or not.
+    // Reason code for allow while-in-use permissions in foreground service.
+    // If it's not DENIED, while-in-use permissions are allowed.
     // while-in-use permissions in FGS started from background might be restricted.
-    boolean mAllowWhileInUsePermissionInFgs;
     @PowerExemptionManager.ReasonCode
-    int mAllowWhileInUsePermissionInFgsReason = REASON_DENIED;
+    int mAllowWhileInUsePermissionInFgsReasonNoBinding = REASON_DENIED;
 
     // A copy of mAllowWhileInUsePermissionInFgs's value when the service is entering FGS state.
     boolean mAllowWhileInUsePermissionInFgsAtEntering;
@@ -205,15 +207,121 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
-    @PowerExemptionManager.ReasonCode int mAllowStartForeground = REASON_DENIED;
+    @PowerExemptionManager.ReasonCode
+    int mAllowStartForegroundNoBinding = REASON_DENIED;
     // A copy of mAllowStartForeground's value when the service is entering FGS state.
-    @PowerExemptionManager.ReasonCode int mAllowStartForegroundAtEntering = REASON_DENIED;
+    @PowerExemptionManager.ReasonCode
+    int mAllowStartForegroundAtEntering = REASON_DENIED;
     // Debug info why mAllowStartForeground is allowed or denied.
     String mInfoAllowStartForeground;
     // Debug info if mAllowStartForeground is allowed because of a temp-allowlist.
     ActivityManagerService.FgsTempAllowListItem mInfoTempFgsAllowListReason;
     // Is the same mInfoAllowStartForeground string has been logged before? Used for dedup.
     boolean mLoggedInfoAllowStartForeground;
+
+    @PowerExemptionManager.ReasonCode
+    int mAllowWIUInBindService = REASON_DENIED;
+
+    @PowerExemptionManager.ReasonCode
+    int mAllowWIUByBindings = REASON_DENIED;
+
+    @PowerExemptionManager.ReasonCode
+    int mAllowStartInBindService = REASON_DENIED;
+
+    @PowerExemptionManager.ReasonCode
+    int mAllowStartByBindings = REASON_DENIED;
+
+    @PowerExemptionManager.ReasonCode
+    int getFgsAllowWIU() {
+        return mAllowWhileInUsePermissionInFgsReasonNoBinding != REASON_DENIED
+                ? mAllowWhileInUsePermissionInFgsReasonNoBinding
+                : mAllowWIUInBindService;
+    }
+
+    boolean isFgsAllowedWIU() {
+        return getFgsAllowWIU() != REASON_DENIED;
+    }
+
+    @PowerExemptionManager.ReasonCode
+    int getFgsAllowStart() {
+        return mAllowStartForegroundNoBinding != REASON_DENIED
+                ? mAllowStartForegroundNoBinding
+                : mAllowStartInBindService;
+    }
+
+    boolean isFgsAllowedStart() {
+        return getFgsAllowStart() != REASON_DENIED;
+    }
+
+    void clearFgsAllowWIU() {
+        mAllowWhileInUsePermissionInFgsReasonNoBinding = REASON_DENIED;
+        mAllowWIUInBindService = REASON_DENIED;
+        mAllowWIUByBindings = REASON_DENIED;
+    }
+
+    void clearFgsAllowStart() {
+        mAllowStartForegroundNoBinding = REASON_DENIED;
+        mAllowStartInBindService = REASON_DENIED;
+        mAllowStartByBindings = REASON_DENIED;
+    }
+
+    @PowerExemptionManager.ReasonCode
+    int reasonOr(@PowerExemptionManager.ReasonCode int first,
+            @PowerExemptionManager.ReasonCode int second) {
+        return first != REASON_DENIED ? first : second;
+    }
+
+    boolean allowedChanged(@PowerExemptionManager.ReasonCode int first,
+            @PowerExemptionManager.ReasonCode int second) {
+        return (first == REASON_DENIED) != (second == REASON_DENIED);
+    }
+
+    String changeMessage(@PowerExemptionManager.ReasonCode int first,
+            @PowerExemptionManager.ReasonCode int second) {
+        return reasonOr(first, second) == REASON_DENIED ? "DENIED"
+                : ("ALLOWED ("
+                + reasonCodeToString(first)
+                + "+"
+                + reasonCodeToString(second)
+                + ")");
+    }
+
+    private String getFgsInfoForWtf() {
+        return " cmp: " + this.getComponentName().toShortString()
+                + " sdk: " + this.appInfo.targetSdkVersion
+                ;
+    }
+
+    void maybeLogFgsLogicChange() {
+        final int origWiu = reasonOr(mAllowWhileInUsePermissionInFgsReasonNoBinding,
+                mAllowWIUInBindService);
+        final int newWiu = reasonOr(mAllowWhileInUsePermissionInFgsReasonNoBinding,
+                mAllowWIUByBindings);
+        final int origStart = reasonOr(mAllowStartForegroundNoBinding, mAllowStartInBindService);
+        final int newStart = reasonOr(mAllowStartForegroundNoBinding, mAllowStartByBindings);
+
+        final boolean wiuChanged = allowedChanged(origWiu, newWiu);
+        final boolean startChanged = allowedChanged(origStart, newStart);
+
+        if (!wiuChanged && !startChanged) {
+            return;
+        }
+        final String message = "FGS logic changed:"
+                + (wiuChanged ? " [WIU changed]" : "")
+                + (startChanged ? " [BFSL changed]" : "")
+                + " OW:" // Orig-WIU
+                + changeMessage(mAllowWhileInUsePermissionInFgsReasonNoBinding,
+                        mAllowWIUInBindService)
+                + " NW:" // New-WIU
+                + changeMessage(mAllowWhileInUsePermissionInFgsReasonNoBinding, mAllowWIUByBindings)
+                + " OS:" // Orig-start
+                + changeMessage(mAllowStartForegroundNoBinding, mAllowStartInBindService)
+                + " NS:" // New-start
+                + changeMessage(mAllowStartForegroundNoBinding, mAllowStartByBindings)
+                + getFgsInfoForWtf();
+        Slog.wtf(TAG_SERVICE, message);
+    }
+
     // The number of times Service.startForeground() is called, after this service record is
     // created. (i.e. due to "bound" or "start".) It never decreases, even when stopForeground()
     // is called.
@@ -502,7 +610,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         ProtoUtils.toDuration(proto, ServiceRecordProto.RESTART_TIME, restartTime, now);
         proto.write(ServiceRecordProto.CREATED_FROM_FG, createdFromFg);
         proto.write(ServiceRecordProto.ALLOW_WHILE_IN_USE_PERMISSION_IN_FGS,
-                mAllowWhileInUsePermissionInFgs);
+                isFgsAllowedWIU());
 
         if (startRequested || delayedStop || lastStartId != 0) {
             long startToken = proto.start(ServiceRecordProto.START);
@@ -618,7 +726,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.println(mBackgroundStartPrivilegesByStartMerged);
         }
         pw.print(prefix); pw.print("mAllowWhileInUsePermissionInFgsReason=");
-        pw.println(PowerExemptionManager.reasonCodeToString(mAllowWhileInUsePermissionInFgsReason));
+        pw.println(PowerExemptionManager.reasonCodeToString(
+                mAllowWhileInUsePermissionInFgsReasonNoBinding));
+
+        pw.print(prefix); pw.print("mAllowWIUInBindService=");
+        pw.println(PowerExemptionManager.reasonCodeToString(mAllowWIUInBindService));
+        pw.print(prefix); pw.print("mAllowWIUByBindings=");
+        pw.println(PowerExemptionManager.reasonCodeToString(mAllowWIUByBindings));
 
         pw.print(prefix); pw.print("allowUiJobScheduling="); pw.println(mAllowUiJobScheduling);
         pw.print(prefix); pw.print("recentCallingPackage=");
@@ -626,7 +740,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         pw.print(prefix); pw.print("recentCallingUid=");
         pw.println(mRecentCallingUid);
         pw.print(prefix); pw.print("allowStartForeground=");
-        pw.println(PowerExemptionManager.reasonCodeToString(mAllowStartForeground));
+        pw.println(PowerExemptionManager.reasonCodeToString(mAllowStartForegroundNoBinding));
+        pw.print(prefix); pw.print("mAllowStartInBindService=");
+        pw.println(PowerExemptionManager.reasonCodeToString(mAllowStartInBindService));
+        pw.print(prefix); pw.print("mAllowStartByBindings=");
+        pw.println(PowerExemptionManager.reasonCodeToString(mAllowStartByBindings));
+
         pw.print(prefix); pw.print("startForegroundCount=");
         pw.println(mStartForegroundCount);
         pw.print(prefix); pw.print("infoAllowStartForeground=");

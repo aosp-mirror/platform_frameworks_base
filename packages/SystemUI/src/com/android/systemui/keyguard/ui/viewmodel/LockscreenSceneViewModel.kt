@@ -16,93 +16,34 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.R
-import com.android.systemui.common.shared.model.ContentDescription
-import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
+import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.SceneKey
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the lockscreen scene. */
+@SysUISingleton
 class LockscreenSceneViewModel
-@AssistedInject
+@Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
-    interactorFactory: LockscreenSceneInteractor.Factory,
-    @Assisted containerName: String,
+    authenticationInteractor: AuthenticationInteractor,
+    private val bouncerInteractor: BouncerInteractor,
 ) {
-    private val interactor: LockscreenSceneInteractor = interactorFactory.create(containerName)
-
-    /** The icon for the "lock" button on the lockscreen. */
-    val lockButtonIcon: StateFlow<Icon> =
-        interactor.isDeviceLocked
-            .map { isLocked -> lockIcon(isLocked = isLocked) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = lockIcon(isLocked = interactor.isDeviceLocked.value),
-            )
-
     /** The key of the scene we should switch to when swiping up. */
-    val upDestinationSceneKey: StateFlow<SceneKey> =
-        interactor.isSwipeToDismissEnabled
-            .map { isSwipeToUnlockEnabled -> upDestinationSceneKey(isSwipeToUnlockEnabled) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = upDestinationSceneKey(interactor.isSwipeToDismissEnabled.value),
-            )
+    val upDestinationSceneKey: Flow<SceneKey> =
+        authenticationInteractor.isUnlocked.map { isUnlocked ->
+            if (isUnlocked) {
+                SceneKey.Gone
+            } else {
+                SceneKey.Bouncer
+            }
+        }
 
     /** Notifies that the lock button on the lock screen was clicked. */
     fun onLockButtonClicked() {
-        interactor.dismissLockscreen()
-    }
-
-    /** Notifies that some content on the lock screen was clicked. */
-    fun onContentClicked() {
-        interactor.dismissLockscreen()
-    }
-
-    private fun upDestinationSceneKey(
-        isSwipeToUnlockEnabled: Boolean,
-    ): SceneKey {
-        return if (isSwipeToUnlockEnabled) SceneKey.Gone else SceneKey.Bouncer
-    }
-
-    private fun lockIcon(
-        isLocked: Boolean,
-    ): Icon {
-        return Icon.Resource(
-            res =
-                if (isLocked) {
-                    R.drawable.ic_device_lock_on
-                } else {
-                    R.drawable.ic_device_lock_off
-                },
-            contentDescription =
-                ContentDescription.Resource(
-                    res =
-                        if (isLocked) {
-                            R.string.accessibility_lock_icon
-                        } else {
-                            R.string.accessibility_unlock_button
-                        }
-                )
-        )
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): LockscreenSceneViewModel
+        bouncerInteractor.showOrUnlockDevice()
     }
 }

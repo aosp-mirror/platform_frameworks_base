@@ -124,8 +124,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     }
 
     private fun updateServices(newServices: List<ControlsServiceInfo>) {
-        if (featureFlags.isEnabled(Flags.USE_APP_PANELS) &&
-                activityTaskManagerProxy.supportsMultiWindow(context)) {
+        if (activityTaskManagerProxy.supportsMultiWindow(context)) {
             val allowAllApps = featureFlags.isEnabled(Flags.APP_PANELS_ALL_APPS_ALLOWED)
             newServices.forEach {
                 it.resolvePanelActivity(allowAllApps) }

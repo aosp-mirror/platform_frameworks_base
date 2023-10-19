@@ -21,6 +21,7 @@
 <com.android.systemui.shade.NotificationShadeWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/legacy_window_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
@@ -68,6 +69,19 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:visibility="invisible" />
+
+    <!-- Root for all keyguard content. It was previously located within the shade. -->
+    <com.android.systemui.keyguard.ui.view.KeyguardRootView
+        android:id="@id/keyguard_root_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Shared container for the notification stack. Can be positioned by either
+         the keyguard_root_view or notification_panel -->
+    <com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+        android:id="@+id/shared_notification_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <include layout="@layout/brightness_mirror_container" />
 

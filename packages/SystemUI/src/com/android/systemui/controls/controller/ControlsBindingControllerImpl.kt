@@ -312,6 +312,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
                 Log.d(TAG, "Canceling loadSubscribtion")
                 it.invoke()
             }
+            callback.error("Load cancelled")
         }
 
         override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {

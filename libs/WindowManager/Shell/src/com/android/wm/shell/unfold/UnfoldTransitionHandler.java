@@ -63,6 +63,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     @Nullable
     private IBinder mTransition;
 
+    private boolean mAnimationFinished = false;
     private final List<UnfoldTaskAnimator> mAnimators = new ArrayList<>();
 
     public UnfoldTransitionHandler(ShellInit shellInit,
@@ -132,6 +133,13 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
         startTransaction.apply();
         mFinishCallback = finishCallback;
+
+        // Shell transition started when unfold animation has already finished,
+        // finish shell transition immediately
+        if (mAnimationFinished) {
+            finishTransitionIfNeeded();
+        }
+
         return true;
     }
 
@@ -161,17 +169,8 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
     @Override
     public void onStateChangeFinished() {
-        if (mFinishCallback == null) return;
-
-        for (int i = 0; i < mAnimators.size(); i++) {
-            final UnfoldTaskAnimator animator = mAnimators.get(i);
-            animator.clearTasks();
-            animator.stop();
-        }
-
-        mFinishCallback.onTransitionFinished(null, null);
-        mFinishCallback = null;
-        mTransition = null;
+        mAnimationFinished = true;
+        finishTransitionIfNeeded();
     }
 
     @Override
@@ -193,7 +192,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             }
             // Apply changes happening during the unfold animation immediately
             t.apply();
-            finishCallback.onTransitionFinished(null, null);
+            finishCallback.onTransitionFinished(null);
         }
     }
 
@@ -217,5 +216,26 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
     public boolean willHandleTransition() {
         return mTransition != null;
+    }
+
+    @Override
+    public void onFoldStateChanged(boolean isFolded) {
+        if (isFolded) {
+            mAnimationFinished = false;
+        }
+    }
+
+    private void finishTransitionIfNeeded() {
+        if (mFinishCallback == null) return;
+
+        for (int i = 0; i < mAnimators.size(); i++) {
+            final UnfoldTaskAnimator animator = mAnimators.get(i);
+            animator.clearTasks();
+            animator.stop();
+        }
+
+        mFinishCallback.onTransitionFinished(null);
+        mFinishCallback = null;
+        mTransition = null;
     }
 }

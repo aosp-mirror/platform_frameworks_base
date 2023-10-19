@@ -1507,8 +1507,9 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /** @hide */
-    public void setRemoteTransition(@Nullable RemoteTransition remoteTransition) {
+    public ActivityOptions setRemoteTransition(@Nullable RemoteTransition remoteTransition) {
         mRemoteTransition = remoteTransition;
+        return this;
     }
 
     /** @hide */

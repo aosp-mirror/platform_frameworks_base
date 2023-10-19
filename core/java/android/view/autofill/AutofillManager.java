@@ -1436,7 +1436,7 @@ public final class AutofillManager {
         }
         for (int i = 0; i < infos.size(); i++) {
             final VirtualViewFillInfo info = infos.valueAt(i);
-            final int virtualId = infos.indexOfKey(i);
+            final int virtualId = infos.keyAt(i);
             notifyViewReadyInner(getAutofillId(view, virtualId),
                     (info == null) ? null : info.getAutofillHints());
         }
@@ -1450,9 +1450,6 @@ public final class AutofillManager {
      * @hide
      */
     public void notifyViewEnteredForFillDialog(View v) {
-        if (sDebug) {
-            Log.d(TAG, "notifyViewEnteredForFillDialog:" + v.getAutofillId());
-        }
         if (v.isCredential()
                 && mIsFillAndSaveDialogDisabledForCredentialManager) {
             if (sDebug) {
@@ -1465,11 +1462,14 @@ public final class AutofillManager {
         notifyViewReadyInner(v.getAutofillId(), v.getAutofillHints());
     }
 
-    private void notifyViewReadyInner(AutofillId id, String[] autofillHints) {
+    private void notifyViewReadyInner(AutofillId id, @Nullable String[] autofillHints) {
+        if (sDebug) {
+            Log.d(TAG, "notifyViewReadyInner:" + id);
+        }
+
         if (!hasAutofillFeature()) {
             return;
         }
-
         synchronized (mLock) {
             if (mAllTrackedViews.contains(id)) {
                 // The id is tracked and will not trigger pre-fill request again.
@@ -1505,26 +1505,38 @@ public final class AutofillManager {
                     final boolean clientAdded = tryAddServiceClientIfNeededLocked();
                     if (clientAdded) {
                         startSessionLocked(/* id= */ AutofillId.NO_AUTOFILL_ID, /* bounds= */ null,
-                                /* value= */ null, /* flags= */ FLAG_PCC_DETECTION);
+                            /* value= */ null, /* flags= */ FLAG_PCC_DETECTION);
                     } else {
                         if (sVerbose) {
                             Log.v(TAG, "not starting session: no service client");
                         }
                     }
-
                 }
             }
         }
 
-        if (mIsFillDialogEnabled
-                || ArrayUtils.containsAny(autofillHints, mFillDialogEnabledHints)) {
+        // Check if framework should send pre-fill request for fill dialog
+        boolean shouldSendPreFillRequestForFillDialog = false;
+        if (mIsFillDialogEnabled) {
+            shouldSendPreFillRequestForFillDialog = true;
+        } else if (autofillHints != null) {
+            // check if supported autofill hint is present
+            for (String autofillHint : autofillHints) {
+                for (String filldialogEnabledHint : mFillDialogEnabledHints) {
+                    if (filldialogEnabledHint.equalsIgnoreCase(autofillHint)) {
+                        shouldSendPreFillRequestForFillDialog = true;
+                        break;
+                    }
+                }
+                if (shouldSendPreFillRequestForFillDialog) break;
+            }
+        }
+        if (shouldSendPreFillRequestForFillDialog) {
             if (sDebug) {
                 Log.d(TAG, "Triggering pre-emptive request for fill dialog.");
             }
-
             int flags = FLAG_SUPPORTS_FILL_DIALOG;
             flags |= FLAG_VIEW_NOT_FOCUSED;
-
             synchronized (mLock) {
                 // To match the id of the IME served view, used AutofillId.NO_AUTOFILL_ID on prefill
                 // request, because IME will reset the id of IME served view to 0 when activity
@@ -1532,9 +1544,10 @@ public final class AutofillManager {
                 // not match the IME served view's, Autofill will be blocking to wait inline
                 // request from the IME.
                 notifyViewEnteredLocked(/* view= */ null, AutofillId.NO_AUTOFILL_ID,
-                        /* bounds= */ null,  /* value= */ null, flags);
+                    /* bounds= */ null,  /* value= */ null, flags);
             }
         }
+        return;
     }
 
     private boolean hasFillDialogUiFeature() {
@@ -4210,6 +4223,14 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.requestHideFillUi(id, false));
+            }
+        }
+
+        @Override
+        public void requestHideFillUiWhenDestroyed(int sessionId, AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.requestHideFillUi(id, true));
             }
         }
 

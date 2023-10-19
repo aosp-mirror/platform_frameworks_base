@@ -17,30 +17,42 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.WakeSleepReason
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RoboPilotTest
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimRepositoryTest : SysuiTestCase() {
     private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
     private lateinit var underTest: LightRevealScrimRepositoryImpl
+
+    @get:Rule val animatorTestRule = AnimatorTestRule()
 
     @Before
     fun setUp() {
@@ -50,112 +62,127 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun nextRevealEffect_effectSwitchesBetweenDefaultAndBiometricWithNoDupes() =
-        runTest {
-            val values = mutableListOf<LightRevealEffect>()
-            val job = launch { underTest.revealEffect.collect { values.add(it) } }
+    fun nextRevealEffect_effectSwitchesBetweenDefaultAndBiometricWithNoDupes() = runTest {
+        val values = mutableListOf<LightRevealEffect>()
+        val job = launch { underTest.revealEffect.collect { values.add(it) } }
 
-            // We should initially emit the default reveal effect.
-            runCurrent()
-            values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT })
-
-            // The source and sensor locations are still null, so we should still be using the
-            // default reveal despite a biometric unlock.
-            fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
-
-            runCurrent()
-            values.assertEffectsMatchPredicates(
-                { it == DEFAULT_REVEAL_EFFECT },
+        fakeKeyguardRepository.setWakefulnessModel(
+            WakefulnessModel(
+                WakefulnessState.STARTING_TO_WAKE,
+                WakeSleepReason.OTHER,
+                WakeSleepReason.OTHER
             )
+        )
+        // We should initially emit the default reveal effect.
+        runCurrent()
+        values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT })
 
-            // We got a source but still have no sensor locations, so should be sticking with
-            // the default effect.
-            fakeKeyguardRepository.setBiometricUnlockSource(
-                BiometricUnlockSource.FINGERPRINT_SENSOR
-            )
+        // The source and sensor locations are still null, so we should still be using the
+        // default reveal despite a biometric unlock.
+        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
 
-            runCurrent()
-            values.assertEffectsMatchPredicates(
-                { it == DEFAULT_REVEAL_EFFECT },
-            )
+        runCurrent()
+        values.assertEffectsMatchPredicates(
+            { it == DEFAULT_REVEAL_EFFECT },
+        )
 
-            // We got a location for the face sensor, but we unlocked with fingerprint.
-            val faceLocation = Point(250, 0)
-            fakeKeyguardRepository.setFaceSensorLocation(faceLocation)
+        // We got a source but still have no sensor locations, so should be sticking with
+        // the default effect.
+        fakeKeyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FINGERPRINT_SENSOR)
 
-            runCurrent()
-            values.assertEffectsMatchPredicates(
-                { it == DEFAULT_REVEAL_EFFECT },
-            )
+        runCurrent()
+        values.assertEffectsMatchPredicates(
+            { it == DEFAULT_REVEAL_EFFECT },
+        )
 
-            // Now we have fingerprint sensor locations, and wake and unlock via fingerprint.
-            val fingerprintLocation = Point(500, 500)
-            fakeKeyguardRepository.setFingerprintSensorLocation(fingerprintLocation)
-            fakeKeyguardRepository.setBiometricUnlockSource(
-                BiometricUnlockSource.FINGERPRINT_SENSOR
-            )
-            fakeKeyguardRepository.setBiometricUnlockState(
-                BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING
-            )
+        // We got a location for the face sensor, but we unlocked with fingerprint.
+        val faceLocation = Point(250, 0)
+        fakeKeyguardRepository.setFaceSensorLocation(faceLocation)
 
-            // We should now have switched to the circle reveal, at the fingerprint location.
-            runCurrent()
-            values.assertEffectsMatchPredicates(
-                { it == DEFAULT_REVEAL_EFFECT },
-                {
-                    it is CircleReveal &&
-                        it.centerX == fingerprintLocation.x &&
-                        it.centerY == fingerprintLocation.y
-                },
-            )
+        runCurrent()
+        values.assertEffectsMatchPredicates(
+            { it == DEFAULT_REVEAL_EFFECT },
+        )
 
-            // Subsequent wake and unlocks should not emit duplicate, identical CircleReveals.
-            val valuesPrevSize = values.size
-            fakeKeyguardRepository.setBiometricUnlockState(
-                BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING
-            )
-            fakeKeyguardRepository.setBiometricUnlockState(
-                BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
-            )
-            assertEquals(valuesPrevSize, values.size)
+        // Now we have fingerprint sensor locations, and wake and unlock via fingerprint.
+        val fingerprintLocation = Point(500, 500)
+        fakeKeyguardRepository.setFingerprintSensorLocation(fingerprintLocation)
+        fakeKeyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FINGERPRINT_SENSOR)
+        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING)
 
-            // Non-biometric unlock, we should return to the default reveal.
-            fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.NONE)
+        // We should now have switched to the circle reveal, at the fingerprint location.
+        runCurrent()
+        values.assertEffectsMatchPredicates(
+            { it == DEFAULT_REVEAL_EFFECT },
+            {
+                it is CircleReveal &&
+                    it.centerX == fingerprintLocation.x &&
+                    it.centerY == fingerprintLocation.y
+            },
+        )
 
-            runCurrent()
-            values.assertEffectsMatchPredicates(
-                { it == DEFAULT_REVEAL_EFFECT },
-                {
-                    it is CircleReveal &&
-                        it.centerX == fingerprintLocation.x &&
-                        it.centerY == fingerprintLocation.y
-                },
-                { it == DEFAULT_REVEAL_EFFECT },
-            )
+        // Subsequent wake and unlocks should not emit duplicate, identical CircleReveals.
+        val valuesPrevSize = values.size
+        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING)
+        fakeKeyguardRepository.setBiometricUnlockState(
+            BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
+        )
+        assertEquals(valuesPrevSize, values.size)
 
-            // We already have a face location, so switching to face source should update the
-            // CircleReveal.
-            fakeKeyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FACE_SENSOR)
-            runCurrent()
-            fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
-            runCurrent()
+        // Non-biometric unlock, we should return to the default reveal.
+        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.NONE)
 
-            values.assertEffectsMatchPredicates(
-                { it == DEFAULT_REVEAL_EFFECT },
-                {
-                    it is CircleReveal &&
-                        it.centerX == fingerprintLocation.x &&
-                        it.centerY == fingerprintLocation.y
-                },
-                { it == DEFAULT_REVEAL_EFFECT },
-                {
-                    it is CircleReveal &&
-                        it.centerX == faceLocation.x &&
-                        it.centerY == faceLocation.y
-                },
-            )
+        runCurrent()
+        values.assertEffectsMatchPredicates(
+            { it == DEFAULT_REVEAL_EFFECT },
+            {
+                it is CircleReveal &&
+                    it.centerX == fingerprintLocation.x &&
+                    it.centerY == fingerprintLocation.y
+            },
+            { it == DEFAULT_REVEAL_EFFECT },
+        )
 
-            job.cancel()
+        // We already have a face location, so switching to face source should update the
+        // CircleReveal.
+        fakeKeyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FACE_SENSOR)
+        runCurrent()
+        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+        runCurrent()
+
+        values.assertEffectsMatchPredicates(
+            { it == DEFAULT_REVEAL_EFFECT },
+            {
+                it is CircleReveal &&
+                    it.centerX == fingerprintLocation.x &&
+                    it.centerY == fingerprintLocation.y
+            },
+            { it == DEFAULT_REVEAL_EFFECT },
+            { it is CircleReveal && it.centerX == faceLocation.x && it.centerY == faceLocation.y },
+        )
+
+        job.cancel()
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    fun revealAmount_emitsTo1AfterAnimationStarted() =
+        runTest(UnconfinedTestDispatcher()) {
+            val value by collectLastValue(underTest.revealAmount)
+            underTest.startRevealAmountAnimator(true)
+            assertEquals(0.0f, value)
+            animatorTestRule.advanceTimeBy(500L)
+            assertEquals(1.0f, value)
+        }
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    fun revealAmount_emitsTo0AfterAnimationStartedReversed() =
+        runTest(UnconfinedTestDispatcher()) {
+            val value by collectLastValue(underTest.revealAmount)
+            underTest.startRevealAmountAnimator(false)
+            assertEquals(1.0f, value)
+            animatorTestRule.advanceTimeBy(500L)
+            assertEquals(0.0f, value)
         }
 
     /**

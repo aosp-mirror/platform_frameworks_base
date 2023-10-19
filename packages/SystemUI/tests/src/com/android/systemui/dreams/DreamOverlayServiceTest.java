@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams;
 
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -506,5 +508,24 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     public void testWakeUpBeforeStartDoesNothing() {
         mService.onWakeUp();
         verify(mDreamOverlayContainerViewController, never()).wakeUp();
+    }
+
+    @Test
+    public void testSystemFlagShowForAllUsersSetOnWindow() throws RemoteException {
+        final IDreamOverlayClient client = getClient();
+
+        // Inform the overlay service of dream starting. Do not show dream complications.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        final ArgumentCaptor<WindowManager.LayoutParams> paramsCaptor =
+                ArgumentCaptor.forClass(WindowManager.LayoutParams.class);
+
+        // Verify that a new window is added.
+        verify(mWindowManager).addView(any(), paramsCaptor.capture());
+
+        assertThat((paramsCaptor.getValue().privateFlags & SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
+                == SYSTEM_FLAG_SHOW_FOR_ALL_USERS).isTrue();
     }
 }

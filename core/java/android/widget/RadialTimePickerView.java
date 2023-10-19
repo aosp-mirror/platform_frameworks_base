@@ -38,6 +38,7 @@ import android.util.MathUtils;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
@@ -1060,9 +1061,11 @@ public class RadialTimePickerView extends View {
         if (!isEnabled()) {
             return null;
         }
-        final int degrees = getDegreesFromXY(event.getX(), event.getY(), false);
-        if (degrees != -1) {
-            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+        if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            final int degrees = getDegreesFromXY(event.getX(), event.getY(), false);
+            if (degrees != -1) {
+                return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+            }
         }
         return super.onResolvePointerIcon(event, pointerIndex);
     }

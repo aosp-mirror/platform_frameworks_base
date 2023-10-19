@@ -221,6 +221,27 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
     }
 
     /**
+     * Stops an ongoing search for nearby Broadcast Sources.
+     *
+     * On success, {@link BluetoothLeBroadcastAssistant.Callback#onSearchStopped(int)} will be
+     * called with reason code {@link BluetoothStatusCodes#REASON_LOCAL_APP_REQUEST}.
+     * On failure, {@link BluetoothLeBroadcastAssistant.Callback#onSearchStopFailed(int)} will be
+     * called with reason code
+     *
+     * @throws IllegalStateException if callback was not registered
+     */
+    public void stopSearchingForSources() {
+        if (DEBUG) {
+            Log.d(TAG, "stopSearchingForSources()");
+        }
+        if (mService == null) {
+            Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
+            return;
+        }
+        mService.stopSearchingForSources();
+    }
+
+    /**
      * Get information about all Broadcast Sources that a Broadcast Sink knows about.
      *
      * @param sink Broadcast Sink from which to get all Broadcast Sources

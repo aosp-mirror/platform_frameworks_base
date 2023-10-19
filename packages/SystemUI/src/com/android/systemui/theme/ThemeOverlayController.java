@@ -74,20 +74,21 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.monet.Style;
 import com.android.systemui.monet.TonalPalette;
-import com.android.systemui.monet.dynamiccolor.MaterialDynamicColors;
-import com.android.systemui.monet.hct.Hct;
-import com.android.systemui.monet.scheme.DynamicScheme;
-import com.android.systemui.monet.scheme.SchemeExpressive;
-import com.android.systemui.monet.scheme.SchemeFruitSalad;
-import com.android.systemui.monet.scheme.SchemeMonochrome;
-import com.android.systemui.monet.scheme.SchemeNeutral;
-import com.android.systemui.monet.scheme.SchemeRainbow;
-import com.android.systemui.monet.scheme.SchemeTonalSpot;
-import com.android.systemui.monet.scheme.SchemeVibrant;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.util.settings.SecureSettings;
+
+import com.google.ux.material.libmonet.dynamiccolor.MaterialDynamicColors;
+import com.google.ux.material.libmonet.hct.Hct;
+import com.google.ux.material.libmonet.scheme.DynamicScheme;
+import com.google.ux.material.libmonet.scheme.SchemeExpressive;
+import com.google.ux.material.libmonet.scheme.SchemeFruitSalad;
+import com.google.ux.material.libmonet.scheme.SchemeMonochrome;
+import com.google.ux.material.libmonet.scheme.SchemeNeutral;
+import com.google.ux.material.libmonet.scheme.SchemeRainbow;
+import com.google.ux.material.libmonet.scheme.SchemeTonalSpot;
+import com.google.ux.material.libmonet.scheme.SchemeVibrant;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -129,6 +130,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private final boolean mIsMonochromaticEnabled;
     private final Context mContext;
     private final boolean mIsMonetEnabled;
+    private final boolean mIsFidelityEnabled;
     private final UserTracker mUserTracker;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final Resources mResources;
@@ -397,6 +399,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         mContext = context;
         mIsMonochromaticEnabled = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEME);
         mIsMonetEnabled = featureFlags.isEnabled(Flags.MONET);
+        mIsFidelityEnabled = featureFlags.isEnabled(Flags.COLOR_FIDELITY);
         mDeviceProvisionedController = deviceProvisionedController;
         mBroadcastDispatcher = broadcastDispatcher;
         mUserManager = userManager;
@@ -631,7 +634,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private void assignDynamicPaletteToOverlay(FabricatedOverlay overlay, boolean isDark) {
         String suffix = isDark ? "dark" : "light";
         DynamicScheme scheme = isDark ? mDynamicSchemeDark : mDynamicSchemeLight;
-        DynamicColors.ALL_DYNAMIC_COLORS_MAPPED.forEach(p -> {
+        DynamicColors.allDynamicColorsMapped(mIsFidelityEnabled).forEach(p -> {
             String resourceName = "android:color/system_" + p.first + "_" + suffix;
             int colorValue = p.second.getArgb(scheme);
             overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
@@ -640,7 +643,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     }
 
     private void assignFixedColorsToOverlay(FabricatedOverlay overlay) {
-        DynamicColors.FIXED_COLORS_MAPPED.forEach(p -> {
+        DynamicColors.getFixedColorsMapped(mIsFidelityEnabled).forEach(p -> {
             String resourceName = "android:color/system_" + p.first;
             int colorValue = p.second.getArgb(mDynamicSchemeLight);
             overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
@@ -659,7 +662,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             Resources res = userHandle.isSystem()
                     ? mResources : mContext.createContextAsUser(userHandle, 0).getResources();
             Resources.Theme theme = mContext.getTheme();
-            MaterialDynamicColors dynamicColors = new MaterialDynamicColors();
+            MaterialDynamicColors dynamicColors = new MaterialDynamicColors(mIsFidelityEnabled);
             if (!(res.getColor(android.R.color.system_accent1_500, theme)
                     == mColorScheme.getAccent1().getS500()
                     && res.getColor(android.R.color.system_accent2_500, theme)
@@ -818,6 +821,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         pw.println("mNeutralOverlay=" + mNeutralOverlay);
         pw.println("mDynamicOverlay=" + mDynamicOverlay);
         pw.println("mIsMonetEnabled=" + mIsMonetEnabled);
+        pw.println("mIsFidelityEnabled=" + mIsFidelityEnabled);
         pw.println("mColorScheme=" + mColorScheme);
         pw.println("mNeedsOverlayCreation=" + mNeedsOverlayCreation);
         pw.println("mAcceptColorEvents=" + mAcceptColorEvents);

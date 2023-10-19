@@ -52,7 +52,7 @@ import com.android.server.backup.params.BackupParams;
 import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
-import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -86,6 +86,7 @@ public class UserBackupManagerServiceTest {
     @Mock BackupTransportClient mBackupTransport;
     @Mock BackupEligibilityRules mBackupEligibilityRules;
     @Mock LifecycleOperationStorage mOperationStorage;
+    @Mock BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     private MockitoSession mSession;
     private TestBackupService mService;
@@ -94,7 +95,7 @@ public class UserBackupManagerServiceTest {
     public void setUp() throws Exception {
         mSession = mockitoSession()
                 .initMocks(this)
-                .mockStatic(BackupManagerMonitorUtils.class)
+                .mockStatic(BackupManagerMonitorEventSender.class)
                 .mockStatic(FeatureFlagUtils.class)
                 // TODO(b/263239775): Remove unnecessary stubbing.
                 .strictness(Strictness.LENIENT)
@@ -246,9 +247,9 @@ public class UserBackupManagerServiceTest {
                 new DataTypeResult(/* dataType */ "type_2"));
         mService.reportDelayedRestoreResult(TEST_PACKAGE, results);
 
-        verify(() -> BackupManagerMonitorUtils.sendAgentLoggingResults(
-                eq(mBackupManagerMonitor), eq(packageInfo), eq(results), eq(
-                        BackupAnnotations.OperationType.RESTORE)));
+
+        verify(mBackupManagerMonitorEventSender).sendAgentLoggingResults(
+                eq(packageInfo), eq(results), eq(BackupAnnotations.OperationType.RESTORE));
     }
 
     private static PackageInfo getPackageInfo(String packageName) {
@@ -258,7 +259,7 @@ public class UserBackupManagerServiceTest {
         return packageInfo;
     }
 
-    private static class TestBackupService extends UserBackupManagerService {
+    private class TestBackupService extends UserBackupManagerService {
         boolean isEnabledStatePersisted = false;
         boolean shouldUseNewBackupEligibilityRules = false;
 
@@ -291,6 +292,11 @@ public class UserBackupManagerServiceTest {
         Thread getThreadForAsyncOperation(String operationName, Runnable operation) {
             mWorkerThread = super.getThreadForAsyncOperation(operationName, operation);
             return mWorkerThread;
+        }
+
+        @Override
+        BackupManagerMonitorEventSender getBMMEventSender(IBackupManagerMonitor monitor) {
+            return mBackupManagerMonitorEventSender;
         }
 
         private void waitForAsyncOperation() {

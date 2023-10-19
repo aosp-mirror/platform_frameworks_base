@@ -27,8 +27,6 @@ import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.R;
 import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
@@ -347,10 +345,12 @@ public class StackStateAnimator {
             final ExpandableView changingView = (ExpandableView) event.mChangingView;
             boolean loggable = false;
             boolean isHeadsUp = false;
+            boolean isGroupChild = false;
             String key = null;
             if (changingView instanceof ExpandableNotificationRow && mLogger != null) {
                 loggable = true;
                 isHeadsUp = ((ExpandableNotificationRow) changingView).isHeadsUp();
+                isGroupChild = changingView.isChildInGroup();
                 key = ((ExpandableNotificationRow) changingView).getEntry().getKey();
             }
             if (event.animationType ==
@@ -407,17 +407,25 @@ public class StackStateAnimator {
 
                 }
                 Runnable postAnimation = changingView::removeFromTransientContainer;
-                if (loggable && isHeadsUp) {
-                    mLogger.logHUNViewDisappearingWithRemoveEvent(key);
+                if (loggable) {
                     String finalKey = key;
-                    postAnimation = () -> {
-                        mLogger.disappearAnimationEnded(finalKey);
-                        changingView.removeFromTransientContainer();
-                    };
+                    if (isHeadsUp) {
+                        mLogger.logHUNViewDisappearingWithRemoveEvent(key);
+                        postAnimation = () -> {
+                            mLogger.disappearAnimationEnded(finalKey);
+                            changingView.removeFromTransientContainer();
+                        };
+                    } else if (isGroupChild) {
+                        mLogger.groupChildRemovalEventProcessed(key);
+                        postAnimation = () -> {
+                            mLogger.groupChildRemovalAnimationEnded(finalKey);
+                            changingView.removeFromTransientContainer();
+                        };
+                    }
                 }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,
-                        0, postAnimation, null);
+                        postAnimation, null);
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
                 if (mHostLayout.isFullySwipedOut(changingView)) {
@@ -464,27 +472,11 @@ public class StackStateAnimator {
                     mTmpState.initFrom(changingView);
                     endRunnable = changingView::removeFromTransientContainer;
                 }
-                float targetLocation = 0;
                 boolean needsAnimation = true;
                 if (changingView instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) changingView;
                     if (row.isDismissed()) {
                         needsAnimation = false;
-                    }
-
-                    NotificationEntry entry = row.getEntry();
-                    StatusBarIconView icon = entry.getIcons().getStatusBarIcon();
-                    final StatusBarIconView centeredIcon = entry.getIcons().getCenteredIcon();
-                    if (centeredIcon != null && centeredIcon.getParent() != null) {
-                        icon = centeredIcon;
-                    }
-                    if (icon.getParent() != null) {
-                        icon.getLocationOnScreen(mTmpLocation);
-                        float iconPosition = mTmpLocation[0] - icon.getTranslationX()
-                                + ViewState.getFinalTranslationX(icon)
-                                + icon.getWidth() * 0.25f;
-                        mHostLayout.getLocationOnScreen(mTmpLocation);
-                        targetLocation = iconPosition - mTmpLocation[0];
                     }
                 }
 
@@ -505,7 +497,7 @@ public class StackStateAnimator {
                     }
                     long removeAnimationDelay = changingView.performRemoveAnimation(
                             ANIMATION_DURATION_HEADS_UP_DISAPPEAR,
-                            0, 0.0f, true /* isHeadsUpAppear */, targetLocation,
+                            0, 0.0f, true /* isHeadsUpAppear */,
                             postAnimation, getGlobalAnimationFinishedListener());
                     mAnimationProperties.delay += removeAnimationDelay;
                 } else if (endRunnable != null) {

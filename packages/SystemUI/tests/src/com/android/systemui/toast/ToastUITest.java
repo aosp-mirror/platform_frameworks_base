@@ -18,6 +18,8 @@ package com.android.systemui.toast;
 
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
@@ -36,6 +39,7 @@ import android.app.ITransientNotificationCallback;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Parcel;
@@ -61,7 +65,6 @@ import com.android.internal.util.IntPair;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -73,6 +76,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
+
+import java.util.Arrays;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -106,8 +111,7 @@ public class ToastUITest extends SysuiTestCase {
     @Mock private IAccessibilityManager mAccessibilityManager;
     @Mock private PluginManager mPluginManager;
     @Mock private DumpManager mDumpManager;
-    @Mock private ToastLogger mToastLogger;
-    @Mock private FeatureFlags mFeatureFlags;
+    private final ToastLogger mToastLogger = spy(new ToastLogger(logcatLogBuffer()));
     @Mock private PackageManager mPackageManager;
 
     @Mock private ITransientNotificationCallback mCallback;
@@ -400,6 +404,18 @@ public class ToastUITest extends SysuiTestCase {
         verify(mToastLogger, never()).logOnHideToast(PACKAGE_NAME_1, TOKEN_1.toString());
     }
 
+    @Test
+    public void testShowToast_invalidDisplayId_logsAndSkipsToast() {
+        int invalidDisplayId = getInvalidDisplayId();
+
+        mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
+                mCallback, invalidDisplayId);
+
+        verify(mToastLogger).logOnSkipToastForInvalidDisplay(PACKAGE_NAME_1, TOKEN_1.toString(),
+                invalidDisplayId);
+        verifyZeroInteractions(mWindowManager);
+    }
+
     private View verifyWmAddViewAndAttachToParent() {
         ArgumentCaptor<View> viewCaptor = ArgumentCaptor.forClass(View.class);
         verify(mWindowManager).addView(viewCaptor.capture(), any());
@@ -415,5 +431,11 @@ public class ToastUITest extends SysuiTestCase {
             inv.<Parcelable>getArgument(i).writeToParcel(dest, 0);
             return null;
         };
+    }
+
+    private int getInvalidDisplayId() {
+        return Arrays.stream(
+                mContext.getSystemService(DisplayManager.class).getDisplays())
+                .map(Display::getDisplayId).max(Integer::compare).get() + 1;
     }
 }

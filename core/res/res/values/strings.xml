@@ -1795,6 +1795,8 @@
     <string name="biometric_error_user_canceled">Authentication canceled</string>
     <!-- Message shown by the biometric dialog when biometric is not recognized -->
     <string name="biometric_not_recognized">Not recognized</string>
+    <!-- Message shown by the biometric dialog when face is not recognized [CHAR LIMIT=50] -->
+    <string name="biometric_face_not_recognized">Face not recognized</string>
     <!-- Message shown when biometric authentication has been canceled [CHAR LIMIT=50] -->
     <string name="biometric_error_canceled">Authentication canceled</string>
     <!-- Message returned to applications if BiometricPrompt setAllowDeviceCredentials is enabled but no pin, pattern, or password is set. [CHAR LIMIT=NONE] -->
@@ -1835,6 +1837,8 @@
     <string name="fingerprint_error_not_match">Fingerprint not recognized</string>
     <!-- Message shown when UDFPS fails to match -->
     <string name="fingerprint_udfps_error_not_match">Fingerprint not recognized</string>
+    <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
+    <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
 
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
@@ -1891,22 +1895,22 @@
     <!-- Content description which should be used for the fingerprint icon. -->
     <string name="fingerprint_icon_content_description">Fingerprint icon</string>
 
+    <!-- Notification name shown when the system requires the user to set up device unlock. [CHAR LIMIT=NONE] -->
+    <string name="device_unlock_notification_name">Device unlock</string>
+    <!-- Notification title shown when the system suggests the user to set up another way to unlock. [CHAR LIMIT=NONE] -->
+    <string name="alternative_unlock_setup_notification_title">Try another way to unlock</string>
+    <!-- Notification content shown when the system suggests the user to enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="alternative_face_setup_notification_content">Use Face Unlock when your fingerprint isn\'t recognized, like when your fingers are wet</string>
+    <!-- Notification content shown when the system suggests the user to enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="alternative_fp_setup_notification_content">Use Fingerprint Unlock when your face isn\'t recognized, like when there\'s not enough light</string>
     <!-- Notification name shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_name">Face Unlock</string>
     <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_title">Issue with Face Unlock</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_content">Tap to delete your face model, then add your face again</string>
-    <!-- Title of a notification that directs the user to set up Face Unlock by enrolling their face. [CHAR LIMIT=NONE] -->
-    <string name="face_setup_notification_title">Set up Face Unlock</string>
-    <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
-    <string name="face_setup_notification_content">Unlock your phone by looking at it</string>
     <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=NONE] -->
     <string name="face_sensor_privacy_enabled">To use Face Unlock, turn on <b>Camera access</b> in Settings > Privacy</string>
-    <!-- Title of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
-    <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
-    <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
-    <string name="fingerprint_setup_notification_content">Tap to add a fingerprint</string>
 
     <!-- Notification name shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
     <string name="fingerprint_recalibrate_notification_name">Fingerprint Unlock</string>
@@ -3796,7 +3800,7 @@
          keyboard is connected -->
     <string name="show_ime">Keep it on screen while physical keyboard is active</string>
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=30] -->
-    <string name="hardware">Show virtual keyboard</string>
+    <string name="hardware">Use on-screen keyboard</string>
 
     <!-- Title of the notification to prompt the user to configure physical keyboard settings. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="select_keyboard_layout_notification_title">Configure <xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g></string>

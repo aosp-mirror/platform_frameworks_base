@@ -18,10 +18,10 @@ package com.android.wm.shell.bubbles;
 
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.content.Context;
 import android.hardware.input.InputManager;
-import android.util.Log;
 import android.view.Choreographer;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
@@ -29,6 +29,7 @@ import android.view.InputMonitor;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.bubbles.BubblesNavBarMotionEventHandler.MotionEventListener;
 
 /**
@@ -58,9 +59,7 @@ class BubblesNavBarGestureTracker {
      * @param listener listener that is notified of touch events
      */
     void start(MotionEventListener listener) {
-        if (BubbleDebugConfig.DEBUG_BUBBLE_GESTURE) {
-            Log.d(TAG, "start monitoring bubbles swipe up gesture");
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "start monitoring bubbles swipe up gesture");
 
         stopInternal();
 
@@ -76,9 +75,7 @@ class BubblesNavBarGestureTracker {
     }
 
     void stop() {
-        if (BubbleDebugConfig.DEBUG_BUBBLE_GESTURE) {
-            Log.d(TAG, "stop monitoring bubbles swipe up gesture");
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "stop monitoring bubbles swipe up gesture");
         stopInternal();
     }
 
@@ -94,9 +91,7 @@ class BubblesNavBarGestureTracker {
     }
 
     private void onInterceptTouch() {
-        if (BubbleDebugConfig.DEBUG_BUBBLE_GESTURE) {
-            Log.d(TAG, "intercept touch event");
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "intercept touch event");
         if (mInputMonitor != null) {
             mInputMonitor.pilferPointers();
         }

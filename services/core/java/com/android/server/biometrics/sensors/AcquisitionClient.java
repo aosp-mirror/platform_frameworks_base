@@ -210,4 +210,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
     public boolean isInterruptable() {
         return true;
     }
+
+    public boolean isAlreadyCancelled() {
+        return mAlreadyCancelled;
+    }
 }

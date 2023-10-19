@@ -32,10 +32,10 @@ import android.view.ViewRootImpl
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-import android.widget.FrameLayout
 import com.android.app.animation.Interpolators
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CujType
+import com.android.systemui.util.maybeForceFullscreen
 import com.android.systemui.util.registerAnimationOnBackInvoked
 import kotlin.math.roundToInt
 
@@ -621,96 +621,12 @@ private class AnimatedDialog(
 
                 viewGroupWithBackground
             } else {
-                // We will make the dialog window (and therefore its DecorView) fullscreen to make
-                // it possible to animate outside its bounds.
-                //
-                // Before that, we add a new View as a child of the DecorView with the same size and
-                // gravity as that DecorView, then we add all original children of the DecorView to
-                // that new View. Finally we remove the background of the DecorView and add it to
-                // the new View, then we make the DecorView fullscreen. This new View now acts as a
-                // fake (non fullscreen) window.
-                //
-                // On top of that, we also add a fullscreen transparent background between the
-                // DecorView and the view that we added so that we can dismiss the dialog when this
-                // view is clicked. This is necessary because DecorView overrides onTouchEvent and
-                // therefore we can't set the click listener directly on the (now fullscreen)
-                // DecorView.
-                val fullscreenTransparentBackground = FrameLayout(dialog.context)
-                decorView.addView(
-                    fullscreenTransparentBackground,
-                    0 /* index */,
-                    FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-                )
-
-                val dialogContentWithBackground = LaunchableFrameLayout(dialog.context)
-                dialogContentWithBackground.background = decorView.background
-
-                // Make the window background transparent. Note that setting the window (or
-                // DecorView) background drawable to null leads to issues with background color (not
-                // being transparent) or with insets that are not refreshed. Therefore we need to
-                // set it to something not null, hence we are using android.R.color.transparent
-                // here.
-                window.setBackgroundDrawableResource(android.R.color.transparent)
-
-                // Close the dialog when clicking outside of it.
-                fullscreenTransparentBackground.setOnClickListener { dialog.dismiss() }
-                dialogContentWithBackground.isClickable = true
-
-                // Make sure the transparent and dialog backgrounds are not focusable by
-                // accessibility
-                // features.
-                fullscreenTransparentBackground.importantForAccessibility =
-                    View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                dialogContentWithBackground.importantForAccessibility =
-                    View.IMPORTANT_FOR_ACCESSIBILITY_NO
-
-                fullscreenTransparentBackground.addView(
-                    dialogContentWithBackground,
-                    FrameLayout.LayoutParams(
-                        window.attributes.width,
-                        window.attributes.height,
-                        window.attributes.gravity
-                    )
-                )
-
-                // Move all original children of the DecorView to the new View we just added.
-                for (i in 1 until decorView.childCount) {
-                    val view = decorView.getChildAt(1)
-                    decorView.removeViewAt(1)
-                    dialogContentWithBackground.addView(view)
-                }
-
-                // Make the window fullscreen and add a layout listener to ensure it stays
-                // fullscreen.
-                window.setLayout(MATCH_PARENT, MATCH_PARENT)
-                decorViewLayoutListener =
-                    View.OnLayoutChangeListener {
-                        v,
-                        left,
-                        top,
-                        right,
-                        bottom,
-                        oldLeft,
-                        oldTop,
-                        oldRight,
-                        oldBottom ->
-                        if (
-                            window.attributes.width != MATCH_PARENT ||
-                                window.attributes.height != MATCH_PARENT
-                        ) {
-                            // The dialog size changed, copy its size to dialogContentWithBackground
-                            // and make the dialog window full screen again.
-                            val layoutParams = dialogContentWithBackground.layoutParams
-                            layoutParams.width = window.attributes.width
-                            layoutParams.height = window.attributes.height
-                            dialogContentWithBackground.layoutParams = layoutParams
-                            window.setLayout(MATCH_PARENT, MATCH_PARENT)
-                        }
-                    }
-                decorView.addOnLayoutChangeListener(decorViewLayoutListener)
-
+                val (dialogContentWithBackground, decorViewLayoutListener) =
+                    dialog.maybeForceFullscreen()!!
+                this.decorViewLayoutListener = decorViewLayoutListener
                 dialogContentWithBackground
             }
+
         this.dialogContentWithBackground = dialogContentWithBackground
         dialogContentWithBackground.setTag(R.id.tag_dialog_background, true)
 

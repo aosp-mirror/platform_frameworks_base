@@ -38,7 +38,6 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.keyguard.domain.interactor.BurnInInteractor;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeViewController;
@@ -94,7 +93,6 @@ public final class DozeServiceHost implements DozeHost {
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private final AuthController mAuthController;
     private final NotificationIconAreaController mNotificationIconAreaController;
-    private final BurnInInteractor mBurnInInteractor;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private ShadeViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
@@ -118,8 +116,7 @@ public final class DozeServiceHost implements DozeHost {
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             AuthController authController,
             NotificationIconAreaController notificationIconAreaController,
-            DozeInteractor dozeInteractor,
-            BurnInInteractor burnInInteractor) {
+            DozeInteractor dozeInteractor) {
         super();
         mDozeLog = dozeLog;
         mPowerManager = powerManager;
@@ -138,7 +135,6 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mAuthController = authController;
         mNotificationIconAreaController = notificationIconAreaController;
-        mBurnInInteractor = burnInInteractor;
         mHeadsUpManagerPhone.addListener(mOnHeadsUpChangedListener);
         mDozeInteractor = dozeInteractor;
     }
@@ -311,12 +307,12 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public void dozeTimeTick() {
+        mDozeInteractor.dozeTimeTick();
         mNotificationPanel.dozeTimeTick();
         mAuthController.dozeTimeTick();
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
             ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
         }
-        mBurnInInteractor.dozeTimeTick();
     }
 
     @Override

@@ -16,6 +16,9 @@
 
 package android.view;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
+import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
 import static android.view.InsetsStateProto.DISPLAY_FRAME;
 import static android.view.InsetsStateProto.SOURCES;
@@ -37,7 +40,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.ActivityType;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -134,21 +137,26 @@ public class InsetsState implements Parcelable {
      * @return The calculated insets.
      */
     public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
-            boolean isScreenRound, boolean alwaysConsumeSystemBars,
-            int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags,
-            int windowType, @WindowConfiguration.WindowingMode int windowingMode,
+            boolean isScreenRound, int legacySoftInputMode, int legacyWindowFlags,
+            int legacySystemUiFlags, int windowType, @ActivityType int activityType,
             @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
         boolean[] typeVisibilityMap = new boolean[Type.SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
+        @InsetsType int forceConsumingTypes = 0;
         @InsetsType int suppressScrimTypes = 0;
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
+            final @InsetsType int type = source.getType();
+
+            if ((source.getFlags() & InsetsSource.FLAG_FORCE_CONSUMING) != 0) {
+                forceConsumingTypes |= type;
+            }
 
             if ((source.getFlags() & InsetsSource.FLAG_SUPPRESS_SCRIM) != 0) {
-                suppressScrimTypes |= source.getType();
+                suppressScrimTypes |= type;
             }
 
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
@@ -156,7 +164,7 @@ public class InsetsState implements Parcelable {
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
-            if (source.getType() != WindowInsets.Type.ime()) {
+            if (type != WindowInsets.Type.ime()) {
                 InsetsSource ignoringVisibilitySource = ignoringVisibilityState != null
                         ? ignoringVisibilityState.peekSource(source.getId())
                         : source;
@@ -177,13 +185,12 @@ public class InsetsState implements Parcelable {
         if ((legacyWindowFlags & FLAG_FULLSCREEN) != 0) {
             compatInsetsTypes &= ~statusBars();
         }
-        if (clearsCompatInsets(windowType, legacyWindowFlags, windowingMode)
-                && !alwaysConsumeSystemBars) {
+        if (clearsCompatInsets(windowType, legacyWindowFlags, activityType, forceConsumingTypes)) {
             compatInsetsTypes = 0;
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeSystemBars, suppressScrimTypes, calculateRelativeCutout(frame),
+                forceConsumingTypes, suppressScrimTypes, calculateRelativeCutout(frame),
                 calculateRelativeRoundedCorners(frame),
                 calculateRelativePrivacyIndicatorBounds(frame),
                 calculateRelativeDisplayShape(frame),
@@ -220,7 +227,7 @@ public class InsetsState implements Parcelable {
         final Rect roundedCornerFrame = new Rect(mRoundedCornerFrame);
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
-            if (source.insetsRoundedCornerFrame()) {
+            if (source.hasFlags(FLAG_INSETS_ROUNDED_CORNER)) {
                 final Insets insets = source.calculateInsets(roundedCornerFrame, false);
                 roundedCornerFrame.inset(insets);
             }
@@ -287,24 +294,27 @@ public class InsetsState implements Parcelable {
         return insets;
     }
 
-    public Insets calculateVisibleInsets(Rect frame, int windowType, int windowingMode,
+    public Insets calculateVisibleInsets(Rect frame, int windowType, @ActivityType int activityType,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
-        if (clearsCompatInsets(windowType, windowFlags, windowingMode)) {
-            return Insets.NONE;
-        }
         final int softInputAdjustMode = softInputMode & SOFT_INPUT_MASK_ADJUST;
         final int visibleInsetsTypes = softInputAdjustMode != SOFT_INPUT_ADJUST_NOTHING
                 ? systemBars() | ime()
                 : systemBars();
+        @InsetsType int forceConsumingTypes = 0;
         Insets insets = Insets.NONE;
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
             if ((source.getType() & visibleInsetsTypes) == 0) {
                 continue;
             }
+            if (source.hasFlags(FLAG_FORCE_CONSUMING)) {
+                forceConsumingTypes |= source.getType();
+            }
             insets = Insets.max(source.calculateVisibleInsets(frame), insets);
         }
-        return insets;
+        return clearsCompatInsets(windowType, windowFlags, activityType, forceConsumingTypes)
+                ? Insets.NONE
+                : insets;
     }
 
     /**
@@ -370,11 +380,17 @@ public class InsetsState implements Parcelable {
             @InternalInsetsSide @Nullable SparseIntArray idSideMap,
             @Nullable boolean[] typeVisibilityMap, Insets insets, int type) {
         int index = indexOf(type);
-        Insets existing = typeInsetsMap[index];
-        if (existing == null) {
-            typeInsetsMap[index] = insets;
-        } else {
-            typeInsetsMap[index] = Insets.max(existing, insets);
+
+        // Don't put Insets.NONE into typeInsetsMap. Otherwise, two WindowInsets can be considered
+        // as non-equal while they provide the same insets of each type from WindowInsets#getInsets
+        // if one WindowInsets has Insets.NONE for a type and the other has null for the same type.
+        if (!Insets.NONE.equals(insets)) {
+            Insets existing = typeInsetsMap[index];
+            if (existing == null) {
+                typeInsetsMap[index] = insets;
+            } else {
+                typeInsetsMap[index] = Insets.max(existing, insets);
+            }
         }
 
         if (typeVisibilityMap != null) {
@@ -646,10 +662,15 @@ public class InsetsState implements Parcelable {
         mSources.put(source.getId(), source);
     }
 
-    public static boolean clearsCompatInsets(int windowType, int windowFlags, int windowingMode) {
+    public static boolean clearsCompatInsets(int windowType, int windowFlags,
+            @ActivityType int activityType, @InsetsType int forceConsumingTypes) {
         return (windowFlags & FLAG_LAYOUT_NO_LIMITS) != 0
+                // For compatibility reasons, this excludes the wallpaper, the system error windows,
+                // and the app windows while any system bar is forcibly consumed.
                 && windowType != TYPE_WALLPAPER && windowType != TYPE_SYSTEM_ERROR
-                && !WindowConfiguration.inMultiWindowMode(windowingMode);
+                // This ensures the app content won't be obscured by compat insets even if the app
+                // has FLAG_LAYOUT_NO_LIMITS.
+                && (forceConsumingTypes == 0 || activityType != ACTIVITY_TYPE_STANDARD);
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -686,15 +707,14 @@ public class InsetsState implements Parcelable {
      * An equals method can exclude the caption insets. This is useful because we assemble the
      * caption insets information on the client side, and when we communicate with server, it's
      * excluded.
-     * @param excludingCaptionInsets {@code true} if we want to compare two InsetsState objects but
-     *                                           ignore the caption insets source value.
-     * @param excludeInvisibleImeFrames If {@link WindowInsets.Type#ime()} frames should be ignored
-     *                                  when IME is not visible.
+     * @param excludesCaptionBar If {@link Type#captionBar()}} should be ignored.
+     * @param excludesInvisibleIme If {@link WindowInsets.Type#ime()} should be ignored when IME is
+     *                             not visible.
      * @return {@code true} if the two InsetsState objects are equal, {@code false} otherwise.
      */
     @VisibleForTesting
-    public boolean equals(@Nullable Object o, boolean excludingCaptionInsets,
-            boolean excludeInvisibleImeFrames) {
+    public boolean equals(@Nullable Object o, boolean excludesCaptionBar,
+            boolean excludesInvisibleIme) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
 
@@ -711,29 +731,35 @@ public class InsetsState implements Parcelable {
 
         final SparseArray<InsetsSource> thisSources = mSources;
         final SparseArray<InsetsSource> thatSources = state.mSources;
-        if (!excludingCaptionInsets && !excludeInvisibleImeFrames) {
+        if (!excludesCaptionBar && !excludesInvisibleIme) {
             return thisSources.contentEquals(thatSources);
         } else {
             final int thisSize = thisSources.size();
             final int thatSize = thatSources.size();
             int thisIndex = 0;
             int thatIndex = 0;
-            while (thisIndex < thisSize && thatIndex < thatSize) {
+            while (thisIndex < thisSize || thatIndex < thatSize) {
+                InsetsSource thisSource = thisIndex < thisSize
+                        ? thisSources.valueAt(thisIndex)
+                        : null;
+
                 // Seek to the next non-excluding source of ours.
-                InsetsSource thisSource = thisSources.valueAt(thisIndex);
                 while (thisSource != null
-                        && (excludingCaptionInsets && thisSource.getType() == captionBar()
-                                || excludeInvisibleImeFrames && thisSource.getType() == ime()
+                        && (excludesCaptionBar && thisSource.getType() == captionBar()
+                                || excludesInvisibleIme && thisSource.getType() == ime()
                                         && !thisSource.isVisible())) {
                     thisIndex++;
                     thisSource = thisIndex < thisSize ? thisSources.valueAt(thisIndex) : null;
                 }
 
+                InsetsSource thatSource = thatIndex < thatSize
+                        ? thatSources.valueAt(thatIndex)
+                        : null;
+
                 // Seek to the next non-excluding source of theirs.
-                InsetsSource thatSource = thatSources.valueAt(thatIndex);
                 while (thatSource != null
-                        && (excludingCaptionInsets && thatSource.getType() == captionBar()
-                                || excludeInvisibleImeFrames && thatSource.getType() == ime()
+                        && (excludesCaptionBar && thatSource.getType() == captionBar()
+                                || excludesInvisibleIme && thatSource.getType() == ime()
                                         && !thatSource.isVisible())) {
                     thatIndex++;
                     thatSource = thatIndex < thatSize ? thatSources.valueAt(thatIndex) : null;
@@ -746,7 +772,7 @@ public class InsetsState implements Parcelable {
                 thisIndex++;
                 thatIndex++;
             }
-            return thisIndex >= thisSize && thatIndex >= thatSize;
+            return true;
         }
     }
 

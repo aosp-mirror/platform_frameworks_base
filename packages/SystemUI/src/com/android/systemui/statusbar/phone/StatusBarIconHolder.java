@@ -24,8 +24,6 @@ import android.os.UserHandle;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModel;
 
 import java.lang.annotation.Retention;
@@ -36,8 +34,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class StatusBarIconHolder {
     public static final int TYPE_ICON = 0;
-    public static final int TYPE_WIFI = 1;
-    public static final int TYPE_MOBILE = 2;
     /**
      * TODO (b/249790733): address this once the new pipeline is in place
      * This type exists so that the new pipeline (see {@link MobileIconViewModel}) can be used
@@ -65,8 +61,6 @@ public class StatusBarIconHolder {
 
     @IntDef({
             TYPE_ICON,
-            TYPE_WIFI,
-            TYPE_MOBILE,
             TYPE_MOBILE_NEW,
             TYPE_WIFI_NEW
     })
@@ -74,8 +68,6 @@ public class StatusBarIconHolder {
     @interface IconType {}
 
     private StatusBarIcon mIcon;
-    private WifiIconState mWifiState;
-    private MobileIconState mMobileState;
     private @IconType int mType = TYPE_ICON;
     private int mTag = 0;
 
@@ -83,8 +75,6 @@ public class StatusBarIconHolder {
     public static String getTypeString(@IconType int type) {
         switch(type) {
             case TYPE_ICON: return "ICON";
-            case TYPE_WIFI: return "WIFI_OLD";
-            case TYPE_MOBILE: return "MOBILE_OLD";
             case TYPE_MOBILE_NEW: return "MOBILE_NEW";
             case TYPE_WIFI_NEW: return "WIFI_NEW";
             default: return "UNKNOWN";
@@ -101,38 +91,10 @@ public class StatusBarIconHolder {
         return wrapper;
     }
 
-    /** */
-    public static StatusBarIconHolder fromResId(
-            Context context,
-            int resId,
-            CharSequence contentDescription) {
-        StatusBarIconHolder holder = new StatusBarIconHolder();
-        holder.mIcon = new StatusBarIcon(UserHandle.SYSTEM, context.getPackageName(),
-                Icon.createWithResource( context, resId), 0, 0, contentDescription);
-        return holder;
-    }
-
-    /** */
-    public static StatusBarIconHolder fromWifiIconState(WifiIconState state) {
-        StatusBarIconHolder holder = new StatusBarIconHolder();
-        holder.mWifiState = state;
-        holder.mType = TYPE_WIFI;
-        return holder;
-    }
-
     /** Creates a new holder with for the new wifi icon. */
     public static StatusBarIconHolder forNewWifiIcon() {
         StatusBarIconHolder holder = new StatusBarIconHolder();
         holder.mType = TYPE_WIFI_NEW;
-        return holder;
-    }
-
-    /** */
-    public static StatusBarIconHolder fromMobileIconState(MobileIconState state) {
-        StatusBarIconHolder holder = new StatusBarIconHolder();
-        holder.mMobileState = state;
-        holder.mType = TYPE_MOBILE;
-        holder.mTag = state.subId;
         return holder;
     }
 
@@ -177,32 +139,10 @@ public class StatusBarIconHolder {
         mIcon = icon;
     }
 
-    @Nullable
-    public WifiIconState getWifiState() {
-        return mWifiState;
-    }
-
-    public void setWifiState(WifiIconState state) {
-        mWifiState = state;
-    }
-
-    @Nullable
-    public MobileIconState getMobileState() {
-        return mMobileState;
-    }
-
-    public void setMobileState(MobileIconState state) {
-        mMobileState = state;
-    }
-
     public boolean isVisible() {
         switch (mType) {
             case TYPE_ICON:
                 return mIcon.visible;
-            case TYPE_WIFI:
-                return mWifiState.visible;
-            case TYPE_MOBILE:
-                return mMobileState.visible;
             case TYPE_MOBILE_NEW:
             case TYPE_WIFI_NEW:
                 // The new pipeline controls visibilities via the view model and view binder, so
@@ -221,14 +161,6 @@ public class StatusBarIconHolder {
         switch (mType) {
             case TYPE_ICON:
                 mIcon.visible = visible;
-                break;
-
-            case TYPE_WIFI:
-                mWifiState.visible = visible;
-                break;
-
-            case TYPE_MOBILE:
-                mMobileState.visible = visible;
                 break;
 
             case TYPE_MOBILE_NEW:

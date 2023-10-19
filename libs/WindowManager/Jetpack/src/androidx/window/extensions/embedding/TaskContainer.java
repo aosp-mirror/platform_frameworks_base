@@ -51,11 +51,15 @@ class TaskContainer {
 
     /** Active TaskFragments in this Task. */
     @NonNull
-    final List<TaskFragmentContainer> mContainers = new ArrayList<>();
+    private final List<TaskFragmentContainer> mContainers = new ArrayList<>();
 
     /** Active split pairs in this Task. */
     @NonNull
-    final List<SplitContainer> mSplitContainers = new ArrayList<>();
+    private final List<SplitContainer> mSplitContainers = new ArrayList<>();
+
+    /** Active pin split pair in this Task. */
+    @Nullable
+    private SplitPinContainer mSplitPinContainer;
 
     @NonNull
     private final Configuration mConfiguration;
@@ -174,11 +178,36 @@ class TaskContainer {
     }
 
     @Nullable
-    TaskFragmentContainer getTopTaskFragmentContainer() {
-        if (mContainers.isEmpty()) {
-            return null;
+    TaskFragmentContainer getTopNonFinishingTaskFragmentContainer() {
+        return getTopNonFinishingTaskFragmentContainer(true /* includePin */);
+    }
+
+    @Nullable
+    TaskFragmentContainer getTopNonFinishingTaskFragmentContainer(boolean includePin) {
+        for (int i = mContainers.size() - 1; i >= 0; i--) {
+            final TaskFragmentContainer container = mContainers.get(i);
+            if (!includePin && isTaskFragmentContainerPinned(container)) {
+                continue;
+            }
+            if (!container.isFinished()) {
+                return container;
+            }
         }
-        return mContainers.get(mContainers.size() - 1);
+        return null;
+    }
+
+    /** Gets a non-finishing container below the given one. */
+    @Nullable
+    TaskFragmentContainer getNonFinishingTaskFragmentContainerBelow(
+            @NonNull TaskFragmentContainer current) {
+        final int index = mContainers.indexOf(current);
+        for (int i = index - 1; i >= 0; i--) {
+            final TaskFragmentContainer container = mContainers.get(i);
+            if (!container.isFinished()) {
+                return container;
+            }
+        }
+        return null;
     }
 
     @Nullable
@@ -205,6 +234,129 @@ class TaskContainer {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns a list of {@link SplitContainer}. Do not modify the containers directly on the
+     * returned list. Use {@link #addSplitContainer} or {@link #removeSplitContainers} instead.
+     */
+    @NonNull
+    List<SplitContainer> getSplitContainers() {
+        return mSplitContainers;
+    }
+
+    void addSplitContainer(@NonNull SplitContainer splitContainer) {
+        if (splitContainer instanceof SplitPinContainer) {
+            mSplitPinContainer = (SplitPinContainer) splitContainer;
+            mSplitContainers.add(splitContainer);
+            return;
+        }
+
+        // Keeps the SplitPinContainer on the top of the list.
+        mSplitContainers.remove(mSplitPinContainer);
+        mSplitContainers.add(splitContainer);
+        if (mSplitPinContainer != null) {
+            mSplitContainers.add(mSplitPinContainer);
+        }
+    }
+
+    void removeSplitContainers(@NonNull List<SplitContainer> containers) {
+        mSplitContainers.removeAll(containers);
+    }
+
+    void removeSplitPinContainer() {
+        if (mSplitPinContainer == null) {
+            return;
+        }
+
+        final TaskFragmentContainer primaryContainer = mSplitPinContainer.getPrimaryContainer();
+        final TaskFragmentContainer secondaryContainer = mSplitPinContainer.getSecondaryContainer();
+        mSplitContainers.remove(mSplitPinContainer);
+        mSplitPinContainer = null;
+
+        // Remove the other SplitContainers that contains the unpinned container (unless it
+        // is the current top-most split-pair), since the state are no longer valid.
+        final List<SplitContainer> splitsToRemove = new ArrayList<>();
+        for (SplitContainer splitContainer : mSplitContainers) {
+            if (splitContainer.getSecondaryContainer().equals(secondaryContainer)
+                    && !splitContainer.getPrimaryContainer().equals(primaryContainer)) {
+                splitsToRemove.add(splitContainer);
+            }
+        }
+        removeSplitContainers(splitsToRemove);
+    }
+
+    @Nullable
+    SplitPinContainer getSplitPinContainer() {
+        return mSplitPinContainer;
+    }
+
+    boolean isTaskFragmentContainerPinned(@NonNull TaskFragmentContainer taskFragmentContainer) {
+        return mSplitPinContainer != null
+                && mSplitPinContainer.getSecondaryContainer() == taskFragmentContainer;
+    }
+
+    void addTaskFragmentContainer(@NonNull TaskFragmentContainer taskFragmentContainer) {
+        mContainers.add(taskFragmentContainer);
+        onTaskFragmentContainerUpdated();
+    }
+
+    void addTaskFragmentContainer(int index, @NonNull TaskFragmentContainer taskFragmentContainer) {
+        mContainers.add(index, taskFragmentContainer);
+        onTaskFragmentContainerUpdated();
+    }
+
+    void removeTaskFragmentContainer(@NonNull TaskFragmentContainer taskFragmentContainer) {
+        mContainers.remove(taskFragmentContainer);
+        onTaskFragmentContainerUpdated();
+    }
+
+    void removeTaskFragmentContainers(@NonNull List<TaskFragmentContainer> taskFragmentContainer) {
+        mContainers.removeAll(taskFragmentContainer);
+        onTaskFragmentContainerUpdated();
+    }
+
+    void clearTaskFragmentContainer() {
+        mContainers.clear();
+        onTaskFragmentContainerUpdated();
+    }
+
+    /**
+     * Returns a list of {@link TaskFragmentContainer}. Do not modify the containers directly on
+     * the returned list. Use {@link #addTaskFragmentContainer},
+     * {@link #removeTaskFragmentContainer} or other related methods instead.
+     */
+    @NonNull
+    List<TaskFragmentContainer> getTaskFragmentContainers() {
+        return mContainers;
+    }
+
+    private void onTaskFragmentContainerUpdated() {
+        if (mSplitPinContainer == null) {
+            return;
+        }
+
+        final TaskFragmentContainer pinnedContainer = mSplitPinContainer.getSecondaryContainer();
+        final int pinnedContainerIndex = mContainers.indexOf(pinnedContainer);
+        if (pinnedContainerIndex <= 0) {
+            removeSplitPinContainer();
+            return;
+        }
+
+        // Ensure the pinned container is top-most.
+        if (pinnedContainerIndex != mContainers.size() - 1) {
+            mContainers.remove(pinnedContainer);
+            mContainers.add(pinnedContainer);
+        }
+
+        // Update the primary container adjacent to the pinned container if needed.
+        final TaskFragmentContainer adjacentContainer =
+                getNonFinishingTaskFragmentContainerBelow(pinnedContainer);
+        if (adjacentContainer == null) {
+            removeSplitPinContainer();
+        } else if (mSplitPinContainer.getPrimaryContainer() != adjacentContainer) {
+            mSplitPinContainer.setPrimaryContainer(adjacentContainer);
+        }
     }
 
     /** Adds the descriptors of split states in this Task to {@code outSplitStates}. */

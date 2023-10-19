@@ -19,26 +19,32 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
 import android.graphics.Point
+import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.common.shared.model.Position
+import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
-import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -47,6 +53,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import javax.inject.Inject
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -59,7 +66,20 @@ constructor(
     private val commandQueue: CommandQueue,
     featureFlags: FeatureFlags,
     bouncerRepository: KeyguardBouncerRepository,
+    configurationRepository: ConfigurationRepository,
 ) {
+
+    data class PreviewMode(
+        val isInPreviewMode: Boolean = false,
+        val shouldHighlightSelectedAffordance: Boolean = false,
+    )
+
+    /**
+     * Whether this view-model instance is powering the preview experience that renders exclusively
+     * in the wallpaper picker application. This should _always_ be `false` for the real lock screen
+     * experience.
+     */
+    val previewMode = MutableStateFlow(PreviewMode())
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
      * all.
@@ -67,6 +87,8 @@ constructor(
     val dozeAmount: Flow<Float> = repository.linearDozeAmount
     /** Whether the system is in doze mode. */
     val isDozing: Flow<Boolean> = repository.isDozing
+    /** Receive an event for doze time tick */
+    val dozeTimeTick: Flow<Long> = repository.dozeTimeTick
     /** Whether Always-on Display mode is available. */
     val isAodAvailable: Flow<Boolean> = repository.isAodAvailable
     /** Doze transition information. */
@@ -78,6 +100,8 @@ constructor(
     val isDreaming: Flow<Boolean> = repository.isDreaming
     /** Whether the system is dreaming with an overlay active */
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
+    /** Whether the system is dreaming and the active dream is hosted in lockscreen */
+    val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> = conflatedCallbackFlow {
         val callback =
@@ -97,7 +121,10 @@ constructor(
     }
 
     /** The device wake/sleep state */
-    val wakefulnessModel: Flow<WakefulnessModel> = repository.wakefulness
+    val wakefulnessModel: StateFlow<WakefulnessModel> = repository.wakefulness
+
+    /** The device screen state */
+    val screenModel: StateFlow<ScreenModel> = repository.screenModel
 
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
@@ -135,8 +162,6 @@ constructor(
     val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
-    /** Whether or not quick settings or quick quick settings are showing. */
-    val isQuickSettingsVisible: Flow<Boolean> = repository.isQuickSettingsVisible
     /**
      * Observable for [BiometricUnlockModel] when biometrics like face or any fingerprint (rear,
      * side, under display) is used to unlock the device.
@@ -172,6 +197,21 @@ constructor(
     /** The approximate location on the screen of the face unlock sensor, if one is available. */
     val faceSensorLocation: Flow<Point?> = repository.faceSensorLocation
 
+    /** Notifies when a new configuration is set */
+    val configurationChange: Flow<Unit> = configurationRepository.onAnyConfigurationChange
+
+    /** Represents the current state of the KeyguardRootView visibility */
+    val keyguardRootViewVisibilityState: Flow<KeyguardRootViewVisibilityState> =
+        repository.keyguardRootViewVisibility
+
+    /** The position of the keyguard clock. */
+    val clockPosition: Flow<Position> = repository.clockPosition
+
+    val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
+
+    /** Whether to animate the next doze mode transition. */
+    val animateDozingTransitions: Flow<Boolean> = repository.animateBottomAreaDozingTransitions
+
     fun dozeTransitionTo(vararg states: DozeStateModel): Flow<DozeTransitionModel> {
         return dozeTransitionModel.filter { states.contains(it.to) }
     }
@@ -192,12 +232,59 @@ constructor(
         }
     }
 
+    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
+        repository.setIsActiveDreamLockscreenHosted(isLockscreenHosted)
+    }
+
     /** Sets whether quick settings or quick-quick settings is visible. */
     fun setQuickSettingsVisible(isVisible: Boolean) {
         repository.setQuickSettingsVisible(isVisible)
     }
 
+    fun setKeyguardRootVisibility(
+        statusBarState: Int,
+        goingToFullShade: Boolean,
+        isOcclusionTransitionRunning: Boolean
+    ) {
+        repository.setKeyguardVisibility(
+            statusBarState,
+            goingToFullShade,
+            isOcclusionTransitionRunning
+        )
+    }
+
+    fun setClockPosition(x: Int, y: Int) {
+        repository.setClockPosition(x, y)
+    }
+
+    fun setAlpha(alpha: Float) {
+        repository.setKeyguardAlpha(alpha)
+    }
+
+    fun setAnimateDozingTransitions(animate: Boolean) {
+        repository.setAnimateDozingTransitions(animate)
+    }
+
+    fun isKeyguardDismissable(): Boolean {
+        return repository.isKeyguardUnlocked.value
+    }
+
     companion object {
         private const val TAG = "KeyguardInteractor"
+
+        fun isKeyguardVisibleInState(state: KeyguardState): Boolean {
+            return when (state) {
+                KeyguardState.OFF -> true
+                KeyguardState.DOZING -> true
+                KeyguardState.DREAMING -> true
+                KeyguardState.AOD -> true
+                KeyguardState.ALTERNATE_BOUNCER -> true
+                KeyguardState.PRIMARY_BOUNCER -> true
+                KeyguardState.LOCKSCREEN -> true
+                KeyguardState.GONE -> false
+                KeyguardState.OCCLUDED -> true
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> false
+            }
+        }
     }
 }

@@ -192,7 +192,7 @@ public final class ColorSpaceProfiles {
      * @see OutputConfiguration#setDynamicRangeProfile
      * @see SessionConfiguration#setColorSpace
      * @see ColorSpace.Named
-     * @see DynamicRangeProfiles.Profile
+     * @see DynamicRangeProfiles
      */
     public @NonNull Set<Long> getSupportedDynamicRangeProfiles(@NonNull ColorSpace.Named colorSpace,
             @ImageFormat.Format int imageFormat) {
@@ -230,7 +230,7 @@ public final class ColorSpaceProfiles {
      * @see SessionConfiguration#setColorSpace
      * @see OutputConfiguration#setDynamicRangeProfile
      * @see ColorSpace.Named
-     * @see DynamicRangeProfiles.Profile
+     * @see DynamicRangeProfiles
      */
     public @NonNull Set<ColorSpace.Named> getSupportedColorSpacesForDynamicRange(
             @ImageFormat.Format int imageFormat,

@@ -27,6 +27,8 @@ import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_PHONE_CALL
 import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_USB;
 import static android.os.Process.INVALID_UID;
 
+import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA;
+
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ForegroundServiceApiType;
@@ -141,6 +143,10 @@ public class ForegroundServiceTypeLoggerModule {
         // grab the appropriate types
         final IntArray apiTypes =
                 convertFgsTypeToApiTypes(record.foregroundServiceType);
+        if (apiTypes.size() == 0) {
+            Slog.w(TAG, "Foreground service start for UID: "
+                    + uid + " does not have any types");
+        }
         // now we need to iterate through the types
         // and insert the new record as needed
         final IntArray apiTypesFound = new IntArray();
@@ -201,6 +207,9 @@ public class ForegroundServiceTypeLoggerModule {
         // and also clean up the start calls stack by UID
         final IntArray apiTypes = convertFgsTypeToApiTypes(record.foregroundServiceType);
         final UidState uidState = mUids.get(uid);
+        if (apiTypes.size() == 0) {
+            Slog.w(TAG, "FGS stop call for: " + uid + " has no types!");
+        }
         if (uidState == null) {
             Slog.w(TAG, "FGS stop call being logged with no start call for UID for UID "
                     + uid
@@ -211,6 +220,24 @@ public class ForegroundServiceTypeLoggerModule {
         final ArrayList<Long> timestampsFound = new ArrayList<>();
         for (int i = 0, size = apiTypes.size(); i < size; i++) {
             final int apiType = apiTypes.get(i);
+
+            // remove the FGS record from the stack
+            final ArrayMap<ComponentName, ServiceRecord> runningFgsOfType =
+                    uidState.mRunningFgs.get(apiType);
+            if (runningFgsOfType == null) {
+                Slog.w(TAG, "Could not find appropriate running FGS for FGS stop for UID " + uid
+                        + " in package " + record.packageName);
+                continue;
+            }
+
+            runningFgsOfType.remove(record.getComponentName());
+            if (runningFgsOfType.size() == 0) {
+                // there's no more FGS running for this type, just get rid of it
+                uidState.mRunningFgs.remove(apiType);
+                // but we need to keep track of the timestamp in case an API stops
+                uidState.mLastFgsTimeStamp.put(apiType, System.currentTimeMillis());
+            }
+
             final int apiTypeIndex = uidState.mOpenWithFgsCount.indexOfKey(apiType);
             if (apiTypeIndex < 0) {
                 Slog.w(TAG, "Logger should be tracking FGS types correctly for UID " + uid
@@ -228,22 +255,6 @@ public class ForegroundServiceTypeLoggerModule {
                 timestampsFound.add(closedApi.mTimeStart);
                 // remove the last API close call
                 uidState.mApiClosedCalls.remove(apiType);
-            }
-            // remove the FGS record from the stack
-            final ArrayMap<ComponentName, ServiceRecord> runningFgsOfType =
-                    uidState.mRunningFgs.get(apiType);
-            if (runningFgsOfType == null) {
-                Slog.w(TAG, "Could not find appropriate running FGS for FGS stop for UID " + uid
-                        + " in package " + record.packageName);
-                continue;
-            }
-
-            runningFgsOfType.remove(record.getComponentName());
-            if (runningFgsOfType.size() == 0) {
-                // there's no more FGS running for this type, just get rid of it
-                uidState.mRunningFgs.remove(apiType);
-                // but we need to keep track of the timestamp in case an API stops
-                uidState.mLastFgsTimeStamp.put(apiType, System.currentTimeMillis());
             }
         }
         if (!apisFound.isEmpty()) {
@@ -374,9 +385,14 @@ public class ForegroundServiceTypeLoggerModule {
             // initialize if we don't contain
             uidState.mOpenedWithoutFgsCount.put(apiType, 0);
         }
-        if (uidState.mOpenedWithoutFgsCount.get(apiType) != 0) {
+        int apiOpenWithoutFgsCount = uidState.mOpenedWithoutFgsCount.get(apiType);
+        if (apiOpenWithoutFgsCount != 0) {
+            apiOpenWithoutFgsCount -= 1;
+            if (apiOpenWithoutFgsCount == 0) {
+                uidState.mApiOpenCalls.remove(apiType);
+            }
             uidState.mOpenedWithoutFgsCount
-                    .put(apiType, uidState.mOpenedWithoutFgsCount.get(apiType) - 1);
+                    .put(apiType, apiOpenWithoutFgsCount);
             return System.currentTimeMillis();
         }
         // This is a part of a valid active FGS
@@ -460,16 +476,17 @@ public class ForegroundServiceTypeLoggerModule {
     public void logFgsApiEvent(ServiceRecord r, int fgsState,
             @FgsApiState int apiState,
             @ForegroundServiceApiType int apiType, long timestamp) {
-        long apiDurationBeforeFgsStart = r.createRealTime - timestamp;
-        long apiDurationAfterFgsEnd = timestamp - r.mFgsExitTime;
+        long apiDurationBeforeFgsStart = 0;
+        long apiDurationAfterFgsEnd = 0;
         UidState uidState = mUids.get(r.appInfo.uid);
-        if (uidState != null) {
-            if (uidState.mFirstFgsTimeStamp.contains(apiType)) {
-                apiDurationBeforeFgsStart = uidState.mFirstFgsTimeStamp.get(apiType) - timestamp;
-            }
-            if (uidState.mLastFgsTimeStamp.contains(apiType)) {
-                apiDurationAfterFgsEnd = timestamp - uidState.mLastFgsTimeStamp.get(apiType);
-            }
+        if (uidState == null) {
+            return;
+        }
+        if (uidState.mFirstFgsTimeStamp.contains(apiType)) {
+            apiDurationBeforeFgsStart = uidState.mFirstFgsTimeStamp.get(apiType) - timestamp;
+        }
+        if (uidState.mLastFgsTimeStamp.contains(apiType)) {
+            apiDurationAfterFgsEnd = timestamp - uidState.mLastFgsTimeStamp.get(apiType);
         }
         final int[] apiTypes = new int[1];
         apiTypes[0] = apiType;
@@ -479,8 +496,8 @@ public class ForegroundServiceTypeLoggerModule {
                 r.appInfo.uid,
                 r.shortInstanceName,
                 fgsState, // FGS State
-                r.mAllowWhileInUsePermissionInFgs, // allowWhileInUsePermissionInFgs
-                r.mAllowStartForeground, // fgsStartReasonCode
+                r.isFgsAllowedWIU(), // allowWhileInUsePermissionInFgs
+                r.getFgsAllowStart(), // fgsStartReasonCode
                 r.appInfo.targetSdkVersion,
                 r.mRecentCallingUid,
                 0, // callerTargetSdkVersion
@@ -506,7 +523,16 @@ public class ForegroundServiceTypeLoggerModule {
                 ActivityManager.PROCESS_STATE_UNKNOWN,
                 ActivityManager.PROCESS_CAPABILITY_NONE,
                 apiDurationBeforeFgsStart,
-                apiDurationAfterFgsEnd);
+                apiDurationAfterFgsEnd,
+                r.mAllowWhileInUsePermissionInFgsReasonNoBinding,
+                r.mAllowWIUInBindService,
+                r.mAllowWIUByBindings,
+                r.mAllowStartForegroundNoBinding,
+                r.mAllowStartInBindService,
+                r.mAllowStartByBindings,
+                FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA,
+                false
+        );
     }
 
     /**
@@ -519,10 +545,11 @@ public class ForegroundServiceTypeLoggerModule {
             @ForegroundServiceApiType int apiType, long timestamp) {
         long apiDurationAfterFgsEnd = 0;
         UidState uidState = mUids.get(uid);
-        if (uidState != null) {
-            if (uidState.mLastFgsTimeStamp.contains(apiType)) {
-                apiDurationAfterFgsEnd = timestamp - uidState.mLastFgsTimeStamp.get(apiType);
-            }
+        if (uidState == null) {
+            return;
+        }
+        if (uidState.mLastFgsTimeStamp.contains(apiType)) {
+            apiDurationAfterFgsEnd = timestamp - uidState.mLastFgsTimeStamp.get(apiType);
         }
         final int[] apiTypes = new int[1];
         apiTypes[0] = apiType;
@@ -557,7 +584,16 @@ public class ForegroundServiceTypeLoggerModule {
                 ActivityManager.PROCESS_STATE_UNKNOWN,
                 ActivityManager.PROCESS_CAPABILITY_NONE,
                 0,
-                apiDurationAfterFgsEnd);
+                apiDurationAfterFgsEnd,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA,
+                false
+        );
     }
 
     /**

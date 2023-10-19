@@ -261,7 +261,10 @@ public final class CreateCredentialRequest implements Parcelable {
 
         /**
          * @param type the type of the credential to be stored
-         * @param credentialData the full credential creation request data
+         * @param credentialData the full credential creation request data, which must at minimum
+         * contain the required fields observed at the
+         * {@link androidx.credentials.CreateCredentialRequest} Bundle conversion static methods,
+         * because they are required for properly displaying the system credential selector UI
          * @param candidateQueryData the partial request data that will be sent to the provider
          *                           during the initial creation candidate query stage
          */

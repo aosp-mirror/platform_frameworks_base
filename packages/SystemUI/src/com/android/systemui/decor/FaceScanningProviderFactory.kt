@@ -34,6 +34,7 @@ import com.android.systemui.FaceScanningOverlay
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import java.util.concurrent.Executor
@@ -47,6 +48,7 @@ class FaceScanningProviderFactory @Inject constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Main private val mainExecutor: Executor,
     private val logger: ScreenDecorationsLogger,
+    private val featureFlags: FeatureFlags,
 ) : DecorProviderFactory() {
     private val display = context.display
     private val displayInfo = DisplayInfo()
@@ -86,6 +88,7 @@ class FaceScanningProviderFactory @Inject constructor(
                                         keyguardUpdateMonitor,
                                         mainExecutor,
                                         logger,
+                                        featureFlags,
                                 )
                         )
                     }
@@ -110,6 +113,7 @@ class FaceScanningOverlayProviderImpl(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val mainExecutor: Executor,
     private val logger: ScreenDecorationsLogger,
+    private val featureFlags: FeatureFlags,
 ) : BoundDecorProvider() {
     override val viewId: Int = com.android.systemui.R.id.face_scanning_anim
 
@@ -144,6 +148,7 @@ class FaceScanningOverlayProviderImpl(
                 mainExecutor,
                 logger,
                 authController,
+                featureFlags
         )
         view.id = viewId
         view.setColor(tintColor)

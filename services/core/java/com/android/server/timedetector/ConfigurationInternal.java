@@ -244,6 +244,8 @@ public final class ConfigurationInternal {
                 && mAutoDetectionEnabledSetting == that.mAutoDetectionEnabledSetting
                 && mUserId == that.mUserId && mUserConfigAllowed == that.mUserConfigAllowed
                 && mSystemClockUpdateThresholdMillis == that.mSystemClockUpdateThresholdMillis
+                && mSystemClockConfidenceThresholdMillis
+                == that.mSystemClockConfidenceThresholdMillis
                 && mAutoSuggestionLowerBound.equals(that.mAutoSuggestionLowerBound)
                 && mManualSuggestionLowerBound.equals(that.mManualSuggestionLowerBound)
                 && mSuggestionUpperBound.equals(that.mSuggestionUpperBound)
@@ -253,7 +255,8 @@ public final class ConfigurationInternal {
     @Override
     public int hashCode() {
         int result = Objects.hash(mAutoDetectionSupported, mAutoDetectionEnabledSetting, mUserId,
-                mUserConfigAllowed, mSystemClockUpdateThresholdMillis, mAutoSuggestionLowerBound,
+                mUserConfigAllowed, mSystemClockUpdateThresholdMillis,
+                mSystemClockConfidenceThresholdMillis, mAutoSuggestionLowerBound,
                 mManualSuggestionLowerBound, mSuggestionUpperBound);
         result = 31 * result + Arrays.hashCode(mOriginPriorities);
         return result;

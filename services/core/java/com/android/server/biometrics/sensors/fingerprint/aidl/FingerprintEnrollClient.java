@@ -29,7 +29,6 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.IBinder;
@@ -87,7 +86,6 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
-            @Nullable IUdfpsOverlay udfpsOverlay,
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
         // UDFPS haptics occur when an image is acquired (instead of when the result is known)
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
@@ -95,8 +93,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 biometricContext);
         setRequestId(requestId);
         mSensorProps = sensorProps;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
-                sidefpsController, udfpsOverlay);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mMaxTemplatesPerUser = maxTemplatesPerUser;
 
         mALSProbeCallback = getLogger().getAmbientLightProbe(true /* startWithClient */);
@@ -105,6 +102,13 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
             getLogger().disableMetrics();
         }
+    }
+
+    @Override
+    public void start(@NonNull ClientMonitorCallback callback) {
+        super.start(callback);
+
+        BiometricNotificationUtils.cancelFingerprintEnrollNotification(getContext());
     }
 
     @NonNull
@@ -265,11 +269,20 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     }
 
     @Override
-    public void onUiReady() {
+    public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event) {
         try {
-            getFreshDaemon().getSession().onUiReady();
+            switch (event) {
+                case FingerprintManager.UDFPS_UI_OVERLAY_SHOWN:
+                    getListener().onUdfpsOverlayShown();
+                    break;
+                case FingerprintManager.UDFPS_UI_READY:
+                    getFreshDaemon().getSession().onUiReady();
+                    break;
+                default:
+                    Slog.w(TAG, "No matching event for onUdfpsUiEvent");
+            }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to send UI ready", e);
+            Slog.e(TAG, "Unable to send onUdfpsUiEvent", e);
         }
     }
 

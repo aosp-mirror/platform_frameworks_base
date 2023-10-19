@@ -46,6 +46,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
@@ -130,6 +131,9 @@ public class VoiceInteractionService extends Service {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long MULTIPLE_ACTIVE_HOTWORD_DETECTORS = 193232191L;
+
+    private static final boolean SYSPROP_VISUAL_QUERY_SERVICE_ENABLED =
+            SystemProperties.getBoolean("ro.hotword.visual_query_service_enabled", false);
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
         @Override
@@ -947,6 +951,10 @@ public class VoiceInteractionService extends Service {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
+        if (!SYSPROP_VISUAL_QUERY_SERVICE_ENABLED) {
+            throw new IllegalStateException("VisualQueryDetectionService is not enabled on this "
+                    + "system. Please set ro.hotword.visual_query_service_enabled to true.");
+        }
         if (mSystemService == null) {
             throw new IllegalStateException("Not available until onReady() is called");
         }
@@ -965,7 +973,7 @@ public class VoiceInteractionService extends Service {
             }
 
             VisualQueryDetector visualQueryDetector =
-                    new VisualQueryDetector(mSystemService, executor, callback);
+                    new VisualQueryDetector(mSystemService, executor, callback, this);
             HotwordDetector visualQueryDetectorInitializationDelegate =
                     visualQueryDetector.getInitializationDelegate();
             mActiveDetectors.add(visualQueryDetectorInitializationDelegate);

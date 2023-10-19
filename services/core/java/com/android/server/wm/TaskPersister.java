@@ -509,7 +509,7 @@ public class TaskPersister implements PersisterQueue.Listener {
 
     private static boolean createParentDirectory(String filePath) {
         File parentDir = new File(filePath).getParentFile();
-        return parentDir.exists() || parentDir.mkdirs();
+        return parentDir.isDirectory() || parentDir.mkdir();
     }
 
     private static class TaskWriteQueueItem implements PersisterQueue.WriteQueueItem {

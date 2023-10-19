@@ -26,6 +26,7 @@ import androidx.core.animation.doOnEnd
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.dream.lowlight.util.TruncatedInterpolator
 import com.android.systemui.R
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutParams
@@ -35,6 +36,9 @@ import com.android.systemui.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.DreamLog
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -64,11 +68,13 @@ constructor(
     private val mDreamInTranslationYDistance: Int,
     @Named(DreamOverlayModule.DREAM_IN_TRANSLATION_Y_DURATION)
     private val mDreamInTranslationYDurationMs: Long,
-    private val mLogger: DreamLogger,
+    @DreamLog logBuffer: LogBuffer,
 ) {
     companion object {
         private const val TAG = "DreamOverlayAnimationsController"
     }
+
+    private val logger = Logger(logBuffer, TAG)
 
     private var mAnimator: Animator? = null
     private lateinit var view: View
@@ -178,11 +184,11 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setEntryAnimationsFinished(true)
-                    mLogger.d(TAG, "Dream overlay entry animations finished.")
+                    logger.d("Dream overlay entry animations finished.")
                 }
-                doOnCancel { mLogger.d(TAG, "Dream overlay entry animations canceled.") }
+                doOnCancel { logger.d("Dream overlay entry animations canceled.") }
                 start()
-                mLogger.d(TAG, "Dream overlay entry animations started.")
+                logger.d("Dream overlay entry animations started.")
             }
     }
 
@@ -204,31 +210,28 @@ constructor(
                     translationYAnimator(
                         from = 0f,
                         to = -mDreamInTranslationYDistance.toFloat(),
-                        durationMs = mDreamInTranslationYDurationMs,
+                        durationMs = mDreamInComplicationsAnimDurationMs,
                         delayMs = 0,
-                        interpolator = Interpolators.EMPHASIZED
+                        // Truncate the animation from the full duration to match the alpha
+                        // animation so that the whole animation ends at the same time.
+                        interpolator =
+                            TruncatedInterpolator(
+                                Interpolators.EMPHASIZED,
+                                /*originalDuration=*/ mDreamInTranslationYDurationMs.toFloat(),
+                                /*newDuration=*/ mDreamInComplicationsAnimDurationMs.toFloat()
+                            )
                     ),
                     alphaAnimator(
-                            from =
-                                mCurrentAlphaAtPosition.getOrDefault(
-                                    key = POSITION_BOTTOM,
-                                    defaultValue = 1f
-                                ),
-                            to = 0f,
-                            durationMs = mDreamInComplicationsAnimDurationMs,
-                            delayMs = 0,
-                            positions = POSITION_BOTTOM
-                        )
-                        .apply {
-                            doOnEnd {
-                                // The logical end of the animation is once the alpha and blur
-                                // animations finish, end the animation so that any listeners are
-                                // notified. The Y translation animation is much longer than all of
-                                // the other animations due to how the spec is defined, but is not
-                                // expected to run to completion.
-                                mAnimator?.end()
-                            }
-                        },
+                        from =
+                            mCurrentAlphaAtPosition.getOrDefault(
+                                key = POSITION_BOTTOM,
+                                defaultValue = 1f
+                            ),
+                        to = 0f,
+                        durationMs = mDreamInComplicationsAnimDurationMs,
+                        delayMs = 0,
+                        positions = POSITION_BOTTOM
+                    ),
                     alphaAnimator(
                         from =
                             mCurrentAlphaAtPosition.getOrDefault(
@@ -244,11 +247,11 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setExitAnimationsRunning(false)
-                    mLogger.d(TAG, "Dream overlay exit animations finished.")
+                    logger.d("Dream overlay exit animations finished.")
                 }
-                doOnCancel { mLogger.d(TAG, "Dream overlay exit animations canceled.") }
+                doOnCancel { logger.d("Dream overlay exit animations canceled.") }
                 start()
-                mLogger.d(TAG, "Dream overlay exit animations started.")
+                logger.d("Dream overlay exit animations started.")
             }
         mOverlayStateController.setExitAnimationsRunning(true)
         return mAnimator as AnimatorSet

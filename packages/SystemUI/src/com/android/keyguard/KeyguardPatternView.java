@@ -16,8 +16,10 @@
 package com.android.keyguard;
 
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED;
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -74,6 +76,7 @@ public class KeyguardPatternView extends KeyguardInputView
     BouncerKeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
     private ConstraintLayout mContainer;
+    @DevicePostureInt private int mLastDevicePosture = DEVICE_POSTURE_UNKNOWN;
 
     public KeyguardPatternView(Context context) {
         this(context, null);
@@ -95,14 +98,27 @@ public class KeyguardPatternView extends KeyguardInputView
                 mContext, android.R.interpolator.fast_out_linear_in));
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        updateMargins();
+    }
+
     void onDevicePostureChanged(@DevicePostureInt int posture) {
+        if (mLastDevicePosture != posture) {
+            mLastDevicePosture = posture;
+            updateMargins();
+        }
+    }
+
+    private void updateMargins() {
         // Update the guideline based on the device posture...
         float halfOpenPercentage =
                 mContext.getResources().getFloat(R.dimen.half_opened_bouncer_height_ratio);
 
         ConstraintSet cs = new ConstraintSet();
         cs.clone(mContainer);
-        cs.setGuidelinePercent(R.id.pattern_top_guideline, posture == DEVICE_POSTURE_HALF_OPENED
+        cs.setGuidelinePercent(R.id.pattern_top_guideline,
+                mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED
                 ? halfOpenPercentage : 0.0f);
         cs.applyTo(mContainer);
     }

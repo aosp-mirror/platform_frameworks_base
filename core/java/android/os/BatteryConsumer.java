@@ -795,11 +795,12 @@ public abstract class BatteryConsumer {
         protected final BatteryConsumer.BatteryConsumerData mData;
         protected final PowerComponents.Builder mPowerComponentsBuilder;
 
-        public BaseBuilder(BatteryConsumer.BatteryConsumerData data, int consumerType) {
+        public BaseBuilder(BatteryConsumer.BatteryConsumerData data, int consumerType,
+                double minConsumedPowerThreshold) {
             mData = data;
             data.putLong(COLUMN_INDEX_BATTERY_CONSUMER_TYPE, consumerType);
 
-            mPowerComponentsBuilder = new PowerComponents.Builder(data);
+            mPowerComponentsBuilder = new PowerComponents.Builder(data, minConsumedPowerThreshold);
         }
 
         @Nullable

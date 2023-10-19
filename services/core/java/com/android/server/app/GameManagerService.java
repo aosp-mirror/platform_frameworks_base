@@ -25,6 +25,7 @@ import static com.android.internal.R.styleable.GameModeConfig_allowGameDownscali
 import static com.android.internal.R.styleable.GameModeConfig_allowGameFpsOverride;
 import static com.android.internal.R.styleable.GameModeConfig_supportsBatteryGameMode;
 import static com.android.internal.R.styleable.GameModeConfig_supportsPerformanceGameMode;
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -40,6 +41,7 @@ import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameManagerService;
 import android.app.IGameModeListener;
+import android.app.IGameStateListener;
 import android.app.StatsManager;
 import android.app.UidObserver;
 import android.content.BroadcastReceiver;
@@ -148,6 +150,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final Object mLock = new Object();
     private final Object mDeviceConfigLock = new Object();
     private final Object mGameModeListenerLock = new Object();
+    private final Object mGameStateListenerLock = new Object();
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     final Handler mHandler;
     private final PackageManager mPackageManager;
@@ -164,6 +167,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
     // listener to caller uid map
     @GuardedBy("mGameModeListenerLock")
     private final ArrayMap<IGameModeListener, Integer> mGameModeListeners = new ArrayMap<>();
+    @GuardedBy("mGameStateListenerLock")
+    private final ArrayMap<IGameStateListener, Integer> mGameStateListeners = new ArrayMap<>();
     @Nullable
     private final GameServiceController mGameServiceController;
     private final Object mUidObserverLock = new Object();
@@ -342,6 +347,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         if (mHandler.hasMessages(CANCEL_GAME_LOADING_MODE)) {
                             mHandler.removeMessages(CANCEL_GAME_LOADING_MODE);
                         }
+                        Slog.v(TAG, String.format(
+                                "Game loading power mode %s (game state change isLoading=%b)",
+                                        isLoading ? "ON" : "OFF", isLoading));
                         mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, isLoading);
                         if (isLoading) {
                             int loadingBoostDuration = getLoadingBoostDuration(packageName, userId);
@@ -352,9 +360,20 @@ public final class GameManagerService extends IGameManagerService.Stub {
                                     loadingBoostDuration);
                         }
                     }
+                    synchronized (mGameStateListenerLock) {
+                        for (IGameStateListener listener : mGameStateListeners.keySet()) {
+                            try {
+                                listener.onGameStateChanged(packageName, gameState, userId);
+                            } catch (RemoteException ex) {
+                                Slog.w(TAG, "Cannot notify game state change for listener added by "
+                                        + mGameStateListeners.get(listener));
+                            }
+                        }
+                    }
                     break;
                 }
                 case CANCEL_GAME_LOADING_MODE: {
+                    Slog.v(TAG, "Game loading power mode OFF (loading boost ended)");
                     mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, false);
                     break;
                 }
@@ -397,59 +416,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
         public void finalize() {
             DeviceConfig.removeOnPropertiesChangedListener(this);
         }
-    }
-
-    public enum FrameRate {
-        FPS_DEFAULT(0),
-        FPS_30(30),
-        FPS_36(36),
-        FPS_40(40),
-        FPS_45(45),
-        FPS_48(48),
-        FPS_60(60),
-        FPS_72(72),
-        FPS_90(90),
-        FPS_120(120),
-        FPS_144(144),
-        FPS_INVALID(-1);
-
-        public final int fps;
-
-        FrameRate(int fps) {
-            this.fps = fps;
-        }
-    }
-
-    // Turn the raw string to the corresponding fps int.
-    // Return 0 when disabling, -1 for invalid fps.
-    static int getFpsInt(String raw) {
-        // TODO(b/243448953): make sure this translates to proper values based on current display
-        switch (raw) {
-            case "30":
-                return FrameRate.FPS_30.fps;
-            case "36":
-                return FrameRate.FPS_36.fps;
-            case "40":
-                return FrameRate.FPS_40.fps;
-            case "45":
-                return FrameRate.FPS_45.fps;
-            case "48":
-                return FrameRate.FPS_48.fps;
-            case "60":
-                return FrameRate.FPS_60.fps;
-            case "72":
-                return FrameRate.FPS_72.fps;
-            case "90":
-                return FrameRate.FPS_90.fps;
-            case "120":
-                return FrameRate.FPS_120.fps;
-            case "144":
-                return FrameRate.FPS_144.fps;
-            case "disable":
-            case "":
-                return FrameRate.FPS_DEFAULT.fps;
-        }
-        return FrameRate.FPS_INVALID.fps;
     }
 
     /**
@@ -699,7 +665,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
 
             public synchronized int getFps() {
-                return GameManagerService.getFpsInt(mFps);
+                try {
+                    final int fpsInt = Integer.parseInt(mFps);
+                    return fpsInt;
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
             }
 
             synchronized String getFpsStr() {
@@ -739,7 +710,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
 
             android.app.GameModeConfiguration toPublicGameModeConfig() {
-                int fpsOverride = getFpsInt(mFps);
+                int fpsOverride;
+                try {
+                    fpsOverride = Integer.parseInt(mFps);
+                } catch (NumberFormatException e) {
+                    fpsOverride = 0;
+                }
                 // TODO(b/243448953): match to proper value in case of display change?
                 fpsOverride = fpsOverride > 0 ? fpsOverride
                         : android.app.GameModeConfiguration.FPS_OVERRIDE_NONE;
@@ -1265,6 +1241,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 // instruction.
                 mHandler.removeMessages(CANCEL_GAME_LOADING_MODE);
             } else {
+                Slog.v(TAG, "Game loading power mode ON (loading boost on game start)");
                 mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, true);
             }
 
@@ -1474,6 +1451,43 @@ public final class GameManagerService extends IGameManagerService.Stub {
     }
 
     /**
+     * Adds a game state listener.
+     */
+    @Override
+    public void addGameStateListener(@NonNull IGameStateListener listener) {
+        try {
+            final IBinder listenerBinder = listener.asBinder();
+            listenerBinder.linkToDeath(new DeathRecipient() {
+                @Override public void binderDied() {
+                    removeGameStateListenerUnchecked(listener);
+                    listenerBinder.unlinkToDeath(this, 0 /*flags*/);
+                }
+            }, 0 /*flags*/);
+            synchronized (mGameStateListenerLock) {
+                mGameStateListeners.put(listener, Binder.getCallingUid());
+            }
+        } catch (RemoteException ex) {
+            Slog.e(TAG,
+                    "Failed to link death recipient for IGameStateListener from caller "
+                            + Binder.getCallingUid() + ", abandoned its listener registration", ex);
+        }
+    }
+
+    /**
+     * Removes a game state listener.
+     */
+    @Override
+    public void removeGameStateListener(@NonNull IGameStateListener listener) {
+        removeGameStateListenerUnchecked(listener);
+    }
+
+    private void removeGameStateListenerUnchecked(IGameStateListener listener) {
+        synchronized (mGameStateListenerLock) {
+            mGameStateListeners.remove(listener);
+        }
+    }
+
+    /**
      * Notified when boot is completed.
      */
     @VisibleForTesting
@@ -1504,6 +1518,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
             }
         }, new IntentFilter(Intent.ACTION_SHUTDOWN));
+        Slog.v(TAG, "Game loading power mode OFF (game manager service start/restart)");
+        mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, false);
+        Slog.v(TAG, "Game power mode OFF (game manager service start/restart)");
+        mPowerManagerInternal.setPowerMode(Mode.GAME, false);
     }
 
     private void sendUserMessage(int userId, int what, String eventForLog, int delayMillis) {
@@ -2032,17 +2050,17 @@ public final class GameManagerService extends IGameManagerService.Stub {
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.GAME_MODE_INFO,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.GAME_MODE_CONFIGURATION,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.GAME_MODE_LISTENER,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
     }
 
@@ -2166,7 +2184,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             synchronized (mUidObserverLock) {
-                if (ActivityManager.isProcStateBackground(procState)) {
+                if (procState != ActivityManager.PROCESS_STATE_TOP) {
                     disableGameMode(uid);
                     return;
                 }

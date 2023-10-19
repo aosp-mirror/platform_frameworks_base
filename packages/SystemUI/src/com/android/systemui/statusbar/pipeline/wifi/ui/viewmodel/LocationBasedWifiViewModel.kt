@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import java.lang.IllegalArgumentException
 
 /**
  * A view model for a wifi icon in a specific location. This allows us to control parameters that
@@ -27,18 +27,9 @@ import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
  * Must be subclassed for each distinct location.
  */
 abstract class LocationBasedWifiViewModel(
-    val commonImpl: WifiViewModelCommon,
-    statusBarPipelineFlags: StatusBarPipelineFlags,
-    debugTint: Int,
+    private val commonImpl: WifiViewModelCommon,
 ) : WifiViewModelCommon by commonImpl {
-    val useDebugColoring: Boolean = statusBarPipelineFlags.useDebugColoring()
-
-    val defaultColor: Int =
-        if (useDebugColoring) {
-            debugTint
-        } else {
-            Color.WHITE
-        }
+    val defaultColor: Int = Color.WHITE
 
     companion object {
         /**
@@ -47,13 +38,14 @@ abstract class LocationBasedWifiViewModel(
          */
         fun viewModelForLocation(
             commonImpl: WifiViewModelCommon,
-            flags: StatusBarPipelineFlags,
             location: StatusBarLocation,
         ): LocationBasedWifiViewModel =
             when (location) {
-                StatusBarLocation.HOME -> HomeWifiViewModel(commonImpl, flags)
-                StatusBarLocation.KEYGUARD -> KeyguardWifiViewModel(commonImpl, flags)
-                StatusBarLocation.QS -> QsWifiViewModel(commonImpl, flags)
+                StatusBarLocation.HOME -> HomeWifiViewModel(commonImpl)
+                StatusBarLocation.KEYGUARD -> KeyguardWifiViewModel(commonImpl)
+                StatusBarLocation.QS -> QsWifiViewModel(commonImpl)
+                StatusBarLocation.SHADE_CARRIER_GROUP ->
+                    throw IllegalArgumentException("invalid location for WifiViewModel: $location")
             }
     }
 }
@@ -64,23 +56,22 @@ abstract class LocationBasedWifiViewModel(
  */
 class HomeWifiViewModel(
     commonImpl: WifiViewModelCommon,
-    statusBarPipelineFlags: StatusBarPipelineFlags,
-) :
-    WifiViewModelCommon,
-    LocationBasedWifiViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.CYAN)
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)
 
 /** A view model for the wifi icon shown on keyguard (lockscreen). */
 class KeyguardWifiViewModel(
     commonImpl: WifiViewModelCommon,
-    statusBarPipelineFlags: StatusBarPipelineFlags,
-) :
-    WifiViewModelCommon,
-    LocationBasedWifiViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.MAGENTA)
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)
 
 /** A view model for the wifi icon shown in quick settings (when the shade is pulled down). */
 class QsWifiViewModel(
     commonImpl: WifiViewModelCommon,
-    statusBarPipelineFlags: StatusBarPipelineFlags,
-) :
-    WifiViewModelCommon,
-    LocationBasedWifiViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.GREEN)
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)
+
+/**
+ * A view model for the wifi icon in the shade carrier group (visible when quick settings is fully
+ * expanded, and in large screen shade). Currently unused.
+ */
+class ShadeCarrierGroupWifiViewModel(
+    commonImpl: WifiViewModelCommon,
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)

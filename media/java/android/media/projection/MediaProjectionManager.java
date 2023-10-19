@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.ContentRecordingSession;
 import android.view.Surface;
 
 import java.util.Map;
@@ -255,6 +256,7 @@ public final class MediaProjectionManager {
      */
     public void stopActiveProjection() {
         try {
+            Log.d(TAG, "Content Recording: stopping active projection");
             mService.stopActiveProjection();
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to stop the currently active media projection", e);
@@ -268,6 +270,7 @@ public final class MediaProjectionManager {
      */
     public void addCallback(@NonNull Callback callback, @Nullable Handler handler) {
         if (callback == null) {
+            Log.w(TAG, "Content Recording: cannot add null callback");
             throw new IllegalArgumentException("callback must not be null");
         }
         CallbackDelegate delegate = new CallbackDelegate(callback, handler);
@@ -285,6 +288,7 @@ public final class MediaProjectionManager {
      */
     public void removeCallback(@NonNull Callback callback) {
         if (callback == null) {
+            Log.w(TAG, "ContentRecording: cannot remove null callback");
             throw new IllegalArgumentException("callback must not be null");
         }
         CallbackDelegate delegate = mCallbacks.remove(callback);
@@ -300,7 +304,22 @@ public final class MediaProjectionManager {
     /** @hide */
     public static abstract class Callback {
         public abstract void onStart(MediaProjectionInfo info);
+
         public abstract void onStop(MediaProjectionInfo info);
+
+        /**
+         * Called when the {@link ContentRecordingSession} was set for the current media
+         * projection.
+         *
+         * @param info    always present and contains information about the media projection host.
+         * @param session the recording session for the current media projection. Can be
+         *                {@code null} when the recording will stop.
+         */
+        public void onRecordingSessionSet(
+                @NonNull MediaProjectionInfo info,
+                @Nullable ContentRecordingSession session
+        ) {
+        }
     }
 
     /** @hide */
@@ -334,6 +353,14 @@ public final class MediaProjectionManager {
                     mCallback.onStop(info);
                 }
             });
+        }
+
+        @Override
+        public void onRecordingSessionSet(
+                @NonNull final MediaProjectionInfo info,
+                @Nullable final ContentRecordingSession session
+        ) {
+            mHandler.post(() -> mCallback.onRecordingSessionSet(info, session));
         }
     }
 }

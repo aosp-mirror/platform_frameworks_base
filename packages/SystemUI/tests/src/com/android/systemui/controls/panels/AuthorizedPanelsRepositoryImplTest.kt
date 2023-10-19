@@ -22,8 +22,6 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.FakeSharedPreferences
@@ -42,8 +40,6 @@ class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var userTracker: UserTracker
 
-    private val featureFlags = FakeFeatureFlags()
-
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -52,7 +48,6 @@ class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
             arrayOf<String>()
         )
         whenever(userTracker.userId).thenReturn(0)
-        featureFlags.set(Flags.APP_PANELS_REMOVE_APPS_ALLOWED, true)
     }
 
     @Test
@@ -132,25 +127,8 @@ class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
         assertThat(sharedPrefs.getStringSet(KEY, null)).isEmpty()
     }
 
-    @Test
-    fun testSetAuthorizedPackageAfterFeatureDisabled() {
-        mContext.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf(TEST_PACKAGE)
-        )
-        val sharedPrefs = FakeSharedPreferences()
-        val fileManager = FakeUserFileManager(mapOf(0 to sharedPrefs))
-        val repository = createRepository(fileManager)
-
-        repository.removeAuthorizedPanels(setOf(TEST_PACKAGE))
-
-        featureFlags.set(Flags.APP_PANELS_REMOVE_APPS_ALLOWED, false)
-
-        assertThat(repository.getAuthorizedPanels()).isEqualTo(setOf(TEST_PACKAGE))
-    }
-
     private fun createRepository(userFileManager: UserFileManager): AuthorizedPanelsRepositoryImpl {
-        return AuthorizedPanelsRepositoryImpl(mContext, userFileManager, userTracker, featureFlags)
+        return AuthorizedPanelsRepositoryImpl(mContext, userFileManager, userTracker)
     }
 
     private class FakeUserFileManager(private val sharedPrefs: Map<Int, SharedPreferences>) :

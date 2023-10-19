@@ -26,7 +26,7 @@
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="18dp"/>
-            <solid android:color="?androidprv:attr/colorAccentPrimary"/>
+            <solid android:color="@color/qs_dialog_btn_filled_large_background"/>
         </shape>
     </item>
 </ripple>

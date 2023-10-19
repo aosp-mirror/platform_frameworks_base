@@ -17,32 +17,43 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.hardware.biometrics.SensorLocationInternal
-import android.util.Log
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 
 /** Business logic for SideFps overlay offsets. */
 interface SideFpsOverlayInteractor {
 
-    /** Get the corresponding offsets based on different displayId. */
-    fun getOverlayOffsets(displayId: String): SensorLocationInternal
+    /** The displayId of the current display. */
+    val displayId: Flow<String>
+
+    /** Overlay offsets corresponding to given displayId. */
+    val overlayOffsets: Flow<SensorLocationInternal>
+
+    /** Called on display changes, used to keep the display state in sync */
+    fun onDisplayChanged(displayId: String)
 }
 
 @SysUISingleton
 class SideFpsOverlayInteractorImpl
 @Inject
-constructor(private val fingerprintPropertyRepository: FingerprintPropertyRepository) :
+constructor(fingerprintPropertyRepository: FingerprintPropertyRepository) :
     SideFpsOverlayInteractor {
 
-    override fun getOverlayOffsets(displayId: String): SensorLocationInternal {
-        val offsets = fingerprintPropertyRepository.sensorLocations.value
-        return if (offsets.containsKey(displayId)) {
-            offsets[displayId]!!
-        } else {
-            Log.w(TAG, "No location specified for display: $displayId")
-            offsets[""]!!
+    private val _displayId: MutableStateFlow<String> = MutableStateFlow("")
+    override val displayId: Flow<String> = _displayId.asStateFlow()
+
+    override val overlayOffsets: Flow<SensorLocationInternal> =
+        combine(displayId, fingerprintPropertyRepository.sensorLocations) { displayId, offsets ->
+            offsets[displayId] ?: SensorLocationInternal.DEFAULT
         }
+
+    override fun onDisplayChanged(displayId: String) {
+        _displayId.value = displayId
     }
 
     companion object {

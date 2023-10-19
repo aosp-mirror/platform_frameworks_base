@@ -87,7 +87,7 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
         if (mIsDropDownMode) {
             // use a divider
             listView.setDividerHeight(res.getDimensionPixelSize(R.dimen.control_list_divider));
-            listView.setDivider(res.getDrawable(R.drawable.controls_list_divider_inset));
+            listView.setDivider(res.getDrawable(R.drawable.global_actions_list_divider_inset));
         } else {
             if (mAdapter == null) return;
 

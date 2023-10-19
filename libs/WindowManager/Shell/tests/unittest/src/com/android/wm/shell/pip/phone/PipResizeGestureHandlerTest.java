@@ -36,14 +36,16 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
-import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
-import com.android.wm.shell.pip.PipUiEventLogger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +89,7 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
 
     private PipBoundsState mPipBoundsState;
 
-    private PipSizeSpecHandler mPipSizeSpecHandler;
+    private SizeSpecSource mSizeSpecSource;
 
     private PipDisplayLayoutState mPipDisplayLayoutState;
 
@@ -97,13 +99,14 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
+        mSizeSpecSource = new PhoneSizeSpecSource(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mSizeSpecSource, mPipDisplayLayoutState);
         final PipSnapAlgorithm pipSnapAlgorithm = new PipSnapAlgorithm();
         final PipKeepClearAlgorithmInterface pipKeepClearAlgorithm =
                 new PipKeepClearAlgorithmInterface() {};
         final PipBoundsAlgorithm pipBoundsAlgorithm = new PipBoundsAlgorithm(mContext,
-                mPipBoundsState, pipSnapAlgorithm, pipKeepClearAlgorithm, mPipSizeSpecHandler);
+                mPipBoundsState, pipSnapAlgorithm, pipKeepClearAlgorithm, mPipDisplayLayoutState,
+                mSizeSpecSource);
         final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, pipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator);

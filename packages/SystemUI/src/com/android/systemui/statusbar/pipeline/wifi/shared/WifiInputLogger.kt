@@ -20,7 +20,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.WifiInputLog
 import com.android.systemui.statusbar.pipeline.shared.LoggerHelper
 import javax.inject.Inject
@@ -59,6 +59,8 @@ constructor(
     fun logActivity(activity: String) {
         buffer.log(TAG, LogLevel.DEBUG, { str1 = activity }, { "Activity: $str1" })
     }
+
+    fun logScanResults() = buffer.log(TAG, LogLevel.DEBUG, {}, { "onScanResultsAvailable" })
 }
 
 private const val TAG = "WifiInputLog"

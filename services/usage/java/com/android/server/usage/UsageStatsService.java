@@ -2043,6 +2043,12 @@ public class UsageStatsService extends SystemService implements
         mAppStandby.clearLastUsedTimestampsForTest(packageName, userId);
     }
 
+    void deletePackageData(@NonNull String packageName, @UserIdInt int userId) {
+        synchronized (mLock) {
+            mUserState.get(userId).deleteDataFor(packageName);
+        }
+    }
+
     private final class BinderService extends IUsageStatsManager.Stub {
 
         private boolean hasPermission(String callingPackage) {

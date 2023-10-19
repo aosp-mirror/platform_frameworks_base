@@ -50,7 +50,6 @@ import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
-import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
@@ -1993,7 +1992,7 @@ public class CarrierConfigManager {
             "lte_plus_threshold_bandwidth_khz_int";
 
     /**
-     * The combined channel bandwidth threshold (non-inclusive) in KHz required to display the
+     * The combined channel bandwidth threshold (inclusive) in KHz required to display the
      * NR advanced (i.e. 5G+) data icon. It is 0 by default, meaning minimum bandwidth check is
      * not enabled. Other factors like bands or frequency can also determine whether the NR
      * advanced data icon is shown or not.
@@ -5813,6 +5812,21 @@ public class CarrierConfigManager {
          */
         public static final int NR_SA_DISABLE_POLICY_VOWIFI_REGISTERED = 3;
 
+        /**
+         * This specifies whether the carrier support the global number format or not.
+         * {@link SubscriptionManager#getPhoneNumber(int)},
+         * {@link SubscriptionManager#getPhoneNumber(int, int)} with
+         * {@link SubscriptionManager#PHONE_NUMBER_SOURCE_IMS}
+         * In order to provide the phone number to the APIs, the framework extracts the phone
+         * number from the message received from the carrier server. If the carrier does not use
+         * global number format, the framework could not provide phone number.
+         * <p>
+         * If not set or set to false value, the framework handle only global number format URI.
+         * @hide
+         */
+        public static final String KEY_ALLOW_NON_GLOBAL_PHONE_NUMBER_FORMAT_BOOL =
+                KEY_PREFIX + "allow_non_global_phone_number_format_bool";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -5924,6 +5938,8 @@ public class CarrierConfigManager {
             defaults.putString(KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING, "");
             defaults.putString(KEY_IMS_USER_AGENT_STRING,
                                "#MANUFACTURER#_#MODEL#_Android#AV#_#BUILD#");
+
+            defaults.putBoolean(KEY_ALLOW_NON_GLOBAL_PHONE_NUMBER_FORMAT_BOOL, false);
 
             return defaults;
         }
@@ -9384,6 +9400,39 @@ public class CarrierConfigManager {
             "missed_incoming_call_sms_pattern_string_array";
 
     /**
+     * Indicate the satellite services supported per provider by a carrier.
+     *
+     * Key is the PLMN of a satellite provider. Value should be an integer array of supported
+     * services with the following value:
+     * <ul>
+     * <li>1 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VOICE}</li>
+     * <li>2 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_DATA}</li>
+     * <li>3 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_SMS}</li>
+     * <li>4 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VIDEO}</li>
+     * <li>5 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_EMERGENCY}</li>
+     * </ul>
+     * <p>
+     * If this carrier config is not present, the overlay config
+     * {@code config_satellite_services_supported_by_providers} will be used. If the carrier config
+     * is present, the supported satellite services will be identified as follows:
+     * <ul>
+     * <li>For the PLMN that exists in both provider supported satellite services and carrier
+     * supported satellite services, the supported services will be the intersection of the two
+     * sets.</li>
+     * <li>For the PLMN that is present in provider supported satellite services but not in carrier
+     * supported satellite services, the provider supported satellite services will be used.</li>
+     * <li>For the PLMN that is present in carrier supported satellite services but not in provider
+     * supported satellite services, the PLMN will be ignored.</li>
+     * </ul>
+     *
+     * This config is empty by default.
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE =
+            "carrier_supported_satellite_services_per_provider_bundle";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -9605,6 +9654,7 @@ public class CarrierConfigManager {
      *
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED
      */
     public static final String
             KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG =
@@ -9729,6 +9779,27 @@ public class CarrierConfigManager {
      */
     public static final String KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY =
             "iwlan_handover_policy_string_array";
+
+    /**
+     * Score table for {@link TelephonyManager#MOBILE_DATA_POLICY_AUTO_DATA_SWITCH}. The score is
+     * used in conjunction with a tolerance value defined in resource config
+     * {@code auto_data_switch_score_tolerance}, greater than which device will switch to the sub
+     * with higher score.
+     * Possible keys are network type name string(also see {@link #KEY_BANDWIDTH_STRING_ARRAY}).
+     * Value should be "score_level_0, score_level_1, score_level_2, score_level_3,score_level_4".
+     * Each network type must have 5 scores correspond to {@link CellSignalStrength}, where score is
+     * a non-negative integer. A score of 0 is treated the same as data out of service.
+     *
+     * For NR (5G), the following network names should be used:
+     * - NR_NSA: NR NSA, sub-6 frequencies
+     * - NR_NSA_MMWAVE: NR NSA, mmwave frequencies
+     * - NR_SA: NR SA, sub-6 frequencies
+     * - NR_SA_MMWAVE: NR SA, mmwave frequencies
+     *
+     * @hide
+     */
+    public static final String KEY_AUTO_DATA_SWITCH_RAT_SIGNAL_SCORE_BUNDLE =
+            "auto_data_switch_rat_signal_score_string_bundle";
 
     /** The default value for every variable. */
     private static final PersistableBundle sDefaults;
@@ -10111,7 +10182,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
         sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
-        sDefaults.putBoolean(KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL, true);
+        sDefaults.putBoolean(KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL, false);
         sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
                 new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
@@ -10367,6 +10438,9 @@ public class CarrierConfigManager {
                 });
         sDefaults.putBoolean(KEY_DELAY_IMS_TEAR_DOWN_UNTIL_CALL_END_BOOL, false);
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
+        sDefaults.putPersistableBundle(
+                KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
+                PersistableBundle.EMPTY);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
@@ -10404,6 +10478,51 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
                 "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
                         + "target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"});
+        PersistableBundle auto_data_switch_rat_signal_score_string_bundle = new PersistableBundle();
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "NR_SA_MMWAVE", new int[]{10000, 13227, 16000, 18488, 20017});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "NR_NSA_MMWAVE", new int[]{8000, 10227, 12488, 15017, 15278});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "LTE", new int[]{3731, 5965, 8618, 11179, 13384});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "NR_SA", new int[]{5288, 6795, 6955, 7562, 9713});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "NR_NSA", new int[]{5463, 6827, 8029, 9007, 9428});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "UMTS", new int[]{100, 169, 183, 192, 300});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "eHRPD", new int[]{10, 400, 600, 800, 1000});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "TD_SCDMA", new int[]{1, 100, 500, 1000});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "iDEN", new int[]{1, 2, 10, 50, 100});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "EvDo_B", new int[]{1000, 1495, 2186, 2532, 2600});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "HSPA+", new int[]{1619, 2500, 3393, 4129, 4212});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "HSPA", new int[]{1000, 1495, 2186, 2532, 2544});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "HSUPA", new int[]{1500, 1919, 2132, 2362, 2704});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "HSDPA", new int[]{1500, 1732, 4000, 7000, 8000});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "EvDo_A", new int[]{600, 840, 1200, 1300, 1400});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "EvDo_0", new int[]{300, 600, 1000, 1500, 2000});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "1xRTT", new int[]{50, 60, 70, 80});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "EDGE", new int[]{154, 169, 183, 192, 267});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "GPRS", new int[]{15, 30, 40, 45, 50});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "CDMA", new int[]{1, 50, 100, 300, 2000});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "GSM", new int[]{1, 2, 10, 50, 100});
+        sDefaults.putPersistableBundle(KEY_AUTO_DATA_SWITCH_RAT_SIGNAL_SCORE_BUNDLE,
+                auto_data_switch_rat_signal_score_string_bundle);
         sDefaults.putInt(KEY_CELLULAR_USAGE_SETTING_INT,
                 SubscriptionManager.USAGE_SETTING_UNKNOWN);
         // Default data stall recovery configurations.

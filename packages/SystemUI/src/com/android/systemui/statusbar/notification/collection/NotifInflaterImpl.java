@@ -36,12 +36,14 @@ import javax.inject.Inject;
 public class NotifInflaterImpl implements NotifInflater {
 
     private final NotifInflationErrorManager mNotifErrorManager;
+    private final NotifInflaterLogger mLogger;
 
     private NotificationRowBinderImpl mNotificationRowBinder;
 
     @Inject
-    public NotifInflaterImpl(NotifInflationErrorManager errorManager) {
+    public NotifInflaterImpl(NotifInflationErrorManager errorManager, NotifInflaterLogger logger) {
         mNotifErrorManager = errorManager;
+        mLogger = logger;
     }
 
     /**
@@ -51,12 +53,6 @@ public class NotifInflaterImpl implements NotifInflater {
         mNotificationRowBinder = rowBinder;
     }
 
-    @Override
-    public void rebindViews(@NonNull NotificationEntry entry, @NonNull Params params,
-            @NonNull InflationCallback callback) {
-        inflateViews(entry, params, callback);
-    }
-
     /**
      * Called to inflate the views of an entry.  Views are not considered inflated until all of its
      * views are bound.
@@ -64,23 +60,43 @@ public class NotifInflaterImpl implements NotifInflater {
     @Override
     public void inflateViews(@NonNull NotificationEntry entry, @NonNull Params params,
             @NonNull InflationCallback callback) {
+        mLogger.logInflatingViews(entry, params);
+        inflateViewsImpl(entry, params, callback);
+        mLogger.logInflatedViews(entry);
+    }
+    @Override
+    public void rebindViews(@NonNull NotificationEntry entry, @NonNull Params params,
+            @NonNull InflationCallback callback) {
+        mLogger.logRebindingViews(entry, params);
+        inflateViewsImpl(entry, params, callback);
+        mLogger.logReboundViews(entry);
+    }
+
+    private void inflateViewsImpl(@NonNull NotificationEntry entry, @NonNull Params params,
+            @NonNull InflationCallback callback) {
         try {
             requireBinder().inflateViews(
                     entry,
                     params,
                     wrapInflationCallback(callback));
         } catch (InflationException e) {
+            mLogger.logInflationException(entry, e);
             mNotifErrorManager.setInflationError(entry, e);
         }
     }
 
     @Override
     public boolean abortInflation(NotificationEntry entry) {
-        return entry.abortTask();
+        final boolean abortedTask = entry.abortTask();
+        if (abortedTask) {
+            mLogger.logAbortInflationAbortedTask(entry);
+        }
+        return abortedTask;
     }
 
     @Override
     public void releaseViews(@NonNull NotificationEntry entry) {
+        mLogger.logReleasingViews(entry);
         requireBinder().releaseViews(entry);
     }
 

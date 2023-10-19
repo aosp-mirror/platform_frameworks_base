@@ -683,7 +683,7 @@ public abstract class Context {
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
     /**
-     * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a (@code long)
+     * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a {@code long}
      * value that is compatible to {@link BindServiceFlags}.
      */
     public static final long BIND_EXTERNAL_SERVICE_LONG = 1L << 62;
@@ -1413,7 +1413,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directories returned
      * by {@link #getFilesDir()}, etc.
@@ -1501,7 +1501,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directories returned
      * by {@link #getFilesDir()}, etc.
@@ -1812,7 +1812,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directory returned by
      * {@link #getCacheDir()}.
@@ -5311,6 +5311,13 @@ public abstract class Context {
      */
     @SystemApi
     public static final String APP_PREDICTION_SERVICE = "app_prediction";
+
+    /**
+     * Used for reading system-wide, overridable flags.
+     *
+     * @hide
+     */
+    public static final String FEATURE_FLAGS_SERVICE = "feature_flags";
 
     /**
      * Official published name of the search ui service.

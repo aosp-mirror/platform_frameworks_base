@@ -1,0 +1,54 @@
+/*
+ * Copyright 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package com.android.internal.os;
+
+option java_outer_classname = "KeyboardConfiguredProto";
+
+/**
+ * RepeatedKeyboardLayout proto from input_extension_atoms.proto,
+ * duplicated here so that it's accessible in the build.
+ * Must be kept in sync with the version in input_extension_atoms.proto.
+ */
+
+// Message containing the repeated field for KeyboardLayoutConfig
+message RepeatedKeyboardLayoutConfig {
+  repeated KeyboardLayoutConfig keyboard_layout_config = 1;
+}
+
+// Keyboard layout configured when the device is connected
+// used in KeyboardConfigured atom
+message KeyboardLayoutConfig {
+  // Keyboard configuration details
+  // Layout type mappings found at:
+  // frameworks/base/core/res/res/values/attrs.xml
+  optional int32 keyboard_layout_type = 1;
+  // PK language language tag (e.g. en-US, ru-Cyrl, etc). This will follow
+  // BCP-47 language tag standards.
+  optional string keyboard_language_tag = 2;
+  // Selected keyboard layout name (e.g. English(US), English(Dvorak), etc.)
+  optional string keyboard_layout_name = 3;
+  // Criteria for layout selection (such as user, device, virtual keyboard based)
+  // IntDef annotation at:
+  // services/core/java/com/android/server/input/KeyboardMetricsCollector.java
+  optional int32 layout_selection_criteria = 4;
+  // Keyboard layout type provided by IME
+  optional int32 ime_layout_type = 5;
+  // Language tag provided by IME (e.g. en-US, ru-Cyrl etc.)
+  optional string ime_language_tag = 6;
+}

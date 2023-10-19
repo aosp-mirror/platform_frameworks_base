@@ -68,7 +68,9 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -79,9 +81,9 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -106,12 +108,13 @@ import java.util.ArrayList;
 @TestableLooper.RunWithLooper
 public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private NotificationStackScrollLayout mStackScroller;  // Normally test this
     private NotificationStackScrollLayout mStackScrollerInternal;  // See explanation below
     private AmbientState mAmbientState;
     private TestableResources mTestableResources;
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private NotificationsController mNotificationsController;
     @Mock private SysuiStatusBarStateController mBarState;
     @Mock private GroupMembershipManager mGroupMembershipManger;
     @Mock private GroupExpansionManager mGroupExpansionManager;
@@ -129,7 +132,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
-    @Mock private FeatureFlags mFeatureFlags;
 
     @Before
     public void setUp() throws Exception {
@@ -143,11 +145,25 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mNotificationSectionsManager,
                 mBypassController,
                 mStatusBarKeyguardViewManager,
-                mLargeScreenShadeInterpolator,
-                mFeatureFlags
+                mLargeScreenShadeInterpolator
         ));
 
+        // Register the debug flags we use
+        assertFalse(Flags.NSSL_DEBUG_LINES.getDefault());
+        assertFalse(Flags.NSSL_DEBUG_REMOVE_ANIMATION.getDefault());
+        mFeatureFlags.set(Flags.NSSL_DEBUG_LINES, false);
+        mFeatureFlags.set(Flags.NSSL_DEBUG_REMOVE_ANIMATION, false);
+
+        // Register the feature flags we use
+        // TODO: Ideally we wouldn't need to set these unless a test actually reads them,
+        //  and then we would test both configurations, but currently they are all read
+        //  in the constructor.
+        mFeatureFlags.setDefault(Flags.SENSITIVE_REVEAL_ANIM);
+        mFeatureFlags.setDefault(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
+        mFeatureFlags.setDefault(Flags.NOTIFICATION_SHELF_REFACTOR);
+
         // Inject dependencies before initializing the layout
+        mDependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectTestDependency(
@@ -176,13 +192,18 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper,
                 mNotificationStackSizeCalculator);
         mStackScroller = spy(mStackScrollerInternal);
-        mStackScroller.setShelfController(notificationShelfController);
-        mStackScroller.setCentralSurfaces(mCentralSurfaces);
+        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            mStackScroller.setShelfController(notificationShelfController);
+        }
+        mStackScroller.setNotificationsController(mNotificationsController);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mStackScrollLayoutController.isHistoryEnabled()).thenReturn(true);
         when(mStackScrollLayoutController.getNotificationRoundnessManager())
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            mStackScroller.setShelf(mNotificationShelf);
+        }
 
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
@@ -899,7 +920,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void testWindowInsetAnimationProgress_updatesBottomInset() {
         int bottomImeInset = 100;
-        mStackScrollerInternal.setAnimatedInsetsEnabled(true);
         WindowInsets windowInsets = new WindowInsets.Builder()
                 .setInsets(ime(), Insets.of(0, 0, 0, bottomImeInset)).build();
         ArrayList<WindowInsetsAnimation> windowInsetsAnimations = new ArrayList<>();

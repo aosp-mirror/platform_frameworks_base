@@ -25,10 +25,12 @@
     <color name="settingslib_color_blue100">#d2e3fc</color>
     <color name="settingslib_color_blue50">#e8f0fe</color>
     <color name="settingslib_color_green600">#1e8e3e</color>
+    <color name="settingslib_color_green500">#34A853</color>
     <color name="settingslib_color_green400">#5bb974</color>
     <color name="settingslib_color_green100">#ceead6</color>
     <color name="settingslib_color_green50">#e6f4ea</color>
     <color name="settingslib_color_red600">#d93025</color>
+    <color name="settingslib_color_red500">#B3261E</color>
     <color name="settingslib_color_red400">#ee675c</color>
     <color name="settingslib_color_red100">#fad2cf</color>
     <color name="settingslib_color_red50">#fce8e6</color>

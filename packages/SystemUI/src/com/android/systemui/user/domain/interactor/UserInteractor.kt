@@ -27,6 +27,7 @@ import android.content.pm.UserInfo
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.os.Process
 import android.os.RemoteException
 import android.os.UserHandle
 import android.os.UserManager
@@ -334,6 +335,7 @@ constructor(
                 onBroadcastReceived(intent, previousSelectedUser)
             }
             .launchIn(applicationScope)
+        restartSecondaryService(repository.getSelectedUserInfo().id)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
     }
 
@@ -530,6 +532,12 @@ constructor(
         }
     }
 
+    /** Returns the ID of the currently-selected user. */
+    @UserIdInt
+    fun getSelectedUserId(): Int {
+        return repository.getSelectedUserInfo().id
+    }
+
     private fun showDialog(request: ShowDialogRequestModel) {
         _dialogShowRequests.value = request
     }
@@ -646,7 +654,7 @@ constructor(
 
         // Connect to the new secondary user's service (purely to ensure that a persistent
         // SystemUI application is created for that user)
-        if (userId != UserHandle.USER_SYSTEM) {
+        if (userId != Process.myUserHandle().identifier) {
             applicationContext.startServiceAsUser(
                 intent,
                 UserHandle.of(userId),
@@ -774,17 +782,16 @@ constructor(
         }
 
         // TODO(b/246631653): cache the bitmaps to avoid the background work to fetch them.
-        val userIcon = withContext(backgroundDispatcher) {
-            manager.getUserIcon(userId)
-                ?.let { bitmap ->
+        val userIcon =
+            withContext(backgroundDispatcher) {
+                manager.getUserIcon(userId)?.let { bitmap ->
                     val iconSize =
-                        applicationContext
-                            .resources
-                            .getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size)
+                        applicationContext.resources.getDimensionPixelSize(
+                            R.dimen.bouncer_user_switcher_icon_size
+                        )
                     Icon.scaleDownIfNecessary(bitmap, iconSize, iconSize)
                 }
-        }
-
+            }
 
         if (userIcon != null) {
             return BitmapDrawable(userIcon)

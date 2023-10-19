@@ -188,7 +188,7 @@ public class StartingSurfaceDrawer {
         final SnapshotRecord record = sRecord instanceof SnapshotRecord
                 ? (SnapshotRecord) sRecord : null;
         if (record != null && record.hasImeSurface()) {
-            records.removeWindow(taskId, true);
+            records.removeWindow(taskId);
         }
     }
 
@@ -256,10 +256,15 @@ public class StartingSurfaceDrawer {
 
         @WindowConfiguration.ActivityType protected final int mActivityType;
         protected final ShellExecutor mRemoveExecutor;
+        private final int mTaskId;
+        private final StartingWindowRecordManager mRecordManager;
 
-        SnapshotRecord(int activityType, ShellExecutor removeExecutor) {
+        SnapshotRecord(int activityType, ShellExecutor removeExecutor, int taskId,
+                StartingWindowRecordManager recordManager) {
             mActivityType = activityType;
             mRemoveExecutor = removeExecutor;
+            mTaskId = taskId;
+            mRecordManager = recordManager;
         }
 
         @Override
@@ -301,6 +306,7 @@ public class StartingSurfaceDrawer {
         @CallSuper
         protected void removeImmediately() {
             mRemoveExecutor.removeCallbacks(mScheduledRunnable);
+            mRecordManager.onRecordRemoved(mTaskId);
         }
     }
 
@@ -316,7 +322,7 @@ public class StartingSurfaceDrawer {
                 taskIds[i] = mStartingWindowRecords.keyAt(i);
             }
             for (int i = taskSize - 1; i >= 0; --i) {
-                removeWindow(taskIds[i], true);
+                removeWindow(taskIds[i]);
             }
         }
 
@@ -335,9 +341,13 @@ public class StartingSurfaceDrawer {
             }
         }
 
-        void removeWindow(int taskId, boolean immediately) {
+        void removeWindow(int taskId) {
             mTmpRemovalInfo.taskId = taskId;
-            removeWindow(mTmpRemovalInfo, immediately);
+            removeWindow(mTmpRemovalInfo, true/* immediately */);
+        }
+
+        void onRecordRemoved(int taskId) {
+            mStartingWindowRecords.remove(taskId);
         }
 
         StartingWindowRecord getRecord(int taskId) {

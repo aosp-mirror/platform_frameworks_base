@@ -159,7 +159,7 @@ public class BatteryUsageStatsPerfTest {
 
     private static BatteryUsageStats buildBatteryUsageStats() {
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, false)
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, false, 0)
                         .setBatteryCapacity(4000)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)

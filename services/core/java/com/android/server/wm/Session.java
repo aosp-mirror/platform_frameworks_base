@@ -22,6 +22,7 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.SET_UNRESTRICTED_GESTURE_EXCLUSION;
 import static android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
@@ -107,6 +108,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private final ArraySet<WindowSurfaceController> mAlertWindowSurfaces = new ArraySet<>();
     private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
+    boolean mCanForceShowingInsets;
     private final boolean mCanStartTasksFromRecents;
 
     final boolean mCanCreateSystemApplicationOverlay;
@@ -129,6 +131,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
         mCanAddInternalSystemWindow = service.mContext.checkCallingOrSelfPermission(
                 INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
+        mCanForceShowingInsets = service.mAtmService.isCallerRecents(mUid)
+                || service.mContext.checkCallingOrSelfPermission(STATUS_BAR_SERVICE)
+                == PERMISSION_GRANTED;
         mCanHideNonSystemOverlayWindows = service.mContext.checkCallingOrSelfPermission(
                 HIDE_NON_SYSTEM_OVERLAY_WINDOWS) == PERMISSION_GRANTED
                 || service.mContext.checkCallingOrSelfPermission(HIDE_OVERLAY_WINDOWS)
@@ -687,11 +692,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void updateRequestedVisibleTypes(IWindow window, @InsetsType int requestedVisibleTypes) {
         synchronized (mService.mGlobalLock) {
-            final WindowState windowState = mService.windowForClientLocked(this, window,
+            final WindowState win = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
-            if (windowState != null) {
-                windowState.setRequestedVisibleTypes(requestedVisibleTypes);
-                windowState.getDisplayContent().getInsetsPolicy().onInsetsModified(windowState);
+            if (win != null) {
+                win.setRequestedVisibleTypes(requestedVisibleTypes);
+                win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win);
             }
         }
     }

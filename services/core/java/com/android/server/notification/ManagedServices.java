@@ -1371,7 +1371,9 @@ abstract public class ManagedServices {
     protected void rebindServices(boolean forceRebind, int userToRebind) {
         if (DEBUG) Slog.d(TAG, "rebindServices " + forceRebind + " " + userToRebind);
         IntArray userIds = mUserProfiles.getCurrentProfileIds();
-        if (userToRebind != USER_ALL) {
+        boolean rebindAllCurrentUsers = mUserProfiles.isProfileUser(userToRebind)
+                && allowRebindForParentUser();
+        if (userToRebind != USER_ALL && !rebindAllCurrentUsers) {
             userIds = new IntArray(1);
             userIds.add(userToRebind);
         }
@@ -1757,6 +1759,13 @@ abstract public class ManagedServices {
         }
         return true;
     }
+
+    /**
+     * Returns true if services in the parent user should be rebound
+     *  when rebindServices is called with a profile userId.
+     * Must be false for NotificationAssistants.
+     */
+    protected abstract boolean allowRebindForParentUser();
 
     public class ManagedServiceInfo implements IBinder.DeathRecipient {
         public IInterface service;

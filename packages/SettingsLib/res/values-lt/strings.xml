@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD garsas: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD garsas"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Klausos aparatai"</string>
-    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Prisijungta prie klausos aparatų"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Prisijungta prie „LE Audio“"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Prijungta prie medijos garso įrašo"</string>
@@ -215,7 +215,6 @@
     <string name="choose_profile" msgid="343803890897657450">"Profilio pasirinkimas"</string>
     <string name="category_personal" msgid="6236798763159385225">"Asmeninės"</string>
     <string name="category_work" msgid="4014193632325996115">"Darbo"</string>
-    <string name="category_clone" msgid="1554511758987195974">"Identiška kopija"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Kūrėjo parinktys"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Įgalinti kūrėjo parinktis"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Nustatyti programos kūrimo parinktis"</string>
@@ -545,9 +544,6 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ką tik"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Šis telefonas"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Šis planšetinis kompiuteris"</string>
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Doko garsiakalbis"</string>
-    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Išorinis įrenginys"</string>
-    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Prijungtas įrenginys"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Šis telefonas"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Negalima leisti šiame įrenginyje"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Jei norite perjungti, naujovinkite paskyrą"</string>

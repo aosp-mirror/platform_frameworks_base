@@ -1057,7 +1057,7 @@ public class MediaPlayer extends PlayerBase
      * this API to pass the cookies as a list of HttpCookie. If the app has not installed
      * a CookieHandler already, this API creates a CookieManager and populates its CookieStore with
      * the provided cookies. If the app has installed its own handler already, this API requires the
-     * handler to be of CookieManager type such that the API can update the manager’s CookieStore.
+     * handler to be of CookieManager type such that the API can update the manager's CookieStore.
      *
      * <p><strong>Note</strong> that the cross domain redirection is allowed by default,
      * but that can be changed with key/value pairs through the headers parameter with

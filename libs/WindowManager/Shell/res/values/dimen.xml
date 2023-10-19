@@ -226,10 +226,40 @@
     <dimen name="bubble_user_education_padding_end">58dp</dimen>
     <!-- Padding between the bubble and the user education text. -->
     <dimen name="bubble_user_education_stack_padding">16dp</dimen>
-    <!-- Size of the bubble bar (height), should match transient_taskbar_size in Launcher. -->
-    <dimen name="bubblebar_size">72dp</dimen>
-    <!-- The size of the drag handle / menu shown along with a bubble bar expanded view. -->
-    <dimen name="bubblebar_expanded_view_menu_size">16dp</dimen>
+    <!-- Max width for the bubble popup view. -->
+    <dimen name="bubble_popup_content_max_width">300dp</dimen>
+    <!-- Horizontal margin for the bubble popup view. -->
+    <dimen name="bubble_popup_margin_horizontal">32dp</dimen>
+    <!-- Top margin for the bubble popup view. -->
+    <dimen name="bubble_popup_margin_top">16dp</dimen>
+    <!-- Width for the bubble popup view arrow. -->
+    <dimen name="bubble_popup_arrow_width">12dp</dimen>
+    <!-- Height for the bubble popup view arrow. -->
+    <dimen name="bubble_popup_arrow_height">10dp</dimen>
+    <!-- Corner radius for the bubble popup view arrow. -->
+    <dimen name="bubble_popup_arrow_corner_radius">2dp</dimen>
+    <!-- Padding for the bubble popup view contents. -->
+    <dimen name="bubble_popup_padding">24dp</dimen>
+    <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_caption_height">32dp</dimen>
+    <!-- The height of the dots shown for the caption menu in the bubble bar expanded view.. -->
+    <dimen name="bubble_bar_expanded_view_caption_dot_size">4dp</dimen>
+    <!-- The spacing between the dots for the caption menu in the bubble bar expanded view.. -->
+    <dimen name="bubble_bar_expanded_view_caption_dot_spacing">4dp</dimen>
+    <!-- Minimum width of the bubble bar manage menu. -->
+    <dimen name="bubble_bar_manage_menu_min_width">200dp</dimen>
+    <!-- Size of the dismiss icon in the bubble bar manage menu. -->
+    <dimen name="bubble_bar_manage_menu_dismiss_icon_size">16dp</dimen>
+    <!-- Padding of the bubble bar manage menu, provides space for menu shadows -->
+    <dimen name="bubble_bar_manage_menu_padding">8dp</dimen>
+    <!-- Top padding of the bubble bar manage menu -->
+    <dimen name="bubble_bar_manage_menu_padding_top">2dp</dimen>
+    <!-- Spacing between sections of the bubble bar manage menu -->
+    <dimen name="bubble_bar_manage_menu_section_spacing">2dp</dimen>
+    <!-- Height of an item in the bubble bar manage menu. -->
+    <dimen name="bubble_bar_manage_menu_item_height">52dp</dimen>
+    <!-- Size of the icons in the bubble bar manage menu. -->
+    <dimen name="bubble_bar_manage_menu_item_icon_size">20dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>
@@ -244,8 +274,8 @@
         + compat_button_margin - compat_hint_corner_radius - compat_hint_point_width / 2). -->
     <dimen name="compat_hint_padding_end">7dp</dimen>
 
-    <!-- The width of the size compat hint. -->
-    <dimen name="size_compat_hint_width">188dp</dimen>
+    <!-- The width of the compat hint. -->
+    <dimen name="compat_hint_width">188dp</dimen>
 
     <!-- The width of the camera compat hint. -->
     <dimen name="camera_compat_hint_width">143dp</dimen>
@@ -398,7 +428,15 @@
     <!-- The radius of the caption menu shadow. -->
     <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>
 
-    <dimen name="freeform_resize_handle">30dp</dimen>
+    <dimen name="freeform_resize_handle">15dp</dimen>
 
     <dimen name="freeform_resize_corner">44dp</dimen>
+
+    <!-- The width of the area at the sides of the screen where a freeform task will transition to
+    split select if dragged until the touch input is within the range. -->
+    <dimen name="desktop_mode_transition_area_width">32dp</dimen>
+
+    <!-- The height of the area at the top of the screen where a freeform task will transition to
+    fullscreen if dragged until the top bound of the task is within the area. -->
+    <dimen name="desktop_mode_transition_area_height">16dp</dimen>
 </resources>

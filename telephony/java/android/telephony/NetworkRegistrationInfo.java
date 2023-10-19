@@ -203,6 +203,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
      */
     public static final int SERVICE_TYPE_EMERGENCY  = 5;
 
+    /** @hide  */
+    public static final int FIRST_SERVICE_TYPE = SERVICE_TYPE_VOICE;
+
+    /** @hide  */
+    public static final int LAST_SERVICE_TYPE = SERVICE_TYPE_EMERGENCY;
+
     @Domain
     private final int mDomain;
 
@@ -240,7 +246,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     private final boolean mEmergencyOnly;
 
     @ServiceType
-    private final ArrayList<Integer> mAvailableServices;
+    private ArrayList<Integer> mAvailableServices;
 
     @Nullable
     private CellIdentity mCellIdentity;
@@ -256,6 +262,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
 
     // Updated based on the accessNetworkTechnology
     private boolean mIsUsingCarrierAggregation;
+
+    // Set to {@code true} when network is a non-terrestrial network.
+    private boolean mIsNonTerrestrialNetwork;
 
     /**
      * @param domain Network domain. Must be a {@link Domain}. For transport type
@@ -280,6 +289,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @param rplmn the registered plmn or the last plmn for attempted registration if reg failed.
      * @param voiceSpecificInfo Voice specific registration information.
      * @param dataSpecificInfo Data specific registration information.
+     * @param isNonTerrestrialNetwork {@code true} if network is a non-terrestrial network.
      */
     private NetworkRegistrationInfo(@Domain int domain, @TransportType int transportType,
             @RegistrationState int registrationState,
@@ -287,7 +297,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
             boolean emergencyOnly, @Nullable @ServiceType List<Integer> availableServices,
             @Nullable CellIdentity cellIdentity, @Nullable String rplmn,
             @Nullable VoiceSpecificRegistrationInfo voiceSpecificInfo,
-            @Nullable DataSpecificRegistrationInfo dataSpecificInfo) {
+            @Nullable DataSpecificRegistrationInfo dataSpecificInfo,
+            boolean isNonTerrestrialNetwork) {
         mDomain = domain;
         mTransportType = transportType;
         mRegistrationState = registrationState;
@@ -304,6 +315,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mRplmn = rplmn;
         mVoiceSpecificInfo = voiceSpecificInfo;
         mDataSpecificInfo = dataSpecificInfo;
+        mIsNonTerrestrialNetwork = isNonTerrestrialNetwork;
 
         updateNrState();
     }
@@ -322,7 +334,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
                 emergencyOnly, availableServices, cellIdentity, rplmn,
                 new VoiceSpecificRegistrationInfo(cssSupported, roamingIndicator,
-                        systemIsInPrl, defaultRoamingIndicator), null);
+                        systemIsInPrl, defaultRoamingIndicator), null, false);
     }
 
     /**
@@ -344,7 +356,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
                         .setNrAvailable(isNrAvailable)
                         .setEnDcAvailable(isEndcAvailable)
                         .setVopsSupportInfo(vopsSupportInfo)
-                        .build());
+                        .build(), false);
     }
 
     private NetworkRegistrationInfo(Parcel source) {
@@ -366,6 +378,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mNrState = source.readInt();
         mRplmn = source.readString();
         mIsUsingCarrierAggregation = source.readBoolean();
+        mIsNonTerrestrialNetwork = source.readBoolean();
     }
 
     /**
@@ -382,6 +395,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mRoamingType = nri.mRoamingType;
         mAccessNetworkTechnology = nri.mAccessNetworkTechnology;
         mIsUsingCarrierAggregation = nri.mIsUsingCarrierAggregation;
+        mIsNonTerrestrialNetwork = nri.mIsNonTerrestrialNetwork;
         mRejectCause = nri.mRejectCause;
         mEmergencyOnly = nri.mEmergencyOnly;
         mAvailableServices = new ArrayList<>(nri.mAvailableServices);
@@ -596,6 +610,16 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
+     * Set available service types.
+     *
+     * @param availableServices The list of available services for this network.
+     * @hide
+     */
+    public void setAvailableServices(@NonNull @ServiceType List<Integer> availableServices) {
+        mAvailableServices = new ArrayList<>(availableServices);
+    }
+
+    /**
      * @return The access network technology {@link NetworkType}.
      */
     public @NetworkType int getAccessNetworkTechnology() {
@@ -655,6 +679,27 @@ public final class NetworkRegistrationInfo implements Parcelable {
      */
     public boolean isUsingCarrierAggregation() {
         return mIsUsingCarrierAggregation;
+    }
+
+    /**
+     * Set whether the network is a non-terrestrial network.
+     *
+     * @param isNonTerrestrialNetwork {@code true} if network is a non-terrestrial network
+     *                                            else {@code false}.
+     * @hide
+     */
+    public void setIsNonTerrestrialNetwork(boolean isNonTerrestrialNetwork) {
+        mIsNonTerrestrialNetwork = isNonTerrestrialNetwork;
+    }
+
+    /**
+     * Get whether the network is a non-terrestrial network.
+     *
+     * @return {@code true} if network is a non-terrestrial network else {@code false}.
+     * @hide
+     */
+    public boolean isNonTerrestrialNetwork() {
+        return mIsNonTerrestrialNetwork;
     }
 
     /**
@@ -769,6 +814,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
                         ? nrStateToString(mNrState) : "****")
                 .append(" rRplmn=").append(mRplmn)
                 .append(" isUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
+                .append(" isNonTerrestrialNetwork=").append(mIsNonTerrestrialNetwork)
                 .append("}").toString();
     }
 
@@ -777,7 +823,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         return Objects.hash(mDomain, mTransportType, mRegistrationState, mNetworkRegistrationState,
                 mRoamingType, mAccessNetworkTechnology, mRejectCause, mEmergencyOnly,
                 mAvailableServices, mCellIdentity, mVoiceSpecificInfo, mDataSpecificInfo, mNrState,
-                mRplmn, mIsUsingCarrierAggregation);
+                mRplmn, mIsUsingCarrierAggregation, mIsNonTerrestrialNetwork);
     }
 
     @Override
@@ -803,7 +849,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 && Objects.equals(mVoiceSpecificInfo, other.mVoiceSpecificInfo)
                 && Objects.equals(mDataSpecificInfo, other.mDataSpecificInfo)
                 && TextUtils.equals(mRplmn, other.mRplmn)
-                && mNrState == other.mNrState;
+                && mNrState == other.mNrState
+                && mIsNonTerrestrialNetwork == other.mIsNonTerrestrialNetwork;
     }
 
     /**
@@ -827,6 +874,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         dest.writeInt(mNrState);
         dest.writeString(mRplmn);
         dest.writeBoolean(mIsUsingCarrierAggregation);
+        dest.writeBoolean(mIsNonTerrestrialNetwork);
     }
 
     /**
@@ -936,6 +984,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
         @Nullable
         private VoiceSpecificRegistrationInfo mVoiceSpecificRegistrationInfo;
 
+        private boolean mIsNonTerrestrialNetwork;
+
         /**
          * Default constructor for Builder.
          */
@@ -964,6 +1014,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 mVoiceSpecificRegistrationInfo = new VoiceSpecificRegistrationInfo(
                         nri.mVoiceSpecificInfo);
             }
+            mIsNonTerrestrialNetwork = nri.mIsNonTerrestrialNetwork;
         }
 
         /**
@@ -1111,6 +1162,19 @@ public final class NetworkRegistrationInfo implements Parcelable {
         }
 
         /**
+         * Set whether the network is a non-terrestrial network.
+         *
+         * @param isNonTerrestrialNetwork {@code true} if network is a non-terrestrial network
+         *                                            else {@code false}.
+         * @return The builder.
+         * @hide
+         */
+        public @NonNull Builder setIsNonTerrestrialNetwork(boolean isNonTerrestrialNetwork) {
+            mIsNonTerrestrialNetwork = isNonTerrestrialNetwork;
+            return this;
+        }
+
+        /**
          * Build the NetworkRegistrationInfo.
          * @return the NetworkRegistrationInfo object.
          * @hide
@@ -1120,7 +1184,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
             return new NetworkRegistrationInfo(mDomain, mTransportType, mNetworkRegistrationState,
                     mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
                     mCellIdentity, mRplmn, mVoiceSpecificRegistrationInfo,
-                    mDataSpecificRegistrationInfo);
+                    mDataSpecificRegistrationInfo, mIsNonTerrestrialNetwork);
         }
     }
 }

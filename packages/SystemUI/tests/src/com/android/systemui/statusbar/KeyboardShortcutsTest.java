@@ -75,5 +75,6 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
         mKeyboardShortcuts.toggle(mContext, DEVICE_ID);
 
         verify(mWindowManager).requestAppKeyboardShortcuts(any(), anyInt());
+        verify(mWindowManager).requestImeKeyboardShortcuts(any(), anyInt());
     }
 }

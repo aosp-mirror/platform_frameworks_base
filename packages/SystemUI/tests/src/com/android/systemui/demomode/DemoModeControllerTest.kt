@@ -94,7 +94,7 @@ class DemoModeControllerTest : SysuiTestCase() {
         intent.putExtra("command", command)
         args.forEach { arg -> intent.putExtra(arg.key, arg.value) }
 
-        fakeBroadcastDispatcher.registeredReceivers.forEach { it.onReceive(context, intent) }
+        fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent)
     }
 
     companion object {

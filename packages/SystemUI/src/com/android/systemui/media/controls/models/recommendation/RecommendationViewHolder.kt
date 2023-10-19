@@ -31,15 +31,12 @@ import com.android.systemui.util.animation.TransitionLayout
 private const val TAG = "RecommendationViewHolder"
 
 /** ViewHolder for a Smartspace media recommendation. */
-class RecommendationViewHolder private constructor(itemView: View, updatedView: Boolean) {
+class RecommendationViewHolder private constructor(itemView: View) {
 
     val recommendations = itemView as TransitionLayout
 
     // Recommendation screen
-    lateinit var cardIcon: ImageView
-    lateinit var mediaAppIcons: List<CachingIconView>
-    lateinit var mediaProgressBars: List<SeekBar>
-    lateinit var cardTitle: TextView
+    val cardTitle: TextView = itemView.requireViewById(R.id.media_rec_title)
 
     val mediaCoverContainers =
         listOf<ViewGroup>(
@@ -47,53 +44,25 @@ class RecommendationViewHolder private constructor(itemView: View, updatedView: 
             itemView.requireViewById(R.id.media_cover2_container),
             itemView.requireViewById(R.id.media_cover3_container)
         )
+    val mediaAppIcons: List<CachingIconView> =
+        mediaCoverContainers.map { it.requireViewById(R.id.media_rec_app_icon) }
     val mediaTitles: List<TextView> =
-        if (updatedView) {
-            mediaCoverContainers.map { it.requireViewById(R.id.media_title) }
-        } else {
-            listOf(
-                itemView.requireViewById(R.id.media_title1),
-                itemView.requireViewById(R.id.media_title2),
-                itemView.requireViewById(R.id.media_title3)
-            )
-        }
+        mediaCoverContainers.map { it.requireViewById(R.id.media_title) }
     val mediaSubtitles: List<TextView> =
-        if (updatedView) {
-            mediaCoverContainers.map { it.requireViewById(R.id.media_subtitle) }
-        } else {
-            listOf(
-                itemView.requireViewById(R.id.media_subtitle1),
-                itemView.requireViewById(R.id.media_subtitle2),
-                itemView.requireViewById(R.id.media_subtitle3)
-            )
+        mediaCoverContainers.map { it.requireViewById(R.id.media_subtitle) }
+    val mediaProgressBars: List<SeekBar> =
+        mediaCoverContainers.map {
+            it.requireViewById<SeekBar?>(R.id.media_progress_bar).apply {
+                // Media playback is in the direction of tape, not time, so it stays LTR
+                layoutDirection = View.LAYOUT_DIRECTION_LTR
+            }
         }
 
     val mediaCoverItems: List<ImageView> =
-        if (updatedView) {
-            mediaCoverContainers.map { it.requireViewById(R.id.media_cover) }
-        } else {
-            listOf(
-                itemView.requireViewById(R.id.media_cover1),
-                itemView.requireViewById(R.id.media_cover2),
-                itemView.requireViewById(R.id.media_cover3)
-            )
-        }
+        mediaCoverContainers.map { it.requireViewById(R.id.media_cover) }
     val gutsViewHolder = GutsViewHolder(itemView)
 
     init {
-        if (updatedView) {
-            mediaAppIcons = mediaCoverContainers.map { it.requireViewById(R.id.media_rec_app_icon) }
-            cardTitle = itemView.requireViewById(R.id.media_rec_title)
-            mediaProgressBars =
-                mediaCoverContainers.map {
-                    it.requireViewById<SeekBar?>(R.id.media_progress_bar).apply {
-                        // Media playback is in the direction of tape, not time, so it stays LTR
-                        layoutDirection = View.LAYOUT_DIRECTION_LTR
-                    }
-                }
-        } else {
-            cardIcon = itemView.requireViewById<ImageView>(R.id.recommendation_card_icon)
-        }
         (recommendations.background as IlluminationDrawable).let { background ->
             mediaCoverContainers.forEach { background.registerLightSource(it) }
             background.registerLightSource(gutsViewHolder.cancel)
@@ -114,63 +83,31 @@ class RecommendationViewHolder private constructor(itemView: View, updatedView: 
          * @param parent Parent of inflated view.
          */
         @JvmStatic
-        fun create(
-            inflater: LayoutInflater,
-            parent: ViewGroup,
-            updatedView: Boolean,
-        ): RecommendationViewHolder {
+        fun create(inflater: LayoutInflater, parent: ViewGroup): RecommendationViewHolder {
             val itemView =
-                if (updatedView) {
-                    inflater.inflate(
-                        R.layout.media_recommendations,
-                        parent,
-                        false /* attachToRoot */
-                    )
-                } else {
-                    inflater.inflate(
-                        R.layout.media_smartspace_recommendations,
-                        parent,
-                        false /* attachToRoot */
-                    )
-                }
+                inflater.inflate(R.layout.media_recommendations, parent, false /* attachToRoot */)
             // Because this media view (a TransitionLayout) is used to measure and layout the views
             // in various states before being attached to its parent, we can't depend on the default
             // LAYOUT_DIRECTION_INHERIT to correctly resolve the ltr direction.
             itemView.layoutDirection = View.LAYOUT_DIRECTION_LOCALE
-            return RecommendationViewHolder(itemView, updatedView)
+            return RecommendationViewHolder(itemView)
         }
 
         // Res Ids for the control components on the recommendation view.
         val controlsIds =
             setOf(
-                R.id.recommendation_card_icon,
                 R.id.media_rec_title,
-                R.id.media_cover1,
-                R.id.media_cover2,
-                R.id.media_cover3,
                 R.id.media_cover,
                 R.id.media_cover1_container,
                 R.id.media_cover2_container,
                 R.id.media_cover3_container,
-                R.id.media_title1,
-                R.id.media_title2,
-                R.id.media_title3,
                 R.id.media_title,
-                R.id.media_subtitle1,
-                R.id.media_subtitle2,
-                R.id.media_subtitle3,
                 R.id.media_subtitle,
             )
 
         val mediaTitlesAndSubtitlesIds =
             setOf(
-                R.id.media_title1,
-                R.id.media_title2,
-                R.id.media_title3,
                 R.id.media_title,
-                R.id.media_subtitle1,
-                R.id.media_subtitle2,
-                R.id.media_subtitle3,
                 R.id.media_subtitle,
             )
 

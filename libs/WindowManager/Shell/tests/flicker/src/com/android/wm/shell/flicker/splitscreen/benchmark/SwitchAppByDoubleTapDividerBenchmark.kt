@@ -16,21 +16,18 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.PlatinumTest
-import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
-import com.android.wm.shell.flicker.splitscreen.SplitScreenUtils
+import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -39,7 +36,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class SwitchAppByDoubleTapDividerBenchmark(override val flicker: FlickerTest) :
+abstract class SwitchAppByDoubleTapDividerBenchmark(override val flicker: LegacyFlickerTest) :
     SplitScreenBase(flicker) {
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
@@ -51,14 +48,6 @@ open class SwitchAppByDoubleTapDividerBenchmark(override val flicker: FlickerTes
                 waitForLayersToSwitch(wmHelper)
                 waitForWindowsToSwitch(wmHelper)
             }
-        }
-
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            withoutTracing(this)
-            defaultSetup(this)
-            defaultTeardown(this)
-            thisTransition(this)
         }
 
     private fun waitForWindowsToSwitch(wmHelper: WindowManagerStateHelper) {
@@ -134,22 +123,13 @@ open class SwitchAppByDoubleTapDividerBenchmark(override val flicker: FlickerTes
         return displayBounds.width > displayBounds.height
     }
 
-    @PlatinumTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    open fun cujCompleted() {
-        // TODO(b/246490534): Add validation for switched app after withAppTransitionIdle is
-        // robust enough to get the correct end state.
-    }
-
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
-        }
     }
 }

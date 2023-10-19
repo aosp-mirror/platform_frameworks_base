@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
@@ -51,7 +50,6 @@ import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
-import android.media.permission.IdentityContext;
 import android.media.permission.PermissionUtil;
 import android.media.permission.SafeCloseable;
 import android.os.Binder;
@@ -61,7 +59,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -88,6 +85,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionListener;
@@ -104,6 +102,7 @@ import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+import com.android.server.policy.AppOpsPolicy;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -138,6 +137,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
             mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
+    private IVisualQueryRecognitionStatusListener mVisualQueryRecognitionStatusListener;
 
     public VoiceInteractionManagerService(Context context) {
         super(context);
@@ -336,6 +336,9 @@ public class VoiceInteractionManagerService extends SystemService {
         /** The start value of showSessionId */
         private static final int SHOW_SESSION_START_ID = 0;
 
+        private final boolean IS_HDS_REQUIRED = AppOpsPolicy.isHotwordDetectionServiceRequired(
+                mContext.getPackageManager());
+
         @GuardedBy("this")
         private int mShowSessionId = SHOW_SESSION_START_ID;
 
@@ -393,8 +396,14 @@ public class VoiceInteractionManagerService extends SystemService {
             }
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
+                if (!IS_HDS_REQUIRED) {
+                    // For devices which still have hotword exemption, any client (not just HDS
+                    // clients) are trusted.
+                    // TODO (b/292012931) remove once trusted uniformly required.
+                    forHotwordDetectionService = true;
+                }
                 return new SoundTriggerSession(mSoundTriggerInternal.attach(client,
-                            moduleProperties, forHotwordDetectionService));
+                            moduleProperties, forHotwordDetectionService), originatorIdentity);
             }
         }
 
@@ -1336,6 +1345,17 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(
                 android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
+        public void subscribeVisualQueryRecognitionStatus(IVisualQueryRecognitionStatusListener
+                listener) {
+            super.subscribeVisualQueryRecognitionStatus_enforcePermission();
+            synchronized (this) {
+                mVisualQueryRecognitionStatusListener = listener;
+            }
+        }
+
+        @android.annotation.EnforcePermission(
+                android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
+        @Override
         public void enableVisualQueryDetection(
                 IVisualQueryDetectionAttentionListener listener) {
             super.enableVisualQueryDetection_enforcePermission();
@@ -1381,7 +1401,10 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.startPerceivingLocked(callback);
+                    boolean success = mImpl.startPerceivingLocked(callback);
+                    if (success && mVisualQueryRecognitionStatusListener != null) {
+                        mVisualQueryRecognitionStatusListener.onStartPerceiving();
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1399,7 +1422,10 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.stopPerceivingLocked();
+                    boolean success = mImpl.stopPerceivingLocked();
+                    if (success && mVisualQueryRecognitionStatusListener != null) {
+                        mVisualQueryRecognitionStatusListener.onStopPerceiving();
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1674,10 +1700,13 @@ public class VoiceInteractionManagerService extends SystemService {
             final SoundTriggerInternal.Session mSession;
             private IHotwordRecognitionStatusCallback mSessionExternalCallback;
             private IRecognitionStatusCallback mSessionInternalCallback;
+            private final Identity mVoiceInteractorIdentity;
 
             SoundTriggerSession(
-                    SoundTriggerInternal.Session session) {
+                    SoundTriggerInternal.Session session,
+                    Identity voiceInteractorIdentity) {
                 mSession = session;
+                mVoiceInteractorIdentity = voiceInteractorIdentity;
             }
 
             @Override
@@ -1731,7 +1760,8 @@ public class VoiceInteractionManagerService extends SystemService {
                         if (mSessionExternalCallback == null
                                 || mSessionInternalCallback == null
                                 || callback.asBinder() != mSessionExternalCallback.asBinder()) {
-                            mSessionInternalCallback = createSoundTriggerCallbackLocked(callback);
+                            mSessionInternalCallback = createSoundTriggerCallbackLocked(callback,
+                                    mVoiceInteractorIdentity);
                             mSessionExternalCallback = callback;
                         }
                     }
@@ -1752,7 +1782,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     if (mSessionExternalCallback == null
                             || mSessionInternalCallback == null
                             || callback.asBinder() != mSessionExternalCallback.asBinder()) {
-                        soundTriggerCallback = createSoundTriggerCallbackLocked(callback);
+                        soundTriggerCallback = createSoundTriggerCallbackLocked(callback,
+                                mVoiceInteractorIdentity);
                         Slog.w(TAG, "stopRecognition() called with a different callback than"
                                 + "startRecognition()");
                     } else {
@@ -2090,6 +2121,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mTemporarilyDisabled: " + mTemporarilyDisabled);
                 pw.println("  mCurUser: " + mCurUser);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
+                pw.println("  mIsHdsRequired: " + IS_HDS_REQUIRED);
                 dumpSupportedUsers(pw, "  ");
                 mDbHelper.dump(pw);
                 if (mImpl == null) {
@@ -2165,11 +2197,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         private IRecognitionStatusCallback createSoundTriggerCallbackLocked(
-                IHotwordRecognitionStatusCallback callback) {
+                IHotwordRecognitionStatusCallback callback,
+                Identity voiceInteractorIdentity) {
             if (mImpl == null) {
                 return null;
             }
-            return mImpl.createSoundTriggerCallbackLocked(callback);
+            return mImpl.createSoundTriggerCallbackLocked(mContext, callback,
+                    voiceInteractorIdentity);
         }
 
         class RoleObserver implements OnRoleHoldersChangedListener {

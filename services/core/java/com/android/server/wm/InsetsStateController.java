@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
@@ -85,6 +86,8 @@ class InsetsStateController {
         }
     };
 
+    private @InsetsType int mForcedConsumingTypes;
+
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
     }
@@ -122,6 +125,11 @@ class InsetsStateController {
         provider = id == ID_IME
                 ? new ImeInsetsSourceProvider(source, this, mDisplayContent)
                 : new InsetsSourceProvider(source, this, mDisplayContent);
+        provider.setFlags(
+                (mForcedConsumingTypes & type) != 0
+                        ? FLAG_FORCE_CONSUMING
+                        : 0,
+                FLAG_FORCE_CONSUMING);
         mProviders.put(id, provider);
         return provider;
     }
@@ -134,6 +142,24 @@ class InsetsStateController {
         if (id != ID_IME) {
             mState.removeSource(id);
             mProviders.remove(id);
+        }
+    }
+
+    void setForcedConsumingTypes(@InsetsType int types) {
+        if (mForcedConsumingTypes != types) {
+            mForcedConsumingTypes = types;
+            boolean changed = false;
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                final InsetsSourceProvider provider = mProviders.valueAt(i);
+                changed |= provider.setFlags(
+                        (types & provider.getSource().getType()) != 0
+                                ? FLAG_FORCE_CONSUMING
+                                : 0,
+                        FLAG_FORCE_CONSUMING);
+            }
+            if (changed) {
+                notifyInsetsChanged();
+            }
         }
     }
 
@@ -190,7 +216,7 @@ class InsetsStateController {
         }
     }
 
-    void onInsetsModified(InsetsControlTarget caller) {
+    void onRequestedVisibleTypesChanged(InsetsControlTarget caller) {
         boolean changed = false;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             changed |= mProviders.valueAt(i).updateClientVisibility(caller);
@@ -352,7 +378,7 @@ class InsetsStateController {
             // to the clients, so that the clients can change the current visibilities to the
             // requested visibilities with animations.
             for (int i = newControlTargets.size() - 1; i >= 0; i--) {
-                onInsetsModified(newControlTargets.valueAt(i));
+                onRequestedVisibleTypesChanged(newControlTargets.valueAt(i));
             }
             newControlTargets.clear();
         });
@@ -390,6 +416,10 @@ class InsetsStateController {
         pw.println(prefix + "InsetsSourceProviders:");
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             mProviders.valueAt(i).dump(pw, prefix + "  ");
+        }
+        if (mForcedConsumingTypes != 0) {
+            pw.println(prefix + "mForcedConsumingTypes="
+                    + WindowInsets.Type.toString(mForcedConsumingTypes));
         }
     }
 

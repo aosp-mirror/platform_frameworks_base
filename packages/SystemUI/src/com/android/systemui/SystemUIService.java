@@ -30,8 +30,10 @@ import com.android.internal.os.BinderInternal;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpHandler;
+import com.android.systemui.dump.LogBufferEulogizer;
 import com.android.systemui.dump.LogBufferFreezer;
 import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
+import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager;
 import com.android.systemui.statusbar.policy.BatteryStateNotifier;
 
 import java.io.FileDescriptor;
@@ -44,22 +46,29 @@ public class SystemUIService extends Service {
     private final Handler mMainHandler;
     private final DumpHandler mDumpHandler;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final LogBufferEulogizer mLogBufferEulogizer;
     private final LogBufferFreezer mLogBufferFreezer;
     private final BatteryStateNotifier mBatteryStateNotifier;
+
+    private final UncaughtExceptionPreHandlerManager mUncaughtExceptionPreHandlerManager;
 
     @Inject
     public SystemUIService(
             @Main Handler mainHandler,
             DumpHandler dumpHandler,
             BroadcastDispatcher broadcastDispatcher,
+            LogBufferEulogizer logBufferEulogizer,
             LogBufferFreezer logBufferFreezer,
-            BatteryStateNotifier batteryStateNotifier) {
+            BatteryStateNotifier batteryStateNotifier,
+            UncaughtExceptionPreHandlerManager uncaughtExceptionPreHandlerManager) {
         super();
         mMainHandler = mainHandler;
         mDumpHandler = dumpHandler;
         mBroadcastDispatcher = broadcastDispatcher;
+        mLogBufferEulogizer = logBufferEulogizer;
         mLogBufferFreezer = logBufferFreezer;
         mBatteryStateNotifier = batteryStateNotifier;
+        mUncaughtExceptionPreHandlerManager = uncaughtExceptionPreHandlerManager;
     }
 
     @Override
@@ -71,7 +80,10 @@ public class SystemUIService extends Service {
 
         // Finish initializing dump logic
         mLogBufferFreezer.attach(mBroadcastDispatcher);
-        mDumpHandler.init();
+
+        // Attempt to dump all LogBuffers for any uncaught exception
+        mUncaughtExceptionPreHandlerManager.registerHandler(
+                (thread, throwable) -> mLogBufferEulogizer.record(throwable));
 
         // If configured, set up a battery notification
         if (getResources().getBoolean(R.bool.config_showNotificationForUnknownBatteryState)) {

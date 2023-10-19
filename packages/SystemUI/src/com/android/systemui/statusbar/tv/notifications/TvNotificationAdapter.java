@@ -103,6 +103,8 @@ public class TvNotificationAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 if (mPendingIntent != null) {
                     BroadcastOptions options = BroadcastOptions.makeBasic();
                     options.setInteractive(true);
+                    options.setPendingIntentBackgroundActivityStartMode(
+                            BroadcastOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
                     mPendingIntent.send(options.toBundle());
                 }
             } catch (PendingIntent.CanceledException e) {

@@ -17,9 +17,9 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="rectangle">
     <corners
-        android:bottomLeftRadius="28dp"
-        android:topLeftRadius="28dp"
-        android:bottomRightRadius="0dp"
-        android:topRightRadius="0dp"/>
+        android:bottomLeftRadius="@dimen/media_output_dialog_icon_left_radius"
+        android:topLeftRadius="@dimen/media_output_dialog_icon_left_radius"
+        android:bottomRightRadius="@dimen/media_output_dialog_icon_right_radius"
+        android:topRightRadius="@dimen/media_output_dialog_icon_right_radius"/>
     <solid android:color="@color/media_dialog_item_background" />
 </shape>

@@ -20,6 +20,15 @@
          On large screens should be the same as the regular status bar. -->
     <dimen name="status_bar_header_height_keyguard">@dimen/status_bar_height</dimen>
 
+    <!-- padding for container with status icons and battery -->
+    <dimen name="status_bar_icons_padding_end">4dp</dimen>
+    <!-- start padding is smaller to account for status icon margins coming from drawable itself -->
+    <dimen name="status_bar_icons_padding_start">3dp</dimen>
+    <dimen name="status_bar_icons_padding_bottom">2dp</dimen>
+    <dimen name="status_bar_icons_padding_top">2dp</dimen>
+
+    <dimen name="status_bar_padding_end">0dp</dimen>
+
     <!-- Size of user icon + frame in the qs user picker (incl. frame) -->
     <dimen name="qs_framed_avatar_size">60dp</dimen>
     <!-- Size of user icon + frame in the keyguard user picker (incl. frame) -->
@@ -46,6 +55,9 @@
 
     <dimen name="navigation_key_padding">25dp</dimen>
 
+    <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
+    <dimen name="immersive_mode_cling_width">380dp</dimen>
+
     <!-- Keyboard shortcuts helper -->
     <dimen name="ksh_layout_width">488dp</dimen>
 
@@ -67,6 +79,11 @@
     <dimen name="large_dialog_width">472dp</dimen>
 
     <dimen name="large_screen_shade_header_height">42dp</dimen>
+    <!-- start padding is smaller to account for status icon margins coming from drawable itself -->
+    <dimen name="shade_header_system_icons_padding_start">3dp</dimen>
+    <dimen name="shade_header_system_icons_padding_end">4dp</dimen>
+    <dimen name="shade_header_system_icons_padding_top">2dp</dimen>
+    <dimen name="shade_header_system_icons_padding_bottom">2dp</dimen>
 
     <!-- Lockscreen shade transition values -->
     <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
@@ -90,4 +107,7 @@
 
     <dimen name="controls_header_horizontal_padding">12dp</dimen>
     <dimen name="controls_content_margin_horizontal">24dp</dimen>
+    <dimen name="controls_content_padding">24dp</dimen>
+    <dimen name="control_list_vertical_spacing">8dp</dimen>
+    <dimen name="control_list_horizontal_spacing">16dp</dimen>
 </resources>

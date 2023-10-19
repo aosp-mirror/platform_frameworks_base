@@ -207,17 +207,18 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         private String mPackageWithHighestDrain = PACKAGE_NAME_UNINITIALIZED;
         private boolean mExcludeFromBatteryUsageStats;
 
-        public Builder(BatteryConsumerData data, @NonNull BatteryStats.Uid batteryStatsUid) {
-            this(data, batteryStatsUid, batteryStatsUid.getUid());
+        public Builder(BatteryConsumerData data, @NonNull BatteryStats.Uid batteryStatsUid,
+                double minConsumedPowerThreshold) {
+            this(data, batteryStatsUid, batteryStatsUid.getUid(), minConsumedPowerThreshold);
         }
 
-        public Builder(BatteryConsumerData data, int uid) {
-            this(data, null, uid);
+        public Builder(BatteryConsumerData data, int uid, double minConsumedPowerThreshold) {
+            this(data, null, uid, minConsumedPowerThreshold);
         }
 
         private Builder(BatteryConsumerData data, @Nullable BatteryStats.Uid batteryStatsUid,
-                int uid) {
-            super(data, CONSUMER_TYPE_UID);
+                int uid, double minConsumedPowerThreshold) {
+            super(data, CONSUMER_TYPE_UID, minConsumedPowerThreshold);
             mBatteryStatsUid = batteryStatsUid;
             mUid = uid;
             mIsVirtualUid = mUid == Process.SDK_SANDBOX_VIRTUAL_UID;

@@ -182,7 +182,7 @@ public class UserManagerServiceCreateProfileTest {
         UserInfo secondaryUser = addUser();
         UserInfo profile = addProfile(secondaryUser);
         // Add the profile it to the users being removed.
-        mUserManagerService.addRemovingUserIdLocked(profile.id);
+        mUserManagerService.addRemovingUserId(profile.id);
         // We should reuse the badge from the profile being removed.
         assertEquals("Badge index not reused while removing a user", 0,
                 mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id,

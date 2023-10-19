@@ -43,6 +43,11 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
     void onUserSwitched(int newUserId);
 
     /**
+     * Called when a new row is created and bound to a notification.
+     */
+    void onBindRow(ExpandableNotificationRow row);
+
+    /**
      * @return true iff the device is in vr mode
      */
     boolean isDeviceInVrMode();

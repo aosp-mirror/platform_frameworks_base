@@ -168,7 +168,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
                         mOnAnimationFinishedCallback.accept(finishT);
                     }
                     mTransitions.getMainExecutor().execute(
-                            () -> finishCallback.onTransitionFinished(null, null));
+                            () -> finishCallback.onTransitionFinished(null));
                 }
             });
             animator.start();

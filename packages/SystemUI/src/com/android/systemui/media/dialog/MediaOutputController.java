@@ -99,7 +99,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -177,7 +176,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             lbm, ActivityStarter starter,
             CommonNotifCollection notifCollection,
             DialogLaunchAnimator dialogLaunchAnimator,
-            Optional<NearbyMediaDevicesManager> nearbyMediaDevicesManagerOptional,
+            NearbyMediaDevicesManager nearbyMediaDevicesManager,
             AudioManager audioManager,
             PowerExemptionManager powerExemptionManager,
             KeyguardManager keyGuardManager,
@@ -198,7 +197,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mNearbyMediaDevicesManager = nearbyMediaDevicesManagerOptional.orElse(null);
+        mNearbyMediaDevicesManager = nearbyMediaDevicesManager;
         mColorItemContent = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_item_main_content);
         mColorSeekbarProgress = Utils.getColorStateListDefaultColor(mContext,
@@ -844,6 +843,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mMetricLogger.logInteractionAdjustVolume(device);
     }
 
+    void logInteractionMuteDevice(MediaDevice device) {
+        mMetricLogger.logInteractionMute(device);
+    }
+
+    void logInteractionUnmuteDevice(MediaDevice device) {
+        mMetricLogger.logInteractionUnmute(device);
+    }
+
     String getPackageName() {
         return mPackageName;
     }
@@ -927,7 +934,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     void launchMediaOutputBroadcastDialog(View mediaOutputDialog, BroadcastSender broadcastSender) {
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
-                mNotifCollection, mDialogLaunchAnimator, Optional.of(mNearbyMediaDevicesManager),
+                mNotifCollection, mDialogLaunchAnimator, mNearbyMediaDevicesManager,
                 mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags,
                 mUserTracker);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
@@ -990,7 +997,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         LocalBluetoothLeBroadcast broadcast =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
         if (broadcast == null) {
-            Log.d(TAG, "getBroadcastMetadata: LE Audio Broadcast is null");
+            Log.d(TAG, "getLocalBroadcastMetadataQrCodeString: LE Audio Broadcast is null");
             return "";
         }
         final LocalBluetoothLeBroadcastMetadata metadata =
@@ -1094,11 +1101,23 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         broadcast.unregisterServiceCallBack(callback);
     }
 
+    List<BluetoothDevice> getConnectedBroadcastSinkDevices() {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "getConnectedBroadcastSinkDevices: The broadcast assistant profile is null");
+            return null;
+        }
+
+        return assistant.getConnectedDevices();
+    }
+
     boolean isThereAnyBroadcastSourceIntoSinkDevice(BluetoothDevice sink) {
         LocalBluetoothLeBroadcastAssistant assistant =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
         if (assistant == null) {
-            Log.d(TAG, "The broadcast assistant profile is null");
+            Log.d(TAG, "isThereAnyBroadcastSourceIntoSinkDevice: The broadcast assistant profile "
+                    + "is null");
             return false;
         }
         List<BluetoothLeBroadcastReceiveState> sourceList = assistant.getAllSources(sink);
@@ -1111,7 +1130,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         LocalBluetoothLeBroadcastAssistant assistant =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
         if (assistant == null) {
-            Log.d(TAG, "The broadcast assistant profile is null");
+            Log.d(TAG, "addSourceIntoSinkDeviceWithBluetoothLeAssistant: The broadcast assistant "
+                    + "profile is null");
             return false;
         }
         assistant.addSource(sink, metadata, isGroupOp);
@@ -1124,7 +1144,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         LocalBluetoothLeBroadcastAssistant assistant =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
         if (assistant == null) {
-            Log.d(TAG, "The broadcast assistant profile is null");
+            Log.d(TAG, "registerLeBroadcastAssistantServiceCallback: The broadcast assistant "
+                    + "profile is null");
             return;
         }
         Log.d(TAG, "Register LE broadcast assistant callback");
@@ -1136,7 +1157,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         LocalBluetoothLeBroadcastAssistant assistant =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
         if (assistant == null) {
-            Log.d(TAG, "The broadcast assistant profile is null");
+            Log.d(TAG, "unregisterLeBroadcastAssistantServiceCallback: The broadcast assistant "
+                    + "profile is null");
             return;
         }
         Log.d(TAG, "Unregister LE broadcast assistant callback");

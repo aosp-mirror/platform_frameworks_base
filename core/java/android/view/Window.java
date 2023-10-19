@@ -658,6 +658,12 @@ public abstract class Window {
         void updateStatusBarColor(int color);
 
         /**
+         * Update the status bar appearance.
+         */
+
+        void updateStatusBarAppearance(int appearance);
+
+        /**
          * Update the navigation bar color to a forced one.
          */
         void updateNavigationBarColor(int color);
@@ -1038,6 +1044,9 @@ public abstract class Window {
         mSystemBarAppearance = appearance;
         if (mDecorCallback != null) {
             mDecorCallback.onSystemBarAppearanceChanged(appearance);
+        }
+        if (mWindowControllerCallback != null) {
+            mWindowControllerCallback.updateStatusBarAppearance(appearance);
         }
     }
 
@@ -1479,6 +1488,11 @@ public abstract class Window {
             mCloseOnTouchOutside = close;
             mSetCloseOnTouchOutside = true;
         }
+    }
+
+    /** @hide */
+    public boolean shouldCloseOnTouchOutside() {
+        return mCloseOnTouchOutside;
     }
 
     /** @hide */

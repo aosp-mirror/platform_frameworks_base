@@ -19,18 +19,28 @@ package com.android.systemui.user.data.repository
 
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import com.android.systemui.user.data.model.SelectedUserModel
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.yield
 
 class FakeUserRepository : UserRepository {
     companion object {
         // User id to represent a non system (human) user id. We presume this is the main user.
         private const val MAIN_USER_ID = 10
+
+        private val DEFAULT_SELECTED_USER = 0
+        private val DEFAULT_SELECTED_USER_INFO =
+            UserInfo(
+                /* id= */ DEFAULT_SELECTED_USER,
+                /* name= */ "default selected user",
+                /* flags= */ 0,
+            )
     }
 
     private val _userSwitcherSettings = MutableStateFlow(UserSwitcherSettingsModel())
@@ -40,8 +50,11 @@ class FakeUserRepository : UserRepository {
     private val _userInfos = MutableStateFlow<List<UserInfo>>(emptyList())
     override val userInfos: Flow<List<UserInfo>> = _userInfos.asStateFlow()
 
-    private val _selectedUserInfo = MutableStateFlow<UserInfo?>(null)
-    override val selectedUserInfo: Flow<UserInfo> = _selectedUserInfo.filterNotNull()
+    override val selectedUser =
+        MutableStateFlow(
+            SelectedUserModel(DEFAULT_SELECTED_USER_INFO, SelectionStatus.SELECTION_COMPLETE)
+        )
+    override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
 
     private val _userSwitchingInProgress = MutableStateFlow(false)
     override val userSwitchingInProgress: Flow<Boolean>
@@ -72,7 +85,7 @@ class FakeUserRepository : UserRepository {
     }
 
     override fun getSelectedUserInfo(): UserInfo {
-        return checkNotNull(_selectedUserInfo.value)
+        return selectedUser.value.userInfo
     }
 
     override fun isSimpleUserSwitcher(): Boolean {
@@ -87,12 +100,15 @@ class FakeUserRepository : UserRepository {
         _userInfos.value = infos
     }
 
-    suspend fun setSelectedUserInfo(userInfo: UserInfo) {
+    suspend fun setSelectedUserInfo(
+        userInfo: UserInfo,
+        selectionStatus: SelectionStatus = SelectionStatus.SELECTION_COMPLETE,
+    ) {
         check(_userInfos.value.contains(userInfo)) {
             "Cannot select the following user, it is not in the list of user infos: $userInfo!"
         }
 
-        _selectedUserInfo.value = userInfo
+        selectedUser.value = SelectedUserModel(userInfo, selectionStatus)
         yield()
     }
 

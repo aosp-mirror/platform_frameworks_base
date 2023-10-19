@@ -21,6 +21,7 @@ import android.testing.TestableLooper
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.view.LaunchableFrameLayout
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith

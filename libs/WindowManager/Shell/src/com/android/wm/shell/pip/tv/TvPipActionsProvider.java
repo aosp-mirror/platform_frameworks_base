@@ -35,8 +35,8 @@ import android.content.Context;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
-import com.android.wm.shell.pip.PipMediaController;
-import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;

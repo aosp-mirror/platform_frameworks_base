@@ -63,7 +63,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
@@ -83,6 +82,11 @@ import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -364,13 +368,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mMainExecutor = mainExecutor;
 
         // TODO: Can be removed once wm components are created on the shell-main thread
-        mMainExecutor.execute(() -> {
-            mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
-        });
-        mTaskOrganizer.addFocusListener(this);
-        mPipTransitionController.setPipOrganizer(this);
-        displayController.addDisplayWindowListener(this);
-        pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            mMainExecutor.execute(() -> {
+                mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
+            });
+            mTaskOrganizer.addFocusListener(this);
+            mPipTransitionController.setPipOrganizer(this);
+            displayController.addDisplayWindowListener(this);
+            pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+        }
     }
 
     public PipTransitionController getTransitionController() {
@@ -590,7 +596,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 SplitScreenController split = mSplitScreenOptional.get();
                 if (split.isTaskInSplitScreen(mTaskInfo.lastParentTaskIdBeforePip)) {
                     split.prepareExitSplitScreen(wct, split.getStageOfTask(
-                            mTaskInfo.lastParentTaskIdBeforePip));
+                            mTaskInfo.lastParentTaskIdBeforePip),
+                            SplitScreenController.EXIT_REASON_APP_FINISHED);
                 }
             }
             mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct, destinationBounds);
@@ -1732,17 +1739,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 // animation.
                 // TODO(b/272819817): cleanup the null-check and extra logging.
                 final boolean hasTopActivityInfo = mTaskInfo.topActivityInfo != null;
-                if (!hasTopActivityInfo) {
-                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                            "%s: TaskInfo.topActivityInfo is null", TAG);
-                }
-                if (SystemProperties.getBoolean(
-                        "persist.wm.debug.enable_pip_app_icon_overlay", true)
-                        && hasTopActivityInfo) {
+                if (hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, mTaskInfo.topActivityInfo,
                             mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "%s: TaskInfo.topActivityInfo is null", TAG);
                     animator.setColorContentOverlay(mContext);
                 }
             } else {

@@ -37,7 +37,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
-import com.android.internal.os.Clock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,8 +63,9 @@ public class BatteryStatsHistoryTest {
     private final Parcel mHistoryBuffer = Parcel.obtain();
     private File mSystemDir;
     private File mHistoryDir;
-    private final Clock mClock = new MockClock();
+    private final MockClock mClock = new MockClock();
     private BatteryStatsHistory mHistory;
+    private BatteryStats.HistoryPrinter mHistoryPrinter;
     @Mock
     private BatteryStatsHistory.TraceDelegate mTracer;
     @Mock
@@ -89,6 +89,8 @@ public class BatteryStatsHistoryTest {
 
         when(mStepDetailsCalculator.getHistoryStepDetails())
                 .thenReturn(new BatteryStats.HistoryStepDetails());
+
+        mHistoryPrinter = new BatteryStats.HistoryPrinter();
     }
 
     @Test
@@ -366,11 +368,95 @@ public class BatteryStatsHistoryTest {
         assertThat(checkin).contains("XC,10321,400,500,600");
     }
 
+    @Test
+    public void largeTagPool() {
+        // Keep the preserved part of history short - we only need to capture the very tail of
+        // history.
+        mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 1, 6000,
+                mStepDetailsCalculator, mClock, mTracer);
+
+        mHistory.forceRecordAllHistory();
+
+        mClock.realtime = 2_000_000;
+        mClock.uptime = 1_000_000;
+        // More than 32k strings
+        final int tagCount = 0x7FFF + 20;
+        for (int tag = 0; tag < tagCount;) {
+            mClock.realtime += 10;
+            mClock.uptime += 10;
+            mHistory.recordEvent(mClock.realtime, mClock.uptime, HistoryItem.EVENT_ALARM_START,
+                    "a" + (tag++), 42);
+
+            mHistory.setBatteryState(true, BatteryManager.BATTERY_STATUS_CHARGING, tag % 50, 0);
+            mClock.realtime += 10;
+            mClock.uptime += 10;
+            mHistory.recordWakelockStartEvent(mClock.realtime, mClock.uptime, "w" + tag, 42);
+            mClock.realtime += 10;
+            mClock.uptime += 10;
+            mHistory.recordWakelockStopEvent(mClock.realtime, mClock.uptime, "w" + tag, 42);
+            tag++;
+
+            mHistory.recordWakeupEvent(mClock.realtime, mClock.uptime, "wr" + (tag++));
+        }
+
+        int eventTagsPooled = 0;
+        int eventTagsUnpooled = 0;
+        int wakelockTagsPooled = 0;
+        int wakelockTagsUnpooled = 0;
+        int wakeReasonTagsPooled = 0;
+        int wakeReasonTagsUnpooled = 0;
+        for (BatteryStatsHistoryIterator iterator = mHistory.iterate(); iterator.hasNext(); ) {
+            HistoryItem item  = iterator.next();
+            if (item.cmd != HistoryItem.CMD_UPDATE) {
+                continue;
+            }
+            String checkinDump = toString(item, true);
+            if (item.eventCode == HistoryItem.EVENT_ALARM_START) {
+                if (item.eventTag.poolIdx != BatteryStats.HistoryTag.HISTORY_TAG_POOL_OVERFLOW) {
+                    eventTagsPooled++;
+                    assertThat(checkinDump).contains("+Eal=" + item.eventTag.poolIdx);
+                } else {
+                    eventTagsUnpooled++;
+                    assertThat(checkinDump).contains("+Eal=42:\"" + item.eventTag.string + "\"");
+                }
+            }
+
+            if (item.wakelockTag != null) {
+                if (item.wakelockTag.poolIdx != BatteryStats.HistoryTag.HISTORY_TAG_POOL_OVERFLOW) {
+                    wakelockTagsPooled++;
+                    assertThat(checkinDump).contains("w=" + item.wakelockTag.poolIdx);
+                } else {
+                    wakelockTagsUnpooled++;
+                    assertThat(checkinDump).contains("w=42:\"" + item.wakelockTag.string + "\"");
+                }
+            }
+
+            if (item.wakeReasonTag != null) {
+                if (item.wakeReasonTag.poolIdx
+                        != BatteryStats.HistoryTag.HISTORY_TAG_POOL_OVERFLOW) {
+                    wakeReasonTagsPooled++;
+                    assertThat(checkinDump).contains("wr=" + item.wakeReasonTag.poolIdx);
+                } else {
+                    wakeReasonTagsUnpooled++;
+                    assertThat(checkinDump).contains("wr=0:\"" + item.wakeReasonTag.string + "\"");
+                }
+            }
+        }
+
+        // Self-check - ensure that we have all cases represented in the test
+        assertThat(eventTagsPooled).isGreaterThan(0);
+        assertThat(eventTagsUnpooled).isGreaterThan(0);
+        assertThat(wakelockTagsPooled).isGreaterThan(0);
+        assertThat(wakelockTagsUnpooled).isGreaterThan(0);
+        assertThat(wakeReasonTagsPooled).isGreaterThan(0);
+        assertThat(wakeReasonTagsUnpooled).isGreaterThan(0);
+    }
+
     private String toString(BatteryStats.HistoryItem item, boolean checkin) {
         BatteryStats.HistoryPrinter printer = new BatteryStats.HistoryPrinter();
         StringWriter writer = new StringWriter();
         PrintWriter pw = new PrintWriter(writer);
-        printer.printNextItem(pw, item, 0, checkin, /* verbose */ true);
+        mHistoryPrinter.printNextItem(pw, item, 0, checkin, /* verbose */ false);
         pw.flush();
         return writer.toString();
     }

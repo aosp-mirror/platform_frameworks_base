@@ -22,10 +22,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,40 +38,113 @@ import org.junit.runners.JUnit4
 class SceneInteractorTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
-    private val underTest = utils.sceneInteractor()
+    private val testScope = utils.testScope
+    private val repository = utils.fakeSceneContainerRepository()
+    private val underTest = utils.sceneInteractor(repository = repository)
 
     @Test
     fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys("container1")).isEqualTo(utils.fakeSceneKeys())
+        assertThat(underTest.allSceneKeys()).isEqualTo(utils.fakeSceneKeys())
     }
 
     @Test
-    fun sceneTransitions() = runTest {
-        val currentScene by collectLastValue(underTest.currentScene("container1"))
-        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+    fun changeScene() =
+        testScope.runTest {
+            val desiredScene by collectLastValue(underTest.desiredScene)
+            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
-        underTest.setCurrentScene("container1", SceneModel(SceneKey.Shade))
-        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
-    }
-
-    @Test
-    fun sceneTransitionProgress() = runTest {
-        val progress by collectLastValue(underTest.sceneTransitionProgress("container1"))
-        assertThat(progress).isEqualTo(1f)
-
-        underTest.setSceneTransitionProgress("container1", 0.55f)
-        assertThat(progress).isEqualTo(0.55f)
-    }
+            underTest.changeScene(SceneModel(SceneKey.Shade), "reason")
+            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Shade))
+        }
 
     @Test
-    fun isVisible() = runTest {
-        val isVisible by collectLastValue(underTest.isVisible("container1"))
-        assertThat(isVisible).isTrue()
+    fun onSceneChanged() =
+        testScope.runTest {
+            val desiredScene by collectLastValue(underTest.desiredScene)
+            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
-        underTest.setVisible("container1", false)
-        assertThat(isVisible).isFalse()
+            underTest.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
+            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Shade))
+        }
 
-        underTest.setVisible("container1", true)
-        assertThat(isVisible).isTrue()
-    }
+    @Test
+    fun transitionState() =
+        testScope.runTest {
+            val underTest = utils.fakeSceneContainerRepository()
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.Lockscreen)
+                )
+            underTest.setTransitionState(transitionState)
+            val reflectedTransitionState by collectLastValue(underTest.transitionState)
+            assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
+
+            val progress = MutableStateFlow(1f)
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Lockscreen,
+                    toScene = SceneKey.Shade,
+                    progress = progress,
+                )
+            assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
+
+            progress.value = 0.1f
+            assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
+
+            progress.value = 0.9f
+            assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
+
+            underTest.setTransitionState(null)
+            assertThat(reflectedTransitionState)
+                .isEqualTo(
+                    ObservableTransitionState.Idle(utils.fakeSceneContainerConfig().initialSceneKey)
+                )
+        }
+
+    @Test
+    fun transitioningTo() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(underTest.desiredScene.value.key)
+                )
+            underTest.setTransitionState(transitionState)
+
+            val transitionTo by collectLastValue(underTest.transitioningTo)
+            assertThat(transitionTo).isNull()
+
+            underTest.changeScene(SceneModel(SceneKey.Shade), "reason")
+            assertThat(transitionTo).isNull()
+
+            val progress = MutableStateFlow(0f)
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = underTest.desiredScene.value.key,
+                    toScene = SceneKey.Shade,
+                    progress = progress,
+                )
+            assertThat(transitionTo).isEqualTo(SceneKey.Shade)
+
+            progress.value = 0.5f
+            assertThat(transitionTo).isEqualTo(SceneKey.Shade)
+
+            progress.value = 1f
+            assertThat(transitionTo).isEqualTo(SceneKey.Shade)
+
+            transitionState.value = ObservableTransitionState.Idle(SceneKey.Shade)
+            assertThat(transitionTo).isNull()
+        }
+
+    @Test
+    fun isVisible() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isVisible)
+            assertThat(isVisible).isTrue()
+
+            underTest.setVisible(false, "reason")
+            assertThat(isVisible).isFalse()
+
+            underTest.setVisible(true, "reason")
+            assertThat(isVisible).isTrue()
+        }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.temporarydisplay.chipbar
 
 import android.os.VibrationEffect
+import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.annotation.AttrRes
 import com.android.internal.logging.InstanceId
@@ -42,6 +43,7 @@ data class ChipbarInfo(
     val text: Text,
     val endItem: ChipbarEndItem?,
     val vibrationEffect: VibrationEffect? = null,
+    val vibrationConstant: Int = HapticFeedbackConstants.NO_HAPTICS,
     val allowSwipeToDismiss: Boolean = false,
     override val windowTitle: String,
     override val wakeReason: String,

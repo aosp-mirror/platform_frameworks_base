@@ -17,10 +17,9 @@
 
 package com.android.compose.ui.util
 
+import androidx.compose.ui.unit.IntSize
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
-
-// TODO(b/272311106): this is a fork from material. Unfork it when MathHelpers.kt reaches material3.
 
 /** Linearly interpolate between [start] and [stop] with [fraction] fraction between them. */
 fun lerp(start: Float, stop: Float, fraction: Float): Float {
@@ -35,4 +34,12 @@ fun lerp(start: Int, stop: Int, fraction: Float): Int {
 /** Linearly interpolate between [start] and [stop] with [fraction] fraction between them. */
 fun lerp(start: Long, stop: Long, fraction: Float): Long {
     return start + ((stop - start) * fraction.toDouble()).roundToLong()
+}
+
+/** Linearly interpolate between [start] and [stop] with [fraction] fraction between them. */
+fun lerp(start: IntSize, stop: IntSize, fraction: Float): IntSize {
+    return IntSize(
+        lerp(start.width, stop.width, fraction),
+        lerp(start.height, stop.height, fraction)
+    )
 }
