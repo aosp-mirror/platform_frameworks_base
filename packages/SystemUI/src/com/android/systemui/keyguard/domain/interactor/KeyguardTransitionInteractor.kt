@@ -143,6 +143,11 @@ constructor(
     val dozingToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(DOZING, LOCKSCREEN)
 
+    /** Receive all [TransitionStep] matching a filter of [from]->[to] */
+    fun transition(from: KeyguardState, to: KeyguardState): Flow<TransitionStep> {
+        return repository.transition(from, to)
+    }
+
     /**
      * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
      * Lockscreen (0f).

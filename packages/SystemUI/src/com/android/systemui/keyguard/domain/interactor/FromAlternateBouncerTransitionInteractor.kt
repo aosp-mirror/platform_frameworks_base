@@ -26,13 +26,13 @@ import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.sample
 import com.android.wm.shell.animation.Interpolators
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 @SysUISingleton
 class FromAlternateBouncerTransitionInteractor
@@ -130,11 +130,16 @@ constructor(
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = TRANSITION_DURATION_MS.inWholeMilliseconds
+            duration =
+                when (toState) {
+                    KeyguardState.GONE -> TO_GONE_DURATION
+                    else -> TRANSITION_DURATION_MS
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
         val TRANSITION_DURATION_MS = 300.milliseconds
+        val TO_GONE_DURATION = 500.milliseconds
     }
 }
