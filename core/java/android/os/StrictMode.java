@@ -2023,9 +2023,13 @@ public final class StrictMode {
             return;
         }
 
+        // Temporarily disable checks so that explicit GC is allowed.
+        final int oldMask = getThreadPolicyMask();
+        setThreadPolicyMask(0);
         System.gc();
         System.runFinalization();
         System.gc();
+        setThreadPolicyMask(oldMask);
 
         // Note: classInstanceLimit is immutable, so this is lock-free
         // Create the classes array.
