@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import com.android.systemui.res.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.GuestResetOrExitSessionReceiver.ResetSessionDialogFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -36,13 +37,13 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.util.concurrent.Executor;
-
-import javax.inject.Inject;
-
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+
+import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * Manages notification when a guest session is resumed.
@@ -58,7 +59,7 @@ public class GuestResumeSessionReceiver {
     private final Executor mMainExecutor;
     private final UserTracker mUserTracker;
     private final SecureSettings mSecureSettings;
-    private final ResetSessionDialog.Factory mResetSessionDialogFactory;
+    private final ResetSessionDialogFactory mResetSessionDialogFactory;
     private final GuestSessionNotification mGuestSessionNotification;
 
     @VisibleForTesting
@@ -104,7 +105,7 @@ public class GuestResumeSessionReceiver {
             UserTracker userTracker,
             SecureSettings secureSettings,
             GuestSessionNotification guestSessionNotification,
-            ResetSessionDialog.Factory resetSessionDialogFactory) {
+            ResetSessionDialogFactory resetSessionDialogFactory) {
         mMainExecutor = mainExecutor;
         mUserTracker = userTracker;
         mSecureSettings = secureSettings;
