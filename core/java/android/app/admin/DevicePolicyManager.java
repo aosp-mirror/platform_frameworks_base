@@ -3995,8 +3995,7 @@ public class DevicePolicyManager {
 
     /**
      * An integer array extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate which
-     * resource IDs (see {@link DevicePolicyResources.Drawables} and
-     * {@link DevicePolicyResources.Strings}) have been updated.
+     * resource IDs (i.e. strings and drawables) have been updated.
      */
     public static final String EXTRA_RESOURCE_IDS =
             "android.app.extra.RESOURCE_IDS";
@@ -8367,9 +8366,7 @@ public class DevicePolicyManager {
      * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
      * successfully set or not. This callback will contain:
      * <ul>
-     * <li> The policy identifier returned from
-     * {@link DevicePolicyIdentifiers#getIdentifierForUserRestriction(String)} with user restriction
-     * {@link UserManager#DISALLOW_CAMERA}
+     * <li> The policy identifier: userRestriction_no_camera
      * <li> The {@link TargetUser} that this policy relates to
      * <li> The {@link PolicyUpdateResult}, which will be
      * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
@@ -17073,19 +17070,19 @@ public class DevicePolicyManager {
      * Returns {@code true} if this device is marked as a financed device.
      *
      * <p>A financed device can be entered into lock task mode (see {@link #setLockTaskPackages})
-     * by the holder of the role {@link android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK}.
+     * by the holder of the role {@code android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK}.
      * If this occurs, Device Owners and Profile Owners that have set lock task packages or
      * features, or that attempt to set lock task packages or features, will receive a callback
      * indicating that it could not be set. See {@link PolicyUpdateReceiver#onPolicyChanged} and
      * {@link PolicyUpdateReceiver#onPolicySetResult}.
      *
      * <p>To be informed of changes to this status you can subscribe to the broadcast
-     * {@link ACTION_DEVICE_FINANCING_STATE_CHANGED}.
+     * {@link #ACTION_DEVICE_FINANCING_STATE_CHANGED}.
      *
      * @throws SecurityException if the caller is not a device owner, profile owner of an
      * organization-owned managed profile, profile owner on the primary user or holder of one of the
-     * following roles: {@link android.app.role.RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT},
-     * android.app.role.RoleManager.ROLE_SYSTEM_SUPERVISION.
+     * following roles: {@code android.app.role.RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT},
+     * {@code android.app.role.RoleManager.ROLE_SYSTEM_SUPERVISION}.
      */
     public boolean isDeviceFinanced() {
         throwIfParentInstance("isDeviceFinanced");
