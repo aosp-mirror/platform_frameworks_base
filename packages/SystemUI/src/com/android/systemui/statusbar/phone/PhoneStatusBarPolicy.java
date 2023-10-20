@@ -300,7 +300,8 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotCast, false);
 
         // connected display
-        mIconController.setIcon(mSlotConnectedDisplay, R.drawable.stat_sys_connected_display, null);
+        mIconController.setIcon(mSlotConnectedDisplay, R.drawable.stat_sys_connected_display,
+                mResources.getString(R.string.connected_display_icon_desc));
         mIconController.setIconVisibility(mSlotConnectedDisplay, false);
 
         // hotspot
