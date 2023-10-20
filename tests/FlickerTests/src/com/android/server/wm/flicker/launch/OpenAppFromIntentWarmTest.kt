@@ -24,6 +24,7 @@ import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.launch.common.OpenAppFromLauncherTransition
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
