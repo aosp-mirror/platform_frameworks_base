@@ -123,6 +123,10 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.nfc.flags-aconfig-java",
     aconfig_declarations: "android.nfc.flags-aconfig",
+    min_sdk_version: "VanillaIceCream",
+    apex_available: [
+        "com.android.nfcservices",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
