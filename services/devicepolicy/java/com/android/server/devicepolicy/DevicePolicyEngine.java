@@ -40,6 +40,7 @@ import android.app.admin.PolicyUpdateReceiver;
 import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
 import android.app.admin.UserRestrictionPolicyKey;
+import android.app.admin.flags.FlagUtils;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -65,7 +66,6 @@ import android.util.Xml;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.devicepolicy.flags.FlagUtils;
 import com.android.server.utils.Slogf;
 
 import libcore.io.IoUtils;

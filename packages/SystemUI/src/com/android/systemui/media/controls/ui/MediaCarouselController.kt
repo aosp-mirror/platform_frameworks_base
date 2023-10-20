@@ -731,6 +731,7 @@ constructor(
                     removePlayer(existingSmartspaceMediaKey, dismissMediaData = false)
                 removedPlayer?.run {
                     debugLogger.logPotentialMemoryLeak(existingSmartspaceMediaKey)
+                    onDestroy()
                 }
             }
 
@@ -1302,6 +1303,7 @@ internal object MediaPlayerData {
         val removedPlayer = removeMediaPlayer(key)
         if (removedPlayer != null && removedPlayer != player) {
             debugLogger?.logPotentialMemoryLeak(key)
+            removedPlayer.onDestroy()
         }
         val sortKey =
             MediaSortKey(
@@ -1329,6 +1331,7 @@ internal object MediaPlayerData {
         val removedPlayer = removeMediaPlayer(key)
         if (!update && removedPlayer != null && removedPlayer != player) {
             debugLogger?.logPotentialMemoryLeak(key)
+            removedPlayer.onDestroy()
         }
         val sortKey =
             MediaSortKey(
@@ -1357,7 +1360,10 @@ internal object MediaPlayerData {
             // MediaPlayer should not be visible
             // no need to set isDismissed flag.
             val removedPlayer = removeMediaPlayer(newKey)
-            removedPlayer?.run { debugLogger?.logPotentialMemoryLeak(newKey) }
+            removedPlayer?.run {
+                debugLogger?.logPotentialMemoryLeak(newKey)
+                onDestroy()
+            }
             mediaData.put(newKey, it)
         }
     }

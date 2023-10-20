@@ -25,6 +25,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
@@ -236,7 +237,7 @@ constructor(
                                 getDefaultAnimatorForTransitionsToState(KeyguardState.GONE).apply {
                                     this.duration = duration.inWholeMilliseconds
                                 },
-                            resetIfCancelled = true
+                            modeOnCanceled = TransitionModeOnCanceled.RESET,
                         )
                     }
                 }

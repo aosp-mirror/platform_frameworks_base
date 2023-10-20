@@ -255,7 +255,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     public void testUnlockUserKeyIfUnsecuredPassesPrimaryUserAuthSecret() throws RemoteException {
         initSpAndSetCredential(PRIMARY_USER_ID, newPassword(null));
         reset(mAuthSecretService);
-        mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
+        mService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
         verify(mAuthSecretService).setPrimaryUserCredential(any(byte[].class));
     }
 
@@ -267,7 +267,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         mService.setLockCredential(nonePassword(), password, PRIMARY_USER_ID);
 
         reset(mAuthSecretService);
-        mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
+        mService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
         verify(mAuthSecretService).setPrimaryUserCredential(any(byte[].class));
     }
 
@@ -285,39 +285,39 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     @Test
     public void testHeadlessSystemUserDoesNotPassAuthSecret() throws RemoteException {
         setupHeadlessTest();
-        mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
+        mService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
         verify(mAuthSecretService, never()).setPrimaryUserCredential(any(byte[].class));
     }
 
     @Test
     public void testHeadlessSecondaryUserPassesAuthSecret() throws RemoteException {
         setupHeadlessTest();
-        mLocalService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
+        mService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
         verify(mAuthSecretService).setPrimaryUserCredential(any(byte[].class));
     }
 
     @Test
     public void testHeadlessTertiaryUserPassesSameAuthSecret() throws RemoteException {
         setupHeadlessTest();
-        mLocalService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
+        mService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
         var captor = ArgumentCaptor.forClass(byte[].class);
         verify(mAuthSecretService).setPrimaryUserCredential(captor.capture());
         var value = captor.getValue();
         reset(mAuthSecretService);
-        mLocalService.unlockUserKeyIfUnsecured(TERTIARY_USER_ID);
+        mService.unlockUserKeyIfUnsecured(TERTIARY_USER_ID);
         verify(mAuthSecretService).setPrimaryUserCredential(eq(value));
     }
 
     @Test
     public void testHeadlessTertiaryUserPassesSameAuthSecretAfterReset() throws RemoteException {
         setupHeadlessTest();
-        mLocalService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
+        mService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
         var captor = ArgumentCaptor.forClass(byte[].class);
         verify(mAuthSecretService).setPrimaryUserCredential(captor.capture());
         var value = captor.getValue();
         mService.clearAuthSecret();
         reset(mAuthSecretService);
-        mLocalService.unlockUserKeyIfUnsecured(TERTIARY_USER_ID);
+        mService.unlockUserKeyIfUnsecured(TERTIARY_USER_ID);
         verify(mAuthSecretService).setPrimaryUserCredential(eq(value));
     }
 

@@ -570,9 +570,9 @@ public final class DisplayDeviceConfigTest {
         assertNotNull(data);
         assertEquals(2, data.mMaxBrightnessLimits.size());
         assertEquals(13000, data.mBrightnessDecreaseDebounceMillis);
-        assertEquals(10000, data.mBrightnessDecreaseDurationMillis);
+        assertEquals(0.1f, data.mScreenBrightnessRampDecrease, SMALL_DELTA);
         assertEquals(1000, data.mBrightnessIncreaseDebounceMillis);
-        assertEquals(11000, data.mBrightnessIncreaseDurationMillis);
+        assertEquals(0.11f, data.mScreenBrightnessRampIncrease, SMALL_DELTA);
 
         assertEquals(0.3f, data.mMaxBrightnessLimits.get(500f), SMALL_DELTA);
         assertEquals(0.6f, data.mMaxBrightnessLimits.get(1200f), SMALL_DELTA);
@@ -841,9 +841,9 @@ public final class DisplayDeviceConfigTest {
               + "        </point>\n"
               + "    </brightnessMap>\n"
               + "    <brightnessIncreaseDebounceMillis>1000</brightnessIncreaseDebounceMillis>\n"
-              + "    <brightnessIncreaseDurationMillis>11000</brightnessIncreaseDurationMillis>\n"
+              + "    <screenBrightnessRampIncrease>0.11</screenBrightnessRampIncrease>\n"
               + "    <brightnessDecreaseDebounceMillis>13000</brightnessDecreaseDebounceMillis>\n"
-              + "    <brightnessDecreaseDurationMillis>10000</brightnessDecreaseDurationMillis>\n"
+              + "    <screenBrightnessRampDecrease>0.1</screenBrightnessRampDecrease>\n"
               + "</hdrBrightnessConfig>";
     }
 

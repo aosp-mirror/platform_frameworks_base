@@ -6,3 +6,10 @@ flag {
     description: "Controls if the new Builder is exposed to test apis."
     bug: "296251481"
 }
+
+flag {
+    name: "companion_transport_apis"
+    namespace: "companion"
+    description: "Grants access to the companion transport apis."
+    bug: "288297505"
+}

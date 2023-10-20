@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.KeyguardTransitionRunner
@@ -86,7 +87,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun startingSecondTransitionWillCancelTheFirstTransition() =
+    fun startingSecondTransitionWillCancelTheFirstTransitionAndUseLastValue() =
         TestScope().runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
@@ -100,13 +101,90 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
             val job2 = underTest.transition(LOCKSCREEN, AOD).onEach { steps.add(it) }.launchIn(this)
             runner.startTransition(
                 this,
-                TransitionInfo(OWNER_NAME, LOCKSCREEN, AOD, getAnimator()),
+                TransitionInfo(
+                    OWNER_NAME,
+                    LOCKSCREEN,
+                    AOD,
+                    getAnimator(),
+                    TransitionModeOnCanceled.LAST_VALUE
+                ),
             )
 
             val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
             assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
 
+            // Second transition starts from .1 (LAST_VALUE)
             val secondTransitionSteps = listWithStep(step = BigDecimal(.1), start = BigDecimal(.1))
+            assertSteps(steps.subList(4, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
+
+            job.cancel()
+            job2.cancel()
+        }
+
+    @Test
+    fun startingSecondTransitionWillCancelTheFirstTransitionAndUseReset() =
+        TestScope().runTest {
+            val steps = mutableListOf<TransitionStep>()
+            val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
+            runner.startTransition(
+                this,
+                TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, getAnimator()),
+                maxFrames = 3,
+            )
+
+            // Now start 2nd transition, which will interrupt the first
+            val job2 = underTest.transition(LOCKSCREEN, AOD).onEach { steps.add(it) }.launchIn(this)
+            runner.startTransition(
+                this,
+                TransitionInfo(
+                    OWNER_NAME,
+                    LOCKSCREEN,
+                    AOD,
+                    getAnimator(),
+                    TransitionModeOnCanceled.RESET
+                ),
+            )
+
+            val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
+            assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
+
+            // Second transition starts from 0 (RESET)
+            val secondTransitionSteps = listWithStep(start = BigDecimal(0), step = BigDecimal(.1))
+            assertSteps(steps.subList(4, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
+
+            job.cancel()
+            job2.cancel()
+        }
+
+    @Test
+    fun startingSecondTransitionWillCancelTheFirstTransitionAndUseReverse() =
+        TestScope().runTest {
+            val steps = mutableListOf<TransitionStep>()
+            val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
+            runner.startTransition(
+                this,
+                TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, getAnimator()),
+                maxFrames = 3,
+            )
+
+            // Now start 2nd transition, which will interrupt the first
+            val job2 = underTest.transition(LOCKSCREEN, AOD).onEach { steps.add(it) }.launchIn(this)
+            runner.startTransition(
+                this,
+                TransitionInfo(
+                    OWNER_NAME,
+                    LOCKSCREEN,
+                    AOD,
+                    getAnimator(),
+                    TransitionModeOnCanceled.REVERSE
+                ),
+            )
+
+            val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
+            assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
+
+            // Second transition starts from .9 (REVERSE)
+            val secondTransitionSteps = listWithStep(start = BigDecimal(0.9), step = BigDecimal(.1))
             assertSteps(steps.subList(4, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
 
             job.cancel()

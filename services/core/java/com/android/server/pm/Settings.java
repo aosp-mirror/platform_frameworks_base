@@ -931,16 +931,24 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             sharedUserSetting.mDisabledPackages.remove(p);
         }
         p.getPkgState().setUpdatedSystemApp(false);
-        PackageSetting ret = addPackageLPw(name, p.getRealName(), p.getPath(),
-                p.getLegacyNativeLibraryPath(), p.getPrimaryCpuAbiLegacy(),
-                p.getSecondaryCpuAbiLegacy(), p.getCpuAbiOverride(),
-                p.getAppId(), p.getVersionCode(), p.getFlags(), p.getPrivateFlags(),
-                p.getUsesSdkLibraries(), p.getUsesSdkLibrariesVersionsMajor(),
-                p.getUsesStaticLibraries(), p.getUsesStaticLibrariesVersions(), p.getMimeGroups(),
-                mDomainVerificationManager.generateNewId());
+        PackageSetting ret = addPackageLPw(name, p.getRealName(), p.getPath(), p.getAppId(),
+                p.getFlags(), p.getPrivateFlags(), mDomainVerificationManager.generateNewId());
         if (ret != null) {
+            ret.setLegacyNativeLibraryPath(p.getLegacyNativeLibraryPath());
+            ret.setPrimaryCpuAbi(p.getPrimaryCpuAbiLegacy());
+            ret.setSecondaryCpuAbi(p.getSecondaryCpuAbiLegacy());
+            ret.setCpuAbiOverride(p.getCpuAbiOverride());
+            ret.setLongVersionCode(p.getVersionCode());
+            ret.setUsesSdkLibraries(p.getUsesSdkLibraries());
+            ret.setUsesSdkLibrariesVersionsMajor(p.getUsesSdkLibrariesVersionsMajor());
+            ret.setUsesStaticLibraries(p.getUsesStaticLibraries());
+            ret.setUsesStaticLibrariesVersions(p.getUsesStaticLibrariesVersions());
+            ret.setMimeGroups(p.getMimeGroups());
             ret.setAppMetadataFilePath(p.getAppMetadataFilePath());
             ret.getPkgState().setUpdatedSystemApp(false);
+            ret.setIsPersistent(p.isPersistent());
+            ret.setTargetSdkVersion(p.getTargetSdkVersion());
+            ret.setRestrictUpdateHash(p.getRestrictUpdateHash());
         }
         mDisabledSysPackages.remove(name);
         return ret;
@@ -961,13 +969,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
     }
 
-    PackageSetting addPackageLPw(String name, String realName, File codePath,
-            String legacyNativeLibraryPathString, String primaryCpuAbiString,
-            String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, long vc,
-            int pkgFlags, int pkgPrivateFlags, String[] usesSdkLibraries,
-            long[] usesSdkLibrariesVersions, String[] usesStaticLibraries,
-            long[] usesStaticLibrariesVersions, Map<String, Set<String>> mimeGroups,
-            @NonNull UUID domainSetId) {
+    PackageSetting addPackageLPw(String name, String realName, File codePath, int uid, int pkgFlags,
+                                 int pkgPrivateFlags, @NonNull UUID domainSetId) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.getAppId() == uid) {
@@ -977,11 +980,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     "Adding duplicate package, keeping first: " + name);
             return null;
         }
-        p = new PackageSetting(name, realName, codePath, legacyNativeLibraryPathString,
-                primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString, vc, pkgFlags,
-                pkgPrivateFlags, 0 /*userId*/, usesSdkLibraries, usesSdkLibrariesVersions,
-                usesStaticLibraries, usesStaticLibrariesVersions, mimeGroups, domainSetId);
-        p.setAppId(uid);
+        p = new PackageSetting(name, realName, codePath, pkgFlags, pkgPrivateFlags, domainSetId)
+                .setAppId(uid);
         if (mAppIds.registerExistingAppId(uid, p, name)) {
             mPackages.put(name, p);
             return p;
@@ -1092,16 +1092,21 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             int installUserId = installUser != null ? installUser.getIdentifier()
                     : UserHandle.USER_SYSTEM;
 
-            pkgSetting = new PackageSetting(pkgName, realPkgName, codePath,
-                    legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
-                    null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
-                    0 /*sharedUserAppId*/, usesSdkLibraries, usesSdkLibrariesVersions,
-                    usesStaticLibraries, usesStaticLibrariesVersions,
-                    createMimeGroups(mimeGroupNames), domainSetId)
+            pkgSetting = new PackageSetting(pkgName, realPkgName, codePath, pkgFlags,
+                    pkgPrivateFlags, domainSetId)
+                    .setUsesSdkLibraries(usesSdkLibraries)
+                    .setUsesSdkLibrariesVersionsMajor(usesSdkLibrariesVersions)
+                    .setUsesStaticLibraries(usesStaticLibraries)
+                    .setUsesStaticLibrariesVersions(usesStaticLibrariesVersions)
+                    .setLegacyNativeLibraryPath(legacyNativeLibraryPath)
+                    .setPrimaryCpuAbi(primaryCpuAbi)
+                    .setSecondaryCpuAbi(secondaryCpuAbi)
+                    .setLongVersionCode(versionCode)
+                    .setMimeGroups(createMimeGroups(mimeGroupNames))
                     .setIsPersistent(isPersistent)
                     .setTargetSdkVersion(targetSdkVersion)
-                    .setRestrictUpdateHash(restrictUpdatedHash);
-            pkgSetting.setLastModifiedTime(codePath.lastModified());
+                    .setRestrictUpdateHash(restrictUpdatedHash)
+                    .setLastModifiedTime(codePath.lastModified());
             if (sharedUser != null) {
                 pkgSetting.setSharedUserAppId(sharedUser.mAppId);
             }
@@ -3066,6 +3071,12 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
         serializer.attributeLong(null, "version", pkg.getVersionCode());
+        serializer.attributeBoolean(null, "isPersistent", pkg.isPersistent());
+        serializer.attributeInt(null, "targetSdkVersion", pkg.getTargetSdkVersion());
+        if (pkg.getRestrictUpdateHash() != null) {
+            serializer.attributeBytesBase64(null, "restrictUpdateHash",
+                    pkg.getRestrictUpdateHash());
+        }
         if (pkg.getLegacyNativeLibraryPath() != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.getLegacyNativeLibraryPath());
         }
@@ -3129,6 +3140,12 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
         serializer.attributeLong(null, "version", pkg.getVersionCode());
+        serializer.attributeBoolean(null, "isPersistent", pkg.isPersistent());
+        serializer.attributeInt(null, "targetSdkVersion", pkg.getTargetSdkVersion());
+        if (pkg.getRestrictUpdateHash() != null) {
+            serializer.attributeBytesBase64(null, "restrictUpdateHash",
+                    pkg.getRestrictUpdateHash());
+        }
         if (!pkg.hasSharedUser()) {
             serializer.attributeInt(null, "userId", pkg.getAppId());
         } else {
@@ -3861,6 +3878,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
 
         long versionCode = parser.getAttributeLong(null, "version", 0);
+        boolean isPersistent = parser.getAttributeBoolean(null, "isPersistent", false);
+        int targetSdkVersion = parser.getAttributeInt(null, "targetSdkVersion", 0);
+        byte[] restrictUpdateHash = parser.getAttributeBytesBase64(null, "restrictUpdateHash",
+                null);
 
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
@@ -3873,10 +3894,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         // debug invalid entries. The actual logic for migrating to a new ID is done in other
         // methods that use DomainVerificationManagerInternal#generateNewId
         UUID domainSetId = DomainVerificationManagerInternal.DISABLED_ID;
-        PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
-                legacyNativeLibraryPathStr, primaryCpuAbiStr, secondaryCpuAbiStr, cpuAbiOverrideStr,
-                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserAppId*/, null, null, null,
-                null, null, domainSetId);
+        PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr), pkgFlags,
+                pkgPrivateFlags, domainSetId)
+                .setLegacyNativeLibraryPath(legacyNativeLibraryPathStr)
+                .setPrimaryCpuAbi(primaryCpuAbiStr)
+                .setSecondaryCpuAbi(secondaryCpuAbiStr)
+                .setCpuAbiOverride(cpuAbiOverrideStr)
+                .setLongVersionCode(versionCode)
+                .setIsPersistent(isPersistent)
+                .setTargetSdkVersion(targetSdkVersion)
+                .setRestrictUpdateHash(restrictUpdateHash);
         long timeStamp = parser.getAttributeLongHex(null, "ft", 0);
         if (timeStamp == 0) {
             timeStamp = parser.getAttributeLong(null, "ts", 0);
@@ -3970,6 +3997,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         long loadingCompletedTime = 0;
         UUID domainSetId;
         String appMetadataFilePath = null;
+        boolean isPersistent = false;
+        int targetSdkVersion = 0;
+        byte[] restrictUpdateHash = null;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3993,6 +4023,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             }
 
             versionCode = parser.getAttributeLong(null, "version", 0);
+            isPersistent = parser.getAttributeBoolean(null, "isPersistent", false);
+            targetSdkVersion = parser.getAttributeInt(null, "targetSdkVersion", 0);
+            restrictUpdateHash = parser.getAttributeBytesBase64(null, "restrictUpdateHash", null);
             installerPackageName = parser.getAttributeValue(null, "installer");
             installerPackageUid = parser.getAttributeInt(null, "installerUid", INVALID_UID);
             updateOwnerPackageName = parser.getAttributeValue(null, "updateOwner");
@@ -4088,11 +4121,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 + parser.getPositionDescription());
             } else if (appId > 0) {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
-                        legacyNativeLibraryPathStr, primaryCpuAbiString, secondaryCpuAbiString,
-                        cpuAbiOverrideString, appId, versionCode, pkgFlags, pkgPrivateFlags,
-                        null /* usesSdkLibraries */, null /* usesSdkLibraryVersions */,
-                        null /* usesStaticLibraries */, null /* usesStaticLibraryVersions */,
-                        null /* mimeGroups */, domainSetId);
+                        appId, pkgFlags, pkgPrivateFlags, domainSetId);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": appId="
                             + appId + " pkg=" + packageSetting);
@@ -4101,22 +4130,26 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                             + appId + " while parsing settings at "
                             + parser.getPositionDescription());
                 } else {
+                    packageSetting.setLegacyNativeLibraryPath(legacyNativeLibraryPathStr);
+                    packageSetting.setPrimaryCpuAbi(primaryCpuAbiString);
+                    packageSetting.setSecondaryCpuAbi(secondaryCpuAbiString);
+                    packageSetting.setCpuAbiOverride(cpuAbiOverrideString);
+                    packageSetting.setLongVersionCode(versionCode);
                     packageSetting.setLastModifiedTime(timeStamp);
                     packageSetting.setLastUpdateTime(lastUpdateTime);
                 }
             } else if (sharedUserAppId != 0) {
                 if (sharedUserAppId > 0) {
                     packageSetting = new PackageSetting(name.intern(), realName,
-                            new File(codePathStr), legacyNativeLibraryPathStr,
-                            primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                            versionCode, pkgFlags, pkgPrivateFlags, sharedUserAppId,
-                            null /* usesSdkLibraries */,
-                            null /* usesSdkLibrariesVersions */,
-                            null /* usesStaticLibraries */,
-                            null /* usesStaticLibraryVersions */,
-                            null /* mimeGroups */, domainSetId);
-                    packageSetting.setLastModifiedTime(timeStamp);
-                    packageSetting.setLastUpdateTime(lastUpdateTime);
+                            new File(codePathStr), pkgFlags, pkgPrivateFlags, domainSetId)
+                            .setLegacyNativeLibraryPath(legacyNativeLibraryPathStr)
+                            .setPrimaryCpuAbi(primaryCpuAbiString)
+                            .setSecondaryCpuAbi(secondaryCpuAbiString)
+                            .setCpuAbiOverride(cpuAbiOverrideString)
+                            .setLongVersionCode(versionCode)
+                            .setSharedUserAppId(sharedUserAppId)
+                            .setLastModifiedTime(timeStamp)
+                            .setLastUpdateTime(lastUpdateTime);
                     mPendingPackages.add(packageSetting);
                     if (PackageManagerService.DEBUG_SETTINGS)
                         Log.i(PackageManagerService.TAG, "Reading package " + name
@@ -4155,7 +4188,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setForceQueryableOverride(installedForceQueryable)
                     .setLoadingProgress(loadingProgress)
                     .setLoadingCompletedTime(loadingCompletedTime)
-                    .setAppMetadataFilePath(appMetadataFilePath);
+                    .setAppMetadataFilePath(appMetadataFilePath)
+                    .setIsPersistent(isPersistent)
+                    .setTargetSdkVersion(targetSdkVersion)
+                    .setRestrictUpdateHash(restrictUpdateHash);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -4916,9 +4952,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
         pw.print(prefix); pw.print("  versionCode="); pw.print(ps.getVersionCode());
         if (pkg != null) {
-            pw.print(" minSdk="); pw.print(pkg.getMinSdkVersion());
-            pw.print(" targetSdk="); pw.println(pkg.getTargetSdkVersion());
-
+            pw.print(" minSdk=");
+            pw.print(pkg.getMinSdkVersion());
+        }
+        pw.print(" targetSdk="); pw.println(ps.getTargetSdkVersion());
+        if (pkg != null) {
             SparseIntArray minExtensionVersions = pkg.getMinExtensionVersions();
 
             pw.print(prefix); pw.print("  minExtensionVersions=[");

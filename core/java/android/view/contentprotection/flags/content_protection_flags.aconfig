@@ -13,3 +13,10 @@ flag {
     description: "If true, content protection groups config will be parsed."
     bug: "302187922"
 }
+
+flag {
+    name: "setting_ui_enabled"
+    namespace: "content_protection"
+    description: "If true, content protection setting ui is displayed in Settings > Privacy & Security > More security & privacy."
+    bug: "305792348"
+}

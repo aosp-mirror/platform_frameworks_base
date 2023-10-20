@@ -11,18 +11,16 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
-package com.android.systemui.log.dagger
+package com.android.systemui.keyguard.shared.model
 
-import javax.inject.Qualifier
-
-/**
- * A default [com.android.systemui.log.LogBuffer] for QS tiles messages. It's used exclusively in
- * [com.android.systemui.qs.tiles.base.logging.QSTileLogger]. If you need to increase it for you
- * tile, add one to the map provided by the [QSTilesLogBuffers]
- */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class QSTilesDefaultLog
+/** When canceled, provide different ways to start the next transition. */
+enum class TransitionModeOnCanceled {
+    /** Proceed from the last value. If canceled at .7, start from .7 and end at 1 */
+    LAST_VALUE,
+    /** Start over from 0. If canceled at .7, start from 0 and end at 1 */
+    RESET,
+    /** Reverse the transition. If canceled at .7, start from 1-.7 (0.3) and end at 1 */
+    REVERSE
+}

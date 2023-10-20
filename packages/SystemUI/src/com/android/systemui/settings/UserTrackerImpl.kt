@@ -227,6 +227,13 @@ open class UserTrackerImpl internal constructor(
     protected open fun handleBeforeUserSwitching(newUserId: Int) {
         Assert.isNotMainThread()
         setUserIdInternal(newUserId)
+
+        val list = synchronized(callbacks) {
+            callbacks.toList()
+        }
+        list.forEach {
+            it.callback.get()?.onBeforeUserSwitching(newUserId)
+        }
     }
 
     @WorkerThread

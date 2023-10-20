@@ -179,15 +179,15 @@ package com.android.server.display.config {
   public class HdrBrightnessConfig {
     ctor public HdrBrightnessConfig();
     method public final java.math.BigInteger getBrightnessDecreaseDebounceMillis();
-    method public final java.math.BigInteger getBrightnessDecreaseDurationMillis();
     method public final java.math.BigInteger getBrightnessIncreaseDebounceMillis();
-    method public final java.math.BigInteger getBrightnessIncreaseDurationMillis();
     method @NonNull public final com.android.server.display.config.NonNegativeFloatToFloatMap getBrightnessMap();
+    method public final java.math.BigDecimal getScreenBrightnessRampDecrease();
+    method public final java.math.BigDecimal getScreenBrightnessRampIncrease();
     method public final void setBrightnessDecreaseDebounceMillis(java.math.BigInteger);
-    method public final void setBrightnessDecreaseDurationMillis(java.math.BigInteger);
     method public final void setBrightnessIncreaseDebounceMillis(java.math.BigInteger);
-    method public final void setBrightnessIncreaseDurationMillis(java.math.BigInteger);
     method public final void setBrightnessMap(@NonNull com.android.server.display.config.NonNegativeFloatToFloatMap);
+    method public final void setScreenBrightnessRampDecrease(java.math.BigDecimal);
+    method public final void setScreenBrightnessRampIncrease(java.math.BigDecimal);
   }
 
   public class HighBrightnessMode {
