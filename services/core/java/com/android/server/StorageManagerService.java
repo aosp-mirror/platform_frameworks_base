@@ -1236,7 +1236,7 @@ class StorageManagerService extends IStorageManager.Stub
     private void onUserStopped(int userId) {
         Slog.d(TAG, "onUserStopped " + userId);
 
-        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+        Watchdog.getInstance().pauseWatchingMonitorsFor(
                 SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#onUserStopped might be slow");
         try {
             mVold.onUserStopped(userId);
@@ -1320,7 +1320,7 @@ class StorageManagerService extends IStorageManager.Stub
                 unlockedUsers.add(userId);
             }
         }
-        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+        Watchdog.getInstance().pauseWatchingMonitorsFor(
                 SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#onUserStopped might be slow");
         for (Integer userId : unlockedUsers) {
             try {
@@ -2341,7 +2341,7 @@ class StorageManagerService extends IStorageManager.Stub
         try {
             // TODO(b/135341433): Remove cautious logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
-            Watchdog.getInstance().setOneOffTimeoutForMonitors(
+            Watchdog.getInstance().pauseWatchingMonitorsFor(
                     SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#mount might be slow");
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
                 @Override
@@ -2472,7 +2472,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
 
-        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+        Watchdog.getInstance().pauseWatchingMonitorsFor(
                 PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_PUBLIC, -1);
@@ -2491,7 +2491,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
 
-        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+        Watchdog.getInstance().pauseWatchingMonitorsFor(
                 PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_PRIVATE, -1);
@@ -2510,7 +2510,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
 
-        Watchdog.getInstance().setOneOffTimeoutForMonitors(
+        Watchdog.getInstance().pauseWatchingMonitorsFor(
                 PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_MIXED, ratio);
@@ -3620,7 +3620,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public ParcelFileDescriptor open() throws AppFuseMountException {
-            Watchdog.getInstance().setOneOffTimeoutForMonitors(
+            Watchdog.getInstance().pauseWatchingMonitorsFor(
                 SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#open might be slow");
             try {
                 final FileDescriptor fd = mVold.mountAppFuse(uid, mountId);
@@ -3634,7 +3634,7 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public ParcelFileDescriptor openFile(int mountId, int fileId, int flags)
                 throws AppFuseMountException {
-            Watchdog.getInstance().setOneOffTimeoutForMonitors(
+            Watchdog.getInstance().pauseWatchingMonitorsFor(
                 SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#openFile might be slow");
             try {
                 return new ParcelFileDescriptor(
@@ -3646,7 +3646,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void close() throws Exception {
-            Watchdog.getInstance().setOneOffTimeoutForMonitors(
+            Watchdog.getInstance().pauseWatchingMonitorsFor(
                 SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#close might be slow");
             if (mMounted) {
                 mVold.unmountAppFuse(uid, mountId);
