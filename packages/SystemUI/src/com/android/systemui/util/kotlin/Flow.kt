@@ -61,10 +61,10 @@ fun <T, R> Flow<T>.pairwiseBy(transform: suspend (old: T, new: T) -> R): Flow<R>
  *
  * Useful for code that needs to compare the current value to the previous value.
  */
-fun <T, R> Flow<T>.pairwiseBy(
-    initialValue: T,
-    transform: suspend (previousValue: T, newValue: T) -> R,
-): Flow<R> = onStart { emit(initialValue) }.pairwiseBy(transform)
+fun <S, T : S, R> Flow<T>.pairwiseBy(
+    initialValue: S,
+    transform: suspend (previousValue: S, newValue: T) -> R,
+): Flow<R> = pairwiseBy(getInitialValue = { initialValue }, transform)
 
 /**
  * Returns a new [Flow] that combines the two most recent emissions from [this] using [transform].
@@ -75,10 +75,16 @@ fun <T, R> Flow<T>.pairwiseBy(
  *
  * Useful for code that needs to compare the current value to the previous value.
  */
-fun <T, R> Flow<T>.pairwiseBy(
-    getInitialValue: suspend () -> T,
-    transform: suspend (previousValue: T, newValue: T) -> R,
-): Flow<R> = onStart { emit(getInitialValue()) }.pairwiseBy(transform)
+fun <S, T : S, R> Flow<T>.pairwiseBy(
+    getInitialValue: suspend () -> S,
+    transform: suspend (previousValue: S, newValue: T) -> R,
+): Flow<R> = flow {
+    var previousValue: S = getInitialValue()
+    collect { newVal ->
+        emit(transform(previousValue, newVal))
+        previousValue = newVal
+    }
+}
 
 /**
  * Returns a new [Flow] that produces the two most recent emissions from [this]. Note that the new
@@ -86,7 +92,7 @@ fun <T, R> Flow<T>.pairwiseBy(
  *
  * Useful for code that needs to compare the current value to the previous value.
  */
-fun <T> Flow<T>.pairwise(): Flow<WithPrev<T>> = pairwiseBy(::WithPrev)
+fun <T> Flow<T>.pairwise(): Flow<WithPrev<T, T>> = pairwiseBy(::WithPrev)
 
 /**
  * Returns a new [Flow] that produces the two most recent emissions from [this]. [initialValue] will
@@ -94,10 +100,11 @@ fun <T> Flow<T>.pairwise(): Flow<WithPrev<T>> = pairwiseBy(::WithPrev)
  *
  * Useful for code that needs to compare the current value to the previous value.
  */
-fun <T> Flow<T>.pairwise(initialValue: T): Flow<WithPrev<T>> = pairwiseBy(initialValue, ::WithPrev)
+fun <S, T : S> Flow<T>.pairwise(initialValue: S): Flow<WithPrev<S, T>> =
+    pairwiseBy(initialValue, ::WithPrev)
 
 /** Holds a [newValue] emitted from a [Flow], along with the [previousValue] emitted value. */
-data class WithPrev<T>(val previousValue: T, val newValue: T)
+data class WithPrev<out S, out T : S>(val previousValue: S, val newValue: T)
 
 /**
  * Returns a new [Flow] that combines the [Set] changes between each emission from [this] using
@@ -265,112 +272,120 @@ fun <T> Flow<T>.throttle(periodMs: Long, clock: SystemClock): Flow<T> = channelF
  * immediately invoke [getValue] to establish its initial value.
  */
 inline fun <T> CoroutineScope.stateFlow(
-    changedSignals: Flow<Unit>,
+    changedSignals: Flow<*>,
     crossinline getValue: () -> T,
 ): StateFlow<T> =
     changedSignals.map { getValue() }.stateIn(this, SharingStarted.Eagerly, getValue())
 
 inline fun <T1, T2, T3, T4, T5, T6, R> combine(
-        flow: Flow<T1>,
-        flow2: Flow<T2>,
-        flow3: Flow<T3>,
-        flow4: Flow<T4>,
-        flow5: Flow<T5>,
-        flow6: Flow<T6>,
-        crossinline transform: suspend (T1, T2, T3, T4, T5, T6) -> R
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    flow5: Flow<T5>,
+    flow6: Flow<T6>,
+    crossinline transform: suspend (T1, T2, T3, T4, T5, T6) -> R
 ): Flow<R> {
-    return kotlinx.coroutines.flow.combine(flow, flow2, flow3, flow4, flow5, flow6) {
-        args: Array<*> ->
+    return kotlinx.coroutines.flow.combine(flow, flow2, flow3, flow4, flow5, flow6) { args: Array<*>
+        ->
         @Suppress("UNCHECKED_CAST")
         transform(
-                args[0] as T1,
-                args[1] as T2,
-                args[2] as T3,
-                args[3] as T4,
-                args[4] as T5,
-                args[5] as T6
+            args[0] as T1,
+            args[1] as T2,
+            args[2] as T3,
+            args[3] as T4,
+            args[4] as T5,
+            args[5] as T6
         )
     }
 }
 
 inline fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
-        flow: Flow<T1>,
-        flow2: Flow<T2>,
-        flow3: Flow<T3>,
-        flow4: Flow<T4>,
-        flow5: Flow<T5>,
-        flow6: Flow<T6>,
-        flow7: Flow<T7>,
-        crossinline transform: suspend (T1, T2, T3, T4, T5, T6, T7) -> R
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    flow5: Flow<T5>,
+    flow6: Flow<T6>,
+    flow7: Flow<T7>,
+    crossinline transform: suspend (T1, T2, T3, T4, T5, T6, T7) -> R
 ): Flow<R> {
     return kotlinx.coroutines.flow.combine(flow, flow2, flow3, flow4, flow5, flow6, flow7) {
         args: Array<*> ->
         @Suppress("UNCHECKED_CAST")
         transform(
-                args[0] as T1,
-                args[1] as T2,
-                args[2] as T3,
-                args[3] as T4,
-                args[4] as T5,
-                args[5] as T6,
-                args[6] as T7
+            args[0] as T1,
+            args[1] as T2,
+            args[2] as T3,
+            args[3] as T4,
+            args[4] as T5,
+            args[5] as T6,
+            args[6] as T7
         )
     }
 }
 
 inline fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
-        flow: Flow<T1>,
-        flow2: Flow<T2>,
-        flow3: Flow<T3>,
-        flow4: Flow<T4>,
-        flow5: Flow<T5>,
-        flow6: Flow<T6>,
-        flow7: Flow<T7>,
-        flow8: Flow<T8>,
-        crossinline transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8) -> R
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    flow5: Flow<T5>,
+    flow6: Flow<T6>,
+    flow7: Flow<T7>,
+    flow8: Flow<T8>,
+    crossinline transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8) -> R
 ): Flow<R> {
     return kotlinx.coroutines.flow.combine(flow, flow2, flow3, flow4, flow5, flow6, flow7, flow8) {
         args: Array<*> ->
         @Suppress("UNCHECKED_CAST")
         transform(
-                args[0] as T1,
-                args[1] as T2,
-                args[2] as T3,
-                args[3] as T4,
-                args[4] as T5,
-                args[5] as T6,
-                args[6] as T7,
-                args[7] as T8
+            args[0] as T1,
+            args[1] as T2,
+            args[2] as T3,
+            args[3] as T4,
+            args[4] as T5,
+            args[5] as T6,
+            args[6] as T7,
+            args[7] as T8
         )
     }
 }
 
 inline fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, R> combine(
-        flow: Flow<T1>,
-        flow2: Flow<T2>,
-        flow3: Flow<T3>,
-        flow4: Flow<T4>,
-        flow5: Flow<T5>,
-        flow6: Flow<T6>,
-        flow7: Flow<T7>,
-        flow8: Flow<T8>,
-        flow9: Flow<T9>,
-        crossinline transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    flow5: Flow<T5>,
+    flow6: Flow<T6>,
+    flow7: Flow<T7>,
+    flow8: Flow<T8>,
+    flow9: Flow<T9>,
+    crossinline transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R
 ): Flow<R> {
     return kotlinx.coroutines.flow.combine(
-        flow, flow2, flow3, flow4, flow5, flow6, flow7, flow8, flow9
+        flow,
+        flow2,
+        flow3,
+        flow4,
+        flow5,
+        flow6,
+        flow7,
+        flow8,
+        flow9
     ) { args: Array<*> ->
         @Suppress("UNCHECKED_CAST")
         transform(
-                args[0] as T1,
-                args[1] as T2,
-                args[2] as T3,
-                args[3] as T4,
-                args[4] as T5,
-                args[5] as T6,
-                args[6] as T7,
-                args[6] as T8,
-                args[6] as T9,
+            args[0] as T1,
+            args[1] as T2,
+            args[2] as T3,
+            args[3] as T4,
+            args[4] as T5,
+            args[5] as T6,
+            args[6] as T7,
+            args[6] as T8,
+            args[6] as T9,
         )
     }
 }

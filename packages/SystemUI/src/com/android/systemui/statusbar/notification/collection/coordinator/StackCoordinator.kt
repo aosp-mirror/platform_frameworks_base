@@ -52,9 +52,10 @@ internal constructor(
     fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
         traceSection("StackCoordinator.onAfterRenderList") {
             controller.setNotifStats(calculateNotifStats(entries))
-            notificationIconAreaController.updateNotificationIcons(entries)
             if (featureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
                 renderListInteractor.setRenderedList(entries)
+            } else {
+                notificationIconAreaController.updateNotificationIcons(entries)
             }
         }
 
