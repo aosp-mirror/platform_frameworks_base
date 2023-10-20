@@ -4929,8 +4929,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mTouchExplorationEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.TOUCH_EXPLORATION_ENABLED);
 
-        private final Uri mDisplayMagnificationEnabledUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED);
+        private final Uri mMagnificationmSingleFingerTripleTapEnabledUri = Settings.Secure
+                .getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED);
 
         private final Uri mAutoclickEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED);
@@ -4987,7 +4987,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public void register(ContentResolver contentResolver) {
             contentResolver.registerContentObserver(mTouchExplorationEnabledUri,
                     false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(mDisplayMagnificationEnabledUri,
+            contentResolver.registerContentObserver(mMagnificationmSingleFingerTripleTapEnabledUri,
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mAutoclickEnabledUri,
                     false, this, UserHandle.USER_ALL);
@@ -5035,7 +5035,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (readTouchExplorationEnabledSettingLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
-                } else if (mDisplayMagnificationEnabledUri.equals(uri)) {
+                } else if (mMagnificationmSingleFingerTripleTapEnabledUri.equals(uri)) {
                     if (readMagnificationEnabledSettingsLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
