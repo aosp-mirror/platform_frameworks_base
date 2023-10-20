@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -31,7 +30,6 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -66,18 +64,8 @@ public class InstallSuccess extends AlertActivity {
             ApplicationInfo appInfo =
                     intent.getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
             mAppPackageName = appInfo.packageName;
-            Uri packageURI = intent.getData();
-
-            // Set header icon and title
-            PackageManager pm = getPackageManager();
-
-            if ("package".equals(packageURI.getScheme())) {
-                mAppSnippet = new PackageUtil.AppSnippet(pm.getApplicationLabel(appInfo),
-                        pm.getApplicationIcon(appInfo));
-            } else {
-                File sourceFile = new File(packageURI.getPath());
-                mAppSnippet = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
-            }
+            mAppSnippet = intent.getParcelableExtra(PackageInstallerActivity.EXTRA_APP_SNIPPET,
+                    PackageUtil.AppSnippet.class);
 
             mLaunchIntent = getPackageManager().getLaunchIntentForPackage(mAppPackageName);
 

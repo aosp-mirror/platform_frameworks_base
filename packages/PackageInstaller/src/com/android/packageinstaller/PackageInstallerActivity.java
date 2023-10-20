@@ -81,6 +81,7 @@ public class PackageInstallerActivity extends AlertActivity {
     static final String EXTRA_CALLING_ATTRIBUTION_TAG = "EXTRA_CALLING_ATTRIBUTION_TAG";
     static final String EXTRA_ORIGINAL_SOURCE_INFO = "EXTRA_ORIGINAL_SOURCE_INFO";
     static final String EXTRA_STAGED_SESSION_ID = "EXTRA_STAGED_SESSION_ID";
+    static final String EXTRA_APP_SNIPPET = "EXTRA_APP_SNIPPET";
     private static final String ALLOW_UNKNOWN_SOURCES_KEY =
             PackageInstallerActivity.class.getName() + "ALLOW_UNKNOWN_SOURCES_KEY";
 
@@ -692,6 +693,9 @@ public class PackageInstallerActivity extends AlertActivity {
         }
         if (stagedSessionId > 0) {
             newIntent.putExtra(EXTRA_STAGED_SESSION_ID, stagedSessionId);
+        }
+        if (mAppSnippet != null) {
+            newIntent.putExtra(EXTRA_APP_SNIPPET, mAppSnippet);
         }
         newIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
         if (mLocalLOGV) Log.i(TAG, "downloaded app uri=" + mPackageURI);
