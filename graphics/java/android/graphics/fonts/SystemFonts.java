@@ -241,7 +241,7 @@ public final class SystemFonts {
             int configVersion
     ) {
         final String fontsXml;
-        if (com.android.text.flags.Flags.deprecateFontsXml()) {
+        if (com.android.text.flags.Flags.newFontsFallbackXml()) {
             fontsXml = FONTS_XML;
         } else {
             fontsXml = LEGACY_FONTS_XML;
@@ -272,7 +272,7 @@ public final class SystemFonts {
      */
     public static @NonNull FontConfig getSystemPreinstalledFontConfig() {
         final String fontsXml;
-        if (com.android.text.flags.Flags.deprecateFontsXml()) {
+        if (com.android.text.flags.Flags.newFontsFallbackXml()) {
             fontsXml = FONTS_XML;
         } else {
             fontsXml = LEGACY_FONTS_XML;

@@ -1,8 +1,0 @@
-package: "com.android.text.flags"
-
-flag {
-  name: "no_break_no_hyphenation_span"
-  namespace: "text"
-  description: "A feature flag that adding new spans that prevents line breaking and hyphenation."
-  bug: "283193586"
-}

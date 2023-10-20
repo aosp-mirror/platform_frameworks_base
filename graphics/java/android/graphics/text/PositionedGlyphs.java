@@ -16,7 +16,7 @@
 
 package android.graphics.text;
 
-import static com.android.text.flags.Flags.FLAG_DEPRECATE_FONTS_XML;
+import static com.android.text.flags.Flags.FLAG_NEW_FONTS_FALLBACK_XML;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
@@ -173,7 +173,7 @@ public final class PositionedGlyphs {
      * @param index the glyph index
      * @return true if the fake bold option is on, otherwise off.
      */
-    @FlaggedApi(FLAG_DEPRECATE_FONTS_XML)
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
     public boolean getFakeBold(@IntRange(from = 0) int index) {
         Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
         return nGetFakeBold(mLayoutPtr, index);
@@ -185,7 +185,7 @@ public final class PositionedGlyphs {
      * @param index the glyph index
      * @return true if the fake italic option is on, otherwise off.
      */
-    @FlaggedApi(FLAG_DEPRECATE_FONTS_XML)
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
     public boolean getFakeItalic(@IntRange(from = 0) int index) {
         Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
         return nGetFakeItalic(mLayoutPtr, index);
@@ -195,7 +195,7 @@ public final class PositionedGlyphs {
      * A special value returned by {@link #getWeightOverride(int)} and
      * {@link #getItalicOverride(int)} that indicates no font variation setting is overridden.
      */
-    @FlaggedApi(FLAG_DEPRECATE_FONTS_XML)
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
     public static final float NO_OVERRIDE = Float.MIN_VALUE;
 
     /**
@@ -205,7 +205,7 @@ public final class PositionedGlyphs {
      * @param index the glyph index
      * @return overridden weight value or {@link #NO_OVERRIDE}.
      */
-    @FlaggedApi(FLAG_DEPRECATE_FONTS_XML)
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
     public float getWeightOverride(@IntRange(from = 0) int index) {
         Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
         float value = nGetWeightOverride(mLayoutPtr, index);
@@ -223,7 +223,7 @@ public final class PositionedGlyphs {
      * @param index the glyph index
      * @return overridden weight value or {@link #NO_OVERRIDE}.
      */
-    @FlaggedApi(FLAG_DEPRECATE_FONTS_XML)
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
     public float getItalicOverride(@IntRange(from = 0) int index) {
         Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
         float value = nGetItalicOverride(mLayoutPtr, index);
