@@ -869,8 +869,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (!mWallpaper.wallpaperUpdating && mWallpaper.userId == mCurrentUserId) {
                     Slog.w(TAG, "Wallpaper reconnect timed out for " + mWallpaper.wallpaperComponent
                             + ", reverting to built-in wallpaper!");
-                    int which = mWallpaper.mWhich;
-                    clearWallpaperLocked(which, mWallpaper.userId, false, null);
+                    clearWallpaperLocked(mWallpaper.mWhich, mWallpaper.userId, false, null);
                 }
             }
         };
