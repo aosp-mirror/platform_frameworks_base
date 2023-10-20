@@ -139,9 +139,22 @@ droidstubs {
 // using droiddoc
 /////////////////////////////////////////////////////////////////////
 
-framework_docs_only_args = " -android -manifest $(location :frameworks-base-core-AndroidManifest.xml) " +
+// doclava contains checks for a few issues that are have been migrated to metalava.
+// disable them in doclava, to avoid mistriggering or double triggering.
+ignore_doclava_errors_checked_by_metalava = "" +
+    "-hide 111 " + // HIDDEN_SUPERCLASS
+    "-hide 113 " + // DEPRECATION_MISMATCH
+    "-hide 125 " + // REQUIRES_PERMISSION
+    "-hide 126 " + // BROADCAST_BEHAVIOR
+    "-hide 127 " + // SDK_CONSTANT
+    "-hide 128 " // TODO
+
+framework_docs_only_args = "-android " +
+    "-manifest $(location :frameworks-base-core-AndroidManifest.xml) " +
     "-metalavaApiSince " +
-    "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
+    "-werror " +
+    "-lerror " +
+    ignore_doclava_errors_checked_by_metalava +
     "-overview $(location :frameworks-base-java-overview) " +
     // Federate Support Library references against local API file.
     "-federate SupportLib https://developer.android.com " +
