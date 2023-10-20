@@ -176,4 +176,21 @@ interface IMediaProjectionManager {
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     oneway void notifyPermissionRequestStateChange(int hostUid, int state, int sessionCreationSource);
+
+    /**
+     * Notifies system server that the permission request was initiated.
+     *
+     * <p>Only used for emitting atoms.
+     *
+     * @param hostUid               The uid of the process requesting consent to capture, may be an app or
+     *                              SystemUI.
+     * @param sessionCreationSource Only set if the state is MEDIA_PROJECTION_STATE_INITIATED.
+     *                              Indicates the entry point for requesting the permission. Must be
+     *                              a valid state defined
+     *                              in the SessionCreationSource enum.
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    oneway void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource);
 }

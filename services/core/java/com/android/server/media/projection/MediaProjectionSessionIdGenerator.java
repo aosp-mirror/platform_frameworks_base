@@ -47,8 +47,11 @@ public class MediaProjectionSessionIdGenerator {
             if (sInstance == null) {
                 File preferencesFile =
                         new File(Environment.getDataSystemDirectory(), PREFERENCES_FILE_NAME);
+                // Needed as this class is instantiated before the device is unlocked.
+                Context directBootContext = context.createDeviceProtectedStorageContext();
                 SharedPreferences preferences =
-                        context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE);
+                        directBootContext.getSharedPreferences(
+                                preferencesFile, Context.MODE_PRIVATE);
                 sInstance = new MediaProjectionSessionIdGenerator(preferences);
             }
             return sInstance;

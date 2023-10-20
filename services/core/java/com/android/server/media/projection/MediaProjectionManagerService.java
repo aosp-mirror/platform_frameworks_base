@@ -162,7 +162,7 @@ public final class MediaProjectionManagerService extends SystemService
         mWmInternal = LocalServices.getService(WindowManagerInternal.class);
         mMediaRouter = (MediaRouter) mContext.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mMediaRouterCallback = new MediaRouterCallback();
-        mMediaProjectionMetricsLogger = injector.mediaProjectionMetricsLogger();
+        mMediaProjectionMetricsLogger = injector.mediaProjectionMetricsLogger(context);
         Watchdog.getInstance().addMonitor(this);
     }
 
@@ -197,8 +197,8 @@ public final class MediaProjectionManagerService extends SystemService
             return Looper.getMainLooper();
         }
 
-        MediaProjectionMetricsLogger mediaProjectionMetricsLogger() {
-            return MediaProjectionMetricsLogger.getInstance();
+        MediaProjectionMetricsLogger mediaProjectionMetricsLogger(Context context) {
+            return MediaProjectionMetricsLogger.getInstance(context);
         }
     }
 
@@ -293,6 +293,12 @@ public final class MediaProjectionManagerService extends SystemService
     private void stopProjectionLocked(final MediaProjection projection) {
         Slog.d(TAG, "Content Recording: Stopped active MediaProjection and "
                 + "dispatching stop to callbacks");
+        ContentRecordingSession session = projection.mSession;
+        int targetUid =
+                session != null
+                        ? session.getTargetUid()
+                        : ContentRecordingSession.TARGET_UID_UNKNOWN;
+        mMediaProjectionMetricsLogger.logStopped(projection.uid, targetUid);
         mProjectionToken = null;
         mProjectionGrant = null;
         dispatchStop(projection);
@@ -450,6 +456,11 @@ public final class MediaProjectionManagerService extends SystemService
                 .putExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, true)
                 .putExtra(EXTRA_PACKAGE_REUSING_GRANTED_CONSENT, mProjectionGrant.packageName)
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    }
+
+    @VisibleForTesting
+    void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource) {
+        mMediaProjectionMetricsLogger.logInitiated(hostUid, sessionCreationSource);
     }
 
     /**
@@ -836,6 +847,19 @@ public final class MediaProjectionManagerService extends SystemService
             final long token = Binder.clearCallingIdentity();
             try {
                 mMediaProjectionMetricsLogger.notifyProjectionStateChange(hostUid, state, sessionCreationSource);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource) {
+            notifyPermissionRequestInitiated_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyPermissionRequestInitiated(
+                        hostUid, sessionCreationSource);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

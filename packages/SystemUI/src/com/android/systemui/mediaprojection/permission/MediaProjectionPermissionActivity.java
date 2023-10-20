@@ -140,7 +140,7 @@ public class MediaProjectionPermissionActivity extends Activity
             if (MediaProjectionServiceHelper.hasProjectionPermission(mUid, mPackageName)) {
                 if (savedInstanceState == null) {
                     mMediaProjectionMetricsLogger.notifyProjectionInitiated(
-                            SessionCreationSource.APP);
+                            mUid, SessionCreationSource.APP);
                 }
                 final IMediaProjection projection =
                         MediaProjectionServiceHelper.createOrReuseProjection(mUid, mPackageName,
@@ -242,6 +242,7 @@ public class MediaProjectionPermissionActivity extends Activity
 
         if (savedInstanceState == null) {
             mMediaProjectionMetricsLogger.notifyProjectionInitiated(
+                    mUid,
                     appName == null
                             ? SessionCreationSource.CAST
                             : SessionCreationSource.APP);
