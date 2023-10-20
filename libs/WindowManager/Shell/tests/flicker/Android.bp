@@ -220,19 +220,6 @@ android_test {
 }
 
 android_test {
-    name: "WMShellFlickerTestsPip",
-    defaults: ["WMShellFlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestPip.xml"],
-    package_name: "com.android.wm.shell.flicker.pip",
-    instrumentation_target_package: "com.android.wm.shell.flicker.pip",
-    srcs: [
-        ":WMShellFlickerTestsBase-src",
-        ":WMShellFlickerTestsPip3-src",
-        ":WMShellFlickerTestsPipCommon-src",
-    ],
-}
-
-android_test {
     name: "WMShellFlickerTestsPip1",
     defaults: ["WMShellFlickerTestsDefault"],
     additional_manifests: ["manifests/AndroidManifestPip.xml"],
