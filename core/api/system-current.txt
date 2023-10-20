@@ -12745,7 +12745,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordRejectedResult.Builder setConfidenceLevel(int);
   }
 
-  public final class HotwordTrainingAudio implements android.os.Parcelable {
+  @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public final class HotwordTrainingAudio implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.media.AudioFormat getAudioFormat();
     method @NonNull public int getAudioType();
@@ -12756,7 +12756,7 @@ package android.service.voice {
     field public static final int HOTWORD_OFFSET_UNSET = -1; // 0xffffffff
   }
 
-  public static final class HotwordTrainingAudio.Builder {
+  @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final class HotwordTrainingAudio.Builder {
     ctor public HotwordTrainingAudio.Builder(@NonNull byte[], @NonNull android.media.AudioFormat);
     method @NonNull public android.service.voice.HotwordTrainingAudio build();
     method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setAudioFormat(@NonNull android.media.AudioFormat);
@@ -12765,7 +12765,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setHotwordOffsetMillis(int);
   }
 
-  public final class HotwordTrainingData implements android.os.Parcelable {
+  @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public final class HotwordTrainingData implements android.os.Parcelable {
     method public int describeContents();
     method public static int getMaxTrainingDataBytes();
     method public int getTimeoutStage();
@@ -12774,7 +12774,7 @@ package android.service.voice {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordTrainingData> CREATOR;
   }
 
-  public static final class HotwordTrainingData.Builder {
+  @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final class HotwordTrainingData.Builder {
     ctor public HotwordTrainingData.Builder();
     method @NonNull public android.service.voice.HotwordTrainingData.Builder addTrainingAudio(@NonNull android.service.voice.HotwordTrainingAudio);
     method @NonNull public android.service.voice.HotwordTrainingData build();

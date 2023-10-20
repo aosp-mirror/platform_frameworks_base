@@ -16,6 +16,7 @@
 
 package android.service.voice;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -23,6 +24,7 @@ import android.annotation.SystemApi;
 import android.media.AudioFormat;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.voice.flags.Flags;
 
 import com.android.internal.util.DataClass;
 
@@ -33,6 +35,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
 @DataClass(
         genConstructor = false,
         genBuilder = true,
@@ -65,12 +68,12 @@ public final class HotwordTrainingAudio implements Parcelable {
 
     /**
      * App-defined identifier to distinguish hotword training audio instances.
-     */
+     * <p> Returns -1 if unset. */
     @NonNull
     private final int mAudioType;
 
     private static int defaultAudioType() {
-        return 0;
+        return -1;
     }
 
     /**
@@ -152,6 +155,7 @@ public final class HotwordTrainingAudio implements Parcelable {
 
     /**
      * App-defined identifier to distinguish hotword training audio instances.
+     * <p> Returns -1 if unset.
      */
     @DataClass.Generated.Member
     public @NonNull int getAudioType() {
@@ -274,6 +278,7 @@ public final class HotwordTrainingAudio implements Parcelable {
     /**
      * A builder for {@link HotwordTrainingAudio}
      */
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
     @SuppressWarnings("WeakerAccess")
     @DataClass.Generated.Member
     public static final class Builder extends BaseBuilder {
@@ -318,6 +323,7 @@ public final class HotwordTrainingAudio implements Parcelable {
 
         /**
          * App-defined identifier to distinguish hotword training audio instances.
+         * <p> Returns -1 if unset.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setAudioType(@NonNull int value) {
@@ -368,7 +374,7 @@ public final class HotwordTrainingAudio implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1694193905346L,
+            time = 1697827049629L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordTrainingAudio.java",
             inputSignatures = "public static final  int HOTWORD_OFFSET_UNSET\nprivate final @android.annotation.NonNull byte[] mHotwordAudio\nprivate final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull int mAudioType\nprivate  int mHotwordOffsetMillis\nprivate  java.lang.String hotwordAudioToString()\nprivate static  int defaultAudioType()\nclass HotwordTrainingAudio extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.service.voice.HotwordTrainingAudio.Builder setHotwordAudio(byte[])\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.service.voice.HotwordTrainingAudio.Builder setHotwordAudio(byte[])\nclass BaseBuilder extends java.lang.Object implements []")
