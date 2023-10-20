@@ -228,7 +228,8 @@ public class LauncherAppsService extends SystemService {
         final LauncherAppsServiceInternal mInternal;
 
         @NonNull
-        private final RemoteCallbackList<IDumpCallback> mDumpCallbacks = new RemoteCallbackList<>();
+        private final RemoteCallbackList<IDumpCallback> mDumpCallbacks =
+                new RemoteCallbackList<>();
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
@@ -2182,8 +2183,8 @@ public class LauncherAppsService extends SystemService {
 
         class PackageLoadingProgressCallback extends
                 PackageManagerInternal.InstalledLoadingProgressCallback {
-            private String mPackageName;
-            private UserHandle mUser;
+            private final String mPackageName;
+            private final UserHandle mUser;
 
             PackageLoadingProgressCallback(String packageName, UserHandle user) {
                 super(mCallbackHandler);

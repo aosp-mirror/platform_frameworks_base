@@ -61,7 +61,7 @@ public final class PackageManagerServiceTestParams {
     public IncrementalManager incrementalManager;
     public PackageInstallerService installerService;
     public InstantAppRegistry instantAppRegistry;
-    public ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
+    public final ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
     public InstantAppResolverConnection instantAppResolverConnection;
     public ComponentName instantAppResolverSettingsComponent;
     public boolean isPreNmr1Upgrade;
@@ -120,7 +120,7 @@ public final class PackageManagerServiceTestParams {
     public SuspendPackageHelper suspendPackageHelper;
     public DistractingPackageHelper distractingPackageHelper;
     public StorageEventHelper storageEventHelper;
-    public Set<String> initialNonStoppedSystemPackages = new ArraySet<>();
+    public final Set<String> initialNonStoppedSystemPackages = new ArraySet<>();
     public boolean shouldStopSystemPackagesByDefault;
     public FreeStorageHelper freeStorageHelper;
     public PackageMonitorCallbackHelper packageMonitorCallbackHelper;

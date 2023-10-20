@@ -1135,7 +1135,7 @@ public class PackageInfoUtils {
      */
     public static class CachedApplicationInfoGenerator {
         // Map from a package name to the corresponding app info.
-        private ArrayMap<String, ApplicationInfo> mCache = new ArrayMap<>();
+        private final ArrayMap<String, ApplicationInfo> mCache = new ArrayMap<>();
 
         /**
          * {@link PackageInfoUtils#generateApplicationInfo} with a cache.

@@ -328,11 +328,11 @@ public class ParsingPackageUtils {
         return input.success(pkg);
     }
 
-    private String[] mSeparateProcesses;
-    private DisplayMetrics mDisplayMetrics;
+    private final String[] mSeparateProcesses;
+    private final DisplayMetrics mDisplayMetrics;
     @NonNull
-    private List<PermissionManager.SplitPermissionInfo> mSplitPermissionInfos;
-    private Callback mCallback;
+    private final List<PermissionManager.SplitPermissionInfo> mSplitPermissionInfos;
+    private final Callback mCallback;
 
     public ParsingPackageUtils(String[] separateProcesses, DisplayMetrics displayMetrics,
             @NonNull List<PermissionManager.SplitPermissionInfo> splitPermissions,

@@ -1774,7 +1774,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     static class ParentChildSessionMap {
-        private TreeMap<PackageInstallerSession, TreeSet<PackageInstallerSession>> mSessionMap;
+        private final TreeMap<PackageInstallerSession, TreeSet<PackageInstallerSession>>
+                mSessionMap;
 
         private final Comparator<PackageInstallerSession> mSessionCreationComparator =
                 Comparator.comparingLong(

@@ -201,7 +201,7 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
 
     protected static final boolean CACHE_VALID = true;
     protected static final boolean CACHE_INVALID = false;
-    protected AtomicBoolean mCacheValid = new AtomicBoolean(CACHE_INVALID);
+    protected final AtomicBoolean mCacheValid = new AtomicBoolean(CACHE_INVALID);
 
     protected boolean isForceQueryable(int callingAppId) {
         return mForceQueryable.contains(callingAppId);
