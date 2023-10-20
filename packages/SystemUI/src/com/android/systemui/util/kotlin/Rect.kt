@@ -11,21 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
+package com.android.systemui.util.kotlin
 
-package com.android.systemui.statusbar.notification.stack.ui.viewmodel
+import android.graphics.Rect
 
-import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
-import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
-import java.util.Optional
-import javax.inject.Inject
-
-/** ViewModel for the list of notifications. */
-class NotificationListViewModel
-@Inject
-constructor(
-    val shelf: NotificationShelfViewModel,
-    val hideListViewModel: HideListViewModel,
-    val footer: Optional<FooterViewModel>
-)
+/** Returns the area of this rectangle */
+val Rect.area: Long
+    get() = width().toLong() * height().toLong()

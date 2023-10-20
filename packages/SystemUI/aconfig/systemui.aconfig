@@ -38,6 +38,13 @@ flag {
 }
 
 flag {
+    name: "notifications_hide_on_display_switch"
+    namespace: "systemui"
+    description: "Temporary hides notifications when folding/unfolding to reduce unfold latency"
+    bug: "293824309"
+}
+
+flag {
     name: "notification_lifetime_extension_refactor"
     namespace: "systemui"
     description: "Enables moving notification lifetime extension management from SystemUI to "

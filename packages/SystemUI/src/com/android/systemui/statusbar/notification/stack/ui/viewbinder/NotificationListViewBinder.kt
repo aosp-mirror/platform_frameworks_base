@@ -29,6 +29,8 @@ import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterVi
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -46,9 +48,13 @@ constructor(
     private val shelfIconViewStore: ShelfNotificationIconViewStore,
 ) {
 
-    fun bind(view: NotificationStackScrollLayout) {
+    fun bind(
+        view: NotificationStackScrollLayout,
+        viewController: NotificationStackScrollLayoutController
+    ) {
         bindShelf(view)
         bindFooter(view)
+        bindHideList(viewController, viewModel)
     }
 
     private fun bindShelf(parentView: NotificationStackScrollLayout) {

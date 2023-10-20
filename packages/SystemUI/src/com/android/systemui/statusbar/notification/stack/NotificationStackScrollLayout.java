@@ -1157,6 +1157,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mSpeedBumpIndex;
     }
 
+    private boolean mSuppressChildrenMeasureAndLayout = false;
+
+    /**
+     * Similar to {@link ViewGroup#suppressLayout} but still performs layout of
+     * the container itself and suppresses only measure and layout calls to children.
+     */
+    public void suppressChildrenMeasureAndLayout(boolean suppress) {
+        mSuppressChildrenMeasureAndLayout = suppress;
+
+        if (!suppress) {
+            requestLayout();
+        }
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Trace.beginSection("NotificationStackScrollLayout#onMeasure");
@@ -1169,6 +1183,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         int width = MeasureSpec.getSize(widthMeasureSpec);
         updateSidePadding(width);
+
+        if (mSuppressChildrenMeasureAndLayout) {
+            Trace.endSection();
+            return;
+        }
+
         int childWidthSpec = MeasureSpec.makeMeasureSpec(width - mSidePaddings * 2,
                 MeasureSpec.getMode(widthMeasureSpec));
         // Don't constrain the height of the children so we know how big they'd like to be
@@ -1192,18 +1212,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        // we layout all our children centered on the top
-        float centerX = getWidth() / 2.0f;
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            // We need to layout all children even the GONE ones, such that the heights are
-            // calculated correctly as they are used to calculate how many we can fit on the screen
-            float width = child.getMeasuredWidth();
-            float height = child.getMeasuredHeight();
-            child.layout((int) (centerX - width / 2.0f),
-                    0,
-                    (int) (centerX + width / 2.0f),
-                    (int) height);
+        if (!mSuppressChildrenMeasureAndLayout) {
+            // we layout all our children centered on the top
+            float centerX = getWidth() / 2.0f;
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                // We need to layout all children even the GONE ones, such that the heights are
+                // calculated correctly as they are used to calculate how many we can fit on
+                // the screen
+                float width = child.getMeasuredWidth();
+                float height = child.getMeasuredHeight();
+                child.layout((int) (centerX - width / 2.0f),
+                        0,
+                        (int) (centerX + width / 2.0f),
+                        (int) height);
+            }
         }
         setMaxLayoutHeight(getHeight());
         updateContentHeight();
@@ -5097,6 +5120,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             println(pw, "qsClipDismiss", mDismissUsingRowTranslationX);
             println(pw, "visibility", visibilityString(getVisibility()));
             println(pw, "alpha", getAlpha());
+            println(pw, "suppressChildrenMeasureLayout", mSuppressChildrenMeasureAndLayout);
             println(pw, "scrollY", mAmbientState.getScrollY());
             println(pw, "maxTopPadding", mMaxTopPadding);
             println(pw, "showShelfOnly", mShouldShowShelfOnly);

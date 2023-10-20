@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
+
+import static com.android.app.animation.Interpolators.STANDARD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -27,8 +29,10 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.SelectedRows;
+import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_STANDARD;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
+import android.animation.ObjectAnimator;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -38,6 +42,7 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Property;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -53,6 +58,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.view.OneShotPreDrawListener;
+import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
@@ -133,6 +140,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.settings.SecureSettings;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -145,7 +153,7 @@ import javax.inject.Named;
  * Controller for {@link NotificationStackScrollLayout}.
  */
 @SysUISingleton
-public class NotificationStackScrollLayoutController {
+public class NotificationStackScrollLayoutController implements Dumpable {
     private static final String TAG = "StackScrollerController";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final String HIGH_PRIORITY = "high_priority";
@@ -190,7 +198,6 @@ public class NotificationStackScrollLayoutController {
     private final GroupExpansionManager mGroupExpansionManager;
     private final SeenNotificationsInteractor mSeenNotificationsInteractor;
     private final KeyguardTransitionRepository mKeyguardTransitionRepo;
-
     private NotificationStackScrollLayout mView;
     private NotificationSwipeHelper mSwipeHelper;
     @Nullable
@@ -239,6 +246,22 @@ public class NotificationStackScrollLayoutController {
                     mStatusBarStateController.removeCallback(mStateListener);
                 }
             };
+
+    private static final Property<NotificationStackScrollLayoutController, Float>
+            HIDE_ALPHA_PROPERTY = new Property<>(Float.class, "HideNotificationsAlpha") {
+                @Override
+                public Float get(NotificationStackScrollLayoutController object) {
+                    return object.mMaxAlphaForUnhide;
+                }
+
+                @Override
+                public void set(NotificationStackScrollLayoutController object, Float value) {
+                    object.setMaxAlphaForUnhide(value);
+                }
+            };
+
+    @Nullable
+    private ObjectAnimator mHideAlphaAnimator = null;
 
     private final DeviceProvisionedListener mDeviceProvisionedListener =
             new DeviceProvisionedListener() {
@@ -302,6 +325,8 @@ public class NotificationStackScrollLayoutController {
     };
 
     private NotifStats mNotifStats = NotifStats.getEmpty();
+    private float mMaxAlphaForExpansion = 1.0f;
+    private float mMaxAlphaForUnhide = 1.0f;
 
     private final NotificationListViewBinder mViewBinder;
 
@@ -713,6 +738,7 @@ public class NotificationStackScrollLayoutController {
         mDismissibilityProvider = dismissibilityProvider;
         mActivityStarter = activityStarter;
         mView.passSplitShadeStateController(splitShadeStateController);
+        mDumpManager.registerDumpable(this);
         updateResources();
         setUpView();
     }
@@ -818,7 +844,7 @@ public class NotificationStackScrollLayoutController {
         mGroupExpansionManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
 
-        mViewBinder.bind(mView);
+        mViewBinder.bind(mView, this);
 
         collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),
                 this::onKeyguardTransitionChanged);
@@ -873,6 +899,10 @@ public class NotificationStackScrollLayoutController {
 
     public void requestLayout() {
         mView.requestLayout();
+    }
+
+    public void addOneShotPreDrawListener(Runnable runnable) {
+        OneShotPreDrawListener.add(mView, runnable);
     }
 
     public Display getDisplay() {
@@ -1157,10 +1187,47 @@ public class NotificationStackScrollLayoutController {
         return mView.getEmptyShadeViewHeight();
     }
 
-    public void setAlpha(float alpha) {
+    public void setMaxAlphaForExpansion(float alpha) {
+        mMaxAlphaForExpansion = alpha;
+        updateAlpha();
+    }
+
+    private void setMaxAlphaForUnhide(float alpha) {
+        mMaxAlphaForUnhide = alpha;
+        updateAlpha();
+    }
+
+    private void updateAlpha() {
         if (mView != null) {
-            mView.setAlpha(alpha);
+            mView.setAlpha(Math.min(mMaxAlphaForExpansion, mMaxAlphaForUnhide));
         }
+    }
+
+    public void setSuppressChildrenMeasureAndLayout(boolean suppressLayout) {
+        mView.suppressChildrenMeasureAndLayout(suppressLayout);
+    }
+
+    public void updateNotificationsContainerVisibility(boolean visible, boolean animate) {
+        if (mHideAlphaAnimator != null) {
+            mHideAlphaAnimator.cancel();
+        }
+
+        final float targetAlpha = visible ? 1f : 0f;
+
+        if (animate) {
+            mHideAlphaAnimator = createAlphaAnimator(targetAlpha);
+            mHideAlphaAnimator.start();
+        } else {
+            HIDE_ALPHA_PROPERTY.set(this, targetAlpha);
+        }
+    }
+
+    private ObjectAnimator createAlphaAnimator(float targetAlpha) {
+        final ObjectAnimator objectAnimator = ObjectAnimator
+                .ofFloat(this, HIDE_ALPHA_PROPERTY, targetAlpha);
+        objectAnimator.setInterpolator(STANDARD);
+        objectAnimator.setDuration(ANIMATION_DURATION_STANDARD);
+        return objectAnimator;
     }
 
     public float calculateAppearFraction(float height) {
@@ -1633,6 +1700,12 @@ public class NotificationStackScrollLayoutController {
             mIsInTransitionToAod = isTransitionToAod;
             updateShowEmptyShadeView();
         }
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("mMaxAlphaForExpansion=" + mMaxAlphaForExpansion);
+        pw.println("mMaxAlphaForUnhide=" + mMaxAlphaForUnhide);
     }
 
     /**

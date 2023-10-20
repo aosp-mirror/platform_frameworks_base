@@ -793,7 +793,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         // We are interested in the last value of the stack alpha.
         ArgumentCaptor<Float> alphaCaptor = ArgumentCaptor.forClass(Float.class);
         verify(mNotificationStackScrollLayoutController, atLeastOnce())
-                .setAlpha(alphaCaptor.capture());
+                .setMaxAlphaForExpansion(alphaCaptor.capture());
         assertThat(alphaCaptor.getValue()).isEqualTo(1.0f);
     }
 
@@ -814,7 +814,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         // We are interested in the last value of the stack alpha.
         ArgumentCaptor<Float> alphaCaptor = ArgumentCaptor.forClass(Float.class);
         verify(mNotificationStackScrollLayoutController, atLeastOnce())
-                .setAlpha(alphaCaptor.capture());
+                .setMaxAlphaForExpansion(alphaCaptor.capture());
         assertThat(alphaCaptor.getValue()).isEqualTo(0.0f);
     }
 

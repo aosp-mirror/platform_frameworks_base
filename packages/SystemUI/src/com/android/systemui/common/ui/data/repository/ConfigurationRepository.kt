@@ -22,7 +22,7 @@ import android.content.res.Configuration
 import android.view.DisplayInfo
 import androidx.annotation.DimenRes
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -49,6 +49,7 @@ interface ConfigurationRepository {
     val onConfigurationChange: Flow<Unit>
 
     val scaleForResolution: Flow<Float>
+    val configurationValues: Flow<Configuration>
 
     fun getResolutionScale(): Float
 
@@ -68,7 +69,7 @@ constructor(
     private val displayInfo = MutableStateFlow(DisplayInfo())
 
     override val onAnyConfigurationChange: Flow<Unit> =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
+        conflatedCallbackFlow {
             val callback =
                 object : ConfigurationController.ConfigurationListener {
                     override fun onUiModeChanged() {
@@ -92,7 +93,7 @@ constructor(
         }
 
     override val onConfigurationChange: Flow<Unit> =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
+        conflatedCallbackFlow {
             val callback =
                 object : ConfigurationController.ConfigurationListener {
                     override fun onConfigChanged(newConfig: Configuration) {
@@ -102,6 +103,20 @@ constructor(
             configurationController.addCallback(callback)
             awaitClose { configurationController.removeCallback(callback) }
         }
+
+    override val configurationValues: Flow<Configuration> =
+            conflatedCallbackFlow {
+                val callback =
+                        object : ConfigurationController.ConfigurationListener {
+                            override fun onConfigChanged(newConfig: Configuration) {
+                                trySend(newConfig)
+                            }
+                        }
+
+                trySend(context.resources.configuration)
+                configurationController.addCallback(callback)
+                awaitClose { configurationController.removeCallback(callback) }
+            }
 
     override val scaleForResolution: StateFlow<Float> =
         onConfigurationChange
