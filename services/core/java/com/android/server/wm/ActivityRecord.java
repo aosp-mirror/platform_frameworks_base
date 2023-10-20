@@ -4030,6 +4030,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mAppStopped) {
             abortAndClearOptionsAnimation();
         }
+        if (mDisplayContent != null) {
+            mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+        }
     }
 
     boolean isFinishing() {
@@ -5388,12 +5391,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLastDeferHidingClient = deferHidingClient;
 
         if (!visible) {
-            // If this activity is about to finish/stopped and now becomes invisible, remove it
-            // from the unknownApp list in case the activity does not want to draw anything, which
-            // keep the user waiting for the next transition to start.
-            if (finishing || isState(STOPPED)) {
-                displayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
-            }
             // Because starting window was transferred, this activity may be a trampoline which has
             // been occluded by next activity. If it has added windows, set client visibility
             // immediately to avoid the client getting RELAYOUT_RES_FIRST_TIME from relayout and
@@ -5837,6 +5834,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 break;
             case STOPPED:
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
+                if (mDisplayContent != null) {
+                    mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+                }
                 break;
             case DESTROYED:
                 if (app != null && (mVisible || mVisibleRequested)) {
@@ -6517,7 +6517,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // Reset the last saved PiP snap fraction on app stop.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
-        mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
         if (isClientVisible()) {
             // Though this is usually unlikely to happen, still make sure the client is invisible.
             setClientVisible(false);

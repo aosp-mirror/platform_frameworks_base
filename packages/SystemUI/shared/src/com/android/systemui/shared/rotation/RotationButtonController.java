@@ -702,13 +702,18 @@ public class RotationButtonController {
 
         @Override
         public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
-            // Only hide the icon if the top task changes its requestedOrientation
-            // Launcher can alter its requestedOrientation while it's not on top, don't hide on this
-            Optional.ofNullable(ActivityManagerWrapper.getInstance())
-                    .map(ActivityManagerWrapper::getRunningTask)
-                    .ifPresent(a -> {
-                        if (a.id == taskId) setRotateSuggestionButtonState(false /* visible */);
-                    });
+            mBgExecutor.execute(() -> {
+                // Only hide the icon if the top task changes its requestedOrientation Launcher can
+                // alter its requestedOrientation while it's not on top, don't hide on this
+                Optional.ofNullable(ActivityManagerWrapper.getInstance())
+                        .map(ActivityManagerWrapper::getRunningTask)
+                        .ifPresent(a -> {
+                            if (a.id == taskId) {
+                                mMainThreadHandler.post(() ->
+                                        setRotateSuggestionButtonState(false /* visible */));
+                            }
+                        });
+            });
         }
     }
 

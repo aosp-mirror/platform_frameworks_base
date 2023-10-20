@@ -23,6 +23,7 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -216,12 +217,14 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @TestApi public static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
     /**
      * Message header assigned to the remote authentication handshakes.
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int MESSAGE_REQUEST_REMOTE_AUTHENTICATION = 0x63827765; // ?RMA
     /**
@@ -229,6 +232,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 0x63678883; // ?CXS
     /**
@@ -236,6 +240,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
@@ -873,6 +878,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     public interface OnTransportsChangedListener {
         /**
@@ -892,6 +898,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void addOnTransportsChangedListener(
@@ -913,6 +920,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void removeOnTransportsChangedListener(
@@ -934,6 +942,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void sendMessage(int messageType, @NonNull byte[] data, @NonNull int[] associationIds) {
@@ -951,6 +960,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     public interface OnMessageReceivedListener {
         /**
@@ -964,6 +974,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void addOnMessageReceivedListener(
@@ -983,6 +994,7 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void removeOnMessageReceivedListener(int messageType,

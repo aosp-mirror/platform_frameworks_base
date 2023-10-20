@@ -19,8 +19,8 @@ package com.android.systemui.qs.tiles.base.logging
 import androidx.annotation.GuardedBy
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.log.dagger.QSTilesDefaultLog
 import com.android.systemui.log.dagger.QSTilesLogBuffers
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -29,14 +29,13 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.statusbar.StatusBarState
 import javax.inject.Inject
-import javax.inject.Provider
 
 @SysUISingleton
 class QSTileLogger
 @Inject
 constructor(
     @QSTilesLogBuffers logBuffers: Map<TileSpec, LogBuffer>,
-    @QSTilesDefaultLog private val defaultLogBufferProvider: Provider<LogBuffer>,
+    private val factory: LogBufferFactory,
     private val mStatusBarStateController: StatusBarStateController,
 ) {
     @GuardedBy("logBufferCache") private val logBufferCache = logBuffers.toMutableMap()
@@ -154,7 +153,13 @@ constructor(
 
     private fun TileSpec.getLogBuffer(): LogBuffer =
         synchronized(logBufferCache) {
-            logBufferCache.getOrPut(this) { defaultLogBufferProvider.get() }
+            logBufferCache.getOrPut(this) {
+                factory.create(
+                    "QSTileLog_${this.getLogTag()}",
+                    BUFFER_MAX_SIZE /* maxSize */,
+                    false /* systrace */
+                )
+            }
         }
 
     private fun StateUpdateTrigger.toLogString(): String =
@@ -185,5 +190,6 @@ constructor(
     private companion object {
         const val TAG_FORMAT_PREFIX = "QSLog"
         const val DATA_MAX_LENGTH = 50
+        const val BUFFER_MAX_SIZE = 25
     }
 }

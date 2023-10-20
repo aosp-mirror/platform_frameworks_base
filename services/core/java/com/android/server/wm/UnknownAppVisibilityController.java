@@ -70,6 +70,9 @@ class UnknownAppVisibilityController {
     }
 
     boolean isVisibilityUnknown(ActivityRecord r) {
+        if (mUnknownApps.isEmpty()) {
+            return false;
+        }
         return mUnknownApps.containsKey(r);
     }
 
@@ -90,6 +93,9 @@ class UnknownAppVisibilityController {
     }
 
     void appRemovedOrHidden(@NonNull ActivityRecord activity) {
+        if (mUnknownApps.isEmpty()) {
+            return;
+        }
         if (DEBUG_UNKNOWN_APP_VISIBILITY) {
             Slog.d(TAG, "App removed or hidden activity=" + activity);
         }
@@ -117,8 +123,11 @@ class UnknownAppVisibilityController {
      * Notifies that {@param activity} has finished resuming.
      */
     void notifyAppResumedFinished(@NonNull ActivityRecord activity) {
-        if (mUnknownApps.containsKey(activity)
-                && mUnknownApps.get(activity) == UNKNOWN_STATE_WAITING_RESUME) {
+        if (mUnknownApps.isEmpty()) {
+            return;
+        }
+        final Integer state = mUnknownApps.get(activity);
+        if (state != null && state == UNKNOWN_STATE_WAITING_RESUME) {
             if (DEBUG_UNKNOWN_APP_VISIBILITY) {
                 Slog.d(TAG, "App resume finished activity=" + activity);
             }
@@ -130,13 +139,16 @@ class UnknownAppVisibilityController {
      * Notifies that {@param activity} has relaid out.
      */
     void notifyRelayouted(@NonNull ActivityRecord activity) {
-        if (!mUnknownApps.containsKey(activity)) {
+        if (mUnknownApps.isEmpty()) {
+            return;
+        }
+        final Integer state = mUnknownApps.get(activity);
+        if (state == null) {
             return;
         }
         if (DEBUG_UNKNOWN_APP_VISIBILITY) {
             Slog.d(TAG, "App relayouted appWindow=" + activity);
         }
-        int state = mUnknownApps.get(activity);
         if (state == UNKNOWN_STATE_WAITING_RELAYOUT || activity.mStartingWindow != null) {
             mUnknownApps.put(activity, UNKNOWN_STATE_WAITING_VISIBILITY_UPDATE);
             mDisplayContent.notifyKeyguardFlagsChanged();

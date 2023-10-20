@@ -68,6 +68,10 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
      */
     @WeaklyReferencedCallback
     interface Callback {
+        /**
+         * Notifies that the current user will be changed.
+         */
+        fun onBeforeUserSwitching(newUser: Int) {}
 
         /**
          * Same as {@link onUserChanging(Int, Context, Runnable)} but the callback will be

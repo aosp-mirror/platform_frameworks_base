@@ -272,12 +272,12 @@
         <xs:element name="brightnessDecreaseDebounceMillis" type="xs:nonNegativeInteger">
             <xs:annotation name="final"/>
         </xs:element>
-        <!-- Animation time for brightness increase in millis -->
-        <xs:element  name="brightnessIncreaseDurationMillis" type="xs:nonNegativeInteger">
+        <!-- Animation speed for brightness increase. In framework brightness units per second. -->
+        <xs:element  name="screenBrightnessRampIncrease" type="nonNegativeDecimal">
             <xs:annotation name="final"/>
         </xs:element>
-        <!-- Animation time for brightness decrease in millis -->
-        <xs:element name="brightnessDecreaseDurationMillis" type="xs:nonNegativeInteger">
+        <!-- Animation speed for brightness decrease. In framework brightness units per second. -->
+        <xs:element name="screenBrightnessRampDecrease" type="nonNegativeDecimal">
             <xs:annotation name="final"/>
         </xs:element>
     </xs:complexType>

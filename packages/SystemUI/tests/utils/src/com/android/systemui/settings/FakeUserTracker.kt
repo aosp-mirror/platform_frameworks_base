@@ -69,8 +69,14 @@ class FakeUserTracker(
         _userId = _userInfo.id
         _userHandle = UserHandle.of(_userId)
 
+        onBeforeUserSwitching()
         onUserChanging()
         onUserChanged()
+    }
+
+    fun onBeforeUserSwitching(userId: Int = _userId) {
+        val copy = callbacks.toList()
+        copy.forEach { it.onBeforeUserSwitching(userId) }
     }
 
     fun onUserChanging(userId: Int = _userId) {

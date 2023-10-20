@@ -115,6 +115,11 @@ public final class VirtualSensor implements Parcelable {
         parcel.writeStrongBinder(mToken);
     }
 
+    @Override
+    public String toString() {
+        return "VirtualSensor{ mType=" + mType + ", mName='" + mName + "' }";
+    }
+
     /**
      * Send a sensor event to the system.
      */

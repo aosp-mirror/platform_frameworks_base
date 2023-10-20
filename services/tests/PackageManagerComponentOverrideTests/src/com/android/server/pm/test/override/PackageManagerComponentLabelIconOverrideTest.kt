@@ -143,8 +143,8 @@ class PackageManagerComponentLabelIconOverrideTest {
             val result: Result,
             val componentName: ComponentName? = ComponentName(pkgName, COMPONENT_CLASS_NAME)
         ) {
-            constructor(pkgName: String, appType: AppType, exception: Class<out Exception>)
-                    : this(pkgName, appType, Result.Exception(exception))
+            constructor(pkgName: String, appType: AppType, exception: Class<out Exception>) :
+                    this(pkgName, appType, Result.Exception(exception))
 
             val expectedLabel = when (result) {
                 Result.Changed, Result.ChangedWithoutNotify, Result.NotChanged -> TEST_LABEL
@@ -299,11 +299,9 @@ class PackageManagerComponentLabelIconOverrideTest {
                     .hideAsFinal()
 
     private fun makePkgSetting(pkgName: String, pkg: AndroidPackageInternal) =
-        PackageSetting(
-            pkgName, null, File("/test"),
-            null, null, null, null, 0, 0, 0, 0, null, null, null, null, null,
-            UUID.fromString("3f9d52b7-d7b4-406a-a1da-d9f19984c72c")
-        ).apply {
+        PackageSetting(pkgName, null, File("/test"), 0, 0,
+                UUID.fromString("3f9d52b7-d7b4-406a-a1da-d9f19984c72c"))
+        .apply {
             if (params.isSystem) {
                 this.flags = this.flags or ApplicationInfo.FLAG_SYSTEM
             }
@@ -373,7 +371,7 @@ class PackageManagerComponentLabelIconOverrideTest {
             whenever(this.isCallerRecents(anyInt())) { false }
         }
         val mockAppsFilter: AppsFilterImpl = mockThrowOnUnmocked {
-            whenever(this.shouldFilterApplication(any<PackageDataSnapshot>(), anyInt(), 
+            whenever(this.shouldFilterApplication(any<PackageDataSnapshot>(), anyInt(),
                     any<PackageSetting>(), any<PackageSetting>(), anyInt())) { false }
             whenever(this.snapshot()) { this@mockThrowOnUnmocked }
             whenever(registerObserver(any())).thenCallRealMethod()

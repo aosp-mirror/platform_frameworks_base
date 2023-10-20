@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.Flags.sdkLibIndependence;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST;
 
@@ -951,10 +952,12 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
             }
         }
         if (!pkg.getUsesSdkLibraries().isEmpty()) {
+            // Allow installation even if sdk-library dependency doesn't exist
+            boolean required = !sdkLibIndependence();
             usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesSdkLibraries(),
                     pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesCertDigests(),
-                    pkg.getPackageName(), "sdk", true, pkg.getTargetSdkVersion(), usesLibraryInfos,
-                    availablePackages, newLibraries);
+                    pkg.getPackageName(), "sdk", required, pkg.getTargetSdkVersion(),
+                    usesLibraryInfos, availablePackages, newLibraries);
         }
         return usesLibraryInfos;
     }
