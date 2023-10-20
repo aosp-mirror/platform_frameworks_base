@@ -273,6 +273,11 @@ class SystemEventChipAnimationController @Inject constructor(
         })
     }
 
+    /** Announces [contentDescriptions] for accessibility. */
+    fun announceForAccessibility(contentDescriptions: String) {
+        currentAnimatedView?.view?.announceForAccessibility(contentDescriptions)
+    }
+
     private fun updateDimens(contentArea: Rect) {
         val lp = animationWindowView.layoutParams as FrameLayout.LayoutParams
         lp.height = contentArea.height()
