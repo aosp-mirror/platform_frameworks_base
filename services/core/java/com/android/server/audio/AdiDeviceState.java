@@ -188,7 +188,7 @@ import java.util.Objects;
      * {@link AdiDeviceState#toPersistableString()}.
      */
     public static int getPeristedMaxSize() {
-        return 36;  /* (mDeviceType)2 + (mDeviceAddresss)17 + (mInternalDeviceType)9 + (mSAEnabled)1
+        return 36;  /* (mDeviceType)2 + (mDeviceAddress)17 + (mInternalDeviceType)9 + (mSAEnabled)1
                            + (mHasHeadTracker)1 + (mHasHeadTrackerEnabled)1
                            + (SETTINGS_FIELD_SEPARATOR)5 */
     }
