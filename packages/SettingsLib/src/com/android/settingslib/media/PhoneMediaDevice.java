@@ -18,6 +18,8 @@ package com.android.settingslib.media;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
+import static android.media.MediaRoute2Info.TYPE_HDMI_ARC;
+import static android.media.MediaRoute2Info.TYPE_HDMI_EARC;
 import static android.media.MediaRoute2Info.TYPE_USB_ACCESSORY;
 import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
@@ -71,6 +73,8 @@ public class PhoneMediaDevice extends MediaDevice {
                 name = context.getString(R.string.media_transfer_this_device_name);
                 break;
             case TYPE_HDMI:
+            case TYPE_HDMI_ARC:
+            case TYPE_HDMI_EARC:
                 name = context.getString(R.string.media_transfer_external_device_name);
                 break;
             default:
@@ -144,6 +148,8 @@ public class PhoneMediaDevice extends MediaDevice {
             case TYPE_USB_ACCESSORY:
             case TYPE_DOCK:
             case TYPE_HDMI:
+            case TYPE_HDMI_ARC:
+            case TYPE_HDMI_EARC:
                 id = USB_HEADSET_ID;
                 break;
             case TYPE_BUILTIN_SPEAKER:

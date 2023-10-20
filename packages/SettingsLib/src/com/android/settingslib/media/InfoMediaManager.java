@@ -21,6 +21,8 @@ import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
+import static android.media.MediaRoute2Info.TYPE_HDMI_ARC;
+import static android.media.MediaRoute2Info.TYPE_HDMI_EARC;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
@@ -635,6 +637,8 @@ public abstract class InfoMediaManager extends MediaManager {
             case TYPE_USB_ACCESSORY:
             case TYPE_DOCK:
             case TYPE_HDMI:
+            case TYPE_HDMI_ARC:
+            case TYPE_HDMI_EARC:
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
                 mediaDevice =
@@ -671,8 +675,8 @@ public abstract class InfoMediaManager extends MediaManager {
             default:
                 Log.w(TAG, "addMediaDevice() unknown device type : " + deviceType);
                 break;
-
         }
+
         if (mediaDevice != null && !TextUtils.isEmpty(mPackageName)
                 && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
             mediaDevice.setState(STATE_SELECTED);

@@ -18,6 +18,9 @@ package android.media;
 
 import static android.media.MediaRouter2Utils.toUniqueId;
 
+import static com.android.media.flags.Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -141,6 +144,8 @@ public final class MediaRoute2Info implements Parcelable {
                 TYPE_WIRED_HEADPHONES,
                 TYPE_BLUETOOTH_A2DP,
                 TYPE_HDMI,
+                TYPE_HDMI_ARC,
+                TYPE_HDMI_EARC,
                 TYPE_USB_DEVICE,
                 TYPE_USB_ACCESSORY,
                 TYPE_DOCK,
@@ -204,6 +209,22 @@ public final class MediaRoute2Info implements Parcelable {
      * @see #getType
      */
     public static final int TYPE_HDMI = AudioDeviceInfo.TYPE_HDMI;
+
+    /**
+     * Indicates the route is an Audio Return Channel of an HDMI connection.
+     *
+     * @see #getType
+     */
+    @FlaggedApi(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
+    public static final int TYPE_HDMI_ARC = AudioDeviceInfo.TYPE_HDMI_ARC;
+
+    /**
+     * Indicates the route is an Enhanced Audio Return Channel of an HDMI connection.
+     *
+     * @see #getType
+     */
+    @FlaggedApi(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
+    public static final int TYPE_HDMI_EARC = AudioDeviceInfo.TYPE_HDMI_EARC;
 
     /**
      * Indicates the route is a USB audio device.
@@ -907,6 +928,10 @@ public final class MediaRoute2Info implements Parcelable {
                 return "BLUETOOTH_A2DP";
             case TYPE_HDMI:
                 return "HDMI";
+            case TYPE_HDMI_ARC:
+                return "HDMI_ARC";
+            case TYPE_HDMI_EARC:
+                return "HDMI_EARC";
             case TYPE_DOCK:
                 return "DOCK";
             case TYPE_USB_DEVICE:
