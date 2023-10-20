@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.media.projection.IMediaProjectionManager;
 import android.os.IBinder;
@@ -36,15 +37,27 @@ import android.os.ServiceManager;
 import android.view.ContentRecordingSession;
 import android.view.ContentRecordingSession.RecordContent;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 /**
  * Manages content recording for a particular {@link DisplayContent}.
  */
 final class ContentRecorder implements WindowContainerListener {
+
+    /**
+     * Maximum acceptable anisotropy for the output image.
+     *
+     * Necessary to avoid unnecessary scaling when the anisotropy is almost the same, as it is not
+     * exact anyway. For external displays, we expect an anisoptry of about 2% even if the pixels
+     * are, in fact, square due to the imprecision of the display's actual size (rounded to the
+     * nearest cm).
+     */
+    private static final float MAX_ANISOTROPY = 0.025f;
 
     /**
      * The display content this class is handling recording for.
@@ -87,15 +100,20 @@ final class ContentRecorder implements WindowContainerListener {
     @Configuration.Orientation
     private int mLastOrientation = ORIENTATION_UNDEFINED;
 
+    private final boolean mCorrectForAnisotropicPixels;
+
     ContentRecorder(@NonNull DisplayContent displayContent) {
-        this(displayContent, new RemoteMediaProjectionManagerWrapper(displayContent.mDisplayId));
+        this(displayContent, new RemoteMediaProjectionManagerWrapper(displayContent.mDisplayId),
+                new DisplayManagerFlags().isConnectedDisplayManagementEnabled());
     }
 
     @VisibleForTesting
     ContentRecorder(@NonNull DisplayContent displayContent,
-            @NonNull MediaProjectionManagerWrapper mediaProjectionManager) {
+            @NonNull MediaProjectionManagerWrapper mediaProjectionManager,
+            boolean correctForAnisotropicPixels) {
         mDisplayContent = displayContent;
         mMediaProjectionManager = mediaProjectionManager;
+        mCorrectForAnisotropicPixels = correctForAnisotropicPixels;
     }
 
     /**
@@ -460,6 +478,33 @@ final class ContentRecorder implements WindowContainerListener {
         }
     }
 
+    private void computeScaling(int inputSizeX, int inputSizeY,
+            float inputDpiX, float inputDpiY,
+            int outputSizeX, int outputSizeY,
+            float outputDpiX, float outputDpiY,
+            PointF scaleOut) {
+        float relAnisotropy = (inputDpiY / inputDpiX) / (outputDpiY / outputDpiX);
+        if (!mCorrectForAnisotropicPixels
+                || (relAnisotropy > (1 - MAX_ANISOTROPY) && relAnisotropy < (1 + MAX_ANISOTROPY))) {
+            // Calculate the scale to apply to the root mirror SurfaceControl to fit the size of the
+            // output surface.
+            float scaleX = outputSizeX / (float) inputSizeX;
+            float scaleY = outputSizeY / (float) inputSizeY;
+            float scale = Math.min(scaleX, scaleY);
+            scaleOut.x = scale;
+            scaleOut.y = scale;
+            return;
+        }
+
+        float relDpiX = outputDpiX / inputDpiX;
+        float relDpiY = outputDpiY / inputDpiY;
+
+        float scale = Math.min(outputSizeX / relDpiX / inputSizeX,
+                outputSizeY / relDpiY / inputSizeY);
+        scaleOut.x = scale * relDpiX;
+        scaleOut.y = scale * relDpiY;
+    }
+
     /**
      * Apply transformations to the mirrored surface to ensure the captured contents are scaled to
      * fit and centred in the output surface.
@@ -473,13 +518,19 @@ final class ContentRecorder implements WindowContainerListener {
      */
     @VisibleForTesting void updateMirroredSurface(SurfaceControl.Transaction transaction,
             Rect recordedContentBounds, Point surfaceSize) {
-        // Calculate the scale to apply to the root mirror SurfaceControl to fit the size of the
-        // output surface.
-        float scaleX = surfaceSize.x / (float) recordedContentBounds.width();
-        float scaleY = surfaceSize.y / (float) recordedContentBounds.height();
-        float scale = Math.min(scaleX, scaleY);
-        int scaledWidth = Math.round(scale * (float) recordedContentBounds.width());
-        int scaledHeight = Math.round(scale * (float) recordedContentBounds.height());
+
+        DisplayInfo inputDisplayInfo = mRecordedWindowContainer.mDisplayContent.getDisplayInfo();
+        DisplayInfo outputDisplayInfo = mDisplayContent.getDisplayInfo();
+
+        PointF scale = new PointF();
+        computeScaling(recordedContentBounds.width(), recordedContentBounds.height(),
+                inputDisplayInfo.physicalXDpi, inputDisplayInfo.physicalYDpi,
+                surfaceSize.x, surfaceSize.y,
+                outputDisplayInfo.physicalXDpi, outputDisplayInfo.physicalYDpi,
+                scale);
+
+        int scaledWidth = Math.round(scale.x * (float) recordedContentBounds.width());
+        int scaledHeight = Math.round(scale.y * (float) recordedContentBounds.height());
 
         // Calculate the shift to apply to the root mirror SurfaceControl to centre the mirrored
         // contents in the output surface.
@@ -493,10 +544,10 @@ final class ContentRecorder implements WindowContainerListener {
         }
 
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                "Content Recording: Apply transformations of shift %d x %d, scale %f, crop (aka "
-                        + "recorded content size) %d x %d for display %d; display has size %d x "
-                        + "%d; surface has size %d x %d",
-                shiftedX, shiftedY, scale, recordedContentBounds.width(),
+                "Content Recording: Apply transformations of shift %d x %d, scale %f x %f, crop "
+                        + "(aka recorded content size) %d x %d for display %d; display has size "
+                        + "%d x %d; surface has size %d x %d",
+                shiftedX, shiftedY, scale.x, scale.y, recordedContentBounds.width(),
                 recordedContentBounds.height(), mDisplayContent.getDisplayId(),
                 mDisplayContent.getConfiguration().screenWidthDp,
                 mDisplayContent.getConfiguration().screenHeightDp, surfaceSize.x, surfaceSize.y);
@@ -508,7 +559,7 @@ final class ContentRecorder implements WindowContainerListener {
                         recordedContentBounds.height())
                 // Scale the root mirror SurfaceControl, based upon the size difference between the
                 // source (DisplayArea to capture) and output (surface the app reads images from).
-                .setMatrix(mRecordedSurface, scale, 0 /* dtdx */, 0 /* dtdy */, scale)
+                .setMatrix(mRecordedSurface, scale.x, 0 /* dtdx */, 0 /* dtdy */, scale.y)
                 // Position needs to be updated when the mirrored DisplayArea has changed, since
                 // the content will no longer be centered in the output surface.
                 .setPosition(mRecordedSurface, shiftedX /* x */, shiftedY /* y */);
