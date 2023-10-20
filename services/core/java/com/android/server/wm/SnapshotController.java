@@ -85,7 +85,7 @@ class SnapshotController {
             if (info.mWindowingMode == WINDOWING_MODE_PINNED) continue;
             if (info.mContainer.isActivityTypeHome()) continue;
             final Task task = info.mContainer.asTask();
-            if (task != null && !task.isVisibleRequested()) {
+            if (task != null && !task.mCreatedByOrganizer && !task.isVisibleRequested()) {
                 mTaskSnapshotController.recordSnapshot(task, info);
             }
             // Won't need to capture activity snapshot in close transition.
