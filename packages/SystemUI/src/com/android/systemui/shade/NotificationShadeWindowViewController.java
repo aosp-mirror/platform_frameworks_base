@@ -35,7 +35,6 @@ import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.Dumpable;
-import com.android.systemui.FeatureFlags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
@@ -43,6 +42,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.bouncer.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.communal.data.repository.CommunalRepository;
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dagger.SysUISingleton;
@@ -107,8 +107,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final LockscreenHostedDreamGestureListener mLockscreenHostedDreamGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
     private final CommunalViewModel mCommunalViewModel;
+    private final CommunalRepository mCommunalRepository;
     private final boolean mIsTrackpadCommonEnabled;
-    private final FeatureFlags mFeatureFlags;
     private final FeatureFlagsClassic mFeatureFlagsClassic;
     private final SysUIKeyEventHandler mSysUIKeyEventHandler;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
@@ -181,9 +181,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             CommunalViewModel communalViewModel,
+            CommunalRepository communalRepository,
             NotificationExpansionRepository notificationExpansionRepository,
             FeatureFlagsClassic featureFlagsClassic,
-            FeatureFlags featureFlags,
             SystemClock clock,
             BouncerMessageInteractor bouncerMessageInteractor,
             BouncerLogger bouncerLogger,
@@ -214,8 +214,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mLockscreenHostedDreamGestureListener = lockscreenHostedDreamGestureListener;
         mNotificationInsetsController = notificationInsetsController;
         mCommunalViewModel = communalViewModel;
+        mCommunalRepository = communalRepository;
         mIsTrackpadCommonEnabled = featureFlagsClassic.isEnabled(TRACKPAD_GESTURE_COMMON);
-        mFeatureFlags = featureFlags;
         mFeatureFlagsClassic = featureFlagsClassic;
         mSysUIKeyEventHandler = sysUIKeyEventHandler;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
@@ -575,7 +575,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
      * The layout lives in {@link R.id.communal_ui_container}.
      */
     public void setupCommunalHubLayout() {
-        if (!mFeatureFlags.communalHub() || !ComposeFacade.INSTANCE.isComposeAvailable()) {
+        if (!mCommunalRepository.isCommunalEnabled()
+                || !ComposeFacade.INSTANCE.isComposeAvailable()) {
             return;
         }
 

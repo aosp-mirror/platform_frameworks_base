@@ -23,7 +23,6 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.contains
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardMessageAreaController
 import com.android.keyguard.KeyguardSecurityContainerController
@@ -31,8 +30,6 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
-import com.android.systemui.FakeFeatureFlagsImpl
-import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
@@ -47,6 +44,7 @@ import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.compose.ComposeFacade.isComposeAvailable
 import com.android.systemui.dock.DockManager
@@ -150,6 +148,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var mCommunalViewModel: CommunalViewModel
+    private lateinit var mCommunalRepository: FakeCommunalRepository
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
@@ -175,7 +174,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var testScope: TestScope
 
     private lateinit var featureFlagsClassic: FakeFeatureFlagsClassic
-    private lateinit var featureFlags: FakeFeatureFlagsImpl
 
     @Before
     fun setUp() {
@@ -199,7 +197,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlagsClassic.set(MIGRATE_NSSL, false)
         featureFlagsClassic.set(ALTERNATE_BOUNCER_VIEW, false)
 
-        featureFlags = FakeFeatureFlagsImpl()
+        mCommunalRepository = FakeCommunalRepository()
 
         testScope = TestScope()
         fakeClock = FakeSystemClock()
@@ -235,9 +233,9 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
                 mCommunalViewModel,
+                mCommunalRepository,
                 notificationExpansionRepository,
                 featureFlagsClassic,
-                featureFlags,
                 fakeClock,
                 BouncerMessageInteractor(
                     repository = BouncerMessageRepositoryImpl(),
@@ -499,7 +497,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             return
         }
 
-        featureFlags.setFlag(FLAG_COMMUNAL_HUB, true)
+        mCommunalRepository.setIsCommunalEnabled(true)
 
         val mockCommunalPlaceholder = mock(View::class.java)
         val fakeViewIndex = 20
@@ -520,7 +518,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             return
         }
 
-        featureFlags.setFlag(FLAG_COMMUNAL_HUB, false)
+        mCommunalRepository.setIsCommunalEnabled(false)
 
         val mockCommunalPlaceholder = mock(View::class.java)
         val fakeViewIndex = 20
