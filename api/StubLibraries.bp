@@ -721,7 +721,9 @@ java_api_library {
         "android_stubs_current_contributions",
         "android_system_stubs_current_contributions",
         "android_test_frameworks_core_stubs_current_contributions",
-        "stub-annotation-defaults",
+    ],
+    libs: [
+        "stub-annotations",
     ],
     api_contributions: [
         "api-stubs-docs-non-updatable.api.contribution",
