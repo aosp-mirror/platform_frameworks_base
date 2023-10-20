@@ -356,7 +356,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     }
 
     private ExternalInterfaceBinder createExternalInterface() {
-        return new IShellTransitionsImpl(this);
+        return new IShellTransitionsImpl(mContext, getMainExecutor(), this);
     }
 
     @Override
@@ -1400,9 +1400,12 @@ public class Transitions implements RemoteCallable<Transitions>,
     private static class IShellTransitionsImpl extends IShellTransitions.Stub
             implements ExternalInterfaceBinder {
         private Transitions mTransitions;
+        private final HomeTransitionObserver mHomeTransitionObserver;
 
-        IShellTransitionsImpl(Transitions transitions) {
+        IShellTransitionsImpl(Context context, ShellExecutor executor, Transitions transitions) {
             mTransitions = transitions;
+            mHomeTransitionObserver = new HomeTransitionObserver(context, executor,
+                    mTransitions);
         }
 
         /**
@@ -1410,6 +1413,7 @@ public class Transitions implements RemoteCallable<Transitions>,
          */
         @Override
         public void invalidate() {
+            mHomeTransitionObserver.invalidate();
             mTransitions = null;
         }
 
@@ -1433,6 +1437,14 @@ public class Transitions implements RemoteCallable<Transitions>,
         @Override
         public IBinder getShellApplyToken() {
             return SurfaceControl.Transaction.getDefaultApplyToken();
+        }
+
+        @Override
+        public void setHomeTransitionListener(IHomeTransitionListener listener) {
+            executeRemoteCallWithTaskPermission(mTransitions, "setHomeTransitionListener",
+                    (transitions) -> {
+                        mHomeTransitionObserver.setHomeTransitionListener(listener);
+                    });
         }
     }
 
