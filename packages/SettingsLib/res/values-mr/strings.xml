@@ -216,6 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"प्रोफाइल निवडा"</string>
     <string name="category_personal" msgid="6236798763159385225">"वैयक्तिक"</string>
     <string name="category_work" msgid="4014193632325996115">"कार्य"</string>
+    <string name="category_private" msgid="4244892185452788977">"खाजगी"</string>
     <string name="category_clone" msgid="1554511758987195974">"क्लोन करा"</string>
     <string name="development_settings_title" msgid="140296922921597393">"डेव्हलपर पर्याय"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"डेव्हलपर पर्याय सुरू करा"</string>
