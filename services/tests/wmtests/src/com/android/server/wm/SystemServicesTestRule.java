@@ -134,10 +134,19 @@ public class SystemServicesTestRule implements TestRule {
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
+    private Runnable mOnBeforeServicesCreated;
     /**
      * Spied {@link SurfaceControl.Transaction} class than can be used to verify calls.
      */
     SurfaceControl.Transaction mTransaction;
+
+    public SystemServicesTestRule(Runnable onBeforeServicesCreated) {
+        mOnBeforeServicesCreated = onBeforeServicesCreated;
+    }
+
+    public SystemServicesTestRule() {
+        this(/* onBeforeServicesCreated= */ null);
+    }
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -168,6 +177,10 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUp() {
+        if (mOnBeforeServicesCreated != null) {
+            mOnBeforeServicesCreated.run();
+        }
+
         // Use stubOnly() to reduce memory usage if it doesn't need verification.
         final MockSettings spyStubOnly = withSettings().stubOnly()
                 .defaultAnswer(CALLS_REAL_METHODS);
