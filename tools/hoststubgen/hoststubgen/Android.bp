@@ -12,6 +12,7 @@ genrule_defaults {
     name: "hoststubgen-for-prototype-only-genrule",
     visibility: [
         ":__subpackages__",
+        "//frameworks/base",
         "//frameworks/base/ravenwood:__subpackages__",
     ],
 }
@@ -21,6 +22,7 @@ java_defaults {
     name: "hoststubgen-for-prototype-only-java",
     visibility: [
         ":__subpackages__",
+        "//frameworks/base",
         "//frameworks/base/ravenwood:__subpackages__",
     ],
 }
@@ -30,6 +32,7 @@ filegroup_defaults {
     name: "hoststubgen-for-prototype-only-filegroup",
     visibility: [
         ":__subpackages__",
+        "//frameworks/base",
         "//frameworks/base/ravenwood:__subpackages__",
     ],
 }
@@ -44,8 +47,6 @@ java_library {
     ],
     host_supported: true,
 
-    // Seems like we need it to avoid circular deps.
-    // Copied it from "app-compat-annotations".
     sdk_version: "core_current",
 }
 
@@ -53,6 +54,21 @@ java_library {
 // This library is _not_ specific to Android APIs.
 java_library_host {
     name: "hoststubgen-helper-runtime",
+    srcs: [
+        "helper-runtime-src/**/*.java",
+    ],
+    libs: [
+        "junit",
+    ],
+    static_libs: [
+        "guava",
+    ],
+    jarjar_rules: "jarjar-rules.txt",
+    visibility: ["//visibility:public"],
+}
+
+java_library {
+    name: "hoststubgen-helper-runtime.ravenwood",
     srcs: [
         "helper-runtime-src/**/*.java",
     ],
@@ -242,6 +258,18 @@ java_library_host {
     libs: [
         "hoststubgen-helper-runtime",
         "framework-all-hidden-api-host-impl",
+    ],
+}
+
+java_library {
+    name: "hoststubgen-helper-framework-runtime.ravenwood",
+    defaults: ["hoststubgen-for-prototype-only-java"],
+    srcs: [
+        "helper-framework-runtime-src/framework/**/*.java",
+    ],
+    libs: [
+        "hoststubgen-helper-runtime.ravenwood",
+        "framework-minus-apex.ravenwood",
     ],
 }
 

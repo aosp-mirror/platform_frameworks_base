@@ -24,8 +24,14 @@ READY_TEST_MODULES=(
   hoststubgen-test-tiny-test
 )
 
-# First, build all the test modules. This shouldn't fail.
-run m run-ravenwood-test ${READY_TEST_MODULES[*]} ${NOT_READY_TEST_MODULES[*]}
+MUST_BUILD_MODULES=(
+    run-ravenwood-test
+    "${NOT_READY_TEST_MODULES[*]}"
+    HostStubGenTest-framework-test
+)
+
+# First, build all the test / etc modules. This shouldn't fail.
+run m "${MUST_BUILD_MODULES[@]}"
 
 # Next, run the golden check. This should always pass too.
 # The following scripts _should_ pass too, but they depend on the internal paths to soong generated
