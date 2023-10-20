@@ -62,4 +62,24 @@ public class ClientTransactionTests {
         verify(callback2, times(1)).preExecute(clientTransactionHandler);
         verify(stateRequest, times(1)).preExecute(clientTransactionHandler);
     }
+
+    @Test
+    public void testPreExecuteTransactionItems() {
+        final ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
+        final ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
+        final ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);
+        final ClientTransactionHandler clientTransactionHandler =
+                mock(ClientTransactionHandler.class);
+
+        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        transaction.addTransactionItem(callback1);
+        transaction.addTransactionItem(callback2);
+        transaction.addTransactionItem(stateRequest);
+
+        transaction.preExecute(clientTransactionHandler);
+
+        verify(callback1, times(1)).preExecute(clientTransactionHandler);
+        verify(callback2, times(1)).preExecute(clientTransactionHandler);
+        verify(stateRequest, times(1)).preExecute(clientTransactionHandler);
+    }
 }
