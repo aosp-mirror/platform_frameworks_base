@@ -58,11 +58,6 @@ public abstract class ActivityLifecycleItem extends ActivityTransactionItem {
         super(in);
     }
 
-    @Override
-    boolean isActivityLifecycleItem() {
-        return true;
-    }
-
     /** A final lifecycle state that an activity should reach. */
     @LifecycleState
     public abstract int getTargetState();
