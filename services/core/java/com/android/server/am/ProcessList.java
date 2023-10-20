@@ -869,6 +869,8 @@ public final class ProcessList {
                                 ApplicationExitInfo.REASON_LOW_MEMORY,
                                 ApplicationExitInfo.SUBREASON_OOM_KILL,
                                 "oom");
+
+                            oomKill.logKillOccurred();
                         }
                     }
                 }
