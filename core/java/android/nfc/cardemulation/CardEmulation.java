@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.nfc.Constants;
 import android.nfc.INfcCardEmulation;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
@@ -274,7 +275,7 @@ public final class CardEmulation {
             try {
                 preferForeground = Settings.Secure.getInt(
                         contextAsUser.getContentResolver(),
-                        Settings.Secure.NFC_PAYMENT_FOREGROUND) != 0;
+                        Constants.SETTINGS_SECURE_NFC_PAYMENT_FOREGROUND) != 0;
             } catch (SettingNotFoundException e) {
             }
             return preferForeground;
