@@ -4,6 +4,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import static com.android.server.job.JobStore.JOB_FILE_SPLIT_PREFIX;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,6 +48,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -209,6 +212,43 @@ public class JobStoreTest {
         assertEquals("Incorrect # of persisted tasks.", 0, jobStatusSet.size());
     }
 
+    @Test
+    public void testSkipExtraFiles() throws Exception {
+        setUseSplitFiles(true);
+        final JobInfo task1 = new Builder(8, mComponent)
+                .setRequiresDeviceIdle(true)
+                .setPeriodic(10000L)
+                .setRequiresCharging(true)
+                .setPersisted(true)
+                .build();
+        final JobInfo task2 = new Builder(12, mComponent)
+                .setMinimumLatency(5000L)
+                .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
+                .setOverrideDeadline(30000L)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                .setPersisted(true)
+                .build();
+        final int uid1 = SOME_UID;
+        final int uid2 = uid1 + 1;
+        final JobStatus JobStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null, null);
+        final JobStatus JobStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null, null);
+        runWritingJobsToDisk(JobStatus1, JobStatus2);
+
+        final File rootDir = new File(mTestContext.getFilesDir(), "system/job");
+        final File file1 = new File(rootDir, JOB_FILE_SPLIT_PREFIX + uid1 + ".xml");
+        final File file2 = new File(rootDir, JOB_FILE_SPLIT_PREFIX + uid2 + ".xml");
+
+        Files.copy(file1.toPath(),
+                new File(rootDir, JOB_FILE_SPLIT_PREFIX + uid1 + ".xml.bak").toPath());
+        Files.copy(file1.toPath(), new File(rootDir, "random.xml").toPath());
+        Files.copy(file2.toPath(),
+                new File(rootDir, "blah" + JOB_FILE_SPLIT_PREFIX + uid1 + ".xml").toPath());
+
+        JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 2, jobStatusSet.size());
+    }
+
     /**
      * Test that dynamic constraints aren't written to disk.
      */
@@ -254,22 +294,22 @@ public class JobStoreTest {
         file = new File(mTestContext.getFilesDir(), "10000");
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX);
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX);
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "text.xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + "text.xml");
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + ".xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + ".xml");
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "-10123.xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + "-10123.xml");
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "1.xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + "1.xml");
         assertEquals(1, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "101023.xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + "101023.xml");
         assertEquals(101023, JobStore.extractUidFromJobFileName(file));
     }
 
