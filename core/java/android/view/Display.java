@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.KeyguardManager;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1366,7 +1367,8 @@ public final class Display {
             // form of the larger DISPLAY_CHANGED event
             mGlobal.registerDisplayListener(toRegister, executor,
                     DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED
-                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED,
+                    ActivityThread.currentPackageName());
         }
 
     }
