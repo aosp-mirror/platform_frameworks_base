@@ -18,6 +18,7 @@ package com.android.server.notification;
 import static com.android.server.notification.SnoozeHelper.CONCURRENT_SNOOZE_LIMIT;
 import static com.android.server.notification.SnoozeHelper.EXTRA_KEY;
 
+import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -483,6 +484,29 @@ public class SnoozeHelperTest extends UiServiceTestCase {
 
         mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM, true);
         verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, true);
+    }
+
+    @Test
+    public void testRepostAll() throws Exception {
+        final int profileId = 11;
+        final int otherUserId = 2;
+        IntArray userIds = new IntArray();
+        userIds.add(UserHandle.USER_SYSTEM);
+        userIds.add(profileId);
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
+        NotificationRecord r3 = getNotificationRecord("pkg", 3, "three", UserHandle.of(profileId));
+        NotificationRecord r4 = getNotificationRecord("pkg", 4, "four", UserHandle.of(otherUserId));
+        mSnoozeHelper.snooze(r,  1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.snooze(r3, 1000);
+        mSnoozeHelper.snooze(r4, 1000);
+
+        mSnoozeHelper.repostAll(userIds);
+
+        verify(mCallback, times(3)).repost(anyInt(), any(), anyBoolean());
+        // All notifications were reposted, except the one for otherUserId
+        assertThat(mSnoozeHelper.getSnoozed()).containsExactly(r4);
     }
 
     @Test

@@ -244,6 +244,7 @@ import android.os.WorkSource;
 import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.ConversationChannelWrapper;
@@ -2008,6 +2009,8 @@ public class NotificationManagerService extends SystemService {
                         Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
         private final Uri LOCK_SCREEN_SHOW_NOTIFICATIONS
                 = Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS);
+        private final Uri SHOW_NOTIFICATION_SNOOZE
+                = Settings.Secure.getUriFor(Settings.Secure.SHOW_NOTIFICATION_SNOOZE);
 
         SettingsObserver(Handler handler) {
             super(handler);
@@ -2034,6 +2037,10 @@ public class NotificationManagerService extends SystemService {
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(LOCK_SCREEN_SHOW_NOTIFICATIONS,
                     false, this, UserHandle.USER_ALL);
+
+            resolver.registerContentObserver(SHOW_NOTIFICATION_SNOOZE,
+                    false, this, UserHandle.USER_ALL);
+
             update(null);
         }
 
@@ -2082,6 +2089,14 @@ public class NotificationManagerService extends SystemService {
             }
             if (uri == null || LOCK_SCREEN_SHOW_NOTIFICATIONS.equals(uri)) {
                 mPreferencesHelper.updateLockScreenShowNotifications();
+            }
+            if (SHOW_NOTIFICATION_SNOOZE.equals(uri)) {
+                final boolean snoozeEnabled = Settings.Secure.getIntForUser(resolver,
+                        Secure.SHOW_NOTIFICATION_SNOOZE, 0, UserHandle.USER_CURRENT)
+                        != 0;
+                if (!snoozeEnabled) {
+                    unsnoozeAll();
+                }
             }
         }
     }
@@ -7789,6 +7804,13 @@ public class NotificationManagerService extends SystemService {
         private boolean isSnoozable(NotificationRecord record) {
             return !(record.getNotification().isGroupSummary() && GroupHelper.AUTOGROUP_KEY.equals(
                     record.getNotification().getGroup()));
+        }
+    }
+
+    private void unsnoozeAll() {
+        synchronized (mNotificationLock) {
+            mSnoozeHelper.repostAll(mUserProfiles.getCurrentProfileIds());
+            handleSavePolicyFile();
         }
     }
 
