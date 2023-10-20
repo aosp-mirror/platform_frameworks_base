@@ -76,6 +76,8 @@
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ୱାର୍କ ପ୍ରୋଫାଇଲରେ ସ୍କ୍ରିନସଟ ସେଭ କରାଯାଉଛି…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ସ୍କ୍ରୀନଶଟ୍ ସେଭ୍ ହୋଇଛି"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ସ୍କ୍ରୀନ୍‍ଶଟ୍ ସେଭ୍ କରିହେବ ନାହିଁ"</string>
+    <!-- no translation found for screenshot_failed_external_display_indication (6555673132061101936) -->
+    <skip />
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ସ୍କ୍ରିନସଟ୍ ସେଭ୍ କରିବା ପୂର୍ବରୁ ଡିଭାଇସକୁ ଅନଲକ୍ କରାଯିବା ଆବଶ୍ୟକ"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ପୁଣିଥରେ ସ୍କ୍ରୀନ୍‌ଶଟ୍ ନେବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ସ୍କ୍ରିନସଟକୁ ସେଭ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
@@ -280,7 +282,8 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"କାଷ୍ଟିଙ୍ଗ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"ନାମହୀନ ଡିଭାଇସ୍‍"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"କୌଣସି ଡିଭାଇସ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ୱାଇ-ଫାଇ ସଂଯୋଜିତ ହୋଇନାହିଁ"</string>
+    <!-- no translation found for quick_settings_cast_no_network (3863016850468559522) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ଉଜ୍ଜ୍ୱଳତା"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"କଲର ଇନଭର୍ସନ"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"ରଙ୍ଗ ସଂଶୋଧନ"</string>
@@ -395,6 +398,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଶୀଘ୍ର ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
+    <string name="communal_tutorial_indicator_text" msgid="700342473477865107">"କମ୍ୟୁନାଲ ଟ୍ୟୁଟୋରିଆଲ ଆରମ୍ଭ କରିବା ପାଇଁ ତୀର ବଟନରେ କ୍ଲିକ କରନ୍ତୁ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ୟୁଜର୍‍ ବଦଳାନ୍ତୁ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ପୁଲଡାଉନ ମେନୁ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ଏହି ସେସନର ସମସ୍ତ ଆପ୍‌ ଓ ଡାଟା ଡିଲିଟ୍‌ ହୋଇଯିବ।"</string>
@@ -660,7 +664,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ବର୍ତ୍ତମାନର"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"ଫେରନ୍ତୁ"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ବିଜ୍ଞପ୍ତି"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"କୀ\'ବୋର୍ଡ ସର୍ଟକଟ୍"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"କୀବୋର୍ଡ ସର୍ଟକଟ"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"କୀ\'ବୋର୍ଡ୍‍ର ଲେଆଉଟ୍‍କୁ ବଦଳାନ୍ତୁ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"ଟେକ୍ସଟ ଖାଲି କରନ୍ତୁ"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ସର୍ଟକଟଗୁଡ଼ିକ"</string>

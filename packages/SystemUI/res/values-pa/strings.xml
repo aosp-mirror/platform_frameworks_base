@@ -76,6 +76,8 @@
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
+    <!-- no translation found for screenshot_failed_external_display_indication (6555673132061101936) -->
+    <skip />
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨੂੰ ਰੱਖਿਅਤ ਕੀਤੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਡੀਵਾਈਸ ਨੂੰ ਅਣਲਾਕ ਕੀਤਾ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੁਬਾਰਾ ਲੈ ਕੇ ਦੇਖੋ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨੂੰ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
@@ -280,7 +282,8 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"ਕਾਸਟਿੰਗ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"ਬਿਨਾਂ ਨਾਮ ਦਾ ਡੀਵਾਈਸ"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ਕੋਈ ਡਿਵਾਈਸਾਂ ਉਪਲਬਧ ਨਹੀਂ"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ਵਾਈ-ਫਾਈ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
+    <!-- no translation found for quick_settings_cast_no_network (3863016850468559522) -->
+    <skip />
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ਚਮਕ"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ਰੰਗ ਪਲਟਨਾ"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"ਰੰਗ ਸੁਧਾਈ"</string>
@@ -395,6 +398,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਤੇਜ਼ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
+    <string name="communal_tutorial_indicator_text" msgid="700342473477865107">"ਭਾਈਚਾਰਕ ਟਿਊਟੋਰੀਅਲ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਤੀਰ ਬਟਨ \'ਤੇ ਕਲਿੱਕ ਕਰੋ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ਪੁੱਲਡਾਊਨ ਮੀਨੂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
