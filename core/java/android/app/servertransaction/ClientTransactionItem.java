@@ -72,13 +72,6 @@ public abstract class ClientTransactionItem implements BaseClientRequest, Parcel
         return null;
     }
 
-    /**
-     * Whether this is a {@link ActivityLifecycleItem}.
-     */
-    boolean isActivityLifecycleItem() {
-        return false;
-    }
-
     /** Dumps this transaction item. */
     void dump(@NonNull String prefix, @NonNull PrintWriter pw,
             @NonNull ClientTransactionHandler transactionHandler) {

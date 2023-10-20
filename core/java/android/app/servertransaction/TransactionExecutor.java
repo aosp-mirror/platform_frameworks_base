@@ -28,7 +28,6 @@ import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 import static android.app.servertransaction.TransactionExecutorHelper.getShortActivityName;
 import static android.app.servertransaction.TransactionExecutorHelper.getStateName;
 import static android.app.servertransaction.TransactionExecutorHelper.lastCallbackRequestingState;
-import static android.app.servertransaction.TransactionExecutorHelper.shouldExcludeLastLifecycleState;
 import static android.app.servertransaction.TransactionExecutorHelper.tId;
 import static android.app.servertransaction.TransactionExecutorHelper.transactionToString;
 
@@ -62,9 +61,6 @@ public class TransactionExecutor {
     private final PendingTransactionActions mPendingActions = new PendingTransactionActions();
     private final TransactionExecutorHelper mHelper = new TransactionExecutorHelper();
 
-    /** Keeps track of display ids whose Configuration got updated within a transaction. */
-    private final ArraySet<Integer> mConfigUpdatedDisplayIds = new ArraySet<>();
-
     /** Initialize an instance with transaction handler, that will execute all requested actions. */
     public TransactionExecutor(@NonNull ClientTransactionHandler clientTransactionHandler) {
         mTransactionHandler = clientTransactionHandler;
@@ -83,52 +79,15 @@ public class TransactionExecutor {
             Slog.d(TAG, transactionToString(transaction, mTransactionHandler));
         }
 
-        if (transaction.getTransactionItems() != null) {
-            executeTransactionItems(transaction);
-        } else {
-            // TODO(b/260873529): cleanup after launch.
-            executeCallbacks(transaction);
-            executeLifecycleState(transaction);
-        }
-
-        if (!mConfigUpdatedDisplayIds.isEmpty()) {
-            // Whether this transaction should trigger DisplayListener#onDisplayChanged.
-            final ClientTransactionListenerController controller =
-                    ClientTransactionListenerController.getInstance();
-            final int displayCount = mConfigUpdatedDisplayIds.size();
-            for (int i = 0; i < displayCount; i++) {
-                final int displayId = mConfigUpdatedDisplayIds.valueAt(i);
-                controller.onDisplayChanged(displayId);
-            }
-            mConfigUpdatedDisplayIds.clear();
-        }
+        executeCallbacks(transaction);
+        executeLifecycleState(transaction);
 
         mPendingActions.clear();
         if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "End resolving transaction");
     }
 
-    /** Cycles through all transaction items and execute them at proper times. */
+    /** Cycle through all states requested by callbacks and execute them at proper times. */
     @VisibleForTesting
-    public void executeTransactionItems(@NonNull ClientTransaction transaction) {
-        final List<ClientTransactionItem> items = transaction.getTransactionItems();
-        final int size = items.size();
-        for (int i = 0; i < size; i++) {
-            final ClientTransactionItem item = items.get(i);
-            if (item.isActivityLifecycleItem()) {
-                executeLifecycleItem(transaction, (ActivityLifecycleItem) item);
-            } else {
-                executeNonLifecycleItem(transaction, item,
-                        shouldExcludeLastLifecycleState(items, i));
-            }
-        }
-    }
-
-    /**
-     * Cycle through all states requested by callbacks and execute them at proper times.
-     * @deprecated use {@link #executeTransactionItems} instead.
-     */
-    @VisibleForTesting
-    @Deprecated
     public void executeCallbacks(@NonNull ClientTransaction transaction) {
         final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
         if (callbacks == null || callbacks.isEmpty()) {
@@ -146,78 +105,83 @@ public class TransactionExecutor {
         // Index of the last callback that requests some post-execution state.
         final int lastCallbackRequestingState = lastCallbackRequestingState(transaction);
 
+        // Keep track of display ids whose Configuration got updated with this transaction.
+        ArraySet<Integer> configUpdatedDisplays = null;
+
         final int size = callbacks.size();
         for (int i = 0; i < size; ++i) {
             final ClientTransactionItem item = callbacks.get(i);
+            final IBinder token = item.getActivityToken();
+            ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
 
-            // Skip the very last transition and perform it by explicit state request instead.
+            if (token != null && r == null
+                    && mTransactionHandler.getActivitiesToBeDestroyed().containsKey(token)) {
+                // The activity has not been created but has been requested to destroy, so all
+                // transactions for the token are just like being cancelled.
+                Slog.w(TAG, "Skip pre-destroyed transaction item:\n" + item);
+                continue;
+            }
+
+            if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callback: " + item);
             final int postExecutionState = item.getPostExecutionState();
-            final boolean shouldExcludeLastLifecycleState = postExecutionState != UNDEFINED
-                    && i == lastCallbackRequestingState && finalState == postExecutionState;
-            executeNonLifecycleItem(transaction, item, shouldExcludeLastLifecycleState);
-        }
-    }
 
-    private void executeNonLifecycleItem(@NonNull ClientTransaction transaction,
-            @NonNull ClientTransactionItem item, boolean shouldExcludeLastLifecycleState) {
-        final IBinder token = item.getActivityToken();
-        ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
+            if (item.shouldHaveDefinedPreExecutionState()) {
+                final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
+                        item.getPostExecutionState());
+                if (closestPreExecutionState != UNDEFINED) {
+                    cycleToPath(r, closestPreExecutionState, transaction);
+                }
+            }
 
-        if (token != null && r == null
-                && mTransactionHandler.getActivitiesToBeDestroyed().containsKey(token)) {
-            // The activity has not been created but has been requested to destroy, so all
-            // transactions for the token are just like being cancelled.
-            Slog.w(TAG, "Skip pre-destroyed transaction item:\n" + item);
-            return;
-        }
+            // Can't read flag from isolated process.
+            final boolean isSyncWindowConfigUpdateFlagEnabled = !Process.isIsolated()
+                    && syncWindowConfigUpdateFlag();
+            final Context configUpdatedContext = isSyncWindowConfigUpdateFlagEnabled
+                    ? item.getContextToUpdate(mTransactionHandler)
+                    : null;
+            final Configuration preExecutedConfig = configUpdatedContext != null
+                    ? new Configuration(configUpdatedContext.getResources().getConfiguration())
+                    : null;
 
-        if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callback: " + item);
-        final int postExecutionState = item.getPostExecutionState();
+            item.execute(mTransactionHandler, mPendingActions);
 
-        if (item.shouldHaveDefinedPreExecutionState()) {
-            final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
-                    postExecutionState);
-            if (closestPreExecutionState != UNDEFINED) {
-                cycleToPath(r, closestPreExecutionState, transaction);
+            if (configUpdatedContext != null) {
+                final Configuration postExecutedConfig = configUpdatedContext.getResources()
+                        .getConfiguration();
+                if (!areConfigurationsEqualForDisplay(postExecutedConfig, preExecutedConfig)) {
+                    if (configUpdatedDisplays == null) {
+                        configUpdatedDisplays = new ArraySet<>();
+                    }
+                    configUpdatedDisplays.add(configUpdatedContext.getDisplayId());
+                }
+            }
+
+            item.postExecute(mTransactionHandler, mPendingActions);
+            if (r == null) {
+                // Launch activity request will create an activity record.
+                r = mTransactionHandler.getActivityClient(token);
+            }
+
+            if (postExecutionState != UNDEFINED && r != null) {
+                // Skip the very last transition and perform it by explicit state request instead.
+                final boolean shouldExcludeLastTransition =
+                        i == lastCallbackRequestingState && finalState == postExecutionState;
+                cycleToPath(r, postExecutionState, shouldExcludeLastTransition, transaction);
             }
         }
 
-        // Can't read flag from isolated process.
-        final boolean isSyncWindowConfigUpdateFlagEnabled = !Process.isIsolated()
-                && syncWindowConfigUpdateFlag();
-        final Context configUpdatedContext = isSyncWindowConfigUpdateFlagEnabled
-                ? item.getContextToUpdate(mTransactionHandler)
-                : null;
-        final Configuration preExecutedConfig = configUpdatedContext != null
-                ? new Configuration(configUpdatedContext.getResources().getConfiguration())
-                : null;
-
-        item.execute(mTransactionHandler, mPendingActions);
-
-        if (configUpdatedContext != null) {
-            final Configuration postExecutedConfig = configUpdatedContext.getResources()
-                    .getConfiguration();
-            if (!areConfigurationsEqualForDisplay(postExecutedConfig, preExecutedConfig)) {
-                mConfigUpdatedDisplayIds.add(configUpdatedContext.getDisplayId());
+        if (configUpdatedDisplays != null) {
+            final ClientTransactionListenerController controller =
+                    ClientTransactionListenerController.getInstance();
+            final int displayCount = configUpdatedDisplays.size();
+            for (int i = 0; i < displayCount; i++) {
+                final int displayId = configUpdatedDisplays.valueAt(i);
+                controller.onDisplayChanged(displayId);
             }
-        }
-
-        item.postExecute(mTransactionHandler, mPendingActions);
-        if (r == null) {
-            // Launch activity request will create an activity record.
-            r = mTransactionHandler.getActivityClient(token);
-        }
-
-        if (postExecutionState != UNDEFINED && r != null) {
-            cycleToPath(r, postExecutionState, shouldExcludeLastLifecycleState, transaction);
         }
     }
 
-    /**
-     * Transition to the final state if requested by the transaction.
-     * @deprecated use {@link #executeTransactionItems} instead
-     */
-    @Deprecated
+    /** Transition to the final state if requested by the transaction. */
     private void executeLifecycleState(@NonNull ClientTransaction transaction) {
         final ActivityLifecycleItem lifecycleItem = transaction.getLifecycleStateRequest();
         if (lifecycleItem == null) {
@@ -225,11 +189,6 @@ public class TransactionExecutor {
             return;
         }
 
-        executeLifecycleItem(transaction, lifecycleItem);
-    }
-
-    private void executeLifecycleItem(@NonNull ClientTransaction transaction,
-            @NonNull ActivityLifecycleItem lifecycleItem) {
         final IBinder token = lifecycleItem.getActivityToken();
         final ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
         if (DEBUG_RESOLVER) {
