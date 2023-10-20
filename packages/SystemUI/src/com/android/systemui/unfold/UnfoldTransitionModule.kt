@@ -19,6 +19,7 @@ package com.android.systemui.unfold
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.SystemProperties
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.LifecycleScreenStatusProvider
@@ -34,16 +35,26 @@ import com.android.systemui.unfold.util.UnfoldOnlyProgressProvider
 import com.android.systemui.unfold.util.UnfoldTransitionATracePrefix
 import com.android.systemui.util.time.SystemClockImpl
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider
+import dagger.Binds
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Module(includes = [UnfoldSharedModule::class, SystemUnfoldSharedModule::class])
+@Module(
+    includes =
+        [
+            UnfoldSharedModule::class,
+            SystemUnfoldSharedModule::class,
+            UnfoldTransitionModule.Bindings::class
+        ]
+)
 class UnfoldTransitionModule {
 
     @Provides @UnfoldTransitionATracePrefix fun tracingTagPrefix() = "systemui"
@@ -136,13 +147,22 @@ class UnfoldTransitionModule {
                 null
             }
 
-        return resultingProvider?.get()?.orElse(null)?.let {
-            unfoldProgressProvider -> UnfoldProgressProvider(unfoldProgressProvider, foldProvider)
-        } ?: ShellUnfoldProgressProvider.NO_PROVIDER
+        return resultingProvider?.get()?.orElse(null)?.let { unfoldProgressProvider ->
+            UnfoldProgressProvider(unfoldProgressProvider, foldProvider)
+        }
+            ?: ShellUnfoldProgressProvider.NO_PROVIDER
     }
 
     @Provides
     fun screenStatusProvider(impl: LifecycleScreenStatusProvider): ScreenStatusProvider = impl
+
+    @Module
+    interface Bindings {
+        @Binds
+        @IntoMap
+        @ClassKey(UnfoldTraceLogger::class)
+        fun bindUnfoldTraceLogger(impl: UnfoldTraceLogger): CoreStartable
+    }
 }
 
 const val UNFOLD_STATUS_BAR = "unfold_status_bar"
