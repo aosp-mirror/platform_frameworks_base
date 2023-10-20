@@ -17,6 +17,7 @@
 package com.android.wm.shell.bubbles.animation;
 
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.bubbles.animation.FlingToDismissUtils.getFlingToDismissTargetWidth;
 
 import android.content.ContentResolver;
 import android.content.res.Resources;
@@ -851,6 +852,15 @@ public class StackAnimationController extends
         if (mLayout != null) {
             Resources res = mLayout.getContext().getResources();
             mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+            updateFlingToDismissTargetWidth();
+        }
+    }
+
+    private void updateFlingToDismissTargetWidth() {
+        if (mLayout != null && mMagnetizedStack != null) {
+            int screenWidthPx = mLayout.getResources().getDisplayMetrics().widthPixels;
+            mMagnetizedStack.setFlingToTargetWidthPercent(
+                    getFlingToDismissTargetWidth(screenWidthPx));
         }
     }
 
@@ -1022,23 +1032,8 @@ public class StackAnimationController extends
             };
             mMagnetizedStack.setHapticsEnabled(true);
             mMagnetizedStack.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
+            updateFlingToDismissTargetWidth();
         }
-
-        final ContentResolver contentResolver = mLayout.getContext().getContentResolver();
-        final float minVelocity = Settings.Secure.getFloat(contentResolver,
-                "bubble_dismiss_fling_min_velocity",
-                mMagnetizedStack.getFlingToTargetMinVelocity() /* default */);
-        final float maxVelocity = Settings.Secure.getFloat(contentResolver,
-                "bubble_dismiss_stick_max_velocity",
-                mMagnetizedStack.getStickToTargetMaxXVelocity() /* default */);
-        final float targetWidth = Settings.Secure.getFloat(contentResolver,
-                "bubble_dismiss_target_width_percent",
-                mMagnetizedStack.getFlingToTargetWidthPercent() /* default */);
-
-        mMagnetizedStack.setFlingToTargetMinVelocity(minVelocity);
-        mMagnetizedStack.setStickToTargetMaxXVelocity(maxVelocity);
-        mMagnetizedStack.setFlingToTargetWidthPercent(targetWidth);
-
         return mMagnetizedStack;
     }
 
@@ -1053,7 +1048,7 @@ public class StackAnimationController extends
      * property directly to move the first bubble and cause the stack to 'follow' to the new
      * location.
      *
-     * This could also be achieved by simply animating the first bubble view and adding an update
+     * <p>This could also be achieved by simply animating the first bubble view and adding an update
      * listener to dispatch movement to the rest of the stack. However, this would require
      * duplication of logic in that update handler - it's simpler to keep all logic contained in the
      * {@link #moveFirstBubbleWithStackFollowing} method.
