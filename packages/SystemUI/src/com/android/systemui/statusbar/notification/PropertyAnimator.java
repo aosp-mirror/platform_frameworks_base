@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.util.Log;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.notification.stack.ViewState;
  * An animator to animate properties
  */
 public class PropertyAnimator {
+    private static final String TAG = "PropertyAnimator";
 
     /**
      * Set a property on a view, updating its value, even if it's already animating.
@@ -123,6 +125,8 @@ public class PropertyAnimator {
                     view.setTag(animatorTag, null);
                     view.setTag(animationStartTag, null);
                     view.setTag(animationEndTag, null);
+                } else {
+                    Log.e(TAG, "Unexpected Animator set during onAnimationEnd. Not cleaning up.");
                 }
             }
         });
