@@ -17,42 +17,71 @@ package com.android.systemui.statusbar.phone
 
 import android.app.Dialog
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity
-import android.view.WindowManager
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowManager.LayoutParams.MATCH_PARENT
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+import android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
+import android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 
 /** A dialog shown as a bottom sheet. */
 open class SystemUIBottomSheetDialog(
     context: Context,
-    theme: Int = R.style.Theme_SystemUI_Dialog,
+    private val configurationController: ConfigurationController? = null,
+    theme: Int = R.style.Theme_SystemUI_Dialog
 ) : Dialog(context, theme) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        window?.apply {
-            setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
-            addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
-
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            setGravity(Gravity.BOTTOM)
-            val edgeToEdgeHorizontally =
-                context.resources.getBoolean(R.bool.config_edgeToEdgeBottomSheetDialog)
-            if (edgeToEdgeHorizontally) {
-                decorView.setPadding(0, 0, 0, 0)
-                setLayout(
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT
-                )
-
-                val lp = attributes
-                lp.fitInsetsSides = 0
-                lp.horizontalMargin = 0f
-                attributes = lp
-            }
-        }
+        setupWindow()
+        setupEdgeToEdge()
         setCanceledOnTouchOutside(true)
     }
+
+    private fun setupWindow() {
+        window?.apply {
+            setType(TYPE_STATUS_BAR_SUB_PANEL)
+            addPrivateFlags(SYSTEM_FLAG_SHOW_FOR_ALL_USERS or PRIVATE_FLAG_NO_MOVE_ANIMATION)
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setGravity(Gravity.BOTTOM)
+            decorView.setPadding(0, 0, 0, 0)
+            attributes =
+                attributes.apply {
+                    fitInsetsSides = 0
+                    horizontalMargin = 0f
+                }
+        }
+    }
+
+    private fun setupEdgeToEdge() {
+        val edgeToEdgeHorizontally =
+            context.resources.getBoolean(R.bool.config_edgeToEdgeBottomSheetDialog)
+        val width = if (edgeToEdgeHorizontally) MATCH_PARENT else WRAP_CONTENT
+        val height = WRAP_CONTENT
+        window?.setLayout(width, height)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        configurationController?.addCallback(onConfigChanged)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        configurationController?.removeCallback(onConfigChanged)
+    }
+
+    private val onConfigChanged =
+        object : ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                super.onConfigChanged(newConfig)
+                setupEdgeToEdge()
+            }
+        }
 }

@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.ui.view.MirroringConfirmationDialog
+import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +42,8 @@ constructor(
     private val context: Context,
     private val connectedDisplayInteractor: ConnectedDisplayInteractor,
     @Application private val scope: CoroutineScope,
-    @Background private val bgDispatcher: CoroutineDispatcher
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    private val configurationController: ConfigurationController
 ) {
 
     private var dialog: Dialog? = null
@@ -71,7 +73,8 @@ constructor(
                     onCancelMirroring = {
                         scope.launch(bgDispatcher) { pendingDisplay.ignore() }
                         hideDialog()
-                    }
+                    },
+                    configurationController
                 )
                 .apply { show() }
     }
