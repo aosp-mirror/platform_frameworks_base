@@ -3149,7 +3149,6 @@ package android.companion {
 
   public final class AssociationInfo implements android.os.Parcelable {
     method @NonNull public String getPackageName();
-    method public boolean isSelfManaged();
   }
 
   public final class CompanionDeviceManager {
