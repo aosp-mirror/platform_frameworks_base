@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Akkua kuluttavat sovellukset"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Suurennus"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Esteetön käyttö"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Näyttö"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> käyttää akkua."</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> sovellusta käyttää akkua."</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Katso lisätietoja akun ja datan käytöstä napauttamalla."</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Sallii kumppanisovelluksen aloittaa etualan palveluja taustalla."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofoni on käytettävissä"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofoni on estetty"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Näytön peilaaminen ei onnistu"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Käytä eri johtoa ja yritä uudelleen"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Johto ei ehkä tue näyttöjä"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C-johtosi ei ehkä yhdisty näyttöihin kunnolla"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Kaksoisnäyttö"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Kaksoisnäyttö on päällä"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> käyttää molempia näyttöjä sisällön näyttämiseen"</string>

@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"耗用電量的應用程式"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"放大"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"無障礙功能使用情況"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"顯示屏"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用電量"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個應用程式正在使用電量"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"輕按即可查看電池和數據用量詳情"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"允許隨附應用程式從背景啟動前景服務。"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"可以使用麥克風"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"已封鎖麥克風"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"無法將畫面鏡像投放至螢幕"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"請改用其他連接線，然後再試一次"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"連接線可能不支援顯示屏"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"你的 USB-C 連接線可能未妥善連接顯示屏"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"雙螢幕"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"已開啟雙螢幕功能"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用雙螢幕顯示內容"</string>

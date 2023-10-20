@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Pil kullanan uygulamalar"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Büyütme"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Erişilebilirlik kullanımı"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Ekran"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> pil kullanıyor"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> uygulama pil kullanıyor"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Pil ve veri kullanımı ile ilgili ayrıntılar için dokunun"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tamamlayıcı uygulamanın arka plandan ön plan hizmetlerini başlatmasına izin verir."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon kullanılabilir"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon engellenmiş"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Ekrana yansıtılamıyor"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Farklı kablo kullanarak tekrar deneyin"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kablo, ekranları desteklemeyebilir"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C kablonuz ekranlara doğru şekilde bağlanamayabilir"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen açık"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, içeriği göstermek için her iki ekranı da kullanıyor"</string>

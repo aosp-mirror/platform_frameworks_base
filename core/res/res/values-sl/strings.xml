@@ -292,6 +292,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije, ki porabljajo energijo baterije"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Povečava"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Uporaba funkcij za dostopnost"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Zaslon"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> porablja energijo baterije"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Toliko aplikacij porablja energijo baterije: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dotaknite se za prikaz podrobnosti porabe baterije in prenosa podatkov"</string>
@@ -2335,6 +2336,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Spremljevalni aplikaciji dovoljuje, da storitve v ospredju zažene iz ozadja."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon je na voljo"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon je blokiran"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Ni mogoče zrcaliti zaslona"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Uporabite drug kabel in poskusite znova"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabel morda ne podpira zaslonov"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Kabel USB-C se morda ne more ustrezno povezati z zasloni."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen je vklopljen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> uporablja oba zaslona za prikaz vsebine."</string>

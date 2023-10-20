@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"အက်ပ်များက ဘက်ထရီကုန်စေသည်"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ချဲ့ခြင်း"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"အများသုံးစွဲနိုင်မှုကို အသုံးပြုမှု"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"ဖန်သားပြင်"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> က ဘက်ထရီကို အသုံးပြုနေသည်"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"အက်ပ် <xliff:g id="NUMBER">%1$d</xliff:g> ခုက ဘက်ထရီကို အသုံးပြုနေသည်"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ဘက်ထရီနှင့် ဒေတာအသုံးပြုမှု အသေးစိတ်ကို ကြည့်ရန် တို့ပါ"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"နောက်ခံမှနေ၍ မျက်နှာစာဝန်ဆောင်မှုများ စတင်ရန် တွဲဖက် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"မိုက်ခရိုဖုန်း သုံးနိုင်သည်"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"မိုက်ခရိုဖုန်း ပိတ်ထားသည်"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ဖန်သားပြင်တွင် စကရင်ပွား၍ မရပါ"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"အခြားကေဘယ်ကြိုးသုံးပြီး ထပ်စမ်းကြည့်ပါ"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ကေဘယ်ကြိုးက ဖန်သားပြင်များကို မပံ့ပိုးခြင်း ဖြစ်နိုင်သည်"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"သင့် USB-C ကေဘယ်ကြိုးသည် ဖန်သားပြင်များနှင့် မှန်ကန်စွာ ချိတ်ဆက်မထားခြင်း ဖြစ်နိုင်သည်"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen ဖွင့်ထားသည်"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် အကြောင်းအရာကို ပြရန် ဖန်သားပြင်နှစ်ခုစလုံးကို သုံးနေသည်"</string>

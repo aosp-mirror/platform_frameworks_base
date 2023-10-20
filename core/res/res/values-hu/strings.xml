@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Akkumulátort használó alkalmazások"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Nagyítás"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Kisegítő lehetőségek használata"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Kijelző"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás használja az akkumulátort"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> alkalmazás használja az akkumulátort"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Koppintson az akkumulátor- és adathasználat részleteinek megtekintéséhez"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Lehetővé teszi a társalkalmazások számára, hogy előtérben futó szolgáltatásokat indítsanak a háttérből."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"A mikrofon rendelkezésre áll"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"A mikrofon le van tiltva"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nem lehet tükrözni a kijelzőre"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Használjon másik kábelt, és próbálja újra"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Előfordulhat, hogy a kábel nem támogatja a kijelzőket"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Előfordulhat, hogy az USB-C kábellel nem csatlakoztathatók megfelelően a kijelzők"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"A Dual Screen funkció be van kapcsolva"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> mindkét kijelzőt használja a tartalmak megjelenítésére"</string>

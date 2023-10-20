@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"பேட்டரியைப் பயன்படுத்தும் ஆப்ஸ்"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"பெரிதாக்கல்"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"அணுகல்தன்மை உபயோகம்"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"டிஸ்ப்ளே"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் பேட்டரியைப் பயன்படுத்துகிறது"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ஆப்ஸ் பேட்டரியைப் பயன்படுத்துகின்றன"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"பேட்டரி மற்றும் டேட்டா உபயோக விவரங்களைக் காண, தட்டவும்"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"பின்னணியிலிருந்து முன்புலச் சேவைகளைத் தொடங்க துணைத் தயாரிப்பு ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"மைக்ரோஃபோன் இயக்கப்பட்டது"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"மைக்ரோஃபோன் முடக்கப்பட்டுள்ளது"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"டிஸ்ப்ளேயில் பிரதிபலிக்க முடியவில்லை"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"வெவ்வேறு கேபிள்களைப் பயன்படுத்தி மீண்டும் முயலவும்"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"டிஸ்ப்ளேக்களைக் கேபிள் ஆதரிக்காமல் இருக்கக்கூடும்"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"டிஸ்ப்ளேக்களில் உங்கள் USB-C கேபிள் சரியாக இணைக்கப்படாமல் இருக்கக்கூடும்"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"இரட்டைத் திரை"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"இரட்டைத் திரை அம்சம் இயக்கத்தில் உள்ளது"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"உள்ளடக்கத்தைக் காட்டுவதற்கு இரண்டு டிஸ்ப்ளேக்களையும் <xliff:g id="APP_NAME">%1$s</xliff:g> பயன்படுத்துகிறது"</string>

@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"മാഗ്നിഫിക്കേഷൻ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ഉപയോഗസഹായി ഉപയോഗം"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"ഡിസ്‌പ്ലേ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ബാറ്ററി, ഡാറ്റ ഉപയോഗം എന്നിവയുടെ വിശദാംശങ്ങളറിയാൻ ടാപ്പുചെയ്യുക"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"പശ്ചാത്തലത്തിൽ നിന്ന് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ ആരംഭിക്കാൻ സഹകാരി ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"മൈക്രോഫോൺ ലഭ്യമാണ്"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"മൈക്രോഫോൺ ബ്ലോക്ക് ചെയ്‌തു"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ഡിസ്‌പ്ലേയിലേക്ക് മിറർ ചെയ്യാനാകില്ല"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"മറ്റൊരു കേബിൾ ഉപയോഗിച്ച് വീണ്ടും ശ്രമിക്കുക"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"കേബിൾ, ഡിസ്പ്ലേകളെ പിന്തുണച്ചേക്കില്ല"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"നിങ്ങളുടെ USB-C കേബിൾ, ഡിസ്‌പ്ലേകളിലേക്ക് ശരിയായി കണക്റ്റ് ആയേക്കില്ല"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ഡ്യുവൽ സ്ക്രീൻ"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ഡ്യുവൽ സ്ക്രീൻ ഓണാണ്"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ഉള്ളടക്കം കാണിക്കാൻ <xliff:g id="APP_NAME">%1$s</xliff:g> രണ്ട് ഡിസ്പ്ലേകളും ഉപയോഗിക്കുന്നു"</string>

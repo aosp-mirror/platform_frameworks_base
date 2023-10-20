@@ -291,6 +291,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Апликације које троше батерију"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увећање"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Коришћење Приступачности"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Екран"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> користи батерију"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Апликације (<xliff:g id="NUMBER">%1$d</xliff:g>) користе батерију"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Додирните за детаље о батерији и потрошњи података"</string>
@@ -314,7 +315,7 @@
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика и звук"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"приступ музици и аудио садржају на уређају"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Слике и видео снимци"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"приступ сликама и видео снимцима на уређају"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"приступ сликама и видеима на уређају"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"снима звук"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физичке активности"</string>
@@ -2334,6 +2335,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Дозвољава пратећој апликацији да покрене услуге у првом плану из позадине."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон је доступан"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон је блокиран"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Пресликавање на екран није могуће"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Употребите други кабл и пробајте поново"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабл не подржава екране"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C кабл се не повезује правилно са екранима"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen је укључен"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> користи оба екрана за приказивање садржаја"</string>

@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"電池を消費しているアプリ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"拡大"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ユーザー補助の使用"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"ディスプレイ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」がバッテリーを使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップしてバッテリーやデータの使用量を確認"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"バックグラウンドからのフォアグラウンド サービスの起動をコンパニオン アプリに許可します。"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"マイクを利用できます"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"マイクがブロックされています"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ディスプレイにミラーリングできません"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"別のケーブルでもう一度お試しください"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ケーブルはディスプレイに対応していない可能性があります"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C ケーブルがディスプレイに正しく接続されていない可能性があります"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"デュアル スクリーン"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"デュアル スクリーン: ON"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>は 2 画面でコンテンツを表示しています"</string>

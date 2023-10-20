@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Батареяны пайдаланып жатқан қолданбалар"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ұлғайту"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Арнайы мүмкіндіктерді қолдану"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Дисплей"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> батареяны пайдалануда"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> қолданба батареяны пайдалануда"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батарея мен деректер трафигі туралы білу үшін түртіңіз"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Қосымша қолданбаға экрандық режимдегі қызметтерді фоннан іске қосуға рұқсат беріледі."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон қолжетімді."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон блокталған."</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Дисплейге көшірмені көрсету мүмкін емес"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Басқа кабельмен әрекетті қайталап көріңіз."</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабель дисплейлерді қолдамауы мүмкін"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C кабелі дисплейлерге дұрыс жалғанбаған болуы мүмкін."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen функциясы қосулы"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы контентті көрсету үшін екі дисплейді де пайдаланады."</string>
