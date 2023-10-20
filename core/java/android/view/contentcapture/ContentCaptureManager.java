@@ -783,7 +783,9 @@ public final class ContentCaptureManager {
                 (params.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
 
         MainContentCaptureSession mainSession;
+        boolean alreadyDisabledByApp;
         synchronized (mLock) {
+            alreadyDisabledByApp = (mFlags & ContentCaptureContext.FLAG_DISABLED_BY_APP) != 0;
             if (flagSecureEnabled) {
                 mFlags |= ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
             } else {
@@ -791,7 +793,9 @@ public final class ContentCaptureManager {
             }
             mainSession = mMainSession;
         }
-        if (mainSession != null) {
+
+        // Prevent overriding the status of disabling by app
+        if (mainSession != null && !alreadyDisabledByApp) {
             mainSession.setDisabled(flagSecureEnabled);
         }
     }
