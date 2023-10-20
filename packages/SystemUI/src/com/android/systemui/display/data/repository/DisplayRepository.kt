@@ -47,6 +47,8 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
 /** Provides a [Flow] of [Display] as returned by [DisplayManager]. */
@@ -54,10 +56,7 @@ interface DisplayRepository {
     /** Display change event indicating a change to the given displayId has occurred. */
     val displayChangeEvent: Flow<Int>
 
-    /**
-     * Provides a nullable set of displays. Updates when new displays have been added or removed but
-     * not when a display's info has changed.
-     */
+    /** Provides the current set of displays. */
     val displays: Flow<Set<Display>>
 
     /**
@@ -112,10 +111,6 @@ constructor(
                             trySend(DisplayEvent.Changed(displayId))
                         }
                     }
-                // Triggers an initial event when subscribed. This is needed to avoid getDisplays to
-                // be called when this class is constructed, but only when someone subscribes to
-                // this flow.
-                trySend(DisplayEvent.Changed(Display.DEFAULT_DISPLAY))
                 displayManager.registerDisplayListener(
                     callback,
                     backgroundHandler,
@@ -125,6 +120,7 @@ constructor(
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }
+            .onStart { emit(DisplayEvent.Changed(Display.DEFAULT_DISPLAY)) }
             .flowOn(backgroundCoroutineDispatcher)
 
     override val displayChangeEvent: Flow<Int> =
@@ -134,13 +130,9 @@ constructor(
         allDisplayEvents
             .map { getDisplays() }
             .flowOn(backgroundCoroutineDispatcher)
-            .stateIn(
-                applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                // To avoid getting displays on this object construction, they are get after the
-                // first event. allDisplayEvents emits a changed event when we subscribe to it.
-                initialValue = emptySet()
-            )
+            .shareIn(applicationScope, started = SharingStarted.WhileSubscribed(), replay = 1)
+
+    override val displays: Flow<Set<Display>> = enabledDisplays
 
     private fun getDisplays(): Set<Display> =
         traceSection("DisplayRepository#getDisplays()") {
@@ -148,8 +140,6 @@ constructor(
         }
 
     /** Propagate to the listeners only enabled displays */
-    override val displays: Flow<Set<Display>> = enabledDisplays
-
     private val enabledDisplayIds: Flow<Set<Int>> =
         enabledDisplays
             .map { enabledDisplaysSet -> enabledDisplaysSet.map { it.displayId }.toSet() }
@@ -251,6 +241,7 @@ constructor(
                 val id = pendingDisplayIds.maxOrNull() ?: return@map null
                 object : DisplayRepository.PendingDisplay {
                     override val id = id
+
                     override suspend fun enable() {
                         traceSection("DisplayRepository#enable($id)") {
                             if (DEBUG) {
@@ -303,8 +294,12 @@ constructor(
 private interface DisplayConnectionListener : DisplayListener {
 
     override fun onDisplayConnected(id: Int) {}
+
     override fun onDisplayDisconnected(id: Int) {}
+
     override fun onDisplayAdded(id: Int) {}
+
     override fun onDisplayRemoved(id: Int) {}
+
     override fun onDisplayChanged(id: Int) {}
 }
