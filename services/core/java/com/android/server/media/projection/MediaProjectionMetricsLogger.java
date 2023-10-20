@@ -17,6 +17,7 @@
 package com.android.server.media.projection;
 
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
@@ -105,6 +106,21 @@ public class MediaProjectionMetricsLogger {
         write(
                 mSessionIdGenerator.getCurrentSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED,
+                hostUid,
+                TARGET_UID_UNKNOWN,
+                TIME_SINCE_LAST_ACTIVE_UNKNOWN,
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    /**
+     * Logs that the app selector dialog is shown for the user.
+     *
+     * @param hostUid UID of the package that initiates MediaProjection.
+     */
+    public void logAppSelectorDisplayed(int hostUid) {
+        write(
+                mSessionIdGenerator.getCurrentSessionId(),
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED,
                 hostUid,
                 TARGET_UID_UNKNOWN,
                 TIME_SINCE_LAST_ACTIVE_UNKNOWN,
