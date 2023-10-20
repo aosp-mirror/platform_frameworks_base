@@ -34,11 +34,11 @@ import androidx.compose.ui.unit.Velocity
 class PriorityNestedScrollConnection(
     private val canStartPreScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
     private val canStartPostScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
+    private val canStartPostFling: (velocityAvailable: Velocity) -> Boolean,
     private val canContinueScroll: () -> Boolean,
     private val onStart: () -> Unit,
     private val onScroll: (offsetAvailable: Offset) -> Offset,
     private val onStop: (velocityAvailable: Velocity) -> Velocity,
-    private val onPostFling: suspend (velocityAvailable: Velocity) -> Velocity,
 ) : NestedScrollConnection {
 
     /** In priority mode [onPreScroll] events are first consumed by the parent, via [onScroll]. */
@@ -102,7 +102,14 @@ class PriorityNestedScrollConnection(
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-        return onPostFling(available)
+        if (!canStartPostFling(available)) {
+            return Velocity.Zero
+        }
+
+        onPriorityStart(available = Offset.Zero)
+
+        // This is the last event of a scroll gesture.
+        return onPriorityStop(available)
     }
 
     /** Method to call before destroying the object or to reset the initial state. */

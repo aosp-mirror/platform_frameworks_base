@@ -556,6 +556,15 @@ class SceneNestedScrollHandler(
         // moving on to the next scene.
         var gestureStartedOnNestedChild = false
 
+        fun findNextScene(amount: Float): SceneKey? {
+            val fromScene = gestureHandler.currentScene
+            return when {
+                amount < 0f -> fromScene.upOrLeft(gestureHandler.orientation)
+                amount > 0f -> fromScene.downOrRight(gestureHandler.orientation)
+                else -> null
+            }
+        }
+
         return PriorityNestedScrollConnection(
             canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
                 gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
@@ -576,15 +585,16 @@ class SceneNestedScrollHandler(
                 if (amount == 0f) return@PriorityNestedScrollConnection false
 
                 gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
+                nextScene = findNextScene(amount)
+                nextScene != null
+            },
+            canStartPostFling = { velocityAvailable ->
+                val amount = velocityAvailable.toAmount()
+                if (amount == 0f) return@PriorityNestedScrollConnection false
 
-                val fromScene = gestureHandler.currentScene
-                nextScene =
-                    when {
-                        amount < 0f -> fromScene.upOrLeft(gestureHandler.orientation)
-                        amount > 0f -> fromScene.downOrRight(gestureHandler.orientation)
-                        else -> null
-                    }
-
+                // We could start an overscroll animation
+                gestureStartedOnNestedChild = true
+                nextScene = findNextScene(amount)
                 nextScene != null
             },
             canContinueScroll = { priorityScene == gestureHandler.swipeTransitionToScene.key },
@@ -610,18 +620,6 @@ class SceneNestedScrollHandler(
                 )
 
                 // The onDragStopped animation consumes any remaining velocity.
-                velocityAvailable
-            },
-            onPostFling = { velocityAvailable ->
-                val velocityAmount = velocityAvailable.toAmount()
-                if (velocityAmount != 0f) {
-                    // If there is any velocity left, we can try running an overscroll animation
-                    // between scenes.
-                    gestureHandler.onDragStarted()
-                    gestureHandler.onDragStopped(velocity = velocityAmount, canChangeScene = false)
-                }
-
-                // We consumed any remaining velocity.
                 velocityAvailable
             },
         )
