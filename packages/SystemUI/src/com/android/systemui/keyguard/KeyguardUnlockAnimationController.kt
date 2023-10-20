@@ -707,8 +707,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 return@postDelayed
             }
 
-            if ((wallpaperTargets?.isNotEmpty() == true) &&
-                    wallpaperManager.isLockscreenLiveWallpaperEnabled()) {
+            if ((wallpaperTargets?.isNotEmpty() == true)) {
                 fadeInWallpaper()
                 hideKeyguardViewAfterRemoteAnimation()
             } else {

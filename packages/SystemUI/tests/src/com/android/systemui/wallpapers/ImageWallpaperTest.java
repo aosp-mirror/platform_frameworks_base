@@ -16,15 +16,20 @@
 
 package com.android.systemui.wallpapers;
 
+import static android.app.WallpaperManager.FLAG_LOCK;
+import static android.app.WallpaperManager.FLAG_SYSTEM;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -111,7 +116,8 @@ public class ImageWallpaperTest extends SysuiTestCase {
         when(mWallpaperBitmap.getConfig()).thenReturn(Bitmap.Config.ARGB_8888);
 
         // set up wallpaper manager
-        when(mWallpaperManager.getBitmapAsUser(eq(ActivityManager.getCurrentUser()), anyBoolean()))
+        when(mWallpaperManager.getBitmapAsUser(
+                eq(ActivityManager.getCurrentUser()), anyBoolean(), anyInt(), anyBoolean()))
                 .thenReturn(mWallpaperBitmap);
         when(mMockContext.getSystemService(WallpaperManager.class)).thenReturn(mWallpaperManager);
 
@@ -208,6 +214,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
         ImageWallpaper.CanvasEngine spyEngine = spy(engine);
         doNothing().when(spyEngine).drawFrameOnCanvas(any(Bitmap.class));
         doNothing().when(spyEngine).reportEngineShown(anyBoolean());
+        doReturn(FLAG_SYSTEM | FLAG_LOCK).when(spyEngine).getWallpaperFlags();
         doAnswer(invocation -> {
             ((ImageWallpaper.CanvasEngine) invocation.getMock()).onMiniBitmapUpdated();
             return null;
@@ -216,7 +223,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
     }
 
     private void setBitmapDimensions(int bitmapWidth, int bitmapHeight) {
-        when(mWallpaperManager.peekBitmapDimensions())
+        when(mWallpaperManager.peekBitmapDimensions(anyInt(), anyBoolean()))
                 .thenReturn(new Rect(0, 0, bitmapWidth, bitmapHeight));
         when(mWallpaperBitmap.getWidth()).thenReturn(bitmapWidth);
         when(mWallpaperBitmap.getHeight()).thenReturn(bitmapHeight);
@@ -234,9 +241,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
         clearInvocations(mSurfaceHolder);
         setBitmapDimensions(bitmapWidth, bitmapHeight);
 
-        ImageWallpaper imageWallpaper = createImageWallpaper();
-        ImageWallpaper.CanvasEngine engine =
-                (ImageWallpaper.CanvasEngine) imageWallpaper.onCreateEngine();
+        ImageWallpaper.CanvasEngine engine = getSpyEngine();
         engine.onCreate(mSurfaceHolder);
 
         verify(mSurfaceHolder, times(1)).setFixedSize(

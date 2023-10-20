@@ -32,11 +32,6 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
     boolean isPresenterFullyCollapsed();
 
     /**
-     * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
-     */
-    void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation);
-
-    /**
      * Called when the current user changes.
      * @param newUserId new user id
      */

@@ -26,24 +26,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <com.android.systemui.statusbar.BackDropView
-        android:id="@+id/backdrop"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        sysui:ignoreRightInset="true"
-    >
-        <ImageView android:id="@+id/backdrop_back"
-                   android:layout_width="match_parent"
-                   android:scaleType="centerCrop"
-                   android:layout_height="match_parent" />
-        <ImageView android:id="@+id/backdrop_front"
-                   android:layout_width="match_parent"
-                   android:layout_height="match_parent"
-                   android:scaleType="centerCrop"
-                   android:visibility="invisible" />
-    </com.android.systemui.statusbar.BackDropView>
-
     <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_behind"
         android:layout_width="match_parent"

@@ -549,12 +549,6 @@ object Flags {
     val LOCKSCREEN_ENABLE_LANDSCAPE =
             unreleasedFlag("lockscreen.enable_landscape")
 
-    // TODO(b/273443374): Tracking Bug
-    @Keep
-    @JvmField
-    val LOCKSCREEN_LIVE_WALLPAPER =
-        sysPropBooleanFlag("persist.wm.debug.lockscreen_live_wallpaper", default = true)
-
     // TODO(b/281648899): Tracking bug
     @Keep
     @JvmField
