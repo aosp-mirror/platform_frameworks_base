@@ -80,7 +80,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
+
 import androidx.test.runner.AndroidJUnit4;
+
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
@@ -93,6 +95,7 @@ import com.android.server.pm.PackageManagerService;
 
 import java.util.List;
 import java.util.Objects;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -190,7 +193,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         assertTrue(mAccessibilityManager.isEnabled());
 
         // TODO (b/291907312): remove feature flag
-        mTestFlagResolver.setFlagOverride(NotificationFlags.ENABLE_ATTENTION_HELPER_REFACTOR, true);
+        mSetFlagsRule.enableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER);
         // Disable feature flags by default. Tests should enable as needed.
         mSetFlagsRule.disableFlags(Flags.FLAG_POLITE_NOTIFICATIONS, Flags.FLAG_EXPIRE_BITMAPS);
 
