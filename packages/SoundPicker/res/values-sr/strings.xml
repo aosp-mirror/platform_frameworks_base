@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Додавање прилагођене мелодије звона није успело"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Брисање прилагођене мелодије звона није успело"</string>
     <string name="app_label" msgid="3091611356093417332">"Звукови"</string>
-    <string name="empty_list" msgid="2871978423955821191">"Листа је празна"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"Звук"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"Вибрирање"</string>
 </resources>

@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Nem sikerült hozzáadni az egyéni csengőhangot"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Nem sikerült törölni az egyéni csengőhangot"</string>
     <string name="app_label" msgid="3091611356093417332">"Hangok"</string>
-    <string name="empty_list" msgid="2871978423955821191">"A lista üres"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"Hang"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"Rezgés"</string>
 </resources>
