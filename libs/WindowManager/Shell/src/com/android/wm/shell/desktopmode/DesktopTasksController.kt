@@ -343,9 +343,8 @@ class DesktopTasksController(
             task.taskId
         )
         val wct = WindowContainerTransaction()
-        wct.setWindowingMode(task.token, WINDOWING_MODE_MULTI_WINDOW)
         wct.setBounds(task.token, Rect())
-        wct.setDensityDpi(task.token, getDefaultDensityDpi())
+        addMoveToSplitChanges(wct, task)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
@@ -827,7 +826,9 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
-        wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_MULTI_WINDOW)
+        // Explicitly setting multi-window at task level interferes with animations.
+        // Let task inherit windowing mode once transition is complete instead.
+        wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED)
         // The task's density may have been overridden in freeform; revert it here as we don't
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
