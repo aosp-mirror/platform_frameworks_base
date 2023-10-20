@@ -17,9 +17,12 @@
 package com.android.wm.shell.unfold;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -27,6 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.view.Display;
@@ -35,6 +39,9 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.window.flags.FakeFeatureFlagsImpl;
+import com.android.window.flags.FeatureFlags;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
@@ -45,6 +52,8 @@ import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,6 +141,55 @@ public class UnfoldTransitionHandlerTest {
     }
 
     @Test
+    public void startAnimation_sameTransitionAsHandleRequest_startsAnimation() {
+        TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
+        mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                mock(TransitionInfo.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        assertThat(animationStarted).isTrue();
+    }
+
+    @Test
+    public void startAnimation_differentTransitionFromRequestWithUnfold_startsAnimation() {
+        mUnfoldTransitionHandler.handleRequest(new Binder(), createNoneTransitionInfo());
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                createUnfoldTransitionInfo(),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        assertThat(animationStarted).isTrue();
+    }
+
+    @Test
+    public void startAnimation_differentTransitionFromRequestWithoutUnfold_doesNotStart() {
+        mUnfoldTransitionHandler.handleRequest(new Binder(), createNoneTransitionInfo());
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                createNonUnfoldTransitionInfo(),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        assertThat(animationStarted).isFalse();
+    }
+
+    @Test
     public void startAnimation_animationFinishes_finishesTheTransition() {
         TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
         mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
@@ -215,6 +273,12 @@ public class UnfoldTransitionHandlerTest {
                 triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
     }
 
+    private TransitionRequestInfo createNoneTransitionInfo() {
+        return new TransitionRequestInfo(TRANSIT_NONE,
+                /* triggerTask= */ null, /* remoteTransition= */ null,
+                /* displayChange= */ null,  /* flags= */ 0);
+    }
+
     private static class TestShellUnfoldProgressProvider implements ShellUnfoldProgressProvider,
             ShellUnfoldProgressProvider.UnfoldListener {
 
@@ -276,5 +340,36 @@ public class UnfoldTransitionHandlerTest {
         public boolean hasCallback(Runnable runnable) {
             return false;
         }
+    }
+
+    static class TestCase {
+        private final boolean mShouldHandleMixedUnfold;
+
+        public TestCase(boolean shouldHandleMixedUnfold) {
+            mShouldHandleMixedUnfold = shouldHandleMixedUnfold;
+        }
+
+        public boolean mixedUnfoldFlagEnabled() {
+            return mShouldHandleMixedUnfold;
+        }
+
+        @Override
+        public String toString() {
+            return "shouldHandleMixedUnfold flag = " + mShouldHandleMixedUnfold;
+        }
+    }
+
+    private TransitionInfo createUnfoldTransitionInfo() {
+        TransitionInfo transitionInfo = new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
+        TransitionInfo.Change change = new TransitionInfo.Change(null, mock(SurfaceControl.class));
+        change.setStartAbsBounds(new Rect(0, 0, 10, 10));
+        change.setEndAbsBounds(new Rect(0, 0, 100, 100));
+        change.setFlags(TransitionInfo.FLAG_IS_DISPLAY);
+        transitionInfo.addChange(change);
+        return transitionInfo;
+    }
+
+    private TransitionInfo createNonUnfoldTransitionInfo() {
+        return new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
     }
 }
