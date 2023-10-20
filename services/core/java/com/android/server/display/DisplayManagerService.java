@@ -2307,8 +2307,10 @@ public final class DisplayManagerService extends SystemService {
 
     @GuardedBy("mSyncRoot")
     private boolean hdrConversionIntroducesLatencyLocked() {
+        HdrConversionMode mode = getHdrConversionModeSettingInternal();
         final int preferredHdrOutputType =
-                getHdrConversionModeSettingInternal().getPreferredHdrOutputType();
+                mode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM
+                        ? mSystemPreferredHdrOutputType : mode.getPreferredHdrOutputType();
         if (preferredHdrOutputType != Display.HdrCapabilities.HDR_TYPE_INVALID) {
             int[] hdrTypesWithLatency = mInjector.getHdrOutputTypesWithLatency();
             return ArrayUtils.contains(hdrTypesWithLatency, preferredHdrOutputType);
@@ -2589,16 +2591,14 @@ public final class DisplayManagerService extends SystemService {
             // TODO(b/202378408) set minimal post-processing only if it's supported once we have a
             // separate API for disabling on-device processing.
             boolean mppRequest = isMinimalPostProcessingAllowed() && preferMinimalPostProcessing;
-            boolean disableHdrConversionForLatency = false;
+            // If HDR conversion introduces latency, disable that in case minimal
+            // post-processing is requested
+            boolean disableHdrConversionForLatency =
+                    mppRequest ? hdrConversionIntroducesLatencyLocked() : false;
 
             if (display.getRequestedMinimalPostProcessingLocked() != mppRequest) {
                 display.setRequestedMinimalPostProcessingLocked(mppRequest);
                 shouldScheduleTraversal = true;
-                // If HDR conversion introduces latency, disable that in case minimal
-                // post-processing is requested
-                if (mppRequest) {
-                    disableHdrConversionForLatency = hdrConversionIntroducesLatencyLocked();
-                }
             }
 
             if (shouldScheduleTraversal) {
