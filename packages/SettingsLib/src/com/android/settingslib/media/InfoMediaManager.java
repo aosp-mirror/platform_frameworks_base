@@ -668,6 +668,7 @@ public abstract class InfoMediaManager extends MediaManager {
                                 route,
                                 mPackageName,
                                 mPreferenceItemMap.get(route.getId()));
+                break;
             default:
                 Log.w(TAG, "addMediaDevice() unknown device type : " + deviceType);
                 break;
