@@ -53,7 +53,17 @@ filegroup {
 }
 
 filegroup {
-    name: "FlickerTestsAppLaunch-src",
+    name: "FlickerTestsAppLaunchCommon-src",
+    srcs: ["src/**/launch/common/*.kt"],
+}
+
+filegroup {
+    name: "FlickerTestsAppLaunch1-src",
+    srcs: ["src/**/launch/OpenApp*.kt"],
+}
+
+filegroup {
+    name: "FlickerTestsAppLaunch2-src",
     srcs: ["src/**/launch/*.kt"],
 }
 
@@ -119,7 +129,8 @@ android_test {
     exclude_srcs: [
         ":FlickerTestsAppClose-src",
         ":FlickerTestsIme-src",
-        ":FlickerTestsAppLaunch-src",
+        ":FlickerTestsAppLaunch1-src",
+        ":FlickerTestsAppLaunch2-src",
         ":FlickerTestsQuickswitch-src",
         ":FlickerTestsRotation-src",
         ":FlickerTestsNotification-src",
@@ -162,10 +173,44 @@ android_test {
     instrumentation_target_package: "com.android.server.wm.flicker.launch",
     srcs: [
         ":FlickerTestsBase-src",
-        ":FlickerTestsAppLaunch-src",
+        ":FlickerTestsAppLaunchCommon-src",
+        ":FlickerTestsAppLaunch2-src",
     ],
     exclude_srcs: [
         ":FlickerTestsActivityEmbedding-src",
+    ],
+}
+
+android_test {
+    name: "FlickerTestsAppLaunch1",
+    defaults: ["FlickerTestsDefault"],
+    additional_manifests: ["manifests/AndroidManifestAppLaunch.xml"],
+    package_name: "com.android.server.wm.flicker.launch",
+    instrumentation_target_package: "com.android.server.wm.flicker.launch",
+    srcs: [
+        ":FlickerTestsBase-src",
+        ":FlickerTestsAppLaunchCommon-src",
+        ":FlickerTestsAppLaunch1-src",
+    ],
+    exclude_srcs: [
+        ":FlickerTestsActivityEmbedding-src",
+    ],
+}
+
+android_test {
+    name: "FlickerTestsAppLaunch2",
+    defaults: ["FlickerTestsDefault"],
+    additional_manifests: ["manifests/AndroidManifestAppLaunch.xml"],
+    package_name: "com.android.server.wm.flicker.launch",
+    instrumentation_target_package: "com.android.server.wm.flicker.launch",
+    srcs: [
+        ":FlickerTestsBase-src",
+        ":FlickerTestsAppLaunchCommon-src",
+        ":FlickerTestsAppLaunch2-src",
+    ],
+    exclude_srcs: [
+        ":FlickerTestsActivityEmbedding-src",
+        ":FlickerTestsAppLaunch1-src",
     ],
 }
 
