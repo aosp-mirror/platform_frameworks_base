@@ -285,6 +285,10 @@ public class TransactionParcelTests {
                 78 /* configChanges */);
 
         ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        transaction.addTransactionItem(callback1);
+        transaction.addTransactionItem(callback2);
+        transaction.addTransactionItem(lifecycleRequest);
+
         transaction.addCallback(callback1);
         transaction.addCallback(callback2);
         transaction.setLifecycleStateRequest(lifecycleRequest);
