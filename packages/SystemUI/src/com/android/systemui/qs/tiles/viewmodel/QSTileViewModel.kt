@@ -29,25 +29,13 @@ import kotlinx.coroutines.flow.StateFlow
  */
 interface QSTileViewModel {
 
-    /**
-     * State of the tile to be shown by the view. It's guaranteed that it's only accessed between
-     * [QSTileLifecycle.ALIVE] and [QSTileLifecycle.DEAD].
-     */
+    /** State of the tile to be shown by the view. */
     val state: SharedFlow<QSTileState>
 
     val config: QSTileConfig
 
-    /**
-     * Specifies whether this device currently supports this tile. This might be called outside of
-     * [QSTileLifecycle.ALIVE] and [QSTileLifecycle.DEAD] bounds (for example in Edit Mode).
-     */
+    /** Specifies whether this device currently supports this tile. */
     val isAvailable: StateFlow<Boolean>
-
-    /**
-     * Handles ViewModel lifecycle. Implementations should be inactive outside of
-     * [QSTileLifecycle.ALIVE] and [QSTileLifecycle.DEAD] bounds.
-     */
-    fun onLifecycle(lifecycle: QSTileLifecycle)
 
     /**
      * Notifies about the user change. Implementations should avoid using 3rd party userId sources
@@ -61,6 +49,12 @@ interface QSTileViewModel {
 
     /** Notifies underlying logic about user input. */
     fun onActionPerformed(userAction: QSTileUserAction)
+
+    /**
+     * Frees the resources held by this view model. Call it when you no longer need the instance,
+     * because there is no guarantee it will work as expected beyond this point.
+     */
+    fun destroy()
 }
 
 /**

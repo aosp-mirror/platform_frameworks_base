@@ -77,9 +77,6 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
         testScope.runTest {
             assertThat(fakeQSTileDataInteractor.dataRequests).isEmpty()
 
-            underTest.onLifecycle(QSTileLifecycle.ALIVE)
-            underTest.onUserIdChanged(1)
-
             assertThat(fakeQSTileDataInteractor.dataRequests).isEmpty()
 
             underTest.state.launchIn(backgroundScope)
@@ -87,7 +84,7 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
 
             assertThat(fakeQSTileDataInteractor.dataRequests).isNotEmpty()
             assertThat(fakeQSTileDataInteractor.dataRequests.first())
-                .isEqualTo(FakeQSTileDataInteractor.DataRequest(1))
+                .isEqualTo(FakeQSTileDataInteractor.DataRequest(0))
         }
 
     private fun createViewModel(
@@ -95,12 +92,14 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
         config: QSTileConfig = TEST_QS_TILE_CONFIG,
     ): QSTileViewModel =
         BaseQSTileViewModel(
-            config,
-            fakeQSTileUserActionInteractor,
-            fakeQSTileDataInteractor,
-            object : QSTileDataToStateMapper<Any> {
-                override fun map(config: QSTileConfig, data: Any): QSTileState =
-                    QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {}
+            { config },
+            { fakeQSTileUserActionInteractor },
+            { fakeQSTileDataInteractor },
+            {
+                object : QSTileDataToStateMapper<Any> {
+                    override fun map(config: QSTileConfig, data: Any): QSTileState =
+                        QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {}
+                }
             },
             fakeDisabledByPolicyInteractor,
             fakeUserRepository,
