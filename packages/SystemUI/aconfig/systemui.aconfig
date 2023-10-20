@@ -31,6 +31,13 @@ flag {
 }
 
 flag {
+    name: "notification_async_hybrid_view_inflation"
+    namespace: "systemui"
+    description: "Inflates the hybrid (single-line) notification views form the background thread."
+    bug: "217799515"
+}
+
+flag {
     name: "scene_container"
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
