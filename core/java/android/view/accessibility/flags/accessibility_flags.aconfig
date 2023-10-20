@@ -1,10 +1,12 @@
 package: "android.view.accessibility"
 
+# NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
+
 flag {
+    name: "a11y_overlay_callbacks"
     namespace: "accessibility"
-    name: "force_invert_color"
-    description: "Enable force force-dark for smart inversion and dark theme everywhere"
-    bug: "282821643"
+    description: "Whether to allow the passing of result callbacks when attaching a11y overlays."
+    bug: "304478691"
 }
 
 flag {
@@ -15,8 +17,8 @@ flag {
 }
 
 flag {
-        name: "a11y_overlay_callbacks"
     namespace: "accessibility"
-    description: "Whether to allow the passing of result callbacks when attaching a11y overlays."
-    bug: "304478691"
+    name: "force_invert_color"
+    description: "Enable force force-dark for smart inversion and dark theme everywhere"
+    bug: "282821643"
 }
