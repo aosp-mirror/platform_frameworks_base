@@ -2244,6 +2244,25 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return SPLIT_POSITION_UNDEFINED;
     }
 
+    /**
+     * Returns the {@link StageType} where {@param token} is being used
+     * {@link SplitScreen#STAGE_TYPE_UNDEFINED} otherwise
+     */
+    @StageType
+    public int getSplitItemStage(@Nullable WindowContainerToken token) {
+        if (token == null) {
+            return STAGE_TYPE_UNDEFINED;
+        }
+
+        if (mMainStage.containsToken(token)) {
+            return STAGE_TYPE_MAIN;
+        } else if (mSideStage.containsToken(token)) {
+            return STAGE_TYPE_SIDE;
+        }
+
+        return STAGE_TYPE_UNDEFINED;
+    }
+
     @Override
     public void setLayoutOffsetTarget(int offsetX, int offsetY, SplitLayout layout) {
         final StageTaskListener topLeftStage =
@@ -2491,7 +2510,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mRecentTasks.ifPresent(
                         recentTasks -> recentTasks.removeSplitPair(triggerTask.taskId));
             }
-            prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, outWCT);
+            @StageType int topStage = STAGE_TYPE_UNDEFINED;
+            if (isSplitScreenVisible()) {
+                // Get the stage where a child exists to keep that stage onTop
+                if (mMainStage.getChildCount() != 0 && mSideStage.getChildCount() == 0) {
+                    topStage = STAGE_TYPE_MAIN;
+                } else if (mSideStage.getChildCount() != 0 && mMainStage.getChildCount() == 0) {
+                    topStage = STAGE_TYPE_SIDE;
+                }
+            }
+            prepareExitSplitScreen(topStage, outWCT);
         }
     }
 
@@ -2908,7 +2936,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return SPLIT_POSITION_UNDEFINED;
     }
 
-    /** Synchronize split-screen state with transition and make appropriate preparations. */
+    /**
+     * Synchronize split-screen state with transition and make appropriate preparations.
+     * @param toStage The stage that will not be dismissed. If set to
+     *        {@link SplitScreen#STAGE_TYPE_UNDEFINED} then both stages will be dismissed
+     */
     public void prepareDismissAnimation(@StageType int toStage, @ExitReason int dismissReason,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t,
             @NonNull SurfaceControl.Transaction finishT) {

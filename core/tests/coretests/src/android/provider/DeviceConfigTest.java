@@ -67,6 +67,7 @@ public class DeviceConfigTest {
         deleteViaContentProvider(NAMESPACE, KEY);
         deleteViaContentProvider(NAMESPACE, KEY2);
         deleteViaContentProvider(NAMESPACE, KEY3);
+        DeviceConfig.setSyncDisabledMode(DeviceConfig.SYNC_DISABLED_MODE_NONE);
     }
 
     @Test
