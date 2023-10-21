@@ -76,7 +76,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -385,10 +384,12 @@ public final class MediaProjectionManagerService extends SystemService
             if (mProjectionGrant != null) {
                 // Cache the session details.
                 mProjectionGrant.mSession = incomingSession;
-                mMediaProjectionMetricsLogger.notifyProjectionStateChange(
-                        mProjectionGrant.uid,
-                        FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS,
-                        FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+                if (incomingSession != null) {
+                    // Only log in progress when session is not null.
+                    // setContentRecordingSession is called with a null session for the stop case.
+                    mMediaProjectionMetricsLogger.logInProgress(
+                            mProjectionGrant.uid, incomingSession.getTargetUid());
+                }
                 dispatchSessionSet(mProjectionGrant.getProjectionInfo(), incomingSession);
             }
             return true;
@@ -461,6 +462,11 @@ public final class MediaProjectionManagerService extends SystemService
     @VisibleForTesting
     void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource) {
         mMediaProjectionMetricsLogger.logInitiated(hostUid, sessionCreationSource);
+    }
+
+    @VisibleForTesting
+    void notifyPermissionRequestDisplayed(int hostUid) {
+        mMediaProjectionMetricsLogger.logPermissionRequestDisplayed(hostUid);
     }
 
     /**
@@ -860,6 +866,18 @@ public final class MediaProjectionManagerService extends SystemService
             try {
                 MediaProjectionManagerService.this.notifyPermissionRequestInitiated(
                         hostUid, sessionCreationSource);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyPermissionRequestDisplayed(int hostUid) {
+            notifyPermissionRequestDisplayed_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyPermissionRequestDisplayed(hostUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

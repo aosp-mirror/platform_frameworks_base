@@ -47,6 +47,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -71,6 +72,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     private final FeatureFlags mFlags;
     private final PanelInteractor mPanelInteractor;
     private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
+    private final UserContextProvider mUserContextProvider;
 
     private long mMillisUntilFinished = 0;
 
@@ -91,7 +93,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             KeyguardStateController keyguardStateController,
             DialogLaunchAnimator dialogLaunchAnimator,
             PanelInteractor panelInteractor,
-            MediaProjectionMetricsLogger mediaProjectionMetricsLogger
+            MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
+            UserContextProvider userContextProvider
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -103,6 +106,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mPanelInteractor = panelInteractor;
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
+        mUserContextProvider = userContextProvider;
     }
 
     @Override
@@ -195,7 +199,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
                 dialog.show();
             }
 
-            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed();
+            int uid = mUserContextProvider.getUserContext().getUserId();
+            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(uid);
 
             return false;
         };
