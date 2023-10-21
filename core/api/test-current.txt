@@ -851,7 +851,7 @@ package android.companion {
     method @NonNull public android.companion.AssociationInfo.Builder setRevoked(boolean);
     method @NonNull public android.companion.AssociationInfo.Builder setSelfManaged(boolean);
     method @NonNull public android.companion.AssociationInfo.Builder setSystemDataSyncFlags(int);
-    method @NonNull public android.companion.AssociationInfo.Builder setTag(@Nullable String);
+    method @FlaggedApi("android.companion.association_tag") @NonNull public android.companion.AssociationInfo.Builder setTag(@Nullable String);
     method @NonNull public android.companion.AssociationInfo.Builder setTimeApproved(long);
   }
 
@@ -2117,7 +2117,7 @@ package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
     method @Nullable public static android.net.wifi.sharedconnectivity.app.SharedConnectivityManager create(@NonNull android.content.Context, @NonNull String, @NonNull String);
-    method @NonNull public android.content.BroadcastReceiver getBroadcastReceiver();
+    method @FlaggedApi("com.android.wifi.flags.shared_connectivity_broadcast_receiver_test_api") @NonNull public android.content.BroadcastReceiver getBroadcastReceiver();
     method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
   }
@@ -2148,7 +2148,7 @@ package android.os {
   }
 
   public final class BugreportParams {
-    field public static final int BUGREPORT_MODE_MAX_VALUE = 7; // 0x7
+    field @FlaggedApi("android.os.bugreport_mode_max_value") public static final int BUGREPORT_MODE_MAX_VALUE = 7; // 0x7
   }
 
   public class Build {

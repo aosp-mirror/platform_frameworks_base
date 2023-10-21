@@ -1,0 +1,9 @@
+package: "android.service.notification"
+
+flag {
+  name: "ranking_update_ashmem"
+  namespace: "systemui"
+  description: "This flag controls moving ranking update contents into ashmem"
+  bug: "284297289"
+}
+

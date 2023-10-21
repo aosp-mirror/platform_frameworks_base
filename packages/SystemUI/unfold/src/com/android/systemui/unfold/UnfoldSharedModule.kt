@@ -22,6 +22,8 @@ import com.android.systemui.unfold.progress.PhysicsBasedUnfoldTransitionProgress
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
 import com.android.systemui.unfold.updates.DeviceFoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider
+import com.android.systemui.unfold.updates.FoldStateRepository
+import com.android.systemui.unfold.updates.FoldStateRepositoryImpl
 import com.android.systemui.unfold.updates.hinge.EmptyHingeAngleProvider
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.hinge.HingeSensorAngleProvider
@@ -55,6 +57,12 @@ class UnfoldSharedModule {
     fun unfoldKeyguardVisibilityManager(
         impl: UnfoldKeyguardVisibilityManagerImpl
     ): UnfoldKeyguardVisibilityManager = impl
+
+    @Provides
+    @Singleton
+    fun foldStateRepository(
+            impl: FoldStateRepositoryImpl
+    ): FoldStateRepository = impl
 }
 
 /**

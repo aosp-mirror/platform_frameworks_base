@@ -2887,6 +2887,12 @@
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "419378610": {
+      "message": "Content Recording: Apply transformations of shift %d x %d, scale %f x %f, crop (aka recorded content size) %d x %d for display %d; display has size %d x %d; surface has size %d x %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
     "422634333": {
       "message": "First draw done in potential wallpaper target %s",
       "level": "VERBOSE",
@@ -4338,12 +4344,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "1936800105": {
-      "message": "Content Recording: Apply transformations of shift %d x %d, scale %f, crop (aka recorded content size) %d x %d for display %d; display has size %d x %d; surface has size %d x %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONTENT_RECORDING",
-      "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
     "1945495497": {
       "message": "Focused window didn't have a valid surface drawn.",

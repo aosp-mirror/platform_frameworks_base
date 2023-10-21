@@ -30,6 +30,7 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 internal fun fingerprintSensorPropertiesInternal(
     ids: List<Int> = listOf(0),
     strong: Boolean = true,
+    sensorType: Int = FingerprintSensorProperties.TYPE_REAR
 ): List<FingerprintSensorPropertiesInternal> {
     val componentInfo =
         listOf(
@@ -54,7 +55,7 @@ internal fun fingerprintSensorPropertiesInternal(
             if (strong) SensorProperties.STRENGTH_STRONG else SensorProperties.STRENGTH_WEAK,
             5 /* maxEnrollmentsPerUser */,
             componentInfo,
-            FingerprintSensorProperties.TYPE_REAR,
+            sensorType,
             false /* resetLockoutRequiresHardwareAuthToken */
         )
     }

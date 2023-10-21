@@ -83,6 +83,21 @@ constructor(@NotificationRemoteInputLog private val logBuffer: LogBuffer) {
             }
         )
 
+    fun logRemoteInputApplySkipped(entryKey: String, reason: String, notificationStyle: String) =
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = entryKey
+                str2 = reason
+                str3 = notificationStyle
+            },
+            {
+                "removeRemoteInput[apply is skipped] reason: $str2" +
+                    "for entry: $str1, style: $str3 "
+            }
+        )
+
     private companion object {
         private const val TAG = "RemoteInputControllerLog"
     }

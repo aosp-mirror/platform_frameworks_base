@@ -254,9 +254,16 @@ constructor(
         currentlyRunningAnimationJob =
             coroutineScope.launch {
                 runChipAppearAnimation()
+                announceForAccessibilityIfNeeded(event)
                 delay(APPEAR_ANIMATION_DURATION + DISPLAY_LENGTH)
                 runChipDisappearAnimation()
             }
+    }
+
+    private fun announceForAccessibilityIfNeeded(event: StatusEvent) {
+        val description = event.contentDescription ?: return
+        if (!event.shouldAnnounceAccessibilityEvent)  return
+        chipAnimationController.announceForAccessibility(description)
     }
 
     /**

@@ -74,6 +74,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
+import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.brightness.clamper.HdrClamper;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.feature.DisplayManagerFlags;
@@ -1314,6 +1315,54 @@ public final class DisplayPowerController2Test {
     }
 
     @Test
+    public void testRampRateForClampersControllerApplied() {
+        float transitionRate = 1.5f;
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
+        when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
+        when(mHolder.clamperController.clamp(any(), anyFloat(), anyBoolean())).thenAnswer(
+                invocation -> DisplayBrightnessState.builder()
+                        .setIsSlowChange(invocation.getArgument(2))
+                        .setBrightness(invocation.getArgument(1))
+                        .setMaxBrightness(PowerManager.BRIGHTNESS_MAX)
+                        .setCustomAnimationRate(transitionRate).build());
+
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator, atLeastOnce()).animateTo(anyFloat(), anyFloat(),
+                eq(transitionRate), anyBoolean());
+    }
+
+    @Test
+    public void testRampRateForClampersControllerNotApplied_ifDoze() {
+        float transitionRate = 1.5f;
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        dpr.dozeScreenState = Display.STATE_UNKNOWN;
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
+        when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
+        when(mHolder.clamperController.clamp(any(), anyFloat(), anyBoolean())).thenAnswer(
+                invocation -> DisplayBrightnessState.builder()
+                        .setIsSlowChange(invocation.getArgument(2))
+                        .setBrightness(invocation.getArgument(1))
+                        .setMaxBrightness(PowerManager.BRIGHTNESS_MAX)
+                        .setCustomAnimationRate(transitionRate).build());
+
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator, atLeastOnce()).animateTo(anyFloat(), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_DECREASE), anyBoolean());
+        verify(mHolder.animator, never()).animateTo(anyFloat(), anyFloat(),
+                eq(transitionRate), anyBoolean());
+    }
+
+    @Test
     @RequiresFlagsDisabled(Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1)
     public void testRampMaxTimeInteractiveThenIdle() {
         // Send a display power request
@@ -1637,13 +1686,20 @@ public final class DisplayPowerController2Test {
                 mock(ScreenOffBrightnessSensorController.class);
         final HighBrightnessModeController hbmController = mock(HighBrightnessModeController.class);
         final HdrClamper hdrClamper = mock(HdrClamper.class);
+        BrightnessClamperController clamperController = mock(BrightnessClamperController.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
+        when(clamperController.clamp(any(), anyFloat(), anyBoolean())).thenAnswer(
+                invocation -> DisplayBrightnessState.builder()
+                        .setIsSlowChange(invocation.getArgument(2))
+                        .setBrightness(invocation.getArgument(1))
+                        .setMaxBrightness(PowerManager.BRIGHTNESS_MAX)
+                        .setCustomAnimationRate(-1).build());
 
         TestInjector injector = spy(new TestInjector(displayPowerState, animator,
                 automaticBrightnessController, wakelockController, brightnessMappingStrategy,
                 hysteresisLevels, screenOffBrightnessSensorController, hbmController, hdrClamper,
-                flags));
+                clamperController, flags));
 
         final LogicalDisplay display = mock(LogicalDisplay.class);
         final DisplayDevice device = mock(DisplayDevice.class);
@@ -1662,8 +1718,8 @@ public final class DisplayPowerController2Test {
 
         return new DisplayPowerControllerHolder(dpc, display, displayPowerState, brightnessSetting,
                 animator, automaticBrightnessController, wakelockController,
-                screenOffBrightnessSensorController, hbmController, hdrClamper, hbmMetadata,
-                brightnessMappingStrategy, injector, config);
+                screenOffBrightnessSensorController, hbmController, hdrClamper, clamperController,
+                hbmMetadata, brightnessMappingStrategy, injector, config);
     }
 
     /**
@@ -1682,6 +1738,7 @@ public final class DisplayPowerController2Test {
         public final HighBrightnessModeController hbmController;
 
         public final HdrClamper hdrClamper;
+        public final BrightnessClamperController clamperController;
         public final HighBrightnessModeMetadata hbmMetadata;
         public final BrightnessMappingStrategy brightnessMappingStrategy;
         public final DisplayPowerController2.Injector injector;
@@ -1695,6 +1752,7 @@ public final class DisplayPowerController2Test {
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
                 HighBrightnessModeController hbmController,
                 HdrClamper hdrClamper,
+                BrightnessClamperController clamperController,
                 HighBrightnessModeMetadata hbmMetadata,
                 BrightnessMappingStrategy brightnessMappingStrategy,
                 DisplayPowerController2.Injector injector,
@@ -1709,6 +1767,7 @@ public final class DisplayPowerController2Test {
             this.screenOffBrightnessSensorController = screenOffBrightnessSensorController;
             this.hbmController = hbmController;
             this.hdrClamper = hdrClamper;
+            this.clamperController = clamperController;
             this.hbmMetadata = hbmMetadata;
             this.brightnessMappingStrategy = brightnessMappingStrategy;
             this.injector = injector;
@@ -1728,6 +1787,8 @@ public final class DisplayPowerController2Test {
 
         private final HdrClamper mHdrClamper;
 
+        private final BrightnessClamperController mClamperController;
+
         private final DisplayManagerFlags mFlags;
 
         TestInjector(DisplayPowerState dps, DualRampAnimator<DisplayPowerState> animator,
@@ -1738,6 +1799,7 @@ public final class DisplayPowerController2Test {
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
                 HighBrightnessModeController highBrightnessModeController,
                 HdrClamper hdrClamper,
+                BrightnessClamperController clamperController,
                 DisplayManagerFlags flags) {
             mDisplayPowerState = dps;
             mAnimator = animator;
@@ -1748,6 +1810,7 @@ public final class DisplayPowerController2Test {
             mScreenOffBrightnessSensorController = screenOffBrightnessSensorController;
             mHighBrightnessModeController = highBrightnessModeController;
             mHdrClamper = hdrClamper;
+            mClamperController = clamperController;
             mFlags = flags;
         }
 
@@ -1861,6 +1924,14 @@ public final class DisplayPowerController2Test {
                 DisplayManagerFlags flags, IBinder displayToken, DisplayDeviceInfo info) {
             return new BrightnessRangeController(hbmController, modeChangeCallback,
                     displayDeviceConfig, mHdrClamper, mFlags, displayToken, info);
+        }
+
+        @Override
+        BrightnessClamperController getBrightnessClamperController(Handler handler,
+                BrightnessClamperController.ClamperChangeListener clamperChangeListener,
+                BrightnessClamperController.DisplayDeviceData data, Context context,
+                DisplayManagerFlags flags) {
+            return mClamperController;
         }
 
         @Override

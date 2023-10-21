@@ -16,9 +16,11 @@
 
 package android.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -30,6 +32,7 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.R;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -39,7 +42,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -66,6 +69,8 @@ public class LocaleConfig implements Parcelable {
     public static final String TAG_LOCALE_CONFIG = "locale-config";
     public static final String TAG_LOCALE = "locale";
     private LocaleList mLocales;
+
+    private Locale mDefaultLocale;
     private int mStatus = STATUS_NOT_SPECIFIED;
 
     /**
@@ -193,8 +198,17 @@ public class LocaleConfig implements Parcelable {
         XmlUtils.beginDocument(parser, TAG_LOCALE_CONFIG);
         int outerDepth = parser.getDepth();
         AttributeSet attrs = Xml.asAttributeSet(parser);
-        // LinkedHashSet to preserve insertion order
-        Set<String> localeNames = new LinkedHashSet<>();
+
+        String defaultLocale = null;
+        if (android.content.res.Flags.defaultLocale()) {
+            TypedArray att = res.obtainAttributes(
+                    attrs, com.android.internal.R.styleable.LocaleConfig);
+            defaultLocale = att.getString(
+                    R.styleable.LocaleConfig_defaultLocale);
+            att.recycle();
+        }
+
+        Set<String> localeNames = new HashSet<>();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             if (TAG_LOCALE.equals(parser.getName())) {
                 final TypedArray attributes = res.obtainAttributes(
@@ -209,6 +223,15 @@ public class LocaleConfig implements Parcelable {
         }
         mStatus = STATUS_SUCCESS;
         mLocales = LocaleList.forLanguageTags(String.join(",", localeNames));
+        if (defaultLocale != null) {
+            if (localeNames.contains(defaultLocale)) {
+                mDefaultLocale = Locale.forLanguageTag(defaultLocale);
+            } else {
+                Slog.w(TAG, "Default locale specified that is not contained in the list: "
+                        + defaultLocale);
+                mStatus = STATUS_PARSING_FAILED;
+            }
+        }
     }
 
     /**
@@ -221,6 +244,17 @@ public class LocaleConfig implements Parcelable {
      */
     public @Nullable LocaleList getSupportedLocales() {
         return mLocales;
+    }
+
+    /**
+     * Returns the default locale if specified, otherwise null
+     *
+     * @return The default Locale or null
+     */
+    @SuppressLint("UseIcu")
+    @FlaggedApi(android.content.res.Flags.FLAG_DEFAULT_LOCALE)
+    public @Nullable Locale getDefaultLocale() {
+        return mDefaultLocale;
     }
 
     /**

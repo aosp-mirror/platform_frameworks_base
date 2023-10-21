@@ -16,9 +16,7 @@
 
 package com.android.systemui.statusbar.dagger;
 
-import android.app.WallpaperManager;
 import android.content.Context;
-import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -29,7 +27,6 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
-import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
@@ -121,24 +118,14 @@ public interface CentralSurfacesDependenciesModule {
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             MediaDataManager mediaDataManager,
-            StatusBarStateController statusBarStateController,
-            SysuiColorExtractor colorExtractor,
-            KeyguardStateController keyguardStateController,
-            DumpManager dumpManager,
-            WallpaperManager wallpaperManager,
-            DisplayManager displayManager) {
+            DumpManager dumpManager) {
         return new NotificationMediaManager(
                 context,
                 visibilityProvider,
                 notifPipeline,
                 notifCollection,
                 mediaDataManager,
-                statusBarStateController,
-                colorExtractor,
-                keyguardStateController,
-                dumpManager,
-                wallpaperManager,
-                displayManager);
+                dumpManager);
     }
 
     /** */

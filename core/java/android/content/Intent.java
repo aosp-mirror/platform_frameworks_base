@@ -4292,6 +4292,14 @@ public class Intent implements Parcelable, Cloneable {
             "com.android.intent.action.SHOW_BRIGHTNESS_DIALOG";
 
     /**
+     * Intent Extra: holds boolean that determines whether brightness dialog is full width when
+     * in landscape mode.
+     * @hide
+     */
+    public static final String EXTRA_BRIGHTNESS_DIALOG_IS_FULL_WIDTH =
+            "android.intent.extra.BRIGHTNESS_DIALOG_IS_FULL_WIDTH";
+
+    /**
      * Activity Action: Shows the contrast setting dialog.
      * @hide
      */

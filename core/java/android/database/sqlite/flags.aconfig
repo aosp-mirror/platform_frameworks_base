@@ -1,7 +1,7 @@
 package: "android.database.sqlite"
 
 flag {
-     name: "sqlite_apis_15"
+     name: "sqlite_apis_35"
      namespace: "system_performance"
      is_fixed_read_only: true
      description: "SQLite APIs held back for Android 15"

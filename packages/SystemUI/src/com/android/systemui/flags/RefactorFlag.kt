@@ -16,7 +16,6 @@
 
 package com.android.systemui.flags
 
-import android.util.Log
 import com.android.systemui.Dependency
 
 /**
@@ -65,8 +64,7 @@ private constructor(
      * }
      * ````
      */
-    fun assertInLegacyMode() =
-        check(!isEnabled) { "Legacy code path not supported when $flagName is enabled." }
+    fun assertInLegacyMode() = RefactorFlagUtils.assertInLegacyMode(isEnabled, flagName)
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
@@ -81,13 +79,8 @@ private constructor(
      * }
      * ```
      */
-    fun isUnexpectedlyInLegacyMode(): Boolean {
-        if (!isEnabled) {
-            val message = "New code path expects $flagName to be enabled."
-            Log.wtf(TAG, message, Exception(message))
-        }
-        return !isEnabled
-    }
+    fun isUnexpectedlyInLegacyMode(): Boolean =
+        RefactorFlagUtils.isUnexpectedlyInLegacyMode(isEnabled, flagName)
 
     companion object {
         private const val TAG = "RefactorFlag"

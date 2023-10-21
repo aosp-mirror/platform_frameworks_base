@@ -205,7 +205,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         // End old BaseStatusBar.userSwitched
         mCommandQueue.animateCollapsePanels();
         mMediaManager.clearCurrentMediaNotification();
-        updateMediaMetaData(true, false);
     }
 
     @Override
@@ -217,11 +216,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     @Override
     public boolean isPresenterFullyCollapsed() {
         return mNotificationPanel.isFullyCollapsed();
-    }
-
-    @Override
-    public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
-        mMediaManager.updateMediaMetaData(metaDataChanged);
     }
 
     @Override

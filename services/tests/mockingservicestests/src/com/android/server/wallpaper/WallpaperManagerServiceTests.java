@@ -462,7 +462,7 @@ public class WallpaperManagerServiceTests {
         wallpaper.wallpaperObserver.stopWatching();
 
         spyOn(wallpaper.wallpaperObserver);
-        doReturn(wallpaper).when(wallpaper.wallpaperObserver).dataForEvent(true, false);
+        doReturn(wallpaper).when(wallpaper.wallpaperObserver).dataForEvent(false);
         wallpaper.wallpaperObserver.onEvent(CLOSE_WRITE, WALLPAPER);
 
         // ACTION_WALLPAPER_CHANGED should be invoked before onWallpaperColorsChanged.

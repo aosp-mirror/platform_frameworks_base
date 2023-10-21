@@ -72,6 +72,7 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN shade expands
+            shadeRepository.setLegacyShadeTracking(true)
             shadeRepository.setLegacyShadeExpansion(.5f)
             runCurrent()
 
@@ -108,6 +109,7 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
 
             // WHEN detector is disabled and shade opens
             detector.disable()
+            shadeRepository.setLegacyShadeTracking(true)
             shadeRepository.setLegacyShadeExpansion(.5f)
             runCurrent()
 

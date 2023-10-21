@@ -16,6 +16,7 @@
 
 package android.content.om;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -546,6 +547,7 @@ public class FabricatedOverlay {
      * @param configuration The string representation of the config this overlay is enabled for
      */
     @NonNull
+    @FlaggedApi(android.content.res.Flags.FLAG_ASSET_FILE_DESCRIPTOR_FRRO)
     public void setResourceValue(
             @NonNull String resourceName,
             @NonNull AssetFileDescriptor value,

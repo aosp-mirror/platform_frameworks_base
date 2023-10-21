@@ -22,6 +22,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.flicker.pip.common.EnterPipTransition
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -55,7 +56,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
-    EnterPipViaAppUiButtonTest(flicker) {
+    EnterPipTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
 
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {

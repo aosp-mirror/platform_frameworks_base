@@ -17,6 +17,7 @@
 package android.net.wifi.sharedconnectivity.app;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -296,6 +297,7 @@ public class SharedConnectivityManager {
      */
     @TestApi
     @NonNull
+    @FlaggedApi("com.android.wifi.flags.shared_connectivity_broadcast_receiver_test_api")
     public BroadcastReceiver getBroadcastReceiver() {
         return mBroadcastReceiver;
     }

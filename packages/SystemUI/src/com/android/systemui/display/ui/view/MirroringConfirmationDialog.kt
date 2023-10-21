@@ -21,6 +21,7 @@ import android.view.View
 import android.widget.TextView
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIBottomSheetDialog
+import com.android.systemui.statusbar.policy.ConfigurationController
 
 /**
  * Dialog used to decide what to do with a connected display.
@@ -32,8 +33,9 @@ class MirroringConfirmationDialog(
     context: Context,
     private val onStartMirroringClickListener: View.OnClickListener,
     private val onCancelMirroring: View.OnClickListener,
+    configurationController: ConfigurationController? = null,
     theme: Int = R.style.Theme_SystemUI_Dialog,
-) : SystemUIBottomSheetDialog(context, theme) {
+) : SystemUIBottomSheetDialog(context, configurationController, theme) {
 
     private lateinit var mirrorButton: TextView
     private lateinit var dismissButton: TextView

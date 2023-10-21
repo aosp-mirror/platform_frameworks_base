@@ -27,6 +27,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +40,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
@@ -133,7 +135,7 @@ public class MediaProjectionManagerServiceTest {
     private final MediaProjectionManagerService.Injector mMediaProjectionMetricsLoggerInjector =
             new MediaProjectionManagerService.Injector() {
                 @Override
-                MediaProjectionMetricsLogger mediaProjectionMetricsLogger() {
+                MediaProjectionMetricsLogger mediaProjectionMetricsLogger(Context context) {
                     return mMediaProjectionMetricsLogger;
                 }
             };
@@ -308,6 +310,70 @@ public class MediaProjectionManagerServiceTest {
 
         // But this is a new projection.
         assertThat(secondProjection).isNotEqualTo(projection);
+    }
+
+    @Test
+    public void stop_noActiveProjections_doesNotLog() throws Exception {
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+
+        projection.stop();
+
+        verifyZeroInteractions(mMediaProjectionMetricsLogger);
+    }
+
+    @Test
+    public void stop_noSession_logsHostUidAndUnknownTargetUid() throws Exception {
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+
+        projection.stop();
+
+        verify(mMediaProjectionMetricsLogger)
+                .logStopped(UID, ContentRecordingSession.TARGET_UID_UNKNOWN);
+    }
+
+    @Test
+    public void stop_displaySession_logsHostUidAndUnknownTargetUidFullScreen() throws Exception {
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+        doReturn(true)
+                .when(mWindowManagerInternal)
+                .setContentRecordingSession(any(ContentRecordingSession.class));
+        service.setContentRecordingSession(DISPLAY_SESSION);
+
+        projection.stop();
+
+        verify(mMediaProjectionMetricsLogger)
+                .logStopped(UID, ContentRecordingSession.TARGET_UID_FULL_SCREEN);
+    }
+
+    @Test
+    public void stop_taskSession_logsHostUidAndTargetUid() throws Exception {
+        int targetUid = 1234;
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+        doReturn(true)
+                .when(mWindowManagerInternal)
+                .setContentRecordingSession(any(ContentRecordingSession.class));
+        ContentRecordingSession taskSession =
+                ContentRecordingSession.createTaskSession(mock(IBinder.class), targetUid);
+        service.setContentRecordingSession(taskSession);
+
+        projection.stop();
+
+        verify(mMediaProjectionMetricsLogger).logStopped(UID, targetUid);
     }
 
     @Test
@@ -586,6 +652,18 @@ public class MediaProjectionManagerServiceTest {
                 /* isSetSessionSuccessful= */ false, RECORD_CANCEL);
     }
 
+    @Test
+    public void notifyPermissionRequestInitiated_forwardsToLogger() {
+        int hostUid = 123;
+        int sessionCreationSource = 456;
+        mService =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+
+        mService.notifyPermissionRequestInitiated(hostUid, sessionCreationSource);
+
+        verify(mMediaProjectionMetricsLogger).logInitiated(hostUid, sessionCreationSource);
+    }
+
     /**
      * Executes and validates scenario where the consent result indicates the projection ends.
      */
@@ -749,8 +827,10 @@ public class MediaProjectionManagerServiceTest {
     public void setContentRecordingSession_success_logsCaptureInProgress()
             throws Exception {
         mService.addCallback(mWatcherCallback);
-        MediaProjectionManagerService service = new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
-        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
         projection.start(mIMediaProjectionCallback);
         doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(
                 any(ContentRecordingSession.class));

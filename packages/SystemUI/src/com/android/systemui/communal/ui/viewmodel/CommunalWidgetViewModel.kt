@@ -17,7 +17,7 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.shared.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import javax.inject.Inject

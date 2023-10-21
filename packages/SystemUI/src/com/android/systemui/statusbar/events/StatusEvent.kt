@@ -36,6 +36,11 @@ interface StatusEvent {
     val showAnimation: Boolean
     val viewCreator: ViewCreator
     var contentDescription: String?
+    /**
+     * When true, an accessibility event with [contentDescription] is announced when the view
+     * becomes visible.
+     */
+    val shouldAnnounceAccessibilityEvent: Boolean
 
     // Update this event with values from another event.
     fun updateFromEvent(other: StatusEvent?) {
@@ -76,6 +81,7 @@ class BatteryEvent(@IntRange(from = 0, to = 100) val batteryLevel: Int) : Status
     override var forceVisible = false
     override val showAnimation = true
     override var contentDescription: String? = ""
+    override val shouldAnnounceAccessibilityEvent: Boolean = false
 
     override val viewCreator: ViewCreator = { context ->
         BatteryStatusChip(context).apply {
@@ -95,6 +101,7 @@ class ConnectedDisplayEvent : StatusEvent {
     override var forceVisible = false
     override val showAnimation = true
     override var contentDescription: String? = ""
+    override val shouldAnnounceAccessibilityEvent: Boolean = true
 
     override val viewCreator: ViewCreator = { context ->
         ConnectedDisplayChip(context)
@@ -110,6 +117,7 @@ open class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEven
     override var contentDescription: String? = null
     override val priority = 100
     override var forceVisible = true
+    override val shouldAnnounceAccessibilityEvent: Boolean = false
     var privacyItems: List<PrivacyItem> = listOf()
     private var privacyChip: OngoingPrivacyChip? = null
 

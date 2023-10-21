@@ -70,6 +70,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -796,7 +797,7 @@ public final class SurfaceControl implements Parcelable {
         if (nativeObject != 0) {
             // Only add valid surface controls to the registry. This is called at the end of this
             // method since its information is dumped if the process threshold is reached.
-            addToRegistry();
+            SurfaceControlRegistry.getProcessInstance().add(this);
         }
     }
 
@@ -1501,7 +1502,7 @@ public final class SurfaceControl implements Parcelable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
-            removeFromRegistry();
+            SurfaceControlRegistry.getProcessInstance().remove(this);
         } finally {
             super.finalize();
         }
@@ -1519,6 +1520,10 @@ public final class SurfaceControl implements Parcelable {
      */
     public void release() {
         if (mNativeObject != 0) {
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "release", null, this, null);
+            }
             mFreeNativeResources.run();
             mNativeObject = 0;
             mNativeHandle = 0;
@@ -1532,7 +1537,7 @@ public final class SurfaceControl implements Parcelable {
                     mChoreographer = null;
                 }
             }
-            removeFromRegistry();
+            SurfaceControlRegistry.getProcessInstance().remove(this);
         }
     }
 
@@ -2765,8 +2770,10 @@ public final class SurfaceControl implements Parcelable {
 
         private Transaction(long nativeObject) {
             mNativeObject = nativeObject;
-            mFreeNativeResources =
-                    sRegistry.registerNativeAllocation(this, mNativeObject);
+            mFreeNativeResources = sRegistry.registerNativeAllocation(this, mNativeObject);
+            if (!SurfaceControlRegistry.sCallStackDebuggingInitialized) {
+                SurfaceControlRegistry.initializeCallStackDebugging();
+            }
         }
 
         private Transaction(Parcel in) {
@@ -2845,6 +2852,11 @@ public final class SurfaceControl implements Parcelable {
             applyResizedSurfaces();
             notifyReparentedSurfaces();
             nativeApplyTransaction(mNativeObject, sync, oneWay);
+
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "apply", this, null, null);
+            }
         }
 
         /**
@@ -2920,6 +2932,10 @@ public final class SurfaceControl implements Parcelable {
         @UnsupportedAppUsage
         public Transaction show(SurfaceControl sc) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "show", this, sc, null);
+            }
             nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SURFACE_HIDDEN);
             return this;
         }
@@ -2934,6 +2950,10 @@ public final class SurfaceControl implements Parcelable {
         @UnsupportedAppUsage
         public Transaction hide(SurfaceControl sc) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "hide", this, sc, null);
+            }
             nativeSetFlags(mNativeObject, sc.mNativeObject, SURFACE_HIDDEN, SURFACE_HIDDEN);
             return this;
         }
@@ -2950,6 +2970,10 @@ public final class SurfaceControl implements Parcelable {
         @NonNull
         public Transaction setPosition(@NonNull SurfaceControl sc, float x, float y) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setPosition", this, sc, "x=" + x + " y=" + y);
+            }
             nativeSetPosition(mNativeObject, sc.mNativeObject, x, y);
             return this;
         }
@@ -2968,6 +2992,10 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             Preconditions.checkArgument(scaleX >= 0, "Negative value passed in for scaleX");
             Preconditions.checkArgument(scaleY >= 0, "Negative value passed in for scaleY");
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setScale", this, sc, "sx=" + scaleX + " sy=" + scaleY);
+            }
             nativeSetScale(mNativeObject, sc.mNativeObject, scaleX, scaleY);
             return this;
         }
@@ -2985,6 +3013,10 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setBufferSize(@NonNull SurfaceControl sc,
                 @IntRange(from = 0) int w, @IntRange(from = 0) int h) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setBufferSize", this, sc, "w=" + w + " h=" + h);
+            }
             mResizedSurfaces.put(sc, new Point(w, h));
             return this;
         }
@@ -3005,6 +3037,10 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setFixedTransformHint(@NonNull SurfaceControl sc,
                        @Surface.Rotation int transformHint) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setFixedTransformHint", this, sc, "hint=" + transformHint);
+            }
             nativeSetFixedTransformHint(mNativeObject, sc.mNativeObject, transformHint);
             return this;
         }
@@ -3018,6 +3054,10 @@ public final class SurfaceControl implements Parcelable {
         @NonNull
         public Transaction unsetFixedTransformHint(@NonNull SurfaceControl sc) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "unsetFixedTransformHint", this, sc, null);
+            }
             nativeSetFixedTransformHint(mNativeObject, sc.mNativeObject, -1/* INVALID_ROTATION */);
             return this;
         }
@@ -3035,6 +3075,10 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setLayer(@NonNull SurfaceControl sc,
                 @IntRange(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int z) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setLayer", this, sc, "z=" + z);
+            }
             nativeSetLayer(mNativeObject, sc.mNativeObject, z);
             return this;
         }
@@ -3044,6 +3088,10 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setRelativeLayer(SurfaceControl sc, SurfaceControl relativeTo, int z) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setRelativeLayer", this, sc, "relTo=" + relativeTo + " z=" + z);
+            }
             nativeSetRelativeLayer(mNativeObject, sc.mNativeObject, relativeTo.mNativeObject, z);
             return this;
         }
@@ -3053,6 +3101,10 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setTransparentRegionHint(SurfaceControl sc, Region transparentRegion) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "unsetFixedTransformHint", this, sc, "region=" + transparentRegion);
+            }
             nativeSetTransparentRegionHint(mNativeObject,
                     sc.mNativeObject, transparentRegion);
             return this;
@@ -3069,6 +3121,10 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setAlpha(@NonNull SurfaceControl sc,
                 @FloatRange(from = 0.0, to = 1.0) float alpha) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setAlpha", this, sc, "alpha=" + alpha);
+            }
             nativeSetAlpha(mNativeObject, sc.mNativeObject, alpha);
             return this;
         }
@@ -3124,6 +3180,11 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setMatrix(SurfaceControl sc,
                 float dsdx, float dtdx, float dtdy, float dsdy) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setMatrix", this, sc,
+                        "dsdx=" + dsdx + " dtdx=" + dtdx + " dtdy=" + dtdy + " dsdy=" + dsdy);
+            }
             nativeSetMatrix(mNativeObject, sc.mNativeObject,
                     dsdx, dtdx, dtdy, dsdy);
             return this;
@@ -3189,6 +3250,10 @@ public final class SurfaceControl implements Parcelable {
         @UnsupportedAppUsage
         public Transaction setWindowCrop(SurfaceControl sc, Rect crop) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setWindowCrop", this, sc, "crop=" + crop);
+            }
             if (crop != null) {
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
                         crop.left, crop.top, crop.right, crop.bottom);
@@ -3211,6 +3276,10 @@ public final class SurfaceControl implements Parcelable {
          */
         public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, @Nullable Rect crop) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setCrop", this, sc, "crop=" + crop);
+            }
             if (crop != null) {
                 Preconditions.checkArgument(crop.isValid(), "Crop isn't valid.");
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
@@ -3233,6 +3302,10 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setWindowCrop(SurfaceControl sc, int width, int height) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setCornerRadius", this, sc, "w=" + width + " h=" + height);
+            }
             nativeSetWindowCrop(mNativeObject, sc.mNativeObject, 0, 0, width, height);
             return this;
         }
@@ -3247,6 +3320,10 @@ public final class SurfaceControl implements Parcelable {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Transaction setCornerRadius(SurfaceControl sc, float cornerRadius) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setCornerRadius", this, sc, "cornerRadius=" + cornerRadius);
+            }
             nativeSetCornerRadius(mNativeObject, sc.mNativeObject, cornerRadius);
 
             return this;
@@ -3262,6 +3339,10 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setBackgroundBlurRadius(SurfaceControl sc, int radius) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setBackgroundBlurRadius", this, sc, "radius=" + radius);
+            }
             nativeSetBackgroundBlurRadius(mNativeObject, sc.mNativeObject, radius);
             return this;
         }
@@ -3318,6 +3399,10 @@ public final class SurfaceControl implements Parcelable {
         public Transaction reparent(@NonNull SurfaceControl sc,
                 @Nullable SurfaceControl newParent) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "reparent", this, sc, "newParent=" + newParent);
+            }
             long otherObject = 0;
             if (newParent != null) {
                 newParent.checkNotReleased();
@@ -3337,6 +3422,11 @@ public final class SurfaceControl implements Parcelable {
         @UnsupportedAppUsage
         public Transaction setColor(SurfaceControl sc, @Size(3) float[] color) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "reparent", this, sc,
+                        "r=" + color[0] + " g=" + color[1] + " b=" + color[2]);
+            }
             nativeSetColor(mNativeObject, sc.mNativeObject, color);
             return this;
         }
@@ -3347,6 +3437,10 @@ public final class SurfaceControl implements Parcelable {
         */
         public Transaction unsetColor(SurfaceControl sc) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "unsetColor", this, sc, null);
+            }
             nativeSetColor(mNativeObject, sc.mNativeObject, INVALID_COLOR);
             return this;
         }
@@ -3358,6 +3452,10 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setSecure(SurfaceControl sc, boolean isSecure) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setSecure", this, sc, "secure=" + isSecure);
+            }
             if (isSecure) {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, SECURE, SECURE);
             } else {
@@ -3411,6 +3509,10 @@ public final class SurfaceControl implements Parcelable {
         @NonNull
         public Transaction setOpaque(@NonNull SurfaceControl sc, boolean isOpaque) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setOpaque", this, sc, "opaque=" + isOpaque);
+            }
             if (isOpaque) {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, SURFACE_OPAQUE, SURFACE_OPAQUE);
             } else {
@@ -3580,6 +3682,10 @@ public final class SurfaceControl implements Parcelable {
           */
         public Transaction setShadowRadius(SurfaceControl sc, float shadowRadius) {
             checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setShadowRadius", this, sc, "radius=" + shadowRadius);
+            }
             nativeSetShadowRadius(mNativeObject, sc.mNativeObject, shadowRadius);
             return this;
         }
@@ -4461,26 +4567,6 @@ public final class SurfaceControl implements Parcelable {
         }
 
         return -1;
-    }
-
-    /**
-     * Adds this surface control to the registry for this process if it is created.
-     */
-    private void addToRegistry() {
-        final SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
-        if (registry != null) {
-            registry.add(this);
-        }
-    }
-
-    /**
-     * Removes this surface control from the registry for this process.
-     */
-    private void removeFromRegistry() {
-        final SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
-        if (registry != null) {
-            registry.remove(this);
-        }
     }
 
     // Called by native

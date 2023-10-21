@@ -22,7 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
-import com.android.systemui.communal.shared.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi

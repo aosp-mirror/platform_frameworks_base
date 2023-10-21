@@ -100,9 +100,12 @@ constructor(
     }
 
     private fun startConnectedDisplayCollection() {
+        val connectedDisplayEvent = ConnectedDisplayEvent().apply {
+            contentDescription = context.getString(R.string.connected_display_icon_desc)
+        }
         connectedDisplayCollectionJob =
                 onDisplayConnectedFlow
-                        .onEach { scheduler.onStatusEvent(ConnectedDisplayEvent()) }
+                        .onEach { scheduler.onStatusEvent(connectedDisplayEvent) }
                         .launchIn(appScope)
     }
 

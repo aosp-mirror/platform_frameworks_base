@@ -1,5 +1,6 @@
 package com.android.systemui.communal.layout
 
+import android.util.SizeF
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -91,7 +92,7 @@ class CommunalLayoutEngineTest {
             override val supportedSizes = listOf(size)
 
             @Composable
-            override fun Content(modifier: Modifier) {
+            override fun Content(modifier: Modifier, size: SizeF) {
                 Card(modifier = modifier, content = {})
             }
         }

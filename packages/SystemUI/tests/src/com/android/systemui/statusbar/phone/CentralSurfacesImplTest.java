@@ -277,8 +277,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
             mNotificationShadeWindowViewControllerLazy;
     @Mock private NotificationShelfController mNotificationShelfController;
     @Mock private DozeParameters mDozeParameters;
-    @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
-    @Mock private LockscreenWallpaper mLockscreenWallpaper;
     @Mock private DozeServiceHost mDozeServiceHost;
     @Mock private BackActionInteractor mBackActionInteractor;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
@@ -404,7 +402,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mGradientColors.supportsDarkText()).thenReturn(true);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
-        when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
         when(mCameraLauncherLazy.get()).thenReturn(mCameraLauncher);
         when(mNotificationShadeWindowViewControllerLazy.get())
@@ -508,7 +505,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new NotificationExpansionRepository(),
                 mDozeParameters,
                 mScrimController,
-                mLockscreenWallpaperLazy,
                 mBiometricUnlockControllerLazy,
                 mAuthRippleController,
                 mDozeServiceHost,

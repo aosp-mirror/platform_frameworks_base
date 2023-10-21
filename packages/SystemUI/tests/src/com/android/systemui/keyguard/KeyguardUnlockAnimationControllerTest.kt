@@ -106,7 +106,6 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         whenever(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
         whenever(powerManager.isInteractive).thenReturn(true)
-        whenever(wallpaperManager.isLockscreenLiveWallpaperEnabled).thenReturn(false)
 
         // All of these fields are final, so we can't mock them, but are needed so that the surface
         // appear amount setter doesn't short circuit.

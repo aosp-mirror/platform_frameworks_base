@@ -44,6 +44,10 @@ class TamperedUpdatedSystemPackageTest : BaseHostJUnit4Test() {
         private const val VERSION_TWO_ALT_KEY = "PackageManagerTestAppVersion2AltKey.apk"
         private const val VERSION_TWO_ALT_KEY_IDSIG =
                 "PackageManagerTestAppVersion2AltKey.apk.idsig"
+
+        private const val ANOTHER_PKG_NAME = "com.android.server.pm.test.test_app2"
+        private const val ANOTHER_PKG = "PackageManagerTestAppDifferentPkgName.apk"
+
         private const val STRICT_SIGNATURE_CONFIG_PATH =
                 "/system/etc/sysconfig/preinstalled-packages-strict-signature.xml"
         private const val TIMESTAMP_REFERENCE_FILE_PATH = "/data/local/tmp/timestamp.ref"
@@ -74,6 +78,7 @@ class TamperedUpdatedSystemPackageTest : BaseHostJUnit4Test() {
     @After
     fun removeApk() {
         device.uninstallPackage(TEST_PKG_NAME)
+        device.uninstallPackage(ANOTHER_PKG_NAME)
     }
 
     @Before
@@ -90,7 +95,9 @@ class TamperedUpdatedSystemPackageTest : BaseHostJUnit4Test() {
                     .readText()
                     .replace(
                         "</config>",
-                            "<require-strict-signature package=\"${TEST_PKG_NAME}\"/></config>"
+                            "<require-strict-signature package=\"${TEST_PKG_NAME}\"/>" +
+                            "<require-strict-signature package=\"${ANOTHER_PKG_NAME}\"/>" +
+                            "</config>"
                     )
             writeText(newConfigText)
         }
@@ -146,10 +153,7 @@ class TamperedUpdatedSystemPackageTest : BaseHostJUnit4Test() {
                 tempFolder.newFile()
         )
         assertThat(device.installPackage(versionTwoFile, true)).isNull()
-        val baseApkPath = device.executeShellCommand("pm path ${TEST_PKG_NAME}")
-                .lineSequence()
-                .first()
-                .replace("package:", "")
+        val baseApkPath = getBaseApkPath(TEST_PKG_NAME)
         assertThat(baseApkPath).doesNotContain(productPath.toString())
         preparer.pushResourceFile(VERSION_TWO_ALT_KEY_IDSIG, baseApkPath.toString() + ".idsig")
 
@@ -174,5 +178,24 @@ class TamperedUpdatedSystemPackageTest : BaseHostJUnit4Test() {
         preparer.reboot()
         assertThat(device.executeShellCommand("pm path ${TEST_PKG_NAME}"))
                 .contains(productPath.toString())
+    }
+
+    @Test
+    fun allowlistedPackageIsNotASystemApp() {
+        // If an allowlisted package isn't a system app, make sure install and boot still works
+        // normally.
+        assertThat(device.installJavaResourceApk(tempFolder, ANOTHER_PKG, /* reinstall */ false))
+                .isNull()
+        assertThat(getBaseApkPath(ANOTHER_PKG_NAME)).startsWith("/data/app/")
+
+        preparer.reboot()
+        assertThat(getBaseApkPath(ANOTHER_PKG_NAME)).startsWith("/data/app/")
+    }
+
+    private fun getBaseApkPath(pkgName: String): String {
+        return device.executeShellCommand("pm path $pkgName")
+                .lineSequence()
+                .first()
+                .replace("package:", "")
     }
 }

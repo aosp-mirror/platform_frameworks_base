@@ -45,7 +45,6 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -116,8 +115,6 @@ class WallpaperController {
     private final FindWallpaperTargetResult mFindResults = new FindWallpaperTargetResult();
 
     private boolean mShouldOffsetWallpaperCenter;
-
-    final boolean mIsLockscreenLiveWallpaperEnabled;
 
     private final Consumer<WindowState> mFindWallpapers = w -> {
         if (w.mAttrs.type == TYPE_WALLPAPER) {
@@ -236,9 +233,6 @@ class WallpaperController {
     WallpaperController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
-        mIsLockscreenLiveWallpaperEnabled =
-                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", true);
-
         Resources resources = service.mContext.getResources();
         mMinWallpaperScale =
                 resources.getFloat(com.android.internal.R.dimen.config_wallpaperMinScale);

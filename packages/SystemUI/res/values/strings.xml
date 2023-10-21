@@ -3224,6 +3224,9 @@
     <!--- Label of the dismiss button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->
     <string name="dismiss_dialog">Dismiss</string>
 
+    <!--- Content description of the connected display status bar icon that appears every time a display is connected [CHAR LIMIT=NONE]-->
+    <string name="connected_display_icon_desc">Display connected</string>
+
     <!-- Title of the privacy dialog, shown for active / recent app usage of some phone sensors [CHAR LIMIT=30] -->
     <string name="privacy_dialog_title">Microphone &amp; Camera</string>
     <!-- Subtitle of the privacy dialog, shown for active / recent app usage of some phone sensors [CHAR LIMIT=NONE] -->

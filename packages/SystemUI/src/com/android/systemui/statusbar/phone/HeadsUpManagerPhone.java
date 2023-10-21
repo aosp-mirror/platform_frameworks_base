@@ -175,7 +175,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
         if (!hasPinnedHeadsUp() || topEntry == null) {
             return null;
         } else {
-            if (topEntry.isChildInGroup()) {
+            if (topEntry.rowIsChildInGroup()) {
                 final NotificationEntry groupSummary =
                         mGroupMembershipManager.getGroupSummary(topEntry);
                 if (groupSummary != null) {

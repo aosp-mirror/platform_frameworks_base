@@ -24,7 +24,7 @@
     <!-- This test requires root to write against block device. -->
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
 
-    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="test-file-name" value="FsVerityTestApp.apk"/>
         <option name="cleanup-apks" value="true"/>
     </target_preparer>

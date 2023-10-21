@@ -91,7 +91,6 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     private static final Multimap<Class<?>, String> KNOWN_BAD =
             ImmutableMultimap.<Class<?>, String>builder()
                     .put(Person.Builder.class, "setUri") // TODO: b/281044385
-                    .put(RemoteViews.class, "setRemoteAdapter") // TODO: b/281044385
                     .build();
 
     // Types that we can't really produce. No methods receiving these parameters will be invoked.

@@ -3196,6 +3196,16 @@ public final class Telephony {
         public static final String ALWAYS_ON = "always_on";
 
         /**
+         * The infrastructure bitmask which the APN can be used on. For example, some APNs can only
+         * be used when the device is on cellular, on satellite, or both. The default value is
+         * 1 (INFRASTRUCTURE_CELLULAR).
+         *
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String INFRASTRUCTURE_BITMASK = "infrastructure_bitmask";
+
+        /**
          * MVNO type:
          * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
          * <P>Type: TEXT</P>

@@ -26,6 +26,7 @@ class FakeStatusEvent(
     override var forceVisible: Boolean = false,
     override val showAnimation: Boolean = true,
     override var contentDescription: String? = "",
+    override val shouldAnnounceAccessibilityEvent: Boolean = false
 ) : StatusEvent
 
 class FakePrivacyStatusEvent(

@@ -16,7 +16,7 @@
 
 package com.android.systemui.communal.data.model
 
-import com.android.systemui.communal.shared.CommunalContentSize
+import com.android.systemui.communal.shared.model.CommunalContentSize
 
 /** Metadata for the default widgets */
 data class CommunalWidgetMetadata(

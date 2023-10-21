@@ -42,8 +42,11 @@ import kotlinx.coroutines.flow.stateIn
 /** Repository for the current state of the display */
 interface DisplayStateRepository {
     /**
-     * Whether or not the direction rotation is applied to get to an application's requested
-     * orientation is reversed.
+     * If true, the direction rotation is applied to get to an application's requested orientation
+     * is reversed. Normally, the model is that landscape is clockwise from portrait; thus on a
+     * portrait device an app requesting landscape will cause a clockwise rotation, and on a
+     * landscape device an app requesting portrait will cause a counter-clockwise rotation. Setting
+     * true here reverses that logic. See go/natural-orientation for context.
      */
     val isReverseDefaultRotation: Boolean
 

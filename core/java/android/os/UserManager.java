@@ -3330,7 +3330,10 @@ public class UserManager {
      *
      * @return whether the context user is running in the foreground.
      */
-    @UserHandleAware
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
     public boolean isUserForeground() {
         try {
             return mService.isUserForeground(mUserId);
@@ -3404,11 +3407,10 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @UserHandleAware
-    @RequiresPermission(anyOf = {
-            "android.permission.INTERACT_ACROSS_USERS",
-            "android.permission.MANAGE_USERS"
-    })
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
     public boolean isUserVisible() {
         try {
             return mService.isUserVisible(mUserId);
