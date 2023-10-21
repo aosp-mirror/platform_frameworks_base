@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**********************************************************************
  * This file is not a part of the NFC mainline module                 *
@@ -79,7 +80,7 @@ public final class AidGroup implements Parcelable {
             throw new IllegalArgumentException("Too many AIDs in AID group.");
         }
         for (String aid : aids) {
-            if (!CardEmulation.isValidAid(aid)) {
+            if (!isValidAid(aid)) {
                 throw new IllegalArgumentException("AID " + aid + " is not a valid AID.");
             }
         }
@@ -263,5 +264,35 @@ public final class AidGroup implements Parcelable {
     private static boolean isValidCategory(String category) {
         return CardEmulation.CATEGORY_PAYMENT.equals(category) ||
                 CardEmulation.CATEGORY_OTHER.equals(category);
+    }
+
+    private static final Pattern AID_PATTERN = Pattern.compile("[0-9A-Fa-f]{10,32}\\*?\\#?");
+    /**
+     * Copied over from {@link CardEmulation#isValidAid(String)}
+     * @hide
+     */
+    private static boolean isValidAid(String aid) {
+        if (aid == null)
+            return false;
+
+        // If a prefix/subset AID, the total length must be odd (even # of AID chars + '*')
+        if ((aid.endsWith("*") || aid.endsWith("#")) && ((aid.length() % 2) == 0)) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        // If not a prefix/subset AID, the total length must be even (even # of AID chars)
+        if ((!(aid.endsWith("*") || aid.endsWith("#"))) && ((aid.length() % 2) != 0)) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        // Verify hex characters
+        if (!AID_PATTERN.matcher(aid).matches()) {
+            Log.e(TAG, "AID " + aid + " is not a valid AID.");
+            return false;
+        }
+
+        return true;
     }
 }
