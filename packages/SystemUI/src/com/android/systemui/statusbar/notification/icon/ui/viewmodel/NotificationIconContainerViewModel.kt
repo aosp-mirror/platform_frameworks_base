@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import android.graphics.Rect
 import com.android.systemui.util.ui.AnimatedValue
 import kotlinx.coroutines.flow.Flow
 
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
  * AOD.
  */
 interface NotificationIconContainerViewModel {
+
     /** Are changes to the icon container animated? */
     val animationsEnabled: Flow<Boolean>
 
@@ -32,15 +34,39 @@ interface NotificationIconContainerViewModel {
     /** Is the icon container visible? */
     val isVisible: Flow<AnimatedValue<Boolean>>
 
+    /** The colors with which to display the notification icons. */
+    val iconColors: Flow<ColorLookup>
+
     /**
      * Signal completion of the [isDozing] animation; if [isDozing]'s [AnimatedValue.isAnimating]
-     * property was `true`, calling this method will update it to `false.
+     * property was `true`, calling this method will update it to `false`.
      */
     fun completeDozeAnimation()
 
     /**
      * Signal completion of the [isVisible] animation; if [isVisible]'s [AnimatedValue.isAnimating]
-     * property was `true`, calling this method will update it to `false.
+     * property was `true`, calling this method will update it to `false`.
      */
     fun completeVisibilityAnimation()
+
+    /**
+     * Lookup the colors to use for the notification icons based on the bounds of the icon
+     * container. A result of `null` indicates that no color changes should be applied.
+     */
+    fun interface ColorLookup {
+        fun iconColors(viewBounds: Rect): IconColors?
+    }
+
+    /** Colors to apply to notification icons. */
+    interface IconColors {
+
+        /** A tint to apply to the icons. */
+        val tint: Int
+
+        /**
+         * Returns the color to be applied to an icon, based on that icon's view bounds and whether
+         * or not the notification icon is colorized.
+         */
+        fun staticDrawableColor(viewBounds: Rect, isColorized: Boolean): Int
+    }
 }

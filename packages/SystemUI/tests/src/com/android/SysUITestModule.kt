@@ -17,11 +17,17 @@ package com.android
 
 import android.content.Context
 import android.content.res.Resources
+import android.testing.TestableContext
+import android.testing.TestableResources
 import com.android.systemui.FakeSystemUiModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.SysuiTestableContext
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.statusbar.notification.data.repository.NotificationStackRepositoryModule
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 
@@ -33,15 +39,29 @@ import dagger.Provides
             FakeSystemUiModule::class,
         ]
 )
-class SysUITestModule {
-    @Provides fun provideContext(test: SysuiTestCase): Context = test.context
+interface SysUITestModule {
 
-    @Provides @Application fun provideAppContext(test: SysuiTestCase): Context = test.context
+    @Binds fun bindTestableContext(sysuiTestableContext: SysuiTestableContext): TestableContext
+    @Binds fun bindContext(testableContext: TestableContext): Context
+    @Binds @Application fun bindAppContext(context: Context): Context
+    @Binds @Application fun bindAppResources(resources: Resources): Resources
+    @Binds @Main fun bindMainResources(resources: Resources): Resources
+    @Binds fun bindBroadcastDispatcher(fake: FakeBroadcastDispatcher): BroadcastDispatcher
 
-    @Provides @Main
-    fun provideResources(@Application context: Context): Resources = context.resources
+    companion object {
+        @Provides
+        fun provideSysuiTestableContext(test: SysuiTestCase): SysuiTestableContext = test.context
 
-    @Provides
-    fun provideBroadcastDispatcher(test: SysuiTestCase): BroadcastDispatcher =
-        test.fakeBroadcastDispatcher
+        @Provides
+        fun provideTestableResources(context: TestableContext): TestableResources =
+            context.getOrCreateTestableResources()
+
+        @Provides
+        fun provideResources(testableResources: TestableResources): Resources =
+            testableResources.resources
+
+        @Provides
+        fun provideFakeBroadcastDispatcher(test: SysuiTestCase): FakeBroadcastDispatcher =
+            test.fakeBroadcastDispatcher
+    }
 }

@@ -13,17 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.notification.data
+package com.android.systemui.statusbar.phone.data
 
-import com.android.systemui.statusbar.notification.data.repository.NotificationStackRepositoryModule
-import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardStateRepositoryModule
+import com.android.systemui.statusbar.phone.data.repository.DarkIconRepositoryModule
 import dagger.Module
 
-@Module(
-    includes =
-        [
-            NotificationStackRepositoryModule::class,
-            NotificationsKeyguardStateRepositoryModule::class,
-        ]
-)
-interface NotificationDataLayerModule
+@Module(includes = [DarkIconRepositoryModule::class]) object StatusBarPhoneDataLayerModule

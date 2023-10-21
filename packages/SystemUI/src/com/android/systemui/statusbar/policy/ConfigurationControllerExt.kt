@@ -13,7 +13,7 @@
  */
 package com.android.systemui.statusbar.policy
 
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 
@@ -23,14 +23,30 @@ import kotlinx.coroutines.flow.Flow
  * @see ConfigurationController.ConfigurationListener.onDensityOrFontScaleChanged
  */
 val ConfigurationController.onDensityOrFontScaleChanged: Flow<Unit>
-    get() =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
-            val listener =
-                object : ConfigurationController.ConfigurationListener {
-                    override fun onDensityOrFontScaleChanged() {
-                        trySend(Unit)
-                    }
+    get() = conflatedCallbackFlow {
+        val listener =
+            object : ConfigurationController.ConfigurationListener {
+                override fun onDensityOrFontScaleChanged() {
+                    trySend(Unit)
                 }
-            addCallback(listener)
-            awaitClose { removeCallback(listener) }
-        }
+            }
+        addCallback(listener)
+        awaitClose { removeCallback(listener) }
+    }
+
+/**
+ * A [Flow] that emits whenever the theme has changed.
+ *
+ * @see ConfigurationController.ConfigurationListener.onThemeChanged
+ */
+val ConfigurationController.onThemeChanged: Flow<Unit>
+    get() = conflatedCallbackFlow {
+        val listener =
+            object : ConfigurationController.ConfigurationListener {
+                override fun onThemeChanged() {
+                    trySend(Unit)
+                }
+            }
+        addCallback(listener)
+        awaitClose { removeCallback(listener) }
+    }

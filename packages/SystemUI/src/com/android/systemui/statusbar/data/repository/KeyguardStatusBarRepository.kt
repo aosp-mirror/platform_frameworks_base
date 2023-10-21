@@ -22,6 +22,8 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.user.data.repository.UserSwitcherRepository
+import dagger.Binds
+import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -77,4 +79,9 @@ constructor(
         ) { isEnabled, isKeyguardEnabled ->
             isEnabled && isKeyguardEnabled
         }
+}
+
+@Module
+interface KeyguardStatusBarRepositoryModule {
+    @Binds fun bindImpl(impl: KeyguardStatusBarRepositoryImpl): KeyguardStatusBarRepository
 }

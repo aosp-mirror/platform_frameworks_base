@@ -19,7 +19,6 @@ package com.android.systemui.plugins;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -51,19 +50,9 @@ public interface DarkIconDispatcher {
     void addDarkReceiver(DarkReceiver receiver);
 
     /**
-     * Adds a receiver to receive callbacks onDarkChanged
-     */
-    void addDarkReceiver(ImageView imageView);
-
-    /**
      * Must have been previously been added through one of the addDarkReceive methods above.
      */
     void removeDarkReceiver(DarkReceiver object);
-
-    /**
-     * Must have been previously been added through one of the addDarkReceive methods above.
-     */
-    void removeDarkReceiver(ImageView object);
 
     /**
      * Used to reapply darkness on an object, must have previously been added through
@@ -104,8 +93,8 @@ public interface DarkIconDispatcher {
     }
 
     /**
-     * @return true if more than half of the view area are in any of the given
-     *         areas, false otherwise
+     * @return true if more than half of the view's area is in any of the given area Rects, false
+     *         otherwise
      */
     static boolean isInAreas(Collection<Rect> areas, View view) {
         if (areas.isEmpty()) {
@@ -120,9 +109,40 @@ public interface DarkIconDispatcher {
     }
 
     /**
-     * @return true if more than half of the view area are in area, false
+     * @return true if more than half of the viewBounds are in any of the given area Rects, false
      *         otherwise
      */
+    static boolean isInAreas(Collection<Rect> areas, Rect viewBounds) {
+        if (areas.isEmpty()) {
+            return true;
+        }
+        for (Rect area : areas) {
+            if (isInArea(area, viewBounds)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @return true if more than half of the viewBounds are in the area Rect, false otherwise */
+    static boolean isInArea(Rect area, Rect viewBounds) {
+        if (area.isEmpty()) {
+            return true;
+        }
+        sTmpRect.set(area);
+        int left = viewBounds.left;
+        int width = viewBounds.width();
+
+        int intersectStart = Math.max(left, area.left);
+        int intersectEnd = Math.min(left + width, area.right);
+        int intersectAmount = Math.max(0, intersectEnd - intersectStart);
+
+        boolean coversFullStatusBar = area.top <= 0;
+        boolean majorityOfWidth = 2 * intersectAmount > width;
+        return majorityOfWidth && coversFullStatusBar;
+    }
+
+    /** @return true if more than half of the view's area is in the area Rect, false otherwise */
     static boolean isInArea(Rect area, View view) {
         if (area.isEmpty()) {
             return true;

@@ -17,18 +17,13 @@
 package com.android.systemui.statusbar.dagger
 
 import com.android.systemui.CoreStartable
-import com.android.systemui.statusbar.core.StatusBarInitializer
-import com.android.systemui.statusbar.data.repository.KeyguardStatusBarRepository
-import com.android.systemui.statusbar.data.repository.KeyguardStatusBarRepositoryImpl
-import com.android.systemui.statusbar.data.repository.StatusBarModeRepository
-import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryImpl
+import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import dagger.multibindings.IntoSet
 
 /**
  * A module for **only** classes related to the status bar **UI element**. This module specifically
@@ -38,23 +33,8 @@ import dagger.multibindings.IntoSet
  *   ([com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule],
  *   [com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule], etc.).
  */
-@Module
+@Module(includes = [StatusBarDataLayerModule::class])
 abstract class StatusBarModule {
-    @Binds
-    abstract fun bindStatusBarModeRepository(
-        impl: StatusBarModeRepositoryImpl
-    ): StatusBarModeRepository
-
-    @Binds
-    @IntoMap
-    @ClassKey(StatusBarModeRepositoryImpl::class)
-    abstract fun bindStatusBarModeRepositoryStart(impl: StatusBarModeRepositoryImpl): CoreStartable
-
-    @Binds
-    abstract fun bindKeyguardStatusBarRepository(
-        impl: KeyguardStatusBarRepositoryImpl
-    ): KeyguardStatusBarRepository
-
     @Binds
     @IntoMap
     @ClassKey(OngoingCallController::class)
@@ -64,10 +44,4 @@ abstract class StatusBarModule {
     @IntoMap
     @ClassKey(LightBarController::class)
     abstract fun bindLightBarController(impl: LightBarController): CoreStartable
-
-    @Binds
-    @IntoSet
-    abstract fun statusBarInitializedListener(
-        statusBarModeRepository: StatusBarModeRepository,
-    ): StatusBarInitializer.OnStatusBarViewInitializedListener
 }
