@@ -1,8 +1,0 @@
-package: "com.android.text.flags"
-
-flag {
-  name: "fix_line_height_for_locale"
-  namespace: "text"
-  description: "Feature flag that preserve the line height of the TextView and EditText even if the the locale is different from Latin"
-  bug: "303326708"
-}
