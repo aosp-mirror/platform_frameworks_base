@@ -27,12 +27,12 @@ import dagger.Component
 import org.junit.Test
 
 @SmallTest
-class NotificationsInteractorTest : SysuiTestCase() {
+class NotificationAlertsInteractorTest : SysuiTestCase() {
 
     @Component(modules = [SysUITestModule::class])
     @SysUISingleton
     interface TestComponent {
-        val underTest: NotificationsInteractor
+        val underTest: NotificationAlertsInteractor
         val disableFlags: FakeDisableFlagsRepository
 
         @Component.Factory
@@ -42,7 +42,7 @@ class NotificationsInteractorTest : SysuiTestCase() {
     }
 
     private val testComponent: TestComponent =
-        DaggerNotificationsInteractorTest_TestComponent.factory().create(test = this)
+        DaggerNotificationAlertsInteractorTest_TestComponent.factory().create(test = this)
 
     @Test
     fun disableFlags_notifAlertsNotDisabled_notifAlertsEnabledTrue() =

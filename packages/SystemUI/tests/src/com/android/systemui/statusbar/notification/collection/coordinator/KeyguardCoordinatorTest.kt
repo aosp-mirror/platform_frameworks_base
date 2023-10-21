@@ -39,10 +39,10 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.notification.stack.data.repository.NotificationListRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationListInteractor
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.mockito.any
@@ -246,7 +246,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
             unseenFilter.onCleanup()
 
             // THEN: The SeenNotificationProvider has been updated to reflect the suppression
-            assertThat(notificationListInteractor.hasFilteredOutSeenNotifications.value).isTrue()
+            assertThat(seenNotificationsInteractor.hasFilteredOutSeenNotifications.value).isTrue()
         }
     }
 
@@ -597,7 +597,8 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
             FakeSettings().apply {
                 putInt(Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS, 1)
             }
-        val notificationListInteractor = NotificationListInteractor(NotificationListRepository())
+        val seenNotificationsInteractor =
+            SeenNotificationsInteractor(ActiveNotificationListRepository())
         val keyguardCoordinator =
             KeyguardCoordinator(
                 testDispatcher,
@@ -610,7 +611,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 sectionHeaderVisibilityProvider,
                 fakeSettings,
-                notificationListInteractor,
+                seenNotificationsInteractor,
                 statusBarStateController,
             )
         keyguardCoordinator.attach(notifPipeline)
@@ -618,7 +619,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
             KeyguardCoordinatorTestScope(
                     keyguardCoordinator,
                     testScope,
-                    notificationListInteractor,
+                    seenNotificationsInteractor,
                     fakeSettings,
                 )
                 .testBlock()
@@ -628,7 +629,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
     private inner class KeyguardCoordinatorTestScope(
         private val keyguardCoordinator: KeyguardCoordinator,
         private val scope: TestScope,
-        val notificationListInteractor: NotificationListInteractor,
+        val seenNotificationsInteractor: SeenNotificationsInteractor,
         private val fakeSettings: FakeSettings,
     ) : CoroutineScope by scope {
         val testScheduler: TestCoroutineScheduler

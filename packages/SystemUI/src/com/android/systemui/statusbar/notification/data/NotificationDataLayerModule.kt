@@ -15,15 +15,8 @@
  */
 package com.android.systemui.statusbar.notification.data
 
-import com.android.systemui.statusbar.notification.data.repository.NotificationStackRepositoryModule
 import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardStateRepositoryModule
 import dagger.Module
 
-@Module(
-    includes =
-        [
-            NotificationStackRepositoryModule::class,
-            NotificationsKeyguardStateRepositoryModule::class,
-        ]
-)
+@Module(includes = [NotificationsKeyguardStateRepositoryModule::class])
 interface NotificationDataLayerModule
