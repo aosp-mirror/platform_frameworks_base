@@ -16,17 +16,43 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.appwidget.AppWidgetHost
+import android.content.Context
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
+import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.ui.model.CommunalContentUiModel
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @SysUISingleton
 class CommunalViewModel
 @Inject
 constructor(
+    @Application private val context: Context,
+    private val appWidgetHost: AppWidgetHost,
+    communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
 ) {
     /** Whether communal hub should show tutorial content. */
     val showTutorialContent: Flow<Boolean> = tutorialInteractor.isTutorialAvailable
+
+    /** List of widgets to be displayed in the communal hub. */
+    val widgetContent: Flow<List<CommunalContentUiModel>> =
+        communalInteractor.widgetContent.map {
+            it.map {
+                // TODO(b/306406256): As adding and removing widgets functionalities are
+                // supported, cache the host views so they're not recreated each time.
+                val hostView = appWidgetHost.createView(context, it.appWidgetId, it.providerInfo)
+                return@map CommunalContentUiModel(
+                    view = hostView,
+                    priority = it.priority,
+                    // All widgets have HALF size.
+                    size = CommunalContentSize.HALF,
+                )
+            }
+        }
 }

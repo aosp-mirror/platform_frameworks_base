@@ -20,6 +20,7 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -28,11 +29,12 @@ import android.os.UserManager
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.communal.data.model.CommunalWidgetMetadata
-import com.android.systemui.communal.shared.CommunalAppWidgetInfo
-import com.android.systemui.communal.shared.CommunalContentSize
+import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -43,6 +45,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /** Encapsulates the state of widgets for communal mode. */
@@ -52,6 +55,9 @@ interface CommunalWidgetRepository {
 
     /** Widgets that are allowed to render in the glanceable hub */
     val communalWidgetAllowlist: List<CommunalWidgetMetadata>
+
+    /** A flow of information about all the communal widgets to show. */
+    val communalWidgets: Flow<List<CommunalWidgetContentModel>>
 }
 
 @SysUISingleton
@@ -67,7 +73,7 @@ constructor(
     private val userManager: UserManager,
     private val userTracker: UserTracker,
     @CommunalLog logBuffer: LogBuffer,
-    featureFlags: FeatureFlags,
+    featureFlags: FeatureFlagsClassic,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
@@ -88,48 +94,58 @@ constructor(
     // Widgets that should be rendered in communal mode.
     private val widgets: HashMap<Int, CommunalAppWidgetInfo> = hashMapOf()
 
-    private val isUserUnlocked: Flow<Boolean> = callbackFlow {
-        if (!featureFlags.isEnabled(Flags.WIDGET_ON_KEYGUARD)) {
-            awaitClose()
-        }
-
-        fun isUserUnlockingOrUnlocked(): Boolean {
-            return userManager.isUserUnlockingOrUnlocked(userTracker.userHandle)
-        }
-
-        fun send() {
-            trySendWithFailureLogging(isUserUnlockingOrUnlocked(), TAG)
-        }
-
-        if (isUserUnlockingOrUnlocked()) {
-            send()
-            awaitClose()
-        } else {
-            val receiver =
-                object : BroadcastReceiver() {
-                    override fun onReceive(context: Context?, intent: Intent?) {
-                        send()
-                    }
+    private val isUserUnlocked: Flow<Boolean> =
+        callbackFlow {
+                if (!communalRepository.isCommunalEnabled) {
+                    awaitClose()
                 }
 
-            broadcastDispatcher.registerReceiver(
-                receiver,
-                IntentFilter(Intent.ACTION_USER_UNLOCKED),
-            )
+                fun isUserUnlockingOrUnlocked(): Boolean {
+                    return userManager.isUserUnlockingOrUnlocked(userTracker.userHandle)
+                }
 
-            awaitClose { broadcastDispatcher.unregisterReceiver(receiver) }
+                fun send() {
+                    trySendWithFailureLogging(isUserUnlockingOrUnlocked(), TAG)
+                }
+
+                if (isUserUnlockingOrUnlocked()) {
+                    send()
+                    awaitClose()
+                } else {
+                    val receiver =
+                        object : BroadcastReceiver() {
+                            override fun onReceive(context: Context?, intent: Intent?) {
+                                send()
+                            }
+                        }
+
+                    broadcastDispatcher.registerReceiver(
+                        receiver,
+                        IntentFilter(Intent.ACTION_USER_UNLOCKED),
+                    )
+
+                    awaitClose { broadcastDispatcher.unregisterReceiver(receiver) }
+                }
+            }
+            .distinctUntilChanged()
+
+    private val isHostActive: Flow<Boolean> =
+        isUserUnlocked.map {
+            if (it) {
+                startListening()
+                true
+            } else {
+                stopListening()
+                clearWidgets()
+                false
+            }
         }
-    }
 
     override val stopwatchAppWidgetInfo: Flow<CommunalAppWidgetInfo?> =
-        isUserUnlocked.map { isUserUnlocked ->
-            if (!isUserUnlocked) {
-                clearWidgets()
-                stopListening()
+        isHostActive.map { isHostActive ->
+            if (!isHostActive || !featureFlags.isEnabled(Flags.WIDGET_ON_KEYGUARD)) {
                 return@map null
             }
-
-            startListening()
 
             val providerInfo =
                 appWidgetManager.installedProviders.find {
@@ -144,6 +160,42 @@ constructor(
             return@map addWidget(providerInfo)
         }
 
+    override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
+        isHostActive.map { isHostActive ->
+            if (!isHostActive) {
+                return@map emptyList()
+            }
+
+            // The allowlist should be fetched from the local database with all the metadata tied to
+            // a widget, including an appWidgetId if it has been bound. Before the database is set
+            // up, we are going to use the app widget host as the source of truth for bound widgets,
+            // and rebind each time on boot.
+
+            // Remove all previously bound widgets.
+            appWidgetHost.appWidgetIds.forEach { appWidgetHost.deleteAppWidgetId(it) }
+
+            val inventory = mutableListOf<CommunalWidgetContentModel>()
+
+            // Bind all widgets from the allowlist.
+            communalWidgetAllowlist.forEach {
+                val id = appWidgetHost.allocateAppWidgetId()
+                appWidgetManager.bindAppWidgetId(
+                    id,
+                    ComponentName.unflattenFromString(it.componentName),
+                )
+
+                inventory.add(
+                    CommunalWidgetContentModel(
+                        appWidgetId = id,
+                        providerInfo = appWidgetManager.getAppWidgetInfo(id),
+                        priority = it.priority,
+                    )
+                )
+            }
+
+            return@map inventory.toList()
+        }
+
     private fun getWidgetAllowlist(): List<CommunalWidgetMetadata> {
         val componentNames =
             applicationContext.resources.getStringArray(R.array.config_communalWidgetAllowlist)
@@ -151,7 +203,7 @@ constructor(
             CommunalWidgetMetadata(
                 componentName = name,
                 priority = componentNames.size - index,
-                sizes = listOf(CommunalContentSize.HALF)
+                sizes = listOf(CommunalContentSize.HALF),
             )
         }
     }

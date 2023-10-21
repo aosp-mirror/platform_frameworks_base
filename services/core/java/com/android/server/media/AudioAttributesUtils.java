@@ -23,6 +23,8 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.MediaRoute2Info;
 
+import com.android.media.flags.Flags;
+
 /* package */ final class AudioAttributesUtils {
 
     /* package */ static final AudioAttributes ATTRIBUTES_MEDIA = new AudioAttributes.Builder()
@@ -36,6 +38,14 @@ import android.media.MediaRoute2Info;
     @MediaRoute2Info.Type
     /* package */ static int mapToMediaRouteType(
             @NonNull AudioDeviceAttributes audioDeviceAttributes) {
+        if (Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
+            switch (audioDeviceAttributes.getType()) {
+                case AudioDeviceInfo.TYPE_HDMI_ARC:
+                    return MediaRoute2Info.TYPE_HDMI_ARC;
+                case AudioDeviceInfo.TYPE_HDMI_EARC:
+                    return MediaRoute2Info.TYPE_HDMI_EARC;
+            }
+        }
         switch (audioDeviceAttributes.getType()) {
             case AudioDeviceInfo.TYPE_BUILTIN_EARPIECE:
             case AudioDeviceInfo.TYPE_BUILTIN_SPEAKER:
@@ -63,7 +73,6 @@ import android.media.MediaRoute2Info;
                 return MediaRoute2Info.TYPE_UNKNOWN;
         }
     }
-
 
     /* package */ static boolean isDeviceOutputAttributes(
             @Nullable AudioDeviceAttributes audioDeviceAttributes) {

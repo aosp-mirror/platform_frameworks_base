@@ -1,5 +1,7 @@
 package: "com.android.systemui"
 
+# NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
+
 flag {
     name: "floating_menu_overlaps_nav_bars_flag"
     namespace: "accessibility"

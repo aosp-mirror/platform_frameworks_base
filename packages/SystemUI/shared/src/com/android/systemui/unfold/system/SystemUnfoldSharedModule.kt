@@ -48,6 +48,9 @@ abstract class SystemUnfoldSharedModule {
     abstract fun foldState(provider: DeviceStateManagerFoldProvider): FoldProvider
 
     @Binds
+    abstract fun deviceStateRepository(provider: DeviceStateRepositoryImpl): DeviceStateRepository
+
+    @Binds
     @UnfoldMain
     abstract fun mainExecutor(@Main executor: Executor): Executor
 

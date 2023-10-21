@@ -259,6 +259,31 @@ TEST_F(HintSessionWrapperTests, delayedDeletionResolvesAfterAsyncCreationFinishe
 
 TEST_F(HintSessionWrapperTests, delayedDeletionDoesNotKillReusedSession) {
     EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(0);
+    EXPECT_CALL(*sMockBinding, fakeReportActualWorkDuration(sessionPtr, 5_ms)).Times(1);
+
+    mWrapper->init();
+    waitForWrapperReady();
+    // Init a second time just to grab the wrapper from the promise
+    mWrapper->init();
+    EXPECT_EQ(mWrapper->alive(), true);
+
+    // First schedule the deletion
+    scheduleDelayedDestroyManaged();
+
+    // Then, report an actual duration
+    mWrapper->reportActualWorkDuration(5_ms);
+
+    // Then, run the delayed deletion after sending the update
+    allowDelayedDestructionToStart();
+    waitForDelayedDestructionToFinish();
+
+    // Ensure it didn't close within the timeframe of the test
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), true);
+}
+
+TEST_F(HintSessionWrapperTests, loadUpDoesNotResetDeletionTimer) {
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
     EXPECT_CALL(*sMockBinding,
                 fakeSendHint(sessionPtr, static_cast<int32_t>(SessionHint::CPU_LOAD_UP)))
             .Times(1);
@@ -272,16 +297,46 @@ TEST_F(HintSessionWrapperTests, delayedDeletionDoesNotKillReusedSession) {
     // First schedule the deletion
     scheduleDelayedDestroyManaged();
 
-    // Then, send a hint to update the timestamp
+    // Then, send a load_up hint
     mWrapper->sendLoadIncreaseHint();
 
     // Then, run the delayed deletion after sending the update
     allowDelayedDestructionToStart();
     waitForDelayedDestructionToFinish();
 
-    // Ensure it didn't close within the timeframe of the test
+    // Ensure it closed within the timeframe of the test
     Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
+}
+
+TEST_F(HintSessionWrapperTests, manualSessionDestroyPlaysNiceWithDelayedDestruct) {
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
+
+    mWrapper->init();
+    waitForWrapperReady();
+    // Init a second time just to grab the wrapper from the promise
+    mWrapper->init();
     EXPECT_EQ(mWrapper->alive(), true);
+
+    // First schedule the deletion
+    scheduleDelayedDestroyManaged();
+
+    // Then, kill the session
+    mWrapper->destroy();
+
+    // Verify it died
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
+
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(0);
+
+    // Then, run the delayed deletion after manually killing the session
+    allowDelayedDestructionToStart();
+    waitForDelayedDestructionToFinish();
+
+    // Ensure it didn't close again and is still dead
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
 }
 
 }  // namespace android::uirenderer::renderthread

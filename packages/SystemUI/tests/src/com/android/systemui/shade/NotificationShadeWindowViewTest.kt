@@ -42,6 +42,8 @@ import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
@@ -142,6 +144,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     private lateinit var unfoldTransitionProgressProvider:
         Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
+    @Mock private lateinit var mCommunalViewModel: CommunalViewModel
+    private lateinit var mCommunalRepository: FakeCommunalRepository
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
@@ -177,6 +181,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         whenever(dockManager.isDocked).thenReturn(false)
         whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
             .thenReturn(emptyFlow())
+
+        mCommunalRepository = FakeCommunalRepository()
 
         val featureFlags = FakeFeatureFlags()
         featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
@@ -218,6 +224,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 Mockito.mock(KeyguardMessageAreaController.Factory::class.java),
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
+                mCommunalViewModel,
+                mCommunalRepository,
                 NotificationExpansionRepository(),
                 featureFlags,
                 FakeSystemClock(),

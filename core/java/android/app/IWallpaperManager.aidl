@@ -161,12 +161,6 @@ interface IWallpaperManager {
      */
     boolean isWallpaperBackupEligible(int which, int userId);
 
-    /*
-     * Keyguard: register a callback for being notified that lock-state relevant
-     * wallpaper content has changed.
-     */
-    boolean setLockWallpaperCallback(IWallpaperManagerCallback cb);
-
     /**
      * Returns the colors used by the lock screen or system wallpaper.
      *
@@ -251,13 +245,6 @@ interface IWallpaperManager {
      * @hide
      */
     boolean isStaticWallpaper(int which);
-
-    /**
-     * Temporary method for project b/197814683.
-     * Return true if the lockscreen wallpaper always uses a WallpaperService, not a static image.
-     * @hide
-     */
-     boolean isLockscreenLiveWallpaperEnabled();
 
     /**
      * Temporary method for project b/270726737.

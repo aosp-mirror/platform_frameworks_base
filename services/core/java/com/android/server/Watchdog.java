@@ -250,7 +250,7 @@ public class Watchdog implements Dumpable {
         private Monitor mCurrentMonitor;
         private long mStartTimeMillis;
         private int mPauseCount;
-        private long mOneOffTimeoutMillis;
+        private long mPauseEndTimeMillis;
 
         HandlerChecker(Handler handler, String name) {
             mHandler = handler;
@@ -270,20 +270,19 @@ public class Watchdog implements Dumpable {
          * @param handlerCheckerTimeoutMillis the timeout to use for this run
          */
         public void scheduleCheckLocked(long handlerCheckerTimeoutMillis) {
-            if (mOneOffTimeoutMillis > 0) {
-              mWaitMaxMillis = mOneOffTimeoutMillis;
-              mOneOffTimeoutMillis = 0;
-            } else {
-              mWaitMaxMillis = handlerCheckerTimeoutMillis;
-            }
+            mWaitMaxMillis = handlerCheckerTimeoutMillis;
 
             if (mCompleted) {
                 // Safe to update monitors in queue, Handler is not in the middle of work
                 mMonitors.addAll(mMonitorQueue);
                 mMonitorQueue.clear();
             }
+
+            long nowMillis = SystemClock.uptimeMillis();
+            boolean isPaused = mPauseCount > 0
+                    || (mPauseEndTimeMillis > 0 && mPauseEndTimeMillis < nowMillis);
             if ((mMonitors.size() == 0 && mHandler.getLooper().getQueue().isPolling())
-                    || (mPauseCount > 0)) {
+                    || isPaused) {
                 // Don't schedule until after resume OR
                 // If the target looper has recently been polling, then
                 // there is no reason to enqueue our checker on it since that
@@ -301,7 +300,8 @@ public class Watchdog implements Dumpable {
 
             mCompleted = false;
             mCurrentMonitor = null;
-            mStartTimeMillis = SystemClock.uptimeMillis();
+            mStartTimeMillis = nowMillis;
+            mPauseEndTimeMillis = 0;
             mHandler.postAtFrontOfQueue(this);
         }
 
@@ -360,20 +360,19 @@ public class Watchdog implements Dumpable {
         }
 
         /**
-         * Sets the timeout of the HandlerChecker for one run.
+         * Pauses the checks for the given time.
          *
-         * <p>The current run will be ignored and the next run will be set to this timeout.
-         *
-         * <p>If a one off timeout is already set, the maximum timeout will be used.
+         * <p>The current run will be ignored and another run will be scheduled after
+         * the given time.
          */
-        public void setOneOffTimeoutLocked(int temporaryTimeoutMillis, String reason) {
-            mOneOffTimeoutMillis = Math.max(temporaryTimeoutMillis, mOneOffTimeoutMillis);
+        public void pauseForLocked(int pauseMillis, String reason) {
+            mPauseEndTimeMillis = SystemClock.uptimeMillis() + pauseMillis;
             // Mark as completed, because there's a chance we called this after the watchog
             // thread loop called Object#wait after 'WAITED_HALF'. In that case we want to ensure
             // the next call to #getCompletionStateLocked for this checker returns 'COMPLETED'
             mCompleted = true;
-            Slog.i(TAG, "Extending timeout of HandlerChecker: " + mName + " for reason: "
-                    + reason + ". New timeout: " + mOneOffTimeoutMillis);
+            Slog.i(TAG, "Pausing of HandlerChecker: " + mName + " for reason: "
+                    + reason + ". Pause end time: " + mPauseEndTimeMillis);
         }
 
         /** Pause the HandlerChecker. */
@@ -623,34 +622,32 @@ public class Watchdog implements Dumpable {
     }
 
      /**
-     * Sets a one-off timeout for the next run of the watchdog for this thread. This is useful
+     * Pauses the checks of the watchdog for this thread. This is useful
      * to run a slow operation on one of the monitored thread.
      *
-     * <p>After the next run, the timeout will go back to the default value.
-     *
-     * <p>If the current thread has not been added to the Watchdog, this call is a no-op.
-     *
-     * <p>If a one-off timeout for the current thread is already, the max value will be used.
+     * <p>After the given time, the timeout will go back to the default value.
+     * <p>This method does not require resume to be called.
      */
-    public void setOneOffTimeoutForCurrentThread(int oneOffTimeoutMillis, String reason) {
+    public void pauseWatchingCurrentThreadFor(int pauseMillis, String reason) {
         synchronized (mLock) {
             for (HandlerCheckerAndTimeout hc : mHandlerCheckers) {
                 HandlerChecker checker = hc.checker();
                 if (Thread.currentThread().equals(checker.getThread())) {
-                    checker.setOneOffTimeoutLocked(oneOffTimeoutMillis, reason);
+                    checker.pauseForLocked(pauseMillis, reason);
                 }
             }
         }
     }
 
     /**
-     * Sets a one-off timeout for the next run of the watchdog for the monitor thread.
+     * Pauses the checks of the watchdog for the monitor thread for the given time
      *
-     * <p>Simiar to {@link setOneOffTimeoutForCurrentThread} but used for monitors added through
-     * {@link #addMonitor}
+     * <p>Similar to {@link pauseWatchingCurrentThreadFor} but used for monitors added
+     * through {@link #addMonitor}
+     * <p>This method does not require resume to be called.
      */
-    public void setOneOffTimeoutForMonitors(int oneOffTimeoutMillis, String reason) {
-        mMonitorChecker.setOneOffTimeoutLocked(oneOffTimeoutMillis, reason);
+    public void pauseWatchingMonitorsFor(int pauseMillis, String reason) {
+        mMonitorChecker.pauseForLocked(pauseMillis, reason);
     }
 
     /**
@@ -664,7 +661,7 @@ public class Watchdog implements Dumpable {
      * adds another pause and will require an additional {@link #resumeCurrentThread} to resume.
      *
      * <p>Note: Use with care, as any deadlocks on the current thread will be undetected until all
-     * pauses have been resumed. Prefer to use #setOneOffTimeoutForCurrentThread.
+     * pauses have been resumed. Prefer to use #pauseWatchingCurrentThreadFor.
      */
     public void pauseWatchingCurrentThread(String reason) {
         synchronized (mLock) {

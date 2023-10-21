@@ -1,5 +1,6 @@
 package com.android.systemui.communal.data.repository
 
+import com.android.systemui.FeatureFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -15,10 +16,11 @@ interface CommunalRepository {
 class CommunalRepositoryImpl
 @Inject
 constructor(
-    private val featureFlags: FeatureFlagsClassic,
+    private val featureFlags: FeatureFlags,
+    private val featureFlagsClassic: FeatureFlagsClassic,
 ) : CommunalRepository {
     override val isCommunalEnabled: Boolean
         get() =
-            featureFlags.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) &&
-                featureFlags.isEnabled(Flags.COMMUNAL_HUB)
+            featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) &&
+                featureFlags.communalHub()
 }

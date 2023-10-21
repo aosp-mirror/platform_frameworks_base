@@ -549,12 +549,6 @@ object Flags {
     val LOCKSCREEN_ENABLE_LANDSCAPE =
             unreleasedFlag("lockscreen.enable_landscape")
 
-    // TODO(b/273443374): Tracking Bug
-    @Keep
-    @JvmField
-    val LOCKSCREEN_LIVE_WALLPAPER =
-        sysPropBooleanFlag("persist.wm.debug.lockscreen_live_wallpaper", default = true)
-
     // TODO(b/281648899): Tracking bug
     @Keep
     @JvmField
@@ -776,7 +770,7 @@ object Flags {
     val ENABLE_NEW_PRIVACY_DIALOG = releasedFlag("enable_new_privacy_dialog")
 
     // TODO(b/289573946): Tracking Bug
-    @JvmField val PRECOMPUTED_TEXT = unreleasedFlag("precomputed_text", teamfood = true)
+    @JvmField val PRECOMPUTED_TEXT = releasedFlag("precomputed_text")
 
     // TODO(b/302087895): Tracking Bug
     @JvmField val CALL_LAYOUT_ASYNC_SET_DATA = unreleasedFlag("call_layout_async_set_data")

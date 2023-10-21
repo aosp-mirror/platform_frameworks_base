@@ -16,6 +16,7 @@
 
 package android.net.wifi.sharedconnectivity.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -169,6 +170,7 @@ public final class NetworkProviderInfo implements Parcelable {
          * @return Returns the Builder object.
          */
         @NonNull
+        @FlaggedApi("com.android.wifi.flags.network_provider_battery_charging_status")
         public Builder setBatteryCharging(boolean isBatteryCharging) {
             mIsBatteryCharging = isBatteryCharging;
             return this;
@@ -283,6 +285,7 @@ public final class NetworkProviderInfo implements Parcelable {
      *
      * @return Returns true if the battery of the remote device is charging.
      */
+    @FlaggedApi("com.android.wifi.flags.network_provider_battery_charging_status")
     public boolean isBatteryCharging() {
         return mIsBatteryCharging;
     }

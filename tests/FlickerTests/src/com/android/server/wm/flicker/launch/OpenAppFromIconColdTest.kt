@@ -16,13 +16,11 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import androidx.test.filters.FlakyTest
+import com.android.server.wm.flicker.launch.common.OpenAppFromIconTransition
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,28 +52,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class OpenAppFromIconColdTest(flicker: LegacyFlickerTest) :
-    OpenAppFromLauncherTransition(flicker) {
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            super.transition(this)
-            setup {
-                if (flicker.scenario.isTablet) {
-                    tapl.setExpectedRotation(flicker.scenario.startRotation.value)
-                } else {
-                    tapl.setExpectedRotation(Rotation.ROTATION_0.value)
-                }
-                RemoveAllTasksButHomeRule.removeAllTasksButHome()
-            }
-            transitions {
-                tapl
-                    .goHome()
-                    .switchToAllApps()
-                    .getAppIcon(testApp.appName)
-                    .launch(testApp.packageName)
-            }
-            teardown { testApp.exit(wmHelper) }
-        }
+    OpenAppFromIconTransition(flicker) {
 
     @FlakyTest(bugId = 240916028)
     @Test

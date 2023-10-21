@@ -75,6 +75,7 @@ import java.util.StringJoiner;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * Maintains the master list of jobs that the job scheduler is tracking. These jobs are compared by
@@ -99,6 +100,8 @@ public final class JobStore {
     private static final long SCHEDULED_JOB_HIGH_WATER_MARK_PERIOD_MS = 30 * 60_000L;
     @VisibleForTesting
     static final String JOB_FILE_SPLIT_PREFIX = "jobs_";
+    private static final Pattern SPLIT_FILE_PATTERN =
+            Pattern.compile("^" + JOB_FILE_SPLIT_PREFIX + "\\d+.xml$");
     private static final int ALL_UIDS = -1;
     @VisibleForTesting
     static final int INVALID_UID = -2;
@@ -1121,6 +1124,11 @@ public final class JobStore {
             int numDuplicates = 0;
             synchronized (mLock) {
                 for (File file : files) {
+                    if (!file.getName().equals("jobs.xml")
+                            && !SPLIT_FILE_PATTERN.matcher(file.getName()).matches()) {
+                        // Skip temporary or other files.
+                        continue;
+                    }
                     final AtomicFile aFile = createJobFile(file);
                     try (FileInputStream fis = aFile.openRead()) {
                         jobs = readJobMapImpl(fis, rtcGood, nowElapsed);

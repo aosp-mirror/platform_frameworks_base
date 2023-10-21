@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.layout.ui.compose
 
+import android.util.SizeF
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,7 +55,14 @@ fun CommunalGridLayout(
                         Row(
                             modifier = Modifier.height(layoutConfig.cardHeight(cardInfo.size)),
                         ) {
-                            cardInfo.card.Content(Modifier.fillMaxSize())
+                            cardInfo.card.Content(
+                                modifier = Modifier.fillMaxSize(),
+                                size =
+                                    SizeF(
+                                        layoutConfig.cardWidth.value,
+                                        layoutConfig.cardHeight(cardInfo.size).value,
+                                    ),
+                            )
                         }
                     }
                 }

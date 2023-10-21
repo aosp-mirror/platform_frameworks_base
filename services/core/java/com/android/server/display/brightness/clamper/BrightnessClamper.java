@@ -19,6 +19,8 @@ package com.android.server.display.brightness.clamper;
 import android.annotation.NonNull;
 import android.os.PowerManager;
 
+import com.android.server.display.DisplayBrightnessState;
+
 import java.io.PrintWriter;
 
 /**
@@ -31,6 +33,10 @@ abstract class BrightnessClamper<T> {
 
     float getBrightnessCap() {
         return mBrightnessCap;
+    }
+
+    float getCustomAnimationRate() {
+        return DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
     }
 
     boolean isActive() {

@@ -124,11 +124,44 @@ class CameraToggleTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLongClickIntent() {
+    fun testLongClickIntent_safetyCenterEnabled() {
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(true)
-        assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_CONTROLS)
+        val cameraTile = CameraToggleTile(
+                host,
+                uiEventLogger,
+                testableLooper.looper,
+                Handler(testableLooper.looper),
+                metricsLogger,
+                FalsingManagerFake(),
+                statusBarStateController,
+                activityStarter,
+                qsLogger,
+                privacyController,
+                keyguardStateController,
+                safetyCenterManager)
+        assertThat(cameraTile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_CONTROLS)
+        cameraTile.destroy()
+        testableLooper.processAllMessages()
+    }
 
+    @Test
+    fun testLongClickIntent_safetyCenterDisabled() {
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(false)
+        val cameraTile = CameraToggleTile(
+                host,
+                uiEventLogger,
+                testableLooper.looper,
+                Handler(testableLooper.looper),
+                metricsLogger,
+                FalsingManagerFake(),
+                statusBarStateController,
+                activityStarter,
+                qsLogger,
+                privacyController,
+                keyguardStateController,
+                safetyCenterManager)
         assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_SETTINGS)
+        cameraTile.destroy()
+        testableLooper.processAllMessages()
     }
 }

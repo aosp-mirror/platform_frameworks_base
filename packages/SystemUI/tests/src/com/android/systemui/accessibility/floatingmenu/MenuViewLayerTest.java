@@ -222,14 +222,14 @@ public class MenuViewLayerTest extends SysuiTestCase {
 
     @Test
     public void showingImeInsetsChange_overlapOnIme_menuShownAboveIme() {
-        final float menuTop = IME_TOP + 100;
-        mMenuAnimationController.moveAndPersistPosition(new PointF(0, menuTop));
+        mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 100));
+        final PointF beforePosition = mMenuView.getMenuPosition();
 
         dispatchShowingImeInsets();
 
         final float menuBottom = mMenuView.getTranslationY() + mMenuView.getMenuHeight();
-        assertThat(mMenuView.getTranslationX()).isEqualTo(0);
-        assertThat(menuBottom).isLessThan(IME_TOP);
+        assertThat(mMenuView.getTranslationX()).isEqualTo(beforePosition.x);
+        assertThat(menuBottom).isLessThan(beforePosition.y);
     }
 
     @Test

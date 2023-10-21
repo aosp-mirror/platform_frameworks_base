@@ -20,8 +20,6 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
-import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.RANKING_UPDATE_ASHMEM;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -42,16 +40,12 @@ import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.SharedMemory;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableContext;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.Flag;
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.FlagResolver;
-
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,6 +64,9 @@ public class NotificationRankingUpdateTest {
     private static final String TEST_KEY = "key";
 
     private NotificationChannel mNotificationChannel;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     // TODO(b/284297289): remove this flag set once resolved.
     @Parameterized.Parameters(name = "rankingUpdateAshmem={0}")
@@ -424,30 +421,11 @@ public class NotificationRankingUpdateTest {
         mNotificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "test channel",
                 NotificationManager.IMPORTANCE_DEFAULT);
 
-        SystemUiSystemPropertiesFlags.TEST_RESOLVER = new FlagResolver() {
-            @Override
-            public boolean isEnabled(Flag flag) {
-                if (flag.mSysPropKey.equals(RANKING_UPDATE_ASHMEM.mSysPropKey)) {
-                    return mRankingUpdateAshmem;
-                }
-                return new SystemUiSystemPropertiesFlags.DebugResolver().isEnabled(flag);
-            }
-
-            @Override
-            public int getIntValue(Flag flag) {
-                return 0;
-            }
-
-            @Override
-            public String getStringValue(Flag flag) {
-                return null;
-            }
-        };
-    }
-
-    @After
-    public void tearDown() {
-        SystemUiSystemPropertiesFlags.TEST_RESOLVER = null;
+        if (mRankingUpdateAshmem) {
+            mSetFlagsRule.enableFlags(Flags.FLAG_RANKING_UPDATE_ASHMEM);
+        } else {
+            mSetFlagsRule.disableFlags(Flags.FLAG_RANKING_UPDATE_ASHMEM);
+        }
     }
 
     /**
@@ -497,8 +475,7 @@ public class NotificationRankingUpdateTest {
         parcel.setDataPosition(0);
         NotificationRankingUpdate nru1 = NotificationRankingUpdate.CREATOR.createFromParcel(parcel);
         // The rankingUpdate file descriptor is only non-null in the new path.
-        if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(
-                SystemUiSystemPropertiesFlags.NotificationFlags.RANKING_UPDATE_ASHMEM)) {
+        if (Flags.rankingUpdateAshmem()) {
             assertTrue(nru1.isFdNotNullAndClosed());
         }
         detailedAssertEquals(nru, nru1);
@@ -636,7 +613,7 @@ public class NotificationRankingUpdateTest {
 
     @Test
     public void testRankingUpdate_writesSmartActionToParcel() {
-        if (!mRankingUpdateAshmem) {
+        if (!Flags.rankingUpdateAshmem()) {
             return;
         }
         ArrayList<Notification.Action> actions = new ArrayList<>();
@@ -674,7 +651,7 @@ public class NotificationRankingUpdateTest {
 
     @Test
     public void testRankingUpdate_handlesEmptySmartActionList() {
-        if (!mRankingUpdateAshmem) {
+        if (!Flags.rankingUpdateAshmem()) {
             return;
         }
         ArrayList<Notification.Action> actions = new ArrayList<>();
@@ -697,7 +674,7 @@ public class NotificationRankingUpdateTest {
 
     @Test
     public void testRankingUpdate_handlesNullSmartActionList() {
-        if (!mRankingUpdateAshmem) {
+        if (!Flags.rankingUpdateAshmem()) {
             return;
         }
         NotificationListenerService.Ranking ranking =

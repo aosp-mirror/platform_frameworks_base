@@ -22,6 +22,7 @@ aconfig_srcjars = [
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
+    ":android.service.notification.flags-aconfig-java{.generated_srcjars}",
     ":android.view.flags-aconfig-java{.generated_srcjars}",
     ":android.view.accessibility.flags-aconfig-java{.generated_srcjars}",
     ":camera_platform_flags_core_java_lib{.generated_srcjars}",
@@ -151,6 +152,11 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.nfc.flags-aconfig-java",
     aconfig_declarations: "android.nfc.flags-aconfig",
+    min_sdk_version: "VanillaIceCream",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -286,6 +292,12 @@ java_aconfig_library {
     name: "android.widget.flags-aconfig-java",
     aconfig_declarations: "android.widget.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+rust_aconfig_library {
+    name: "libandroid_security_flags_rust",
+    crate_name: "android_security_flags",
+    aconfig_declarations: "android.security.flags-aconfig",
 }
 
 // Package Manager
@@ -543,4 +555,17 @@ java_aconfig_library {
 cc_aconfig_library {
     name: "device_policy_aconfig_flags_c_lib",
     aconfig_declarations: "device_policy_aconfig_flags",
+}
+
+// Notifications
+aconfig_declarations {
+    name: "android.service.notification.flags-aconfig",
+    package: "android.service.notification",
+    srcs: ["core/java/android/service/notification/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.notification.flags-aconfig-java",
+    aconfig_declarations: "android.service.notification.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

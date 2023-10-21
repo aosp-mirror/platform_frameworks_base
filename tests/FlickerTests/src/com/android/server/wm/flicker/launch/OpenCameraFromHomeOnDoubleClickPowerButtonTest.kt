@@ -30,6 +30,7 @@ import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import android.view.KeyEvent
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.launch.common.OpenAppFromLauncherTransition
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test

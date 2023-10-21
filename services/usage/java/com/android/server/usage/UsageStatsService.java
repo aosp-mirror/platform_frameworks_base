@@ -202,6 +202,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK = 8;
     static final int MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED = 9;
     static final int MSG_UID_REMOVED = 10;
+    static final int MSG_USER_STARTED = 11;
 
     private final Object mLock = new Object();
     private Handler mHandler;
@@ -334,7 +335,7 @@ public class UsageStatsService extends SystemService implements
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mPackageManager = getContext().getPackageManager();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mHandler = new H(BackgroundThread.get().getLooper());
+        mHandler = getUsageEventProcessingHandler();
         mIoHandler = new Handler(IoThread.get().getLooper(), mIoHandlerCallback);
 
         mAppStandby = mInjector.getAppStandbyController(getContext());
@@ -380,10 +381,12 @@ public class UsageStatsService extends SystemService implements
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
-        getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL,
-                filter, null, /* Handler scheduler */ null);
+        getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
+                null, /* scheduler= */ Flags.useDedicatedHandlerThread() ? mHandler : null);
+
         getContext().registerReceiverAsUser(new UidRemovedReceiver(), UserHandle.ALL,
-                new IntentFilter(ACTION_UID_REMOVED), null, /* Handler scheduler */ null);
+                new IntentFilter(ACTION_UID_REMOVED), null,
+                /* scheduler= */ Flags.useDedicatedHandlerThread() ? mHandler : null);
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
@@ -468,6 +471,14 @@ public class UsageStatsService extends SystemService implements
                 alarmQueue.removeAllAlarms();
                 mLaunchTimeAlarmQueues.remove(userId);
             }
+        }
+    }
+
+    private Handler getUsageEventProcessingHandler() {
+        if (Flags.useDedicatedHandlerThread()) {
+            return new H(UsageStatsHandlerThread.get().getLooper());
+        } else {
+            return new H(BackgroundThread.get().getLooper());
         }
     }
 
@@ -618,7 +629,7 @@ public class UsageStatsService extends SystemService implements
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 if (userId >= 0) {
-                    mAppStandby.postCheckIdleStates(userId);
+                    mHandler.obtainMessage(MSG_USER_STARTED, userId, 0).sendToTarget();
                 }
             }
         }
@@ -1554,8 +1565,7 @@ public class UsageStatsService extends SystemService implements
         synchronized (mLaunchTimeAlarmQueues) {
             LaunchTimeAlarmQueue alarmQueue = mLaunchTimeAlarmQueues.get(userId);
             if (alarmQueue == null) {
-                alarmQueue = new LaunchTimeAlarmQueue(
-                    userId, getContext(), BackgroundThread.get().getLooper());
+                alarmQueue = new LaunchTimeAlarmQueue(userId, getContext(), mHandler.getLooper());
                 mLaunchTimeAlarmQueues.put(userId, alarmQueue);
             }
 
@@ -2039,6 +2049,9 @@ public class UsageStatsService extends SystemService implements
                     break;
                 case MSG_UID_REMOVED:
                     mResponseStatsTracker.onUidRemoved(msg.arg1);
+                    break;
+                case MSG_USER_STARTED:
+                    mAppStandby.postCheckIdleStates(msg.arg1);
                     break;
                 case MSG_PACKAGE_REMOVED:
                     onPackageRemoved(msg.arg1, (String) msg.obj);

@@ -111,6 +111,27 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun show_nullDelegate() {
+        testScope.run {
+            whenever(bouncerView.delegate).thenReturn(null)
+            mainHandler.setMode(FakeHandler.Mode.QUEUEING)
+
+            // WHEN bouncer show is requested
+            underTest.show(true)
+
+            // WHEN all queued messages are dispatched
+            mainHandler.dispatchQueuedMessages()
+
+            // THEN primary bouncer state doesn't update to show since delegate was null
+            verify(repository, never()).setPrimaryShow(true)
+            verify(repository, never()).setPrimaryShowingSoon(false)
+            verify(mPrimaryBouncerCallbackInteractor, never()).dispatchStartingToShow()
+            verify(mPrimaryBouncerCallbackInteractor, never())
+                .dispatchVisibilityChanged(View.VISIBLE)
+        }
+    }
+
+    @Test
     fun testShow_isScrimmed() {
         underTest.show(true)
         verify(repository).setKeyguardAuthenticatedBiometrics(null)

@@ -79,4 +79,7 @@ interface BaseComposeFacade {
         context: Context,
         viewModel: CommunalViewModel,
     ): View
+
+    /** Creates a container that hosts the communal UI and handles gesture transitions. */
+    fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View
 }

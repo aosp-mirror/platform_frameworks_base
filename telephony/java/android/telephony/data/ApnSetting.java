@@ -15,6 +15,7 @@
  */
 package android.telephony.data;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,6 +36,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -121,6 +123,9 @@ public class ApnSetting implements Parcelable {
     public static final int TYPE_BIP = ApnTypes.BIP;
     /** APN type for ENTERPRISE. */
     public static final int TYPE_ENTERPRISE = ApnTypes.ENTERPRISE;
+    /** APN type for RCS (Rich Communication Services). */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final int TYPE_RCS = ApnTypes.RCS;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TYPE_"}, value = {
@@ -139,6 +144,7 @@ public class ApnSetting implements Parcelable {
             TYPE_BIP,
             TYPE_VSIM,
             TYPE_ENTERPRISE,
+            TYPE_RCS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApnType {
@@ -356,6 +362,17 @@ public class ApnSetting implements Parcelable {
     @SystemApi
     public static final String TYPE_ENTERPRISE_STRING = "enterprise";
 
+    /**
+     * APN type for RCS (Rich Communication Services)
+     *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    public static final String TYPE_RCS_STRING = "rcs";
+
 
     /** @hide */
     @IntDef(prefix = { "AUTH_TYPE_" }, value = {
@@ -424,6 +441,26 @@ public class ApnSetting implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface MvnoType {}
 
+    /**
+     * Indicating this APN can be used when the device is using terrestrial cellular networks.
+     * @hide
+     */
+    public static final int INFRASTRUCTURE_CELLULAR = 1 << 0;
+
+    /**
+     * Indicating this APN can be used when the device is attached to satellites.
+     * @hide
+     */
+    public static final int INFRASTRUCTURE_SATELLITE = 1 << 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "INFRASTRUCTURE_" }, value = {
+            INFRASTRUCTURE_CELLULAR,
+            INFRASTRUCTURE_SATELLITE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InfrastructureBitmask {}
+
     private static final Map<String, Integer> APN_TYPE_STRING_MAP;
     private static final Map<Integer, String> APN_TYPE_INT_MAP;
     private static final Map<String, Integer> PROTOCOL_STRING_MAP;
@@ -449,6 +486,7 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_STRING_MAP.put(TYPE_ENTERPRISE_STRING, TYPE_ENTERPRISE);
         APN_TYPE_STRING_MAP.put(TYPE_VSIM_STRING, TYPE_VSIM);
         APN_TYPE_STRING_MAP.put(TYPE_BIP_STRING, TYPE_BIP);
+        APN_TYPE_STRING_MAP.put(TYPE_RCS_STRING, TYPE_RCS);
 
         APN_TYPE_INT_MAP = new ArrayMap<>();
         APN_TYPE_INT_MAP.put(TYPE_DEFAULT, TYPE_DEFAULT_STRING);
@@ -466,6 +504,7 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_INT_MAP.put(TYPE_ENTERPRISE, TYPE_ENTERPRISE_STRING);
         APN_TYPE_INT_MAP.put(TYPE_VSIM, TYPE_VSIM_STRING);
         APN_TYPE_INT_MAP.put(TYPE_BIP, TYPE_BIP_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_RCS, TYPE_RCS_STRING);
 
         PROTOCOL_STRING_MAP = new ArrayMap<>();
         PROTOCOL_STRING_MAP.put("IP", PROTOCOL_IP);
@@ -528,6 +567,7 @@ public class ApnSetting implements Parcelable {
     private final int mCarrierId;
     private final int mSkip464Xlat;
     private final boolean mAlwaysOn;
+    private final @InfrastructureBitmask int mInfrastructureBitmask;
 
     /**
      * Returns the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
@@ -916,6 +956,29 @@ public class ApnSetting implements Parcelable {
         return mAlwaysOn;
     }
 
+    /**
+     * Check if this APN can be used when the device is using certain infrastructure(s).
+     *
+     * @param infrastructures The infrastructure(s) the device is using.
+     *
+     * @return {@code true} if this APN can be used.
+     * @hide
+     */
+    public boolean isForInfrastructure(@InfrastructureBitmask int infrastructures) {
+        return (mInfrastructureBitmask & infrastructures) != 0;
+    }
+
+    /**
+     * @return The infrastructure bitmask of which the APN can be used on. For example, some APNs
+     * can only be used when the device is on cellular, on satellite, or both.
+     *
+     * @hide
+     */
+    @InfrastructureBitmask
+    public int getInfrastructureBitmask() {
+        return mInfrastructureBitmask;
+    }
+
     private ApnSetting(Builder builder) {
         this.mEntryName = builder.mEntryName;
         this.mApnName = builder.mApnName;
@@ -952,6 +1015,7 @@ public class ApnSetting implements Parcelable {
         this.mCarrierId = builder.mCarrierId;
         this.mSkip464Xlat = builder.mSkip464Xlat;
         this.mAlwaysOn = builder.mAlwaysOn;
+        this.mInfrastructureBitmask = builder.mInfrastructureBitmask;
     }
 
     /**
@@ -1031,6 +1095,8 @@ public class ApnSetting implements Parcelable {
                         cursor.getColumnIndexOrThrow(Telephony.Carriers.CARRIER_ID)))
                 .setSkip464Xlat(cursor.getInt(cursor.getColumnIndexOrThrow(Carriers.SKIP_464XLAT)))
                 .setAlwaysOn(cursor.getInt(cursor.getColumnIndexOrThrow(Carriers.ALWAYS_ON)) == 1)
+                .setInfrastructureBitmask(cursor.getInt(cursor.getColumnIndexOrThrow(
+                        Telephony.Carriers.INFRASTRUCTURE_BITMASK)))
                 .buildWithoutCheck();
     }
 
@@ -1070,6 +1136,7 @@ public class ApnSetting implements Parcelable {
                 .setCarrierId(apn.mCarrierId)
                 .setSkip464Xlat(apn.mSkip464Xlat)
                 .setAlwaysOn(apn.mAlwaysOn)
+                .setInfrastructureBitmask(apn.mInfrastructureBitmask)
                 .buildWithoutCheck();
     }
 
@@ -1115,6 +1182,7 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(mCarrierId);
         sb.append(", ").append(mSkip464Xlat);
         sb.append(", ").append(mAlwaysOn);
+        sb.append(", ").append(mInfrastructureBitmask);
         sb.append(", ").append(Objects.hash(mUser, mPassword));
         return sb.toString();
     }
@@ -1179,7 +1247,7 @@ public class ApnSetting implements Parcelable {
                 mProtocol, mRoamingProtocol, mMtuV4, mMtuV6, mCarrierEnabled, mNetworkTypeBitmask,
                 mLingeringNetworkTypeBitmask, mProfileId, mPersistent, mMaxConns, mWaitTime,
                 mMaxConnsTime, mMvnoType, mMvnoMatchData, mApnSetId, mCarrierId, mSkip464Xlat,
-                mAlwaysOn);
+                mAlwaysOn, mInfrastructureBitmask);
     }
 
     @Override
@@ -1191,36 +1259,37 @@ public class ApnSetting implements Parcelable {
         ApnSetting other = (ApnSetting) o;
 
         return mEntryName.equals(other.mEntryName)
-                && Objects.equals(mId, other.mId)
+                && mId == other.mId
                 && Objects.equals(mOperatorNumeric, other.mOperatorNumeric)
                 && Objects.equals(mApnName, other.mApnName)
                 && Objects.equals(mProxyAddress, other.mProxyAddress)
                 && Objects.equals(mMmsc, other.mMmsc)
                 && Objects.equals(mMmsProxyAddress, other.mMmsProxyAddress)
-                && Objects.equals(mMmsProxyPort, other.mMmsProxyPort)
-                && Objects.equals(mProxyPort, other.mProxyPort)
+                && mMmsProxyPort == other.mMmsProxyPort
+                && mProxyPort == other.mProxyPort
                 && Objects.equals(mUser, other.mUser)
                 && Objects.equals(mPassword, other.mPassword)
-                && Objects.equals(mAuthType, other.mAuthType)
-                && Objects.equals(mApnTypeBitmask, other.mApnTypeBitmask)
-                && Objects.equals(mProtocol, other.mProtocol)
-                && Objects.equals(mRoamingProtocol, other.mRoamingProtocol)
-                && Objects.equals(mCarrierEnabled, other.mCarrierEnabled)
-                && Objects.equals(mProfileId, other.mProfileId)
-                && Objects.equals(mPersistent, other.mPersistent)
-                && Objects.equals(mMaxConns, other.mMaxConns)
-                && Objects.equals(mWaitTime, other.mWaitTime)
-                && Objects.equals(mMaxConnsTime, other.mMaxConnsTime)
-                && Objects.equals(mMtuV4, other.mMtuV4)
-                && Objects.equals(mMtuV6, other.mMtuV6)
-                && Objects.equals(mMvnoType, other.mMvnoType)
+                && mAuthType == other.mAuthType
+                && mApnTypeBitmask == other.mApnTypeBitmask
+                && mProtocol == other.mProtocol
+                && mRoamingProtocol == other.mRoamingProtocol
+                && mCarrierEnabled == other.mCarrierEnabled
+                && mProfileId == other.mProfileId
+                && mPersistent == other.mPersistent
+                && mMaxConns == other.mMaxConns
+                && mWaitTime == other.mWaitTime
+                && mMaxConnsTime == other.mMaxConnsTime
+                && mMtuV4 == other.mMtuV4
+                && mMtuV6 == other.mMtuV6
+                && mMvnoType == other.mMvnoType
                 && Objects.equals(mMvnoMatchData, other.mMvnoMatchData)
-                && Objects.equals(mNetworkTypeBitmask, other.mNetworkTypeBitmask)
-                && Objects.equals(mLingeringNetworkTypeBitmask, other.mLingeringNetworkTypeBitmask)
-                && Objects.equals(mApnSetId, other.mApnSetId)
-                && Objects.equals(mCarrierId, other.mCarrierId)
-                && Objects.equals(mSkip464Xlat, other.mSkip464Xlat)
-                && Objects.equals(mAlwaysOn, other.mAlwaysOn);
+                && mNetworkTypeBitmask == other.mNetworkTypeBitmask
+                && mLingeringNetworkTypeBitmask == other.mLingeringNetworkTypeBitmask
+                && mApnSetId == other.mApnSetId
+                && mCarrierId == other.mCarrierId
+                && mSkip464Xlat == other.mSkip464Xlat
+                && mAlwaysOn == other.mAlwaysOn
+                && mInfrastructureBitmask == other.mInfrastructureBitmask;
     }
 
     /**
@@ -1270,7 +1339,8 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(mApnSetId, other.mApnSetId)
                 && Objects.equals(mCarrierId, other.mCarrierId)
                 && Objects.equals(mSkip464Xlat, other.mSkip464Xlat)
-                && Objects.equals(mAlwaysOn, other.mAlwaysOn);
+                && Objects.equals(mAlwaysOn, other.mAlwaysOn)
+                && Objects.equals(mInfrastructureBitmask, other.mInfrastructureBitmask);
     }
 
     /**
@@ -1307,7 +1377,8 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(this.mApnSetId, other.mApnSetId)
                 && Objects.equals(this.mCarrierId, other.mCarrierId)
                 && Objects.equals(this.mSkip464Xlat, other.mSkip464Xlat)
-                && Objects.equals(this.mAlwaysOn, other.mAlwaysOn);
+                && Objects.equals(this.mAlwaysOn, other.mAlwaysOn)
+                && Objects.equals(this.mInfrastructureBitmask, other.mInfrastructureBitmask);
     }
 
     // Equal or one is null.
@@ -1379,6 +1450,7 @@ public class ApnSetting implements Parcelable {
         apnValue.put(Telephony.Carriers.CARRIER_ID, mCarrierId);
         apnValue.put(Telephony.Carriers.SKIP_464XLAT, mSkip464Xlat);
         apnValue.put(Telephony.Carriers.ALWAYS_ON, mAlwaysOn);
+        apnValue.put(Telephony.Carriers.INFRASTRUCTURE_BITMASK, mInfrastructureBitmask);
         return apnValue;
     }
 
@@ -1651,6 +1723,7 @@ public class ApnSetting implements Parcelable {
         dest.writeInt(mCarrierId);
         dest.writeInt(mSkip464Xlat);
         dest.writeBoolean(mAlwaysOn);
+        dest.writeInt(mInfrastructureBitmask);
     }
 
     private static ApnSetting readFromParcel(Parcel in) {
@@ -1686,6 +1759,7 @@ public class ApnSetting implements Parcelable {
                 .setCarrierId(in.readInt())
                 .setSkip464Xlat(in.readInt())
                 .setAlwaysOn(in.readBoolean())
+                .setInfrastructureBitmask(in.readInt())
                 .buildWithoutCheck();
     }
 
@@ -1767,6 +1841,7 @@ public class ApnSetting implements Parcelable {
         private int mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
         private int mSkip464Xlat = Carriers.SKIP_464XLAT_DEFAULT;
         private boolean mAlwaysOn;
+        private int mInfrastructureBitmask = INFRASTRUCTURE_CELLULAR;
 
         /**
          * Default constructor for Builder.
@@ -2189,6 +2264,22 @@ public class ApnSetting implements Parcelable {
         }
 
         /**
+         * Set the infrastructure bitmask.
+         *
+         * @param infrastructureBitmask The infrastructure bitmask of which the APN can be used on.
+         * For example, some APNs can only be used when the device is on cellular, on satellite, or
+         * both.
+         *
+         * @return The builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setInfrastructureBitmask(@InfrastructureBitmask int infrastructureBitmask) {
+            this.mInfrastructureBitmask = infrastructureBitmask;
+            return this;
+        }
+
+        /**
          * Builds {@link ApnSetting} from this builder.
          *
          * @return {@code null} if {@link #setApnName(String)} or {@link #setEntryName(String)}
@@ -2198,7 +2289,7 @@ public class ApnSetting implements Parcelable {
         public ApnSetting build() {
             if ((mApnTypeBitmask & (TYPE_DEFAULT | TYPE_MMS | TYPE_SUPL | TYPE_DUN | TYPE_HIPRI
                     | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
-                    | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE)) == 0
+                    | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE | TYPE_RCS)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
                 return null;
             }

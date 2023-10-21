@@ -1056,6 +1056,14 @@ public class CarrierConfigManager {
             "carrier_use_ims_first_for_emergency_bool";
 
     /**
+     * When {@code true}, this carrier will preferentially dial normal routed emergency calls over
+     * an in-service SIM if one is available.
+     * @hide
+     */
+    public static final String KEY_PREFER_IN_SERVICE_SIM_FOR_NORMAL_ROUTED_EMERGENCY_CALLS_BOOL =
+            "prefer_in_service_sim_for_normal_routed_emergency_calls_bool";
+
+    /**
      * When {@code true}, the determination of whether to place a call as an emergency call will be
      * based on the known {@link android.telephony.emergency.EmergencyNumber}s for the SIM on which
      * the call is being placed. In a dual SIM scenario, if Sim A has the emergency numbers
@@ -9874,6 +9882,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL, true);
+        sDefaults.putBoolean(KEY_PREFER_IN_SERVICE_SIM_FOR_NORMAL_ROUTED_EMERGENCY_CALLS_BOOL,
+                false);
         sDefaults.putBoolean(KEY_USE_ONLY_DIALED_SIM_ECC_LIST_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");

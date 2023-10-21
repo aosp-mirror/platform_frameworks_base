@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import android.os.Handler;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.DexmakerShareClassLoaderRule;
 
 import org.junit.Rule;
@@ -27,11 +28,16 @@ import java.util.concurrent.Callable;
 
 /** The base class which provides the common rule for test classes under wm package. */
 class SystemServiceTestsBase {
-    @Rule
+    @Rule(order = 0)
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
-    @Rule
-    public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule();
+
+    @Rule(order = 1)
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Rule(order = 2)
+    public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule(
+            this::onBeforeSystemServicesCreated);
 
     @WindowTestRunner.MethodWrapperRule
     public final WindowManagerGlobalLockRule mLockRule =
@@ -63,6 +69,11 @@ class SystemServiceTestsBase {
     <T> T awaitInWmLock(Callable<T> callable) {
         return mLockRule.waitForLocked(callable);
     }
+
+    /**
+     * Called before system services are created
+     */
+    protected void onBeforeSystemServicesCreated() {}
 
     /**
      * Make the system booted, so that {@link ActivityStack#resumeTopActivityInnerLocked} can really

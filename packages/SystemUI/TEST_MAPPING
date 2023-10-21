@@ -32,22 +32,6 @@
       ]
     },
     {
-      "name": "SystemUIGoogleScreenshotTests",
-      "options": [
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "android.platform.test.annotations.Postsubmit"
-        }
-      ],
-      // The test doesn't run on AOSP Cuttlefish
-      "keywords": ["internal"]
-    },
-    {
       // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
       "name": "SystemUIGoogleBiometricsScreenshotTests",
       "options": [

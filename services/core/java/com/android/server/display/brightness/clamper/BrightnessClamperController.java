@@ -51,6 +51,7 @@ import java.util.concurrent.Executor;
  */
 public class BrightnessClamperController {
     private static final String TAG = "BrightnessClamperController";
+
     private final DeviceConfigParameterProvider mDeviceConfigParameterProvider;
     private final Handler mHandler;
     private final ClamperChangeListener mClamperChangeListenerExternal;
@@ -60,6 +61,8 @@ public class BrightnessClamperController {
     private final List<BrightnessModifier> mModifiers;
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener;
     private float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
+
+    private float mCustomAnimationRate = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
     @Nullable
     private Type mClamperType = null;
     private boolean mClamperApplied = false;
@@ -113,6 +116,7 @@ public class BrightnessClamperController {
         builder.setIsSlowChange(slowChange);
         builder.setBrightness(cappedBrightness);
         builder.setMaxBrightness(mBrightnessCap);
+        builder.setCustomAnimationRate(mCustomAnimationRate);
 
         if (mClamperType != null) {
             builder.getBrightnessReason().addModifier(BrightnessReason.MODIFIER_THROTTLED);
@@ -182,6 +186,7 @@ public class BrightnessClamperController {
     private void recalculateBrightnessCap() {
         float brightnessCap = PowerManager.BRIGHTNESS_MAX;
         Type clamperType = null;
+        float customAnimationRate = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
 
         BrightnessClamper<?> minClamper = mClampers.stream()
                 .filter(BrightnessClamper::isActive)
@@ -191,11 +196,14 @@ public class BrightnessClamperController {
         if (minClamper != null) {
             brightnessCap = minClamper.getBrightnessCap();
             clamperType = minClamper.getType();
+            customAnimationRate = minClamper.getCustomAnimationRate();
         }
 
-        if (mBrightnessCap != brightnessCap || mClamperType != clamperType) {
+        if (mBrightnessCap != brightnessCap || mClamperType != clamperType
+                || mCustomAnimationRate != customAnimationRate) {
             mBrightnessCap = brightnessCap;
             mClamperType = clamperType;
+            mCustomAnimationRate = customAnimationRate;
             mClamperChangeListenerExternal.onChanged();
         }
 

@@ -16,6 +16,13 @@
 
 package com.android.server.display;
 
+import static android.view.Display.TYPE_EXTERNAL;
+import static android.view.Display.TYPE_INTERNAL;
+import static android.view.Display.TYPE_OVERLAY;
+import static android.view.Display.TYPE_UNKNOWN;
+import static android.view.Display.TYPE_VIRTUAL;
+import static android.view.Display.TYPE_WIFI;
+
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
@@ -26,7 +33,10 @@ import android.view.Display;
 import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 class DisplayManagerShellCommand extends ShellCommand {
     private static final String TAG = "DisplayManagerShellCommand";
@@ -153,9 +163,12 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Sets the user disabled HDR types as TYPES");
         pw.println("  get-user-disabled-hdr-types");
         pw.println("    Returns the user disabled HDR types");
-        pw.println("  get-displays [CATEGORY]");
+        pw.println("  get-displays [-c|--category CATEGORY] [-i|--ids-only] [-t|--type TYPE]");
+        pw.println("    [CATEGORY]");
         pw.println("    Returns the current displays. Can specify string category among");
         pw.println("    DisplayManager.DISPLAY_CATEGORY_*; must use the actual string value.");
+        pw.println("    Can choose to print only the ids of the displays. " +  "Can filter by");
+        pw.println("    display types. For example, '--type external'");
         pw.println("  dock");
         pw.println("    Sets brightness to docked + idle screen brightness mode");
         pw.println("  undock");
@@ -171,15 +184,92 @@ class DisplayManagerShellCommand extends ShellCommand {
     }
 
     private int getDisplays() {
-        String category = getNextArg();
+        String opt = "", requestedType, category = null;
+        PrintWriter out = getOutPrintWriter();
+
+        List<Integer> displayTypeList = new ArrayList<>();
+        boolean showIdsOnly = false, filterByType = false;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-i":
+                case "--ids-only":
+                    showIdsOnly = true;
+                    break;
+                case "-t":
+                case "--type":
+                    requestedType = getNextArgRequired();
+                    int displayType = getType(requestedType, out);
+                    if (displayType == -1) {
+                        return 1;
+                    }
+                    displayTypeList.add(displayType);
+                    filterByType = true;
+                    break;
+                case "-c":
+                case "--category":
+                    if (category != null) {
+                        out.println("Error: the category has been specified more than one time. "
+                                + "Please select only one category.");
+                        return 1;
+                    }
+                    category = getNextArgRequired();
+                    break;
+                case "":
+                    break;
+                default:
+                    out.println("Error: unknown option '" + opt + "'");
+                    return 1;
+            }
+        }
+
+        String lastCategoryArgument = getNextArg();
+        if (lastCategoryArgument != null) {
+            if (category != null) {
+                out.println("Error: the category has been specified both with the -c option and "
+                        + "the positional argument. Please select only one category.");
+                return 1;
+            }
+            category = lastCategoryArgument;
+        }
+
         DisplayManager dm = mService.getContext().getSystemService(DisplayManager.class);
         Display[] displays = dm.getDisplays(category);
-        PrintWriter out = getOutPrintWriter();
-        out.println("Displays:");
+
+        if (filterByType) {
+            displays = Arrays.stream(displays).filter(d -> displayTypeList.contains(d.getType()))
+                    .toArray(Display[]::new);
+        }
+
+        if (!showIdsOnly) {
+            out.println("Displays:");
+        }
         for (int i = 0; i < displays.length; i++) {
-            out.println("  " + displays[i]);
+            out.println((showIdsOnly ? displays[i].getDisplayId() : displays[i]));
         }
         return 0;
+    }
+
+    private int getType(String type, PrintWriter out) {
+        type = type.toUpperCase(Locale.ENGLISH);
+        switch (type) {
+            case "UNKNOWN":
+                return TYPE_UNKNOWN;
+            case "INTERNAL":
+                return TYPE_INTERNAL;
+            case "EXTERNAL":
+                return TYPE_EXTERNAL;
+            case "WIFI":
+                return TYPE_WIFI;
+            case "OVERLAY":
+                return TYPE_OVERLAY;
+            case "VIRTUAL":
+                return TYPE_VIRTUAL;
+            default:
+                out.println("Error: argument for display type should be "
+                        + "one of 'UNKNOWN', 'INTERNAL', 'EXTERNAL', 'WIFI', 'OVERLAY', 'VIRTUAL', "
+                        + "but got '" + type + "' instead.");
+                return -1;
+        }
     }
 
     private int showNotification() {

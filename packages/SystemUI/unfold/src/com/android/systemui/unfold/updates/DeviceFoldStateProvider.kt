@@ -17,7 +17,6 @@ package com.android.systemui.unfold.updates
 
 import android.content.Context
 import android.os.Handler
-import android.os.Trace
 import android.util.Log
 import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
@@ -130,7 +129,6 @@ constructor(
                     "lastHingeAngleBeforeTransition: $lastHingeAngleBeforeTransition"
             )
         }
-        Trace.setCounter("DeviceFoldStateProvider#onHingeAngle", angle.toLong())
 
         val currentDirection =
                 if (angle < lastHingeAngle) FOLD_UPDATE_START_CLOSING else FOLD_UPDATE_START_OPENING

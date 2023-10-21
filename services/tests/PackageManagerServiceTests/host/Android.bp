@@ -58,6 +58,7 @@ java_test_host {
         ":PackageManagerTestOverlayTarget",
         ":PackageManagerTestOverlayTargetNoOverlayable",
         ":PackageManagerTestAppDeclaresStaticLibrary",
+        ":PackageManagerTestAppDifferentPkgName",
         ":PackageManagerTestAppStub",
         ":PackageManagerTestAppUsesStaticLibrary",
         ":PackageManagerTestAppVersion1",

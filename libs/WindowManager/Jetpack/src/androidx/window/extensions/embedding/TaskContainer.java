@@ -30,7 +30,10 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowInsets;
+import android.view.WindowMetrics;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
@@ -60,6 +63,10 @@ class TaskContainer {
     /** Active pin split pair in this Task. */
     @Nullable
     private SplitPinContainer mSplitPinContainer;
+
+    /** The overlay container in this Task. */
+    @Nullable
+    private TaskFragmentContainer mOverlayContainer;
 
     @NonNull
     private final Configuration mConfiguration;
@@ -221,6 +228,12 @@ class TaskContainer {
         return null;
     }
 
+    /** Returns the overlay container in the task, or {@code null} if it doesn't exist. */
+    @Nullable
+    TaskFragmentContainer getOverlayContainer() {
+        return mOverlayContainer;
+    }
+
     int indexOf(@NonNull TaskFragmentContainer child) {
         return mContainers.indexOf(child);
     }
@@ -311,8 +324,8 @@ class TaskContainer {
         onTaskFragmentContainerUpdated();
     }
 
-    void removeTaskFragmentContainers(@NonNull List<TaskFragmentContainer> taskFragmentContainer) {
-        mContainers.removeAll(taskFragmentContainer);
+    void removeTaskFragmentContainers(@NonNull List<TaskFragmentContainer> taskFragmentContainers) {
+        mContainers.removeAll(taskFragmentContainers);
         onTaskFragmentContainerUpdated();
     }
 
@@ -332,6 +345,15 @@ class TaskContainer {
     }
 
     private void onTaskFragmentContainerUpdated() {
+        // TODO(b/300211704): Find a better mechanism to handle the z-order in case we introduce
+        //  another special container that should also be on top in the future.
+        updateSplitPinContainerIfNecessary();
+        // Update overlay container after split pin container since the overlay should be on top of
+        // pin container.
+        updateOverlayContainerIfNecessary();
+    }
+
+    private void updateSplitPinContainerIfNecessary() {
         if (mSplitPinContainer == null) {
             return;
         }
@@ -344,10 +366,7 @@ class TaskContainer {
         }
 
         // Ensure the pinned container is top-most.
-        if (pinnedContainerIndex != mContainers.size() - 1) {
-            mContainers.remove(pinnedContainer);
-            mContainers.add(pinnedContainer);
-        }
+        moveContainerToLastIfNecessary(pinnedContainer);
 
         // Update the primary container adjacent to the pinned container if needed.
         final TaskFragmentContainer adjacentContainer =
@@ -356,6 +375,31 @@ class TaskContainer {
             removeSplitPinContainer();
         } else if (mSplitPinContainer.getPrimaryContainer() != adjacentContainer) {
             mSplitPinContainer.setPrimaryContainer(adjacentContainer);
+        }
+    }
+
+    private void updateOverlayContainerIfNecessary() {
+        final List<TaskFragmentContainer> overlayContainers = mContainers.stream()
+                .filter(TaskFragmentContainer::isOverlay).toList();
+        if (overlayContainers.size() > 1) {
+            throw new IllegalStateException("There must be at most one overlay container per Task");
+        }
+        mOverlayContainer = overlayContainers.isEmpty() ? null : overlayContainers.get(0);
+        if (mOverlayContainer != null) {
+            moveContainerToLastIfNecessary(mOverlayContainer);
+        }
+    }
+
+    /** Moves the {@code container} to the last to align taskFragments' z-order. */
+    private void moveContainerToLastIfNecessary(@NonNull TaskFragmentContainer container) {
+        final int index = mContainers.indexOf(container);
+        if (index < 0) {
+            Log.w(TAG, "The container:" + container + " is not in the container list!");
+            return;
+        }
+        if (index != mContainers.size() - 1) {
+            mContainers.remove(container);
+            mContainers.add(container);
         }
     }
 
@@ -396,6 +440,15 @@ class TaskContainer {
         @NonNull
         Configuration getConfiguration() {
             return mConfiguration;
+        }
+
+        /** A helper method to return task {@link WindowMetrics} from this {@link TaskProperties} */
+        @NonNull
+        WindowMetrics getTaskMetrics() {
+            final Rect taskBounds = mConfiguration.windowConfiguration.getBounds();
+            // TODO(b/190433398): Supply correct insets.
+            final float density = mConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+            return new WindowMetrics(taskBounds, WindowInsets.CONSUMED, density);
         }
 
         /** Translates the given absolute bounds to relative bounds in this Task coordinate. */

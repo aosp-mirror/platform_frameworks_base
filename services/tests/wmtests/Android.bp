@@ -60,6 +60,7 @@ android_test {
         "truth",
         "testables",
         "hamcrest-library",
+        "flag-junit",
         "platform-compat-test-rules",
         "CtsSurfaceValidatorLib",
         "service-sdksandbox.impl",

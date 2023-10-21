@@ -23,11 +23,13 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
 import android.testing.AndroidTestingRunner;
@@ -64,6 +66,8 @@ import org.mockito.MockitoAnnotations;
  */
 public class RecordingControllerTest extends SysuiTestCase {
 
+    private static final int TEST_USER_ID = 12345;
+
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     @Mock
@@ -91,6 +95,11 @@ public class RecordingControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        Context spiedContext = spy(mContext);
+        when(spiedContext.getUserId()).thenReturn(TEST_USER_ID);
+
+        when(mUserContextProvider.getUserContext()).thenReturn(spiedContext);
+
         mFeatureFlags = new FakeFeatureFlags();
         mController = new RecordingController(
                 mMainExecutor,
@@ -288,7 +297,6 @@ public class RecordingControllerTest extends SysuiTestCase {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(false);
@@ -297,6 +305,8 @@ public class RecordingControllerTest extends SysuiTestCase {
                 mDialogLaunchAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
 
         verify(mMediaProjectionMetricsLogger)
-                .notifyProjectionInitiated(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
+                .notifyProjectionInitiated(
+                        TEST_USER_ID,
+                        SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
     }
 }

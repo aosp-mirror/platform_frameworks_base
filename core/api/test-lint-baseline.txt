@@ -257,8 +257,6 @@ UnflaggedApi: android.media.soundtrigger.SoundTriggerManager#loadSoundModel(andr
     New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.loadSoundModel(android.hardware.soundtrigger.SoundTrigger.SoundModel)
 UnflaggedApi: android.media.soundtrigger.SoundTriggerManager.Model#getSoundModel():
     New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.Model.getSoundModel()
-UnflaggedApi: android.net.wifi.sharedconnectivity.app.SharedConnectivityManager#getBroadcastReceiver():
-    New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.SharedConnectivityManager.getBroadcastReceiver()
 UnflaggedApi: android.os.BatteryManager#BATTERY_PLUGGED_ANY:
     New API must be flagged with @FlaggedApi: field android.os.BatteryManager.BATTERY_PLUGGED_ANY
 UnflaggedApi: android.os.BugreportParams#BUGREPORT_MODE_MAX_VALUE:

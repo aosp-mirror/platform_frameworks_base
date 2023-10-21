@@ -39,39 +39,50 @@ public class DeviceIconUtil {
     @DrawableRes private static final int DEFAULT_ICON = R.drawable.ic_smartphone;
 
     public DeviceIconUtil() {
-        List<Device> deviceList = Arrays.asList(
-                new Device(
-                    AudioDeviceInfo.TYPE_USB_DEVICE,
-                    MediaRoute2Info.TYPE_USB_DEVICE,
-                    R.drawable.ic_headphone),
-                new Device(
-                    AudioDeviceInfo.TYPE_USB_HEADSET,
-                    MediaRoute2Info.TYPE_USB_HEADSET,
-                    R.drawable.ic_headphone),
-                new Device(
-                    AudioDeviceInfo.TYPE_USB_ACCESSORY,
-                    MediaRoute2Info.TYPE_USB_ACCESSORY,
-                    R.drawable.ic_headphone),
-                new Device(
-                    AudioDeviceInfo.TYPE_DOCK,
-                    MediaRoute2Info.TYPE_DOCK,
-                    R.drawable.ic_dock_device),
-                new Device(
-                    AudioDeviceInfo.TYPE_HDMI,
-                    MediaRoute2Info.TYPE_HDMI,
-                    R.drawable.ic_headphone),
-                new Device(
-                    AudioDeviceInfo.TYPE_WIRED_HEADSET,
-                    MediaRoute2Info.TYPE_WIRED_HEADSET,
-                    R.drawable.ic_headphone),
-                new Device(
-                    AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
-                    MediaRoute2Info.TYPE_WIRED_HEADPHONES,
-                    R.drawable.ic_headphone),
-                new Device(
-                    AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
-                    MediaRoute2Info.TYPE_BUILTIN_SPEAKER,
-                    R.drawable.ic_smartphone));
+        List<Device> deviceList =
+                Arrays.asList(
+                        new Device(
+                                AudioDeviceInfo.TYPE_USB_DEVICE,
+                                MediaRoute2Info.TYPE_USB_DEVICE,
+                                R.drawable.ic_headphone),
+                        new Device(
+                                AudioDeviceInfo.TYPE_USB_HEADSET,
+                                MediaRoute2Info.TYPE_USB_HEADSET,
+                                R.drawable.ic_headphone),
+                        new Device(
+                                AudioDeviceInfo.TYPE_USB_ACCESSORY,
+                                MediaRoute2Info.TYPE_USB_ACCESSORY,
+                                R.drawable.ic_headphone),
+                        new Device(
+                                AudioDeviceInfo.TYPE_DOCK,
+                                MediaRoute2Info.TYPE_DOCK,
+                                R.drawable.ic_dock_device),
+                        new Device(
+                                AudioDeviceInfo.TYPE_HDMI,
+                                MediaRoute2Info.TYPE_HDMI,
+                                R.drawable.ic_headphone),
+                        // TODO: b/306359110 - Put proper iconography for HDMI_ARC type.
+                        new Device(
+                                AudioDeviceInfo.TYPE_HDMI_ARC,
+                                MediaRoute2Info.TYPE_HDMI_ARC,
+                                R.drawable.ic_headphone),
+                        // TODO: b/306359110 - Put proper iconography for HDMI_EARC type.
+                        new Device(
+                                AudioDeviceInfo.TYPE_HDMI_EARC,
+                                MediaRoute2Info.TYPE_HDMI_EARC,
+                                R.drawable.ic_headphone),
+                        new Device(
+                                AudioDeviceInfo.TYPE_WIRED_HEADSET,
+                                MediaRoute2Info.TYPE_WIRED_HEADSET,
+                                R.drawable.ic_headphone),
+                        new Device(
+                                AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
+                                MediaRoute2Info.TYPE_WIRED_HEADPHONES,
+                                R.drawable.ic_headphone),
+                        new Device(
+                                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
+                                MediaRoute2Info.TYPE_BUILTIN_SPEAKER,
+                                R.drawable.ic_smartphone));
         for (int i = 0; i < deviceList.size(); i++) {
             Device device = deviceList.get(i);
             mAudioDeviceTypeToIconMap.put(device.mAudioDeviceType, device);

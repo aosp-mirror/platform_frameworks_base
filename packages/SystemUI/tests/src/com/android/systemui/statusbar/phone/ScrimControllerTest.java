@@ -70,6 +70,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
@@ -141,6 +142,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
+    @Mock private AlternateBouncerToGoneTransitionViewModel
+            mAlternateBouncerToGoneTransitionViewModel;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
     @Mock private CoroutineDispatcher mMainDispatcher;
@@ -264,9 +267,11 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDelayedWakeLockBuilder.build()).thenReturn(mWakeLock);
         when(mDockManager.isDocked()).thenReturn(false);
 
-        when(mKeyguardTransitionInteractor.getPrimaryBouncerToGoneTransition())
+        when(mKeyguardTransitionInteractor.transition(any(), any()))
                 .thenReturn(emptyFlow());
         when(mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha())
+                .thenReturn(emptyFlow());
+        when(mAlternateBouncerToGoneTransitionViewModel.getScrimAlpha())
                 .thenReturn(emptyFlow());
 
         mScrimController = new ScrimController(
@@ -285,6 +290,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mStatusBarKeyguardViewManager,
                 mPrimaryBouncerToGoneTransitionViewModel,
+                mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mWallpaperRepository,
                 mMainDispatcher,
@@ -992,6 +998,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mStatusBarKeyguardViewManager,
                 mPrimaryBouncerToGoneTransitionViewModel,
+                mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mWallpaperRepository,
                 mMainDispatcher,
@@ -1775,7 +1782,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void ignoreTransitionRequestWhileKeyguardTransitionRunning() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.mPrimaryBouncerToGoneTransition.accept(
+        mScrimController.mBouncerToGoneTransition.accept(
                 new TransitionStep(KeyguardState.PRIMARY_BOUNCER, KeyguardState.GONE, 0f,
                         TransitionState.RUNNING, "ScrimControllerTest"));
 
@@ -1787,7 +1794,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void primaryBouncerToGoneOnFinishCallsKeyguardFadedAway() {
         when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
-        mScrimController.mPrimaryBouncerToGoneTransition.accept(
+        mScrimController.mBouncerToGoneTransition.accept(
                 new TransitionStep(KeyguardState.PRIMARY_BOUNCER, KeyguardState.GONE, 0f,
                         TransitionState.FINISHED, "ScrimControllerTest"));
 

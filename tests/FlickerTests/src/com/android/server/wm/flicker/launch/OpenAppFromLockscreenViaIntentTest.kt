@@ -27,6 +27,7 @@ import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
+import com.android.server.wm.flicker.launch.common.OpenAppFromLockscreenTransition
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore

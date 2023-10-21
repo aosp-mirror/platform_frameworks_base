@@ -90,7 +90,9 @@ public class DisplayBrightnessStateTest {
                 .append("\n    isSlowChange:")
                 .append(displayBrightnessState.isSlowChange())
                 .append("\n    maxBrightness:")
-                .append(displayBrightnessState.getMaxBrightness());
+                .append(displayBrightnessState.getMaxBrightness())
+                .append("\n    customAnimationRate:")
+                .append(displayBrightnessState.getCustomAnimationRate());
         return sb.toString();
     }
 }

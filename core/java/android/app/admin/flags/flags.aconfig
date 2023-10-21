@@ -20,3 +20,10 @@ flag {
   description: "Add feature to track required changes for enabled V2 of auto-capturing of onboarding bug reports."
   bug: "302517677"
 }
+
+flag {
+  name: "cross_user_suspension_enabled"
+  namespace: "enterprise"
+  description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
+  bug: "263464464"
+}
