@@ -173,7 +173,7 @@ public final class NfcFServiceInfo implements Parcelable {
                             com.android.internal.R.styleable.SystemCodeFilter);
                     systemCode = a.getString(
                             com.android.internal.R.styleable.SystemCodeFilter_name).toUpperCase();
-                    if (!NfcFCardEmulation.isValidSystemCode(systemCode) &&
+                    if (!isValidSystemCode(systemCode) &&
                             !systemCode.equalsIgnoreCase("NULL")) {
                         Log.e(TAG, "Invalid System Code: " + systemCode);
                         systemCode = null;
@@ -187,7 +187,7 @@ public final class NfcFServiceInfo implements Parcelable {
                             com.android.internal.R.styleable.Nfcid2Filter_name).toUpperCase();
                     if (!nfcid2.equalsIgnoreCase("RANDOM") &&
                             !nfcid2.equalsIgnoreCase("NULL") &&
-                            !NfcFCardEmulation.isValidNfcid2(nfcid2)) {
+                            !isValidNfcid2(nfcid2)) {
                         Log.e(TAG, "Invalid NFCID2: " + nfcid2);
                         nfcid2 = null;
                     }
@@ -436,10 +436,62 @@ public final class NfcFServiceInfo implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public void dumpDebug(@NonNull ProtoOutputStream proto) {
-        Utils.dumpDebugComponentName(getComponent(), proto, NfcFServiceInfoProto.COMPONENT_NAME);
+        getComponent().dumpDebug(proto, NfcFServiceInfoProto.COMPONENT_NAME);
         proto.write(NfcFServiceInfoProto.DESCRIPTION, getDescription());
         proto.write(NfcFServiceInfoProto.SYSTEM_CODE, getSystemCode());
         proto.write(NfcFServiceInfoProto.NFCID2, getNfcid2());
         proto.write(NfcFServiceInfoProto.T3T_PMM, getT3tPmm());
+    }
+
+    /**
+     * Copied over from {@link NfcFCardEmulation#isValidSystemCode(String)}
+     * @hide
+     */
+    private static boolean isValidSystemCode(String systemCode) {
+        if (systemCode == null) {
+            return false;
+        }
+        if (systemCode.length() != 4) {
+            Log.e(TAG, "System Code " + systemCode + " is not a valid System Code.");
+            return false;
+        }
+        // check if the value is between "4000" and "4FFF" (excluding "4*FF")
+        if (!systemCode.startsWith("4") || systemCode.toUpperCase().endsWith("FF")) {
+            Log.e(TAG, "System Code " + systemCode + " is not a valid System Code.");
+            return false;
+        }
+        try {
+            Integer.parseInt(systemCode, 16);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "System Code " + systemCode + " is not a valid System Code.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Copied over from {@link NfcFCardEmulation#isValidNfcid2(String)}
+     * @hide
+     */
+    private static boolean isValidNfcid2(String nfcid2) {
+        if (nfcid2 == null) {
+            return false;
+        }
+        if (nfcid2.length() != 16) {
+            Log.e(TAG, "NFCID2 " + nfcid2 + " is not a valid NFCID2.");
+            return false;
+        }
+        // check if the the value starts with "02FE"
+        if (!nfcid2.toUpperCase().startsWith("02FE")) {
+            Log.e(TAG, "NFCID2 " + nfcid2 + " is not a valid NFCID2.");
+            return false;
+        }
+        try {
+            Long.parseLong(nfcid2, 16);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "NFCID2 " + nfcid2 + " is not a valid NFCID2.");
+            return false;
+        }
+        return true;
     }
 }
