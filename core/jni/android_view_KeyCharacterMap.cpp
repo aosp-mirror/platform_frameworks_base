@@ -48,7 +48,7 @@ static struct {
 
 class NativeKeyCharacterMap {
 public:
-    NativeKeyCharacterMap(int32_t deviceId, std::shared_ptr<KeyCharacterMap> map)
+    NativeKeyCharacterMap(int32_t deviceId, std::unique_ptr<KeyCharacterMap> map)
           : mDeviceId(deviceId), mMap(std::move(map)) {}
 
     ~NativeKeyCharacterMap() {
@@ -58,16 +58,18 @@ public:
         return mDeviceId;
     }
 
-    inline const std::shared_ptr<KeyCharacterMap> getMap() const { return mMap; }
+    inline const std::unique_ptr<KeyCharacterMap>& getMap() const {
+        return mMap;
+    }
 
 private:
     int32_t mDeviceId;
-    std::shared_ptr<KeyCharacterMap> mMap;
+    std::unique_ptr<KeyCharacterMap> mMap;
 };
 
 jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
-                                            const std::shared_ptr<KeyCharacterMap> kcm) {
-    NativeKeyCharacterMap* nativeMap = new NativeKeyCharacterMap(deviceId, kcm);
+                                            std::unique_ptr<KeyCharacterMap> kcm) {
+    NativeKeyCharacterMap* nativeMap = new NativeKeyCharacterMap(deviceId, std::move(kcm));
     if (!nativeMap) {
         return nullptr;
     }
@@ -91,7 +93,7 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
         return 0;
     }
 
-    std::shared_ptr<KeyCharacterMap> kcm = nullptr;
+    std::unique_ptr<KeyCharacterMap> kcm;
     // Check if map is a null character map
     if (parcel->readBool()) {
         kcm = KeyCharacterMap::readFromParcel(parcel);
@@ -99,7 +101,7 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
             return 0;
         }
     }
-    NativeKeyCharacterMap* map = new NativeKeyCharacterMap(deviceId, kcm);
+    NativeKeyCharacterMap* map = new NativeKeyCharacterMap(deviceId, std::move(kcm));
     return reinterpret_cast<jlong>(map);
 }
 
@@ -230,9 +232,9 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
 }
 
 static jboolean nativeEquals(JNIEnv* env, jobject clazz, jlong ptr1, jlong ptr2) {
-    const std::shared_ptr<KeyCharacterMap>& map1 =
+    const std::unique_ptr<KeyCharacterMap>& map1 =
             (reinterpret_cast<NativeKeyCharacterMap*>(ptr1))->getMap();
-    const std::shared_ptr<KeyCharacterMap>& map2 =
+    const std::unique_ptr<KeyCharacterMap>& map2 =
             (reinterpret_cast<NativeKeyCharacterMap*>(ptr2))->getMap();
     if (map1 == nullptr || map2 == nullptr) {
         return map1 == map2;
