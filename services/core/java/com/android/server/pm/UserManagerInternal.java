@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.pm.LauncherUserInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
 import android.graphics.Bitmap;
@@ -405,6 +406,11 @@ public abstract class UserManagerInternal {
      * Gets all {@link UserInfo UserInfos}.
      */
     public abstract @NonNull UserInfo[] getUserInfos();
+
+    /**
+     * Gets a {@link LauncherUserInfo} for the given {@code userId}, or {@code null} if not found.
+     */
+    public abstract @Nullable LauncherUserInfo getLauncherUserInfo(@UserIdInt int userId);
 
     /**
      * Sets all default cross profile intent filters between {@code parentUserId} and
