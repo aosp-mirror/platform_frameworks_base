@@ -23,7 +23,6 @@ import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGE
 import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_CAST as METRICS_CREATION_SOURCE_CAST
 import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_SYSTEM_UI_SCREEN_RECORDER as METRICS_CREATION_SOURCE_SYSTEM_UI_SCREEN_RECORDER
 import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN as METRICS_CREATION_SOURCE_UNKNOWN
-import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED as METRICS_STATE_PERMISSION_REQUEST_DISPLAYED
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
@@ -53,8 +52,17 @@ constructor(private val service: IMediaProjectionManager) {
         }
     }
 
-    fun notifyPermissionRequestDisplayed() {
-        notifyToServer(METRICS_STATE_PERMISSION_REQUEST_DISPLAYED, SessionCreationSource.UNKNOWN)
+    /**
+     * Request to log that the permission request was displayed.
+     *
+     * @param hostUid The UID of the package that initiates MediaProjection.
+     */
+    fun notifyPermissionRequestDisplayed(hostUid: Int) {
+        try {
+            service.notifyPermissionRequestDisplayed(hostUid)
+        } catch (e: RemoteException) {
+            Log.e(TAG, "Error notifying server of projection displayed", e)
+        }
     }
 
     /**

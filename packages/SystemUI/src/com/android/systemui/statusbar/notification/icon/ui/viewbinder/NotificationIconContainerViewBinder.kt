@@ -15,27 +15,30 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
-import android.content.res.Resources
+import android.graphics.Rect
 import android.view.View
-import androidx.annotation.DimenRes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.internal.util.ContrastColorUtil
+import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.CrossFadeHelper
+import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconColors
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.statusbar.policy.onDensityOrFontScaleChanged
-import com.android.systemui.util.kotlin.stateFlow
-import kotlinx.coroutines.CoroutineScope
+import com.android.systemui.util.children
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Binds a [NotificationIconContainer] to its [view model][NotificationIconContainerViewModel]. */
@@ -43,11 +46,12 @@ object NotificationIconContainerViewBinder {
     fun bind(
         view: NotificationIconContainer,
         viewModel: NotificationIconContainerViewModel,
-        configurationController: ConfigurationController,
+        configuration: ConfigurationState,
         dozeParameters: DozeParameters,
         featureFlags: FeatureFlagsClassic,
         screenOffAnimationController: ScreenOffAnimationController,
     ): DisposableHandle {
+        val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
         return view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch { viewModel.animationsEnabled.collect(view::setAnimationsEnabled) }
@@ -59,15 +63,13 @@ object NotificationIconContainerViewBinder {
                         }
                     }
                 }
-                // TODO(278765923): this should live where AOD is bound, not inside of the NIC
+                // TODO(b/278765923): this should live where AOD is bound, not inside of the NIC
                 //  view-binder
                 launch {
                     val iconAppearTranslation =
-                        view.resources.getConfigAwareDimensionPixelSize(
-                            this,
-                            configurationController,
-                            R.dimen.shelf_appear_translation,
-                        )
+                        configuration
+                            .getDimensionPixelSize(R.dimen.shelf_appear_translation)
+                            .stateIn(this)
                     bindVisibility(
                         viewModel,
                         view,
@@ -78,9 +80,40 @@ object NotificationIconContainerViewBinder {
                         viewModel.completeVisibilityAnimation()
                     }
                 }
+                launch {
+                    viewModel.iconColors
+                        .mapNotNull { lookup -> lookup.iconColors(view.viewBounds) }
+                        .collect { iconLookup -> applyTint(view, iconLookup, contrastColorUtil) }
+                }
             }
         }
     }
+
+    // TODO(b/305739416): Once SBIV has its own Recommended Architecture stack, this can be moved
+    //  there and cleaned up.
+    private fun applyTint(
+        view: NotificationIconContainer,
+        iconColors: IconColors,
+        contrastColorUtil: ContrastColorUtil,
+    ) {
+        view.children.filterIsInstance<StatusBarIconView>().forEach { iv ->
+            if (iv.width != 0) {
+                updateTintForIcon(iv, iconColors, contrastColorUtil)
+            }
+        }
+    }
+
+    private fun updateTintForIcon(
+        v: StatusBarIconView,
+        iconColors: IconColors,
+        contrastColorUtil: ContrastColorUtil,
+    ) {
+        val isPreL = java.lang.Boolean.TRUE == v.getTag(R.id.icon_is_pre_L)
+        val isColorized = !isPreL || NotificationUtils.isGrayscale(v, contrastColorUtil)
+        v.staticDrawableColor = iconColors.staticDrawableColor(v.viewBounds, isColorized)
+        v.setDecorColor(iconColors.tint)
+    }
+
     private suspend fun bindVisibility(
         viewModel: NotificationIconContainerViewModel,
         view: NotificationIconContainer,
@@ -173,14 +206,16 @@ object NotificationIconContainerViewBinder {
     }
 
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200
-}
 
-fun Resources.getConfigAwareDimensionPixelSize(
-    scope: CoroutineScope,
-    configurationController: ConfigurationController,
-    @DimenRes id: Int,
-): StateFlow<Int> =
-    scope.stateFlow(
-        changedSignals = configurationController.onDensityOrFontScaleChanged,
-        getValue = { getDimensionPixelSize(id) }
-    )
+    private val View.viewBounds: Rect
+        get() {
+            val tmpArray = intArrayOf(0, 0)
+            getLocationOnScreen(tmpArray)
+            return Rect(
+                /* left = */ tmpArray[0],
+                /* top = */ tmpArray[1],
+                /* right = */ left + width,
+                /* bottom = */ top + height,
+            )
+        }
+}

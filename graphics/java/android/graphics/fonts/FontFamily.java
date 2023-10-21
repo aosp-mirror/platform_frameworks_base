@@ -16,7 +16,7 @@
 
 package android.graphics.fonts;
 
-import static com.android.text.flags.Flags.FLAG_DEPRECATE_FONTS_XML;
+import static com.android.text.flags.Flags.FLAG_NEW_FONTS_FALLBACK_XML;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -145,7 +145,7 @@ public final class FontFamily {
          * @return A variable font family. null if a variable font cannot be built from the given
          *         fonts.
          */
-        @FlaggedApi(FLAG_DEPRECATE_FONTS_XML)
+        @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
         public @Nullable FontFamily buildVariableFamily() {
             int variableFamilyType = analyzeAndResolveVariableType(mFonts);
             if (variableFamilyType == VARIABLE_FONT_FAMILY_TYPE_UNKNOWN) {

@@ -3124,7 +3124,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             if (mAmbientIndicationContainer instanceof AutoReinflateContainer) {
                 ((AutoReinflateContainer) mAmbientIndicationContainer).inflateLayout();
             }
-            mNotificationIconAreaController.onThemeChanged();
+            if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+                mNotificationIconAreaController.onThemeChanged();
+            }
         }
 
         @Override

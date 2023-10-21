@@ -974,7 +974,6 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, userProps::getAlwaysVisible);
     }
 
-
     // Make sure only max managed profiles can be created
     @MediumTest
     @Test

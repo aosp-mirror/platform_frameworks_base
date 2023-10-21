@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.statusbar.data
 
-package com.android.systemui.common.ui.data.repository
-
-import dagger.Binds
+import com.android.systemui.statusbar.data.repository.KeyguardStatusBarRepositoryModule
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryModule
+import com.android.systemui.statusbar.phone.data.StatusBarPhoneDataLayerModule
 import dagger.Module
 
-@Module
-interface CommonRepositoryModule {
-    @Binds fun bindRepository(impl: ConfigurationRepositoryImpl): ConfigurationRepository
-}
+@Module(
+    includes =
+        [
+            KeyguardStatusBarRepositoryModule::class,
+            StatusBarModeRepositoryModule::class,
+            StatusBarPhoneDataLayerModule::class
+        ]
+)
+object StatusBarDataLayerModule

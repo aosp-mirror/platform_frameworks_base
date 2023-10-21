@@ -30,7 +30,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.core.StatusBarInitializer
+import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
 import com.android.systemui.statusbar.data.model.StatusBarAppearance
 import com.android.systemui.statusbar.data.model.StatusBarMode
 import com.android.systemui.statusbar.phone.BoundsPair
@@ -38,6 +38,11 @@ import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
+import dagger.Binds
+import dagger.Module
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
+import dagger.multibindings.IntoSet
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -56,7 +61,7 @@ import kotlinx.coroutines.flow.stateIn
  * Note: These status bar modes are status bar *window* states that are sent to us from
  * WindowManager, not determined internally.
  */
-interface StatusBarModeRepository : StatusBarInitializer.OnStatusBarViewInitializedListener {
+interface StatusBarModeRepository {
     /**
      * True if the status bar window is showing transiently and will disappear soon, and false
      * otherwise. ("Otherwise" in this case means the status bar is persistently hidden OR
@@ -112,7 +117,7 @@ constructor(
     private val commandQueue: CommandQueue,
     private val letterboxAppearanceCalculator: LetterboxAppearanceCalculator,
     ongoingCallRepository: OngoingCallRepository,
-) : StatusBarModeRepository, CoreStartable {
+) : StatusBarModeRepository, CoreStartable, OnStatusBarViewInitializedListener {
 
     private val commandQueueCallback =
         object : CommandQueue.Callbacks {
@@ -333,4 +338,18 @@ constructor(
         val navbarColorManagedByIme: Boolean,
         val statusBarBounds: BoundsPair,
     )
+}
+
+@Module
+interface StatusBarModeRepositoryModule {
+    @Binds fun bindImpl(impl: StatusBarModeRepositoryImpl): StatusBarModeRepository
+
+    @Binds
+    @IntoMap
+    @ClassKey(StatusBarModeRepositoryImpl::class)
+    fun bindCoreStartable(impl: StatusBarModeRepositoryImpl): CoreStartable
+
+    @Binds
+    @IntoSet
+    fun bindViewInitListener(impl: StatusBarModeRepositoryImpl): OnStatusBarViewInitializedListener
 }

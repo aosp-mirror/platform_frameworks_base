@@ -27,14 +27,6 @@ import com.android.text.flags.Flags;
  * @hide
  */
 public class ClientFlags {
-
-    /**
-     * @see Flags#deprecateFontsXml()
-     */
-    public static boolean deprecateFontsXml() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_DEPRECATE_FONTS_XML);
-    }
-
     /**
      * @see Flags#noBreakNoHyphenationSpan()
      */

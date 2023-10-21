@@ -16,84 +16,53 @@ package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.app.StatusBarManager
 import androidx.test.filters.SmallTest
+import com.android.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
-import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
-import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepositoryImpl
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import org.junit.Before
+import dagger.BindsInstance
+import dagger.Component
 import org.junit.Test
-import org.mockito.Mockito.verify
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 class NotificationsInteractorTest : SysuiTestCase() {
 
-    private lateinit var underTest: NotificationsInteractor
+    @Component(modules = [SysUITestModule::class])
+    @SysUISingleton
+    interface TestComponent {
+        val underTest: NotificationsInteractor
+        val disableFlags: FakeDisableFlagsRepository
 
-    private val testScope = TestScope(UnconfinedTestDispatcher())
-    private val commandQueue: CommandQueue = mock()
-    private val logBuffer = LogBufferFactory(DumpManager(), mock()).create("buffer", 10)
-    private val disableFlagsLogger = DisableFlagsLogger()
-    private lateinit var disableFlagsRepository: DisableFlagsRepository
-
-    @Before
-    fun setUp() {
-        disableFlagsRepository =
-            DisableFlagsRepositoryImpl(
-                commandQueue,
-                DISPLAY_ID,
-                testScope.backgroundScope,
-                mock(),
-                logBuffer,
-                disableFlagsLogger,
-            )
-        underTest = NotificationsInteractor(disableFlagsRepository)
+        @Component.Factory
+        interface Factory {
+            fun create(@BindsInstance test: SysuiTestCase): TestComponent
+        }
     }
+
+    private val testComponent: TestComponent =
+        DaggerNotificationsInteractorTest_TestComponent.factory().create(test = this)
 
     @Test
-    fun disableFlags_notifAlertsNotDisabled_notifAlertsEnabledTrue() {
-        val callback = getCommandQueueCallback()
-
-        callback.disable(
-            DISPLAY_ID,
-            StatusBarManager.DISABLE_NONE,
-            StatusBarManager.DISABLE2_NONE,
-            /* animate= */ false
-        )
-
-        assertThat(underTest.areNotificationAlertsEnabled()).isTrue()
-    }
+    fun disableFlags_notifAlertsNotDisabled_notifAlertsEnabledTrue() =
+        with(testComponent) {
+            disableFlags.disableFlags.value =
+                DisableFlagsModel(
+                    StatusBarManager.DISABLE_NONE,
+                    StatusBarManager.DISABLE2_NONE,
+                )
+            assertThat(underTest.areNotificationAlertsEnabled()).isTrue()
+        }
 
     @Test
-    fun disableFlags_notifAlertsDisabled_notifAlertsEnabledFalse() {
-        val callback = getCommandQueueCallback()
-
-        callback.disable(
-            DISPLAY_ID,
-            StatusBarManager.DISABLE_NOTIFICATION_ALERTS,
-            StatusBarManager.DISABLE2_NONE,
-            /* animate= */ false
-        )
-
-        assertThat(underTest.areNotificationAlertsEnabled()).isFalse()
-    }
-
-    private fun getCommandQueueCallback(): CommandQueue.Callbacks {
-        val callbackCaptor = argumentCaptor<CommandQueue.Callbacks>()
-        verify(commandQueue).addCallback(callbackCaptor.capture())
-        return callbackCaptor.value
-    }
-
-    private companion object {
-        const val DISPLAY_ID = 1
-    }
+    fun disableFlags_notifAlertsDisabled_notifAlertsEnabledFalse() =
+        with(testComponent) {
+            disableFlags.disableFlags.value =
+                DisableFlagsModel(
+                    StatusBarManager.DISABLE_NOTIFICATION_ALERTS,
+                    StatusBarManager.DISABLE2_NONE,
+                )
+            assertThat(underTest.areNotificationAlertsEnabled()).isFalse()
+        }
 }

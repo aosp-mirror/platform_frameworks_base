@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.notification.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
+import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.data.repository.NotificationStackRepository
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /** Interactor for notifications in general. */
 @SysUISingleton
@@ -26,9 +29,12 @@ class NotificationsInteractor
 @Inject
 constructor(
     private val disableFlagsRepository: DisableFlagsRepository,
+    stackRepository: NotificationStackRepository,
 ) {
     /** Returns true if notification alerts are allowed. */
-    fun areNotificationAlertsEnabled(): Boolean {
-        return disableFlagsRepository.disableFlags.value.areNotificationAlertsEnabled()
-    }
+    fun areNotificationAlertsEnabled(): Boolean =
+        disableFlagsRepository.disableFlags.value.areNotificationAlertsEnabled()
+
+    /** Notifications actively presented to the user in the notification stack. */
+    val notifications: Flow<List<ListEntry>> = stackRepository.renderedEntries
 }

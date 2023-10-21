@@ -252,7 +252,7 @@ public class MediaProjectionPermissionActivity extends Activity
         mDialog.show();
 
         if (savedInstanceState == null) {
-            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed();
+            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(mUid);
         }
     }
 

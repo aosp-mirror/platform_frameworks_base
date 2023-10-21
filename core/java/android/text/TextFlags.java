@@ -55,7 +55,6 @@ public final class TextFlags {
      * List of text flags to be transferred to the application process.
      */
     public static final String[] TEXT_ACONFIGS_FLAGS = {
-            Flags.FLAG_DEPRECATE_FONTS_XML,
             Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN,
             Flags.FLAG_PHRASE_STRICT_FALLBACK,
             Flags.FLAG_USE_BOUNDS_FOR_WIDTH,
@@ -67,7 +66,6 @@ public final class TextFlags {
      * The order must be the same to the TEXT_ACONFIG_FLAGS.
      */
     public static final boolean[] TEXT_ACONFIG_DEFAULT_VALUE = {
-            Flags.deprecateFontsXml(),
             Flags.noBreakNoHyphenationSpan(),
             Flags.phraseStrictFallback(),
             Flags.useBoundsForWidth(),
