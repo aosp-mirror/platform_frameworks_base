@@ -1417,15 +1417,15 @@ public class AlarmManagerService extends SystemService {
         if (futurity < MIN_FUZZABLE_INTERVAL) {
             futurity = 0;
         }
-        long maxElapsed = triggerAtTime + (long) (0.75 * futurity);
+        long maxElapsed = addClampPositive(triggerAtTime, (long) (0.75 * futurity));
         // For non-repeating alarms, window is capped at a maximum of one hour from the requested
         // delivery time. This allows for inexact-while-idle alarms to be slightly more reliable.
         // In practice, the delivery window should generally be much smaller than that
         // when the device is not idling.
         if (interval == 0) {
-            maxElapsed = Math.min(maxElapsed, triggerAtTime + INTERVAL_HOUR);
+            maxElapsed = Math.min(maxElapsed, addClampPositive(triggerAtTime, INTERVAL_HOUR));
         }
-        return clampPositive(maxElapsed);
+        return maxElapsed;
     }
 
     // The RTC clock has moved arbitrarily, so we need to recalculate all the RTC alarm deliveries.
@@ -1510,6 +1510,18 @@ public class AlarmManagerService extends SystemService {
 
     static long clampPositive(long val) {
         return (val >= 0) ? val : Long.MAX_VALUE;
+    }
+
+    static long addClampPositive(long val1, long val2) {
+        long val = val1 + val2;
+        if (val >= 0) {
+            return val;
+        } else if (val1 >= 0 && val2 >= 0) {
+            /* Both are +ve, so overflow happened. */
+            return Long.MAX_VALUE;
+        } else {
+            return 0;
+        }
     }
 
     /**

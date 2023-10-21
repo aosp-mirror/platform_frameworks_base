@@ -22,7 +22,7 @@ import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 
 import static com.android.server.alarm.AlarmManagerService.PRIORITY_NORMAL;
-import static com.android.server.alarm.AlarmManagerService.clampPositive;
+import static com.android.server.alarm.AlarmManagerService.addClampPositive;
 
 import android.app.AlarmManager;
 import android.app.IAlarmListener;
@@ -148,7 +148,7 @@ class Alarm {
         mPolicyWhenElapsed[REQUESTER_POLICY_INDEX] = requestedWhenElapsed;
         mWhenElapsed = requestedWhenElapsed;
         this.windowLength = windowLength;
-        mMaxWhenElapsed = clampPositive(requestedWhenElapsed + windowLength);
+        mMaxWhenElapsed = addClampPositive(requestedWhenElapsed, windowLength);
         repeatInterval = interval;
         operation = op;
         listener = rec;
@@ -244,8 +244,8 @@ class Alarm {
 
         final long oldMaxWhenElapsed = mMaxWhenElapsed;
         // windowLength should always be >= 0 here.
-        final long maxRequestedElapsed = clampPositive(
-                mPolicyWhenElapsed[REQUESTER_POLICY_INDEX] + windowLength);
+        final long maxRequestedElapsed = addClampPositive(
+                mPolicyWhenElapsed[REQUESTER_POLICY_INDEX], windowLength);
         mMaxWhenElapsed = Math.max(maxRequestedElapsed, mWhenElapsed);
 
         return (oldWhenElapsed != mWhenElapsed) || (oldMaxWhenElapsed != mMaxWhenElapsed);
