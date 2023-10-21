@@ -16,32 +16,27 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Trace
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
-import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.collection.ArrayMap
 import com.android.internal.statusbar.StatusBarIcon
-import com.android.internal.util.ContrastColorUtil
-import com.android.settingslib.Utils
+import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.RefactorFlag
-import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -55,7 +50,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -75,44 +69,34 @@ class NotificationIconAreaControllerViewBinderWrapperImpl
 @Inject
 constructor(
     private val context: Context,
+    private val configuration: ConfigurationState,
     private val wakeUpCoordinator: NotificationWakeUpCoordinator,
     private val bypassController: KeyguardBypassController,
-    private val configurationController: ConfigurationController,
     private val mediaManager: NotificationMediaManager,
     notificationListener: NotificationListener,
     private val dozeParameters: DozeParameters,
     private val sectionStyleProvider: SectionStyleProvider,
     private val bubblesOptional: Optional<Bubbles>,
     demoModeController: DemoModeController,
-    darkIconDispatcher: DarkIconDispatcher,
     private val featureFlags: FeatureFlagsClassic,
     private val statusBarWindowController: StatusBarWindowController,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val shelfIconsViewModel: NotificationIconContainerShelfViewModel,
     private val statusBarIconsViewModel: NotificationIconContainerStatusBarViewModel,
     private val aodIconsViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
-) :
-    NotificationIconAreaController,
-    DarkIconDispatcher.DarkReceiver,
-    NotificationWakeUpCoordinator.WakeUpListener,
-    DemoMode {
+) : NotificationIconAreaController, NotificationWakeUpCoordinator.WakeUpListener, DemoMode {
 
-    private val contrastColorUtil: ContrastColorUtil = ContrastColorUtil.getInstance(context)
     private val updateStatusBarIcons = Runnable { updateStatusBarIcons() }
     private val shelfRefactor = RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR)
-    private val tintAreas = ArrayList<Rect>()
 
     private var iconSize = 0
     private var iconHPadding = 0
-    private var iconTint = Color.WHITE
     private var notificationEntries = listOf<ListEntry>()
     private var notificationIconArea: View? = null
     private var notificationIcons: NotificationIconContainer? = null
     private var shelfIcons: NotificationIconContainer? = null
     private var aodIcons: NotificationIconContainer? = null
     private var aodBindJob: DisposableHandle? = null
-    private var aodIconAppearTranslation = 0
-    private var aodIconTint = 0
     private var showLowPriority = true
 
     @VisibleForTesting
@@ -129,8 +113,6 @@ constructor(
         demoModeController.addCallback(this)
         notificationListener.addNotificationSettingsListener(settingsListener)
         initializeNotificationAreaViews(context)
-        reloadAodColor()
-        darkIconDispatcher.addDarkReceiver(this)
     }
 
     @VisibleForTesting
@@ -152,7 +134,7 @@ constructor(
             NotificationIconContainerViewBinder.bind(
                 aodIcons,
                 aodIconsViewModel,
-                configurationController,
+                configuration,
                 dozeParameters,
                 featureFlags,
                 screenOffAnimationController,
@@ -167,16 +149,17 @@ constructor(
         NotificationShelfViewBinderWrapperControllerImpl.unsupported
 
     override fun setShelfIcons(icons: NotificationIconContainer) {
-        if (shelfRefactor.isUnexpectedlyInLegacyMode()) return
-        NotificationIconContainerViewBinder.bind(
-            icons,
-            shelfIconsViewModel,
-            configurationController,
-            dozeParameters,
-            featureFlags,
-            screenOffAnimationController,
-        )
-        shelfIcons = icons
+        if (shelfRefactor.isUnexpectedlyInLegacyMode()) {
+            NotificationIconContainerViewBinder.bind(
+                icons,
+                shelfIconsViewModel,
+                configuration,
+                dozeParameters,
+                featureFlags,
+                screenOffAnimationController,
+            )
+            shelfIcons = icons
+        }
     }
 
     override fun onDensityOrFontScaleChanged(context: Context) {
@@ -186,22 +169,6 @@ constructor(
     /** Returns the view that represents the notification area. */
     override fun getNotificationInnerAreaView(): View? {
         return notificationIconArea
-    }
-
-    /**
-     * See [com.android.systemui.statusbar.policy.DarkIconDispatcher.setIconsDarkArea]. Sets the
-     * color that should be used to tint any icons in the notification area.
-     *
-     * @param tintAreas the areas in which to tint the icons, specified in screen coordinates
-     * @param darkIntensity
-     */
-    override fun onDarkChanged(tintAreas: ArrayList<Rect>, darkIntensity: Float, iconTint: Int) {
-        this.tintAreas.clear()
-        this.tintAreas.addAll(tintAreas)
-        if (DarkIconDispatcher.isInAreas(tintAreas, notificationIconArea)) {
-            this.iconTint = iconTint
-        }
-        applyNotificationIconsTint()
     }
 
     /** Updates the notifications with the given list of notifications to display. */
@@ -249,10 +216,7 @@ constructor(
 
     override fun setAnimationsEnabled(enabled: Boolean) = unsupported
 
-    override fun onThemeChanged() {
-        reloadAodColor()
-        updateAodIconColors()
-    }
+    override fun onThemeChanged() = unsupported
 
     override fun getHeight(): Int {
         return if (aodIcons == null) 0 else aodIcons!!.height
@@ -260,7 +224,6 @@ constructor(
 
     override fun onFullyHiddenChanged(isFullyHidden: Boolean) {
         updateAodNotificationIcons()
-        updateAodIconColors()
     }
 
     override fun demoCommands(): List<String> {
@@ -296,7 +259,7 @@ constructor(
         NotificationIconContainerViewBinder.bind(
             notificationIcons!!,
             statusBarIconsViewModel,
-            configurationController,
+            configuration,
             dozeParameters,
             featureFlags,
             screenOffAnimationController,
@@ -335,7 +298,6 @@ constructor(
         val res = context.resources
         iconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size_sp)
         iconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_horizontal_margin)
-        aodIconAppearTranslation = res.getDimensionPixelSize(R.dimen.shelf_appear_translation)
     }
 
     private fun shouldShowNotificationIcon(
@@ -383,7 +345,6 @@ constructor(
         updateStatusBarIcons()
         updateShelfIcons()
         updateAodNotificationIcons()
-        applyNotificationIconsTint()
         Trace.endSection()
     }
 
@@ -526,55 +487,7 @@ constructor(
         hostLayout.setReplacingIcons(null)
     }
 
-    /** Applies [.mIconTint] to the notification icons. */
-    private fun applyNotificationIconsTint() {
-        for (i in 0 until notificationIcons!!.childCount) {
-            val iv = notificationIcons!!.getChildAt(i) as StatusBarIconView
-            if (iv.width != 0) {
-                updateTintForIcon(iv, iconTint)
-            } else {
-                iv.executeOnLayout { updateTintForIcon(iv, iconTint) }
-            }
-        }
-        updateAodIconColors()
-    }
-
-    private fun updateTintForIcon(v: StatusBarIconView, tint: Int) {
-        val isPreL = java.lang.Boolean.TRUE == v.getTag(R.id.icon_is_pre_L)
-        var color = StatusBarIconView.NO_COLOR
-        val colorize = !isPreL || NotificationUtils.isGrayscale(v, contrastColorUtil)
-        if (colorize) {
-            color = DarkIconDispatcher.getTint(tintAreas, v, tint)
-        }
-        v.staticDrawableColor = color
-        v.setDecorColor(tint)
-    }
-
-    private fun reloadAodColor() {
-        aodIconTint =
-            Utils.getColorAttrDefaultColor(
-                context,
-                R.attr.wallpaperTextColor,
-                DEFAULT_AOD_ICON_COLOR
-            )
-    }
-
-    private fun updateAodIconColors() {
-        if (aodIcons != null) {
-            for (i in 0 until aodIcons!!.childCount) {
-                val iv = aodIcons!!.getChildAt(i) as StatusBarIconView
-                if (iv.width != 0) {
-                    updateTintForIcon(iv, aodIconTint)
-                } else {
-                    iv.executeOnLayout { updateTintForIcon(iv, aodIconTint) }
-                }
-            }
-        }
-    }
-
     companion object {
-        @ColorInt private val DEFAULT_AOD_ICON_COLOR = -0x1
-
         val unsupported: Nothing
             get() =
                 error(

@@ -374,3 +374,10 @@ inline fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, R> combine(
         )
     }
 }
+
+/**
+ * Returns a [Flow] that immediately emits [Unit] when started, then emits from the given upstream
+ * [Flow] as normal.
+ */
+@Suppress("NOTHING_TO_INLINE")
+inline fun Flow<Unit>.emitOnStart(): Flow<Unit> = onStart { emit(Unit) }

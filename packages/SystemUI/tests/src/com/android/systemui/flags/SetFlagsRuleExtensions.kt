@@ -18,6 +18,17 @@ package com.android.systemui.flags
 
 import android.platform.test.flag.junit.SetFlagsRule
 
+/**
+ * Set the given flag's value to the real value for the current build configuration.
+ * This prevents test code from crashing because it is reading an unspecified flag value.
+ *
+ * REMINDER: You should always test your code with your flag in both configurations, so
+ * generally you should be explicitly enabling or disabling your flag. This method is for
+ * situations where the flag needs to be read (e.g. in the class constructor), but its value
+ * shouldn't affect the actual test cases. In those cases, it's mildly safer to use this method
+ * than to hard-code `false` or `true` because then at least if you're wrong, and the flag value
+ * *does* matter, you'll notice when the flag is flipped and tests start failing.
+ */
 fun SetFlagsRule.setFlagDefault(flagName: String) {
     if (getFlagDefault(flagName)) {
         enableFlags(flagName)

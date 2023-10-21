@@ -63,4 +63,13 @@ class MediaProjectionMetricsLoggerTest : SysuiTestCase() {
 
         verify(service).notifyPermissionRequestInitiated(hostUid, METRICS_CREATION_SOURCE_UNKNOWN)
     }
+
+    @Test
+    fun notifyPermissionRequestDisplayed_forwardsToService() {
+        val hostUid = 987
+
+        logger.notifyPermissionRequestDisplayed(hostUid)
+
+        verify(service).notifyPermissionRequestDisplayed(hostUid)
+    }
 }

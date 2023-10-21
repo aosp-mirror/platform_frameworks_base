@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.ColorLookup
 import com.android.systemui.util.ui.AnimatedValue
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -29,4 +30,5 @@ class NotificationIconContainerShelfViewModel @Inject constructor() :
     override val isVisible: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override fun completeDozeAnimation() {}
     override fun completeVisibilityAnimation() {}
+    override val iconColors: Flow<ColorLookup> = emptyFlow()
 }

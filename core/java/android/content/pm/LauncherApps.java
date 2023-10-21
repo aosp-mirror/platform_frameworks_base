@@ -20,6 +20,7 @@ import static android.Manifest.permission;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,6 +56,7 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -770,6 +772,28 @@ public class LauncherApps {
         }
         try {
             return mService.getActivityLaunchIntent(mContext.getPackageName(), component, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns information related to a user which is useful for displaying UI elements
+     * to distinguish it from other users (eg, badges). Only system launchers should
+     * call this API.
+     *
+     * @param userHandle user handle of the user for which LauncherUserInfo is requested
+     * @return the LauncherUserInfo object related to the user specified.
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    public final LauncherUserInfo getLauncherUserInfo(@NonNull UserHandle userHandle) {
+        if (DEBUG) {
+            Log.i(TAG, "getLauncherUserInfo " + userHandle);
+        }
+        try {
+            return mService.getLauncherUserInfo(userHandle);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

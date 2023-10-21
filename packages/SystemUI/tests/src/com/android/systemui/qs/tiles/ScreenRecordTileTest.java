@@ -52,6 +52,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -96,6 +97,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
     @Mock
     private Dialog mPermissionDialogPrompt;
+    @Mock
+    private UserContextProvider mUserContextProvider;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -106,6 +109,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
 
+        when(mUserContextProvider.getUserContext()).thenReturn(mContext);
         when(mHost.getContext()).thenReturn(mContext);
 
         mTile = new ScreenRecordTile(
@@ -124,7 +128,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mDialogLaunchAnimator,
                 mPanelInteractor,
-                mMediaProjectionMetricsLogger
+                mMediaProjectionMetricsLogger,
+                mUserContextProvider
         );
 
         mTile.initialize();
@@ -308,7 +313,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         onDismissAction.getValue().onDismiss();
 
         verify(mPermissionDialogPrompt).show();
-        verify(mMediaProjectionMetricsLogger).notifyPermissionRequestDisplayed();
+        verify(mMediaProjectionMetricsLogger)
+                .notifyPermissionRequestDisplayed(mContext.getUserId());
     }
 
 }
