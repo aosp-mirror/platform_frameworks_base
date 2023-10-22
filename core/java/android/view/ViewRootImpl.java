@@ -4751,7 +4751,7 @@ public final class ViewRootImpl implements ViewParent,
         mFullRedrawNeeded = false;
 
         mIsDrawing = true;
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, mTag + "-draw");
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw-" + mTag);
 
         addFrameCommitCallbackIfNeeded();
 

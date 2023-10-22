@@ -53,7 +53,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
-import com.android.systemui.statusbar.notification.domain.interactor.NotificationsInteractor;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationAlertsInteractor;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -79,8 +79,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private CommandQueue mCommandQueue;
     private FakeMetricsLogger mMetricsLogger;
     private final ShadeController mShadeController = mock(ShadeController.class);
-    private final NotificationsInteractor mNotificationsInteractor =
-            mock(NotificationsInteractor.class);
+    private final NotificationAlertsInteractor mNotificationAlertsInteractor =
+            mock(NotificationAlertsInteractor.class);
     private final KeyguardStateController mKeyguardStateController =
             mock(KeyguardStateController.class);
     private final InitController mInitController = new InitController();
@@ -116,7 +116,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationShadeWindowController.class),
                 mock(DynamicPrivacyController.class),
                 mKeyguardStateController,
-                mNotificationsInteractor,
+                mNotificationAlertsInteractor,
                 mock(LockscreenShadeTransitionController.class),
                 mock(PowerInteractor.class),
                 mCommandQueue,
@@ -226,7 +226,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 .setTag("a")
                 .setNotification(n)
                 .build();
-        when(mNotificationsInteractor.areNotificationAlertsEnabled()).thenReturn(false);
+        when(mNotificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(false);
 
         assertTrue("When alerts aren't enabled, interruptions are suppressed",
                 mInterruptSuppressor.suppressInterruptions(entry));

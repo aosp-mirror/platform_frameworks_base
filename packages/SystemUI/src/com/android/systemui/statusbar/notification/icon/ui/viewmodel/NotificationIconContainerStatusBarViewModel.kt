@@ -19,7 +19,7 @@ import android.graphics.Rect
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.statusbar.notification.domain.interactor.NotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.ColorLookup
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconColors
 import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
@@ -35,7 +35,7 @@ class NotificationIconContainerStatusBarViewModel
 constructor(
     darkIconInteractor: DarkIconInteractor,
     keyguardInteractor: KeyguardInteractor,
-    notificationsInteractor: NotificationsInteractor,
+    notificationsInteractor: ActiveNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
 ) : NotificationIconContainerViewModel {
     override val animationsEnabled: Flow<Boolean> =

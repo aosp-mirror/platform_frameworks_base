@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.stack.domain.interactor
+package com.android.systemui.statusbar.notification.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.stack.data.repository.NotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
 /** Interactor for business logic associated with the notification stack. */
 @SysUISingleton
-class NotificationListInteractor
+class SeenNotificationsInteractor
 @Inject
 constructor(
-    private val notificationListRepository: NotificationListRepository,
+    private val notificationListRepository: ActiveNotificationListRepository,
 ) {
     /** Are any already-seen notifications currently filtered out of the shade? */
-    val hasFilteredOutSeenNotifications: StateFlow<Boolean>
-        get() = notificationListRepository.hasFilteredOutSeenNotifications
+    val hasFilteredOutSeenNotifications: StateFlow<Boolean> =
+        notificationListRepository.hasFilteredOutSeenNotifications
 
     fun setHasFilteredOutSeenNotifications(value: Boolean) {
-        notificationListRepository.setHasFilteredOutSeenNotifications(value)
+        notificationListRepository.hasFilteredOutSeenNotifications.value = value
     }
 }
