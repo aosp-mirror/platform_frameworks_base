@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -49,6 +50,7 @@ import android.text.TextUtils;
 import android.util.Patterns;
 
 import com.android.internal.telephony.SmsApplication;
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -3191,8 +3193,8 @@ public final class Telephony {
          * Sets whether the PDU session brought up by this APN should always be on.
          * See 3GPP TS 23.501 section 5.6.13
          * <P>Type: INTEGER</P>
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String ALWAYS_ON = "always_on";
 
         /**
@@ -3302,18 +3304,16 @@ public final class Telephony {
          * The MTU (maximum transmit unit) size of the mobile interface for IPv4 to which the APN is
          * connected, in bytes.
          * <p>Type: INTEGER </p>
-         * @hide
          */
-        @SystemApi
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String MTU_V4 = "mtu_v4";
 
         /**
          * The MTU (maximum transmit unit) size of the mobile interface for IPv6 to which the APN is
          * connected, in bytes.
          * <p>Type: INTEGER </p>
-         * @hide
          */
-        @SystemApi
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String MTU_V6 = "mtu_v6";
 
         /**
@@ -3335,17 +3335,15 @@ public final class Telephony {
         /**
          * {@code true} if this APN visible to the user, {@code false} otherwise.
          * <p>Type: INTEGER (boolean)</p>
-         * @hide
          */
-        @SystemApi
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String USER_VISIBLE = "user_visible";
 
         /**
          * {@code true} if the user allowed to edit this APN, {@code false} otherwise.
          * <p>Type: INTEGER (boolean)</p>
-         * @hide
          */
-        @SystemApi
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String USER_EDITABLE = "user_editable";
 
         /**
