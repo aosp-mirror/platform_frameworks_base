@@ -166,22 +166,6 @@ android_test {
 }
 
 android_test {
-    name: "FlickerTestsAppLaunch",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestAppLaunch.xml"],
-    package_name: "com.android.server.wm.flicker.launch",
-    instrumentation_target_package: "com.android.server.wm.flicker.launch",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerTestsAppLaunchCommon-src",
-        ":FlickerTestsAppLaunch2-src",
-    ],
-    exclude_srcs: [
-        ":FlickerTestsActivityEmbedding-src",
-    ],
-}
-
-android_test {
     name: "FlickerTestsAppLaunch1",
     defaults: ["FlickerTestsDefault"],
     additional_manifests: ["manifests/AndroidManifestAppLaunch.xml"],
