@@ -16,10 +16,10 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -35,6 +35,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
+import android.app.AppCompatTaskInfo;
 import android.app.TaskInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -464,11 +465,11 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     }
 
     private static TaskInfo createTaskInfo(boolean hasSizeCompat,
-            @TaskInfo.CameraCompatControlState int cameraCompatControlState) {
+            @AppCompatTaskInfo.CameraCompatControlState int cameraCompatControlState) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.topActivityInSizeCompat = hasSizeCompat;
-        taskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.appCompatTaskInfo.cameraCompatControlState = cameraCompatControlState;
         taskInfo.configuration.uiMode &= ~Configuration.UI_MODE_TYPE_DESK;
         return taskInfo;
     }

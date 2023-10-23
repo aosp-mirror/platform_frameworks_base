@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
@@ -25,8 +25,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
+import android.app.AppCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
-import android.app.TaskInfo.CameraCompatControlState;
 import android.content.ComponentName;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
@@ -147,8 +147,8 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
             @CameraCompatControlState int cameraCompatControlState) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.topActivityInSizeCompat = hasSizeCompat;
-        taskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.appCompatTaskInfo.cameraCompatControlState = cameraCompatControlState;
         taskInfo.realActivity = new ComponentName("com.mypackage.test", "TestActivity");
         return taskInfo;
     }
