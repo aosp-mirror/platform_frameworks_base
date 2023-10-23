@@ -17,13 +17,14 @@
 package com.android.systemui.qs.tiles.base.interactor
 
 import android.annotation.WorkerThread
-import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 
 interface QSTileUserActionInteractor<DATA_TYPE> {
-
     /**
-     * Processes user input based on [userAction] and [currentData]. It's safe to run long running
-     * computations inside this function in this.
+     * Processes user input based on [QSTileInput.userId], [QSTileInput.action], and
+     * [QSTileInput.data]. It's guaranteed that [QSTileInput.userId] is the same as the id passed to
+     * [QSTileDataInteractor] to get [QSTileInput.data].
+     *
+     * It's safe to run long running computations inside this function in this.
      */
-    @WorkerThread suspend fun handleInput(userAction: QSTileUserAction, currentData: DATA_TYPE)
+    @WorkerThread suspend fun handleInput(input: QSTileInput<DATA_TYPE>)
 }
