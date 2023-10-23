@@ -206,4 +206,17 @@ interface IMediaProjectionManager {
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     oneway void notifyPermissionRequestDisplayed(int hostUid);
+
+    /**
+     * Notifies system server that the app selector was displayed.
+     *
+     * <p>Only used for emitting atoms.
+     *
+     * @param hostUid The uid of the process requesting consent to capture, may be an app or
+     *                SystemUI.
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    oneway void notifyAppSelectorDisplayed(int hostUid);
 }

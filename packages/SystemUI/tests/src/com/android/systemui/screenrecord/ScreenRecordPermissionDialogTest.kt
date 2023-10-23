@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenrecord
 
+import android.content.Intent
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -25,11 +26,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
 import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
 import com.android.systemui.mediaprojection.permission.SINGLE_APP
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
@@ -38,6 +41,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.Mockito.eq
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -62,6 +68,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
             ScreenRecordPermissionDialog(
                 context,
                 UserHandle.of(0),
+                TEST_HOST_UID,
                 controller,
                 starter,
                 userContextProvider,
@@ -105,6 +112,19 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
     }
 
     @Test
+    fun startClicked_singleAppSelected_passesHostUidToAppSelector() {
+        dialog.show()
+        onSpinnerItemSelected(SINGLE_APP)
+
+        clickOnStart()
+
+        assertExtraPassedToAppSelector(
+            extraKey = MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID,
+            value = TEST_HOST_UID
+        )
+    }
+
+    @Test
     fun showDialog_dialogIsShowing() {
         dialog.show()
 
@@ -133,9 +153,25 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
         dialog.requireViewById<View>(android.R.id.button2).performClick()
     }
 
+    private fun clickOnStart() {
+        dialog.requireViewById<View>(android.R.id.button1).performClick()
+    }
+
     private fun onSpinnerItemSelected(position: Int) {
         val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
         checkNotNull(spinner.onItemSelectedListener)
             .onItemSelected(spinner, mock(), position, /* id= */ 0)
+    }
+
+    private fun assertExtraPassedToAppSelector(extraKey: String, value: Int) {
+        val intentCaptor = argumentCaptor<Intent>()
+        verify(starter).startActivity(intentCaptor.capture(), /* dismissShade= */ eq(true))
+
+        val intent = intentCaptor.value
+        assertThat(intent.extras!!.getInt(extraKey)).isEqualTo(value)
+    }
+
+    companion object {
+        private const val TEST_HOST_UID = 12345
     }
 }

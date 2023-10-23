@@ -47,13 +47,14 @@ constructor(
     private val thumbnailLoader: RecentTaskThumbnailLoader,
     @MediaProjectionAppSelector private val isFirstStart: Boolean,
     private val logger: MediaProjectionMetricsLogger,
+    @HostUid private val hostUid: Int,
 ) {
 
     fun init() {
         // Only log during the first start of the app selector.
         // Don't log when the app selector restarts due to a config change.
         if (isFirstStart) {
-            logger.notifyPermissionProgress(STATE_APP_SELECTOR_DISPLAYED)
+            logger.notifyAppSelectorDisplayed(hostUid)
         }
 
         scope.launch {

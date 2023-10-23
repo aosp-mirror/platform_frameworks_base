@@ -17,12 +17,14 @@
 package com.android.server.media.projection;
 
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -30,6 +32,8 @@ import java.time.Duration;
 
 /** Class for emitting logs describing a MediaProjection session. */
 public class MediaProjectionMetricsLogger {
+    private static final String TAG = "MediaProjectionMetricsLogger";
+
     private static final int TARGET_UID_UNKNOWN = -2;
     private static final int TIME_SINCE_LAST_ACTIVE_UNKNOWN = -1;
 
@@ -81,6 +85,7 @@ public class MediaProjectionMetricsLogger {
      *     </ul>
      */
     public void logInitiated(int hostUid, int sessionCreationSource) {
+        Log.d(TAG, "logInitiated");
         Duration durationSinceLastActiveSession = mTimestampStore.timeSinceLastActiveSession();
         int timeSinceLastActiveInSeconds =
                 durationSinceLastActiveSession == null
@@ -102,9 +107,26 @@ public class MediaProjectionMetricsLogger {
      * @param hostUid UID of the package that initiates MediaProjection.
      */
     public void logPermissionRequestDisplayed(int hostUid) {
+        Log.d(TAG, "logPermissionRequestDisplayed");
         write(
                 mSessionIdGenerator.getCurrentSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED,
+                hostUid,
+                TARGET_UID_UNKNOWN,
+                TIME_SINCE_LAST_ACTIVE_UNKNOWN,
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    /**
+     * Logs that the app selector dialog is shown for the user.
+     *
+     * @param hostUid UID of the package that initiates MediaProjection.
+     */
+    public void logAppSelectorDisplayed(int hostUid) {
+        Log.d(TAG, "logAppSelectorDisplayed");
+        write(
+                mSessionIdGenerator.getCurrentSessionId(),
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED,
                 hostUid,
                 TARGET_UID_UNKNOWN,
                 TIME_SINCE_LAST_ACTIVE_UNKNOWN,
@@ -118,6 +140,7 @@ public class MediaProjectionMetricsLogger {
      * @param targetUid UID of the package that is captured if selected.
      */
     public void logInProgress(int hostUid, int targetUid) {
+        Log.d(TAG, "logInProgress");
         write(
                 mSessionIdGenerator.getCurrentSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS,
@@ -134,6 +157,10 @@ public class MediaProjectionMetricsLogger {
      * @param targetUid UID of the package that is captured if selected.
      */
     public void logStopped(int hostUid, int targetUid) {
+        boolean wasCaptureInProgress =
+                mPreviousState
+                        == MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
+        Log.d(TAG, "logStopped: wasCaptureInProgress=" + wasCaptureInProgress);
         write(
                 mSessionIdGenerator.getCurrentSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED,
@@ -141,7 +168,10 @@ public class MediaProjectionMetricsLogger {
                 targetUid,
                 TIME_SINCE_LAST_ACTIVE_UNKNOWN,
                 MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
-        mTimestampStore.registerActiveSessionEnded();
+
+        if (wasCaptureInProgress) {
+            mTimestampStore.registerActiveSessionEnded();
+        }
     }
 
     public void notifyProjectionStateChange(int hostUid, int state, int sessionCreationSource) {
