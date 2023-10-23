@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Δεν είναι δυνατή η προσθήκη προσαρμοσμένου ήχου κλήσης"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Δεν είναι δυνατή η διαγραφή προσαρμοσμένου ήχου κλήσης"</string>
     <string name="app_label" msgid="3091611356093417332">"Ήχοι"</string>
-    <string name="empty_list" msgid="2871978423955821191">"Η λίστα είναι κενή"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"Ήχος"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"Δόνηση"</string>
 </resources>

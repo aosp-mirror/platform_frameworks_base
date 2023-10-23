@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"ഇഷ്ടാനുസൃത റിംഗ്‌ടോൺ ചേർക്കാനാവില്ല"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"ഇഷ്ടാനുസൃത റിംഗ്‌ടോൺ ഇല്ലാതാക്കാനാവില്ല"</string>
     <string name="app_label" msgid="3091611356093417332">"ശബ്‌ദങ്ങൾ"</string>
-    <string name="empty_list" msgid="2871978423955821191">"ലിസ്‌റ്റിൽ ഒന്നുമില്ല"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"ശബ്‌ദം"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"വൈബ്രേഷൻ"</string>
 </resources>

@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Impossibile aggiungere suoneria personalizzata"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Impossibile eliminare suoneria personalizzata"</string>
     <string name="app_label" msgid="3091611356093417332">"Sounds"</string>
-    <string name="empty_list" msgid="2871978423955821191">"L\'elenco è vuoto"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"Suoneria"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"Vibrazione"</string>
 </resources>
