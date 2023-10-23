@@ -57,7 +57,6 @@ import android.util.ArrayMap;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.net.flags.Flags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -264,11 +263,7 @@ public class NetworkManagementServiceTest {
         verify(mCm).addUidToMeteredNetworkDenyList(TEST_UID);
 
         mNMService.setDataSaverModeEnabled(true);
-        if (Flags.setDataSaverViaCm()) {
-            verify(mCm).setDataSaverEnabled(true);
-        } else {
-            verify(mNetdService).bandwidthEnableDataSaver(true);
-        }
+        verify(mNetdService).bandwidthEnableDataSaver(true);
 
         mNMService.setUidOnMeteredNetworkDenylist(TEST_UID, false);
         assertTrue("Should be true since data saver is on and the uid is not allowlisted",
@@ -284,11 +279,7 @@ public class NetworkManagementServiceTest {
         mNMService.setUidOnMeteredNetworkAllowlist(TEST_UID, false);
         verify(mCm).removeUidFromMeteredNetworkAllowList(TEST_UID);
         mNMService.setDataSaverModeEnabled(false);
-        if (Flags.setDataSaverViaCm()) {
-            verify(mCm).setDataSaverEnabled(false);
-        } else {
-            verify(mNetdService).bandwidthEnableDataSaver(false);
-        }
+        verify(mNetdService).bandwidthEnableDataSaver(false);
         assertFalse("Network should not be restricted when data saver is off",
                 mNMService.isNetworkRestricted(TEST_UID));
     }
