@@ -23,6 +23,7 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NOR
 import static com.android.internal.app.procstats.ProcessStats.ADJ_NOTHING;
 
 import android.annotation.IntDef;
+import android.os.Trace;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -90,17 +91,31 @@ public final class LowMemDetector {
     private native int waitForPressure();
 
     private final class LowMemThread extends Thread {
+        private boolean mIsTracingMemCriticalLow;
+
+        LowMemThread() {
+            super("LowMemThread");
+        }
+
         public void run() {
 
             while (true) {
                 // sleep waiting for a PSI event
                 int newPressureState = waitForPressure();
+                // PSI event detected
+                boolean isCriticalLowMemory = newPressureState == ADJ_MEM_FACTOR_CRITICAL;
+                if (isCriticalLowMemory && !mIsTracingMemCriticalLow) {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "criticalLowMemory");
+                } else if (!isCriticalLowMemory && mIsTracingMemCriticalLow) {
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                }
+                mIsTracingMemCriticalLow = isCriticalLowMemory;
                 if (newPressureState == -1) {
                     // epoll broke, tear this down
                     mAvailable = false;
                     break;
                 }
-                // got a PSI event? let's update lowmem info
+                // got an actual PSI event? let's update lowmem info
                 synchronized (mPressureStateLock) {
                     mPressureState = newPressureState;
                 }
