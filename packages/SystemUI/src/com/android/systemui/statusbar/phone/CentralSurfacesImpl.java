@@ -207,6 +207,7 @@ import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -237,8 +238,6 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 
 import dalvik.annotation.optimization.NeverCompile;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -249,6 +248,8 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+
+import dagger.Lazy;
 
 /**
  * A class handling initialization and coordination between some of the key central surfaces in
@@ -2639,7 +2640,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 !mDozeServiceHost.isPulsing(), mDeviceProvisionedController.isFrpActive());
 
         mShadeSurface.setTouchAndAnimationDisabled(disabled);
-        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+        if (!NotificationIconContainerRefactor.isEnabled()) {
             mNotificationIconAreaController.setAnimationsEnabled(!disabled);
         }
     }
@@ -3106,7 +3107,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
             // TODO: Bring these out of CentralSurfaces.
             mUserInfoControllerImpl.onDensityOrFontScaleChanged();
-            if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            if (!NotificationIconContainerRefactor.isEnabled()) {
                 mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
             }
         }
@@ -3126,7 +3127,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             if (mAmbientIndicationContainer instanceof AutoReinflateContainer) {
                 ((AutoReinflateContainer) mAmbientIndicationContainer).inflateLayout();
             }
-            if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            if (!NotificationIconContainerRefactor.isEnabled()) {
                 mNotificationIconAreaController.onThemeChanged();
             }
         }

@@ -29,14 +29,13 @@ import android.util.Log;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.domain.interactor.SilentNotificationStatusIconsVisibilityInteractor;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
 import com.android.systemui.statusbar.notification.collection.PipelineDumper;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 import com.android.systemui.util.time.SystemClock;
@@ -62,7 +61,6 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     private static final long MAX_RANKING_DELAY_MILLIS = 500L;
 
     private final Context mContext;
-    private final FeatureFlagsClassic mFeatureFlags;
     private final NotificationManager mNotificationManager;
     private final SilentNotificationStatusIconsVisibilityInteractor mStatusIconInteractor;
     private final SystemClock mSystemClock;
@@ -80,7 +78,6 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     @Inject
     public NotificationListener(
             Context context,
-            FeatureFlagsClassic featureFlags,
             NotificationManager notificationManager,
             SilentNotificationStatusIconsVisibilityInteractor statusIconInteractor,
             SystemClock systemClock,
@@ -88,7 +85,6 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
             PluginManager pluginManager) {
         super(pluginManager);
         mContext = context;
-        mFeatureFlags = featureFlags;
         mNotificationManager = notificationManager;
         mStatusIconInteractor = statusIconInteractor;
         mSystemClock = systemClock;
@@ -106,6 +102,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     /** Registers a listener that's notified when any notification-related settings change. */
     @Deprecated
     public void addNotificationSettingsListener(NotificationSettingsListener listener) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         mSettingsListeners.add(listener);
     }
 
@@ -240,7 +237,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
 
     @Override
     public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+        if (NotificationIconContainerRefactor.isEnabled()) {
             mStatusIconInteractor.setHideSilentStatusIcons(hideSilentStatusIcons);
         } else {
             for (NotificationSettingsListener listener : mSettingsListeners) {

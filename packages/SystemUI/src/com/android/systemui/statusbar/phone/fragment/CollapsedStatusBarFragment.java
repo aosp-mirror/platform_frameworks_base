@@ -44,7 +44,6 @@ import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -60,6 +59,7 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.Notificati
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
@@ -317,7 +317,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mStatusBarWindowStateController.addListener(mStatusBarWindowStateListener);
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+        if (NotificationIconContainerRefactor.isEnabled()) {
             mDemoModeController.addCallback(mDemoModeCallback);
         }
     }
@@ -326,7 +326,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onDestroy() {
         super.onDestroy();
         mStatusBarWindowStateController.removeListener(mStatusBarWindowStateListener);
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+        if (NotificationIconContainerRefactor.isEnabled()) {
             mDemoModeController.removeCallback(mDemoModeCallback);
         }
     }
@@ -469,7 +469,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     /** Initializes views related to the notification icon area. */
     public void initNotificationIconArea() {
         ViewGroup notificationIconArea = mStatusBar.requireViewById(R.id.notification_icon_area);
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+        if (NotificationIconContainerRefactor.isEnabled()) {
             mNotificationIconAreaInner =
                 LayoutInflater.from(getContext())
                         .inflate(R.layout.notification_icon_area, notificationIconArea, true);

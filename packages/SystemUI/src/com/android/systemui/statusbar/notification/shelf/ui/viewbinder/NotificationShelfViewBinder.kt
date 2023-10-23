@@ -22,7 +22,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
@@ -31,6 +30,7 @@ import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.ActivatableNotificationViewBinder
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -93,7 +93,7 @@ object NotificationShelfViewBinder {
     ) {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.apply {
-            if (featureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            if (NotificationIconContainerRefactor.isEnabled) {
                 NotificationIconContainerViewBinder.bind(
                     shelfIcons,
                     viewModel.icons,

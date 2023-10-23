@@ -40,10 +40,9 @@ import androidx.collection.ArrayMap;
 import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.settingslib.Utils;
-import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -132,9 +131,6 @@ public class NotificationIconContainer extends ViewGroup {
             return mAnimationFilter;
         }
     }.setDuration(CONTENT_FADE_DURATION);
-
-    private final RefactorFlag mIconContainerRefactorFlag =
-            RefactorFlag.forView(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR);
 
     /* Maximum number of icons on AOD when also showing overflow dot. */
     private int mMaxIconsOnAod;
@@ -352,7 +348,7 @@ public class NotificationIconContainer extends ViewGroup {
         StatusBarIconView iconView = (StatusBarIconView) child;
         Icon sourceIcon = iconView.getSourceIcon();
         String groupKey = iconView.getNotification().getGroupKey();
-        if (mIconContainerRefactorFlag.isEnabled()) {
+        if (NotificationIconContainerRefactor.isEnabled()) {
             if (mReplacingIcons == null) {
                 return false;
             }
@@ -695,18 +691,18 @@ public class NotificationIconContainer extends ViewGroup {
     }
 
     public void setReplacingIconsLegacy(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
-        mIconContainerRefactorFlag.assertInLegacyMode();
+        NotificationIconContainerRefactor.assertInLegacyMode();
         mReplacingIconsLegacy = replacingIcons;
     }
 
     public void setReplacingIcons(ArrayMap<String, StatusBarIcon> replacingIcons) {
-        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
         mReplacingIcons = replacingIcons;
     }
 
     @Deprecated
     public void showIconIsolated(StatusBarIconView icon, boolean animated) {
-        mIconContainerRefactorFlag.assertInLegacyMode();
+        NotificationIconContainerRefactor.assertInLegacyMode();
         if (animated) {
             showIconIsolatedAnimated(icon, null);
         } else {
@@ -716,14 +712,14 @@ public class NotificationIconContainer extends ViewGroup {
 
     public void showIconIsolatedAnimated(StatusBarIconView icon,
             @Nullable Runnable onAnimationEnd) {
-        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
         mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
         mIsolatedIconAnimationEndRunnable = onAnimationEnd;
         showIconIsolated(icon);
     }
 
     public void showIconIsolated(StatusBarIconView icon) {
-        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
         mIsolatedIcon = icon;
         updateState();
     }

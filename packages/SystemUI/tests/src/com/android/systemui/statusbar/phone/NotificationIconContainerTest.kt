@@ -20,12 +20,15 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.setFlagDefault
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -40,6 +43,11 @@ import org.mockito.Mockito.`when` as whenever
 class NotificationIconContainerTest : SysuiTestCase() {
 
     private val iconContainer = NotificationIconContainer(context, /* attrs= */ null)
+
+    @Before
+    fun setup() {
+        mSetFlagsRule.setFlagDefault(NotificationIconContainerRefactor.FLAG_NAME)
+    }
 
     @Test
     fun calculateWidthFor_zeroIcons_widthIsZero() {
