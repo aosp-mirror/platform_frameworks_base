@@ -1051,7 +1051,6 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
-                false /*isPersistent*/,
                 34 /*targetSdkVersion*/,
                 null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
@@ -1092,7 +1091,6 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
-                false /*isPersistent*/,
                 34 /*targetSdkVersion*/,
                 null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
@@ -1135,7 +1133,6 @@ public class PackageManagerSettingsTests {
                     null /*usesStaticLibrariesVersions*/,
                     null /*mimeGroups*/,
                     UUID.randomUUID(),
-                    false /*isPersistent*/,
                     34 /*targetSdkVersion*/,
                     null /*restrictUpdateHash*/);
             fail("Expected a PackageManagerException");
@@ -1174,7 +1171,6 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
-                false /*isPersistent*/,
                 34 /*targetSdkVersion*/,
                 null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
@@ -1222,7 +1218,6 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
-                false /*isPersistent*/,
                 34 /*targetSdkVersion*/,
                 null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(0));
@@ -1270,7 +1265,6 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
-                false /*isPersistent*/,
                 34 /*targetSdkVersion*/,
                 null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(10064));
@@ -1319,7 +1313,6 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
-                false /*isPersistent*/,
                 34 /*targetSdkVersion*/,
                 null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(10064));
@@ -1365,7 +1358,6 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
-                false /*isPersistent*/,
                 34 /*targetSdkVersion*/,
                 null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(0));

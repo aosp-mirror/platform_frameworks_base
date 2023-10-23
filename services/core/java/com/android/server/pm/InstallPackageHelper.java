@@ -1632,7 +1632,8 @@ final class InstallPackageHelper {
                 synchronized (mPm.mLock) {
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG,
-                                "replacePackageLI: new=" + parsedPackage + ", old=" + oldPackage);
+                                "replacePackageLI: new=" + parsedPackage
+                                        + ", old=" + oldPackageState.getName());
                     }
 
                     ps = mPm.mSettings.getPackageLPr(pkgName11);
@@ -1791,7 +1792,7 @@ final class InstallPackageHelper {
 
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG, "replaceSystemPackageLI: new=" + parsedPackage
-                                + ", old=" + oldPackage);
+                                + ", old=" + oldPackageState.getName());
                     }
                     request.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
                     request.setApexModuleName(oldPackageState.getApexModuleName());
@@ -1801,7 +1802,7 @@ final class InstallPackageHelper {
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG,
                                 "replaceNonSystemPackageLI: new=" + parsedPackage + ", old="
-                                        + oldPackage);
+                                        + oldPackageState.getName());
                     }
                 }
             } else { // new package install
