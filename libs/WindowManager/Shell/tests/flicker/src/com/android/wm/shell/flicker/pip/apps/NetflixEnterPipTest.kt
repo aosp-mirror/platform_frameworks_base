@@ -26,6 +26,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -66,8 +67,10 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
             standardAppHelper.launchViaIntent(
                 wmHelper,
                 NetflixAppHelper.getNetflixWatchVideoIntent("70184207"),
-                ComponentNameMatcher(NetflixAppHelper.PACKAGE_NAME,
-                    NetflixAppHelper.WATCH_ACTIVITY)
+                ComponentNameMatcher(
+                    NetflixAppHelper.PACKAGE_NAME,
+                    NetflixAppHelper.WATCH_ACTIVITY
+                )
             )
             standardAppHelper.waitForVideoPlaying()
         }
@@ -97,6 +100,41 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
         // in gestural nav the focus goes to different activity on swipe up with auto enter PiP
         Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
         super.focusChanges()
+    }
+
+    @Postsubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        // Netflix starts in immersive fullscreen mode, so taskbar bar is not visible at start
+        flicker.assertLayersStart { this.isInvisible(ComponentNameMatcher.TASK_BAR) }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.TASK_BAR) }
+    }
+
+    @Postsubmit
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() {
+        // Netflix plays in immersive fullscreen mode, so taskbar will be gone at some point
+    }
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {
+        // Netflix starts in immersive fullscreen mode, so status bar is not visible at start
+        flicker.assertLayersStart { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+    }
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() {
+        // Netflix starts in immersive fullscreen mode, so status bar is not visible at start
+        flicker.statusBarLayerPositionAtEnd()
+    }
+
+    @Postsubmit
+    @Test override fun statusBarWindowIsAlwaysVisible() {
+        // Netflix plays in immersive fullscreen mode, so taskbar will be gone at some point
     }
 
     companion object {
