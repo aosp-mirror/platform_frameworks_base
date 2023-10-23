@@ -103,7 +103,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -210,7 +209,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    Dimmer mDimmer = Flags.dimmerRefactor()
+    Dimmer mDimmer = Dimmer.DIMMER_REFACTOR
             ? new SmoothDimmer(this) : new LegacyDimmer(this);
 
     /** Apply the dim layer on the embedded TaskFragment. */

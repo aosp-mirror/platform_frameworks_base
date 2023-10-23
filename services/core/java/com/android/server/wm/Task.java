@@ -199,7 +199,6 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.uri.NeededUriGrants;
-import com.android.window.flags.Flags;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -3304,7 +3303,7 @@ class Task extends TaskFragment {
         // Once at the root task level, we want to check {@link #isTranslucent(ActivityRecord)}.
         // If true, we want to get the Dimmer from the level above since we don't want to animate
         // the dim with the Task.
-        if (!isRootTask() || (Flags.dimmerRefactor() && isTranslucentAndVisible())
+        if (!isRootTask() || (Dimmer.DIMMER_REFACTOR && isTranslucentAndVisible())
                 || isTranslucent(null)) {
             return super.getDimmer();
         }
