@@ -35,6 +35,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.compatui.AppCompatUtils.isSingleTopActivityTranslucent;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
@@ -72,6 +73,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
@@ -306,6 +308,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             incrementEventReceiverTasks(taskInfo.displayId);
         }
         decoration.relayout(taskInfo);
+    }
+
+    @Override
+    public void onTaskVanished(RunningTaskInfo taskInfo) {
+        // A task vanishing doesn't necessarily mean the task was closed, it could also mean its
+        // windowing mode changed. We're only interested in closing tasks so checking whether
+        // its info still exists in the task organizer is one way to disambiguate.
+        final boolean closed = mTaskOrganizer.getRunningTaskInfo(taskInfo.taskId) == null;
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "Task Vanished: #%d closed=%b", taskInfo.taskId, closed);
+        if (closed) {
+            // Destroying the window decoration is usually handled when a TRANSIT_CLOSE transition
+            // changes happen, but there are certain cases in which closing tasks aren't included
+            // in transitions, such as when a non-visible task is closed. See b/296921167.
+            // Destroy the decoration here in case the lack of transition missed it.
+            destroyWindowDecoration(taskInfo);
+        }
     }
 
     @Override
