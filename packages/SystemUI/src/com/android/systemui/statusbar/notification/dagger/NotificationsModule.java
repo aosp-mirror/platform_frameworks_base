@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutManager;
 import android.os.Handler;
+import android.os.UserManager;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.UiEventLogger;
@@ -144,6 +145,7 @@ public interface NotificationsModule {
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
             NotificationEntryManager notificationEntryManager,
+            UserManager userManager,
             PeopleSpaceWidgetManager peopleSpaceWidgetManager,
             LauncherApps launcherApps,
             ShortcutManager shortcutManager,
@@ -164,6 +166,7 @@ public interface NotificationsModule {
                 highPriorityProvider,
                 notificationManager,
                 notificationEntryManager,
+                userManager,
                 peopleSpaceWidgetManager,
                 launcherApps,
                 shortcutManager,
