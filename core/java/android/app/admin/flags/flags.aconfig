@@ -27,3 +27,10 @@ flag {
   description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
   bug: "263464464"
 }
+
+flag {
+  name: "dedicated_device_control_enabled"
+  namespace: "enterprise"
+  description: "Allow the device management role holder to control which platform features are available on dedicated devices."
+  bug: "281964214"
+}
