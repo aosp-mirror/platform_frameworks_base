@@ -184,9 +184,6 @@ public final class VirtualDeviceManager {
             int associationId,
             @NonNull VirtualDeviceParams params) {
         Objects.requireNonNull(params, "params must not be null");
-        if (Flags.moreLogs()) {
-            Log.i(TAG, "Creating VirtualDevice");
-        }
         try {
             return new VirtualDevice(mService, mContext, associationId, params);
         } catch (RemoteException e) {

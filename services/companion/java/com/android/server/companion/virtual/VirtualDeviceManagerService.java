@@ -355,14 +355,6 @@ public class VirtualDeviceManagerService extends SystemService {
                 @NonNull IVirtualDeviceSoundEffectListener soundEffectListener) {
             createVirtualDevice_enforcePermission();
             attributionSource.enforceCallingUid();
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                if (Flags.moreLogs()) {
-                    Slog.i(TAG, "Creating VirtualDevice");
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
 
             final int callingUid = getCallingUid();
             final String packageName = attributionSource.getPackageName();
