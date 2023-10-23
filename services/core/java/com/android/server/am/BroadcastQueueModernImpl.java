@@ -479,6 +479,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 break;
             }
 
+            // Clear the deferred state of broadcasts in this queue as we are just about to
+            // deliver broadcasts to this process.
+            queue.clearDeferredStates(mBroadcastConsumerDeferClear);
+
             // We might not have heard about a newly running process yet, so
             // consider refreshing if we think we're cold
             updateWarmProcess(queue);
@@ -1567,12 +1571,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultExtras = null;
     };
 
-    private final BroadcastConsumer mBroadcastConsumerDeferApply = (r, i) -> {
+    @VisibleForTesting
+    final BroadcastConsumer mBroadcastConsumerDeferApply = (r, i) -> {
         setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_DEFERRED,
                 "mBroadcastConsumerDeferApply");
     };
 
-    private final BroadcastConsumer mBroadcastConsumerDeferClear = (r, i) -> {
+    @VisibleForTesting
+    final BroadcastConsumer mBroadcastConsumerDeferClear = (r, i) -> {
         setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_PENDING,
                 "mBroadcastConsumerDeferClear");
     };

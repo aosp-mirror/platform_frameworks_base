@@ -62,58 +62,36 @@ import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.UidObserver;
 import android.app.usage.UsageEvents.Event;
-import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
-import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerExemptionManager;
 import android.os.SystemClock;
-import android.os.TestLooperManager;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
-import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.server.AlarmManagerInternal;
-import com.android.server.DropBoxManagerInternal;
-import com.android.server.LocalServices;
-import com.android.server.am.ActivityManagerService.Injector;
-import com.android.server.appop.AppOpsService;
-import com.android.server.wm.ActivityTaskManagerService;
-
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -126,7 +104,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
@@ -136,12 +113,8 @@ import java.util.function.UnaryOperator;
 @MediumTest
 @RunWith(Parameterized.class)
 @SuppressWarnings("GuardedBy")
-public class BroadcastQueueTest {
+public class BroadcastQueueTest extends BaseBroadcastQueueTest {
     private static final String TAG = "BroadcastQueueTest";
-
-    @Rule
-    public final ApplicationExitInfoTest.ServiceThreadRule
-            mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
     private final Impl mImpl;
 
@@ -150,30 +123,8 @@ public class BroadcastQueueTest {
         MODERN,
     }
 
-    private Context mContext;
-    private HandlerThread mHandlerThread;
-    private TestLooperManager mLooper;
-    private AtomicInteger mNextPid;
-
-    @Mock
-    private AppOpsService mAppOpsService;
-    @Mock
-    private ProcessList mProcessList;
-    @Mock
-    private DropBoxManagerInternal mDropBoxManagerInt;
-    @Mock
-    private PackageManagerInternal mPackageManagerInt;
-    @Mock
-    private UsageStatsManagerInternal mUsageStatsManagerInt;
-    @Mock
-    private AlarmManagerInternal mAlarmManagerInt;
-
-    private ActivityManagerService mAms;
     private BroadcastQueue mQueue;
-    BroadcastConstants mConstants;
-    private BroadcastSkipPolicy mSkipPolicy;
     private UidObserver mUidObserver;
-    private UidObserver mUidCachedStateObserver;
 
     /**
      * Desired behavior of the next
@@ -181,11 +132,6 @@ public class BroadcastQueueTest {
      */
     private AtomicReference<ProcessStartBehavior> mNextProcessStartBehavior = new AtomicReference<>(
             ProcessStartBehavior.SUCCESS);
-
-    /**
-     * Map from PID to registered registered runtime receivers.
-     */
-    private SparseArray<ReceiverList> mRegisteredReceivers = new SparseArray<>();
 
     /**
      * Collection of all active processes during current test run.
@@ -208,41 +154,8 @@ public class BroadcastQueueTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        super.setUp();
 
-        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-
-        mHandlerThread = new HandlerThread(TAG);
-        mHandlerThread.start();
-
-        // Pause all event processing until a test chooses to resume
-        mLooper = Objects.requireNonNull(InstrumentationRegistry.getInstrumentation()
-                .acquireLooperManager(mHandlerThread.getLooper()));
-
-        mNextPid = new AtomicInteger(100);
-
-        LocalServices.removeServiceForTest(DropBoxManagerInternal.class);
-        LocalServices.addService(DropBoxManagerInternal.class, mDropBoxManagerInt);
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
-        LocalServices.removeServiceForTest(AlarmManagerInternal.class);
-        LocalServices.addService(AlarmManagerInternal.class, mAlarmManagerInt);
-        doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
-        doNothing().when(mPackageManagerInt).notifyComponentUsed(any(), anyInt(), any(), any());
-        doAnswer((invocation) -> {
-            return getUidForPackage(invocation.getArgument(0));
-        }).when(mPackageManagerInt).getPackageUid(any(), anyLong(), eq(UserHandle.USER_SYSTEM));
-
-        final ActivityManagerService realAms = new ActivityManagerService(
-                new TestInjector(mContext), mServiceThreadRule.getThread());
-        realAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
-        realAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
-        realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
-        realAms.mOomAdjuster = spy(realAms.mOomAdjuster);
-        realAms.mPackageManagerInt = mPackageManagerInt;
-        realAms.mUsageStatsService = mUsageStatsManagerInt;
-        realAms.mProcessesReady = true;
-        mAms = spy(realAms);
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting startProcessLocked() for "
                     + Arrays.toString(invocation.getArguments()));
@@ -321,20 +234,10 @@ public class BroadcastQueueTest {
             return null;
         }).when(mAms).registerUidObserver(any(), anyInt(),
                 eq(ActivityManager.PROCESS_STATE_TOP), any());
-        doAnswer((invocation) -> {
-            mUidCachedStateObserver = invocation.getArgument(0);
-            return null;
-        }).when(mAms).registerUidObserver(any(), anyInt(),
-                eq(ActivityManager.PROCESS_STATE_LAST_ACTIVITY), any());
 
-        mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.TIMEOUT = 200;
         mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
         mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 500;
-
-        mSkipPolicy = spy(new BroadcastSkipPolicy(mAms));
-        doReturn(null).when(mSkipPolicy).shouldSkipMessage(any(), any());
-        doReturn(false).when(mSkipPolicy).disallowBackgroundStart(any());
 
         final BroadcastHistory emptyHistory = new BroadcastHistory(mConstants) {
             public void addBroadcastToHistoryLocked(BroadcastRecord original) {
@@ -358,7 +261,7 @@ public class BroadcastQueueTest {
 
     @After
     public void tearDown() throws Exception {
-        mHandlerThread.quit();
+        super.tearDown();
 
         // Verify that all processes have finished handling broadcasts
         for (ProcessRecord app : mActiveProcesses) {
@@ -369,26 +272,9 @@ public class BroadcastQueueTest {
         }
     }
 
-    private class TestInjector extends Injector {
-        TestInjector(Context context) {
-            super(context);
-        }
-
-        @Override
-        public AppOpsService getAppOpsService(File recentAccessesFile, File storageFile,
-                Handler handler) {
-            return mAppOpsService;
-        }
-
-        @Override
-        public Handler getUiHandler(ActivityManagerService service) {
-            return mHandlerThread.getThreadHandler();
-        }
-
-        @Override
-        public ProcessList getProcessList(ActivityManagerService service) {
-            return mProcessList;
-        }
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     private enum ProcessStartBehavior {
@@ -532,62 +418,6 @@ public class BroadcastQueueTest {
 
     private Pair<Integer, String> makeScheduledBroadcast(ProcessRecord app, Intent intent) {
         return Pair.create(app.getPid(), intent.getAction());
-    }
-
-    static ApplicationInfo makeApplicationInfo(String packageName) {
-        return makeApplicationInfo(packageName, packageName, UserHandle.USER_SYSTEM);
-    }
-
-    static ApplicationInfo makeApplicationInfo(String packageName, String processName, int userId) {
-        final ApplicationInfo ai = new ApplicationInfo();
-        ai.packageName = packageName;
-        ai.processName = processName;
-        ai.uid = getUidForPackage(packageName, userId);
-        return ai;
-    }
-
-    static ResolveInfo withPriority(ResolveInfo info, int priority) {
-        info.priority = priority;
-        return info;
-    }
-
-    static BroadcastFilter withPriority(BroadcastFilter filter, int priority) {
-        filter.setPriority(priority);
-        return filter;
-    }
-
-    static ResolveInfo makeManifestReceiver(String packageName, String name) {
-        return makeManifestReceiver(packageName, name, UserHandle.USER_SYSTEM);
-    }
-
-    static ResolveInfo makeManifestReceiver(String packageName, String name, int userId) {
-        return makeManifestReceiver(packageName, packageName, name, userId);
-    }
-
-    static ResolveInfo makeManifestReceiver(String packageName, String processName, String name,
-            int userId) {
-        final ResolveInfo ri = new ResolveInfo();
-        ri.activityInfo = new ActivityInfo();
-        ri.activityInfo.packageName = packageName;
-        ri.activityInfo.processName = processName;
-        ri.activityInfo.name = name;
-        ri.activityInfo.applicationInfo = makeApplicationInfo(packageName, processName, userId);
-        return ri;
-    }
-
-    private BroadcastFilter makeRegisteredReceiver(ProcessRecord app) {
-        return makeRegisteredReceiver(app, 0);
-    }
-
-    private BroadcastFilter makeRegisteredReceiver(ProcessRecord app, int priority) {
-        final ReceiverList receiverList = mRegisteredReceivers.get(app.getPid());
-        final IntentFilter filter = new IntentFilter();
-        filter.setPriority(priority);
-        final BroadcastFilter res = new BroadcastFilter(filter, receiverList,
-                receiverList.app.info.packageName, null, null, null, receiverList.uid,
-                receiverList.userId, false, false, true);
-        receiverList.add(res);
-        return res;
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, ProcessRecord callerApp,
@@ -774,41 +604,6 @@ public class BroadcastQueueTest {
                 any(), any(),
                 anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
                 eq(userId), anyInt(), anyInt(), any());
-    }
-
-    static final int USER_GUEST = 11;
-
-    static final String PACKAGE_ANDROID = "android";
-    static final String PACKAGE_PHONE = "com.android.phone";
-    static final String PACKAGE_RED = "com.example.red";
-    static final String PACKAGE_GREEN = "com.example.green";
-    static final String PACKAGE_BLUE = "com.example.blue";
-    static final String PACKAGE_YELLOW = "com.example.yellow";
-    static final String PACKAGE_ORANGE = "com.example.orange";
-
-    static final String PROCESS_SYSTEM = "system";
-
-    static final String CLASS_RED = "com.example.red.Red";
-    static final String CLASS_GREEN = "com.example.green.Green";
-    static final String CLASS_BLUE = "com.example.blue.Blue";
-    static final String CLASS_YELLOW = "com.example.yellow.Yellow";
-    static final String CLASS_ORANGE = "com.example.orange.Orange";
-
-    static int getUidForPackage(@NonNull String packageName) {
-        switch (packageName) {
-            case PACKAGE_ANDROID: return android.os.Process.SYSTEM_UID;
-            case PACKAGE_PHONE: return android.os.Process.PHONE_UID;
-            case PACKAGE_RED: return android.os.Process.FIRST_APPLICATION_UID + 1;
-            case PACKAGE_GREEN: return android.os.Process.FIRST_APPLICATION_UID + 2;
-            case PACKAGE_BLUE: return android.os.Process.FIRST_APPLICATION_UID + 3;
-            case PACKAGE_YELLOW: return android.os.Process.FIRST_APPLICATION_UID + 4;
-            case PACKAGE_ORANGE: return android.os.Process.FIRST_APPLICATION_UID + 5;
-            default: throw new IllegalArgumentException();
-        }
-    }
-
-    static int getUidForPackage(@NonNull String packageName, int userId) {
-        return UserHandle.getUid(userId, getUidForPackage(packageName));
     }
 
     /**
