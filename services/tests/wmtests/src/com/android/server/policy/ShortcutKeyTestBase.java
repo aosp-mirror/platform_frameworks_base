@@ -203,5 +203,6 @@ class ShortcutKeyTestBase {
                 mPhoneWindowManager.dispatchUnhandledKey(keyEvent);
             }
         }
+        mPhoneWindowManager.dispatchAllPendingEvents();
     }
 }

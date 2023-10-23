@@ -29,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.os.Looper;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -76,7 +77,7 @@ public class SingleKeyGestureTests {
     public void setUp() {
         mInstrumentation.runOnMainSync(
                 () -> {
-                    mDetector = SingleKeyGestureDetector.get(mContext);
+                    mDetector = SingleKeyGestureDetector.get(mContext, Looper.myLooper());
                     initSingleKeyGestureRules();
                 });
 

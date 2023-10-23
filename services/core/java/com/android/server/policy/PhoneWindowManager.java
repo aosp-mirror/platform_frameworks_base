@@ -2478,7 +2478,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_keyguardDrawnTimeout);
         mKeyguardDelegate = injector.getKeyguardServiceDelegate();
         initKeyCombinationRules();
-        initSingleKeyGestureRules();
+        initSingleKeyGestureRules(injector.getLooper());
         mSideFpsEventHandler = new SideFpsEventHandler(mContext, mHandler, mPowerManager);
     }
 
@@ -2749,8 +2749,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void initSingleKeyGestureRules() {
-        mSingleKeyGestureDetector = SingleKeyGestureDetector.get(mContext);
+    private void initSingleKeyGestureRules(Looper looper) {
+        mSingleKeyGestureDetector = SingleKeyGestureDetector.get(mContext, looper);
         mSingleKeyGestureDetector.addRule(new PowerKeyRule());
         if (hasLongPressOnBackBehavior()) {
             mSingleKeyGestureDetector.addRule(new BackKeyRule());

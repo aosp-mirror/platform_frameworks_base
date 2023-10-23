@@ -118,7 +118,6 @@ import org.mockito.quality.Strictness;
 import java.util.function.Supplier;
 
 class TestPhoneWindowManager {
-    private static final long SHORTCUT_KEY_DELAY_MILLIS = 150;
     private static final long TEST_SINGLE_KEY_DELAY_MILLIS
             = SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT + 1000L * HW_TIMEOUT_MULTIPLIER;
 
@@ -188,7 +187,7 @@ class TestPhoneWindowManager {
         MockitoAnnotations.initMocks(this);
         mHandler = new Handler(mTestLooper.getLooper());
         mContext = mockingDetails(context).isSpy() ? context : spy(context);
-        mHandler.post(() -> setUp(supportSettingsUpdate));
+        setUp(supportSettingsUpdate);
         mTestLooper.dispatchAll();
     }
 
@@ -304,6 +303,10 @@ class TestPhoneWindowManager {
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         Mockito.reset(mPhoneWindowManager);
         mMockitoSession.finishMocking();
+    }
+
+    void dispatchAllPendingEvents() {
+        mTestLooper.dispatchAll();
     }
 
     // Override accessibility setting and perform function.
@@ -446,6 +449,7 @@ class TestPhoneWindowManager {
         doNothing().when(mPhoneWindowManager).sendCloseSystemWindows();
         doReturn(true).when(mPhoneWindowManager).isUserSetupComplete();
         doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
+        doReturn(mSearchManager).when(mContext).getSystemService(eq(SearchManager.class));
     }
 
     void overrideSearchManager(SearchManager searchManager) {
@@ -500,29 +504,24 @@ class TestPhoneWindowManager {
      */
     void assertTakeScreenshotCalled() {
         mTestLooper.dispatchAll();
-        verify(mDisplayPolicy, timeout(SHORTCUT_KEY_DELAY_MILLIS))
-                .takeScreenshot(anyInt(), anyInt());
+        verify(mDisplayPolicy).takeScreenshot(anyInt(), anyInt());
     }
 
     void assertShowGlobalActionsCalled() {
         mTestLooper.dispatchAll();
         verify(mPhoneWindowManager).showGlobalActions();
-        verify(mGlobalActions, timeout(SHORTCUT_KEY_DELAY_MILLIS))
-                .showDialog(anyBoolean(), anyBoolean());
-        verify(mPowerManager, timeout(SHORTCUT_KEY_DELAY_MILLIS))
-                .userActivity(anyLong(), anyBoolean());
+        verify(mGlobalActions).showDialog(anyBoolean(), anyBoolean());
+        verify(mPowerManager).userActivity(anyLong(), anyBoolean());
     }
 
     void assertVolumeMute() {
         mTestLooper.dispatchAll();
-        verify(mAudioManagerInternal, timeout(SHORTCUT_KEY_DELAY_MILLIS))
-                .silenceRingerModeInternal(eq("volume_hush"));
+        verify(mAudioManagerInternal).silenceRingerModeInternal(eq("volume_hush"));
     }
 
     void assertAccessibilityKeychordCalled() {
         mTestLooper.dispatchAll();
-        verify(mAccessibilityShortcutController,
-                timeout(SHORTCUT_KEY_DELAY_MILLIS)).performAccessibilityShortcut();
+        verify(mAccessibilityShortcutController).performAccessibilityShortcut();
     }
 
     void assertDreamRequest() {
@@ -532,14 +531,12 @@ class TestPhoneWindowManager {
 
     void assertPowerSleep() {
         mTestLooper.dispatchAll();
-        verify(mPowerManager,
-                timeout(SHORTCUT_KEY_DELAY_MILLIS)).goToSleep(anyLong(), anyInt(), anyInt());
+        verify(mPowerManager).goToSleep(anyLong(), anyInt(), anyInt());
     }
 
     void assertPowerWakeUp() {
         mTestLooper.dispatchAll();
-        verify(mPowerManager,
-                timeout(SHORTCUT_KEY_DELAY_MILLIS)).wakeUp(anyLong(), anyInt(), anyString());
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     void assertNoPowerSleep() {
@@ -556,7 +553,7 @@ class TestPhoneWindowManager {
 
     void assertSearchManagerLaunchAssist() {
         mTestLooper.dispatchAll();
-        verify(mSearchManager, timeout(SHORTCUT_KEY_DELAY_MILLIS)).launchAssist(any());
+        verify(mSearchManager).launchAssist(any());
     }
 
     void assertLaunchCategory(String category) {
