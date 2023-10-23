@@ -19,6 +19,9 @@ package com.android.settingslib.bluetooth;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -28,10 +31,11 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.annotation.RequiresApi;
+import java.util.concurrent.Executor;
 
 /**
  * VolumeControlProfile handles Bluetooth Volume Control Controller role
@@ -102,6 +106,88 @@ public class VolumeControlProfile implements LocalBluetoothProfile {
                 BluetoothProfile.VOLUME_CONTROL);
     }
 
+
+    /**
+     * Registers a {@link BluetoothVolumeControl.Callback} that will be invoked during the
+     * operation of this profile.
+     *
+     * Repeated registration of the same <var>callback</var> object will have no effect after
+     * the first call to this method, even when the <var>executor</var> is different. API caller
+     * would have to call {@link #unregisterCallback(BluetoothVolumeControl.Callback)} with
+     * the same callback object before registering it again.
+     *
+     * @param executor an {@link Executor} to execute given callback
+     * @param callback user implementation of the {@link BluetoothVolumeControl.Callback}
+     * @throws IllegalArgumentException if a null executor or callback is given
+     */
+    public void registerCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothVolumeControl.Callback callback) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot register callback.");
+            return;
+        }
+        mService.registerCallback(executor, callback);
+    }
+
+    /**
+     * Unregisters the specified {@link BluetoothVolumeControl.Callback}.
+     * <p>The same {@link BluetoothVolumeControl.Callback} object used when calling
+     * {@link #registerCallback(Executor, BluetoothVolumeControl.Callback)} must be used.
+     *
+     * <p>Callbacks are automatically unregistered when application process goes away
+     *
+     * @param callback user implementation of the {@link BluetoothVolumeControl.Callback}
+     * @throws IllegalArgumentException when callback is null or when no callback is registered
+     */
+    public void unregisterCallback(@NonNull BluetoothVolumeControl.Callback callback) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot unregister callback.");
+            return;
+        }
+        mService.unregisterCallback(callback);
+    }
+
+    /**
+     * Tells the remote device to set a volume offset to the absolute volume.
+     *
+     * @param device {@link BluetoothDevice} representing the remote device
+     * @param volumeOffset volume offset to be set on the remote device
+     */
+    public void setVolumeOffset(BluetoothDevice device,
+            @IntRange(from = -255, to = 255) int volumeOffset) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot set volume offset.");
+            return;
+        }
+        if (device == null) {
+            Log.w(TAG, "Device is null. Cannot set volume offset.");
+            return;
+        }
+        mService.setVolumeOffset(device, volumeOffset);
+    }
+
+    /**
+     * Provides information about the possibility to set volume offset on the remote device.
+     * If the remote device supports Volume Offset Control Service, it is automatically
+     * connected.
+     *
+     * @param device {@link BluetoothDevice} representing the remote device
+     * @return {@code true} if volume offset function is supported and available to use on the
+     *         remote device. When Bluetooth is off, the return value should always be
+     *         {@code false}.
+     */
+    public boolean isVolumeOffsetAvailable(BluetoothDevice device) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot get is volume offset available.");
+            return false;
+        }
+        if (device == null) {
+            Log.w(TAG, "Device is null. Cannot get is volume offset available.");
+            return false;
+        }
+        return mService.isVolumeOffsetAvailable(device);
+    }
+
     @Override
     public boolean accessProfileEnabled() {
         return false;
@@ -113,12 +199,12 @@ public class VolumeControlProfile implements LocalBluetoothProfile {
     }
 
     /**
-     * Get VolumeControlProfile devices matching connection states{
+     * Gets VolumeControlProfile devices matching connection states{
+     * {@code BluetoothProfile.STATE_CONNECTED},
+     * {@code BluetoothProfile.STATE_CONNECTING},
+     * {@code BluetoothProfile.STATE_DISCONNECTING}}
      *
      * @return Matching device list
-     * @code BluetoothProfile.STATE_CONNECTED,
-     * @code BluetoothProfile.STATE_CONNECTING,
-     * @code BluetoothProfile.STATE_DISCONNECTING}
      */
     public List<BluetoothDevice> getConnectedDevices() {
         if (mService == null) {
