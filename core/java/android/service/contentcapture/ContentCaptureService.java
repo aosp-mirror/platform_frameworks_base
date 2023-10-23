@@ -138,7 +138,8 @@ public abstract class ContentCaptureService extends Service {
             new LocalDataShareAdapterResourceManager();
 
     private Handler mHandler;
-    private IContentCaptureServiceCallback mCallback;
+    @Nullable private IContentCaptureServiceCallback mContentCaptureServiceCallback;
+    @Nullable private IContentProtectionAllowlistCallback mContentProtectionAllowlistCallback;
 
     private long mCallerMismatchTimeout = 1000;
     private long mLastCallerMismatchLog;
@@ -215,6 +216,16 @@ public abstract class ContentCaptureService extends Service {
                                     Binder.getCallingUid(),
                                     events));
                 }
+
+                @Override
+                public void onUpdateAllowlistRequest(IBinder callback) {
+                    mHandler.sendMessage(
+                            obtainMessage(
+                                    ContentCaptureService::handleOnUpdateAllowlistRequest,
+                                    ContentCaptureService.this,
+                                    Binder.getCallingUid(),
+                                    callback));
+                }
             };
 
     /** Binder that receives calls from the app in the content capture flow. */
@@ -278,14 +289,31 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setContentCaptureWhitelist(@Nullable Set<String> packages,
             @Nullable Set<ComponentName> activities) {
-        final IContentCaptureServiceCallback callback = mCallback;
-        if (callback == null) {
-            Log.w(TAG, "setContentCaptureWhitelist(): no server callback");
+
+        IContentCaptureServiceCallback contentCaptureCallback = mContentCaptureServiceCallback;
+        IContentProtectionAllowlistCallback contentProtectionAllowlistCallback =
+                mContentProtectionAllowlistCallback;
+
+        if (contentCaptureCallback == null && contentProtectionAllowlistCallback == null) {
+            Log.w(TAG, "setContentCaptureWhitelist(): missing both server callbacks");
+            return;
+        }
+
+        if (contentCaptureCallback != null) {
+            if (contentProtectionAllowlistCallback != null) {
+                throw new IllegalStateException("Have both server callbacks");
+            }
+            try {
+                contentCaptureCallback.setContentCaptureWhitelist(
+                        toList(packages), toList(activities));
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
             return;
         }
 
         try {
-            callback.setContentCaptureWhitelist(toList(packages), toList(activities));
+            contentProtectionAllowlistCallback.setAllowlist(toList(packages));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -314,7 +342,7 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setContentCaptureConditions(@NonNull String packageName,
             @Nullable Set<ContentCaptureCondition> conditions) {
-        final IContentCaptureServiceCallback callback = mCallback;
+        final IContentCaptureServiceCallback callback = mContentCaptureServiceCallback;
         if (callback == null) {
             Log.w(TAG, "setContentCaptureConditions(): no server callback");
             return;
@@ -425,7 +453,7 @@ public abstract class ContentCaptureService extends Service {
     public final void disableSelf() {
         if (sDebug) Log.d(TAG, "disableSelf()");
 
-        final IContentCaptureServiceCallback callback = mCallback;
+        final IContentCaptureServiceCallback callback = mContentCaptureServiceCallback;
         if (callback == null) {
             Log.w(TAG, "disableSelf(): no server callback");
             return;
@@ -464,13 +492,14 @@ public abstract class ContentCaptureService extends Service {
     }
 
     private void handleOnConnected(@NonNull IBinder callback) {
-        mCallback = IContentCaptureServiceCallback.Stub.asInterface(callback);
+        mContentCaptureServiceCallback = IContentCaptureServiceCallback.Stub.asInterface(callback);
         onConnected();
     }
 
     private void handleOnDisconnected() {
         onDisconnected();
-        mCallback = null;
+        mContentCaptureServiceCallback = null;
+        mContentProtectionAllowlistCallback = null;
     }
 
     //TODO(b/111276913): consider caching the InteractionSessionId for the lifetime of the session,
@@ -581,6 +610,16 @@ public abstract class ContentCaptureService extends Service {
 
         ContentCaptureEvent endEvent = new ContentCaptureEvent(sessionIdInt, TYPE_SESSION_PAUSED);
         onContentCaptureEvent(sessionId, endEvent);
+    }
+
+    private void handleOnUpdateAllowlistRequest(int uid, @NonNull IBinder callback) {
+        if (uid != Process.SYSTEM_UID) {
+            Log.e(TAG, "handleOnUpdateAllowlistRequest() not allowed for uid: " + uid);
+            return;
+        }
+        mContentProtectionAllowlistCallback =
+                IContentProtectionAllowlistCallback.Stub.asInterface(callback);
+        onConnected();
     }
 
     private void handleOnActivitySnapshot(int sessionId, @NonNull SnapshotData snapshotData) {
@@ -701,13 +740,14 @@ public abstract class ContentCaptureService extends Service {
     private void writeFlushMetrics(int sessionId, @Nullable ComponentName app,
             @NonNull FlushMetrics flushMetrics, @Nullable ContentCaptureOptions options,
             int flushReason) {
-        if (mCallback == null) {
+        if (mContentCaptureServiceCallback == null) {
             Log.w(TAG, "writeSessionFlush(): no server callback");
             return;
         }
 
         try {
-            mCallback.writeSessionFlush(sessionId, app, flushMetrics, options, flushReason);
+            mContentCaptureServiceCallback.writeSessionFlush(
+                    sessionId, app, flushMetrics, options, flushReason);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to write flush metrics: " + e);
         }

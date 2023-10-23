@@ -16,18 +16,19 @@
 
 package android.service.contentcapture;
 
-import android.content.pm.ParceledListSlice;
-import android.os.IBinder;
-import android.view.contentcapture.ContentCaptureEvent;
+import android.content.ComponentName;
+import android.view.contentcapture.ContentCaptureCondition;
+import android.service.contentcapture.FlushMetrics;
+import android.content.ContentCaptureOptions;
+
+import java.util.List;
 
 /**
- * Interface from the system server to the content protection service.
+ * Interface for the callback used by the content protection service to call the system server and
+ * update the allowlist.
  *
  * @hide
  */
-oneway interface IContentProtectionService {
-
-    void onLoginDetected(in ParceledListSlice events);
-
-    void onUpdateAllowlistRequest(in IBinder callback);
+oneway interface IContentProtectionAllowlistCallback {
+    void setAllowlist(in List<String> packages);
 }
