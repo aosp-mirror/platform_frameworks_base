@@ -39,6 +39,12 @@ abstract class FlagsModule {
     @IntoSet
     abstract fun bindsPluggedInCondition(impl: PluggedInCondition): ConditionalRestarter.Condition
 
+    @Binds
+    @IntoSet
+    abstract fun bindsNotOccludedCondition(
+        impl: NotOccludedCondition
+    ): ConditionalRestarter.Condition
+
     @Module
     companion object {
         @JvmStatic
