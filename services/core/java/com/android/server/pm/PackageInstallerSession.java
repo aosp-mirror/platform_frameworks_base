@@ -3445,7 +3445,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             if (!mPm.mInstallerService.mPackageArchiver.verifySupportsUnarchival(
-                    getInstallSource().mInstallerPackageName)) {
+                    getInstallSource().mInstallerPackageName, userId)) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_SESSION_INVALID,
                         "Installer has to support unarchival in order to install archived "

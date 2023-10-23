@@ -38,6 +38,8 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
+import android.content.pm.ResolveInfo;
 import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,6 +50,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelableException;
+import android.os.Process;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -162,15 +165,13 @@ public class PackageArchiver {
                         });
     }
 
-    /**
-     * Creates archived state for the package and user.
-     */
-    public CompletableFuture<ArchiveState> createArchiveState(String packageName, int userId)
+    /** Creates archived state for the package and user. */
+    private CompletableFuture<ArchiveState> createArchiveState(String packageName, int userId)
             throws PackageManager.NameNotFoundException {
         PackageStateInternal ps = getPackageState(packageName, mPm.snapshotComputer(),
                 Binder.getCallingUid(), userId);
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
-        verifyInstaller(responsibleInstallerPackage);
+        verifyInstaller(responsibleInstallerPackage, userId);
 
         List<LauncherActivityInfo> mainActivities = getLauncherActivityInfos(ps.getPackageName(),
                 userId);
@@ -268,27 +269,34 @@ public class PackageArchiver {
         return iconFile.toPath();
     }
 
-    private void verifyInstaller(String installerPackage)
+    private void verifyInstaller(String installerPackage, int userId)
             throws PackageManager.NameNotFoundException {
         if (TextUtils.isEmpty(installerPackage)) {
             throw new PackageManager.NameNotFoundException("No installer found");
         }
-        if (!verifySupportsUnarchival(installerPackage)) {
+        // Allow shell for easier development.
+        if ((Binder.getCallingUid() != Process.SHELL_UID)
+                && !verifySupportsUnarchival(installerPackage, userId)) {
             throw new PackageManager.NameNotFoundException("Installer does not support unarchival");
         }
     }
 
     /**
-     * @return true if installerPackage support unarchival:
-     * - has an action Intent.ACTION_UNARCHIVE_PACKAGE,
-     * - has permissions to install packages.
+     * Returns true if {@code installerPackage} supports unarchival being able to handle
+     * {@link Intent#ACTION_UNARCHIVE_PACKAGE}
      */
-    public boolean verifySupportsUnarchival(String installerPackage) {
-        // TODO(b/278553670) Check if installerPackage supports unarchival.
+    public boolean verifySupportsUnarchival(String installerPackage, int userId) {
         if (TextUtils.isEmpty(installerPackage)) {
             return false;
         }
-        return true;
+
+        Intent intent = new Intent(Intent.ACTION_UNARCHIVE_PACKAGE).setPackage(installerPackage);
+
+        ParceledListSlice<ResolveInfo> intentReceivers =
+                Binder.withCleanCallingIdentity(
+                        () -> mPm.queryIntentReceivers(mPm.snapshotComputer(),
+                                intent, /* resolvedType= */ null, /* flags= */ 0, userId));
+        return intentReceivers != null && !intentReceivers.getList().isEmpty();
     }
 
     void requestUnarchive(
