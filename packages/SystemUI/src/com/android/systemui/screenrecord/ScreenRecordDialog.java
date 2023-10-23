@@ -66,8 +66,10 @@ public class ScreenRecordDialog extends SystemUIDialog {
     private Switch mAudioSwitch;
     private Spinner mOptions;
 
-    public ScreenRecordDialog(Context context, RecordingController controller,
-            UserContextProvider userContextProvider, @Nullable Runnable onStartRecordingClicked) {
+    public ScreenRecordDialog(Context context,
+                              RecordingController controller,
+                              UserContextProvider userContextProvider,
+                              @Nullable Runnable onStartRecordingClicked) {
         super(context);
         mController = controller;
         mUserContextProvider = userContextProvider;
@@ -89,7 +91,6 @@ public class ScreenRecordDialog extends SystemUIDialog {
 
         TextView cancelBtn = findViewById(R.id.button_cancel);
         cancelBtn.setOnClickListener(v -> dismiss());
-
         TextView startBtn = findViewById(R.id.button_start);
         startBtn.setOnClickListener(v -> {
             if (mOnStartRecordingClicked != null) {

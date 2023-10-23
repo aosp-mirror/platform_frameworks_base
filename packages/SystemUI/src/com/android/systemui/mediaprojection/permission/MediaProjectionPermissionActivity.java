@@ -222,13 +222,19 @@ public class MediaProjectionPermissionActivity extends Activity
         // the correct screen width when in split screen.
         Context dialogContext = getApplicationContext();
         if (isPartialScreenSharingEnabled()) {
-            mDialog = new MediaProjectionPermissionDialog(dialogContext, getMediaProjectionConfig(),
+            mDialog = new MediaProjectionPermissionDialog(
+                    dialogContext,
+                    getMediaProjectionConfig(),
                     () -> {
                         MediaProjectionPermissionDialog dialog =
                                 (MediaProjectionPermissionDialog) mDialog;
                         ScreenShareOption selectedOption = dialog.getSelectedScreenShareOption();
                         grantMediaProjectionPermission(selectedOption.getMode());
-                    }, () -> finish(RECORD_CANCEL, /* projection= */ null), appName);
+                    },
+                    () -> finish(RECORD_CANCEL, /* projection= */ null),
+                    appName,
+                    mUid,
+                    mMediaProjectionMetricsLogger);
         } else {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(dialogContext,
                     R.style.Theme_SystemUI_Dialog)

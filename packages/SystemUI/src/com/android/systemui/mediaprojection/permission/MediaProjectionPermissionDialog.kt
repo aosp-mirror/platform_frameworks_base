@@ -18,6 +18,7 @@ package com.android.systemui.mediaprojection.permission
 import android.content.Context
 import android.media.projection.MediaProjectionConfig
 import android.os.Bundle
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
 
 /** Dialog to select screen recording options */
@@ -26,12 +27,16 @@ class MediaProjectionPermissionDialog(
     mediaProjectionConfig: MediaProjectionConfig?,
     private val onStartRecordingClicked: Runnable,
     private val onCancelClicked: Runnable,
-    private val appName: String?
+    private val appName: String?,
+    hostUid: Int,
+    mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
 ) :
     BaseScreenSharePermissionDialog(
         context,
         createOptionList(context, appName, mediaProjectionConfig),
-        appName
+        appName,
+        hostUid,
+        mediaProjectionMetricsLogger
     ) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

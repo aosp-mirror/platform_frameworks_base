@@ -470,6 +470,11 @@ public final class MediaProjectionManagerService extends SystemService
     }
 
     @VisibleForTesting
+    void notifyPermissionRequestCancelled(int hostUid) {
+        mMediaProjectionMetricsLogger.logProjectionPermissionRequestCancelled(hostUid);
+    }
+
+    @VisibleForTesting
     void notifyAppSelectorDisplayed(int hostUid) {
         mMediaProjectionMetricsLogger.logAppSelectorDisplayed(hostUid);
     }
@@ -852,19 +857,6 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-        public void notifyPermissionRequestStateChange(int hostUid, int state,
-                int sessionCreationSource) {
-            notifyPermissionRequestStateChange_enforcePermission();
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mMediaProjectionMetricsLogger.notifyProjectionStateChange(hostUid, state, sessionCreationSource);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override // Binder call
-        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
         public void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource) {
             notifyPermissionRequestInitiated_enforcePermission();
             final long token = Binder.clearCallingIdentity();
@@ -883,6 +875,18 @@ public final class MediaProjectionManagerService extends SystemService
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.notifyPermissionRequestDisplayed(hostUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyPermissionRequestCancelled(int hostUid) {
+            notifyPermissionRequestCancelled_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyPermissionRequestCancelled(hostUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
