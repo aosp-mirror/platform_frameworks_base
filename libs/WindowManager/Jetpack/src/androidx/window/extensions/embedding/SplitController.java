@@ -892,7 +892,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 && taskContainer.getTopNonFinishingTaskFragmentContainer(false /* includePin */)
                         != container) {
             // Do not resolve if the launched activity is not the top-most container (excludes
-            // the pinned container) in the Task.
+            // the pinned and overlay container) in the Task.
             return true;
         }
 
@@ -1756,31 +1756,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * Returns the topmost not finished container in Task of given task id.
-     */
-    @GuardedBy("mLock")
-    @Nullable
-    TaskFragmentContainer getTopActiveContainer(int taskId) {
-        final TaskContainer taskContainer = mTaskContainers.get(taskId);
-        if (taskContainer == null) {
-            return null;
-        }
-        final List<TaskFragmentContainer> containers = taskContainer.getTaskFragmentContainers();
-        for (int i = containers.size() - 1; i >= 0; i--) {
-            final TaskFragmentContainer container = containers.get(i);
-            if (!container.isFinished() && (container.getRunningActivityCount() > 0
-                    // We may be waiting for the top TaskFragment to become non-empty after
-                    // creation. In that case, we don't want to treat the TaskFragment below it as
-                    // top active, otherwise it may incorrectly launch placeholder on top of the
-                    // pending TaskFragment.
-                    || container.isWaitingActivityAppear())) {
-                return container;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Updates the presentation of the container. If the container is part of the split or should
      * have a placeholder, it will also update the other part of the split.
      */
@@ -1968,7 +1943,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /** Whether or not to allow activity in this container to launch placeholder. */
     @GuardedBy("mLock")
     private boolean allowLaunchPlaceholder(@NonNull TaskFragmentContainer container) {
-        final TaskFragmentContainer topContainer = getTopActiveContainer(container.getTaskId());
+        final TaskFragmentContainer topContainer = container.getTaskContainer()
+                .getTopNonFinishingTaskFragmentContainer();
         if (container != topContainer) {
             // The container is not the top most.
             if (!container.isVisible()) {

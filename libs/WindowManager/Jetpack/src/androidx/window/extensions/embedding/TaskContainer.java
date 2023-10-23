@@ -191,9 +191,18 @@ class TaskContainer {
 
     @Nullable
     TaskFragmentContainer getTopNonFinishingTaskFragmentContainer(boolean includePin) {
+        return getTopNonFinishingTaskFragmentContainer(includePin, false /* includeOverlay */);
+    }
+
+    @Nullable
+    TaskFragmentContainer getTopNonFinishingTaskFragmentContainer(boolean includePin,
+                                                                  boolean includeOverlay) {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
             final TaskFragmentContainer container = mContainers.get(i);
             if (!includePin && isTaskFragmentContainerPinned(container)) {
+                continue;
+            }
+            if (!includeOverlay && container.isOverlay()) {
                 continue;
             }
             if (!container.isFinished()) {
