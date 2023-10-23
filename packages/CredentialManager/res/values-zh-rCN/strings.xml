@@ -53,7 +53,7 @@
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"在其他设备上保存密码？"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"在其他设备上保存登录凭据？"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"将“<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>”用于您的所有登录信息？"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"此 <xliff:g id="USERNAME">%1$s</xliff:g> 密码管理工具将会存储您的密码和通行密钥，帮助您轻松登录"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> 的这个密码管理工具将会存储您的密码和通行密钥，帮助您轻松登录"</string>
     <string name="set_as_default" msgid="4415328591568654603">"设为默认项"</string>
     <string name="settings" msgid="6536394145760913145">"设置"</string>
     <string name="use_once" msgid="9027366575315399714">"使用一次"</string>
