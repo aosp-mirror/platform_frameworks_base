@@ -13,13 +13,17 @@
  */
 package com.android.systemui.statusbar.phone
 
+import android.content.res.Configuration
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
+import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -31,6 +35,7 @@ import org.mockito.Mockito.verify
 class SystemUIBottomSheetDialogTest : SysuiTestCase() {
 
     private val configurationController = mock<ConfigurationController>()
+    private val config = mock<Configuration>()
 
     private lateinit var dialog: SystemUIBottomSheetDialog
 
@@ -52,5 +57,24 @@ class SystemUIBottomSheetDialogTest : SysuiTestCase() {
         dialog.dismiss()
 
         verify(configurationController).removeCallback(any())
+    }
+
+    @Test
+    fun onConfigurationChanged_calledInSubclass() {
+        var onConfigChangedCalled = false
+        val subclass =
+            object : SystemUIBottomSheetDialog(mContext, configurationController) {
+                override fun onConfigurationChanged() {
+                    onConfigChangedCalled = true
+                }
+            }
+
+        subclass.show()
+
+        val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
+        verify(configurationController).addCallback(capture(captor))
+        captor.value.onConfigChanged(config)
+
+        assertThat(onConfigChangedCalled).isTrue()
     }
 }

@@ -77,11 +77,15 @@ open class SystemUIBottomSheetDialog(
         configurationController?.removeCallback(onConfigChanged)
     }
 
+    /** Can be overridden by subclasses to receive config changed events. */
+    open fun onConfigurationChanged() {}
+
     private val onConfigChanged =
         object : ConfigurationListener {
             override fun onConfigChanged(newConfig: Configuration?) {
                 super.onConfigChanged(newConfig)
                 setupEdgeToEdge()
+                onConfigurationChanged()
             }
         }
 }
