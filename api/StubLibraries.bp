@@ -50,6 +50,7 @@ droidstubs {
         api_lint: {
             enabled: true,
             new_since: ":android.api.public.latest",
+            baseline_file: ":non-updatable-lint-baseline.txt",
         },
     },
     dists: [
@@ -143,6 +144,7 @@ droidstubs {
         },
         api_lint: {
             enabled: true,
+            new_since: ":android.api.test.latest",
             baseline_file: ":non-updatable-test-lint-baseline.txt",
         },
     },
