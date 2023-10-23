@@ -3363,6 +3363,13 @@ public class InputMethodService extends AbstractInputMethodService {
                 return true;
             }
             return false;
+        } else if (event.getKeyCode() == KeyEvent.KEYCODE_SPACE && KeyEvent.metaStateHasModifiers(
+                event.getMetaState() & ~KeyEvent.META_SHIFT_MASK, KeyEvent.META_CTRL_ON)) {
+            if (mDecorViewVisible && mWindowVisible) {
+                int direction = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
+                mPrivOps.switchKeyboardLayoutAsync(direction);
+                return true;
+            }
         }
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
     }

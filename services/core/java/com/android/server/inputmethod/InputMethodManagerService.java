@@ -5529,6 +5529,42 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         return canAccess;
     }
 
+    @GuardedBy("ImfLock.class")
+    private void switchKeyboardLayoutLocked(int direction) {
+        final InputMethodInfo currentImi = mMethodMap.get(getSelectedMethodIdLocked());
+        if (currentImi == null) {
+            return;
+        }
+        final InputMethodSubtypeHandle currentSubtypeHandle =
+                InputMethodSubtypeHandle.of(currentImi, mCurrentSubtype);
+        final InputMethodSubtypeHandle nextSubtypeHandle =
+                mHardwareKeyboardShortcutController.onSubtypeSwitch(currentSubtypeHandle,
+                        direction > 0);
+        if (nextSubtypeHandle == null) {
+            return;
+        }
+        final InputMethodInfo nextImi = mMethodMap.get(nextSubtypeHandle.getImeId());
+        if (nextImi == null) {
+            return;
+        }
+
+        final int subtypeCount = nextImi.getSubtypeCount();
+        if (subtypeCount == 0) {
+            if (nextSubtypeHandle.equals(InputMethodSubtypeHandle.of(nextImi, null))) {
+                setInputMethodLocked(nextImi.getId(), NOT_A_SUBTYPE_ID);
+            }
+            return;
+        }
+
+        for (int i = 0; i < subtypeCount; ++i) {
+            if (nextSubtypeHandle.equals(
+                    InputMethodSubtypeHandle.of(nextImi, nextImi.getSubtypeAt(i)))) {
+                setInputMethodLocked(nextImi.getId(), i);
+                return;
+            }
+        }
+    }
+
     private void publishLocalService() {
         LocalServices.addService(InputMethodManagerInternal.class, new LocalServiceImpl());
     }
@@ -5734,38 +5770,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void switchKeyboardLayout(int direction) {
             synchronized (ImfLock.class) {
-                final InputMethodInfo currentImi = mMethodMap.get(getSelectedMethodIdLocked());
-                if (currentImi == null) {
-                    return;
-                }
-                final InputMethodSubtypeHandle currentSubtypeHandle =
-                        InputMethodSubtypeHandle.of(currentImi, mCurrentSubtype);
-                final InputMethodSubtypeHandle nextSubtypeHandle =
-                        mHardwareKeyboardShortcutController.onSubtypeSwitch(currentSubtypeHandle,
-                                direction > 0);
-                if (nextSubtypeHandle == null) {
-                    return;
-                }
-                final InputMethodInfo nextImi = mMethodMap.get(nextSubtypeHandle.getImeId());
-                if (nextImi == null) {
-                    return;
-                }
-
-                final int subtypeCount = nextImi.getSubtypeCount();
-                if (subtypeCount == 0) {
-                    if (nextSubtypeHandle.equals(InputMethodSubtypeHandle.of(nextImi, null))) {
-                        setInputMethodLocked(nextImi.getId(), NOT_A_SUBTYPE_ID);
-                    }
-                    return;
-                }
-
-                for (int i = 0; i < subtypeCount; ++i) {
-                    if (nextSubtypeHandle.equals(
-                            InputMethodSubtypeHandle.of(nextImi, nextImi.getSubtypeAt(i)))) {
-                        setInputMethodLocked(nextImi.getId(), i);
-                        return;
-                    }
-                }
+                switchKeyboardLayoutLocked(direction);
             }
         }
 
@@ -6766,6 +6771,22 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void resetStylusHandwriting(int requestId) {
             mImms.resetStylusHandwriting(requestId);
+        }
+
+        @BinderThread
+        @Override
+        public void switchKeyboardLayoutAsync(int direction) {
+            synchronized (ImfLock.class) {
+                if (!mImms.calledWithValidTokenLocked(mToken)) {
+                    return;
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    mImms.switchKeyboardLayoutLocked(direction);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
         }
     }
 }

@@ -431,4 +431,20 @@ public final class InputMethodPrivilegedOperations {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#switchKeyboardLayoutAsync(int)}.
+     */
+    @AnyThread
+    public void switchKeyboardLayoutAsync(int direction) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.switchKeyboardLayoutAsync(direction);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
