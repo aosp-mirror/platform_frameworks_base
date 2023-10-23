@@ -27,7 +27,7 @@
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Geçiş anahtarlarıyla daha yüksek güvenlik"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Geçiş anahtarı kullandığınızda karmaşık şifreler oluşturmanız veya bunları hatırlamanız gerekmez"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Geçiş anahtarları; parmak iziniz, yüzünüz veya ekran kilidinizi kullanarak oluşturduğunuz şifrelenmiş dijital anahtarlardır"</string>
-    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Diğer cihazlarda oturum açabilmeniz için şifre anahtarları bir şifre yöneticisine kaydedilir"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Diğer cihazlarda oturum açabilmeniz için geçiş anahtarları bir şifre yöneticisine kaydedilir"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Geçiş anahtarları hakkında daha fazla bilgi"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Şifresiz teknoloji"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Geçiş anahtarları, şifre kullanmadan oturum açmanıza olanak tanır. Kimliğinizi doğrulayıp geçiş anahtarı oluşturmak için parmak iziniz, yüz tanıma özelliği, PIN veya kaydırma deseni kullanmanız yeterlidir."</string>
@@ -39,10 +39,10 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Şifresiz bir geleceğe doğru ilerlerken şifreler, geçiş anahtarlarıyla birlikte kullanılmaya devam edecektir."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> kaydedileceği yeri seçin"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Bilgilerinizi kaydedip bir dahaki sefere daha hızlı oturum açmak için bir şifre yöneticisi seçin"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> için şifre anahtarı oluşturulsun mu?"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> için geçiş anahtarı oluşturulsun mu?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> için şifre kaydedilsin mi?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> için oturum açma bilgileri kaydedilsin mi?"</string>
-    <string name="passkey" msgid="632353688396759522">"Şifre anahtarı"</string>
+    <string name="passkey" msgid="632353688396759522">"Geçiş anahtarı"</string>
     <string name="password" msgid="6738570945182936667">"Şifre"</string>
     <string name="passkeys" msgid="5733880786866559847">"Geçiş anahtarlarınızın"</string>
     <string name="passwords" msgid="5419394230391253816">"şifreler"</string>
@@ -61,14 +61,14 @@
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> şifre"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> geçiş anahtarı"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> kimlik bilgileri"</string>
-    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Şifre anahtarı"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Geçiş anahtarı"</string>
     <string name="another_device" msgid="5147276802037801217">"Başka bir cihaz"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Diğer şifre yöneticileri"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Sayfayı kapat"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Önceki sayfaya geri dön"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Kapat"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Kapat"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> için kayıtlı şifre anahtarınız kullanılsın mı?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> için kayıtlı geçiş anahtarınız kullanılsın mı?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> için kayıtlı şifreniz kullanılsın mı?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> için oturum açma bilgileriniz kullanılsın mı?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> için oturum açma seçeneklerine izin verilsin mi?"</string>
