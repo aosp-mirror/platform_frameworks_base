@@ -16,10 +16,10 @@
 
 package com.android.commands.svc;
 
-import android.app.ActivityThread;
 import android.content.Context;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcManager;
+import android.nfc.INfcAdapter;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
 public class NfcCommand extends Svc.Command {
 
@@ -42,24 +42,27 @@ public class NfcCommand extends Svc.Command {
 
     @Override
     public void run(String[] args) {
-        Context context = ActivityThread.systemMain().getSystemContext();
-        NfcManager nfcManager = context.getSystemService(NfcManager.class);
-        if (nfcManager == null) {
-            System.err.println("Got a null NfcManager, is the system running?");
-            return;
-        }
-        NfcAdapter adapter = nfcManager.getDefaultAdapter();
+        INfcAdapter adapter = INfcAdapter.Stub.asInterface(
+                ServiceManager.getService(Context.NFC_SERVICE));
+
         if (adapter == null) {
             System.err.println("Got a null NfcAdapter, is the system running?");
             return;
         }
-        if (args.length == 2 && "enable".equals(args[1])) {
-            adapter.enable();
-            return;
-        } else if (args.length == 2 && "disable".equals(args[1])) {
-            adapter.disable(true);
+
+        try {
+            if (args.length == 2 && "enable".equals(args[1])) {
+                adapter.enable();
+                return;
+            } else if (args.length == 2 && "disable".equals(args[1])) {
+                adapter.disable(true);
+                return;
+            }
+        } catch (RemoteException e) {
+            System.err.println("NFC operation failed: " + e);
             return;
         }
+
         System.err.println(longHelp());
     }
 
