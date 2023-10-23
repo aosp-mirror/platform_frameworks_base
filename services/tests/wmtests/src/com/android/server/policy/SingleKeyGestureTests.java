@@ -25,6 +25,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Instrumentation;
@@ -38,7 +39,9 @@ import android.view.KeyEvent;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,6 +60,7 @@ public class SingleKeyGestureTests {
     private CountDownLatch mLongPressed = new CountDownLatch(1);
     private CountDownLatch mVeryLongPressed = new CountDownLatch(1);
     private CountDownLatch mMultiPressed = new CountDownLatch(1);
+    private BlockingQueue<KeyUpData> mKeyUpQueue = new LinkedBlockingQueue<>();
 
     private final Instrumentation mInstrumentation = getInstrumentation();
     private final Context mContext = mInstrumentation.getTargetContext();
@@ -134,6 +138,11 @@ public class SingleKeyGestureTests {
                         assertTrue(mMaxMultiPressCount >= count);
                         assertEquals(mExpectedMultiPressCount, count);
                     }
+
+                    @Override
+                    void onKeyUp(long eventTime, int multiPressCount) {
+                        mKeyUpQueue.add(new KeyUpData(KEYCODE_POWER, multiPressCount));
+                    }
                 });
 
         mDetector.addRule(
@@ -167,10 +176,25 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
+                    void onKeyUp(long eventTime, int multiPressCount) {
+                        mKeyUpQueue.add(new KeyUpData(KEYCODE_BACK, multiPressCount));
+                    }
+
+                    @Override
                     void onLongPress(long downTime) {
                         mLongPressed.countDown();
                     }
                 });
+    }
+
+    private static class KeyUpData {
+        public final int keyCode;
+        public final int pressCount;
+
+        KeyUpData(int keyCode, int pressCount) {
+            this.keyCode = keyCode;
+            this.pressCount = pressCount;
+        }
     }
 
     private void pressKey(int keyCode, long pressTime) {
@@ -250,6 +274,21 @@ public class SingleKeyGestureTests {
     }
 
     @Test
+    public void testOnKeyUp() throws InterruptedException {
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+
+        verifyKeyUpData(KEYCODE_POWER, 1 /* expectedMultiPressCount */);
+    }
+
+    private void verifyKeyUpData(int expectedKeyCode, int expectedMultiPressCount)
+            throws InterruptedException {
+        KeyUpData keyUpData = mKeyUpQueue.poll(mWaitTimeout, TimeUnit.MILLISECONDS);
+        assertNotNull(keyUpData);
+        assertEquals(expectedKeyCode, keyUpData.keyCode);
+        assertEquals(expectedMultiPressCount, keyUpData.pressCount);
+    }
+
+    @Test
     public void testNonInteractive() throws InterruptedException {
         // Disallow short press behavior from non interactive.
         mAllowNonInteractiveForPress = false;
@@ -307,6 +346,33 @@ public class SingleKeyGestureTests {
                 newHandler.runWithScissors(
                         () -> pressKey(KEYCODE_POWER, 0 /* pressTime */), mWaitTimeout);
                 assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+            }
+        } finally {
+            handlerThread.quitSafely();
+        }
+    }
+
+    @Test
+    public void testOnKeyUp_Pressure() throws InterruptedException {
+        final HandlerThread handlerThread =
+                new HandlerThread("testInputReader", Process.THREAD_PRIORITY_DISPLAY);
+        handlerThread.start();
+        Handler newHandler = new Handler(handlerThread.getLooper());
+        try {
+            // To make sure we won't get any unexpected multi-press count.
+            for (int i = 0; i < 5; i++) {
+                newHandler.runWithScissors(
+                        () -> {
+                            pressKey(KEYCODE_POWER, 0 /* pressTime */);
+                            pressKey(KEYCODE_POWER, 0 /* pressTime */);
+                        },
+                        mWaitTimeout);
+                newHandler.runWithScissors(
+                        () -> pressKey(KEYCODE_BACK, 0 /* pressTime */), mWaitTimeout);
+
+                verifyKeyUpData(KEYCODE_POWER, 1 /* expectedMultiPressCount */);
+                verifyKeyUpData(KEYCODE_POWER, 2 /* expectedMultiPressCount */);
+                verifyKeyUpData(KEYCODE_BACK, 1 /* expectedMultiPressCount */);
             }
         } finally {
             handlerThread.quitSafely();
