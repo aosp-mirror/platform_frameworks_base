@@ -44,8 +44,8 @@ constructor(
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundHandler: Handler,
 ) {
-    private val activePreviews: ArrayMap<IBinder, PreviewLifecycleObserver> =
-        ArrayMap<IBinder, PreviewLifecycleObserver>()
+    private val activePreviews: ArrayMap<Pair<IBinder?, Int>, PreviewLifecycleObserver> =
+        ArrayMap<Pair<IBinder?, Int>, PreviewLifecycleObserver>()
 
     fun preview(request: Bundle?): Bundle? {
         if (request == null) {
@@ -56,8 +56,6 @@ constructor(
         return try {
             val renderer = previewRendererFactory.create(request)
 
-            // Destroy any previous renderer associated with this token.
-            activePreviews[renderer.hostToken]?.let { destroyObserver(it) }
             observer =
                 PreviewLifecycleObserver(
                     renderer,
@@ -65,7 +63,9 @@ constructor(
                     mainDispatcher,
                     ::destroyObserver,
                 )
-            activePreviews[renderer.hostToken] = observer
+            // Destroy any previous renderer associated with this token.
+            activePreviews[renderer.id]?.let { destroyObserver(it) }
+            activePreviews[renderer.id] = observer
             renderer.render()
             renderer.hostToken?.linkToDeath(observer, 0)
             val result = Bundle()
@@ -92,9 +92,9 @@ constructor(
     }
 
     private fun destroyObserver(observer: PreviewLifecycleObserver) {
-        observer.onDestroy()?.let { hostToken ->
-            if (activePreviews[hostToken] === observer) {
-                activePreviews.remove(hostToken)
+        observer.onDestroy()?.let { identifier ->
+            if (activePreviews[identifier] === observer) {
+                activePreviews.remove(identifier)
             }
         }
     }
@@ -134,7 +134,7 @@ constructor(
             requestDestruction(this)
         }
 
-        fun onDestroy(): IBinder? {
+        fun onDestroy(): Pair<IBinder?, Int>? {
             if (isDestroyedOrDestroying) {
                 return null
             }
@@ -143,7 +143,7 @@ constructor(
             val hostToken = renderer.hostToken
             hostToken?.unlinkToDeath(this, 0)
             scope.launch(mainDispatcher) { renderer.destroy() }
-            return hostToken
+            return renderer.id
         }
     }
 
