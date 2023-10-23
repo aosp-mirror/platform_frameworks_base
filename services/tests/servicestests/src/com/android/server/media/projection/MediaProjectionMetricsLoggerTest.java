@@ -26,7 +26,7 @@ import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +40,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -219,21 +218,19 @@ public class MediaProjectionMetricsLoggerTest {
     }
 
     @Test
-    public void logStopped_registersActiveSessionEnded_afterLogging() {
+    public void logStopped_capturingWasInProgress_registersActiveSessionEnded() {
+        mLogger.logInProgress(TEST_HOST_UID, TEST_TARGET_UID);
+
         mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
 
-        InOrder inOrder = inOrder(mFrameworkStatsLogWrapper, mTimestampStore);
-        inOrder.verify(mFrameworkStatsLogWrapper)
-                .write(
-                        /* code= */ anyInt(),
-                        /* sessionId= */ anyInt(),
-                        /* state= */ anyInt(),
-                        /* previousState= */ anyInt(),
-                        /* hostUid= */ anyInt(),
-                        /* targetUid= */ anyInt(),
-                        /* timeSinceLastActive= */ anyInt(),
-                        /* creationSource= */ anyInt());
-        inOrder.verify(mTimestampStore).registerActiveSessionEnded();
+        verify(mTimestampStore).registerActiveSessionEnded();
+    }
+
+    @Test
+    public void logStopped_capturingWasNotInProgress_doesNotRegistersActiveSessionEnded() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verify(mTimestampStore, never()).registerActiveSessionEnded();
     }
 
     @Test
