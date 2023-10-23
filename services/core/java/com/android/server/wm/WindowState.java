@@ -1347,6 +1347,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             windowFrames.setContentChanged(true);
         }
 
+        if (!windowFrames.mFrame.equals(windowFrames.mLastFrame)
+                || !windowFrames.mRelFrame.equals(windowFrames.mLastRelFrame)) {
+            mWmService.mFrameChangingWindows.add(this);
+        }
+
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             if (!windowFrames.mFrame.equals(windowFrames.mLastFrame)) {
                 mMovedByResize = true;
@@ -3716,10 +3721,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // that may cause WINDOW_FREEZE_TIMEOUT because resizing the client keeps failing.
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
-
-        // We update mLastFrame always rather than in the conditional with the last inset
-        // variables, because mFrameSizeChanged only tracks the width and height changing.
-        updateLastFrames();
 
         final int prevRotation = mLastReportedConfiguration
                 .getMergedConfiguration().windowConfiguration.getRotation();

@@ -51,7 +51,8 @@ public class WindowFrames {
     final Rect mFrame = new Rect();
 
     /**
-     * The last real frame that was reported to the client.
+     * The frame used to check if mFrame is changed, e.g., moved or resized.  It will be committed
+     * after handling the moving or resizing windows.
      */
     final Rect mLastFrame = new Rect();
 
