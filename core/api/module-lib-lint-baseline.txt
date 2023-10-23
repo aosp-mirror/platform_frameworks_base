@@ -57,3 +57,11 @@ SamShouldBeLast: android.os.IBinder#linkToDeath(android.os.IBinder.DeathRecipien
     SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.IBinder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
     SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+
+
+UnflaggedApi: android.app.Activity#isResumed():
+    New API must be flagged with @FlaggedApi: method android.app.Activity.isResumed()
+UnflaggedApi: android.content.Context#REMOTE_AUTH_SERVICE:
+    New API must be flagged with @FlaggedApi: field android.content.Context.REMOTE_AUTH_SERVICE
+UnflaggedApi: android.os.IpcDataCache#MODULE_TELEPHONY:
+    New API must be flagged with @FlaggedApi: field android.os.IpcDataCache.MODULE_TELEPHONY
