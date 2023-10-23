@@ -74,6 +74,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.modules.utils.build.SdkLevel;
+import com.android.net.flags.Flags;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.FgThread;
@@ -1059,17 +1060,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 Log.w(TAG, "setDataSaverMode(): already " + mDataSaverMode);
                 return true;
             }
-            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "bandwidthEnableDataSaver");
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setDataSaverModeEnabled");
             try {
-                final boolean changed = mNetdService.bandwidthEnableDataSaver(enable);
-                if (changed) {
+                if (Flags.setDataSaverViaCm()) {
+                    // setDataSaverEnabled throws if it fails to set data saver.
+                    mContext.getSystemService(ConnectivityManager.class)
+                            .setDataSaverEnabled(enable);
                     mDataSaverMode = enable;
+                    return true;
                 } else {
-                    Log.w(TAG, "setDataSaverMode(" + enable + "): netd command silently failed");
+                    final boolean changed = mNetdService.bandwidthEnableDataSaver(enable);
+                    if (changed) {
+                        mDataSaverMode = enable;
+                    } else {
+                        Log.e(TAG, "setDataSaverMode(" + enable + "): failed to set iptables");
+                    }
+                    return changed;
                 }
-                return changed;
-            } catch (RemoteException e) {
-                Log.w(TAG, "setDataSaverMode(" + enable + "): netd command failed", e);
+            } catch (RemoteException | IllegalStateException e) {
+                Log.e(TAG, "setDataSaverMode(" + enable + "): failed with exception", e);
                 return false;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
