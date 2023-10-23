@@ -235,12 +235,14 @@ filegroup {
 stubs_defaults {
     name: "services-stubs-default",
     installable: false,
-    args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
-        " --hide-annotation android.annotation.Hide" +
-        " --hide InternalClasses" + // com.android.* classes are okay in this interface
+    flags: [
+        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)",
+        "--hide-annotation android.annotation.Hide",
+        "--hide InternalClasses", // com.android.* classes are okay in this interface
         // TODO: remove the --hide options below
-        " --hide DeprecationMismatch" +
-        " --hide HiddenTypedefConstant",
+        "--hide DeprecationMismatch",
+        "--hide HiddenTypedefConstant",
+    ],
     visibility: ["//frameworks/base:__subpackages__"],
     filter_packages: ["com.android."],
 }
