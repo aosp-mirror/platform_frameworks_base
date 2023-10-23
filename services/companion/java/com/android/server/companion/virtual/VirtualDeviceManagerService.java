@@ -65,6 +65,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.modules.expresslog.Counter;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceImpl.PendingTrampoline;
 import com.android.server.wm.ActivityInterceptorCallback;
@@ -390,6 +391,9 @@ public class VirtualDeviceManagerService extends SystemService {
                     deviceId,
                     cameraAccessController, mPendingTrampolineCallback, activityListener,
                     soundEffectListener, runningAppsChangedCallback, params);
+            if (Flags.expressMetrics()) {
+                Counter.logIncrement("virtual_devices.virtual_devices_created_count");
+            }
 
             synchronized (mVirtualDeviceManagerLock) {
                 if (mVirtualDevices.size() == 0) {

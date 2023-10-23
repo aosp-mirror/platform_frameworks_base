@@ -49,3 +49,10 @@ flag {
   description: "Enable streaming permission dialogs to Virtual Devices"
   bug: "291737919"
 }
+
+flag {
+  name: "express_metrics"
+  namespace: "virtual_devices"
+  description: "Enable express metrics in VDM"
+  bug: "307297730"
+}
