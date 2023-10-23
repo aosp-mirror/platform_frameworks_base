@@ -18,8 +18,10 @@ package android.view;
 
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
+import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1468,17 +1470,18 @@ public final class Display {
     }
 
     /**
-     * Returns null if it's virtual display.
-     * @hide
+     * Returns the {@link OverlayProperties} of the display.
      */
-    @Nullable
+    @FlaggedApi(FLAG_OVERLAYPROPERTIES_CLASS_API)
+    @NonNull
     public OverlayProperties getOverlaySupport() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.type != TYPE_VIRTUAL) {
+            if (mDisplayInfo.type == TYPE_INTERNAL
+                    || mDisplayInfo.type == TYPE_EXTERNAL) {
                 return mGlobal.getOverlaySupport();
             }
-            return null;
+            return OverlayProperties.getDefault();
         }
     }
 
