@@ -56,6 +56,10 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.google.errorprone.annotations.CompileTimeConstant
+import java.io.PrintWriter
+import java.util.Arrays
+import java.util.stream.Collectors
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -78,10 +82,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.PrintWriter
-import java.util.Arrays
-import java.util.stream.Collectors
-import javax.inject.Inject
 
 /**
  * API to run face authentication and detection for device entry / on keyguard (as opposed to the
@@ -368,10 +368,12 @@ constructor(
         return arrayOf(
             Pair(
                 and(
-                    displayStateInteractor.isDefaultDisplayOff,
-                    keyguardTransitionInteractor.isFinishedInStateWhere(
-                            KeyguardState::deviceIsAwakeInState),
-                ).isFalse(),
+                        displayStateInteractor.isDefaultDisplayOff,
+                        keyguardTransitionInteractor.isFinishedInStateWhere(
+                            KeyguardState::deviceIsAwakeInState
+                        ),
+                    )
+                    .isFalse(),
                 // this can happen if an app is requesting for screen off, the display can
                 // turn off without wakefulness.isStartingToSleepOrAsleep calls
                 "displayIsNotOffWhileFullyTransitionedToAwake",
@@ -381,10 +383,7 @@ constructor(
                 "isFaceAuthEnrolledAndEnabled"
             ),
             Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
-            Pair(
-                powerInteractor.isAsleep.isFalse(),
-                "deviceNotAsleep"
-            ),
+            Pair(powerInteractor.isAsleep.isFalse(), "deviceNotAsleep"),
             Pair(
                 keyguardInteractor.isSecureCameraActive
                     .isFalse()
@@ -430,10 +429,15 @@ constructor(
     private val faceAuthCallback =
         object : FaceManager.AuthenticationCallback() {
             override fun onAuthenticationFailed() {
-                _authenticationStatus.value = FailedFaceAuthenticationStatus()
                 _isAuthenticated.value = false
                 faceAuthLogger.authenticationFailed()
-                onFaceAuthRequestCompleted()
+                if (!_isLockedOut.value) {
+                    // onAuthenticationError gets invoked before onAuthenticationFailed when the
+                    // last auth attempt locks out face authentication.
+                    // Skip updating the authentication status in such a scenario.
+                    _authenticationStatus.value = FailedFaceAuthenticationStatus()
+                    onFaceAuthRequestCompleted()
+                }
             }
 
             override fun onAuthenticationAcquired(acquireInfo: Int) {
