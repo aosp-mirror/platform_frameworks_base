@@ -1200,6 +1200,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void updateTrustedOverlay() {
         mInputWindowHandle.setTrustedOverlay(getPendingTransaction(), mSurfaceControl,
                 isWindowTrustedOverlay());
+        mInputWindowHandle.forceChange();
     }
 
     boolean isWindowTrustedOverlay() {
