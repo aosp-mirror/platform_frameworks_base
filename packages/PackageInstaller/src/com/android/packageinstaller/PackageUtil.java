@@ -171,7 +171,11 @@ public class PackageUtil {
 
             // Scale it down if the icon is too large
             if ((bmp.getWidth() > iconSize * 2) || (bmp.getHeight() > iconSize * 2)) {
-                bmp = Bitmap.createScaledBitmap(bmp, iconSize, iconSize, true);
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bmp, iconSize, iconSize, true);
+                if (scaledBitmap != bmp) {
+                    bmp.recycle();
+                }
+                return scaledBitmap;
             }
 
             return bmp;
