@@ -69,7 +69,6 @@ import com.android.compose.animation.Expandable
 import com.android.compose.modifiers.background
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.colorAttr
-import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
@@ -78,6 +77,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.res.R
 import kotlinx.coroutines.launch
 
 /** The Quick Settings footer actions row. */
@@ -328,7 +328,7 @@ private fun TextButton(
         shape = CircleShape,
         color = colorAttr(R.attr.underSurface),
         contentColor = LocalAndroidColorScheme.current.onSurfaceVariant,
-        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.onShadeActive)),
+        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.shadeInactive)),
         modifier = modifier.padding(horizontal = 4.dp),
         onClick = onClick,
     ) {
