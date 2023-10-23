@@ -18,7 +18,7 @@ package com.android.server.pm.pkg.parsing;
 
 import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.Flags.preventSdkLibApp;
+import static android.content.pm.Flags.disallowSdkLibsToBeApps;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
@@ -404,7 +404,7 @@ public class ParsingPackageUtils {
 
         try {
             final File baseApk = new File(lite.getBaseApkPath());
-            boolean shouldSkipComponents = lite.isIsSdkLibrary() && preventSdkLibApp();
+            boolean shouldSkipComponents = lite.isIsSdkLibrary() && disallowSdkLibsToBeApps();
             final ParseResult<ParsingPackage> result = parseBaseApk(input, baseApk,
                     lite.getPath(), assetLoader, flags, shouldSkipComponents);
             if (result.isError()) {
@@ -458,7 +458,7 @@ public class ParsingPackageUtils {
         final PackageLite lite = liteResult.getResult();
         final SplitAssetLoader assetLoader = new DefaultSplitAssetLoader(lite, flags);
         try {
-            boolean shouldSkipComponents =  lite.isIsSdkLibrary() && preventSdkLibApp();
+            boolean shouldSkipComponents =  lite.isIsSdkLibrary() && disallowSdkLibsToBeApps();
             final ParseResult<ParsingPackage> result = parseBaseApk(input,
                     apkFile,
                     apkFile.getCanonicalPath(),
