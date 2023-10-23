@@ -120,8 +120,8 @@ public final class SuspendPackageHelper {
             return packageNames;
         }
 
-        final SuspendParams newSuspendParams =
-                new SuspendParams(dialogInfo, appExtras, launcherExtras, quarantined);
+        final SuspendParams newSuspendParams = suspended
+                ? new SuspendParams(dialogInfo, appExtras, launcherExtras, quarantined) : null;
 
         final List<String> unmodifiablePackages = new ArrayList<>(packageNames.length);
 
@@ -156,8 +156,8 @@ public final class SuspendPackageHelper {
 
             final WatchedArrayMap<String, SuspendParams> suspendParamsMap =
                     packageState.getUserStateOrDefault(userId).getSuspendParams();
-            SuspendParams oldSuspendParams = suspendParamsMap == null
-                    ? null : suspendParamsMap.get(packageName);
+            final SuspendParams oldSuspendParams = suspendParamsMap == null
+                    ? null : suspendParamsMap.get(callingPackage);
             boolean changed = !Objects.equals(oldSuspendParams, newSuspendParams);
 
             if (suspended && !changed) {
