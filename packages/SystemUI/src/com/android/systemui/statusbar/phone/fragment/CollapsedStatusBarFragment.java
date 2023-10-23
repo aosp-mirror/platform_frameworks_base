@@ -86,6 +86,8 @@ import com.android.systemui.util.CarrierConfigTracker.CarrierConfigChangedListen
 import com.android.systemui.util.CarrierConfigTracker.DefaultDataSubscriptionChangedListener;
 import com.android.systemui.util.settings.SecureSettings;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,8 +97,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import kotlin.Unit;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -606,7 +606,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         // Hide notifications if the disable flag is set or we have an ongoing call.
         if (disableNotifications || hasOngoingCall) {
-            hideNotificationIconArea(animate);
+            hideNotificationIconArea(animate && !hasOngoingCall);
         } else {
             showNotificationIconArea(animate);
         }

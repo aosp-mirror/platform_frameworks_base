@@ -500,6 +500,20 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    public void disable_hasOngoingCall_hidesNotifsWithoutAnimation() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // Ongoing call started
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, true);
+
+        // Notification area is hidden without delay
+        assertEquals(0f, mNotificationAreaInner.getAlpha(), 0.01);
+        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+    }
+
+    @Test
     public void disable_isDozing_clockAndSystemInfoVisible() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mStatusBarStateController.isDozing()).thenReturn(true);
