@@ -30,6 +30,8 @@ class CommunalLayoutEngine {
          *
          * Currently treats the first supported size as the size to be rendered in, ignoring other
          * supported sizes.
+         *
+         * Cards are ordered by priority, from highest to lowest.
          */
         fun distributeCardsIntoColumns(
             cards: List<CommunalGridLayoutCard>,
@@ -37,7 +39,8 @@ class CommunalLayoutEngine {
             val result = ArrayList<ArrayList<CommunalGridLayoutCardInfo>>()
 
             var capacityOfLastColumn = 0
-            for (card in cards) {
+            val sorted = cards.sortedByDescending { it.priority }
+            for (card in sorted) {
                 val cardSize = card.supportedSizes.first()
                 if (capacityOfLastColumn >= cardSize.value) {
                     // Card fits in last column
