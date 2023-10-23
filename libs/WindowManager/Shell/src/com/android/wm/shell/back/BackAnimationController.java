@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.back;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_HOME;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
@@ -69,7 +70,6 @@ import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -317,7 +317,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             executeRemoteCallWithTaskPermission(mController, "setBackToLauncherCallback",
                     (controller) -> controller.registerAnimation(
                             BackNavigationInfo.TYPE_RETURN_TO_HOME,
-                            new BackAnimationRunner(callback, runner)));
+                            new BackAnimationRunner(
+                                    callback,
+                                    runner,
+                                    controller.mContext,
+                                    CUJ_PREDICTIVE_BACK_HOME)));
         }
 
         @Override
