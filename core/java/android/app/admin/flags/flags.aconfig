@@ -34,3 +34,10 @@ flag {
   description: "Allow the device management role holder to control which platform features are available on dedicated devices."
   bug: "281964214"
 }
+
+flag {
+  name: "security_log_v2_enabled"
+  namespace: "enterprise"
+  description: "Improve access to security logging in the context of Zero Trust."
+  bug: "295324350"
+}
