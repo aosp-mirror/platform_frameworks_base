@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -39,7 +40,8 @@ import androidx.compose.ui.unit.IntSize
 import com.android.compose.ui.util.fastForEach
 import kotlinx.coroutines.channels.Channel
 
-internal class SceneTransitionLayoutImpl(
+@VisibleForTesting
+class SceneTransitionLayoutImpl(
     onChangeScene: (SceneKey) -> Unit,
     builder: SceneTransitionLayoutScope.() -> Unit,
     transitions: SceneTransitions,
@@ -60,7 +62,7 @@ internal class SceneTransitionLayoutImpl(
      * The size of this layout. Note that this could be [IntSize.Zero] if this layour does not have
      * any scene configured or right before the first measure pass of the layout.
      */
-    internal var size by mutableStateOf(IntSize.Zero)
+    @VisibleForTesting var size by mutableStateOf(IntSize.Zero)
 
     init {
         setScenes(builder)
