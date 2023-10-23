@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /** Implements {@link InfoMediaManager} using {@link MediaRouter2}. */
@@ -54,8 +55,11 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     private final RouteCallback mRouteCallback = new RouteCallback();
     private final TransferCallback mTransferCallback = new TransferCallback();
     private final ControllerCallback mControllerCallback = new ControllerCallback();
-    private final RouteListingPreferenceCallback mRouteListingPreferenceCallback =
-            new RouteListingPreferenceCallback();
+    private final Consumer<RouteListingPreference> mRouteListingPreferenceCallback =
+            (preference) -> {
+                notifyRouteListingPreferenceUpdated(preference);
+                refreshDevices();
+            };
 
     // TODO: b/192657812 - Create factory method in InfoMediaManager to return
     //      RouterInfoMediaManager or ManagerInfoMediaManager based on flag.
@@ -83,7 +87,8 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     @Override
     protected void startScanOnRouter() {
         mRouter.registerRouteCallback(mExecutor, mRouteCallback, RouteDiscoveryPreference.EMPTY);
-        mRouter.registerRouteListingPreferenceCallback(mExecutor, mRouteListingPreferenceCallback);
+        mRouter.registerRouteListingPreferenceUpdatedCallback(
+                mExecutor, mRouteListingPreferenceCallback);
         mRouter.registerTransferCallback(mExecutor, mTransferCallback);
         mRouter.registerControllerCallback(mExecutor, mControllerCallback);
         mRouter.startScan();
@@ -94,7 +99,7 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
         mRouter.stopScan();
         mRouter.unregisterControllerCallback(mControllerCallback);
         mRouter.unregisterTransferCallback(mTransferCallback);
-        mRouter.unregisterRouteListingPreferenceCallback(mRouteListingPreferenceCallback);
+        mRouter.unregisterRouteListingPreferenceUpdatedCallback(mRouteListingPreferenceCallback);
         mRouter.unregisterRouteCallback(mRouteCallback);
     }
 
@@ -305,15 +310,6 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     private final class ControllerCallback extends MediaRouter2.ControllerCallback {
         @Override
         public void onControllerUpdated(@NonNull RoutingController controller) {
-            refreshDevices();
-        }
-    }
-
-    private final class RouteListingPreferenceCallback
-            extends MediaRouter2.RouteListingPreferenceCallback {
-        @Override
-        public void onRouteListingPreferenceChanged(@Nullable RouteListingPreference preference) {
-            notifyRouteListingPreferenceUpdated(preference);
             refreshDevices();
         }
     }
