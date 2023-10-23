@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Programme wat batterykrag gebruik"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Vergroting"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Toeganklikheidgebruik"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Skerm"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruik tans batterykrag"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> programme gebruik tans batterykrag"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Tik vir besonderhede oor battery- en datagebruik"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Laat ’n metgeselapp toe om voorgronddienste van agtergrond af te begin"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofoon is beskikbaar"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofoon is geblokkeer"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Kan nie na skerm weerspieël nie"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Gebruik ’n ander kabel en probeer weer"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabel steun dalk nie skerms nie"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Jou USB-C-kabel koppel dalk nie behoorlik aan skerms nie"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen is aan"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruik tans albei skerms om inhoud te wys"</string>

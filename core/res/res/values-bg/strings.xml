@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Приложения, използващи батерията"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увеличение"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Използване на услугите за достъпност"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Дисплей"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> използва батерията"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> приложения използват батерията"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Разрешава на дадено придружаващо приложение да стартира услуги на преден план, докато се изпълнява на заден план."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофонът е налице"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофонът е блокиран"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Не може да се копира огледално на дисплея"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Използвайте друг кабел и опитайте отново"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабелът не поддържа дисплеи"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C кабелът ви може да не се свързва правилно с дисплеи"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Функцията Dual Screen е включена"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> използва и двата екрана, за да показва съдържание"</string>

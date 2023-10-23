@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"배터리를 소모하는 앱"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"확대"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"접근성 사용"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"디스플레이"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 배터리 사용 중"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"앱 <xliff:g id="NUMBER">%1$d</xliff:g>개에서 배터리 사용 중"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"탭하여 배터리 및 데이터 사용량 확인"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"호환 앱이 백그라운드에서 포그라운드 서비스를 시작할 수 있게 허용합니다."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"마이크 사용 가능"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"마이크가 차단됨"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"디스플레이에 미러링할 수 없음"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"다른 케이블을 사용하여 다시 시도해 보세요."</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"디스플레이를 지원하지 않는 케이블일 수 있음"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"사용 중인 USB-C 케이블이 디스플레이에 제대로 연결되지 않을 수 있습니다."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen 켜짐"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 두 화면을 모두 사용하여 콘텐츠를 표시합니다."</string>

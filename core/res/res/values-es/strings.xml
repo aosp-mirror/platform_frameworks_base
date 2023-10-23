@@ -291,6 +291,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplicaciones que consumen batería"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ampliación"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Uso de accesibilidad"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Pantalla"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando la batería"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicaciones están usando la batería"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Toca para ver información detallada sobre el uso de datos y de la batería"</string>
@@ -2334,6 +2335,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que una aplicación complementaria inicie servicios en primer plano desde el segundo plano."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"El micrófono está disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micrófono está bloqueado"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"No se puede proyectar a la pantalla"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Usa otro cable y vuelve a intentarlo"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"El cable puede no ser compatible con pantallas"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Puede que tu cable USB‑C no sea adecuado para conectarse a pantallas"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Dual Screen está activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando ambas pantallas para mostrar contenido"</string>

@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Εφαρμογές που καταναλώνουν μπαταρία"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Μεγιστοποίηση"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Χρήση προσβασιμότητας"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Οθόνη"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> χρησιμοποιεί μπαταρία"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> εφαρμογές χρησιμοποιούν μπαταρία"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Πατήστε για λεπτομέρειες σχετικά με τη χρήση μπαταρίας και δεδομένων"</string>
@@ -1376,7 +1377,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Εντοπίστηκε αναλογικό αξεσουάρ ήχου"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Η συνδεδεμένη συσκευή δεν είναι συμβατή με αυτό το τηλέφωνο. Πατήστε για να μάθετε περισσότερα."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Συνδέθηκε ο εντοπ. σφαλμ. USB"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Πατήστε για απενεργ. εντοπ./διόρθ. σφαλμ. USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Πατήστε για απενεργ. εντοπ. σφαλμ. USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Επιλογή για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Συνδέθηκε ο ασύρματος εντοπισμός σφαλμάτων"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Πατήστε, για να απενεργοποιήσετε τον ασύρματο εντοπισμό σφαλμάτων"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Επιτρέπει σε μια συνοδευτική εφαρμογή να εκκινεί υπηρεσίες στο προσκήνιο από το παρασκήνιο."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Το μικρόφωνο είναι διαθέσιμο"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Το μικρόφωνο έχει αποκλειστεί"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Δεν είναι δυνατός ο κατοπτρισμός στην οθόνη"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Χρησιμοποιήστε άλλο καλώδιο και δοκιμάστε ξανά"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Το καλώδιο μπορεί να μην υποστηρίζει οθόνες"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Το καλώδιο USB-C που έχετε ίσως να μην μπορεί να συνδεθεί σωστά σε οθόνες"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Διπλή οθόνη"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Η λειτουργία διπλής οθόνης είναι ενεργή"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Η εφαρμ. <xliff:g id="APP_NAME">%1$s</xliff:g> χρησιμοποιεί και τις 2 οθόνες για εμφάνιση περιεχ."</string>

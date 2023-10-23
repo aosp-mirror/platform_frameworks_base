@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"बॅटरी लवकर संपवणारी अ‍ॅप्स"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"मॅग्निफिकेशन"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"अ‍ॅक्सेसिबिलिटी वापर"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"डिस्प्ले"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> बॅटरी वापरत आहे"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> अ‍ॅप्स बॅटरी वापरत आहेत"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"सहयोगी अ‍ॅपला बॅकग्राउंडमधून फोरग्राउंड सेवा सुरू करण्याची अनुमती देते."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"मायक्रोफोन उपलब्ध आहे"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"मायक्रोफोन ब्लॉक केलेला आहे"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"डिस्प्लेवर मिरर करू शकत नाही"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"वेगळी केबल वापरून पुन्हा प्रयत्न करा"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"केबल कदाचित डिस्प्लेना सपोर्ट करणार नाही"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"तुमची USB-C केबल कदाचित डिस्प्लेना योग्यरीत्या कनेक्ट होणार नाही"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen सुरू आहे"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"आशय दाखवण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> दोन्ही डिस्प्ले वापरत आहे"</string>

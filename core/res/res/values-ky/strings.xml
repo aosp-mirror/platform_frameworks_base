@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Колдонмолор батареяңызды коротууда"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Чоңойтуу"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Атайын мүмкүнчүлүктөрдүн колдонулушу"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Экран"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу батареяны пайдаланып жатат"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> колдонмо батареяны пайдаланып жатат"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батареянын кубаты жана трафиктин көлөмү жөнүндө билүү үчүн таптап коюңуз"</string>
@@ -1384,7 +1385,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Сыноо программасынын режими иштетилди"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Сыноо программасынын режимин өчүрүү үчүн баштапкы параметрлерге кайтарыңыз."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Сериялык консоль иштетилди"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Майнаптуулугуна таасири тиет. Аны өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Майнаптуулугуна таасири тиет. Өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Cынамык MTE иштетилди"</string>
     <string name="mte_override_notification_message" msgid="2441170442725738942">"Иштин майнаптуулугуна жана туруктуулугуна кедергиси тийиши мүмкүн. Өчүрүү үчүн түзмөктү өчүрүп-күйгүзүңүз. Эгер arm64.memtag.bootctl аркылуу иштетилген болсо, алдын ала \"none\" маанисин орнотуңуз."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB портунда суюктук же урандылар бар"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Көмөкчү колдонмого активдүү кызматтарды фондо иштетүүгө уруксат берет."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон жеткиликтүү"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон бөгөттөлгөн"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Экранга күзгүдөй чагылдыруу мүмкүн эмес"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Башка кабелди колдонуп, кайра аракет кылыңыз"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабель дисплейлерди колдоого албашы мүмкүн"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C кабели дисплейлерге туура туташпашы мүмкүн"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Кош экран"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen күйүк"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> контентти эки түзмөктө тең көрсөтүүдө"</string>
