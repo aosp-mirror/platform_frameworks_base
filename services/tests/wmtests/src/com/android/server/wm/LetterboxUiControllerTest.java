@@ -676,60 +676,59 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT})
     public void testOverrideOrientationIfNeeded_portraitOverrideEnabled_returnsPortrait()
             throws Exception {
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     @Test
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR})
     public void testOverrideOrientationIfNeeded_portraitOverrideEnabled_returnsNosensor() {
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_NOSENSOR);
+        assertEquals(SCREEN_ORIENTATION_NOSENSOR, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     @Test
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR})
     public void testOverrideOrientationIfNeeded_nosensorOverride_orientationFixed_returnsUnchanged() {
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
     }
 
     @Test
     @EnableCompatChanges({OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE})
     public void testOverrideOrientationIfNeeded_reverseLandscapeOverride_orientationPortraitOrUndefined_returnsUnchanged() {
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_UNSPECIFIED);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     @Test
     @EnableCompatChanges({OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE})
     public void testOverrideOrientationIfNeeded_reverseLandscapeOverride_orientationLandscape_returnsReverseLandscape() {
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_LANDSCAPE),
-                SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_LANDSCAPE));
     }
 
     @Test
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT})
     public void testOverrideOrientationIfNeeded_portraitOverride_orientationFixed_returnsUnchanged() {
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_NOSENSOR), SCREEN_ORIENTATION_NOSENSOR);
+        assertEquals(SCREEN_ORIENTATION_NOSENSOR, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_NOSENSOR));
     }
 
     @Test
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT, OVERRIDE_ANY_ORIENTATION})
     public void testOverrideOrientationIfNeeded_portraitAndIgnoreFixedOverrides_returnsPortrait() {
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_NOSENSOR), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_NOSENSOR));
     }
 
     @Test
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR, OVERRIDE_ANY_ORIENTATION})
     public void testOverrideOrientationIfNeeded_noSensorAndIgnoreFixedOverrides_returnsNosensor() {
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_NOSENSOR);
+        assertEquals(SCREEN_ORIENTATION_NOSENSOR, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
     }
 
     @Test
@@ -740,8 +739,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         mController = new LetterboxUiController(mWm, mActivity);
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_UNSPECIFIED);
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     @Test
@@ -760,8 +759,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(false).when(mDisplayContent.mDisplayRotationCompatPolicy)
                 .isActivityEligibleForOrientationOverride(eq(mActivity));
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_UNSPECIFIED);
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     @Test
@@ -780,8 +779,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
                 .isActivityEligibleForOrientationOverride(eq(mActivity));
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     @Test
@@ -789,8 +788,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         spyOn(mController);
         doReturn(true).when(mController).shouldApplyUserFullscreenOverride();
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_USER);
+        assertEquals(SCREEN_ORIENTATION_USER, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     @Test
@@ -799,8 +798,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         spyOn(mController);
         doReturn(true).when(mController).shouldApplyUserFullscreenOverride();
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_USER);
+        assertEquals(SCREEN_ORIENTATION_USER, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
     }
 
     @Test
@@ -808,8 +807,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         spyOn(mController);
         doReturn(false).when(mController).shouldApplyUserFullscreenOverride();
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
     }
 
     @Test
@@ -817,15 +816,15 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         spyOn(mController);
         doReturn(true).when(mController).shouldApplyUserMinAspectRatioOverride();
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_LOCKED), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_LOCKED));
 
         // unchanged if orientation is specified
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_LANDSCAPE), SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_LANDSCAPE));
     }
 
     @Test
@@ -833,8 +832,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         spyOn(mController);
         doReturn(false).when(mController).shouldApplyUserMinAspectRatioOverride();
 
-        assertEquals(mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_UNSPECIFIED);
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     // shouldApplyUser...Override
@@ -1286,16 +1285,16 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mActivity = setUpActivityWithComponent();
         mController = new LetterboxUiController(mWm, mActivity);
 
-        assertEquals(mController.getFixedOrientationLetterboxAspectRatio(
-                mActivity.getParent().getConfiguration()), 1.5f, /* delta */ 0.01);
+        assertEquals(1.5f, mController.getFixedOrientationLetterboxAspectRatio(
+                mActivity.getParent().getConfiguration()), /* delta */ 0.01);
 
         spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
         doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
                 .isTreatmentEnabledForActivity(eq(mActivity));
 
-        assertEquals(mController.getFixedOrientationLetterboxAspectRatio(
-                mActivity.getParent().getConfiguration()), mController.getSplitScreenAspectRatio(),
-                /* delta */  0.01);
+        assertEquals(mController.getSplitScreenAspectRatio(),
+                mController.getFixedOrientationLetterboxAspectRatio(
+                        mActivity.getParent().getConfiguration()), /* delta */  0.01);
     }
 
     private void mockThatProperty(String propertyName, boolean value) throws Exception {
