@@ -67,18 +67,6 @@ public interface NotificationListContainer extends
     void notifyGroupChildRemoved(ExpandableView row, ViewGroup childrenContainer);
 
     /**
-     * Generate an animation for an added child view.
-     *  @param child The view to be added.
-     * @param fromMoreCard Whether this add is coming from the "more" card on lockscreen.
-     */
-    void generateAddAnimation(ExpandableView child, boolean fromMoreCard);
-
-    /**
-     * Generate a child order changed event.
-     */
-    void generateChildOrderChangedEvent();
-
-    /**
      * Returns the number of children in the NotificationListContainer.
      *
      * @return the number of children in the NotificationListContainer
@@ -185,21 +173,6 @@ public interface NotificationListContainer extends
      * @param row The notification to bind.
      */
     default void bindRow(ExpandableNotificationRow row) {}
-
-    /**
-     * Does this list contain a given view. True by default is fine, since we only ask this if the
-     * view has a parent.
-     */
-    default boolean containsView(View v) {
-        return true;
-    }
-
-    /**
-     * Tells the container that an animation is about to expand it.
-     */
-    default void setWillExpand(boolean willExpand) {}
-
-    void setNotificationActivityStarter(NotificationActivityStarter notificationActivityStarter);
 
     /**
      * @return the start location where we start clipping notifications.
