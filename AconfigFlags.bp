@@ -18,6 +18,7 @@ aconfig_srcjars = [
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.content.res.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.radio.flags-aconfig-java{.generated_srcjars}",
+    ":android.location.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
@@ -140,6 +141,21 @@ java_aconfig_library {
 cc_aconfig_library {
     name: "aconfig_text_flags_c_lib",
     aconfig_declarations: "com.android.text.flags-aconfig",
+}
+
+// Location
+aconfig_declarations {
+    name: "android.location.flags-aconfig",
+    package: "android.location.flags",
+    srcs: [
+        "location/java/android/location/flags/*.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "android.location.flags-aconfig-java",
+    aconfig_declarations: "android.location.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
 // NFC
