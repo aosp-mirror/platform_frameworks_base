@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowInsets.Type.statusBars;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
@@ -137,7 +138,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             Configuration windowDecorConfig) {
         this(context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
-                WindowContainerTransaction::new, new SurfaceControlViewHostFactory() {});
+                WindowContainerTransaction::new, SurfaceControl::new,
+                new SurfaceControlViewHostFactory() {});
     }
 
     WindowDecoration(
@@ -145,17 +147,18 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
-            SurfaceControl taskSurface,
+            @NonNull SurfaceControl taskSurface,
             Configuration windowDecorConfig,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
+            Supplier<SurfaceControl> surfaceControlSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         mContext = context;
         mDisplayController = displayController;
         mTaskOrganizer = taskOrganizer;
         mTaskInfo = taskInfo;
-        mTaskSurface = taskSurface;
+        mTaskSurface = cloneSurfaceControl(taskSurface, surfaceControlSupplier);
         mSurfaceControlBuilderSupplier = surfaceControlBuilderSupplier;
         mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mWindowContainerTransactionSupplier = windowContainerTransactionSupplier;
@@ -453,6 +456,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     public void close() {
         mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);
         releaseViews();
+        mTaskSurface.release();
     }
 
     static int loadDimensionPixelSize(Resources resources, int resourceId) {
@@ -467,6 +471,13 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             return 0;
         }
         return resources.getDimension(resourceId);
+    }
+
+    private static SurfaceControl cloneSurfaceControl(SurfaceControl sc,
+            Supplier<SurfaceControl> surfaceControlSupplier) {
+        final SurfaceControl copy = surfaceControlSupplier.get();
+        copy.copyFrom(sc, "WindowDecoration");
+        return copy;
     }
 
     /**
