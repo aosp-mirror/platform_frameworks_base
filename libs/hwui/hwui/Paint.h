@@ -94,9 +94,10 @@ public:
 
     uint32_t getMinikinLocaleListId() const { return mMinikinLocaleListId; }
 
+    void resetFamilyVariant() { mFamilyVariant.reset(); }
     void setFamilyVariant(minikin::FamilyVariant variant) { mFamilyVariant = variant; }
 
-    minikin::FamilyVariant getFamilyVariant() const { return mFamilyVariant; }
+    std::optional<minikin::FamilyVariant> getFamilyVariant() const { return mFamilyVariant; }
 
     void setStartHyphenEdit(uint32_t startHyphen) {
         mHyphenEdit = minikin::packHyphenEdit(
@@ -171,7 +172,7 @@ private:
     float mWordSpacing = 0;
     std::string mFontFeatureSettings;
     uint32_t mMinikinLocaleListId;
-    minikin::FamilyVariant mFamilyVariant;
+    std::optional<minikin::FamilyVariant> mFamilyVariant;
     uint32_t mHyphenEdit = 0;
     // The native Typeface object has the same lifetime of the Java Typeface
     // object. The Java Paint object holds a strong reference to the Java Typeface
