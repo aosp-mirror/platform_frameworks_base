@@ -4596,6 +4596,7 @@ public class ComputerEngine implements Computer {
         flags = updateFlagsForApplication(flags, userId);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
         final boolean listApex = (flags & MATCH_APEX) != 0;
+        final boolean listArchivedOnly = !listUninstalled && (flags & MATCH_ARCHIVED_PACKAGES) != 0;
 
         enforceCrossUserPermission(
                 callingUid,
@@ -4607,7 +4608,7 @@ public class ComputerEngine implements Computer {
         ArrayList<ApplicationInfo> list;
         final ArrayMap<String, ? extends PackageStateInternal> packageStates =
                 getPackageStates();
-        if (listUninstalled) {
+        if (listUninstalled || listArchivedOnly) {
             list = new ArrayList<>(packageStates.size());
             for (PackageStateInternal ps : packageStates.values()) {
                 ApplicationInfo ai;
@@ -4617,6 +4618,11 @@ public class ComputerEngine implements Computer {
                 }
                 if (ps.getPkg() != null) {
                     if (!listApex && ps.getPkg().isApex()) {
+                        continue;
+                    }
+                    PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
+                    if (listArchivedOnly && !userState.isInstalled()
+                            && userState.getArchiveState() == null) {
                         continue;
                     }
                     if (filterSharedLibPackage(ps, callingUid, userId, flags)) {
