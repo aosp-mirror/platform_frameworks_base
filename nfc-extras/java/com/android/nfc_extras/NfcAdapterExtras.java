@@ -76,9 +76,22 @@ public final class NfcAdapterExtras {
     private final NfcAdapter mAdapter;
     final String mPackageName;
 
+    private static INfcAdapterExtras
+        getNfcAdapterExtrasInterfaceFromNfcAdapter(NfcAdapter adapter) {
+        try {
+            Method method = NfcAdapter.class.getDeclaredMethod("getNfcAdapterExtrasInterface");
+            method.setAccessible(true);
+            return (INfcAdapterExtras) method.invoke(adapter);
+        } catch (SecurityException | NoSuchMethodException | IllegalArgumentException
+                 | IllegalAccessException | IllegalAccessError | InvocationTargetException e) {
+            Log.e(TAG, "Unable to get context from NfcAdapter");
+        }
+        return null;
+    }
+
     /** get service handles */
     private static void initService(NfcAdapter adapter) {
-        final INfcAdapterExtras service = adapter.getNfcAdapterExtrasInterface();
+        final INfcAdapterExtras service = getNfcAdapterExtrasInterfaceFromNfcAdapter(adapter);
         if (service != null) {
             // Leave stale rather than receive a null value.
             sService = service;
