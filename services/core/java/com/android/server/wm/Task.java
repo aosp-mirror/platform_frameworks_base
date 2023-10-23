@@ -241,7 +241,6 @@ class Task extends TaskFragment {
     private static final String ATTR_ROOT_AFFINITY = "root_affinity";
     private static final String ATTR_ROOTHASRESET = "root_has_reset";
     private static final String ATTR_AUTOREMOVERECENTS = "auto_remove_recents";
-    private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
     private static final String ATTR_USERID = "user_id";
     private static final String ATTR_USER_SETUP_COMPLETE = "user_setup_complete";
     private static final String ATTR_EFFECTIVE_UID = "effective_uid";
@@ -344,7 +343,6 @@ class Task extends TaskFragment {
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
     boolean autoRemoveRecents;  // If true, we should automatically remove the task from
                                 // recents when activity finishes
-    boolean askedCompatMode;// Have asked the user about compat mode for this task.
     private boolean mHasBeenVisible; // Set if any activities in the task have been visible
 
     String stringName;      // caching of toString() result.
@@ -617,7 +615,7 @@ class Task extends TaskFragment {
     private Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
-            boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId, int _effectiveUid,
+            boolean _autoRemoveRecents, int _userId, int _effectiveUid,
             String _lastDescription, long lastTimeMoved, boolean neverRelinquishIdentity,
             TaskDescription _lastTaskDescription, PersistedTaskSnapshotData _lastSnapshotData,
             int taskAffiliation, int prevTaskId, int nextTaskId, int callingUid,
@@ -652,7 +650,6 @@ class Task extends TaskFragment {
         rootWasReset = _rootWasReset;
         isAvailable = true;
         autoRemoveRecents = _autoRemoveRecents;
-        askedCompatMode = _askedCompatMode;
         mUserSetupComplete = userSetupComplete;
         effectiveUid = _effectiveUid;
         touchActiveTime();
@@ -3768,8 +3765,8 @@ class Task extends TaskFragment {
             pw.println(")");
         }
         pw.print(prefix); pw.print("Activities="); pw.println(mChildren);
-        if (!askedCompatMode || !inRecents || !isAvailable) {
-            pw.print(prefix); pw.print("askedCompatMode="); pw.print(askedCompatMode);
+        if (!inRecents || !isAvailable) {
+            pw.print(prefix);
             pw.print(" inRecents="); pw.print(inRecents);
             pw.print(" isAvailable="); pw.println(isAvailable);
         }
@@ -3877,7 +3874,6 @@ class Task extends TaskFragment {
         }
         out.attributeBoolean(null, ATTR_ROOTHASRESET, rootWasReset);
         out.attributeBoolean(null, ATTR_AUTOREMOVERECENTS, autoRemoveRecents);
-        out.attributeBoolean(null, ATTR_ASKEDCOMPATMODE, askedCompatMode);
         out.attributeInt(null, ATTR_USERID, mUserId);
         out.attributeBoolean(null, ATTR_USER_SETUP_COMPLETE, mUserSetupComplete);
         out.attributeInt(null, ATTR_EFFECTIVE_UID, effectiveUid);
@@ -3975,7 +3971,6 @@ class Task extends TaskFragment {
         String windowLayoutAffinity = null;
         boolean rootHasReset = false;
         boolean autoRemoveRecents = false;
-        boolean askedCompatMode = false;
         int taskType = 0;
         int userId = 0;
         boolean userSetupComplete = true;
@@ -4035,9 +4030,6 @@ class Task extends TaskFragment {
                     break;
                 case ATTR_AUTOREMOVERECENTS:
                     autoRemoveRecents = Boolean.parseBoolean(attrValue);
-                    break;
-                case ATTR_ASKEDCOMPATMODE:
-                    askedCompatMode = Boolean.parseBoolean(attrValue);
                     break;
                 case ATTR_USERID:
                     userId = Integer.parseInt(attrValue);
@@ -4192,7 +4184,6 @@ class Task extends TaskFragment {
                 .setOrigActivity(origActivity)
                 .setRootWasReset(rootHasReset)
                 .setAutoRemoveRecents(autoRemoveRecents)
-                .setAskedCompatMode(askedCompatMode)
                 .setUserId(userId)
                 .setEffectiveUid(effectiveUid)
                 .setLastDescription(lastDescription)
@@ -6269,7 +6260,6 @@ class Task extends TaskFragment {
         private ComponentName mOrigActivity;
         private boolean mRootWasReset;
         private boolean mAutoRemoveRecents;
-        private boolean mAskedCompatMode;
         private int mUserId;
         private int mEffectiveUid;
         private String mLastDescription;
@@ -6524,11 +6514,6 @@ class Task extends TaskFragment {
             return this;
         }
 
-        private Builder setAskedCompatMode(boolean askedCompatMode) {
-            mAskedCompatMode = askedCompatMode;
-            return this;
-        }
-
         private Builder setAffinityIntent(Intent affinityIntent) {
             mAffinityIntent = affinityIntent;
             return this;
@@ -6661,7 +6646,7 @@ class Task extends TaskFragment {
         Task buildInner() {
             return new Task(mAtmService, mTaskId, mIntent, mAffinityIntent, mAffinity,
                     mRootAffinity, mRealActivity, mOrigActivity, mRootWasReset, mAutoRemoveRecents,
-                    mAskedCompatMode, mUserId, mEffectiveUid, mLastDescription, mLastTimeMoved,
+                    mUserId, mEffectiveUid, mLastDescription, mLastTimeMoved,
                     mNeverRelinquishIdentity, mLastTaskDescription, mLastSnapshotData,
                     mTaskAffiliation, mPrevAffiliateTaskId, mNextAffiliateTaskId, mCallingUid,
                     mCallingPackage, mCallingFeatureId, mResizeMode, mSupportsPictureInPicture,
