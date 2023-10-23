@@ -14,42 +14,44 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.data.repository
+package com.android.systemui.statusbar.notification.domain.interactor
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @SmallTest
-class NotificationExpansionRepositoryTest : SysuiTestCase() {
-    private val underTest = NotificationExpansionRepository()
+class NotificationLaunchAnimationInteractorTest : SysuiTestCase() {
+    private val repository = NotificationLaunchAnimationRepository()
+    private val underTest = NotificationLaunchAnimationInteractor(repository)
 
     @Test
-    fun setIsExpandAnimationRunning_startsAsFalse() = runTest {
-        val latest by collectLastValue(underTest.isExpandAnimationRunning)
+    fun setIsLaunchAnimationRunning_startsAsFalse() = runTest {
+        val latest by collectLastValue(underTest.isLaunchAnimationRunning)
 
         assertThat(latest).isFalse()
     }
 
     @Test
-    fun setIsExpandAnimationRunning_false_emitsTrue() = runTest {
-        val latest by collectLastValue(underTest.isExpandAnimationRunning)
+    fun setIsLaunchAnimationRunning_false_emitsTrue() = runTest {
+        val latest by collectLastValue(underTest.isLaunchAnimationRunning)
 
-        underTest.setIsExpandAnimationRunning(true)
+        underTest.setIsLaunchAnimationRunning(true)
 
         assertThat(latest).isTrue()
     }
 
     @Test
-    fun setIsExpandAnimationRunning_false_emitsFalse() = runTest {
-        val latest by collectLastValue(underTest.isExpandAnimationRunning)
-        underTest.setIsExpandAnimationRunning(true)
+    fun setIsLaunchAnimationRunning_false_emitsFalse() = runTest {
+        val latest by collectLastValue(underTest.isLaunchAnimationRunning)
+        underTest.setIsLaunchAnimationRunning(true)
 
         // WHEN the animation is no longer running
-        underTest.setIsExpandAnimationRunning(false)
+        underTest.setIsLaunchAnimationRunning(false)
 
         // THEN the flow emits false
         assertThat(latest).isFalse()

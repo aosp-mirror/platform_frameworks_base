@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.data.repository
+package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.util.Log
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-
-private const val TAG = "NotificationExpansionRepository"
+import kotlinx.coroutines.flow.StateFlow
 
 /** A repository tracking the status of notification expansion animations. */
 @SysUISingleton
-class NotificationExpansionRepository @Inject constructor() {
-    private val _isExpandAnimationRunning = MutableStateFlow(false)
+class NotificationLaunchAnimationInteractor
+@Inject
+constructor(private val repository: NotificationLaunchAnimationRepository) {
 
     /**
      * Emits true if an animation that expands a notification object into an opening window is
@@ -37,13 +35,18 @@ class NotificationExpansionRepository @Inject constructor() {
      *
      * See [com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController].
      */
-    val isExpandAnimationRunning: Flow<Boolean> = _isExpandAnimationRunning.asStateFlow()
+    val isLaunchAnimationRunning: StateFlow<Boolean>
+        get() = repository.isLaunchAnimationRunning
 
-    /** Sets whether the notification expansion animation is currently running. */
-    fun setIsExpandAnimationRunning(running: Boolean) {
+    /** Sets whether the notification expansion launch animation is currently running. */
+    fun setIsLaunchAnimationRunning(running: Boolean) {
         if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
-            Log.d(TAG, "setIsExpandAnimationRunning(running=$running)")
+            Log.d(TAG, "setIsLaunchAnimationRunning(running=$running)")
         }
-        _isExpandAnimationRunning.value = running
+        repository.isLaunchAnimationRunning.value = running
+    }
+
+    companion object {
+        private const val TAG = "NotificationLaunchAnimationInteractor"
     }
 }
