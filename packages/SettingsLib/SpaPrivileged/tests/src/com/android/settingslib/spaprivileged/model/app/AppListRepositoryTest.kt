@@ -47,6 +47,8 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import android.content.pm.FakeFeatureFlagsImpl
+import android.content.pm.Flags
 
 @RunWith(AndroidJUnit4::class)
 class AppListRepositoryTest {
@@ -268,6 +270,40 @@ class AppListRepositoryTest {
     }
 
     @Test
+    fun loadApps_archivedAppsEnabled() = runTest {
+        val fakeFlags = FakeFeatureFlagsImpl()
+        fakeFlags.setFlag(Flags.FLAG_ARCHIVING, true)
+        mockInstalledApplications(listOf(NORMAL_APP, ARCHIVED_APP), ADMIN_USER_ID)
+        val repository = AppListRepositoryImpl(context, fakeFlags)
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).containsExactly(NORMAL_APP, ARCHIVED_APP)
+        argumentCaptor<ApplicationInfoFlags> {
+            verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
+            assertThat(firstValue.value).isEqualTo(
+                (PackageManager.MATCH_DISABLED_COMPONENTS or
+                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong() or
+                    PackageManager.MATCH_ARCHIVED_PACKAGES
+            )
+        }
+    }
+
+    @Test
+    fun loadApps_archivedAppsDisabled() = runTest {
+        mockInstalledApplications(listOf(NORMAL_APP), ADMIN_USER_ID)
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).containsExactly(NORMAL_APP)
+        argumentCaptor<ApplicationInfoFlags> {
+            verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
+            assertThat(firstValue.value).isEqualTo(
+                PackageManager.MATCH_DISABLED_COMPONENTS or
+                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+            )
+        }
+    }
+
+    @Test
     fun showSystemPredicate_showSystem() = runTest {
         val app = SYSTEM_APP
 
@@ -389,6 +425,12 @@ class AppListRepositoryTest {
         val IN_LAUNCHER_APP = ApplicationInfo().apply {
             packageName = "app.in.launcher"
             flags = ApplicationInfo.FLAG_SYSTEM
+        }
+
+        val ARCHIVED_APP = ApplicationInfo().apply {
+            packageName = "archived.app"
+            flags = ApplicationInfo.FLAG_SYSTEM
+            isArchived = true
         }
 
         fun resolveInfoOf(packageName: String) = ResolveInfo().apply {
