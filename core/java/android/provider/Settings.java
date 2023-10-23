@@ -10308,6 +10308,13 @@ public final class Settings {
         @Readable
         public static final String SHOW_NOTIFICATION_SNOOZE = "show_notification_snooze";
 
+       /**
+         * 1 if it is allowed to remove the primary GAIA account. 0 by default.
+         * @hide
+         */
+        public static final String ALLOW_PRIMARY_GAIA_ACCOUNT_REMOVAL_FOR_TESTS =
+                "allow_primary_gaia_account_removal_for_tests";
+
         /**
          * List of TV inputs that are currently hidden. This is a string
          * containing the IDs of all hidden TV inputs. Each ID is encoded by

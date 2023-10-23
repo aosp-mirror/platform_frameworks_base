@@ -4369,6 +4369,15 @@
          UI is handled by ActivityManagerService -->
     <bool name="config_customUserSwitchUi">false</bool>
 
+    <!-- Flag specifying whether the first account added can be removed or renamed. By default,
+    this ability is enabled. When false, user will not be able to remove the first account. -->
+    <bool name="config_canRemoveFirstAccount">true</bool>
+
+    <!-- Used together with config_canRemoveOrRenameFirstAccount when set to false. By default, this
+    is blank. Check if the first account is of this account type. If it is, then disable
+    remove/rename. -->
+    <string name="config_accountTypeToKeepFirstAccount"></string>
+
     <!-- A array of regex to treat a SMS as VVM SMS if the message body matches.
          Each item represents an entry, which consists of two parts:
          a comma (,) separated list of MCCMNC the regex applies to, followed by a semicolon (;), and
