@@ -216,6 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Khetha iphrofayela"</string>
     <string name="category_personal" msgid="6236798763159385225">"Okomuntu siqu"</string>
     <string name="category_work" msgid="4014193632325996115">"Umsebenzi"</string>
+    <string name="category_private" msgid="4244892185452788977">"Okuyimfihlo"</string>
     <string name="category_clone" msgid="1554511758987195974">"Yenza i-clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Izinketho Zonjiniyela"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Nika amandla izinketho zonjiniyela"</string>

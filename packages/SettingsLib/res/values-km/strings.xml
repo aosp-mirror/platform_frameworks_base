@@ -216,6 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ជ្រើសរើស​កម្រងព័ត៌មាន"</string>
     <string name="category_personal" msgid="6236798763159385225">"ផ្ទាល់ខ្លួន"</string>
     <string name="category_work" msgid="4014193632325996115">"ការងារ"</string>
+    <string name="category_private" msgid="4244892185452788977">"ឯកជន"</string>
     <string name="category_clone" msgid="1554511758987195974">"ក្លូន"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ជម្រើសសម្រាប់អ្នកអភិវឌ្ឍន៍"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"បើកដំណើរការជម្រើសអ្នកអភិវឌ្ឍន៍"</string>
