@@ -2094,7 +2094,8 @@ public final class Display {
         private final int mModeId;
         private final int mWidth;
         private final int mHeight;
-        private final float mRefreshRate;
+        private final float mPeakRefreshRate;
+        private final float mVsyncRate;
         @NonNull
         private final float[] mAlternativeRefreshRates;
         @NonNull
@@ -2106,7 +2107,15 @@ public final class Display {
          */
         @TestApi
         public Mode(int width, int height, float refreshRate) {
-            this(INVALID_MODE_ID, width, height, refreshRate, new float[0], new int[0]);
+            this(INVALID_MODE_ID, width, height, refreshRate, refreshRate, new float[0],
+                    new int[0]);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int width, int height, float refreshRate, float vsyncRate) {
+            this(INVALID_MODE_ID, width, height, refreshRate, vsyncRate, new float[0], new int[0]);
         }
 
         /**
@@ -2114,18 +2123,29 @@ public final class Display {
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Mode(int modeId, int width, int height, float refreshRate) {
-            this(modeId, width, height, refreshRate, new float[0], new int[0]);
+            this(modeId, width, height, refreshRate, refreshRate, new float[0], new int[0]);
         }
 
         /**
          * @hide
          */
         public Mode(int modeId, int width, int height, float refreshRate,
+                    float[] alternativeRefreshRates,
+                    @HdrCapabilities.HdrType int[] supportedHdrTypes) {
+            this(modeId, width, height, refreshRate, refreshRate, alternativeRefreshRates,
+                    supportedHdrTypes);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int modeId, int width, int height, float refreshRate, float vsyncRate,
                 float[] alternativeRefreshRates, @HdrCapabilities.HdrType int[] supportedHdrTypes) {
             mModeId = modeId;
             mWidth = width;
             mHeight = height;
-            mRefreshRate = refreshRate;
+            mPeakRefreshRate = refreshRate;
+            mVsyncRate = vsyncRate;
             mAlternativeRefreshRates =
                     Arrays.copyOf(alternativeRefreshRates, alternativeRefreshRates.length);
             Arrays.sort(mAlternativeRefreshRates);
@@ -2176,7 +2196,17 @@ public final class Display {
          * Returns the refresh rate in frames per second.
          */
         public float getRefreshRate() {
-            return mRefreshRate;
+            return mPeakRefreshRate;
+        }
+
+        /**
+         * Returns the vsync rate in frames per second.
+         * The physical vsync rate may be higher than the refresh rate, as the refresh rate may be
+         * constrained by the system.
+         * @hide
+         */
+        public float getVsyncRate() {
+            return mVsyncRate;
         }
 
         /**
@@ -2222,7 +2252,7 @@ public final class Display {
         public boolean matches(int width, int height, float refreshRate) {
             return mWidth == width &&
                     mHeight == height &&
-                    Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate);
+                    Float.floatToIntBits(mPeakRefreshRate) == Float.floatToIntBits(refreshRate);
         }
 
         /**
@@ -2235,9 +2265,9 @@ public final class Display {
          *
          * @hide
          */
-        public boolean matchesIfValid(int width, int height, float refreshRate) {
+        public boolean matchesIfValid(int width, int height, float peakRefreshRate) {
             if (!isWidthValid(width) && !isHeightValid(height)
-                    && !isRefreshRateValid(refreshRate)) {
+                    && !isRefreshRateValid(peakRefreshRate)) {
                 return false;
             }
             if (isWidthValid(width) != isHeightValid(height)) {
@@ -2245,8 +2275,9 @@ public final class Display {
             }
             return (!isWidthValid(width) || mWidth == width)
                     && (!isHeightValid(height) || mHeight == height)
-                    && (!isRefreshRateValid(refreshRate)
-                    || Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate));
+                    && (!isRefreshRateValid(peakRefreshRate)
+                    || Float.floatToIntBits(mPeakRefreshRate)
+                            == Float.floatToIntBits(peakRefreshRate));
         }
 
         /**
@@ -2265,7 +2296,7 @@ public final class Display {
          * @hide
          */
         public boolean isRefreshRateSet() {
-            return mRefreshRate != INVALID_DISPLAY_REFRESH_RATE;
+            return mPeakRefreshRate != INVALID_DISPLAY_REFRESH_RATE;
         }
 
         /**
@@ -2286,7 +2317,8 @@ public final class Display {
                 return false;
             }
             Mode that = (Mode) other;
-            return mModeId == that.mModeId && matches(that.mWidth, that.mHeight, that.mRefreshRate)
+            return mModeId == that.mModeId
+                    && matches(that.mWidth, that.mHeight, that.mPeakRefreshRate)
                     && Arrays.equals(mAlternativeRefreshRates, that.mAlternativeRefreshRates)
                     && Arrays.equals(mSupportedHdrTypes, that.mSupportedHdrTypes);
         }
@@ -2297,7 +2329,8 @@ public final class Display {
             hash = hash * 17 + mModeId;
             hash = hash * 17 + mWidth;
             hash = hash * 17 + mHeight;
-            hash = hash * 17 + Float.floatToIntBits(mRefreshRate);
+            hash = hash * 17 + Float.floatToIntBits(mPeakRefreshRate);
+            hash = hash * 17 + Float.floatToIntBits(mVsyncRate);
             hash = hash * 17 + Arrays.hashCode(mAlternativeRefreshRates);
             hash = hash * 17 + Arrays.hashCode(mSupportedHdrTypes);
             return hash;
@@ -2309,7 +2342,8 @@ public final class Display {
                     .append("id=").append(mModeId)
                     .append(", width=").append(mWidth)
                     .append(", height=").append(mHeight)
-                    .append(", fps=").append(mRefreshRate)
+                    .append(", fps=").append(mPeakRefreshRate)
+                    .append(", vsync=").append(mVsyncRate)
                     .append(", alternativeRefreshRates=")
                     .append(Arrays.toString(mAlternativeRefreshRates))
                     .append(", supportedHdrTypes=")
@@ -2324,8 +2358,8 @@ public final class Display {
         }
 
         private Mode(Parcel in) {
-            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.createFloatArray(),
-                    in.createIntArray());
+            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.readFloat(),
+                    in.createFloatArray(), in.createIntArray());
         }
 
         @Override
@@ -2333,7 +2367,8 @@ public final class Display {
             out.writeInt(mModeId);
             out.writeInt(mWidth);
             out.writeInt(mHeight);
-            out.writeFloat(mRefreshRate);
+            out.writeFloat(mPeakRefreshRate);
+            out.writeFloat(mVsyncRate);
             out.writeFloatArray(mAlternativeRefreshRates);
             out.writeIntArray(mSupportedHdrTypes);
         }
