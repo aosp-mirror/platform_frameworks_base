@@ -370,17 +370,12 @@ java_defaults {
         // TODO(b/120066492): remove default_television.xml when the build system
         // propagates "required" properly.
         "default_television.xml",
-        "framework-platform-compat-config",
         // TODO(b/120066492): remove gps_debug and protolog.conf.json when the build
         // system propagates "required" properly.
         "gps_debug.conf",
-        "icu4j-platform-compat-config",
         "protolog.conf.json.gz",
-        "services-platform-compat-config",
-        "TeleService-platform-compat-config",
-        "documents-ui-compat-config",
-        "calendar-provider-compat-config",
-        "contacts-provider-platform-compat-config",
+        // any install dependencies should go into framework-minus-apex-install-dependencies
+        // rather than here to avoid bloating incremental build time
     ],
     libs: [
         "androidx.annotation_annotation",
@@ -486,6 +481,20 @@ java_library {
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
+}
+
+java_library {
+    name: "framework-minus-apex-install-dependencies",
+    required: [
+        "framework-minus-apex",
+        "framework-platform-compat-config",
+        "services-platform-compat-config",
+        "icu4j-platform-compat-config",
+        "TeleService-platform-compat-config",
+        "documents-ui-compat-config",
+        "calendar-provider-compat-config",
+        "contacts-provider-platform-compat-config",
+    ],
 }
 
 platform_compat_config {
