@@ -1439,6 +1439,7 @@ public class TransitionTests extends WindowTestsBase {
         activity1.setVisibleRequested(true);
         activity1.setVisible(true);
         activity2.setVisibleRequested(false);
+        activity1.setState(ActivityRecord.State.RESUMED, "test");
 
         // Using abort to force-finish the sync (since we can't wait for drawing in unit test).
         // We didn't call abort on the transition itself, so it will still run onTransactionReady
@@ -1517,6 +1518,8 @@ public class TransitionTests extends WindowTestsBase {
         // Make sure activity1 visibility was committed
         assertFalse(activity1.isVisible());
         assertFalse(activity1.app.hasActivityInVisibleTask());
+        // Make sure the userLeaving is true and the resuming activity is given,
+        verify(task1).startPausing(eq(true), anyBoolean(), eq(activity2), any());
 
         verify(taskSnapshotController, times(1)).recordSnapshot(eq(task1));
         assertTrue(enteringAnimReports.contains(activity2));
