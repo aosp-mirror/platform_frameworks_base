@@ -16,6 +16,7 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 
 import android.annotation.FlaggedApi;
@@ -460,6 +461,43 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Set the minimum font metrics used for line spacing.
+         *
+         * <p>
+         * {@code null} is the default value. If {@code null} is set or left as default, the
+         * font metrics obtained by {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)} is
+         * used.
+         *
+         * <p>
+         * The minimum meaning here is the minimum value of line spacing: maximum value of
+         * {@link Paint#ascent()}, minimum value of {@link Paint#descent()}.
+         *
+         * <p>
+         * By setting this value, each line will have minimum line spacing regardless of the text
+         * rendered. For example, usually Japanese script has larger vertical metrics than Latin
+         * script. By setting the metrics obtained by
+         * {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)} for Japanese or leave it
+         * {@code null} if the Paint's locale is Japanese, the line spacing for Japanese is reserved
+         * if the text is an English text. If the vertical metrics of the text is larger than
+         * Japanese, for example Burmese, the bigger font metrics is used.
+         *
+         * @param minimumFontMetrics A minimum font metrics. Passing {@code null} for using the
+         *                          value obtained by
+         *                          {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)}
+         * @see android.widget.TextView#setMinimumFontMetrics(Paint.FontMetrics)
+         * @see android.widget.TextView#getMinimumFontMetrics()
+         * @see Layout#getMinimumFontMetrics()
+         * @see Layout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+         * @see DynamicLayout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+         */
+        @NonNull
+        @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+        public Builder setMinimumFontMetrics(@Nullable Paint.FontMetrics minimumFontMetrics) {
+            mMinimumFontMetrics = minimumFontMetrics;
+            return this;
+        }
+
+        /**
          * Build the {@link StaticLayout} after options have been set.
          *
          * <p>Note: the builder object must not be reused in any way after calling this
@@ -520,6 +558,7 @@ public class StaticLayout extends Layout {
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
         private boolean mUseBoundsForWidth;
         private boolean mCalculateBounds;
+        @Nullable private Paint.FontMetrics mMinimumFontMetrics;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -550,7 +589,8 @@ public class StaticLayout extends Layout {
                 null,  // rightIndents
                 JUSTIFICATION_MODE_NONE,
                 null,  // lineBreakConfig,
-                false  // useBoundsForWidth
+                false,  // useBoundsForWidth
+                null  // minimumFontMetrics
         );
 
         mColumns = COLUMNS_ELLIPSIZE;
@@ -627,7 +667,8 @@ public class StaticLayout extends Layout {
                 b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd,
                 b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
                 b.mMaxLines, b.mBreakStrategy, b.mHyphenationFrequency, b.mLeftIndents,
-                b.mRightIndents, b.mJustificationMode, b.mLineBreakConfig, b.mUseBoundsForWidth);
+                b.mRightIndents, b.mJustificationMode, b.mLineBreakConfig, b.mUseBoundsForWidth,
+                b.mMinimumFontMetrics);
 
         mColumns = columnSize;
         if (b.mEllipsize != null) {
@@ -709,6 +750,35 @@ public class StaticLayout extends Layout {
             }
         } else {
             indents = null;
+        }
+
+        int defaultTop;
+        int defaultAscent;
+        int defaultDescent;
+        int defaultBottom;
+        if (ClientFlags.fixLineHeightForLocale()) {
+            if (b.mMinimumFontMetrics != null) {
+                defaultTop = (int) Math.floor(b.mMinimumFontMetrics.top);
+                defaultAscent = Math.round(b.mMinimumFontMetrics.ascent);
+                defaultDescent = Math.round(b.mMinimumFontMetrics.descent);
+                defaultBottom = (int) Math.ceil(b.mMinimumFontMetrics.bottom);
+            } else {
+                paint.getFontMetricsIntForLocale(fm);
+                defaultTop = fm.top;
+                defaultAscent = fm.ascent;
+                defaultDescent = fm.descent;
+                defaultBottom = fm.bottom;
+            }
+
+            // Because the font metrics is provided by public APIs, adjust the top/bottom with
+            // ascent/descent: top must be smaller than ascent, bottom must be larger than descent.
+            defaultTop = Math.min(defaultTop, defaultAscent);
+            defaultBottom = Math.max(defaultBottom, defaultDescent);
+        } else {
+            defaultTop = 0;
+            defaultAscent = 0;
+            defaultDescent = 0;
+            defaultBottom = 0;
         }
 
         final LineBreaker lineBreaker = new LineBreaker.Builder()
@@ -889,7 +959,10 @@ public class StaticLayout extends Layout {
             // measuring
             int here = paraStart;
 
-            int fmTop = 0, fmBottom = 0, fmAscent = 0, fmDescent = 0;
+            int fmTop = defaultTop;
+            int fmBottom = defaultBottom;
+            int fmAscent = defaultAscent;
+            int fmDescent = defaultDescent;
             int fmCacheIndex = 0;
             int spanEndCacheIndex = 0;
             int breakIndex = 0;
@@ -982,7 +1055,15 @@ public class StaticLayout extends Layout {
                 && mLineCount < mMaximumVisibleLineCount) {
             final MeasuredParagraph measuredPara =
                     MeasuredParagraph.buildForBidi(source, bufEnd, bufEnd, textDir, null);
-            paint.getFontMetricsInt(fm);
+            if (ClientFlags.fixLineHeightForLocale()) {
+                fm.top = defaultTop;
+                fm.ascent = defaultAscent;
+                fm.descent = defaultDescent;
+                fm.bottom = defaultBottom;
+            } else {
+                paint.getFontMetricsInt(fm);
+            }
+
             v = out(source,
                     bufEnd, bufEnd, fm.ascent, fm.descent,
                     fm.top, fm.bottom,

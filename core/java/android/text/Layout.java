@@ -16,6 +16,7 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 
 import android.annotation.FlaggedApi;
@@ -287,7 +288,7 @@ public abstract class Layout {
         this(text, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingMult, spacingAdd, false, false, 0, null, Integer.MAX_VALUE,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null, null,
-                JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false);
+                JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false, null);
     }
 
     /**
@@ -336,7 +337,8 @@ public abstract class Layout {
             int[] rightIndents,
             int justificationMode,
             LineBreakConfig lineBreakConfig,
-            boolean useBoundsForWidth
+            boolean useBoundsForWidth,
+            Paint.FontMetrics minimumFontMetrics
     ) {
 
         if (width < 0)
@@ -371,6 +373,7 @@ public abstract class Layout {
         mJustificationMode = justificationMode;
         mLineBreakConfig = lineBreakConfig;
         mUseBoundsForWidth = useBoundsForWidth;
+        mMinimumFontMetrics = minimumFontMetrics;
     }
 
     /**
@@ -3332,6 +3335,7 @@ public abstract class Layout {
     private int mJustificationMode;
     private LineBreakConfig mLineBreakConfig;
     private boolean mUseBoundsForWidth;
+    private @Nullable Paint.FontMetrics mMinimumFontMetrics;
 
     /** @hide */
     @IntDef(prefix = { "DIR_" }, value = {
@@ -3787,12 +3791,48 @@ public abstract class Layout {
             return this;
         }
 
+        /**
+         * Set the minimum font metrics used for line spacing.
+         *
+         * <p>
+         * {@code null} is the default value. If {@code null} is set or left it as default, the font
+         * metrics obtained by {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)} is used.
+         *
+         * <p>
+         * The minimum meaning here is the minimum value of line spacing: maximum value of
+         * {@link Paint#ascent()}, minimum value of {@link Paint#descent()}.
+         *
+         * <p>
+         * By setting this value, each line will have minimum line spacing regardless of the text
+         * rendered. For example, usually Japanese script has larger vertical metrics than Latin
+         * script. By setting the metrics obtained by
+         * {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)} for Japanese or leave it
+         * {@code null} if the Paint's locale is Japanese, the line spacing for Japanese is reserved
+         * if the text is an English text. If the vertical metrics of the text is larger than
+         * Japanese, for example Burmese, the bigger font metrics is used.
+         *
+         * @param minimumFontMetrics A minimum font metrics. Passing {@code null} for using the
+         *                          value obtained by
+         *                          {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)}
+         * @see android.widget.TextView#setMinimumFontMetrics(Paint.FontMetrics)
+         * @see android.widget.TextView#getMinimumFontMetrics()
+         * @see Layout#getMinimumFontMetrics()
+         * @see StaticLayout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+         * @see DynamicLayout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+         */
+        @NonNull
+        @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+        public Builder setMinimumFontMetrics(@Nullable Paint.FontMetrics minimumFontMetrics) {
+            mMinimumFontMetrics = minimumFontMetrics;
+            return this;
+        }
+
         private BoringLayout.Metrics isBoring() {
             if (mStart != 0 || mEnd != mText.length()) {  // BoringLayout only support entire text.
                 return null;
             }
             BoringLayout.Metrics metrics = BoringLayout.isBoring(mText, mPaint, mTextDir,
-                    mFallbackLineSpacing, null);
+                    mFallbackLineSpacing, mMinimumFontMetrics, null);
             if (metrics == null) {
                 return null;
             }
@@ -3833,7 +3873,8 @@ public abstract class Layout {
                         mText, mPaint, mWidth, mAlignment, mTextDir, mSpacingMult, mSpacingAdd,
                         mIncludePad, mFallbackLineSpacing, mEllipsizedWidth, mEllipsize, mMaxLines,
                         mBreakStrategy, mHyphenationFrequency, mLeftIndents, mRightIndents,
-                        mJustificationMode, mLineBreakConfig, metrics, mUseBoundsForWidth);
+                        mJustificationMode, mLineBreakConfig, metrics, mUseBoundsForWidth,
+                        mMinimumFontMetrics);
             }
         }
 
@@ -3858,6 +3899,7 @@ public abstract class Layout {
         private int mJustificationMode = JUSTIFICATION_MODE_NONE;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
         private boolean mUseBoundsForWidth;
+        private Paint.FontMetrics mMinimumFontMetrics;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -4163,5 +4205,23 @@ public abstract class Layout {
     @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public boolean getUseBoundsForWidth() {
         return mUseBoundsForWidth;
+    }
+
+    /**
+     * Get the minimum font metrics used for line spacing.
+     *
+     * @see android.widget.TextView#setMinimumFontMetrics(Paint.FontMetrics)
+     * @see android.widget.TextView#getMinimumFontMetrics()
+     * @see Layout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+     * @see StaticLayout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+     * @see DynamicLayout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+     *
+     * @return a minimum font metrics. {@code null} for using the value obtained by
+     *         {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)}
+     */
+    @Nullable
+    @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+    public Paint.FontMetrics getMinimumFontMetrics() {
+        return mMinimumFontMetrics;
     }
 }
