@@ -6370,7 +6370,6 @@ public abstract class Context {
      * @see android.remoteauth.RemoteAuthManager
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String REMOTE_AUTH_SERVICE = "remote_auth";
 
     /**
