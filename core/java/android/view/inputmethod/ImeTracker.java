@@ -172,7 +172,6 @@ public interface ImeTracker {
             PHASE_CLIENT_HANDLE_HIDE_INSETS,
             PHASE_CLIENT_APPLY_ANIMATION,
             PHASE_CLIENT_CONTROL_ANIMATION,
-            PHASE_CLIENT_DISABLED_USER_ANIMATION,
             PHASE_CLIENT_COLLECT_SOURCE_CONTROLS,
             PHASE_CLIENT_INSETS_CONSUMER_REQUEST_SHOW,
             PHASE_CLIENT_REQUEST_IME_SHOW,
@@ -291,9 +290,6 @@ public interface ImeTracker {
 
     /** Started the IME window insets show animation. */
     int PHASE_CLIENT_CONTROL_ANIMATION = ImeProtoEnums.PHASE_CLIENT_CONTROL_ANIMATION;
-
-    /** Checked that the IME is controllable. */
-    int PHASE_CLIENT_DISABLED_USER_ANIMATION = ImeProtoEnums.PHASE_CLIENT_DISABLED_USER_ANIMATION;
 
     /** Collecting insets source controls. */
     int PHASE_CLIENT_COLLECT_SOURCE_CONTROLS = ImeProtoEnums.PHASE_CLIENT_COLLECT_SOURCE_CONTROLS;
