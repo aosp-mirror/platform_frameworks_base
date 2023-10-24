@@ -26,6 +26,8 @@ import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
 
@@ -40,6 +42,9 @@ import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -52,6 +57,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.ImageButton;
 
 import androidx.test.core.view.MotionEventBuilder;
 import androidx.test.filters.SmallTest;
@@ -90,6 +96,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 @SmallTest
@@ -755,6 +762,86 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         }
         Assert.assertTrue("Did not log the captions tooltip dismiss button click.",
                 foundCaptionLog);
+    }
+
+    @Test
+    public void turnOnDnD_volumeSliderIconChangesToDnd() {
+        State state = createShellState();
+        state.zenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
+
+        mDialog.onStateChangedH(state);
+        mTestableLooper.processAllMessages();
+
+        boolean foundDnDIcon = findDndIconAmongVolumeRows();
+        assertTrue(foundDnDIcon);
+    }
+
+    @Test
+    public void turnOffDnD_volumeSliderIconIsNotDnd() {
+        State state = createShellState();
+        state.zenMode = Settings.Global.ZEN_MODE_OFF;
+
+        mDialog.onStateChangedH(state);
+        mTestableLooper.processAllMessages();
+
+        boolean foundDnDIcon = findDndIconAmongVolumeRows();
+        assertFalse(foundDnDIcon);
+    }
+
+    /**
+     * @return true if at least one volume row has the DND icon
+     */
+    private boolean findDndIconAmongVolumeRows() {
+        ViewGroup volumeDialogRows = mDialog.getDialogView().findViewById(R.id.volume_dialog_rows);
+        assumeNotNull(volumeDialogRows);
+        Drawable expected =  getContext().getDrawable(com.android.internal.R.drawable.ic_qs_dnd);
+        boolean foundDnDIcon = false;
+        final int rowCount = volumeDialogRows.getChildCount();
+        // we don't make assumptions about the position of the dnd row
+        for (int i = 0; i < rowCount && !foundDnDIcon; i++) {
+            View volumeRow = volumeDialogRows.getChildAt(i);
+            ImageButton rowIcon = volumeRow.findViewById(R.id.volume_row_icon);
+            assertNotNull(rowIcon);
+
+            // VolumeDialogImpl changes tint and alpha in a private method, so we clear those here.
+            rowIcon.setImageTintList(null);
+            rowIcon.setAlpha(0xFF);
+
+            Drawable actual = rowIcon.getDrawable();
+            foundDnDIcon |= areDrawablesEqual(expected, actual);
+        }
+        return foundDnDIcon;
+    }
+
+    private boolean areDrawablesEqual(Drawable drawable1, Drawable drawable2) {
+        int size = 100;
+        Bitmap bm1 = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Bitmap bm2 = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        Canvas canvas1 = new Canvas(bm1);
+        Canvas canvas2 = new Canvas(bm2);
+
+        drawable1.setBounds(0, 0, size, size);
+        drawable2.setBounds(0, 0, size, size);
+
+        drawable1.draw(canvas1);
+        drawable2.draw(canvas2);
+
+        boolean areBitmapsEqual = areBitmapsEqual(bm1, bm2);
+        bm1.recycle();
+        bm2.recycle();
+        return areBitmapsEqual;
+    }
+
+    private boolean areBitmapsEqual(Bitmap a, Bitmap b) {
+        if (a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight()) return false;
+        int w = a.getWidth();
+        int h = a.getHeight();
+        int[] aPix = new int[w * h];
+        int[] bPix = new int[w * h];
+        a.getPixels(aPix, 0, w, 0, 0, w, h);
+        b.getPixels(bPix, 0, w, 0, 0, w, h);
+        return Arrays.equals(aPix, bPix);
     }
 
     @After
