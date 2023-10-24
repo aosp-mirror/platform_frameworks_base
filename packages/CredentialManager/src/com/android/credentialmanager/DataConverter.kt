@@ -336,7 +336,10 @@ class GetFlowUtils {
             return result
         }
 
-        private fun parseCredentialEntryFromSlice(slice: Slice): CredentialEntry? {
+        /**
+         * @hide
+         */
+        fun parseCredentialEntryFromSlice(slice: Slice): CredentialEntry? {
             try {
                 when (slice.spec?.type) {
                     TYPE_PASSWORD_CREDENTIAL -> return PasswordCredentialEntry.fromSlice(slice)!!
