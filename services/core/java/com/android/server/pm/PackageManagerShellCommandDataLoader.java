@@ -304,10 +304,6 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         public boolean onPrepareImage(@NonNull Collection<InstallationFile> addedFiles,
                 @NonNull Collection<String> removedFiles) {
             ShellCommand shellCommand = lookupShellCommand(mParams.getArguments());
-            if (shellCommand == null) {
-                Slog.e(TAG, "Missing shell command.");
-                return false;
-            }
             try {
                 for (InstallationFile file : addedFiles) {
                     Metadata metadata = Metadata.fromByteArray(file.getMetadata());
@@ -317,11 +313,19 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
                     }
                     switch (metadata.getMode()) {
                         case Metadata.STDIN: {
+                            if (shellCommand == null) {
+                                Slog.e(TAG, "Missing shell command for Metadata.STDIN.");
+                                return false;
+                            }
                             final ParcelFileDescriptor inFd = getStdInPFD(shellCommand);
                             mConnector.writeData(file.getName(), 0, file.getLengthBytes(), inFd);
                             break;
                         }
                         case Metadata.LOCAL_FILE: {
+                            if (shellCommand == null) {
+                                Slog.e(TAG, "Missing shell command for Metadata.LOCAL_FILE.");
+                                return false;
+                            }
                             ParcelFileDescriptor incomingFd = null;
                             try {
                                 final String filePath = new String(metadata.getData(),
