@@ -48,12 +48,11 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
-import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.dagger.CentralSurfacesDependenciesModule;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
@@ -66,7 +65,6 @@ import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.ListenerSet;
-import com.android.systemui.util.kotlin.JavaAdapter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -80,7 +78,7 @@ import java.util.function.Consumer;
  * interaction, keeping track of notifications to remove when NotificationPresenter is collapsed,
  * and handling clicks on remote views.
  */
-public class NotificationRemoteInputManager implements CoreStartable {
+public class NotificationRemoteInputManager implements Dumpable {
     public static final boolean ENABLE_REMOTE_INPUT =
             SystemProperties.getBoolean("debug.enable_remote_input", true);
     public static boolean FORCE_REMOTE_INPUT_HISTORY =
@@ -96,8 +94,6 @@ public class NotificationRemoteInputManager implements CoreStartable {
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final PowerInteractor mPowerInteractor;
     private final ActionClickLogger mLogger;
-    private final JavaAdapter mJavaAdapter;
-    private final ShadeInteractor mShadeInteractor;
     protected final Context mContext;
     protected final NotifPipelineFlags mNotifPipelineFlags;
     private final UserManager mUserManager;
@@ -265,8 +261,7 @@ public class NotificationRemoteInputManager implements CoreStartable {
             RemoteInputControllerLogger remoteInputControllerLogger,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger logger,
-            JavaAdapter javaAdapter,
-            ShadeInteractor shadeInteractor) {
+            DumpManager dumpManager) {
         mContext = context;
         mNotifPipelineFlags = notifPipelineFlags;
         mLockscreenUserManager = lockscreenUserManager;
@@ -274,8 +269,6 @@ public class NotificationRemoteInputManager implements CoreStartable {
         mVisibilityProvider = visibilityProvider;
         mPowerInteractor = powerInteractor;
         mLogger = logger;
-        mJavaAdapter = javaAdapter;
-        mShadeInteractor = shadeInteractor;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
@@ -284,25 +277,8 @@ public class NotificationRemoteInputManager implements CoreStartable {
         mRemoteInputUriController = remoteInputUriController;
         mRemoteInputControllerLogger = remoteInputControllerLogger;
         mClickNotifier = clickNotifier;
-    }
 
-    @Override
-    public void start() {
-        mJavaAdapter.alwaysCollectFlow(mShadeInteractor.isAnyExpanded(),
-                this::onShadeOrQsExpanded);
-    }
-
-    private void onShadeOrQsExpanded(boolean expanded) {
-        if (expanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
-            try {
-                mBarService.clearNotificationEffects();
-            } catch (RemoteException e) {
-                // Won't fail unless the world has ended.
-            }
-        }
-        if (!expanded) {
-            onPanelCollapsed();
-        }
+        dumpManager.registerDumpable(this);
     }
 
     /** Add a listener for various remote input events.  Works with NEW pipeline only. */

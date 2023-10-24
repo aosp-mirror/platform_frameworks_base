@@ -34,7 +34,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
-import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -45,7 +45,6 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
-import com.android.systemui.util.kotlin.JavaAdapter;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,8 +55,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-
-import kotlinx.coroutines.flow.StateFlowKt;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -73,9 +70,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;
     @Mock private AccessibilityManagerWrapper mAccessibilityManagerWrapper;
+    @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private UiEventLogger mUiEventLogger;
-    @Mock private JavaAdapter mJavaAdapter;
-    @Mock private ShadeInteractor mShadeInteractor;
 
     private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
@@ -89,8 +85,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 Handler handler,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger,
-                JavaAdapter javaAdapter,
-                ShadeInteractor shadeInteractor
+                ShadeExpansionStateManager shadeExpansionStateManager
         ) {
             super(
                     context,
@@ -103,8 +98,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     handler,
                     accessibilityManagerWrapper,
                     uiEventLogger,
-                    javaAdapter,
-                    shadeInteractor
+                    shadeExpansionStateManager
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
@@ -123,8 +117,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mTestHandler,
                 mAccessibilityManagerWrapper,
                 mUiEventLogger,
-                mJavaAdapter,
-                mShadeInteractor
+                mShadeExpansionStateManager
         );
     }
 
@@ -136,7 +129,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Before
     @Override
     public void setUp() {
-        when(mShadeInteractor.isAnyExpanded()).thenReturn(StateFlowKt.MutableStateFlow(false));
         final AccessibilityManagerWrapper accessibilityMgr =
                 mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
         when(accessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))

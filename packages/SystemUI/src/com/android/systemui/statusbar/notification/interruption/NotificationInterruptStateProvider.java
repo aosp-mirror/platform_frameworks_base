@@ -180,9 +180,4 @@ public interface NotificationInterruptStateProvider {
      * Add a component that can suppress visual interruptions.
      */
     void addSuppressor(NotificationInterruptSuppressor suppressor);
-
-    /**
-     * Remove a component that can suppress visual interruptions.
-     */
-    void removeSuppressor(NotificationInterruptSuppressor suppressor);
 }
