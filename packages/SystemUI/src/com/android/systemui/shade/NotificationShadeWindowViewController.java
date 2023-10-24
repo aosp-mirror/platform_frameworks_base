@@ -65,7 +65,7 @@ import com.android.systemui.statusbar.NotificationInsetsController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -182,7 +182,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             CommunalViewModel communalViewModel,
             CommunalRepository communalRepository,
-            NotificationExpansionRepository notificationExpansionRepository,
+            NotificationLaunchAnimationInteractor notificationLaunchAnimationInteractor,
             FeatureFlagsClassic featureFlagsClassic,
             SystemClock clock,
             BouncerMessageInteractor bouncerMessageInteractor,
@@ -239,7 +239,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 mLockscreenToDreamingTransition);
         collectFlow(
                 mView,
-                notificationExpansionRepository.isExpandAnimationRunning(),
+                notificationLaunchAnimationInteractor.isLaunchAnimationRunning(),
                 this::setExpandAnimationRunning);
 
         mClock = clock;

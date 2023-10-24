@@ -54,7 +54,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifGutsVi
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.data.NotificationDataLayerModule;
-import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
 import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -204,12 +204,12 @@ public interface NotificationsModule {
     @Provides
     @SysUISingleton
     static NotificationLaunchAnimatorControllerProvider provideNotifLaunchAnimControllerProvider(
-            NotificationExpansionRepository notificationExpansionRepository,
+            NotificationLaunchAnimationInteractor notificationLaunchAnimationInteractor,
             NotificationListContainer notificationListContainer,
             HeadsUpManager headsUpManager,
             InteractionJankMonitor jankMonitor) {
         return new NotificationLaunchAnimatorControllerProvider(
-                notificationExpansionRepository,
+                notificationLaunchAnimationInteractor,
                 notificationListContainer,
                 headsUpManager,
                 jankMonitor);
