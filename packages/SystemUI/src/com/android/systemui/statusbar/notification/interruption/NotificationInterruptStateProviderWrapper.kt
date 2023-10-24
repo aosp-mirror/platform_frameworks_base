@@ -58,10 +58,6 @@ class NotificationInterruptStateProviderWrapper(
         wrapped.addSuppressor(suppressor)
     }
 
-    override fun removeLegacySuppressor(suppressor: NotificationInterruptSuppressor) {
-        wrapped.removeSuppressor(suppressor)
-    }
-
     override fun makeUnloggedHeadsUpDecision(entry: NotificationEntry): Decision =
         wrapped.checkHeadsUp(entry, /* log= */ false).let { DecisionImpl.of(it) }
 
