@@ -36,7 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.android.compose.nestedscroll.PriorityPostNestedScrollConnection
+import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -535,7 +535,7 @@ private class SceneDraggableHandler(
 class SceneNestedScrollHandler(
     private val gestureHandler: SceneGestureHandler,
 ) : NestedScrollHandler {
-    override val connection: PriorityPostNestedScrollConnection = nestedScrollConnection()
+    override val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
     private fun Offset.toAmount() =
         when (gestureHandler.orientation) {
@@ -555,7 +555,7 @@ class SceneNestedScrollHandler(
             Orientation.Vertical -> Offset(x = 0f, y = this)
         }
 
-    private fun nestedScrollConnection(): PriorityPostNestedScrollConnection {
+    private fun nestedScrollConnection(): PriorityNestedScrollConnection {
         // The next potential scene is calculated during the canStart
         var nextScene: SceneKey? = null
 
@@ -566,10 +566,24 @@ class SceneNestedScrollHandler(
         // moving on to the next scene.
         var gestureStartedOnNestedChild = false
 
-        return PriorityPostNestedScrollConnection(
-            canStart = { offsetAvailable, offsetBeforeStart ->
+        return PriorityNestedScrollConnection(
+            canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
+                gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
+
+                val canInterceptPreScroll =
+                    gestureHandler.isDrivingTransition &&
+                        !gestureStartedOnNestedChild &&
+                        offsetAvailable.toAmount() != 0f
+
+                if (!canInterceptPreScroll) return@PriorityNestedScrollConnection false
+
+                nextScene = gestureHandler.swipeTransitionToScene.key
+
+                true
+            },
+            canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
                 val amount = offsetAvailable.toAmount()
-                if (amount == 0f) return@PriorityPostNestedScrollConnection false
+                if (amount == 0f) return@PriorityNestedScrollConnection false
 
                 gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
 
