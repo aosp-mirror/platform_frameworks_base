@@ -172,4 +172,5 @@ android_library {
     kotlincflags: ["-Xjvm-default=all"],
     manifest: "AndroidManifest.xml",
     plugins: ["dagger2-compiler"],
+    use_resource_processor: true,
 }
