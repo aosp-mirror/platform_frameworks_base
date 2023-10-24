@@ -2526,7 +2526,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                     && mFingerprintManager.get() != null
                                     && mFingerprintManager.get().isPowerbuttonFps()
                                     && mKeyguardUpdateMonitor
-                                    .getCachedIsUnlockWithFingerprintPossible(
+                                    .isUnlockWithFingerprintPossible(
                                             mUserTracker.getUserId())
                                     && !touchToUnlockAnytime;
                     if (DEBUG_WAKEUP_DELAY) {
