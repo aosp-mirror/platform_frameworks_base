@@ -315,7 +315,8 @@ internal class ExpandableControllerImpl(
                 }
             }
 
-            override fun shouldAnimateExit(): Boolean = isComposed.value
+            override fun shouldAnimateExit(): Boolean =
+                isComposed.value && composeViewRoot.isAttachedToWindow && composeViewRoot.isShown
 
             override fun onExitAnimationCancelled() {
                 isDialogShowing.value = false
