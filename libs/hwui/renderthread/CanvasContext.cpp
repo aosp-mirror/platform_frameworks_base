@@ -562,7 +562,11 @@ Frame CanvasContext::getFrame() {
 void CanvasContext::draw(bool solelyTextureViewUpdates) {
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
-            LOG_ALWAYS_FATAL("GrContext is abandoned/device lost at start of CanvasContext::draw");
+            if (grContext->isDeviceLost()) {
+                LOG_ALWAYS_FATAL("Lost GPU device unexpectedly");
+                return;
+            }
+            LOG_ALWAYS_FATAL("GrContext is abandoned at start of CanvasContext::draw");
             return;
         }
     }
