@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mantso kargatzen"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bateria ez kaltetzeko, kargatzeko modua optimizatu da"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Arazo bat dago kargatzeko osagarriarekin"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Desblokeatzeko, sakatu Menua."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sarea blokeatuta dago"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ez dago SIMik"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Gehitu SIM bat."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIMa falta da, edo ezin da irakurri. Gehitu SIM bat."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Ezin da erabili SIMa."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Betiko desaktibatu da SIMa.\n Jarri operadorearekin harremanetan beste SIM bat eskuratzeko."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIMa blokeatuta dago."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIMa PUKaren bidez desblokeatu behar da."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIMa desblokeatzen…"</string>

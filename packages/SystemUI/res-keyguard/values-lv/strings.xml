@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek lēnā uzlāde"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Uzlāde optimizēta, lai saudzētu akumulatoru"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problēma ar uzlādes ierīci"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Lai atbloķētu, nospiediet izvēlnes ikonu."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tīkls ir bloķēts."</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Nav SIM kartes"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Pievienojiet SIM karti."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Nav SIM kartes, vai arī to nevar nolasīt. Pievienojiet SIM karti."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM karte nav izmantojama."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Jūsu SIM karte ir neatgriezeniski deaktivizēta.\n Sazinieties ar savu bezvadu pakalpojumu sniedzēju, lai iegūtu citu SIM karti."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM karte ir bloķēta."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM karte ir bloķēta ar PUK kodu."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Notiek SIM kartes atbloķēšana…"</string>

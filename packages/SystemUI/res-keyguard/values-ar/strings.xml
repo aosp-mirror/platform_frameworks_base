@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن ببطء"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • تم تحسين الشحن لحماية البطارية"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"‫<xliff:g id="PERCENTAGE">%s</xliff:g> • مشكلة متعلّقة بجهاز الشحن الملحق"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"الشبكة مؤمّنة"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"‏لا تتوفر شريحة SIM."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"‏يجب إضافة شريحة SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"‏شريحة SIM مفقودة أو غير قابلة للقراءة. يجب إضافة شريحة SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"‏شريحة SIM غير قابلة للاستخدام."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"‏تم إيقاف شريحة SIM نهائيًا.\n عليك التواصل مع مقدم خدمة اللاسلكي للحصول على شريحة SIM أخرى."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"‏شريحة SIM مُقفَلة."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"‏شريحة SIM مُقفَلة برمز PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"‏جارٍ إلغاء قفل شريحة SIM…"</string>

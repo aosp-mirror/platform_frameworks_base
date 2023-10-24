@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"En recharge lente : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge optimisée pour protéger la pile"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problème concernant l\'accessoire de recharge"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Appuyez sur la touche Menu pour déverrouiller l\'appareil."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Réseau verrouillé"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Aucune carte SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Ajouter une carte SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"La carte SIM est manquante ou illisible. Ajouter une carte SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"La carte SIM est inutilisable."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Votre carte SIM a été désactivée de manière permanente.\n Communiquez avec votre fournisseur de services sans fil pour obtenir une autre carte SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"La carte SIM est verrouillée."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"La carte SIM est verrouillée par clé PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Déverrouillage de la carte SIM en cours…"</string>

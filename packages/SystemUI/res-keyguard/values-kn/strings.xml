@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ಬ್ಯಾಟರಿಯನ್ನು ರಕ್ಷಿಸಲು ಚಾರ್ಜಿಂಗ್ ಅನ್ನು ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ಚಾರ್ಜಿಂಗ್ ಪರಿಕರ ಕುರಿತು ಸಮಸ್ಯೆ ಇದೆ"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ನೆಟ್‌ವರ್ಕ್ ಲಾಕ್ ಆಗಿದೆ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM ಇಲ್ಲ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM ಅನ್ನು ಸೇರಿಸಿ."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM ಕಾಣೆಯಾಗಿದೆ ಅಥವಾ ರೀಡ್ ಆಗುತ್ತಿಲ್ಲ. SIM ಅನ್ನು ಸೇರಿಸಿ."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM ನಿಷ್ಪ್ರಯೋಜಕವಾಗಿದೆ."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ನಿಮ್ಮ SIM ಅನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ.\n ಬೇರೊಂದು SIM ಗಾಗಿ ನಿಮ್ಮ ವೈರ್‌ಲೆಸ್ ಸೇವಾ ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM ಲಾಕ್ ಆಗಿದೆ."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM PUK ಲಾಕ್ ಆಗಿದೆ."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
