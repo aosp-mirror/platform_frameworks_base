@@ -52,6 +52,13 @@ interface VisualInterruptionDecisionProvider {
     }
 
     /**
+     * Initializes the provider.
+     *
+     * Must be called before any method except [addLegacySuppressor].
+     */
+    fun start() {}
+
+    /**
      * Adds a [component][suppressor] that can suppress visual interruptions.
      *
      * This class may call suppressors in any order.
