@@ -5434,6 +5434,44 @@ public class UserManager {
     }
 
     /**
+     * Returns the string/label that should be used to represent the context user. For example,
+     * this string can represent a profile in tabbed views. This is only applicable to
+     * {@link #isProfile() profile users}. This string is translated to the device default language.
+     *
+     * @return String representing the label for the context user.
+     *
+     * @throws android.content.res.Resources.NotFoundException if the user does not have a label
+     * defined.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/306636213
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    public @NonNull String getProfileLabel() {
+        if (isManagedProfile(mUserId)) {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            return dpm.getResources().getString(
+                    android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_TAB,
+                    () -> getDefaultProfileLabel(mUserId));
+        }
+        return getDefaultProfileLabel(mUserId);
+    }
+
+    private String getDefaultProfileLabel(int userId) {
+        try {
+            final int resourceId = mService.getProfileLabelResId(userId);
+            return Resources.getSystem().getString(resourceId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * If the user is a {@link UserManager#isProfile profile}, checks if the user
      * shares media with its parent user (the user that created this profile).
      * Returns false for any other type of user.
