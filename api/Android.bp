@@ -87,6 +87,7 @@ combined_apis {
         "framework-devicelock",
         "framework-graphics",
         "framework-healthfitness",
+        "framework-location",
         "framework-media",
         "framework-mediaprovider",
         "framework-ondevicepersonalization",

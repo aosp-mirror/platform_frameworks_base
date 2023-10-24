@@ -123,6 +123,11 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.nfc.flags-aconfig-java",
     aconfig_declarations: "android.nfc.flags-aconfig",
+    min_sdk_version: "VanillaIceCream",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -145,6 +150,12 @@ java_aconfig_library {
     host_supported: true,
     test: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+rust_aconfig_library {
+    name: "libandroid_security_flags_rust",
+    crate_name: "android_security_flags",
+    aconfig_declarations: "android.security.flags-aconfig",
 }
 
 // Package Manager

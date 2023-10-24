@@ -3368,6 +3368,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |=
                             PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
                     break;
+                case "--ignore-dexopt-profile":
+                    sessionParams.installFlags |= PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE;
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -4259,7 +4262,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--enable-rollback]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
         pw.println("       [--apex] [--non-staged] [--force-non-staged]");
-        pw.println("       [--staged-ready-timeout TIMEOUT]");
+        pw.println("       [--staged-ready-timeout TIMEOUT] [--ignore-dexopt-profile]");
         pw.println("       [PATH [SPLIT...]|-]");
         pw.println("    Install an application.  Must provide the apk data to install, either as");
         pw.println("    file path(s) or '-' to read from stdin.  Options are:");
@@ -4299,6 +4302,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          milliseconds for pre-reboot verification to complete when");
         pw.println("          performing staged install. This flag is used to alter the waiting");
         pw.println("          time. You can skip the waiting time by specifying a TIMEOUT of '0'");
+        pw.println("      --ignore-dexopt-profile: If set, all profiles are ignored by dexopt");
+        pw.println("          during the installation, including the profile in the DM file and");
+        pw.println("          the profile embedded in the APK file. If an invalid profile is");
+        pw.println("          provided during installation, no warning will be reported by `adb");
+        pw.println("          install`.");
+        pw.println("          This option does not affect later dexopt operations (e.g.,");
+        pw.println("          background dexopt and manual `pm compile` invocations).");
         pw.println("");
         pw.println("  install-existing [--user USER_ID|all|current]");
         pw.println("       [--instant] [--full] [--wait] [--restrict-permissions] PACKAGE");
