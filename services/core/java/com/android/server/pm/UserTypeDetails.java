@@ -54,8 +54,15 @@ public final class UserTypeDetails {
     /** Whether users of this type can be created. */
     private final boolean mEnabled;
 
-    // TODO(b/142482943): Currently unused and not set. Hook this up.
-    private final int mLabel;
+    /**
+     * Resource IDs ({@link StringRes}) of the user's labels. This might be used to label a
+     * user/profile in tabbed views, etc.
+     * The values are resource IDs referring to the strings not the strings themselves.
+     *
+     * <p>This is an array because, in general, there may be multiple users of the same user type.
+     * In this case, the user is indexed according to its {@link UserInfo#profileBadge}.
+     */
+    private final @Nullable int[] mLabels;
 
     /**
      * Maximum number of this user type allowed on the device.
@@ -160,8 +167,8 @@ public final class UserTypeDetails {
     private final @NonNull UserProperties mDefaultUserProperties;
 
     private UserTypeDetails(@NonNull String name, boolean enabled, int maxAllowed,
-            @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
-            int maxAllowedPerParent,
+            @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags,
+            @Nullable int[] labels, int maxAllowedPerParent,
             int iconBadge, int badgePlain, int badgeNoBackground,
             int statusBarIcon,
             @Nullable int[] badgeLabels, @Nullable int[] badgeColors,
@@ -181,12 +188,11 @@ public final class UserTypeDetails {
         this.mDefaultSystemSettings = defaultSystemSettings;
         this.mDefaultSecureSettings = defaultSecureSettings;
         this.mDefaultCrossProfileIntentFilters = defaultCrossProfileIntentFilters;
-
         this.mIconBadge = iconBadge;
         this.mBadgePlain = badgePlain;
         this.mBadgeNoBackground = badgeNoBackground;
         this.mStatusBarIcon = statusBarIcon;
-        this.mLabel = label;
+        this.mLabels = labels;
         this.mBadgeLabels = badgeLabels;
         this.mBadgeColors = badgeColors;
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
@@ -234,9 +240,16 @@ public final class UserTypeDetails {
         return mDefaultUserInfoPropertyFlags | mBaseType;
     }
 
-    // TODO(b/142482943) Hook this up; it is currently unused.
-    public int getLabel() {
-        return mLabel;
+    /**
+     * Returns the resource ID corresponding to the badgeIndexth label name where the badgeIndex is
+     * expected to be the {@link UserInfo#profileBadge} of the user. If badgeIndex exceeds the
+     * number of labels, returns the label for the highest index.
+     */
+    public @StringRes int getLabel(int badgeIndex) {
+        if (mLabels == null || mLabels.length == 0 || badgeIndex < 0) {
+            return Resources.ID_NULL;
+        }
+        return mLabels[Math.min(badgeIndex, mLabels.length - 1)];
     }
 
     /** Returns whether users of this user type should be badged. */
@@ -358,7 +371,6 @@ public final class UserTypeDetails {
         pw.print(prefix); pw.print("mMaxAllowedPerParent: "); pw.println(mMaxAllowedPerParent);
         pw.print(prefix); pw.print("mDefaultUserInfoFlags: ");
         pw.println(UserInfo.flagsToString(mDefaultUserInfoPropertyFlags));
-        pw.print(prefix); pw.print("mLabel: "); pw.println(mLabel);
         mDefaultUserProperties.println(pw, prefix);
 
         final String restrictionsPrefix = prefix + "    ";
@@ -392,6 +404,8 @@ public final class UserTypeDetails {
         pw.println(mBadgeColors != null ? mBadgeColors.length : "0(null)");
         pw.print(prefix); pw.print("mDarkThemeBadgeColors.length: ");
         pw.println(mDarkThemeBadgeColors != null ? mDarkThemeBadgeColors.length : "0(null)");
+        pw.print(prefix); pw.print("mLabels.length: ");
+        pw.println(mLabels != null ? mLabels.length : "0(null)");
     }
 
     /** Builder for a {@link UserTypeDetails}; see that class for documentation. */
@@ -408,7 +422,7 @@ public final class UserTypeDetails {
         private @Nullable List<DefaultCrossProfileIntentFilter> mDefaultCrossProfileIntentFilters =
                 null;
         private int mEnabled = 1;
-        private int mLabel = Resources.ID_NULL;
+        private @Nullable int[] mLabels = null;
         private @Nullable int[] mBadgeLabels = null;
         private @Nullable int[] mBadgeColors = null;
         private @Nullable int[] mDarkThemeBadgeColors = null;
@@ -488,8 +502,8 @@ public final class UserTypeDetails {
             return this;
         }
 
-        public Builder setLabel(int label) {
-            mLabel = label;
+        public Builder setLabels(@StringRes int ... labels) {
+            mLabels = labels;
             return this;
         }
 
@@ -562,7 +576,7 @@ public final class UserTypeDetails {
                     mMaxAllowed,
                     mBaseType,
                     mDefaultUserInfoPropertyFlags,
-                    mLabel,
+                    mLabels,
                     mMaxAllowedPerParent,
                     mIconBadge,
                     mBadgePlain,
