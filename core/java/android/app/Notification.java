@@ -5607,7 +5607,8 @@ public class Notification implements Parcelable
             // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
                 pillColor = Colors.flattenAlpha(getColors(p).getTertiaryAccentColor(), bgColor);
-                textColor = Colors.flattenAlpha(getColors(p).getOnAccentTextColor(), pillColor);
+                textColor = Colors.flattenAlpha(
+                        getColors(p).getOnTertiaryAccentTextColor(), pillColor);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
@@ -12833,7 +12834,7 @@ public class Notification implements Parcelable
         private int mPrimaryAccentColor = COLOR_INVALID;
         private int mSecondaryAccentColor = COLOR_INVALID;
         private int mTertiaryAccentColor = COLOR_INVALID;
-        private int mOnAccentTextColor = COLOR_INVALID;
+        private int mOnTertiaryAccentTextColor = COLOR_INVALID;
         private int mErrorColor = COLOR_INVALID;
         private int mContrastColor = COLOR_INVALID;
         private int mRippleAlpha = 0x33;
@@ -12908,7 +12909,7 @@ public class Notification implements Parcelable
                 mPrimaryAccentColor = mPrimaryTextColor;
                 mSecondaryAccentColor = mSecondaryTextColor;
                 mTertiaryAccentColor = flattenAlpha(mPrimaryTextColor, mBackgroundColor);
-                mOnAccentTextColor = mBackgroundColor;
+                mOnTertiaryAccentTextColor = mBackgroundColor;
                 mErrorColor = mPrimaryTextColor;
                 mRippleAlpha = 0x33;
             } else {
@@ -12930,7 +12931,7 @@ public class Notification implements Parcelable
                     mPrimaryAccentColor = getColor(ta, 3, COLOR_INVALID);
                     mSecondaryAccentColor = getColor(ta, 4, COLOR_INVALID);
                     mTertiaryAccentColor = getColor(ta, 5, COLOR_INVALID);
-                    mOnAccentTextColor = getColor(ta, 6, COLOR_INVALID);
+                    mOnTertiaryAccentTextColor = getColor(ta, 6, COLOR_INVALID);
                     mErrorColor = getColor(ta, 7, COLOR_INVALID);
                     mRippleAlpha = Color.alpha(getColor(ta, 8, 0x33ffffff));
                 }
@@ -12955,8 +12956,8 @@ public class Notification implements Parcelable
                 if (mTertiaryAccentColor == COLOR_INVALID) {
                     mTertiaryAccentColor = mContrastColor;
                 }
-                if (mOnAccentTextColor == COLOR_INVALID) {
-                    mOnAccentTextColor = ColorUtils.setAlphaComponent(
+                if (mOnTertiaryAccentTextColor == COLOR_INVALID) {
+                    mOnTertiaryAccentTextColor = ColorUtils.setAlphaComponent(
                             ContrastColorUtil.resolvePrimaryColor(
                                     ctx, mTertiaryAccentColor, nightMode), 0xFF);
                 }
@@ -13029,8 +13030,8 @@ public class Notification implements Parcelable
         }
 
         /** @return the theme's text color to be used on the tertiary accent color. */
-        public @ColorInt int getOnAccentTextColor() {
-            return mOnAccentTextColor;
+        public @ColorInt int getOnTertiaryAccentTextColor() {
+            return mOnTertiaryAccentTextColor;
         }
 
         /**
