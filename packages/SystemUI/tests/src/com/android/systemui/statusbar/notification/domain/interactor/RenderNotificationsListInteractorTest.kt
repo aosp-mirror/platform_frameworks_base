@@ -35,6 +35,7 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
     private val underTest =
         RenderNotificationListInteractor(
             notifsRepository,
+            sectionStyleProvider = mock(),
         )
 
     @Test

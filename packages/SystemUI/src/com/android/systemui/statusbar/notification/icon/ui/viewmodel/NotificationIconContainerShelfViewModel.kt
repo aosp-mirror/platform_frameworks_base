@@ -15,20 +15,33 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import com.android.systemui.statusbar.notification.icon.domain.interactor.NotificationIconsInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.ColorLookup
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconsViewData
 import com.android.systemui.util.ui.AnimatedValue
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** View-model for the overflow row of notification icons displayed in the notification shade. */
-class NotificationIconContainerShelfViewModel @Inject constructor() :
-    NotificationIconContainerViewModel {
+class NotificationIconContainerShelfViewModel
+@Inject
+constructor(
+    interactor: NotificationIconsInteractor,
+) : NotificationIconContainerViewModel {
     override val animationsEnabled: Flow<Boolean> = flowOf(true)
     override val isDozing: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override val isVisible: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override fun completeDozeAnimation() {}
     override fun completeVisibilityAnimation() {}
     override val iconColors: Flow<ColorLookup> = emptyFlow()
+
+    override val iconsViewData: Flow<IconsViewData> =
+        interactor.filteredNotifSet().map { entries ->
+            IconsViewData(
+                visibleKeys = entries.mapNotNull { it.toIconInfo(it.shelfIcon) },
+            )
+        }
 }

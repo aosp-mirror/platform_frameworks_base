@@ -3106,7 +3106,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
             // TODO: Bring these out of CentralSurfaces.
             mUserInfoControllerImpl.onDensityOrFontScaleChanged();
-            mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+            if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+                mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+            }
         }
 
         @Override

@@ -40,6 +40,8 @@ import androidx.collection.ArrayMap;
 import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.settingslib.Utils;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
@@ -48,7 +50,9 @@ import com.android.systemui.statusbar.notification.stack.ViewState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * A container for notification icons. It handles overflowing icons properly and positions them
@@ -131,6 +135,9 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
+    private final RefactorFlag mIconContainerRefactorFlag =
+            RefactorFlag.forView(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR);
+
     /* Maximum number of icons on AOD when also showing overflow dot. */
     private int mMaxIconsOnAod;
 
@@ -156,7 +163,8 @@ public class NotificationIconContainer extends ViewGroup {
     private int mIconSize;
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
-    private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
+    private ArrayMap<String, StatusBarIcon> mReplacingIcons;
+    private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIconsLegacy;
     // Keep track of the last visible icon so collapsed container can report on its location
     private IconState mLastVisibleIconState;
     private IconState mFirstVisibleIconState;
@@ -339,23 +347,29 @@ public class NotificationIconContainer extends ViewGroup {
     }
 
     private boolean isReplacingIcon(View child) {
-        if (mReplacingIcons == null) {
-            return false;
-        }
         if (!(child instanceof StatusBarIconView)) {
             return false;
         }
         StatusBarIconView iconView = (StatusBarIconView) child;
         Icon sourceIcon = iconView.getSourceIcon();
         String groupKey = iconView.getNotification().getGroupKey();
-        ArrayList<StatusBarIcon> statusBarIcons = mReplacingIcons.get(groupKey);
-        if (statusBarIcons != null) {
-            StatusBarIcon replacedIcon = statusBarIcons.get(0);
-            if (sourceIcon.sameAs(replacedIcon.icon)) {
-                return true;
+        if (mIconContainerRefactorFlag.isEnabled()) {
+            if (mReplacingIcons == null) {
+                return false;
             }
+            StatusBarIcon replacedIcon = mReplacingIcons.get(groupKey);
+            return replacedIcon != null && sourceIcon.sameAs(replacedIcon.icon);
+        } else {
+            if (mReplacingIconsLegacy == null) {
+                return false;
+            }
+            ArrayList<StatusBarIcon> statusBarIcons = mReplacingIconsLegacy.get(groupKey);
+            if (statusBarIcons != null) {
+                StatusBarIcon replacedIcon = statusBarIcons.get(0);
+                return sourceIcon.sameAs(replacedIcon.icon);
+            }
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -681,7 +695,13 @@ public class NotificationIconContainer extends ViewGroup {
         mAnimationsEnabled = enabled;
     }
 
-    public void setReplacingIcons(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
+    public void setReplacingIconsLegacy(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
+        mIconContainerRefactorFlag.assertInLegacyMode();
+        mReplacingIconsLegacy = replacingIcons;
+    }
+
+    public void setReplacingIcons(ArrayMap<String, StatusBarIcon> replacingIcons) {
+        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
         mReplacingIcons = replacingIcons;
     }
 

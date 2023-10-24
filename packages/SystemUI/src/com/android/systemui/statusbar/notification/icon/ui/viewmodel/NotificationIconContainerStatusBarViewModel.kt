@@ -20,20 +20,24 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.icon.domain.interactor.StatusBarNotificationIconsInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.ColorLookup
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconColors
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconsViewData
 import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
 import com.android.systemui.util.ui.AnimatedValue
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.map
 
 /** View-model for the row of notification icons displayed in the status bar, */
 class NotificationIconContainerStatusBarViewModel
 @Inject
 constructor(
     darkIconInteractor: DarkIconInteractor,
+    iconsInteractor: StatusBarNotificationIconsInteractor,
     keyguardInteractor: KeyguardInteractor,
     notificationsInteractor: ActiveNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
@@ -45,6 +49,7 @@ constructor(
         ) { panelTouchesEnabled, isKeyguardShowing ->
             panelTouchesEnabled && !isKeyguardShowing
         }
+
     override val iconColors: Flow<ColorLookup> =
         combine(
             darkIconInteractor.tintAreas,
@@ -60,10 +65,18 @@ constructor(
                 }
             }
         }
+
     override val isDozing: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override val isVisible: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override fun completeDozeAnimation() {}
     override fun completeVisibilityAnimation() {}
+
+    override val iconsViewData: Flow<IconsViewData> =
+        iconsInteractor.statusBarNotifs.map { entries ->
+            IconsViewData(
+                visibleKeys = entries.mapNotNull { it.toIconInfo(it.statusBarIcon) },
+            )
+        }
 
     private class IconColorsImpl(
         override val tint: Int,

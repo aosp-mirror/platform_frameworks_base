@@ -30,8 +30,10 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.icon.domain.interactor.AlwaysOnDisplayNotificationIconsInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.ColorLookup
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconColors
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconsViewData
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.kotlin.pairwise
@@ -55,6 +57,7 @@ constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val featureFlags: FeatureFlagsClassic,
+    iconsInteractor: AlwaysOnDisplayNotificationIconsInteractor,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
@@ -134,14 +137,19 @@ constructor(
         onVisAnimationComplete.tryEmit(Unit)
     }
 
+    override val iconsViewData: Flow<IconsViewData> =
+        iconsInteractor.aodNotifs.map { entries ->
+            IconsViewData(
+                visibleKeys = entries.mapNotNull { it.toIconInfo(it.aodIcon) },
+            )
+        }
+
     /** Is there an expanded pulse, are we animating in response? */
     private fun isPulseExpandingAnimated(): Flow<AnimatedValue<Boolean>> {
         return notificationsKeyguardInteractor.isPulseExpanding
             .pairwise(initialValue = null)
             // If pulsing changes, start animating, unless it's the first emission
-            .map { (prev, expanding) ->
-                AnimatableEvent(expanding!!, startAnimating = prev != null)
-            }
+            .map { (prev, expanding) -> AnimatableEvent(expanding, startAnimating = prev != null) }
             .toAnimatedValueFlow(completionEvents = onVisAnimationComplete)
     }
 
@@ -164,9 +172,9 @@ constructor(
                         // We only want the appear animations to happen when the notifications
                         // get fully hidden, since otherwise the un-hide animation overlaps.
                         featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION) -> true
-                        else -> fullyHidden!!
+                        else -> fullyHidden
                     }
-                AnimatableEvent(fullyHidden!!, animate)
+                AnimatableEvent(fullyHidden, animate)
             }
             .toAnimatedValueFlow(completionEvents = onVisAnimationComplete)
     }

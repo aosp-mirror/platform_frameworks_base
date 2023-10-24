@@ -19,3 +19,45 @@ import com.google.common.truth.Correspondence
 
 val byKey: Correspondence<ActiveNotificationModel, String> =
     Correspondence.transforming({ it?.key }, "has a key of")
+val byIsAmbient: Correspondence<ActiveNotificationModel, Boolean> =
+    Correspondence.transforming({ it?.isAmbient }, "has an isAmbient value of")
+val byIsSuppressedFromStatusBar: Correspondence<ActiveNotificationModel, Boolean> =
+    Correspondence.transforming(
+        { it?.isSuppressedFromStatusBar },
+        "has an isSuppressedFromStatusBar value of",
+    )
+val byIsSilent: Correspondence<ActiveNotificationModel, Boolean> =
+    Correspondence.transforming({ it?.isSilent }, "has an isSilent value of")
+val byIsRowDismissed: Correspondence<ActiveNotificationModel, Boolean> =
+    Correspondence.transforming({ it?.isRowDismissed }, "has an isRowDismissed value of")
+val byIsLastMessageFromReply: Correspondence<ActiveNotificationModel, Boolean> =
+    Correspondence.transforming(
+        { it?.isLastMessageFromReply },
+        "has an isLastMessageFromReply value of"
+    )
+val byIsPulsing: Correspondence<ActiveNotificationModel, Boolean> =
+    Correspondence.transforming({ it?.isPulsing }, "has an isPulsing value of")
+
+@Suppress("TestFunctionName")
+fun ActiveNotificationModel(
+    key: String,
+    isAmbient: Boolean = false,
+    isRowDismissed: Boolean = false,
+    isSilent: Boolean = false,
+    isLastMessageFromReply: Boolean = false,
+    isSuppressedFromStatusBar: Boolean = false,
+    isPulsing: Boolean = false,
+) =
+    ActiveNotificationModel(
+        key = key,
+        groupKey = null,
+        isAmbient = isAmbient,
+        isRowDismissed = isRowDismissed,
+        isSilent = isSilent,
+        isLastMessageFromReply = isLastMessageFromReply,
+        isSuppressedFromStatusBar = isSuppressedFromStatusBar,
+        isPulsing = isPulsing,
+        aodIcon = null,
+        shelfIcon = null,
+        statusBarIcon = null,
+    )
