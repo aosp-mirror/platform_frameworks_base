@@ -254,7 +254,6 @@ filegroup {
     srcs: [
         /* Keyguard converted tests */
         // data
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/CameraQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/DoNotDisturbQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/FlashlightQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/HomeControlsKeyguardQuickAffordanceConfigTest.kt",
@@ -402,8 +401,17 @@ filegroup {
         "tests/src/com/android/systemui/scene/domain/interactor/WindowRootViewVisibilityInteractorTest.kt",
         "tests/src/com/android/systemui/scene/domain/startable/SceneContainerStartableTest.kt",
         "tests/src/com/android/systemui/scene/ui/viewmodel/SceneContainerViewModelTest.kt",
+
     ],
     path: "tests/src",
+}
+
+filegroup {
+    name: "SystemUI-tests-multivalent",
+    srcs: [
+        "multivalentTests/src/**/*.kt",
+    ],
+    path: "multivalentTests/src",
 }
 
 java_library {
@@ -494,6 +502,7 @@ android_library {
         "src/**/*.java",
         "src/**/I*.aidl",
         ":ReleaseJavaFiles",
+        ":SystemUI-tests-multivalent",
         ":SystemUI-tests-utils",
     ],
     static_libs: [
@@ -572,6 +581,7 @@ android_robolectric_test {
         ":SystemUI-tests-utils",
         ":SystemUI-test-fakes",
         ":SystemUI-tests-robolectric-pilots",
+        ":SystemUI-tests-multivalent",
     ],
     static_libs: [
         "androidx.test.uiautomator_uiautomator",
