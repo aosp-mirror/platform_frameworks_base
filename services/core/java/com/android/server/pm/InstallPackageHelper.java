@@ -2394,12 +2394,6 @@ final class InstallPackageHelper {
                 permissionParamsBuilder.setAutoRevokePermissionsMode(autoRevokePermissionsMode);
                 mPm.mPermissionManager.onPackageInstalled(pkg, installRequest.getPreviousAppId(),
                         permissionParamsBuilder.build(), userId);
-                // Apply restricted settings on potentially dangerous packages.
-                if (installRequest.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
-                        || installRequest.getPackageSource()
-                        == PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE) {
-                    enableRestrictedSettings(pkgName, pkg.getUid());
-                }
             }
             installRequest.setName(pkgName);
             installRequest.setAppId(pkg.getUid());
@@ -2414,16 +2408,13 @@ final class InstallPackageHelper {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private void enableRestrictedSettings(String pkgName, int appId) {
+    private void enableRestrictedSettings(String pkgName, int appId, int userId) {
         final AppOpsManager appOpsManager = mPm.mContext.getSystemService(AppOpsManager.class);
-        final int[] allUsersList = mPm.mUserManager.getUserIds();
-        for (int userId : allUsersList) {
-            final int uid = UserHandle.getUid(userId, appId);
-            appOpsManager.setMode(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
-                    uid,
-                    pkgName,
-                    AppOpsManager.MODE_ERRORED);
-        }
+        final int uid = UserHandle.getUid(userId, appId);
+        appOpsManager.setMode(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
+                uid,
+                pkgName,
+                AppOpsManager.MODE_ERRORED);
     }
 
     /**
@@ -2847,19 +2838,26 @@ final class InstallPackageHelper {
                     mPm.mRequiredInstallerPackage,
                     /* packageSender= */ mPm, launchedForRestore, killApp, update, archived);
 
-
             // Work that needs to happen on first install within each user
-            if (firstUserIds.length > 0) {
-                for (int userId : firstUserIds) {
-                    mPm.restorePermissionsAndUpdateRolesForNewUserInstall(packageName,
-                            userId);
-                }
+            for (int userId : firstUserIds) {
+                mPm.restorePermissionsAndUpdateRolesForNewUserInstall(packageName,
+                        userId);
             }
 
             if (request.isAllNewUsers() && !update) {
                 mPm.notifyPackageAdded(packageName, request.getAppId());
             } else {
                 mPm.notifyPackageChanged(packageName, request.getAppId());
+            }
+
+            for (int userId : firstUserIds) {
+                // Apply restricted settings on potentially dangerous packages. Needs to happen
+                // after appOpsManager is notified of the new package
+                if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
+                        || request.getPackageSource()
+                        == PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE) {
+                    enableRestrictedSettings(packageName, request.getAppId(), userId);
+                }
             }
 
             // Log current value of "unknown sources" setting
