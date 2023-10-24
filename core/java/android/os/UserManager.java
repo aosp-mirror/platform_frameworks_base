@@ -23,6 +23,7 @@ import android.Manifest;
 import android.accounts.AccountManager;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,6 +59,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
+import android.nfc.Flags;
 import android.provider.Settings;
 import android.util.AndroidException;
 import android.util.ArraySet;
@@ -1831,6 +1833,7 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_USER_RESTRICTION)
     public static final String DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO =
             "no_near_field_communication_radio";
 
