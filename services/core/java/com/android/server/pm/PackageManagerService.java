@@ -1486,11 +1486,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 archPkg.archivedActivities = PackageArchiver.createArchivedActivities(
                         archiveState);
             } else {
+                final int iconSize = mContext.getSystemService(
+                        ActivityManager.class).getLauncherLargeIconSize();
+
                 var mainActivities =
                         mInstallerService.mPackageArchiver.getLauncherActivityInfos(packageName,
                                 userId);
                 archPkg.archivedActivities = PackageArchiver.createArchivedActivities(
-                        mainActivities);
+                        mainActivities, iconSize);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Package does not have a main activity", e);
