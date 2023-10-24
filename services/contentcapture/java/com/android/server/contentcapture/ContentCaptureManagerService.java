@@ -103,9 +103,8 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
-import com.android.server.contentprotection.ContentProtectionBlocklistManager;
+import com.android.server.contentprotection.ContentProtectionAllowlistManager;
 import com.android.server.contentprotection.ContentProtectionConsentManager;
-import com.android.server.contentprotection.ContentProtectionPackageManager;
 import com.android.server.contentprotection.RemoteContentProtectionService;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
@@ -207,9 +206,6 @@ public class ContentCaptureManagerService extends
     boolean mDevCfgEnableContentProtectionReceiver;
 
     @GuardedBy("mLock")
-    int mDevCfgContentProtectionAppsBlocklistSize;
-
-    @GuardedBy("mLock")
     int mDevCfgContentProtectionBufferSize;
 
     @GuardedBy("mLock")
@@ -237,7 +233,7 @@ public class ContentCaptureManagerService extends
 
     @Nullable private final ComponentName mContentProtectionServiceComponentName;
 
-    @Nullable private final ContentProtectionBlocklistManager mContentProtectionBlocklistManager;
+    @Nullable private final ContentProtectionAllowlistManager mContentProtectionAllowlistManager;
 
     @Nullable private final ContentProtectionConsentManager mContentProtectionConsentManager;
 
@@ -287,17 +283,15 @@ public class ContentCaptureManagerService extends
         if (getEnableContentProtectionReceiverLocked()) {
             mContentProtectionServiceComponentName = getContentProtectionServiceComponentName();
             if (mContentProtectionServiceComponentName != null) {
-                mContentProtectionBlocklistManager = createContentProtectionBlocklistManager();
-                mContentProtectionBlocklistManager.updateBlocklist(
-                        mDevCfgContentProtectionAppsBlocklistSize);
+                mContentProtectionAllowlistManager = createContentProtectionAllowlistManager();
                 mContentProtectionConsentManager = createContentProtectionConsentManager();
             } else {
-                mContentProtectionBlocklistManager = null;
+                mContentProtectionAllowlistManager = null;
                 mContentProtectionConsentManager = null;
             }
         } else {
             mContentProtectionServiceComponentName = null;
-            mContentProtectionBlocklistManager = null;
+            mContentProtectionAllowlistManager = null;
             mContentProtectionConsentManager = null;
         }
     }
@@ -445,8 +439,6 @@ public class ContentCaptureManagerService extends
                 case ContentCaptureManager
                         .DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER:
                 case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE:
-                case ContentCaptureManager
-                        .DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD:
@@ -502,14 +494,6 @@ public class ContentCaptureManagerService extends
                             ContentCaptureManager
                                     .DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER,
                             ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER);
-            mDevCfgContentProtectionAppsBlocklistSize =
-                    DeviceConfig.getInt(
-                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                            ContentCaptureManager
-                                    .DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE,
-                            ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE);
-            // mContentProtectionBlocklistManager.updateBlocklist not called on purpose here to keep
-            // it immutable at this point
             mDevCfgContentProtectionBufferSize =
                     DeviceConfig.getInt(
                             DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
@@ -542,7 +526,7 @@ public class ContentCaptureManagerService extends
                                 + mDevCfgMaxBufferSize
                                 + ", idleFlush="
                                 + mDevCfgIdleFlushingFrequencyMs
-                                + ", textFluxh="
+                                + ", textFlush="
                                 + mDevCfgTextChangeFlushingFrequencyMs
                                 + ", logHistory="
                                 + mDevCfgLogHistorySize
@@ -552,8 +536,6 @@ public class ContentCaptureManagerService extends
                                 + mDevCfgDisableFlushForViewTreeAppearing
                                 + ", enableContentProtectionReceiver="
                                 + mDevCfgEnableContentProtectionReceiver
-                                + ", contentProtectionAppsBlocklistSize="
-                                + mDevCfgContentProtectionAppsBlocklistSize
                                 + ", contentProtectionBufferSize="
                                 + mDevCfgContentProtectionBufferSize
                                 + ", contentProtectionRequiredGroupsConfig="
@@ -844,9 +826,6 @@ public class ContentCaptureManagerService extends
         pw.print("enableContentProtectionReceiver: ");
         pw.println(mDevCfgEnableContentProtectionReceiver);
         pw.print(prefix2);
-        pw.print("contentProtectionAppsBlocklistSize: ");
-        pw.println(mDevCfgContentProtectionAppsBlocklistSize);
-        pw.print(prefix2);
         pw.print("contentProtectionBufferSize: ");
         pw.println(mDevCfgContentProtectionBufferSize);
         pw.print(prefix2);
@@ -877,9 +856,8 @@ public class ContentCaptureManagerService extends
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @NonNull
-    protected ContentProtectionBlocklistManager createContentProtectionBlocklistManager() {
-        return new ContentProtectionBlocklistManager(
-                new ContentProtectionPackageManager(getContext()));
+    protected ContentProtectionAllowlistManager createContentProtectionAllowlistManager() {
+        return new ContentProtectionAllowlistManager();
     }
 
     /** @hide */
@@ -1429,7 +1407,7 @@ public class ContentCaptureManagerService extends
         private boolean isContentProtectionReceiverEnabled(
                 @UserIdInt int userId, @NonNull String packageName) {
             if (mContentProtectionServiceComponentName == null
-                    || mContentProtectionBlocklistManager == null
+                    || mContentProtectionAllowlistManager == null
                     || mContentProtectionConsentManager == null) {
                 return false;
             }
@@ -1443,7 +1421,7 @@ public class ContentCaptureManagerService extends
                 }
             }
             return mContentProtectionConsentManager.isConsentGranted(userId)
-                    && mContentProtectionBlocklistManager.isAllowed(packageName);
+                    && mContentProtectionAllowlistManager.isAllowed(packageName);
         }
     }
 
