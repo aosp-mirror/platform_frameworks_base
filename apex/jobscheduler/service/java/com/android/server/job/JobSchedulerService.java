@@ -5512,7 +5512,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 pw.print("Evaluated bias: ");
                 pw.println(JobInfo.getBiasString(bias));
 
-                pw.print("Tag: "); pw.println(job.getTag());
                 pw.print("Enq: ");
                 TimeUtils.formatDuration(job.madePending - nowUptime, pw);
                 pw.decreaseIndent();
