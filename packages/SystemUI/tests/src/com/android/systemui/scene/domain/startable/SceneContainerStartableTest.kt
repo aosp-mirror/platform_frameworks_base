@@ -22,11 +22,11 @@ import android.os.PowerManager
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags as AconfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.Flags
 import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Assume.assumeTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
@@ -86,6 +86,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
             falsingCollector = falsingCollector,
             powerInteractor = powerInteractor,
         )
+
+    @Before
+    fun setUp() {
+        mSetFlagsRule.enableFlags(AconfigFlags.FLAG_SCENE_CONTAINER)
+    }
 
     @Test
     fun hydrateVisibility() =
@@ -520,7 +525,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         authenticationMethod: AuthenticationMethodModel? = null,
         startsAwake: Boolean = true,
     ): MutableStateFlow<ObservableTransitionState> {
-        assumeTrue(Flags.SCENE_CONTAINER_ENABLED)
         sceneContainerFlags.enabled = true
         utils.deviceEntryRepository.setUnlocked(isDeviceUnlocked)
         utils.deviceEntryRepository.setBypassEnabled(isBypassEnabled)
