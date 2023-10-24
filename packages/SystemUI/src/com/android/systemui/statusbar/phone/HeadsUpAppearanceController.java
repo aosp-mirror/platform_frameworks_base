@@ -26,6 +26,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
+import com.android.systemui.flags.FeatureFlagsClassic;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
@@ -38,6 +40,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -104,6 +107,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             };
     private boolean mAnimationsEnabled = true;
     private final KeyguardStateController mKeyguardStateController;
+    private final FeatureFlagsClassic mFeatureFlags;
+    private final HeadsUpNotificationIconInteractor mHeadsUpNotificationIconInteractor;
 
     @VisibleForTesting
     @Inject
@@ -122,6 +127,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             NotificationRoundnessManager notificationRoundnessManager,
             HeadsUpStatusBarView headsUpStatusBarView,
             Clock clockView,
+            FeatureFlagsClassic featureFlags,
+            HeadsUpNotificationIconInteractor headsUpNotificationIconInteractor,
             @Named(OPERATOR_NAME_FRAME_VIEW) Optional<View> operatorNameViewOptional) {
         super(headsUpStatusBarView);
         mNotificationIconAreaController = notificationIconAreaController;
@@ -139,6 +146,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
 
         mStackScrollerController = stackScrollerController;
         mShadeViewController = shadeViewController;
+        mFeatureFlags = featureFlags;
+        mHeadsUpNotificationIconInteractor = headsUpNotificationIconInteractor;
         mStackScrollerController.setHeadsUpAppearanceController(this);
         mClockView = clockView;
         mOperatorNameViewOptional = operatorNameViewOptional;
@@ -170,6 +179,9 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mHeadsUpManager.addListener(this);
         mView.setOnDrawingRectChangedListener(
                 () -> updateIsolatedIconLocation(true /* requireUpdate */));
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            updateIsolatedIconLocation(true);
+        }
         mWakeUpCoordinator.addListener(this);
         getShadeHeadsUpTracker().addTrackingHeadsUpListener(mSetTrackingHeadsUp);
         getShadeHeadsUpTracker().setHeadsUpAppearanceController(this);
@@ -185,6 +197,9 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     protected void onViewDetached() {
         mHeadsUpManager.removeListener(this);
         mView.setOnDrawingRectChangedListener(null);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            mHeadsUpNotificationIconInteractor.setIsolatedIconLocation(null);
+        }
         mWakeUpCoordinator.removeListener(this);
         getShadeHeadsUpTracker().removeTrackingHeadsUpListener(mSetTrackingHeadsUp);
         getShadeHeadsUpTracker().setHeadsUpAppearanceController(null);
@@ -193,8 +208,13 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     }
 
     private void updateIsolatedIconLocation(boolean requireStateUpdate) {
-        mNotificationIconAreaController.setIsolatedIconLocation(
-                mView.getIconDrawingRect(), requireStateUpdate);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            mHeadsUpNotificationIconInteractor
+                    .setIsolatedIconLocation(mView.getIconDrawingRect());
+        } else {
+            mNotificationIconAreaController.setIsolatedIconLocation(
+                    mView.getIconDrawingRect(), requireStateUpdate);
+        }
     }
 
     @Override
@@ -230,9 +250,14 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
                 setShown(true);
                 animateIsolation = !isExpanded();
             }
-            updateIsolatedIconLocation(false /* requireUpdate */);
-            mNotificationIconAreaController.showIconIsolated(newEntry == null ? null
-                    : newEntry.getIcons().getStatusBarIcon(), animateIsolation);
+            if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+                mHeadsUpNotificationIconInteractor.setIsolatedIconNotificationKey(
+                        newEntry == null ? null : newEntry.getKey());
+            } else {
+                updateIsolatedIconLocation(false /* requireUpdate */);
+                mNotificationIconAreaController.showIconIsolated(newEntry == null ? null
+                        : newEntry.getIcons().getStatusBarIcon(), animateIsolation);
+            }
         }
     }
 

@@ -15,8 +15,10 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import android.graphics.Rect
 import com.android.systemui.statusbar.notification.icon.domain.interactor.NotificationIconsInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.ColorLookup
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconInfo
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconsViewData
 import com.android.systemui.util.ui.AnimatedValue
 import javax.inject.Inject
@@ -36,6 +38,9 @@ constructor(
     override val isDozing: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override val isVisible: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override val iconColors: Flow<ColorLookup> = emptyFlow()
+    override val isolatedIcon: Flow<AnimatedValue<IconInfo?>> =
+        flowOf(AnimatedValue.NotAnimating(null))
+    override val isolatedIconLocation: Flow<Rect> = emptyFlow()
 
     override val iconsViewData: Flow<IconsViewData> =
         interactor.filteredNotifSet().map { entries ->
