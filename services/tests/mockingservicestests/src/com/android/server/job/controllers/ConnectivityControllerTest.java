@@ -919,6 +919,7 @@ public class ConnectivityControllerTest {
             assertFalse(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
             mSetFlagsRule.disableFlags(FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER);
             when(mService.isBatteryCharging()).thenReturn(false);
+            when(mService.isBatteryNotLow()).thenReturn(false);
 
             when(mNetPolicyManagerInternal.getSubscriptionOpportunisticQuota(
                     any(), eq(NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS)))
@@ -938,6 +939,12 @@ public class ConnectivityControllerTest {
             assertFalse(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
 
             when(mService.isBatteryCharging()).thenReturn(true);
+            assertFalse(controller.isSatisfied(latePrefetch, net, caps, mConstants));
+            // Only relax restrictions when we at least know the estimated download bytes.
+            assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
+            assertFalse(controller.isSatisfied(latePrefetchUnknownUp, net, caps, mConstants));
+
+            when(mService.isBatteryNotLow()).thenReturn(true);
             assertTrue(controller.isSatisfied(latePrefetch, net, caps, mConstants));
             // Only relax restrictions when we at least know the estimated download bytes.
             assertFalse(controller.isSatisfied(latePrefetchUnknownDown, net, caps, mConstants));
