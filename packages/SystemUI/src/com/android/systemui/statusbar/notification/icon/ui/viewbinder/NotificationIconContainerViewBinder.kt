@@ -64,6 +64,7 @@ import kotlinx.coroutines.launch
 
 /** Binds a [NotificationIconContainer] to its [view model][NotificationIconContainerViewModel]. */
 object NotificationIconContainerViewBinder {
+    @JvmStatic
     fun bind(
         view: NotificationIconContainer,
         viewModel: NotificationIconContainerViewModel,
