@@ -56,6 +56,7 @@ import android.content.IntentSender;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageInstallerCallback;
@@ -94,6 +95,7 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -112,6 +114,8 @@ import com.android.internal.util.SizedInputStream;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.ArchiveState;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.DataInputStream;
@@ -513,18 +517,27 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public ParceledListSlice<LauncherActivityInfoInternal> getLauncherActivities(
-                String callingPackage, String packageName, UserHandle user) throws RemoteException {
+                String callingPackage, @Nullable String packageName, UserHandle user)
+                throws RemoteException {
             ParceledListSlice<LauncherActivityInfoInternal> launcherActivities =
-                    queryActivitiesForUser(callingPackage,
+                    queryActivitiesForUser(
+                            callingPackage,
                             new Intent(Intent.ACTION_MAIN)
                                     .addCategory(Intent.CATEGORY_LAUNCHER)
                                     .setPackage(packageName),
                             user);
-            if (Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED, 1) == 0) {
+            if (Flags.archiving()) {
+                launcherActivities =
+                        getActivitiesForArchivedApp(packageName, user, launcherActivities);
+            }
+            if (Settings.Global.getInt(
+                            mContext.getContentResolver(),
+                            Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED,
+                            1)
+                    == 0) {
                 return launcherActivities;
             }
-            if (launcherActivities == null) {
+            if (launcherActivities == null || launcherActivities.getList().isEmpty()) {
                 // Cannot access profile, so we don't even return any hidden apps.
                 return null;
             }
@@ -565,15 +578,16 @@ public class LauncherAppsService extends SystemService {
                     visiblePackages.add(info.getActivityInfo().packageName);
                 }
                 final List<ApplicationInfo> installedPackages =
-                        mPackageManagerInternal.getInstalledApplications(/* flags= */ 0,
-                                user.getIdentifier(), callingUid);
+                        mPackageManagerInternal.getInstalledApplications(
+                                /* flags= */ 0, user.getIdentifier(), callingUid);
                 for (ApplicationInfo applicationInfo : installedPackages) {
                     if (!visiblePackages.contains(applicationInfo.packageName)) {
                         if (!shouldShowSyntheticActivity(user, applicationInfo)) {
                             continue;
                         }
-                        LauncherActivityInfoInternal info = getHiddenAppActivityInfo(
-                                applicationInfo.packageName, callingUid, user);
+                        LauncherActivityInfoInternal info =
+                                getHiddenAppActivityInfo(
+                                        applicationInfo.packageName, callingUid, user);
                         if (info != null) {
                             result.add(info);
                         }
@@ -583,6 +597,23 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 injectRestoreCallingIdentity(ident);
             }
+        }
+
+        private ParceledListSlice<LauncherActivityInfoInternal> getActivitiesForArchivedApp(
+                @Nullable String packageName,
+                UserHandle user,
+                ParceledListSlice<LauncherActivityInfoInternal> launcherActivities) {
+            final List<LauncherActivityInfoInternal> archivedActivities =
+                    generateLauncherActivitiesForArchivedApp(packageName, user);
+            if (archivedActivities.isEmpty()) {
+                return launcherActivities;
+            }
+            if (launcherActivities == null) {
+                return new ParceledListSlice(archivedActivities);
+            }
+            List<LauncherActivityInfoInternal> result = launcherActivities.getList();
+            result.addAll(archivedActivities);
+            return new ParceledListSlice(result);
         }
 
         private boolean shouldShowSyntheticActivity(UserHandle user, ApplicationInfo appInfo) {
@@ -650,23 +681,30 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
 
+            if (component == null || component.getPackageName() == null) {
+                // should not happen
+                return null;
+            }
+
             final int callingUid = injectBinderCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                final ActivityInfo activityInfo = mPackageManagerInternal.getActivityInfo(component,
-                        PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        callingUid, user.getIdentifier());
+                ActivityInfo activityInfo =
+                        mPackageManagerInternal.getActivityInfo(
+                                component,
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                callingUid,
+                                user.getIdentifier());
                 if (activityInfo == null) {
-                    return null;
-                }
-                if (component == null || component.getPackageName() == null) {
-                    // should not happen
+                    if (Flags.archiving()) {
+                        return getMatchingArchivedAppActivityInfo(component, user);
+                    }
                     return null;
                 }
                 final IncrementalStatesInfo incrementalStatesInfo =
-                        mPackageManagerInternal.getIncrementalStatesInfo(component.getPackageName(),
-                                callingUid, user.getIdentifier());
+                        mPackageManagerInternal.getIncrementalStatesInfo(
+                                component.getPackageName(), callingUid, user.getIdentifier());
                 if (incrementalStatesInfo == null) {
                     // package does not exist; should not happen
                     return null;
@@ -675,6 +713,26 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        private @Nullable LauncherActivityInfoInternal getMatchingArchivedAppActivityInfo(
+                @NonNull ComponentName component, UserHandle user) {
+            List<LauncherActivityInfoInternal> archivedActivities =
+                    generateLauncherActivitiesForArchivedApp(component.getPackageName(), user);
+            if (archivedActivities.isEmpty()) {
+                return null;
+            }
+            for (int i = 0; i < archivedActivities.size(); i++) {
+                if (archivedActivities.get(i).getComponentName().equals(component)) {
+                    return archivedActivities.get(i);
+                }
+            }
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Expected archived app component name: %s" + " is not available!",
+                            component));
+            return null;
         }
 
         @Override
@@ -698,6 +756,96 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 injectRestoreCallingIdentity(ident);
             }
+        }
+
+        @NonNull
+        private List<LauncherActivityInfoInternal> generateLauncherActivitiesForArchivedApp(
+                @Nullable String packageName, UserHandle user) {
+            List<ApplicationInfo> applicationInfoList =
+                    (packageName == null)
+                            ? getApplicationInfoListForAllArchivedApps(user)
+                            : getApplicationInfoForArchivedApp(packageName, user);
+            List<LauncherActivityInfoInternal> launcherActivityList = new ArrayList<>();
+            for (int i = 0; i < applicationInfoList.size(); i++) {
+                ApplicationInfo applicationInfo = applicationInfoList.get(i);
+                PackageStateInternal packageState =
+                        mPackageManagerInternal.getPackageStateInternal(
+                                applicationInfo.packageName);
+                if (packageState == null) {
+                    continue;
+                }
+                ArchiveState archiveState =
+                        packageState.getUserStateOrDefault(user.getIdentifier()).getArchiveState();
+                if (archiveState == null) {
+                    Slog.w(
+                            TAG,
+                            TextUtils.formatSimple(
+                                    "Expected package: %s to be archived but missing ArchiveState"
+                                            + " in PackageState.",
+                                    applicationInfo.packageName));
+                    continue;
+                }
+                List<ArchiveState.ArchiveActivityInfo> archiveActivityInfoList =
+                        archiveState.getActivityInfos();
+                for (int j = 0; j < archiveActivityInfoList.size(); j++) {
+                    launcherActivityList.add(
+                            constructLauncherActivityInfoForArchivedApp(
+                                    user, applicationInfo, archiveActivityInfoList.get(j)));
+                }
+            }
+            return launcherActivityList;
+        }
+
+        private static LauncherActivityInfoInternal constructLauncherActivityInfoForArchivedApp(
+                UserHandle user,
+                ApplicationInfo applicationInfo,
+                ArchiveState.ArchiveActivityInfo archiveActivityInfo) {
+            ActivityInfo activityInfo = new ActivityInfo();
+            activityInfo.isArchived = applicationInfo.isArchived;
+            activityInfo.applicationInfo = applicationInfo;
+            activityInfo.packageName =
+                    archiveActivityInfo.getOriginalComponentName().getPackageName();
+            activityInfo.name = archiveActivityInfo.getOriginalComponentName().getClassName();
+            activityInfo.nonLocalizedLabel = archiveActivityInfo.getTitle();
+
+            return new LauncherActivityInfoInternal(
+                    activityInfo,
+                    new IncrementalStatesInfo(
+                            false /* isLoading */, 1 /* progress */, 0 /* loadingCompletedTime */),
+                    user);
+        }
+
+        @NonNull
+        private List<ApplicationInfo> getApplicationInfoListForAllArchivedApps(UserHandle user) {
+            final int callingUid = injectBinderCallingUid();
+            List<ApplicationInfo> installedApplicationInfoList =
+                    mPackageManagerInternal.getInstalledApplications(
+                            PackageManager.MATCH_ARCHIVED_PACKAGES,
+                            user.getIdentifier(),
+                            callingUid);
+            List<ApplicationInfo> archivedApplicationInfos = new ArrayList<>();
+            for (int i = 0; i < installedApplicationInfoList.size(); i++) {
+                ApplicationInfo installedApplicationInfo = installedApplicationInfoList.get(i);
+                if (installedApplicationInfo != null && installedApplicationInfo.isArchived) {
+                    archivedApplicationInfos.add(installedApplicationInfo);
+                }
+            }
+            return archivedApplicationInfos;
+        }
+
+        @NonNull
+        private List<ApplicationInfo> getApplicationInfoForArchivedApp(
+                @NonNull String packageName, UserHandle user) {
+            final int callingUid = injectBinderCallingUid();
+            ApplicationInfo applicationInfo = mPackageManagerInternal.getApplicationInfo(
+                    packageName,
+                    PackageManager.MATCH_ARCHIVED_PACKAGES,
+                    callingUid,
+                    user.getIdentifier());
+            if (applicationInfo == null || !applicationInfo.isArchived) {
+                return Collections.EMPTY_LIST;
+            }
+            return List.of(applicationInfo);
         }
 
         private List<LauncherActivityInfoInternal> queryIntentLauncherActivities(
