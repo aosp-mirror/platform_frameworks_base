@@ -20,3 +20,10 @@ flag {
     description: "Enables desktop windowing"
     bug: "304778354"
 }
+
+flag {
+    name: "enable_split_contextual"
+    namespace: "multitasking"
+    description: "Enables invoking split contextually"
+    bug: "276361926"
+}
