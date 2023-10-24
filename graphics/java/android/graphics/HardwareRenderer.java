@@ -1390,10 +1390,6 @@ public class HardwareRenderer {
             int largestWidth = activeMode.getPhysicalWidth();
             int largestHeight = activeMode.getPhysicalHeight();
             final OverlayProperties overlayProperties = defaultDisplay.getOverlaySupport();
-            boolean supportFp16ForHdr = overlayProperties != null
-                    ? overlayProperties.supportFp16ForHdr() : false;
-            boolean supportMixedColorSpaces = overlayProperties != null
-                    ? overlayProperties.supportMixedColorSpaces() : false;
 
             for (int i = 0; i < allDisplays.length; i++) {
                 final Display display = allDisplays[i];
@@ -1421,7 +1417,8 @@ public class HardwareRenderer {
             nInitDisplayInfo(largestWidth, largestHeight, defaultDisplay.getRefreshRate(),
                     wideColorDataspace, defaultDisplay.getAppVsyncOffsetNanos(),
                     defaultDisplay.getPresentationDeadlineNanos(),
-                    supportFp16ForHdr, supportMixedColorSpaces);
+                    overlayProperties.isFp16SupportedForHdr(),
+                    overlayProperties.isMixedColorSpacesSupported());
 
             mDisplayInitialized = true;
         }
