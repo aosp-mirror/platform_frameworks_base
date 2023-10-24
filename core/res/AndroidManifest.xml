@@ -7768,6 +7768,14 @@
     <permission android:name="android.permission.MANAGE_DISPLAYS"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows apps to reset hotword training data egress count for testing.
+     <p>CTS tests will use UiAutomation.AdoptShellPermissionIdentity() to gain access.
+     <p>Protection level: signature
+     @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds")
+     @hide -->
+    <permission android:name="android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT"
+                android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

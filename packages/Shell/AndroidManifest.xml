@@ -860,6 +860,10 @@
     <!-- Permission required for CTS test - CtsWallpaperTestCases -->
     <uses-permission android:name="android.permission.ALWAYS_UPDATE_WALLPAPER" />
 
+    <!-- Permissions required for CTS test - CtsVoiceInteractionTestCases -->
+    <uses-permission android:name="android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT" />
+    <uses-permission android:name="android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

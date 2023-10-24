@@ -42,6 +42,7 @@ import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
+import android.service.voice.HotwordTrainingData;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.util.Slog;
 
@@ -228,6 +229,23 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                         Slog.i(TAG, "Egressed rejected result: " + result);
                     }
                 }
+            }
+
+            @Override
+            public void onTrainingData(HotwordTrainingData data) throws RemoteException {
+                sendTrainingData(new TrainingDataEgressCallback() {
+                    @Override
+                    public void onHotwordDetectionServiceFailure(
+                            HotwordDetectionServiceFailure failure) throws RemoteException {
+                        externalCallback.onHotwordDetectionServiceFailure(failure);
+                    }
+
+                    @Override
+                    public void onTrainingData(HotwordTrainingData data)
+                            throws RemoteException {
+                        externalCallback.onTrainingData(data);
+                    }
+                }, data);
             }
         };
 
