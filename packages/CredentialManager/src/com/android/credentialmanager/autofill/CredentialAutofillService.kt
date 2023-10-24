@@ -43,6 +43,9 @@ import org.json.JSONException
 import android.widget.inline.InlinePresentationSpec
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import com.android.credentialmanager.GetFlowUtils
+import com.android.credentialmanager.getflow.CredentialEntryInfo
+import com.android.credentialmanager.getflow.ProviderDisplayInfo
+import com.android.credentialmanager.getflow.toProviderDisplayInfo
 import org.json.JSONObject
 import java.util.concurrent.Executors
 
@@ -114,10 +117,14 @@ class CredentialAutofillService : AutofillService() {
         val providerList = GetFlowUtils.toProviderList(
                 getCredResponse.candidateProviderDataList,
                 this@CredentialAutofillService)
+        if (providerList.isEmpty()) {
+            return null
+        }
         var totalEntryCount = 0
         providerList.forEach { provider ->
             totalEntryCount += provider.credentialEntryList.size
         }
+        val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerList)
         val inlineSuggestionsRequest = filLRequest.inlineSuggestionsRequest
         val inlineMaxSuggestedCount = inlineSuggestionsRequest?.maxSuggestionCount ?: 0
         val inlinePresentationSpecs = inlineSuggestionsRequest?.inlinePresentationSpecs
@@ -129,15 +136,30 @@ class CredentialAutofillService : AutofillService() {
         var i = 0
         val fillResponseBuilder = FillResponse.Builder()
         var emptyFillResponse = true
-        providerList.forEach {provider ->
-            // TODO(b/299321128): Before iterating the list, sort the list so that
-            //  the relevant entries don't get truncated
-            provider.credentialEntryList.forEach entryLoop@ {entry ->
-                val autofillId: AutofillId? = entry.fillInIntent?.getParcelableExtra(
-                        CredentialProviderService.EXTRA_AUTOFILL_ID,
-                        AutofillId::class.java)
-                val pendingIntent = entry.pendingIntent
+
+        providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@ {
+            val primaryEntry = it.sortedCredentialEntryList.first()
+            // In regular CredMan bottomsheet, only one primary entry per username is displayed.
+            // But since the credential requests from different fields are allocated into a single
+            // request for autofill, there will be duplicate primary entries, especially for
+            // username/pw autofill fields. These primary entries will be the same entries except
+            // their autofillIds will point to different autofill fields. Process all primary
+            // fields.
+            // TODO(b/307435163): Merge credential options
+            it.sortedCredentialEntryList.forEach entryLoop@ { credentialEntry ->
+                if (!isSameCredentialEntry(primaryEntry, credentialEntry)) {
+                    // Encountering different credential entry means all the duplicate primary
+                    // entries have been processed.
+                    return@usernameLoop
+                }
+                val autofillId: AutofillId? = credentialEntry
+                        .fillInIntent
+                        ?.getParcelableExtra(
+                                CredentialProviderService.EXTRA_AUTOFILL_ID,
+                                AutofillId::class.java)
+                val pendingIntent = credentialEntry.pendingIntent
                 if (autofillId == null || pendingIntent == null) {
+                    Log.e(TAG, "AutofillId or pendingIntent was missing from the entry.")
                     return@entryLoop
                 }
                 var inlinePresentation: InlinePresentation? = null
@@ -151,7 +173,7 @@ class CredentialAutofillService : AutofillService() {
                     }
                     val sliceBuilder = InlineSuggestionUi
                             .newContentBuilder(pendingIntent)
-                            .setTitle(entry.userName)
+                            .setTitle(credentialEntry.userName)
                     inlinePresentation = InlinePresentation(
                             sliceBuilder.build().slice, spec, /* pinned= */ false)
                 }
@@ -169,8 +191,8 @@ class CredentialAutofillService : AutofillService() {
                                         Field.Builder().setPresentations(
                                                 presentationBuilder.build())
                                                 .build())
-                                .setAuthentication(entry.pendingIntent.intentSender)
-                                .setAuthenticationExtras(entry.fillInIntent.extras)
+                                .setAuthentication(pendingIntent.intentSender)
+                                .setAuthenticationExtras(credentialEntry.fillInIntent.extras)
                                 .build())
                 emptyFillResponse = false
             }
@@ -291,5 +313,16 @@ class CredentialAutofillService : AutofillService() {
             }
         }
         return result
+    }
+
+    private fun isSameCredentialEntry(
+            info1: CredentialEntryInfo,
+            info2: CredentialEntryInfo
+    ): Boolean {
+        return info1.providerId == info2.providerId &&
+                info1.lastUsedTimeMillis == info2.lastUsedTimeMillis &&
+                info1.credentialType == info2.credentialType &&
+                info1.displayName == info2.displayName &&
+                info1.userName == info2.userName
     }
 }
