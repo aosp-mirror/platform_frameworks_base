@@ -1646,6 +1646,28 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
 
+    @Test
+    public void testSetAlwaysOnTop() {
+        final Task rootTask = new TaskBuilder(mSupervisor)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        testSetAlwaysOnTop(rootTask);
+
+        final DisplayArea displayArea = mDisplayContent.getDefaultTaskDisplayArea();
+        displayArea.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        testSetAlwaysOnTop(displayArea);
+    }
+
+    private void testSetAlwaysOnTop(WindowContainer wc) {
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+        t.setAlwaysOnTop(wc.mRemoteToken.toWindowContainerToken(), true);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+        assertTrue(wc.isAlwaysOnTop());
+
+        t.setAlwaysOnTop(wc.mRemoteToken.toWindowContainerToken(), false);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+        assertFalse(wc.isAlwaysOnTop());
+    }
+
     private ActivityRecord createActivityRecordAndDispatchPendingEvents(Task task) {
         final ActivityRecord record = createActivityRecord(task);
         // Flush EVENT_APPEARED.
