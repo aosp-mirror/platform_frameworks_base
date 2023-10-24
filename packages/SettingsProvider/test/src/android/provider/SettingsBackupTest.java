@@ -712,6 +712,7 @@ public class SettingsBackupTest {
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY,
+                 Settings.Secure.AUDIO_DEVICE_INVENTORY, // setting not controllable by user
                  Settings.Secure.BACKUP_AUTO_RESTORE,
                  Settings.Secure.BACKUP_ENABLED,
                  Settings.Secure.BACKUP_PROVISIONED,
