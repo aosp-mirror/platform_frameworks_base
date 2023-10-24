@@ -474,13 +474,14 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 // If we have a GNSS provider override, add the hardware provider as a standalone
                 // option for use by apps with the correct permission. Note the GNSS HAL can only
                 // support a single client, so mGnssManagerService.getGnssLocationProvider() can
-                // only be installed with a single provider.
+                // only be installed with a single provider. Locations from this provider won't
+                // be reported through the passive provider.
                 LocationProviderManager gnssHardwareManager =
                         new LocationProviderManager(
                                 mContext,
                                 mInjector,
                                 GPS_HARDWARE_PROVIDER,
-                                mPassiveManager,
+                                /*passiveManager=*/ null,
                                 Collections.singletonList(Manifest.permission.LOCATION_HARDWARE));
                 addLocationProviderManager(
                         gnssHardwareManager, mGnssManagerService.getGnssLocationProvider());
