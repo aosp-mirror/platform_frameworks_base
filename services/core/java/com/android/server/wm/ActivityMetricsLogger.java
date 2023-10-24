@@ -1133,10 +1133,12 @@ class ActivityMetricsLogger {
             isIncremental = true;
             isLoading = isIncrementalLoading(info.packageName, info.userId);
         }
-        final boolean stopped = (info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        final boolean stopped = wasStoppedNeedsLogging(info);
         final int packageState = stopped
                 ? APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
                 : APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+
+        final boolean firstLaunch = wasFirstLaunch(info);
         FrameworkStatsLog.write(
                 FrameworkStatsLog.APP_START_OCCURRED,
                 info.applicationInfo.uid,
@@ -1163,17 +1165,25 @@ class ActivityMetricsLogger {
                 TimeUnit.NANOSECONDS.toMillis(info.timestampNs),
                 processState,
                 processOomAdj,
-                packageState);
+                packageState,
+                false, // is_xr_activity
+                firstLaunch,
+                0L /* TODO: stoppedDuration */);
+        // Reset the stopped state to avoid reporting stopped again
+        if (info.processRecord != null) {
+            info.processRecord.setWasStoppedLogged(true);
+        }
 
         if (DEBUG_METRICS) {
-            Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",
+            Slog.i(TAG, String.format(
+                    "APP_START_OCCURRED(%s, %s, %s, %s, %s, wasStopped=%b, firstLaunch=%b)",
                     info.applicationInfo.uid,
                     info.packageName,
                     getAppStartTransitionType(info.type, info.relaunched),
                     info.launchedActivityName,
-                    info.launchedActivityLaunchedFromPackage));
+                    info.launchedActivityLaunchedFromPackage,
+                    stopped, firstLaunch));
         }
-
 
         logAppStartMemoryStateCapture(info);
     }
@@ -1792,6 +1802,30 @@ class ActivityMetricsLogger {
                 return ActivityMetricsLaunchObserver.TEMPERATURE_COLD;
             default:
                 return -1;
+        }
+    }
+
+    private boolean wasStoppedNeedsLogging(TransitionInfoSnapshot info) {
+        if (info.processRecord != null) {
+            return (info.processRecord.wasForceStopped()
+                        || info.processRecord.wasFirstLaunch())
+                    && !info.processRecord.getWasStoppedLogged();
+        } else {
+            return (info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        }
+    }
+
+    private boolean wasFirstLaunch(TransitionInfoSnapshot info) {
+        if (info.processRecord != null) {
+            return info.processRecord.wasFirstLaunch()
+                    && !info.processRecord.getWasStoppedLogged();
+        }
+        try {
+            return !mSupervisor.mService.getPackageManagerInternalLocked()
+                    .wasPackageEverLaunched(info.packageName, info.userId);
+        } catch (Exception e) {
+            // Couldn't find the state record, so must be a newly installed app
+            return true;
         }
     }
 }

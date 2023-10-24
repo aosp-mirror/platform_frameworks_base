@@ -5046,8 +5046,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Send LOCKED_BOOT_COMPLETED and BOOT_COMPLETED to the package explicitly when unstopped
      */
     private void maybeSendBootCompletedLocked(ProcessRecord app) {
+        if (!android.content.pm.Flags.stayStopped()) return;
         // Nothing to do if it wasn't previously stopped
-        if (!android.content.pm.Flags.stayStopped() || !app.wasForceStopped()) return;
+        if (!app.wasForceStopped() && !app.getWindowProcessController().wasForceStopped()) {
+            return;
+        }
 
         // Send LOCKED_BOOT_COMPLETED, if necessary
         if (app.getApplicationInfo().isEncryptionAware()) {
@@ -5059,7 +5062,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             sendBootBroadcastToAppLocked(app, new Intent(Intent.ACTION_BOOT_COMPLETED),
                     REASON_BOOT_COMPLETED);
         }
-        app.setWasForceStopped(false);
+        // The stopped state is reset in ProcessRecord when the pid changes, to deal with
+        // any re-use of the ProcessRecord.
     }
 
     /** Send a boot_completed broadcast to app */
@@ -6842,6 +6846,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     LocalServices.getService(PermissionManagerServiceInternal.class);
         }
         return mPermissionManagerInt;
+    }
+
+    /** Returns whether the given package was ever launched since install */
+    boolean wasPackageEverLaunched(String packageName, @UserIdInt int userId) {
+        boolean wasLaunched = false;
+        try {
+            wasLaunched = getPackageManagerInternal().wasPackageEverLaunched(packageName, userId);
+        } catch (Exception e) {
+            // If the package state record doesn't exist yet, assume it was never launched
+        }
+        return wasLaunched;
     }
 
     private TestUtilityService getTestUtilityServiceLocked() {
