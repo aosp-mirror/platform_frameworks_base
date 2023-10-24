@@ -21,7 +21,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
@@ -34,10 +33,8 @@ import com.android.systemui.statusbar.notification.shared.NotificationIconContai
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
@@ -84,11 +81,8 @@ object NotificationShelfViewBinder {
         viewModel: NotificationShelfViewModel,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
-        dozeParameters: DozeParameters,
         falsingManager: FalsingManager,
-        featureFlags: FeatureFlagsClassic,
         notificationIconAreaController: NotificationIconAreaController,
-        screenOffAnimationController: ScreenOffAnimationController,
         shelfIconViewStore: ShelfNotificationIconViewStore,
     ) {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
@@ -99,9 +93,6 @@ object NotificationShelfViewBinder {
                     viewModel.icons,
                     configuration,
                     configurationController,
-                    dozeParameters,
-                    featureFlags,
-                    screenOffAnimationController,
                     shelfIconViewStore,
                 )
             } else {

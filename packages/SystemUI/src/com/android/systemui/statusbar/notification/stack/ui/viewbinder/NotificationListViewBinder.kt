@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 import android.view.LayoutInflater
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.reinflateAndBindLatest
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
@@ -30,9 +29,7 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotif
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
-import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.traceSection
 
@@ -44,11 +41,8 @@ object NotificationListViewBinder {
         viewModel: NotificationListViewModel,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
-        dozeParameters: DozeParameters,
         falsingManager: FalsingManager,
-        featureFlags: FeatureFlagsClassic,
         iconAreaController: NotificationIconAreaController,
-        screenOffAnimationController: ScreenOffAnimationController,
         shelfIconViewStore: ShelfNotificationIconViewStore,
     ) {
         val shelf =
@@ -59,11 +53,8 @@ object NotificationListViewBinder {
             viewModel.shelf,
             configuration,
             configurationController,
-            dozeParameters,
             falsingManager,
-            featureFlags,
             iconAreaController,
-            screenOffAnimationController,
             shelfIconViewStore,
         )
         view.setShelf(shelf)

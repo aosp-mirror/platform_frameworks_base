@@ -31,10 +31,6 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.notification.icon.domain.interactor.AlwaysOnDisplayNotificationIconsInteractor
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.ColorLookup
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconColors
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconInfo
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconsViewData
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.kotlin.pairwise
@@ -47,8 +43,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** View-model for the row of notification icons displayed on the always-on display. */
@@ -66,14 +60,16 @@ constructor(
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     screenOffAnimationController: ScreenOffAnimationController,
     shadeInteractor: ShadeInteractor,
-) : NotificationIconContainerViewModel {
+) {
 
-    override val iconColors: Flow<ColorLookup> =
+    /** The colors with which to display the notification icons. */
+    val iconColors: Flow<NotificationIconColorLookup> =
         configuration.getColorAttr(R.attr.wallpaperTextColor, DEFAULT_AOD_ICON_COLOR).map { tint ->
-            ColorLookup { IconColorsImpl(tint) }
+            NotificationIconColorLookup { IconColorsImpl(tint) }
         }
 
-    override val animationsEnabled: Flow<Boolean> =
+    /** Are changes to the icon container animated? */
+    val animationsEnabled: Flow<Boolean> =
         combine(
             shadeInteractor.isShadeTouchable,
             keyguardInteractor.isKeyguardVisible,
@@ -81,7 +77,8 @@ constructor(
             panelTouchesEnabled && isKeyguardVisible
         }
 
-    override val isDozing: Flow<AnimatedValue<Boolean>> =
+    /** Should icons be rendered in "dozing" mode? */
+    val isDozing: Flow<AnimatedValue<Boolean>> =
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             // Determine if we're dozing based on the most recent transition
             .map { step: TransitionStep ->
@@ -98,7 +95,8 @@ constructor(
             .distinctUntilChanged()
             .toAnimatedValueFlow()
 
-    override val isVisible: Flow<AnimatedValue<Boolean>> =
+    /** Is the icon container visible? */
+    val isVisible: Flow<AnimatedValue<Boolean>> =
         combine(
                 keyguardTransitionInteractor.finishedKeyguardState.map { it != KeyguardState.GONE },
                 deviceEntryInteractor.isBypassEnabled,
@@ -136,16 +134,13 @@ constructor(
             }
             .distinctUntilChanged()
 
-    override val iconsViewData: Flow<IconsViewData> =
+    /** [NotificationIconsViewData] indicating which icons to display in the view. */
+    val icons: Flow<NotificationIconsViewData> =
         iconsInteractor.aodNotifs.map { entries ->
-            IconsViewData(
+            NotificationIconsViewData(
                 visibleKeys = entries.mapNotNull { it.toIconInfo(it.aodIcon) },
             )
         }
-
-    override val isolatedIcon: Flow<AnimatedValue<IconInfo?>> =
-        flowOf(AnimatedValue.NotAnimating(null))
-    override val isolatedIconLocation: Flow<Rect> = emptyFlow()
 
     /** Is there an expanded pulse, are we animating in response? */
     private fun isPulseExpandingAnimated(): Flow<AnimatedValue<Boolean>> {
@@ -182,7 +177,7 @@ constructor(
             .toAnimatedValueFlow()
     }
 
-    private class IconColorsImpl(override val tint: Int) : IconColors {
+    private class IconColorsImpl(override val tint: Int) : NotificationIconColors {
         override fun staticDrawableColor(viewBounds: Rect, isColorized: Boolean): Int = tint
     }
 
