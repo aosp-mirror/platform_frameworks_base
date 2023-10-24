@@ -62,6 +62,10 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         )
 
     private val testableResources = mContext.getOrCreateTestableResources()
+    private val maxPanelHeight =
+        mContext.resources.displayMetrics.heightPixels -
+                px(R.dimen.notification_panel_margin_top) -
+                px(R.dimen.notification_panel_margin_bottom)
 
     private fun px(@DimenRes id: Int): Float =
             testableResources.resources.getDimensionPixelSize(id).toFloat()
@@ -147,7 +151,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.initView(context)
         hostView.removeAllViews()
         hostView.addView(emptyShadeView)
-        ambientState.layoutMaxHeight = 1280
+        ambientState.layoutMaxHeight = maxPanelHeight.toInt()
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
@@ -155,7 +159,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 context.resources.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom)
         val fullHeight = ambientState.layoutMaxHeight + marginBottom - ambientState.stackY
         val centeredY = ambientState.stackY + fullHeight / 2f - emptyShadeView.height / 2f
-        assertThat(emptyShadeView.viewState?.yTranslation).isEqualTo(centeredY)
+        assertThat(emptyShadeView.viewState.yTranslation).isEqualTo(centeredY)
     }
 
     @Test
@@ -356,7 +360,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(notificationRow.canViewBeCleared()).thenReturn(false)
         ambientState.isClearAllInProgress = true
         ambientState.isShadeExpanded = true
-        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        ambientState.stackEndHeight = maxPanelHeight // plenty space for the footer in the stack
         hostView.addView(footerView)
 
         stackScrollAlgorithm.resetViewStates(ambientState, 0)
@@ -370,7 +374,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(notificationRow.canViewBeCleared()).thenReturn(true)
         ambientState.isClearAllInProgress = true
         ambientState.isShadeExpanded = true
-        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        ambientState.stackEndHeight = maxPanelHeight // plenty space for the footer in the stack
         hostView.addView(footerView)
 
         stackScrollAlgorithm.resetViewStates(ambientState, 0)
@@ -382,7 +386,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun resetViewStates_clearAllInProgress_allRowsRemoved_emptyShade_footerHidden() {
         ambientState.isClearAllInProgress = true
         ambientState.isShadeExpanded = true
-        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        ambientState.stackEndHeight = maxPanelHeight // plenty space for the footer in the stack
         hostView.removeAllViews() // remove all rows
         hostView.addView(footerView)
 
@@ -1006,7 +1010,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     private fun resetViewStates_stackMargin_changesHunYTranslation() {
-        val stackTopMargin = 50
+        val stackTopMargin = bigGap.toInt() // a gap smaller than the headsUpInset
         val headsUpTranslationY = stackScrollAlgorithm.mHeadsUpInset - stackTopMargin
 
         // we need the shelf to mock the real-life behaviour of StackScrollAlgorithm#updateChild
