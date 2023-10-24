@@ -188,8 +188,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mPanelViewControllerLazy.get()).thenReturn(mNotificationPanelViewController);
-        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger,
-                mInteractionJankMonitor, mock(JavaAdapter.class), () -> mShadeInteractor);
+        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
+                mInteractionJankMonitor, mShadeExpansionStateManager);
 
         FakeDeviceProvisioningRepository deviceProvisioningRepository =
                 new FakeDeviceProvisioningRepository();
