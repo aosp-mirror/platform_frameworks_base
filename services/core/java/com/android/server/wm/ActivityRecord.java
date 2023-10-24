@@ -3055,7 +3055,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean providesOrientation() {
-        return mStyleFillsParent;
+        return mStyleFillsParent || mOccludesParent;
     }
 
     @Override
