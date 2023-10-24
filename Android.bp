@@ -321,7 +321,6 @@ java_defaults {
             ":installd_aidl",
             ":libaudioclient_aidl",
             ":libbinder_aidl",
-            ":libbluetooth-binder-aidl",
             ":libcamera_client_aidl",
             ":libcamera_client_framework_aidl",
             ":libupdate_engine_aidl",
