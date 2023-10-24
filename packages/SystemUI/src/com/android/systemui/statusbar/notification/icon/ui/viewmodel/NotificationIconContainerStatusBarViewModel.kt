@@ -68,8 +68,6 @@ constructor(
 
     override val isDozing: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override val isVisible: Flow<AnimatedValue<Boolean>> = emptyFlow()
-    override fun completeDozeAnimation() {}
-    override fun completeVisibilityAnimation() {}
 
     override val iconsViewData: Flow<IconsViewData> =
         iconsInteractor.statusBarNotifs.map { entries ->

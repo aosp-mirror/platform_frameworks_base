@@ -31,11 +31,10 @@ class NotificationIconContainerShelfViewModel
 constructor(
     interactor: NotificationIconsInteractor,
 ) : NotificationIconContainerViewModel {
+
     override val animationsEnabled: Flow<Boolean> = flowOf(true)
     override val isDozing: Flow<AnimatedValue<Boolean>> = emptyFlow()
     override val isVisible: Flow<AnimatedValue<Boolean>> = emptyFlow()
-    override fun completeDozeAnimation() {}
-    override fun completeVisibilityAnimation() {}
     override val iconColors: Flow<ColorLookup> = emptyFlow()
 
     override val iconsViewData: Flow<IconsViewData> =

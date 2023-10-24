@@ -41,9 +41,9 @@ import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
 import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.toAnimatedValueFlow
+import com.android.systemui.util.ui.zip
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -64,9 +64,6 @@ constructor(
     screenOffAnimationController: ScreenOffAnimationController,
     shadeInteractor: ShadeInteractor,
 ) : NotificationIconContainerViewModel {
-
-    private val onDozeAnimationComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    private val onVisAnimationComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     override val iconColors: Flow<ColorLookup> =
         configuration.getColorAttr(R.attr.wallpaperTextColor, DEFAULT_AOD_ICON_COLOR).map { tint ->
@@ -96,7 +93,7 @@ constructor(
                 AnimatableEvent(isDozing, animate)
             }
             .distinctUntilChanged()
-            .toAnimatedValueFlow(completionEvents = onDozeAnimationComplete)
+            .toAnimatedValueFlow()
 
     override val isVisible: Flow<AnimatedValue<Boolean>> =
         combine(
@@ -106,36 +103,35 @@ constructor(
                 isPulseExpandingAnimated(),
             ) {
                 onKeyguard: Boolean,
-                bypassEnabled: Boolean,
-                (notifsFullyHidden: Boolean, isAnimatingHide: Boolean),
-                (pulseExpanding: Boolean, isAnimatingPulse: Boolean),
+                isBypassEnabled: Boolean,
+                notifsFullyHidden: AnimatedValue<Boolean>,
+                pulseExpanding: AnimatedValue<Boolean>,
                 ->
-                val isAnimating = isAnimatingHide || isAnimatingPulse
                 when {
                     // Hide the AOD icons if we're not in the KEYGUARD state unless the screen off
                     // animation is playing, in which case we want them to be visible if we're
                     // animating in the AOD UI and will be switching to KEYGUARD shortly.
                     !onKeyguard && !screenOffAnimationController.shouldShowAodIconsWhenShade() ->
-                        AnimatedValue(false, isAnimating = false)
-                    // If we're bypassing, then we're visible
-                    bypassEnabled -> AnimatedValue(true, isAnimating)
-                    // If we are pulsing (and not bypassing), then we are hidden
-                    pulseExpanding -> AnimatedValue(false, isAnimating)
-                    // If notifs are fully gone, then we're visible
-                    notifsFullyHidden -> AnimatedValue(true, isAnimating)
-                    // Otherwise, we're hidden
-                    else -> AnimatedValue(false, isAnimating)
+                        AnimatedValue.NotAnimating(false)
+                    else ->
+                        zip(notifsFullyHidden, pulseExpanding) {
+                            areNotifsFullyHidden,
+                            isPulseExpanding,
+                            ->
+                            when {
+                                // If we're bypassing, then we're visible
+                                isBypassEnabled -> true
+                                // If we are pulsing (and not bypassing), then we are hidden
+                                isPulseExpanding -> false
+                                // If notifs are fully gone, then we're visible
+                                areNotifsFullyHidden -> true
+                                // Otherwise, we're hidden
+                                else -> false
+                            }
+                        }
                 }
             }
             .distinctUntilChanged()
-
-    override fun completeDozeAnimation() {
-        onDozeAnimationComplete.tryEmit(Unit)
-    }
-
-    override fun completeVisibilityAnimation() {
-        onVisAnimationComplete.tryEmit(Unit)
-    }
 
     override val iconsViewData: Flow<IconsViewData> =
         iconsInteractor.aodNotifs.map { entries ->
@@ -150,7 +146,7 @@ constructor(
             .pairwise(initialValue = null)
             // If pulsing changes, start animating, unless it's the first emission
             .map { (prev, expanding) -> AnimatableEvent(expanding, startAnimating = prev != null) }
-            .toAnimatedValueFlow(completionEvents = onVisAnimationComplete)
+            .toAnimatedValueFlow()
     }
 
     /** Are notifications completely hidden from view, are we animating in response? */
@@ -176,7 +172,7 @@ constructor(
                     }
                 AnimatableEvent(fullyHidden, animate)
             }
-            .toAnimatedValueFlow(completionEvents = onVisAnimationComplete)
+            .toAnimatedValueFlow()
     }
 
     private class IconColorsImpl(override val tint: Int) : IconColors {

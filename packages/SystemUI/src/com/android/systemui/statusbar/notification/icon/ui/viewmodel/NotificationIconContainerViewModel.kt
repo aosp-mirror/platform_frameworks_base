@@ -46,18 +46,6 @@ interface NotificationIconContainerViewModel {
     val iconsViewData: Flow<IconsViewData>
 
     /**
-     * Signal completion of the [isDozing] animation; if [isDozing]'s [AnimatedValue.isAnimating]
-     * property was `true`, calling this method will update it to `false`.
-     */
-    fun completeDozeAnimation()
-
-    /**
-     * Signal completion of the [isVisible] animation; if [isVisible]'s [AnimatedValue.isAnimating]
-     * property was `true`, calling this method will update it to `false`.
-     */
-    fun completeVisibilityAnimation()
-
-    /**
      * Lookup the colors to use for the notification icons based on the bounds of the icon
      * container. A result of `null` indicates that no color changes should be applied.
      */
