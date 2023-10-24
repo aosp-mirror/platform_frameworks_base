@@ -588,6 +588,12 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mResizingWindows = new ArrayList<>();
 
     /**
+     * Windows that their frames are being changed.  Used so we can clear the frame-changing states
+     * after handling the moved or resized windows.
+     */
+    final ArrayList<WindowState> mFrameChangingWindows = new ArrayList<>();
+
+    /**
      * Mapping of displayId to {@link DisplayImePolicy}.
      * Note that this can be accessed without holding the lock.
      */

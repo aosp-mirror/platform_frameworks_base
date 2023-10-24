@@ -44,7 +44,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
 
     private val thumbnailLoader = FakeThumbnailLoader()
 
-    private fun createController(isFirstStart: Boolean = true) =
+    private fun createController(isFirstStart: Boolean = true, hostUid: Int = 123) =
         MediaProjectionAppSelectorController(
             taskListProvider,
             view,
@@ -55,7 +55,8 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             callerPackageName,
             thumbnailLoader,
             isFirstStart,
-            logger
+            logger,
+            hostUid,
         )
 
     @Before
@@ -212,20 +213,22 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
 
     @Test
     fun init_firstStart_logsAppSelectorDisplayed() {
-        val controller = createController(isFirstStart = true)
+        val hostUid = 123456789
+        val controller = createController(isFirstStart = true,  hostUid)
 
         controller.init()
 
-        verify(logger).notifyPermissionProgress(STATE_APP_SELECTOR_DISPLAYED)
+        verify(logger).notifyAppSelectorDisplayed(hostUid)
     }
 
     @Test
     fun init_notFirstStart_doesNotLogAppSelectorDisplayed() {
-        val controller = createController(isFirstStart = false)
+        val hostUid = 123456789
+        val controller = createController(isFirstStart = false, hostUid)
 
         controller.init()
 
-        verify(logger, never()).notifyPermissionProgress(STATE_APP_SELECTOR_DISPLAYED)
+        verify(logger, never()).notifyAppSelectorDisplayed(hostUid)
     }
 
     private fun givenCaptureAllowed(isAllow: Boolean) {

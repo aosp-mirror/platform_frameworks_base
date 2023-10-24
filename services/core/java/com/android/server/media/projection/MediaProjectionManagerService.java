@@ -469,6 +469,11 @@ public final class MediaProjectionManagerService extends SystemService
         mMediaProjectionMetricsLogger.logPermissionRequestDisplayed(hostUid);
     }
 
+    @VisibleForTesting
+    void notifyAppSelectorDisplayed(int hostUid) {
+        mMediaProjectionMetricsLogger.logAppSelectorDisplayed(hostUid);
+    }
+
     /**
      * Handles result of dialog shown from
      * {@link BinderService#buildReviewGrantedConsentIntentLocked()}.
@@ -878,6 +883,18 @@ public final class MediaProjectionManagerService extends SystemService
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.notifyPermissionRequestDisplayed(hostUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyAppSelectorDisplayed(int hostUid) {
+            notifyAppSelectorDisplayed_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyAppSelectorDisplayed(hostUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

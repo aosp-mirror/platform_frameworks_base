@@ -813,8 +813,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mShadeExpansionStateManager.addExpansionListener(shadeExpansionListener);
         shadeExpansionListener.onPanelExpansionChanged(currentState);
 
-        mShadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
-
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
 
@@ -1398,20 +1396,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // SYSUI_STATE_QUICK_SETTINGS_EXPANDED
                 getShadeViewController().updateSystemUiStateFlags();
             }
-        }
-    }
-
-    @VisibleForTesting
-    void onShadeExpansionFullyChanged(Boolean isExpanded) {
-        if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
-            if (DEBUG) {
-                Log.v(TAG, "clearing notification effects from Height");
-            }
-            clearNotificationEffects();
-        }
-
-        if (!isExpanded) {
-            mRemoteInputManager.onPanelCollapsed();
         }
     }
 

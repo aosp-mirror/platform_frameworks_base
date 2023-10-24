@@ -126,7 +126,7 @@ static struct {
     jfieldID height;
     jfieldID xDpi;
     jfieldID yDpi;
-    jfieldID refreshRate;
+    jfieldID peakRefreshRate;
     jfieldID vsyncRate;
     jfieldID appVsyncOffsetNanos;
     jfieldID presentationDeadlineNanos;
@@ -1232,7 +1232,7 @@ static jobject convertDisplayModeToJavaObject(JNIEnv* env, const ui::DisplayMode
     env->SetFloatField(object, gDisplayModeClassInfo.xDpi, config.xDpi);
     env->SetFloatField(object, gDisplayModeClassInfo.yDpi, config.yDpi);
 
-    env->SetFloatField(object, gDisplayModeClassInfo.refreshRate, config.refreshRate);
+    env->SetFloatField(object, gDisplayModeClassInfo.peakRefreshRate, config.peakRefreshRate);
     env->SetFloatField(object, gDisplayModeClassInfo.vsyncRate, config.vsyncRate);
     env->SetLongField(object, gDisplayModeClassInfo.appVsyncOffsetNanos, config.appVsyncOffset);
     env->SetLongField(object, gDisplayModeClassInfo.presentationDeadlineNanos,
@@ -2396,7 +2396,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gDisplayModeClassInfo.height = GetFieldIDOrDie(env, modeClazz, "height", "I");
     gDisplayModeClassInfo.xDpi = GetFieldIDOrDie(env, modeClazz, "xDpi", "F");
     gDisplayModeClassInfo.yDpi = GetFieldIDOrDie(env, modeClazz, "yDpi", "F");
-    gDisplayModeClassInfo.refreshRate = GetFieldIDOrDie(env, modeClazz, "refreshRate", "F");
+    gDisplayModeClassInfo.peakRefreshRate = GetFieldIDOrDie(env, modeClazz, "peakRefreshRate", "F");
     gDisplayModeClassInfo.vsyncRate = GetFieldIDOrDie(env, modeClazz, "vsyncRate", "F");
     gDisplayModeClassInfo.appVsyncOffsetNanos =
             GetFieldIDOrDie(env, modeClazz, "appVsyncOffsetNanos", "J");

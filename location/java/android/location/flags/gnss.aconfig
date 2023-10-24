@@ -1,0 +1,8 @@
+package: "android.location.flags"
+
+flag {
+    name: "gnss_api_navic_l1"
+    namespace: "location"
+    description: "Flag for GNSS API for NavIC L1"
+    bug: "302199306"
+}

@@ -216,6 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Veldu snið"</string>
     <string name="category_personal" msgid="6236798763159385225">"Persónulegt"</string>
     <string name="category_work" msgid="4014193632325996115">"Vinna"</string>
+    <string name="category_private" msgid="4244892185452788977">"Lokað"</string>
     <string name="category_clone" msgid="1554511758987195974">"Afrit"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Forritunarkostir"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Virkja valkosti þróunaraðila"</string>

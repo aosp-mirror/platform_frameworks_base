@@ -294,6 +294,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"التطبيقات التي تستهلك البطارية"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"التكبير"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"استخدام \"أدوات تسهيل الاستخدام\""</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"الشاشة"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"يستخدم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> البطارية"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"تستخدم <xliff:g id="NUMBER">%1$d</xliff:g> من التطبيقات البطارية"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"انقر للحصول على تفاصيل حول البطارية واستخدام البيانات"</string>
@@ -2337,6 +2338,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"يسمح هذا الإذن للتطبيق المصاحب ببدء الخدمات التي تعمل في المقدّمة من الخلفية."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"الميكروفون متاح."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"تم حظر الميكروفون."</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"يتعذّر إجراء نسخ مطابق لمحتوى جهازك إلى الشاشة"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"يُرجى استخدام كابل آخر وإعادة المحاولة."</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"قد لا يتوافق الكابل مع الشاشات"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"‏قد لا يتم توصيل الكابل المزوَّد بمنفذ USB-C بالشاشات بشكل صحيح."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏ميزة Dual Screen مفعّلة"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"يستخدم \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" كلتا الشاشتين لعرض المحتوى."</string>

@@ -937,6 +937,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // so we still request the window to resize if the current frame is empty.
                 if (!w.getFrame().isEmpty()) {
                     w.updateLastFrames();
+                    mWmService.mFrameChangingWindows.remove(w);
                 }
                 w.onResizeHandled();
             }

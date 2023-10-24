@@ -16,10 +16,12 @@
 
 package android.service.voice;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.voice.flags.Flags;
 import android.text.TextUtils;
 
 import com.android.internal.util.DataClass;
@@ -47,6 +49,7 @@ import java.util.List;
         genParcelable = true,
         genToString = true)
 @SystemApi
+@FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
 public final class HotwordTrainingData implements Parcelable {
     /** Max size for hotword training data in bytes. */
     public static int getMaxTrainingDataBytes() {
@@ -63,11 +66,11 @@ public final class HotwordTrainingData implements Parcelable {
     }
 
     /** App-defined stage when hotword model timed-out while running.
-     * <p> Returns 0 if unset. */
+     * <p> Returns -1 if unset. */
     private final int mTimeoutStage;
 
     private static int defaultTimeoutStage() {
-        return 0;
+        return -1;
     }
 
     private void onConstructed() {
@@ -120,7 +123,7 @@ public final class HotwordTrainingData implements Parcelable {
 
     /**
      * App-defined stage when hotword model timed-out while running.
-     * <p> Returns 0 if unset.
+     * <p> Returns -1 if unset.
      */
     @DataClass.Generated.Member
     public int getTimeoutStage() {
@@ -218,6 +221,7 @@ public final class HotwordTrainingData implements Parcelable {
     /**
      * A builder for {@link HotwordTrainingData}
      */
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
     @SuppressWarnings("WeakerAccess")
     @DataClass.Generated.Member
     public static final class Builder {
@@ -251,7 +255,7 @@ public final class HotwordTrainingData implements Parcelable {
 
         /**
          * App-defined stage when hotword model timed-out while running.
-         * <p> Returns 0 if unset.
+         * <p> Returns -1 if unset.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setTimeoutStage(int value) {
@@ -287,7 +291,7 @@ public final class HotwordTrainingData implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1696092128091L,
+            time = 1697826948280L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordTrainingData.java",
             inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"trainingAudio\") java.util.List<android.service.voice.HotwordTrainingAudio> mTrainingAudioList\nprivate final  int mTimeoutStage\npublic static  int getMaxTrainingDataBytes()\nprivate static  java.util.List<android.service.voice.HotwordTrainingAudio> defaultTrainingAudioList()\nprivate static  int defaultTimeoutStage()\nprivate  void onConstructed()\nclass HotwordTrainingData extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")

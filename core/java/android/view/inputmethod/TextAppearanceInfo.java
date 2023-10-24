@@ -770,7 +770,7 @@ public final class TextAppearanceInfo implements Parcelable {
         }
 
         /**
-         * Set the font variation settings. Returns null if no variation is specified.
+         * Set the font variation settings. Set {@code null} if no variation is specified.
          *
          * @see Paint#getFontVariationSettings()
          */

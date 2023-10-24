@@ -1200,6 +1200,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void updateTrustedOverlay() {
         mInputWindowHandle.setTrustedOverlay(getPendingTransaction(), mSurfaceControl,
                 isWindowTrustedOverlay());
+        mInputWindowHandle.forceChange();
     }
 
     boolean isWindowTrustedOverlay() {
@@ -1344,6 +1345,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mLastRequestedWidth = requestedWidth;
             mLastRequestedHeight = requestedHeight;
             windowFrames.setContentChanged(true);
+        }
+
+        if (!windowFrames.mFrame.equals(windowFrames.mLastFrame)
+                || !windowFrames.mRelFrame.equals(windowFrames.mLastRelFrame)) {
+            mWmService.mFrameChangingWindows.add(this);
         }
 
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
@@ -3715,10 +3721,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // that may cause WINDOW_FREEZE_TIMEOUT because resizing the client keeps failing.
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
-
-        // We update mLastFrame always rather than in the conditional with the last inset
-        // variables, because mFrameSizeChanged only tracks the width and height changing.
-        updateLastFrames();
 
         final int prevRotation = mLastReportedConfiguration
                 .getMergedConfiguration().windowConfiguration.getRotation();

@@ -153,7 +153,7 @@ public final class CredentialManager {
                     mService.getCandidateCredentials(
                             request,
                             new GetCandidateCredentialsTransport(executor, callback),
-                            mContext.getOpPackageName());
+                            callingPackage);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -79,7 +80,7 @@ public class TaskStackChangedListenerTest {
     private ImageReader mImageReader;
     private final ArrayList<Activity> mStartedActivities = new ArrayList<>();
 
-    private static final int WAIT_TIMEOUT_MS = 5000;
+    private static final int WAIT_TIMEOUT_MS = 5000 * HW_TIMEOUT_MULTIPLIER;
     private static final Object sLock = new Object();
 
     @Before

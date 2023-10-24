@@ -46,6 +46,7 @@ import com.android.systemui.settings.UserContextProvider
 class ScreenRecordPermissionDialog(
     context: Context,
     private val hostUserHandle: UserHandle,
+    private val hostUid: Int,
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
     private val userContextProvider: UserContextProvider,
@@ -88,6 +89,7 @@ class ScreenRecordPermissionDialog(
                     MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
                     hostUserHandle
                 )
+                intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID, hostUid)
                 activityStarter.startActivity(intent, /* dismissShade= */ true)
             }
             dismiss()

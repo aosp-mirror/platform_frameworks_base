@@ -216,6 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Chọn hồ sơ"</string>
     <string name="category_personal" msgid="6236798763159385225">"Cá nhân"</string>
     <string name="category_work" msgid="4014193632325996115">"Công việc"</string>
+    <string name="category_private" msgid="4244892185452788977">"Riêng tư"</string>
     <string name="category_clone" msgid="1554511758987195974">"Nhân bản"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Tùy chọn cho nhà phát triển"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Bật tùy chọn nhà phát triển"</string>

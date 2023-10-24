@@ -216,6 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക"</string>
     <string name="category_personal" msgid="6236798763159385225">"വ്യക്തിപരം"</string>
     <string name="category_work" msgid="4014193632325996115">"ഔദ്യോഗികം"</string>
+    <string name="category_private" msgid="4244892185452788977">"സ്വകാര്യം"</string>
     <string name="category_clone" msgid="1554511758987195974">"ക്ലോൺ ചെയ്യുക"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>

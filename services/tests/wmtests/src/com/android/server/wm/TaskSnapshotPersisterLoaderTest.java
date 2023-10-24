@@ -96,7 +96,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     @Test
     public void testTaskRemovedFromRecents() {
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
-        mPersister.onTaskRemovedFromRecents(1, mTestUserId);
+        mPersister.removeSnapshot(1, mTestUserId);
         mSnapshotPersistQueue.waitForQueueEmpty();
         assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1.proto").exists());
         assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1.jpg").exists());

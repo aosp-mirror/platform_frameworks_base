@@ -22,6 +22,7 @@ import android.view.View
 import androidx.annotation.GuardedBy
 import com.android.internal.logging.InstanceId
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon
@@ -31,9 +32,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.function.Supplier
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -44,6 +43,7 @@ import kotlinx.coroutines.launch
 class QSTileViewModelAdapter
 @AssistedInject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     private val qsHost: QSHost,
     @Assisted private val qsTileViewModel: QSTileViewModel,
 ) : QSTile {
@@ -57,25 +57,28 @@ constructor(
     private val listeningClients: MutableCollection<Any> = mutableSetOf()
 
     // Cancels the jobs when the adapter is no longer alive
-    private val adapterScope = CoroutineScope(SupervisorJob())
+    private var availabilityJob: Job? = null
     // Cancels the jobs when clients stop listening
-    private val listeningScope = CoroutineScope(SupervisorJob())
+    private var stateJob: Job? = null
 
     init {
-        adapterScope.launch {
-            qsTileViewModel.isAvailable.collectIndexed { index, isAvailable ->
-                if (!isAvailable) {
-                    qsHost.removeTile(tileSpec)
-                }
-                // qsTileViewModel.isAvailable flow often starts with isAvailable == true. That's
-                // why we only allow isAvailable == true once and throw an exception afterwards.
-                if (index > 0 && isAvailable) {
-                    // See com.android.systemui.qs.pipeline.domain.model.AutoAddable for additional
-                    // guidance on how to auto add your tile
-                    throw UnsupportedOperationException("Turning on tile is not supported now")
+        availabilityJob =
+            applicationScope.launch {
+                qsTileViewModel.isAvailable.collectIndexed { index, isAvailable ->
+                    if (!isAvailable) {
+                        qsHost.removeTile(tileSpec)
+                    }
+                    // qsTileViewModel.isAvailable flow often starts with isAvailable == true.
+                    // That's
+                    // why we only allow isAvailable == true once and throw an exception afterwards.
+                    if (index > 0 && isAvailable) {
+                        // See com.android.systemui.qs.pipeline.domain.model.AutoAddable for
+                        // additional
+                        // guidance on how to auto add your tile
+                        throw UnsupportedOperationException("Turning on tile is not supported now")
+                    }
                 }
             }
-        }
 
         // QSTileHost doesn't call this when userId is initialized
         userSwitch(qsHost.userId)
@@ -140,25 +143,28 @@ constructor(
     )
     override fun getMetricsCategory(): Int = 0
 
+    override fun isTileReady(): Boolean = qsTileViewModel.currentState != null
+
     override fun setListening(client: Any?, listening: Boolean) {
         client ?: return
         synchronized(listeningClients) {
             if (listening) {
                 listeningClients.add(client)
                 if (listeningClients.size == 1) {
-                    qsTileViewModel.state
-                        .map { mapState(context, it, qsTileViewModel.config) }
-                        .onEach { legacyState ->
-                            synchronized(callbacks) {
-                                callbacks.forEach { it.onStateChanged(legacyState) }
+                    stateJob =
+                        qsTileViewModel.state
+                            .map { mapState(context, it, qsTileViewModel.config) }
+                            .onEach { legacyState ->
+                                synchronized(callbacks) {
+                                    callbacks.forEach { it.onStateChanged(legacyState) }
+                                }
                             }
-                        }
-                        .launchIn(listeningScope)
+                            .launchIn(applicationScope)
                 }
             } else {
                 listeningClients.remove(client)
                 if (listeningClients.isEmpty()) {
-                    listeningScope.coroutineContext.cancelChildren()
+                    stateJob?.cancel()
                 }
             }
         }
@@ -172,8 +178,8 @@ constructor(
     }
 
     override fun destroy() {
-        adapterScope.cancel()
-        listeningScope.cancel()
+        stateJob?.cancel()
+        availabilityJob?.cancel()
         qsTileViewModel.onLifecycle(QSTileLifecycle.DEAD)
     }
 

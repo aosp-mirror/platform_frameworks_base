@@ -17,6 +17,7 @@
 package com.android.server.media.projection;
 
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
@@ -25,7 +26,7 @@ import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +40,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -218,21 +218,19 @@ public class MediaProjectionMetricsLoggerTest {
     }
 
     @Test
-    public void logStopped_registersActiveSessionEnded_afterLogging() {
+    public void logStopped_capturingWasInProgress_registersActiveSessionEnded() {
+        mLogger.logInProgress(TEST_HOST_UID, TEST_TARGET_UID);
+
         mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
 
-        InOrder inOrder = inOrder(mFrameworkStatsLogWrapper, mTimestampStore);
-        inOrder.verify(mFrameworkStatsLogWrapper)
-                .write(
-                        /* code= */ anyInt(),
-                        /* sessionId= */ anyInt(),
-                        /* state= */ anyInt(),
-                        /* previousState= */ anyInt(),
-                        /* hostUid= */ anyInt(),
-                        /* targetUid= */ anyInt(),
-                        /* timeSinceLastActive= */ anyInt(),
-                        /* creationSource= */ anyInt());
-        inOrder.verify(mTimestampStore).registerActiveSessionEnded();
+        verify(mTimestampStore).registerActiveSessionEnded();
+    }
+
+    @Test
+    public void logStopped_capturingWasNotInProgress_doesNotRegistersActiveSessionEnded() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verify(mTimestampStore, never()).registerActiveSessionEnded();
     }
 
     @Test
@@ -377,6 +375,79 @@ public class MediaProjectionMetricsLoggerTest {
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED);
 
         mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
+    }
+
+    @Test
+    public void logAppSelectorDisplayed_logsStateChangedAtomId() {
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+
+        verifyStateChangedAtomIdLogged();
+    }
+
+    @Test
+    public void logAppSelectorDisplayed_logsCurrentSessionId() {
+        int currentSessionId = 765;
+        when(mSessionIdGenerator.getCurrentSessionId()).thenReturn(currentSessionId);
+
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+
+        verifySessionIdLogged(currentSessionId);
+    }
+
+    @Test
+    public void logAppSelectorDisplayed_logsStateDisplayed() {
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+
+        verifyStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED);
+    }
+
+    @Test
+    public void logAppSelectorDisplayed_logsHostUid() {
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+
+        verifyHostUidLogged(TEST_HOST_UID);
+    }
+
+    @Test
+    public void logAppSelectorDisplayed_logsUnknownTargetUid() {
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+
+        verifyTargetUidLogged(-2);
+    }
+
+    @Test
+    public void logAppSelectorDisplayed_logsUnknownTimeSinceLastActive() {
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+
+        verifyTimeSinceLastActiveSessionLogged(-1);
+    }
+
+    @Test
+    public void logAppSelectorDisplayed_logsUnknownSessionCreationSource() {
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+
+        verifyCreationSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    @Test
+    public void logAppSelectorDisplayed_logsPreviousState() {
+        mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN);
+
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
+
+        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED);
+
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
     }

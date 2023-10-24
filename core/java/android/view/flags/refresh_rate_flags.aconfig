@@ -22,6 +22,14 @@ flag {
 }
 
 flag {
+    name: "expected_presentation_time_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for using expected presentation time of the Choreographer"
+    bug: "278730197"
+    is_fixed_read_only: true
+}
+
+flag {
   name: "set_frame_rate_callback"
   namespace: "core_graphics"
   description: "Enable the `setFrameRate` callback"

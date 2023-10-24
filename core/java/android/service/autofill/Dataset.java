@@ -1401,6 +1401,7 @@ public final class Dataset implements Parcelable {
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
         parcel.writeInt(mEligibleReason);
+        parcel.writeTypedObject(mAuthenticationExtras, flags);
     }
 
     public static final @NonNull Creator<Dataset> CREATOR = new Creator<Dataset>() {
@@ -1436,6 +1437,7 @@ public final class Dataset implements Parcelable {
                     android.content.IntentSender.class);
             final String datasetId = parcel.readString();
             final int eligibleReason = parcel.readInt();
+            final Bundle authenticationExtras = parcel.readTypedObject(Bundle.CREATOR);
 
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
@@ -1480,6 +1482,7 @@ public final class Dataset implements Parcelable {
                         fieldDialogPresentation);
             }
             builder.setAuthentication(authentication);
+            builder.setAuthenticationExtras(authenticationExtras);
             builder.setId(datasetId);
             Dataset dataset = builder.build();
             dataset.mEligibleReason = eligibleReason;

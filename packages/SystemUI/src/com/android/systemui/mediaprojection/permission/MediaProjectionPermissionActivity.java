@@ -330,6 +330,9 @@ public class MediaProjectionPermissionActivity extends Activity
                         projection.asBinder());
                 intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
                         getHostUserHandle());
+                intent.putExtra(
+                        MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID,
+                        getLaunchedFromUid());
                 intent.putExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, mReviewGrantedConsentRequired);
                 intent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
 

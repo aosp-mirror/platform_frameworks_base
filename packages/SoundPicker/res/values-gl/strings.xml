@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Non se pode engadir un ton de chamada personalizado"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Non se pode eliminar un ton de chamada personalizado"</string>
     <string name="app_label" msgid="3091611356093417332">"Sons"</string>
-    <string name="empty_list" msgid="2871978423955821191">"A lista está baleira"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"Son"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"Vibración"</string>
 </resources>

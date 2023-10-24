@@ -1132,6 +1132,7 @@ public final class DisplayManagerService extends SystemService {
                     new Display.Mode(Display.DISPLAY_MODE_ID_FOR_FRAME_RATE_OVERRIDE,
                             currentMode.getPhysicalWidth(), currentMode.getPhysicalHeight(),
                             overriddenInfo.refreshRateOverride,
+                            currentMode.getVsyncRate(),
                             new float[0], currentMode.getSupportedHdrTypes());
             overriddenInfo.modeId =
                     overriddenInfo.supportedModes[overriddenInfo.supportedModes.length - 1]

@@ -216,6 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"පැතිකඩ තෝරන්න"</string>
     <string name="category_personal" msgid="6236798763159385225">"පෞද්ගලික"</string>
     <string name="category_work" msgid="4014193632325996115">"කාර්යාලය"</string>
+    <string name="category_private" msgid="4244892185452788977">"පෞද්ගලික"</string>
     <string name="category_clone" msgid="1554511758987195974">"ක්ලෝන කරන්න"</string>
     <string name="development_settings_title" msgid="140296922921597393">"වර්ධක විකල්ප"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"සංවර්ධක විකල්ප සබල කිරීම"</string>

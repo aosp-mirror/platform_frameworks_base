@@ -145,6 +145,7 @@ public class SettingsToPropertiesMapper {
         "media_drm",
         "media_solutions",
         "nfc",
+        "pdf_viewer",
         "pixel_audio_android",
         "pixel_system_sw_touch",
         "pixel_watch",

@@ -19,62 +19,35 @@ package com.android.systemui.qs.tiles.base.interactor
 import javax.annotation.CheckReturnValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
 
 class FakeQSTileDataInteractor<T>(
-    private val dataFlow: MutableSharedFlow<FakeData<T>> =
-        MutableSharedFlow(replay = Int.MAX_VALUE),
+    private val dataFlow: MutableSharedFlow<T> = MutableSharedFlow(replay = Int.MAX_VALUE),
     private val availabilityFlow: MutableSharedFlow<Boolean> =
         MutableSharedFlow(replay = Int.MAX_VALUE),
 ) : QSTileDataInteractor<T> {
 
-    private val mutableDataRequests = mutableListOf<QSTileDataRequest>()
-    val dataRequests: List<QSTileDataRequest> = mutableDataRequests
+    private val mutableDataRequests = mutableListOf<DataRequest>()
+    val dataRequests: List<DataRequest> = mutableDataRequests
 
-    private val mutableAvailabilityRequests = mutableListOf<Unit>()
-    val availabilityRequests: List<Unit> = mutableAvailabilityRequests
+    private val mutableAvailabilityRequests = mutableListOf<AvailabilityRequest>()
+    val availabilityRequests: List<AvailabilityRequest> = mutableAvailabilityRequests
 
-    @CheckReturnValue
-    fun emitData(data: T): FilterEmit =
-        object : FilterEmit {
-            override fun forRequest(request: QSTileDataRequest): Boolean =
-                dataFlow.tryEmit(FakeData(data, DataFilter.ForRequest(request)))
-            override fun forAnyRequest(): Boolean = dataFlow.tryEmit(FakeData(data, DataFilter.Any))
-        }
+    @CheckReturnValue fun emitData(data: T): Boolean = dataFlow.tryEmit(data)
 
     fun tryEmitAvailability(isAvailable: Boolean): Boolean = availabilityFlow.tryEmit(isAvailable)
     suspend fun emitAvailability(isAvailable: Boolean) = availabilityFlow.emit(isAvailable)
 
-    override fun tileData(qsTileDataRequest: QSTileDataRequest): Flow<T> {
-        mutableDataRequests.add(qsTileDataRequest)
-        return dataFlow
-            .filter {
-                when (it.filter) {
-                    is DataFilter.Any -> true
-                    is DataFilter.ForRequest -> it.filter.request == qsTileDataRequest
-                }
-            }
-            .map { it.data }
+    override fun tileData(userId: Int, triggers: Flow<DataUpdateTrigger>): Flow<T> {
+        mutableDataRequests.add(DataRequest(userId))
+        return triggers.flatMapLatest { dataFlow }
     }
 
-    override fun availability(): Flow<Boolean> {
-        mutableAvailabilityRequests.add(Unit)
+    override fun availability(userId: Int): Flow<Boolean> {
+        mutableAvailabilityRequests.add(AvailabilityRequest(userId))
         return availabilityFlow
     }
 
-    interface FilterEmit {
-        fun forRequest(request: QSTileDataRequest): Boolean
-        fun forAnyRequest(): Boolean
-    }
-
-    class FakeData<T>(
-        val data: T,
-        val filter: DataFilter,
-    )
-
-    sealed class DataFilter {
-        object Any : DataFilter()
-        class ForRequest(val request: QSTileDataRequest) : DataFilter()
-    }
+    data class DataRequest(val userId: Int)
+    data class AvailabilityRequest(val userId: Int)
 }

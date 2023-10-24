@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Nuk mund të shtojë ton zileje të personalizuar"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Nuk mund të fshijë ton zileje të personalizuar"</string>
     <string name="app_label" msgid="3091611356093417332">"Tingujt"</string>
-    <string name="empty_list" msgid="2871978423955821191">"Lista është bosh"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"Me tingull"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"Me dridhje"</string>
 </resources>

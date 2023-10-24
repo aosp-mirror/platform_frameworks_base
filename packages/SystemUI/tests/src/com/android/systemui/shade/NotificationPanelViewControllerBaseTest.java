@@ -84,6 +84,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.view.LongPressHandlingView;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.dump.DumpManager;
@@ -120,6 +121,8 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.SceneTestUtils;
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeRepository;
@@ -137,6 +140,7 @@ import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -168,6 +172,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -176,8 +181,10 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
+import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
@@ -197,6 +204,8 @@ import java.util.List;
 import java.util.Optional;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.flow.StateFlowKt;
+import kotlinx.coroutines.test.TestScope;
 
 public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
@@ -324,7 +333,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
             mEmptySpaceClickListenerCaptor;
     @Mock protected ActivityStarter mActivityStarter;
     @Mock protected KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
-    @Mock private ShadeInteractor mShadeInteractor;
     @Mock private JavaAdapter mJavaAdapter;
     @Mock private CastController mCastController;
     @Mock private KeyguardRootView mKeyguardRootView;
@@ -335,6 +343,9 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
     protected KeyguardInteractor mKeyguardInteractor;
+    protected SceneTestUtils mUtils = new SceneTestUtils(this);
+    protected TestScope mTestScope = mUtils.getTestScope();
+    protected ShadeInteractor mShadeInteractor;
     protected PowerInteractor mPowerInteractor;
     protected NotificationPanelViewController.TouchHandler mTouchHandler;
     protected ConfigurationController mConfigurationController;
@@ -370,10 +381,31 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mKeyguardInteractor = keyguardInteractorDeps.getKeyguardInteractor();
         mShadeRepository = new FakeShadeRepository();
         mPowerInteractor = keyguardInteractorDeps.getPowerInteractor();
+        when(mKeyguardTransitionInteractor.isInTransitionToStateWhere(any())).thenReturn(
+                StateFlowKt.MutableStateFlow(false));
+        mShadeInteractor = new ShadeInteractor(
+                mTestScope.getBackgroundScope(),
+                new FakeDeviceProvisioningRepository(),
+                new FakeDisableFlagsRepository(),
+                mDozeParameters,
+                new FakeSceneContainerFlags(),
+                mUtils::sceneInteractor,
+                mFakeKeyguardRepository,
+                mKeyguardTransitionInteractor,
+                mPowerInteractor,
+                new FakeUserSetupRepository(),
+                mock(UserSwitcherInteractor.class),
+                new SharedNotificationContainerInteractor(
+                        new FakeConfigurationRepository(),
+                        mContext,
+                        new ResourcesSplitShadeStateController()
+                ),
+                mShadeRepository
+        );
 
         SystemClock systemClock = new FakeSystemClock();
-        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
-                mInteractionJankMonitor, mShadeExpansionStateManager);
+        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger,
+                mInteractionJankMonitor, mJavaAdapter, () -> mShadeInteractor);
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
@@ -532,8 +564,9 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 new NotificationWakeUpCoordinator(
                         mDumpManager,
                         mock(HeadsUpManager.class),
-                        new StatusBarStateControllerImpl(new UiEventLoggerFake(), mDumpManager,
-                                mInteractionJankMonitor, mShadeExpansionStateManager),
+                        new StatusBarStateControllerImpl(new UiEventLoggerFake(),
+                                mInteractionJankMonitor,
+                                mJavaAdapter, () -> mShadeInteractor),
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController,

@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Mga app na kumokonsumo ng baterya"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Pag-magnify"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Paggamit sa pagiging accessible"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Display"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Gumagamit ng baterya ang <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Gumagamit ng baterya ang <xliff:g id="NUMBER">%1$d</xliff:g> (na) app"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"I-tap para sa mga detalye tungkol sa paggamit ng baterya at data"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Nagbibigay-daan sa kasamang app na magsimula ng mga serbisyo sa foreground mula sa background."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Available ang mikropono"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Naka-block ang mikropono"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Hindi makapag-mirror sa display"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Gumamit ng ibang cable at subukan ulit"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Posibleng hindi sinusuportahan ng cable ang mga display"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Posibleng hindi kumonekta nang maayos sa mga display ang iyong USB-C cable"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Naka-on ang dual screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Ginagamit ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang parehong display para magpakita ng content"</string>

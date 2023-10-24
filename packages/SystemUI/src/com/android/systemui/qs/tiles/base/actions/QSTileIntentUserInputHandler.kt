@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.base.actions
 
+import android.app.PendingIntent
 import android.content.Intent
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
@@ -29,7 +30,7 @@ import javax.inject.Inject
  * dismissing and tile from-view animations.
  */
 @SysUISingleton
-class QSTileIntentUserActionHandler
+class QSTileIntentUserInputHandler
 @Inject
 constructor(private val activityStarter: ActivityStarter) {
 
@@ -42,5 +43,20 @@ constructor(private val activityStarter: ActivityStarter) {
                 )
             }
         activityStarter.postStartActivityDismissingKeyguard(intent, 0, animationController)
+    }
+
+    // TODO(b/249804373): make sure to allow showing activities over the lockscreen. See b/292112939
+    fun handle(view: View?, pendingIntent: PendingIntent) {
+        if (!pendingIntent.isActivity) {
+            return
+        }
+        val animationController: ActivityLaunchAnimator.Controller? =
+            view?.let {
+                ActivityLaunchAnimator.Controller.fromView(
+                    it,
+                    InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
+                )
+            }
+        activityStarter.postStartActivityDismissingKeyguard(pendingIntent, animationController)
     }
 }

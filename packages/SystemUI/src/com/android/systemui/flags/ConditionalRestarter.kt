@@ -19,13 +19,17 @@ package com.android.systemui.flags
 import android.util.Log
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.flags.ConditionalRestarter.Condition
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 
 /** Restarts the process after all passed in [Condition]s are true. */
@@ -39,7 +43,6 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : Restarter {
 
-    private var restartJob: Job? = null
     private var pendingReason = ""
     private var androidRestartRequested = false
 
@@ -57,17 +60,19 @@ constructor(
     private fun scheduleRestart(reason: String = "") {
         pendingReason = if (reason.isEmpty()) pendingReason else reason
 
-        if (conditions.all { c -> c.canRestartNow(this::scheduleRestart) }) {
-            if (restartJob == null) {
-                restartJob =
-                    applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(backgroundDispatcher) {
+            combine(conditions.map { condition -> condition.canRestartNow }) { it.all { it } }
+                // Once all conditions are met, delay.
+                .transformLatest { allConditionsMet ->
+                    if (allConditionsMet) {
                         delay(TimeUnit.SECONDS.toMillis(restartDelaySec))
-                        restartNow()
+                        emit(Unit)
                     }
-            }
-        } else {
-            restartJob?.cancel()
-            restartJob = null
+                }
+                // Once we have successfully delayed _once_, continue to restart.
+                .first()
+
+            restartNow()
         }
     }
 
@@ -94,7 +99,7 @@ constructor(
          * multiple [Condition]s are being checked. If any one [Condition] returns false, all the
          * [Condition]s will need to be rechecked on the next restart attempt.
          */
-        fun canRestartNow(retryFn: () -> Unit): Boolean
+        val canRestartNow: Flow<Boolean>
     }
 
     companion object {
