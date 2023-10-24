@@ -25,6 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
@@ -44,6 +45,8 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
+import android.content.pm.ResolveInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -122,6 +125,8 @@ public class PackageArchiverTest {
 
     private PackageSetting mPackageSetting;
 
+    private PackageManagerService mPackageManagerService;
+
     private PackageArchiver mArchiveManager;
 
     @Before
@@ -130,7 +135,7 @@ public class PackageArchiverTest {
         rule.system().stageNominalSystemState();
         when(rule.mocks().getInjector().getPackageInstallerService()).thenReturn(
                 mInstallerService);
-        PackageManagerService pm = spy(new PackageManagerService(rule.mocks().getInjector(),
+        mPackageManagerService = spy(new PackageManagerService(rule.mocks().getInjector(),
                 /* factoryTest= */false,
                 MockSystem.Companion.getDEFAULT_VERSION_INFO().fingerprint,
                 /* isEngBuild= */ false,
@@ -154,15 +159,18 @@ public class PackageArchiverTest {
         when(mContext.getSystemService(LauncherApps.class)).thenReturn(mLauncherApps);
         when(mLauncherApps.getActivityList(eq(PACKAGE), eq(UserHandle.CURRENT))).thenReturn(
                 mLauncherActivityInfos);
-        doReturn(mComputer).when(pm).snapshotComputer();
+        doReturn(mComputer).when(mPackageManagerService).snapshotComputer();
         when(mComputer.getPackageUid(eq(CALLER_PACKAGE), eq(0L), eq(mUserId))).thenReturn(
                 Binder.getCallingUid());
 
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(eq(PACKAGE))).thenReturn(
                 mock(Resources.class));
+        doReturn(new ParceledListSlice<>(List.of(mock(ResolveInfo.class))))
+                .when(mPackageManagerService).queryIntentReceivers(any(), any(), any(), anyLong(),
+                        eq(mUserId));
 
-        mArchiveManager = spy(new PackageArchiver(mContext, pm));
+        mArchiveManager = spy(new PackageArchiver(mContext, mPackageManagerService));
         doReturn(ICON_PATH).when(mArchiveManager).storeIcon(eq(PACKAGE),
                 any(LauncherActivityInfo.class), eq(mUserId), anyInt());
         doReturn(mIcon).when(mArchiveManager).decodeIcon(
@@ -234,6 +242,21 @@ public class PackageArchiverTest {
                         UserHandle.CURRENT));
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
         assertThat(e.getCause()).hasMessageThat().isEqualTo("No installer found");
+    }
+
+    @Test
+    public void archiveApp_installerDoesntSupportUnarchival() {
+        doReturn(new ParceledListSlice<>(List.of()))
+                .when(mPackageManagerService).queryIntentReceivers(any(), any(), any(), anyLong(),
+                        eq(mUserId));
+
+        Exception e = assertThrows(
+                ParcelableException.class,
+                () -> mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
+                        UserHandle.CURRENT));
+        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
+        assertThat(e.getCause()).hasMessageThat().isEqualTo(
+                "Installer does not support unarchival");
     }
 
     @Test

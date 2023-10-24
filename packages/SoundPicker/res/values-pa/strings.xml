@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"ਵਿਉਂਤੀ ਰਿੰਗਟੋਨ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਦੇ ਅਯੋਗ"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"ਵਿਉਂਤੀ ਰਿੰਗਟੋਨ ਨੂੰ ਮਿਟਾਉਣ ਦੇ ਅਯੋਗ"</string>
     <string name="app_label" msgid="3091611356093417332">"Sounds"</string>
-    <string name="empty_list" msgid="2871978423955821191">"ਇਹ ਸੂਚੀ ਖਾਲੀ ਹੈ"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"ਅਵਾਜ਼"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"ਥਰਥਰਾਹਟ"</string>
 </resources>

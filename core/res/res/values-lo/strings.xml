@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ແອັບທີ່ກຳລັງໃຊ້ແບັດເຕີຣີ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ການຂະຫຍາຍ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ການໃຊ້ການຊ່ວຍເຂົ້າເຖິງ"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"ຈໍສະແດງຜົນ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ກຳລັງໃຊ້ແບັດເຕີຣີຢູ່"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ແອັບກຳລັງໃຊ້ແບັດເຕີຣີຢູ່"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ແຕະເພື່ອເບິ່ງລາຍລະອຽດການນຳໃຊ້ແບັດເຕີຣີ ແລະ ອິນເຕີເນັດ"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ອະນຸຍາດຈາກເບື້ອງຫຼັງໃຫ້ແອັບຊ່ວຍເຫຼືອເລີ່ມໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າ."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ໄມໂຄຣໂຟນພ້ອມໃຫ້ນຳໃຊ້"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ໄມໂຄຣໂຟນຖືກບລັອກໄວ້"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ບໍ່ສາມາດສະທ້ອນໄປຫາຈໍສະແດງຜົນໄດ້"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"ກະລຸນາໃຊ້ສາຍອື່ນແລ້ວລອງໃໝ່"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ສາຍອາດບໍ່ຮອງຮັບຈໍສະແດງຜົນ"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ສາຍ USB-C ຂອງທ່ານອາດບໍ່ໄດ້ເຊື່ອມຕໍ່ກັບຈໍສະແດງຜົນຢ່າງຖືກຕ້ອງ"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ໜ້າຈໍຄູ່"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ເປີດ Dual Screen ຢູ່"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ກຳລັງໃຊ້ຈໍສະແດງຜົນທັງສອງເພື່ອສະແດງເນື້ອຫາ"</string>

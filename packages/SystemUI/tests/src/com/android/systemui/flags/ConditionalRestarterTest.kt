@@ -18,9 +18,11 @@ package com.android.systemui.flags
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -61,80 +63,70 @@ class ConditionalRestarterTest : SysuiTestCase() {
     @Test
     fun restart_ImmediatelySatisfied() =
         testScope.runTest {
-            conditionA.canRestart = true
-            conditionB.canRestart = true
+            conditionA.canRestart.emit(true)
+            conditionB.canRestart.emit(true)
             restarter.restartSystemUI("Restart for test")
-            advanceUntilIdle()
+            runCurrent()
             verify(systemExitRestarter).restartSystemUI(any())
         }
 
     @Test
     fun restart_WaitsForConditionA() =
         testScope.runTest {
-            conditionA.canRestart = false
-            conditionB.canRestart = true
+            conditionA.canRestart.emit(false)
+            conditionB.canRestart.emit(true)
 
             restarter.restartSystemUI("Restart for test")
-            advanceUntilIdle()
+            runCurrent()
             // No restart occurs yet.
             verify(systemExitRestarter, never()).restartSystemUI(any())
 
-            conditionA.canRestart = true
-            conditionA.retryFn?.invoke()
-            advanceUntilIdle()
+            conditionA.canRestart.emit(true)
+            runCurrent()
             verify(systemExitRestarter).restartSystemUI(any())
         }
 
     @Test
     fun restart_WaitsForConditionB() =
         testScope.runTest {
-            conditionA.canRestart = true
-            conditionB.canRestart = false
+            conditionA.canRestart.emit(true)
+            conditionB.canRestart.emit(false)
 
             restarter.restartSystemUI("Restart for test")
-            advanceUntilIdle()
+            runCurrent()
             // No restart occurs yet.
             verify(systemExitRestarter, never()).restartSystemUI(any())
 
-            conditionB.canRestart = true
-            conditionB.retryFn?.invoke()
-            advanceUntilIdle()
+            conditionB.canRestart.emit(true)
+            runCurrent()
             verify(systemExitRestarter).restartSystemUI(any())
         }
 
     @Test
     fun restart_WaitsForAllConditions() =
         testScope.runTest {
-            conditionA.canRestart = true
-            conditionB.canRestart = false
+            conditionA.canRestart.emit(true)
+            conditionB.canRestart.emit(false)
 
             restarter.restartSystemUI("Restart for test")
-            advanceUntilIdle()
+            runCurrent()
             // No restart occurs yet.
             verify(systemExitRestarter, never()).restartSystemUI(any())
 
             // B becomes true, but A is now false
-            conditionA.canRestart = false
-            conditionB.canRestart = true
-            conditionB.retryFn?.invoke()
-            advanceUntilIdle()
+            conditionA.canRestart.emit(false)
+            conditionB.canRestart.emit(true)
             // No restart occurs yet.
             verify(systemExitRestarter, never()).restartSystemUI(any())
 
-            conditionA.canRestart = true
-            conditionA.retryFn?.invoke()
-            advanceUntilIdle()
+            conditionA.canRestart.emit(true)
+            runCurrent()
             verify(systemExitRestarter).restartSystemUI(any())
         }
 
     class FakeCondition : ConditionalRestarter.Condition {
-        var retryFn: (() -> Unit)? = null
-        var canRestart = false
+        val canRestart = MutableStateFlow(false)
 
-        override fun canRestartNow(retryFn: () -> Unit): Boolean {
-            this.retryFn = retryFn
-
-            return canRestart
-        }
+        override val canRestartNow: Flow<Boolean> = canRestart
     }
 }

@@ -3622,7 +3622,7 @@ package android.view.accessibility {
 package android.view.animation {
 
   public class AnimationUtils {
-    method @FlaggedApi("android.view.flags.expected_presentation_time_api") public static void lockAnimationClock(long, long);
+    method @FlaggedApi("android.view.flags.expected_presentation_time_read_only") public static void lockAnimationClock(long, long);
     method public static void unlockAnimationClock();
   }
 

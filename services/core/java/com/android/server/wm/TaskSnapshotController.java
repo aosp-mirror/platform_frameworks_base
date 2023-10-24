@@ -284,9 +284,9 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         }
     }
 
-    void notifyTaskRemovedFromRecents(int taskId, int userId) {
+    void removeAndDeleteSnapshot(int taskId, int userId) {
         mCache.onIdRemoved(taskId);
-        mPersister.onTaskRemovedFromRecents(taskId, userId);
+        mPersister.removeSnapshot(taskId, userId);
     }
 
     void removeSnapshotCache(int taskId) {

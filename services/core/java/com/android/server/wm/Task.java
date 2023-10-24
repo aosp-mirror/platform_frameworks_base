@@ -1333,7 +1333,7 @@ class Task extends TaskFragment {
 
         clearRootProcess();
 
-        mAtmService.mWindowManager.mTaskSnapshotController.notifyTaskRemovedFromRecents(
+        mAtmService.mWindowManager.mTaskSnapshotController.removeAndDeleteSnapshot(
                 mTaskId, mUserId);
     }
 

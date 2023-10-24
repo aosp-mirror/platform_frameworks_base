@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"අභිරුචි නාද රිද්මය එක් කළ නොහැකිය"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"අභිරුචි නාද රිද්මය මැකිය නොහැකිය"</string>
     <string name="app_label" msgid="3091611356093417332">"ශබ්ද"</string>
-    <string name="empty_list" msgid="2871978423955821191">"ලැයිස්තුව හිස් ය"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"ශබ්දය"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"කම්පනය"</string>
 </resources>

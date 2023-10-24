@@ -208,15 +208,18 @@ public class SystemServicesTestRule implements TestRule {
     private void setUpSystemCore() {
         doReturn(mock(Watchdog.class)).when(Watchdog::getInstance);
         doAnswer(invocation -> {
-            // Exclude CONSTRAIN_DISPLAY_APIS because ActivityRecord#sConstrainDisplayApisConfig
-            // only registers once and it doesn't reference to outside.
-            if (!NAMESPACE_CONSTRAIN_DISPLAY_APIS.equals(invocation.getArgument(0))) {
-                mDeviceConfigListeners.add(invocation.getArgument(2));
+            if ("addOnPropertiesChangedListener".equals(invocation.getMethod().getName())) {
+                // Exclude CONSTRAIN_DISPLAY_APIS because ActivityRecord#sConstrainDisplayApisConfig
+                // only registers once and it doesn't reference to outside.
+                if (!NAMESPACE_CONSTRAIN_DISPLAY_APIS.equals(invocation.getArgument(0))) {
+                    mDeviceConfigListeners.add(invocation.getArgument(2));
+                }
+                // SizeCompatTests uses setNeverConstrainDisplayApisFlag, and ActivityRecordTests
+                // uses splash_screen_exception_list. So still execute real registration.
             }
-            // SizeCompatTests uses setNeverConstrainDisplayApisFlag, and ActivityRecordTests
-            // uses splash_screen_exception_list. So still execute real registration.
             return invocation.callRealMethod();
-        }).when(() -> DeviceConfig.addOnPropertiesChangedListener(anyString(), any(), any()));
+        }).when(() -> DeviceConfig.addOnPropertiesChangedListener(
+                anyString(), any(), any(DeviceConfig.OnPropertiesChangedListener.class)));
 
         mContext = getInstrumentation().getTargetContext();
         spyOn(mContext);
@@ -397,20 +400,24 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void tearDown() {
-        for (int i = mWmService.mRoot.getChildCount() - 1; i >= 0; i--) {
-            final DisplayContent dc = mWmService.mRoot.getChildAt(i);
-            // Unregister SettingsObserver.
-            dc.getDisplayPolicy().release();
-            // Unregister SensorEventListener (foldable device may register for hinge angle).
-            dc.getDisplayRotation().onDisplayRemoved();
-            if (dc.mDisplayRotationCompatPolicy != null) {
-                dc.mDisplayRotationCompatPolicy.dispose();
+        if (mWmService != null) {
+            for (int i = mWmService.mRoot.getChildCount() - 1; i >= 0; i--) {
+                final DisplayContent dc = mWmService.mRoot.getChildAt(i);
+                // Unregister SettingsObserver.
+                dc.getDisplayPolicy().release();
+                // Unregister SensorEventListener (foldable device may register for hinge angle).
+                dc.getDisplayRotation().onDisplayRemoved();
+                if (dc.mDisplayRotationCompatPolicy != null) {
+                    dc.mDisplayRotationCompatPolicy.dispose();
+                }
             }
         }
 
-        // Unregister display listener from root to avoid issues with subsequent tests.
-        mContext.getSystemService(DisplayManager.class)
-                .unregisterDisplayListener(mAtmService.mRootWindowContainer);
+        if (mAtmService != null) {
+            // Unregister display listener from root to avoid issues with subsequent tests.
+            mContext.getSystemService(DisplayManager.class)
+                    .unregisterDisplayListener(mAtmService.mRootWindowContainer);
+        }
 
         for (int i = mDeviceConfigListeners.size() - 1; i >= 0; i--) {
             DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListeners.get(i));

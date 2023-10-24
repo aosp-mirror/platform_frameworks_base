@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.Log;
 
@@ -141,6 +142,13 @@ public class RecordingController
         return UserHandle.of(UserHandle.myUserId());
     }
 
+    /**
+     * MediaProjection host is SystemUI for the screen recorder, so return 'my process uid'
+     */
+    private int getHostUid() {
+        return Process.myUid();
+    }
+
     /** Create a dialog to show screen recording options to the user.
      *  If screen capturing is currently not allowed it will return a dialog
      *  that warns users about it. */
@@ -159,9 +167,18 @@ public class RecordingController
                 SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
 
         return flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
-                ? new ScreenRecordPermissionDialog(context,  getHostUserHandle(), this,
-                    activityStarter, mUserContextProvider, onStartRecordingClicked)
-                : new ScreenRecordDialog(context, this, mUserContextProvider,
+                ? new ScreenRecordPermissionDialog(
+                        context,
+                        getHostUserHandle(),
+                        getHostUid(),
+                        /* controller= */ this,
+                        activityStarter,
+                        mUserContextProvider,
+                        onStartRecordingClicked)
+                : new ScreenRecordDialog(
+                        context,
+                        /* controller= */ this,
+                        mUserContextProvider,
                         onStartRecordingClicked);
     }
 

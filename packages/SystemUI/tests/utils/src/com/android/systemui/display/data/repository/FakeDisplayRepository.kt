@@ -43,9 +43,10 @@ fun createPendingDisplay(id: Int = 0): DisplayRepository.PendingDisplay =
     mock<DisplayRepository.PendingDisplay> { whenever(this.id).thenReturn(id) }
 
 /** Fake [DisplayRepository] implementation for testing. */
-class FakeDisplayRepository() : DisplayRepository {
-    private val flow = MutableSharedFlow<Set<Display>>()
-    private val pendingDisplayFlow = MutableSharedFlow<DisplayRepository.PendingDisplay?>()
+class FakeDisplayRepository : DisplayRepository {
+    private val flow = MutableSharedFlow<Set<Display>>(replay = 1)
+    private val pendingDisplayFlow =
+        MutableSharedFlow<DisplayRepository.PendingDisplay?>(replay = 1)
 
     /** Emits [value] as [displays] flow value. */
     suspend fun emit(value: Set<Display>) = flow.emit(value)
@@ -59,7 +60,7 @@ class FakeDisplayRepository() : DisplayRepository {
     override val pendingDisplay: Flow<DisplayRepository.PendingDisplay?>
         get() = pendingDisplayFlow
 
-    private val _displayChangeEvent = MutableSharedFlow<Int>()
+    private val _displayChangeEvent = MutableSharedFlow<Int>(replay = 1)
     override val displayChangeEvent: Flow<Int> = _displayChangeEvent
     suspend fun emitDisplayChangeEvent(displayId: Int) = _displayChangeEvent.emit(displayId)
 }

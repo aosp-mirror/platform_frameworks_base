@@ -216,6 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"プロファイルの選択"</string>
     <string name="category_personal" msgid="6236798763159385225">"個人用"</string>
     <string name="category_work" msgid="4014193632325996115">"仕事用"</string>
+    <string name="category_private" msgid="4244892185452788977">"非公開"</string>
     <string name="category_clone" msgid="1554511758987195974">"クローン"</string>
     <string name="development_settings_title" msgid="140296922921597393">"開発者向けオプション"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"開発者向けオプションの有効化"</string>

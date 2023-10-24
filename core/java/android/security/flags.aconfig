@@ -12,6 +12,7 @@ flag {
     namespace: "hardware_backed_security"
     description: "Fix bugs in behavior of UnlockedDeviceRequired keystore keys"
     bug: "296464083"
+    is_fixed_read_only: true
 }
 
 flag {

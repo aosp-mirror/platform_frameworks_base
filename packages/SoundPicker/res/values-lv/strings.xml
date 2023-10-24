@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Nevar pievienot pielāgotu zvana signālu"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Nevar izdzēst pielāgotu zvana signālu"</string>
     <string name="app_label" msgid="3091611356093417332">"Skaņas"</string>
-    <string name="empty_list" msgid="2871978423955821191">"Saraksts ir tukšs"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"Skaņa"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"Vibrācija"</string>
 </resources>

@@ -16,34 +16,19 @@
 
 package com.android.systemui.flags
 
-import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /** Returns true when the device is "asleep" as defined by the [WakefullnessLifecycle]. */
 class ScreenIdleCondition
 @Inject
-constructor(
-    private val wakefulnessLifecycle: WakefulnessLifecycle,
-) : ConditionalRestarter.Condition {
+constructor(private val powerInteractorLazy: Lazy<PowerInteractor>) :
+    ConditionalRestarter.Condition {
 
-    var listenersAdded = false
-    var retryFn: (() -> Unit)? = null
-
-    val observer =
-        object : WakefulnessLifecycle.Observer {
-            override fun onFinishedGoingToSleep() {
-                retryFn?.invoke()
-            }
+    override val canRestartNow: Flow<Boolean>
+        get() {
+            return powerInteractorLazy.get().isAsleep
         }
-
-    override fun canRestartNow(retryFn: () -> Unit): Boolean {
-        if (!listenersAdded) {
-            listenersAdded = true
-            wakefulnessLifecycle.addObserver(observer)
-        }
-
-        this.retryFn = retryFn
-
-        return wakefulnessLifecycle.wakefulness == WakefulnessLifecycle.WAKEFULNESS_ASLEEP
-    }
 }

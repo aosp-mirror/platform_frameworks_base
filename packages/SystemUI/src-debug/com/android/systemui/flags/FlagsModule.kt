@@ -39,6 +39,12 @@ abstract class FlagsModule {
     @IntoSet
     abstract fun bindsScreenIdleCondition(impl: ScreenIdleCondition): ConditionalRestarter.Condition
 
+    @Binds
+    @IntoSet
+    abstract fun bindsNotOccludedCondition(
+        impl: NotOccludedCondition
+    ): ConditionalRestarter.Condition
+
     @Module
     companion object {
         @JvmStatic

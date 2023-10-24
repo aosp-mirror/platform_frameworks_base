@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Rakendused kasutavad akutoidet"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Suurendus"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Juurdepääsetavuse kasutus"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Ekraan"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> kasutab akutoidet"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> rakendust kasutab akutoidet"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Lubab kaasrakendusel taustal käivitada esiplaanil olevaid teenuseid."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon on saadaval"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon on blokeeritud"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Ei saa ekraanile peegeldada"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Kasutage teist kaablit ja proovige uuesti"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kaabel ei pruugi ekraane toetada"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Teie USB-C-kaabel ei pruugi ekraanidega õigesti ühendust luua"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screeni režiim on sisse lülitatud"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> kasutab sisu kuvamiseks mõlemat ekraani"</string>

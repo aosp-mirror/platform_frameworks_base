@@ -16,6 +16,8 @@
 
 package com.android.nfc_extras;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import android.content.Context;
@@ -30,6 +32,8 @@ import android.util.Log;
  *
  * There is a 1-1 relationship between an {@link NfcAdapterExtras} object and
  * a {@link NfcAdapter} object.
+ *
+ * TODO(b/303286040): Deprecate this API surface since this is no longer supported (see ag/443092)
  */
 public final class NfcAdapterExtras {
     private static final String TAG = "NfcAdapterExtras";
@@ -72,13 +76,38 @@ public final class NfcAdapterExtras {
     private final NfcAdapter mAdapter;
     final String mPackageName;
 
+    private static INfcAdapterExtras
+        getNfcAdapterExtrasInterfaceFromNfcAdapter(NfcAdapter adapter) {
+        try {
+            Method method = NfcAdapter.class.getDeclaredMethod("getNfcAdapterExtrasInterface");
+            method.setAccessible(true);
+            return (INfcAdapterExtras) method.invoke(adapter);
+        } catch (SecurityException | NoSuchMethodException | IllegalArgumentException
+                 | IllegalAccessException | IllegalAccessError | InvocationTargetException e) {
+            Log.e(TAG, "Unable to get context from NfcAdapter");
+        }
+        return null;
+    }
+
     /** get service handles */
     private static void initService(NfcAdapter adapter) {
-        final INfcAdapterExtras service = adapter.getNfcAdapterExtrasInterface();
+        final INfcAdapterExtras service = getNfcAdapterExtrasInterfaceFromNfcAdapter(adapter);
         if (service != null) {
             // Leave stale rather than receive a null value.
             sService = service;
         }
+    }
+
+    private static Context getContextFromNfcAdapter(NfcAdapter adapter) {
+        try {
+            Method method = NfcAdapter.class.getDeclaredMethod("getContext");
+            method.setAccessible(true);
+            return (Context) method.invoke(adapter);
+        } catch (SecurityException | NoSuchMethodException | IllegalArgumentException
+                 | IllegalAccessException | IllegalAccessError | InvocationTargetException e) {
+            Log.e(TAG, "Unable to get context from NfcAdapter");
+        }
+        return null;
     }
 
     /**
@@ -91,7 +120,7 @@ public final class NfcAdapterExtras {
      * @return the {@link NfcAdapterExtras} object for the given {@link NfcAdapter}
      */
     public static NfcAdapterExtras get(NfcAdapter adapter) {
-        Context context = adapter.getContext();
+        Context context = getContextFromNfcAdapter(adapter);
         if (context == null) {
             throw new UnsupportedOperationException(
                     "You must pass a context to your NfcAdapter to use the NFC extras APIs");
@@ -112,7 +141,7 @@ public final class NfcAdapterExtras {
 
     private NfcAdapterExtras(NfcAdapter adapter) {
         mAdapter = adapter;
-        mPackageName = adapter.getContext().getPackageName();
+        mPackageName = getContextFromNfcAdapter(adapter).getPackageName();
         mEmbeddedEe = new NfcExecutionEnvironment(this);
         mRouteOnWhenScreenOn = new CardEmulationRoute(CardEmulationRoute.ROUTE_ON_WHEN_SCREEN_ON,
                 mEmbeddedEe);
@@ -156,12 +185,24 @@ public final class NfcAdapterExtras {
         }
     }
 
+    private static void attemptDeadServiceRecoveryOnNfcAdapter(NfcAdapter adapter, Exception e) {
+        try {
+            Method method = NfcAdapter.class.getDeclaredMethod(
+                    "attemptDeadServiceRecovery", Exception.class);
+            method.setAccessible(true);
+            method.invoke(adapter, e);
+        } catch (SecurityException | NoSuchMethodException | IllegalArgumentException
+                 | IllegalAccessException | IllegalAccessError | InvocationTargetException ex) {
+            Log.e(TAG, "Unable to attempt dead service recovery on NfcAdapter");
+        }
+    }
+
     /**
      * NFC service dead - attempt best effort recovery
      */
     void attemptDeadServiceRecovery(Exception e) {
         Log.e(TAG, "NFC Adapter Extras dead - attempting to recover");
-        mAdapter.attemptDeadServiceRecovery(e);
+        attemptDeadServiceRecoveryOnNfcAdapter(mAdapter, e);
         initService(mAdapter);
     }
 

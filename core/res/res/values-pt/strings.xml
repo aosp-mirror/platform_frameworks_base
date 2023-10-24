@@ -291,6 +291,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apps que estão consumindo a bateria"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ampliação"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Uso de acessibilidade"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Tela"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está consumindo a bateria"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> apps estão consumindo a bateria"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
@@ -2334,6 +2335,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que um app complementar em segundo plano inicie serviços em primeiro plano."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"O microfone está disponível"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"O microfone está bloqueado"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Não é possível espelhar a tela"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Use outro cabo e tente de novo"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Talvez o cabo não tenha suporte a telas"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Seu cabo USB-C pode não se conectar a telas corretamente"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Tela dupla"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"A tela dupla está ativada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está usando as duas telas para mostrar conteúdo"</string>

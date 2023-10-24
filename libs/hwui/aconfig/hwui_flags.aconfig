@@ -27,3 +27,10 @@ flag {
   description: "APIs to create a new gainmap with a bitmap for metadata."
   bug: "304478551"
 }
+
+flag {
+  name: "clip_surfaceviews"
+  namespace: "core_graphics"
+  description: "Clip z-above surfaceviews to global clip rect"
+  bug: "298621623"
+}

@@ -66,6 +66,19 @@ constructor(private val service: IMediaProjectionManager) {
     }
 
     /**
+     * Request to log that the app selector was displayed.
+     *
+     * @param hostUid The UID of the package that initiates MediaProjection.
+     */
+    fun notifyAppSelectorDisplayed(hostUid: Int) {
+        try {
+            service.notifyAppSelectorDisplayed(hostUid)
+        } catch (e: RemoteException) {
+            Log.e(TAG, "Error notifying server of app selector displayed", e)
+        }
+    }
+
+    /**
      * Request to log that the permission request moved to the given state.
      *
      * Should not be used for the initialization state, since that should use {@link

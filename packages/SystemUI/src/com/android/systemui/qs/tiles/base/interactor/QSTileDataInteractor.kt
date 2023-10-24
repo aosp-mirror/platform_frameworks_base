@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles.base.interactor
 
-import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 
@@ -29,14 +28,20 @@ import kotlinx.coroutines.flow.Flow
 interface QSTileDataInteractor<DATA_TYPE> {
 
     /**
-     * Returns the data to be mapped to [QSTileState]. Make sure to start the flow [Flow.onStart]
-     * with the current state to update the tile as soon as possible.
+     * Returns a data flow scoped to the user. This means the subscription will live when the tile
+     * is listened for the [userId]. It's cancelled when the tile is not listened or the user
+     * changes.
+     *
+     * You can use [Flow.onStart] on the returned to update the tile with the current state as soon
+     * as possible.
      */
-    fun tileData(qsTileDataRequest: QSTileDataRequest): Flow<DATA_TYPE>
+    fun tileData(userId: Int, triggers: Flow<DataUpdateTrigger>): Flow<DATA_TYPE>
 
     /**
-     * Returns tile availability - whether this device currently supports this tile. Make sure to
-     * start the flow [Flow.onStart] with the current state to update the tile as soon as possible.
+     * Returns tile availability - whether this device currently supports this tile.
+     *
+     * You can use [Flow.onStart] on the returned to update the tile with the current state as soon
+     * as possible.
      */
-    fun availability(): Flow<Boolean>
+    fun availability(userId: Int): Flow<Boolean>
 }

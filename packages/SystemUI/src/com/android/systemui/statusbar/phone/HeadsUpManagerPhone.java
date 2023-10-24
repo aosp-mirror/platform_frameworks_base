@@ -34,7 +34,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener;
@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpPhoneListenerChange;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -105,7 +106,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //  Constructor:
     @Inject
-    public HeadsUpManagerPhone(@NonNull final Context context,
+    public HeadsUpManagerPhone(
+            @NonNull final Context context,
             HeadsUpManagerLogger logger,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,
@@ -115,7 +117,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             @Main Handler handler,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger,
-            ShadeExpansionStateManager shadeExpansionStateManager) {
+            JavaAdapter javaAdapter,
+            ShadeInteractor shadeInteractor) {
         super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
@@ -136,8 +139,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
                 updateResources();
             }
         });
-
-        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
+        javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(), this::onShadeOrQsExpanded);
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -230,7 +232,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
         mTrackingHeadsUp = trackingHeadsUp;
     }
 
-    private void onShadeExpansionFullyChanged(Boolean isExpanded) {
+    private void onShadeOrQsExpanded(Boolean isExpanded) {
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {

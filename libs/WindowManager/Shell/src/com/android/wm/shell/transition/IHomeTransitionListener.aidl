@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade
+package com.android.wm.shell.transition;
 
-/** A listener interface to be notified of expansion events for the notification shade. */
-fun interface ShadeFullExpansionListener {
-    /** Invoked whenever the shade expansion changes, when it is fully collapsed or expanded */
-    fun onShadeExpansionFullyChanged(isExpanded: Boolean)
+import android.window.RemoteTransition;
+import android.window.TransitionFilter;
+
+/**
+ *  Listener interface that Launcher attaches to SystemUI to get home activity transition callbacks.
+ */
+interface IHomeTransitionListener {
+
+    /**
+     * Called when a transition changes the visibility of the home activity.
+     */
+    void onHomeVisibilityChanged(in boolean isVisible);
 }
+

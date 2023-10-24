@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"নিজৰ উপযোগিতা অনুযায়ী তৈয়াৰ কৰা ৰিংট\'ন যোগ কৰিব পৰা নগ\'ল"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"নিজৰ উপযোগিতা অনুযায়ী তৈয়াৰ কৰা ৰিংট\'ন মচিব পৰা নগ\'ল"</string>
     <string name="app_label" msgid="3091611356093417332">"ধ্বনিসমূহ"</string>
-    <string name="empty_list" msgid="2871978423955821191">"সূচীখন খালী আছে"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"ধ্বনি"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"কম্পন"</string>
 </resources>

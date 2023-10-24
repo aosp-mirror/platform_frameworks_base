@@ -16,8 +16,8 @@
 
 package android.view.animation;
 
-import static android.view.flags.Flags.FLAG_EXPECTED_PRESENTATION_TIME_API;
-import static android.view.flags.Flags.expectedPresentationTimeApi;
+import static android.view.flags.Flags.FLAG_EXPECTED_PRESENTATION_TIME_READ_ONLY;
+import static android.view.flags.Flags.expectedPresentationTimeReadOnly;
 
 import android.annotation.AnimRes;
 import android.annotation.FlaggedApi;
@@ -67,6 +67,11 @@ public class AnimationUtils {
     @Overridable
     public static final long OVERRIDE_ENABLE_EXPECTED_PRSENTATION_TIME = 278730197L;
 
+    private static boolean sExpectedPresentationTimeFlagValue;
+    static {
+        sExpectedPresentationTimeFlagValue = expectedPresentationTimeReadOnly();
+    }
+
     private static class AnimationState {
         boolean animationClockLocked;
         long currentVsyncTimeMillis;
@@ -108,12 +113,12 @@ public class AnimationUtils {
      * @hide
      */
     @TestApi
-    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_API)
+    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_READ_ONLY)
     public static void lockAnimationClock(long vsyncMillis, long expectedPresentationTimeNanos) {
         AnimationState state = sAnimationState.get();
         state.animationClockLocked = true;
         state.currentVsyncTimeMillis = vsyncMillis;
-        if (!expectedPresentationTimeApi()) {
+        if (!sExpectedPresentationTimeFlagValue) {
             state.mExpectedPresentationTimeNanos = expectedPresentationTimeNanos;
         }
     }
@@ -158,9 +163,9 @@ public class AnimationUtils {
      * @return the expected presentation time of a frame in the
      *         {@link System#nanoTime()} time base.
      */
-    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_API)
+    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_READ_ONLY)
     public static long getExpectedPresentationTimeNanos() {
-        if (!expectedPresentationTimeApi()) {
+        if (!sExpectedPresentationTimeFlagValue) {
             return SystemClock.uptimeMillis();
         }
 
@@ -176,7 +181,7 @@ public class AnimationUtils {
      * @return the expected presentation time of a frame in the
      *         {@link SystemClock#uptimeMillis()} time base.
      */
-    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_API)
+    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_READ_ONLY)
     public static long getExpectedPresentationTimeMillis() {
         return getExpectedPresentationTimeNanos() / TimeUtils.NANOS_PER_MS;
     }

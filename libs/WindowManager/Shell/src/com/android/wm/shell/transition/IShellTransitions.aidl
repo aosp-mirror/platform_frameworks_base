@@ -19,6 +19,8 @@ package com.android.wm.shell.transition;
 import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 
+import com.android.wm.shell.transition.IHomeTransitionListener;
+
 /**
  * Interface that is exposed to remote callers to manipulate the transitions feature.
  */
@@ -39,4 +41,7 @@ interface IShellTransitions {
      * Retrieves the apply-token used by transactions in Shell
      */
     IBinder getShellApplyToken() = 3;
+
+    /** Set listener that will receive callbacks about transitions involving home activity */
+    oneway void setHomeTransitionListener(in IHomeTransitionListener listener) = 4;
 }

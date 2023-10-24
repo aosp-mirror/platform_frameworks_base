@@ -40,6 +40,7 @@ public final class SingleKeyGestureDetector {
     private static final int MSG_KEY_LONG_PRESS = 0;
     private static final int MSG_KEY_VERY_LONG_PRESS = 1;
     private static final int MSG_KEY_DELAYED_PRESS = 2;
+    private static final int MSG_KEY_UP = 3;
 
     private int mKeyPressCounter;
     private boolean mBeganFromNonInteractive = false;
@@ -144,6 +145,13 @@ public final class SingleKeyGestureDetector {
          *  Callback when very long press has been detected.
          */
         void onVeryLongPress(long eventTime) {}
+        /**
+         * Callback executed upon each key up event that hasn't been processed by long press.
+         *
+         * @param eventTime the timestamp of this event.
+         * @param pressCount the number of presses detected leading up to this key up event.
+         */
+        void onKeyUp(long eventTime, int pressCount) {}
 
         @Override
         public String toString() {
@@ -330,6 +338,13 @@ public final class SingleKeyGestureDetector {
         }
 
         if (event.getKeyCode() == mActiveRule.mKeyCode) {
+            // key-up action should always be triggered if not processed by long press.
+            Message msgKeyUp =
+                    mHandler.obtainMessage(
+                            MSG_KEY_UP, mActiveRule.mKeyCode, mKeyPressCounter, mActiveRule);
+            msgKeyUp.setAsynchronous(true);
+            mHandler.sendMessage(msgKeyUp);
+
             // Directly trigger short press when max count is 1.
             if (mActiveRule.getMaxMultiPressCount() == 1) {
                 if (DEBUG) {
@@ -417,6 +432,12 @@ public final class SingleKeyGestureDetector {
             final int keyCode = msg.arg1;
             final int pressCount = msg.arg2;
             switch(msg.what) {
+                case MSG_KEY_UP:
+                    if (DEBUG) {
+                        Log.i(TAG, "Detect key up " + KeyEvent.keyCodeToString(keyCode));
+                    }
+                    rule.onKeyUp(mLastDownTime, pressCount);
+                    break;
                 case MSG_KEY_LONG_PRESS:
                     if (DEBUG) {
                         Log.i(TAG, "Detect long press " + KeyEvent.keyCodeToString(keyCode));

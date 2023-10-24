@@ -23,6 +23,7 @@ import android.app.IApplicationThread;
 import android.app.ProcessMemoryState.HostingComponentType;
 import android.content.pm.ApplicationInfo;
 import android.os.Debug;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.DebugUtils;
 import android.util.TimeUtils;
@@ -271,15 +272,17 @@ final class ProcessProfileRecord {
                         origBase.makeInactive();
                     }
                     final ApplicationInfo info = mApp.info;
+                    final int attributionUid = getUidForAttribution(mApp);
                     final ProcessState baseProcessTracker = tracker.getProcessStateLocked(
-                            info.packageName, info.uid, info.longVersionCode, mApp.processName);
+                            info.packageName, attributionUid, info.longVersionCode,
+                            mApp.processName);
                     setBaseProcessTracker(baseProcessTracker);
                     baseProcessTracker.makeActive();
                     pkgList.forEachPackage((pkgName, holder) -> {
                         if (holder.state != null && holder.state != origBase) {
                             holder.state.makeInactive();
                         }
-                        tracker.updateProcessStateHolderLocked(holder, pkgName, mApp.info.uid,
+                        tracker.updateProcessStateHolderLocked(holder, pkgName, attributionUid,
                                 mApp.info.longVersionCode, mApp.processName);
                         if (holder.state != baseProcessTracker) {
                             holder.state.makeActive();
@@ -536,7 +539,7 @@ final class ProcessProfileRecord {
                     tracker.reportCachedKill(pkgList.getPackageListLocked(), mLastCachedPss);
                     pkgList.forEachPackageProcessStats(holder ->
                             FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
-                                mApp.info.uid,
+                                getUidForAttribution(mApp),
                                 holder.state.getName(),
                                 holder.state.getPackage(),
                                 mLastCachedPss,
@@ -593,6 +596,21 @@ final class ProcessProfileRecord {
 
     private static void abortNextPssTime(ProcStateMemTracker tracker) {
         tracker.mPendingMemState = -1;
+    }
+
+    /**
+     * Returns the uid that should be used for attribution purposes in profiling / stats.
+     *
+     * In most cases this returns the uid of the process itself. For isolated processes though,
+     * since the process uid is dynamically allocated and can't easily be traced back to the app,
+     * for attribution we use the app package uid.
+     */
+    private static int getUidForAttribution(ProcessRecord processRecord) {
+        if (Process.isIsolatedUid(processRecord.uid)) {
+            return processRecord.info.uid;
+        } else {
+            return processRecord.uid;
+        }
     }
 
     @GuardedBy("mProfilerLock")

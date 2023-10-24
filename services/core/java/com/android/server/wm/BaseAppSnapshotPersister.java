@@ -58,7 +58,7 @@ class BaseAppSnapshotPersister {
      * @param id The id of task that has been removed.
      * @param userId The id of the user the task belonged to.
      */
-    void removeSnap(int id, int userId) {
+    void removeSnapshot(int id, int userId) {
         synchronized (mLock) {
             mSnapshotPersistQueue.sendToQueueLocked(mSnapshotPersistQueue
                     .createDeleteWriteQueueItem(id, userId, mPersistInfoProvider));

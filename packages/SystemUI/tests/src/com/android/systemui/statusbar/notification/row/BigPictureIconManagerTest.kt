@@ -24,9 +24,9 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.NotificationDrawableConsumer
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.graphics.ImageLoader
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -45,6 +45,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 
 private const val FREE_IMAGE_DELAY_MS = 4000L
+private const val MAX_IMAGE_SIZE = 512 // size of the test drawables in pixels
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -81,6 +82,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         allowTestableLooperAsMainThread()
+        overrideMaxImageSizes()
         iconManager =
             BigPictureIconManager(
                 context,
@@ -429,6 +431,17 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             // THEN no more updates are happening
             verifyZeroInteractions(mockConsumer)
         }
+
+    private fun overrideMaxImageSizes() {
+        testableResources.addOverride(
+            com.android.internal.R.dimen.notification_big_picture_max_width,
+            MAX_IMAGE_SIZE
+        )
+        testableResources.addOverride(
+            com.android.internal.R.dimen.notification_big_picture_max_height,
+            MAX_IMAGE_SIZE
+        )
+    }
 
     private fun assertIsPlaceHolder(drawable: Drawable) {
         assertThat(drawable).isInstanceOf(PlaceHolderDrawable::class.java)

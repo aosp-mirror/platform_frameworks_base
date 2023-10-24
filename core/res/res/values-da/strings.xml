@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apps, der bruger batteri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Forstørrelse"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Brug af hjælpefunktioner"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Skærm"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruger batteri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> apps bruger batteri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Tryk for at se info om batteri- og dataforbrug"</string>
@@ -2333,6 +2334,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tillader, at en medfølgende app kan starte tjenester i forgrunden via tilladelser til tjenester i baggrunden."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofonen er tilgængelig"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofonen er blokeret"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Det er ikke muligt at spejle til skærmen"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Brug et andet kabel, og prøv igen"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kablet understøtter muligvis ikke skærme"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Dit USB-C-kabel kan muligvis ikke sluttes korrekt til skærmene"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen er aktiveret"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruger begge skærme til at vise indhold"</string>

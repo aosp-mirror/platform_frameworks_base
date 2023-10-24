@@ -16,10 +16,7 @@ import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -40,12 +37,7 @@ constructor(
     private val screenshotNotificationControllerFactory: ScreenshotNotificationsController.Factory,
 ) {
 
-    private lateinit var displays: StateFlow<Set<Display>>
-    private val displaysCollectionJob: Job =
-        mainScope.launch {
-            displays = displayRepository.displays.stateIn(this, SharingStarted.Eagerly, emptySet())
-        }
-
+    private val displays = displayRepository.displays
     private val screenshotControllers = mutableMapOf<Int, ScreenshotController>()
     private val notificationControllers = mutableMapOf<Int, ScreenshotNotificationsController>()
 
@@ -63,6 +55,7 @@ constructor(
         val displayIds = getDisplaysToScreenshot(screenshotRequest.type)
         val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
         displayIds.forEach { displayId: Int ->
+            Log.d(TAG, "Executing screenshot for display $displayId")
             dispatchToController(
                 rawScreenshotData = ScreenshotData.fromRequest(screenshotRequest, displayId),
                 onSaved =
@@ -126,12 +119,12 @@ constructor(
         callback.reportError()
     }
 
-    private fun getDisplaysToScreenshot(requestType: Int): List<Int> {
+    private suspend fun getDisplaysToScreenshot(requestType: Int): List<Int> {
         return if (requestType == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
             // If this is a provided image, let's show the UI on the default display only.
             listOf(Display.DEFAULT_DISPLAY)
         } else {
-            displays.value.filter { it.type in ALLOWED_DISPLAY_TYPES }.map { it.displayId }
+            displays.first().filter { it.type in ALLOWED_DISPLAY_TYPES }.map { it.displayId }
         }
     }
 
@@ -163,7 +156,6 @@ constructor(
             screenshotController.onDestroy()
         }
         screenshotControllers.clear()
-        displaysCollectionJob.cancel()
     }
 
     private fun getScreenshotController(id: Int): ScreenshotController {

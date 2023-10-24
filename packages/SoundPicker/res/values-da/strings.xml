@@ -26,7 +26,4 @@
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Den tilpassede ringetone kunne ikke tilføjes"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Den tilpassede ringetone kunne ikke slettes"</string>
     <string name="app_label" msgid="3091611356093417332">"Lyde"</string>
-    <string name="empty_list" msgid="2871978423955821191">"Listen er tom"</string>
-    <string name="sound_page_title" msgid="2143312098775103522">"Lyd"</string>
-    <string name="vibration_page_title" msgid="6519501440349124677">"Vibration"</string>
 </resources>

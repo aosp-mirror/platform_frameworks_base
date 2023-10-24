@@ -324,7 +324,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationsController mNotificationsController;
     private ActivityStarter mActivityStarter;
     private final int[] mTempInt2 = new int[2];
-    private boolean mGenerateChildOrderChangedEvent;
     private final HashSet<Runnable> mAnimationFinishedRunnables = new HashSet<>();
     private final HashSet<ExpandableView> mClearTransientViewsWhenFinished = new HashSet<>();
     private final HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
@@ -3144,10 +3143,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         requestChildrenUpdate();
     }
 
-    public boolean containsView(View v) {
-        return v.getParent() == this;
-    }
-
     public void applyLaunchAnimationParams(LaunchAnimationParameters params) {
         // Modify the clipping for launching notifications
         mLaunchAnimationParams = params;
@@ -3410,11 +3405,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAnimationEvents.add(animEvent);
         }
         mChildrenChangingPositions.clear();
-        if (mGenerateChildOrderChangedEvent) {
-            mAnimationEvents.add(new AnimationEvent(null,
-                    AnimationEvent.ANIMATION_TYPE_CHANGE_POSITION));
-            mGenerateChildOrderChangedEvent = false;
-        }
     }
 
     private void generateChildAdditionEvents() {
@@ -4762,14 +4752,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         // Talkback only listenes to scroll events of certain classes, let's make us a scrollview
         info.setClassName(ScrollView.class.getName());
-    }
-
-    public void generateChildOrderChangedEvent() {
-        if (mIsExpanded && mAnimationsEnabled) {
-            mGenerateChildOrderChangedEvent = true;
-            mNeedsAnimation = true;
-            requestChildrenUpdate();
-        }
     }
 
     public int getContainerChildCount() {

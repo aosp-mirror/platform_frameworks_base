@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -39,6 +40,7 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
@@ -64,11 +66,14 @@ import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 /**
  * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
@@ -79,7 +84,6 @@ import dagger.Provides;
 @Module(includes = {StatusBarNotificationPresenterModule.class})
 public interface CentralSurfacesDependenciesModule {
     /** */
-    @SysUISingleton
     @Provides
     static NotificationRemoteInputManager provideNotificationRemoteInputManager(
             Context context,
@@ -93,7 +97,8 @@ public interface CentralSurfacesDependenciesModule {
             RemoteInputControllerLogger remoteInputControllerLogger,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger actionClickLogger,
-            DumpManager dumpManager) {
+            JavaAdapter javaAdapter,
+            ShadeInteractor shadeInteractor) {
         return new NotificationRemoteInputManager(
                 context,
                 notifPipelineFlags,
@@ -106,8 +111,15 @@ public interface CentralSurfacesDependenciesModule {
                 remoteInputControllerLogger,
                 clickNotifier,
                 actionClickLogger,
-                dumpManager);
+                javaAdapter,
+                shadeInteractor);
     }
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(NotificationRemoteInputManager.class)
+    CoreStartable bindsStartNotificationRemoteInputManager(NotificationRemoteInputManager nrim);
 
     /** */
     @SysUISingleton
@@ -164,20 +176,23 @@ public interface CentralSurfacesDependenciesModule {
         return new CommandQueue(context, displayTracker, registry, dumpHandler, powerInteractor);
     }
 
-    /**
-     */
+    /** */
     @Binds
     ManagedProfileController provideManagedProfileController(
             ManagedProfileControllerImpl controllerImpl);
 
-    /**
-     */
+    /** */
     @Binds
     SysuiStatusBarStateController providesSysuiStatusBarStateController(
             StatusBarStateControllerImpl statusBarStateControllerImpl);
 
-    /**
-     */
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(SysuiStatusBarStateController.class)
+    CoreStartable bindsStartStatusBarStateController(StatusBarStateControllerImpl sbsc);
+
+    /** */
     @Binds
     StatusBarIconController provideStatusBarIconController(
             StatusBarIconControllerImpl controllerImpl);
@@ -212,16 +227,14 @@ public interface CentralSurfacesDependenciesModule {
     ShadeCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
             ShadeCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
 
-    /**
-     */
+    /** */
     @Provides
     @SysUISingleton
     static ActivityLaunchAnimator provideActivityLaunchAnimator() {
         return new ActivityLaunchAnimator();
     }
 
-    /**
-     */
+    /** */
     @Provides
     @SysUISingleton
     static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
@@ -253,8 +266,7 @@ public interface CentralSurfacesDependenciesModule {
         return new DialogLaunchAnimator(callback, interactionJankMonitor, animationFeatureFlags);
     }
 
-    /**
-     */
+    /** */
     @Provides
     @SysUISingleton
     static AnimationFeatureFlags provideAnimationFeatureFlags(FeatureFlags featureFlags) {
