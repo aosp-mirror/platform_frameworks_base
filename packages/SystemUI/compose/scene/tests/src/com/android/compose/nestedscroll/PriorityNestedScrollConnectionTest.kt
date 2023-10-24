@@ -32,19 +32,19 @@ import org.junit.runner.RunWith
 class PriorityNestedScrollConnectionTest {
     private var canStartPreScroll = false
     private var canStartPostScroll = false
+    private var canStartPostFling = false
     private var canContinueScroll = false
     private var isStarted = false
     private var lastScroll: Offset? = null
     private var returnOnScroll = Offset.Zero
     private var lastStop: Velocity? = null
     private var returnOnStop = Velocity.Zero
-    private var lastOnPostFling: Velocity? = null
-    private var returnOnPostFling = Velocity.Zero
 
     private val scrollConnection =
         PriorityNestedScrollConnection(
             canStartPreScroll = { _, _ -> canStartPreScroll },
             canStartPostScroll = { _, _ -> canStartPostScroll },
+            canStartPostFling = { canStartPostFling },
             canContinueScroll = { canContinueScroll },
             onStart = { isStarted = true },
             onScroll = {
@@ -54,10 +54,6 @@ class PriorityNestedScrollConnectionTest {
             onStop = {
                 lastStop = it
                 returnOnStop
-            },
-            onPostFling = {
-                lastOnPostFling = it
-                returnOnPostFling
             },
         )
 
@@ -185,11 +181,34 @@ class PriorityNestedScrollConnectionTest {
 
     @Test
     fun receive_onPostFling() = runTest {
+        canStartPostFling = true
+
         scrollConnection.onPostFling(
             consumed = velocity1,
             available = velocity2,
         )
 
-        assertThat(lastOnPostFling).isEqualTo(velocity2)
+        assertThat(lastStop).isEqualTo(velocity2)
+    }
+
+    @Test
+    fun step1_priorityModeShouldStartOnlyOnPostFling() = runTest {
+        canStartPostFling = true
+
+        scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPostScroll(
+            consumed = Offset.Zero,
+            available = Offset.Zero,
+            source = NestedScrollSource.Drag
+        )
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPreFling(available = Velocity.Zero)
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
+        assertThat(isStarted).isEqualTo(true)
     }
 }
