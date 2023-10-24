@@ -21,7 +21,6 @@ import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
@@ -29,7 +28,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -265,17 +264,17 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
             underTest.onLongPress()
             assertThat(isMenuVisible).isTrue()
 
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    to = KeyguardState.GONE,
-                ),
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
             )
             assertThat(isMenuVisible).isFalse()
 
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    to = KeyguardState.LOCKSCREEN,
-                ),
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.LOCKSCREEN,
+                testScope
             )
             assertThat(isMenuVisible).isFalse()
         }
@@ -312,10 +311,10 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         keyguardState: KeyguardState = KeyguardState.LOCKSCREEN,
         isQuickSettingsVisible: Boolean = false,
     ) {
-        keyguardTransitionRepository.sendTransitionStep(
-            TransitionStep(
-                to = keyguardState,
-            ),
+        keyguardTransitionRepository.sendTransitionSteps(
+            from = KeyguardState.AOD,
+            to = keyguardState,
+            testScope = testScope
         )
         keyguardRepository.setQuickSettingsVisible(isVisible = isQuickSettingsVisible)
     }

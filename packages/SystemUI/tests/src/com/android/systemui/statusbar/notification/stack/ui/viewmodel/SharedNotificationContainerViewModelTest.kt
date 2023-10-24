@@ -191,13 +191,10 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val isOnLockscreen by collectLastValue(underTest.isOnLockscreen)
 
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                    value = 1f,
-                    transitionState = TransitionState.FINISHED
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope,
             )
             assertThat(isOnLockscreen).isFalse()
 
@@ -212,19 +209,17 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             )
             assertThat(isOnLockscreen).isTrue()
 
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    to = KeyguardState.LOCKSCREEN,
-                    transitionState = TransitionState.FINISHED
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.LOCKSCREEN,
+                this,
             )
             assertThat(isOnLockscreen).isTrue()
 
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    to = KeyguardState.PRIMARY_BOUNCER,
-                    transitionState = TransitionState.FINISHED
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                testScope,
             )
             assertThat(isOnLockscreen).isTrue()
         }
@@ -237,11 +232,10 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // First on AOD
             shadeRepository.setLockscreenShadeExpansion(0f)
             shadeRepository.setQsExpansion(0f)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    to = KeyguardState.OCCLUDED,
-                    transitionState = TransitionState.FINISHED
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OCCLUDED,
+                testScope,
             )
             assertThat(isOnLockscreenWithoutShade).isFalse()
 
@@ -271,12 +265,13 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val position by collectLastValue(underTest.position)
 
-            // Start on lockscreen
-            showLockscreen()
-
             // When not in split shade
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
+            runCurrent()
+
+            // Start on lockscreen
+            showLockscreen()
 
             keyguardInteractor.sharedNotificationContainerPosition.value =
                 SharedNotificationContainerPosition(top = 1f, bottom = 2f)
@@ -290,12 +285,13 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val position by collectLastValue(underTest.position)
 
-            // Start on lockscreen
-            showLockscreen()
-
             // When in split shade
             overrideResource(R.bool.config_use_split_notification_shade, true)
             configurationRepository.onAnyConfigurationChange()
+            runCurrent()
+
+            // Start on lockscreen
+            showLockscreen()
 
             keyguardInteractor.sharedNotificationContainerPosition.value =
                 SharedNotificationContainerPosition(top = 1f, bottom = 2f)
@@ -372,27 +368,25 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             assertThat(maxNotifications).isEqualTo(-1)
         }
 
-    private suspend fun showLockscreen() {
+    private suspend fun TestScope.showLockscreen() {
         shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(0f)
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-        keyguardTransitionRepository.sendTransitionStep(
-            TransitionStep(
-                to = KeyguardState.LOCKSCREEN,
-                transitionState = TransitionState.FINISHED
-            )
+        keyguardTransitionRepository.sendTransitionSteps(
+            from = KeyguardState.AOD,
+            to = KeyguardState.LOCKSCREEN,
+            this,
         )
     }
 
-    private suspend fun showLockscreenWithShadeExpanded() {
+    private suspend fun TestScope.showLockscreenWithShadeExpanded() {
         shadeRepository.setLockscreenShadeExpansion(1f)
         shadeRepository.setQsExpansion(0f)
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
-        keyguardTransitionRepository.sendTransitionStep(
-            TransitionStep(
-                to = KeyguardState.LOCKSCREEN,
-                transitionState = TransitionState.FINISHED
-            )
+        keyguardTransitionRepository.sendTransitionSteps(
+            from = KeyguardState.AOD,
+            to = KeyguardState.LOCKSCREEN,
+            this,
         )
     }
 

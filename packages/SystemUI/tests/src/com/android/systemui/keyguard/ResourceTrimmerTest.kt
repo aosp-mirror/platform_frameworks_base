@@ -12,7 +12,6 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
@@ -44,7 +43,6 @@ class ResourceTrimmerTest : SysuiTestCase() {
     private val featureFlags = FakeFeatureFlags()
     private val keyguardTransitionRepository = FakeKeyguardTransitionRepository()
     private lateinit var powerInteractor: PowerInteractor
-
 
     @Mock private lateinit var globalWindowManager: GlobalWindowManager
     private lateinit var resourceTrimmer: ResourceTrimmer
@@ -181,8 +179,10 @@ class ResourceTrimmerTest : SysuiTestCase() {
     @Test
     fun keyguardTransitionsToGone_trimsFontCache() =
         testScope.runTest {
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
             )
             verify(globalWindowManager, times(1))
                 .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
@@ -194,8 +194,10 @@ class ResourceTrimmerTest : SysuiTestCase() {
     fun keyguardTransitionsToGone_flagDisabled_doesNotTrimFontCache() =
         testScope.runTest {
             featureFlags.set(Flags.TRIM_FONT_CACHES_AT_UNLOCK, false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
             )
             // Memory hidden should still be called.
             verify(globalWindowManager, times(1))

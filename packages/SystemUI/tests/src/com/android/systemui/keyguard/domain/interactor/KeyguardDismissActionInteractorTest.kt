@@ -26,8 +26,6 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -179,8 +177,10 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
             assertThat(executeDismissAction).isNull()
 
             // WHEN the keyguard is GONE
-            transitionRepository.sendTransitionStep(
-                TransitionStep(to = KeyguardState.GONE, transitionState = TransitionState.FINISHED)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
             )
             assertThat(executeDismissAction).isNotNull()
         }
@@ -198,11 +198,10 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                     willAnimateOnLockscreen = true,
                 )
             )
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    to = KeyguardState.AOD,
-                    transitionState = TransitionState.FINISHED,
-                )
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.AOD,
+                testScope
             )
             assertThat(resetDismissAction).isEqualTo(Unit)
         }
