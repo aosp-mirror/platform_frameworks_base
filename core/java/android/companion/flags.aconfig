@@ -20,3 +20,10 @@ flag {
     description: "Enable Association tag APIs "
     bug: "289241123"
 }
+
+flag {
+    name: "device_presence"
+    namespace: "companion"
+    description: "Enable device presence APIs"
+    bug: "283000075"
+}
