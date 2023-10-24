@@ -1230,10 +1230,6 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(ThermalManagerService.class);
         t.traceEnd();
 
-        t.traceBegin("StartHintManager");
-        mSystemServiceManager.startService(HintManagerService.class);
-        t.traceEnd();
-
         // Now that the power manager has been started, let the activity manager
         // initialize power management features.
         t.traceBegin("InitPowerManagement");
@@ -1613,6 +1609,10 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startService(ENHANCED_CONFIRMATION_SERVICE_CLASS);
                 t.traceEnd();
             }
+
+            t.traceBegin("StartHintManager");
+            mSystemServiceManager.startService(HintManagerService.class);
+            t.traceEnd();
 
             // Grants default permissions and defines roles
             t.traceBegin("StartRoleManagerService");

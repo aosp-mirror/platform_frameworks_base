@@ -48,6 +48,7 @@ import libcore.io.IoUtils;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -588,6 +589,8 @@ public class Process {
      **/
     public static final int THREAD_GROUP_RESTRICTED = 7;
 
+    /** @hide */
+    public static final int SIGNAL_DEFAULT = 0;
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
@@ -1437,6 +1440,49 @@ public class Process {
         sendSignal(pid, SIGNAL_KILL);
     }
 
+    /**
+     * Check the tgid and tid pair to see if the tid still exists and belong to the tgid.
+     *
+     * TOCTOU warning: the status of the tid can change at the time this method returns. This should
+     * be used in very rare cases such as checking if a (tid, tgid) pair that is known to exist
+     * recently no longer exists now. As the possibility of the same tid to be reused under the same
+     * tgid during a short window is rare. And even if it happens the caller logic should be robust
+     * to handle it without error.
+     *
+     * @throws IllegalArgumentException if tgid or tid is not positive.
+     * @throws SecurityException if the caller doesn't have the permission, this method is expected
+     *                           to be used by system process with {@link #SYSTEM_UID} because it
+     *                           internally uses tkill(2).
+     * @throws NoSuchElementException if the Linux process with pid as the tid has exited or it
+     *                                doesn't belong to the tgid.
+     * @hide
+     */
+    public static final void checkTid(int tgid, int tid)
+            throws IllegalArgumentException, SecurityException, NoSuchElementException {
+        sendTgSignalThrows(tgid, tid, SIGNAL_DEFAULT);
+    }
+
+    /**
+     * Check if the pid still exists.
+     *
+     * TOCTOU warning: the status of the pid can change at the time this method returns. This should
+     * be used in very rare cases such as checking if a pid that belongs to an isolated process of a
+     * uid known to exist recently no longer exists now. As the possibility of the same pid to be
+     * reused again under the same uid during a short window is rare. And even if it happens the
+     * caller logic should be robust to handle it without error.
+     *
+     * @throws IllegalArgumentException if pid is not positive.
+     * @throws SecurityException if the caller doesn't have the permission, this method is expected
+     *                           to be used by system process with {@link #SYSTEM_UID} because it
+     *                           internally uses kill(2).
+     * @throws NoSuchElementException if the Linux process with the pid has exited.
+     * @hide
+     */
+    public static final void checkPid(int pid)
+            throws IllegalArgumentException, SecurityException, NoSuchElementException {
+        sendSignalThrows(pid, SIGNAL_DEFAULT);
+    }
+
     /** @hide */
     public static final native int setUid(int uid);
 
@@ -1450,6 +1496,12 @@ public class Process {
      * @param signal The signal to send.
      */
     public static final native void sendSignal(int pid, int signal);
+
+    private static native void sendSignalThrows(int pid, int signal)
+            throws IllegalArgumentException, SecurityException, NoSuchElementException;
+
+    private static native void sendTgSignalThrows(int pid, int tgid, int signal)
+            throws IllegalArgumentException, SecurityException, NoSuchElementException;
 
     /**
      * @hide
