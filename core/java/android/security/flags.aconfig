@@ -36,3 +36,10 @@ flag {
     description: "Collect sepolicy hash from sysfs"
     bug: "308471499"
 }
+
+flag {
+    name: "extend_ecm_to_all_settings"
+    namespace: "responsible_apis"
+    description: "Allow all app settings to be restrictable via configuration"
+    bug: "297372999"
+}
