@@ -137,6 +137,7 @@ import android.media.MediaMetrics;
 import android.media.MediaRecorder.AudioSource;
 import android.media.PlayerBase;
 import android.media.Spatializer;
+import android.media.Utils;
 import android.media.VolumeInfo;
 import android.media.VolumePolicy;
 import android.media.audiofx.AudioEffect;
@@ -7472,7 +7473,7 @@ public class AudioService extends IAudioService.Stub
 
         sVolumeLogger.enqueue(new EventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
                 + AudioSystem.getOutputDeviceName(device.getInternalType()) + " addr:"
-                + device.getAddress() + " behavior:"
+                + Utils.anonymizeBluetoothAddress(device.getAddress()) + " behavior:"
                 + AudioDeviceVolumeManager.volumeBehaviorName(deviceVolumeBehavior)
                 + " pack:" + pkgName).printLog(TAG));
         if (pkgName == null) {
@@ -9646,7 +9647,7 @@ public class AudioService extends IAudioService.Stub
     private void avrcpSupportsAbsoluteVolume(String address, boolean support) {
         // address is not used for now, but may be used when multiple a2dp devices are supported
         sVolumeLogger.enqueue(new EventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
-                + address + " support=" + support).printLog(TAG));
+                + Utils.anonymizeBluetoothAddress(address) + " support=" + support).printLog(TAG));
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(support);
         setAvrcpAbsoluteVolumeSupported(support);
     }
@@ -10544,11 +10545,11 @@ public class AudioService extends IAudioService.Stub
     AudioDeviceAttributes retrieveBluetoothAddressUncheked(@NonNull AudioDeviceAttributes ada) {
         Objects.requireNonNull(ada);
         if (AudioSystem.isBluetoothDevice(ada.getInternalType())) {
-            String anonymizedAddress = anonymizeBluetoothAddress(ada.getAddress());
+            String anonymizedAddress = Utils.anonymizeBluetoothAddress(ada.getAddress());
             for (AdiDeviceState ads : mDeviceBroker.getImmutableDeviceInventory()) {
                 if (!(AudioSystem.isBluetoothDevice(ads.getInternalDeviceType())
                         && (ada.getInternalType() == ads.getInternalDeviceType())
-                        && anonymizedAddress.equals(anonymizeBluetoothAddress(
+                        && anonymizedAddress.equals(Utils.anonymizeBluetoothAddress(
                                 ads.getDeviceAddress())))) {
                     continue;
                 }
@@ -10557,19 +10558,6 @@ public class AudioService extends IAudioService.Stub
             }
         }
         return ada;
-    }
-
-    /**
-     * Convert a Bluetooth MAC address to an anonymized one when exposed to a non privileged app
-     * Must match the implementation of BluetoothUtils.toAnonymizedAddress()
-     * @param address Mac address to be anonymized
-     * @return anonymized mac address
-     */
-    static String anonymizeBluetoothAddress(String address) {
-        if (address == null || address.length() != "AA:BB:CC:DD:EE:FF".length()) {
-            return null;
-        }
-        return "XX:XX:XX:XX" + address.substring("XX:XX:XX:XX".length());
     }
 
     private List<AudioDeviceAttributes> anonymizeAudioDeviceAttributesList(
@@ -10595,7 +10583,7 @@ public class AudioService extends IAudioService.Stub
             return ada;
         }
         AudioDeviceAttributes res = new AudioDeviceAttributes(ada);
-        res.setAddress(anonymizeBluetoothAddress(ada.getAddress()));
+        res.setAddress(Utils.anonymizeBluetoothAddress(ada.getAddress()));
         return res;
     }
 
