@@ -35,6 +35,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -244,25 +245,25 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     @NonNull
     @Override
     protected List<MediaRoute2Info> getTransferableRoutes(@NonNull String packageName) {
-        List<MediaRoute2Info> transferableRoutes = new ArrayList<>();
-
         List<RoutingController> controllers = mRouter.getControllers();
         RoutingController activeController = controllers.get(controllers.size() - 1);
-        RoutingSessionInfo sessionInfo = activeController.getRoutingSessionInfo();
-        List<MediaRoute2Info> routes = mRouter.getRoutes();
+        HashMap<String, MediaRoute2Info> transferableRoutes = new HashMap<>();
 
-        for (MediaRoute2Info route : routes) {
-            boolean isCrossDeviceTransfer = sessionInfo.isSystemSession() ^ route.isSystemRoute();
+        activeController
+                .getTransferableRoutes()
+                .forEach(route -> transferableRoutes.put(route.getId(), route));
 
-            // Always show remote routes if transfer is local -> remote or viceversa regardless of
-            // whether route is in transferable routes list.
-            if (sessionInfo.getTransferableRoutes().contains(route.getId())
-                    || isCrossDeviceTransfer) {
-                transferableRoutes.add(route);
-            }
+        if (activeController.getRoutingSessionInfo().isSystemSession()) {
+            mRouter.getRoutes().stream()
+                    .filter(route -> !route.isSystemRoute())
+                    .forEach(route -> transferableRoutes.put(route.getId(), route));
+        } else {
+            mRouter.getRoutes().stream()
+                    .filter(route -> route.isSystemRoute())
+                    .forEach(route -> transferableRoutes.put(route.getId(), route));
         }
 
-        return transferableRoutes;
+        return new ArrayList<>(transferableRoutes.values());
     }
 
     @Nullable

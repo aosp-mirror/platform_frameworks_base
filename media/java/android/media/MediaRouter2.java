@@ -1399,6 +1399,20 @@ public final class MediaRouter2 {
         }
 
         /**
+         * Returns the unmodifiable list of transferable routes for the session.
+         *
+         * @hide
+         */
+        @NonNull
+        public List<MediaRoute2Info> getTransferableRoutes() {
+            List<String> transferableRoutes;
+            synchronized (mControllerLock) {
+                transferableRoutes = mSessionInfo.getTransferableRoutes();
+            }
+            return getRoutesWithIds(transferableRoutes);
+        }
+
+        /**
          * Returns the current {@link RoutingSessionInfo} associated to this controller.
          */
         @NonNull
