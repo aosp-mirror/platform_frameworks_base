@@ -190,6 +190,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     .replaceWith("?");
     private static final int MAX_LOW_POWER_STATS_SIZE = 32768;
     private static final int POWER_STATS_QUERY_TIMEOUT_MILLIS = 2000;
+    private static final String DEVICE_CONFIG_NAMESPACE = "backstage_power";
     private static final String MIN_CONSUMED_POWER_THRESHOLD_KEY = "min_consumed_power_threshold";
     private static final String EMPTY = "Empty";
 
@@ -903,7 +904,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET:
                     @SuppressLint("MissingPermission")
                     final double minConsumedPowerThreshold =
-                            DeviceConfig.getFloat(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                            DeviceConfig.getFloat(DEVICE_CONFIG_NAMESPACE,
                                     MIN_CONSUMED_POWER_THRESHOLD_KEY, 0);
                     final BatteryUsageStatsQuery querySinceReset =
                             new BatteryUsageStatsQuery.Builder()
