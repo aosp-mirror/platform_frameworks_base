@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs.tiles.base.viewmodel
 
-import androidx.annotation.CallSuper
+import android.os.UserHandle
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
@@ -62,11 +62,11 @@ import kotlinx.coroutines.flow.stateIn
  * Provides a hassle-free way to implement new tiles according to current System UI architecture
  * standards. This ViewModel is cheap to instantiate and does nothing until its [state] is listened.
  *
- * Don't use this constructor directly. Instead, inject [QSViewModelFactory] to create a new
+ * Don't use this constructor directly. Instead, inject [QSTileViewModelFactory] to create a new
  * instance of this class.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class BaseQSTileViewModel<DATA_TYPE>(
+class QSTileViewModelImpl<DATA_TYPE>(
     val tileConfig: () -> QSTileConfig,
     private val userActionInteractor: () -> QSTileUserActionInteractor<DATA_TYPE>,
     private val tileDataInteractor: () -> QSTileDataInteractor<DATA_TYPE>,
@@ -81,8 +81,8 @@ class BaseQSTileViewModel<DATA_TYPE>(
     private val tileScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) : QSTileViewModel {
 
-    private val userIds: MutableStateFlow<Int> =
-        MutableStateFlow(userRepository.getSelectedUserInfo().id)
+    private val users: MutableStateFlow<UserHandle> =
+        MutableStateFlow(userRepository.getSelectedUserInfo().userHandle)
     private val userInputs: MutableSharedFlow<QSTileUserAction> =
         MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     private val forceUpdates: MutableSharedFlow<Unit> =
@@ -108,7 +108,7 @@ class BaseQSTileViewModel<DATA_TYPE>(
                 replay = 1,
             )
     override val isAvailable: StateFlow<Boolean> =
-        userIds
+        users
             .flatMapLatest { tileDataInteractor().availability(it) }
             .flowOn(backgroundDispatcher)
             .stateIn(
@@ -117,17 +117,14 @@ class BaseQSTileViewModel<DATA_TYPE>(
                 true,
             )
 
-    @CallSuper
     override fun forceUpdate() {
         forceUpdates.tryEmit(Unit)
     }
 
-    @CallSuper
-    override fun onUserIdChanged(userId: Int) {
-        userIds.tryEmit(userId)
+    override fun onUserChanged(user: UserHandle) {
+        users.tryEmit(user)
     }
 
-    @CallSuper
     override fun onActionPerformed(userAction: QSTileUserAction) {
         qsTileLogger.logUserAction(
             userAction,
@@ -143,11 +140,11 @@ class BaseQSTileViewModel<DATA_TYPE>(
     }
 
     private fun createTileDataFlow(): SharedFlow<DATA_TYPE> =
-        userIds
-            .flatMapLatest { userId ->
+        users
+            .flatMapLatest { user ->
                 val updateTriggers =
                     merge(
-                            userInputFlow(userId),
+                            userInputFlow(user),
                             forceUpdates
                                 .map { DataUpdateTrigger.ForceUpdate }
                                 .onEach { qsTileLogger.logForceUpdate(spec) },
@@ -157,7 +154,7 @@ class BaseQSTileViewModel<DATA_TYPE>(
                             qsTileLogger.logInitialRequest(spec)
                         }
                 tileDataInteractor()
-                    .tileData(userId, updateTriggers)
+                    .tileData(user, updateTriggers)
                     .cancellable()
                     .flowOn(backgroundDispatcher)
             }
@@ -176,10 +173,10 @@ class BaseQSTileViewModel<DATA_TYPE>(
      *
      * Subscribing to the result flow twice will result in doubling all actions, logs and analytics.
      */
-    private fun userInputFlow(userId: Int): Flow<DataUpdateTrigger> {
+    private fun userInputFlow(user: UserHandle): Flow<DataUpdateTrigger> {
         return userInputs
             .filterFalseActions()
-            .filterByPolicy(userId)
+            .filterByPolicy(user)
             .throttle(CLICK_THROTTLE_DURATION, systemClock)
             // Skip the input until there is some data
             .mapNotNull { action ->
@@ -188,20 +185,20 @@ class BaseQSTileViewModel<DATA_TYPE>(
                 qsTileLogger.logUserActionPipeline(spec, action, state, data)
                 qsTileAnalytics.trackUserAction(config, action)
 
-                DataUpdateTrigger.UserInput(QSTileInput(userId, action, data))
+                DataUpdateTrigger.UserInput(QSTileInput(user, action, data))
             }
             .onEach { userActionInteractor().handleInput(it.input) }
             .flowOn(backgroundDispatcher)
     }
 
-    private fun Flow<QSTileUserAction>.filterByPolicy(userId: Int): Flow<QSTileUserAction> =
+    private fun Flow<QSTileUserAction>.filterByPolicy(user: UserHandle): Flow<QSTileUserAction> =
         config.policy.let { policy ->
             when (policy) {
                 is QSTilePolicy.NoRestrictions -> this@filterByPolicy
                 is QSTilePolicy.Restricted ->
                     filter { action ->
                         val result =
-                            disabledByPolicyInteractor.isDisabled(userId, policy.userRestriction)
+                            disabledByPolicyInteractor.isDisabled(user, policy.userRestriction)
                         !disabledByPolicyInteractor.handlePolicyResult(result).also { isDisabled ->
                             if (isDisabled) {
                                 qsTileLogger.logUserActionRejectedByPolicy(action, spec)

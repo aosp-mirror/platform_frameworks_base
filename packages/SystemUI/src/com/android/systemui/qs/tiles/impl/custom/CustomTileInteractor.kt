@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.custom
 
+import android.os.UserHandle
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
@@ -25,11 +26,14 @@ import kotlinx.coroutines.flow.Flow
 @QSTileScope
 class CustomTileInteractor @Inject constructor() : QSTileDataInteractor<CustomTileData> {
 
-    override fun tileData(userId: Int, triggers: Flow<DataUpdateTrigger>): Flow<CustomTileData> {
+    override fun tileData(
+        user: UserHandle,
+        triggers: Flow<DataUpdateTrigger>
+    ): Flow<CustomTileData> {
         TODO("Not yet implemented")
     }
 
-    override fun availability(userId: Int): Flow<Boolean> {
+    override fun availability(user: UserHandle): Flow<Boolean> {
         TODO("Not yet implemented")
     }
 }

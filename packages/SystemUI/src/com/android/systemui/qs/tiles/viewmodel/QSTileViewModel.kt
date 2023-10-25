@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
+import android.os.UserHandle
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -42,7 +43,7 @@ interface QSTileViewModel {
      * and use this value instead. This is to maintain consistent and concurrency-free behaviour
      * across different parts of QS.
      */
-    fun onUserIdChanged(userId: Int)
+    fun onUserChanged(user: UserHandle)
 
     /** Triggers the emission of the new [QSTileState] in a [state]. */
     fun forceUpdate()

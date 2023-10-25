@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
+import android.os.UserHandle
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
@@ -31,7 +32,7 @@ import com.android.systemui.qs.tiles.base.interactor.FakeQSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
-import com.android.systemui.qs.tiles.base.viewmodel.BaseQSTileViewModel
+import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelImpl
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -84,14 +85,14 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
 
             assertThat(fakeQSTileDataInteractor.dataRequests).isNotEmpty()
             assertThat(fakeQSTileDataInteractor.dataRequests.first())
-                .isEqualTo(FakeQSTileDataInteractor.DataRequest(0))
+                .isEqualTo(FakeQSTileDataInteractor.DataRequest(UserHandle.of(0)))
         }
 
     private fun createViewModel(
         scope: TestScope,
         config: QSTileConfig = TEST_QS_TILE_CONFIG,
     ): QSTileViewModel =
-        BaseQSTileViewModel(
+        QSTileViewModelImpl(
             { config },
             { fakeQSTileUserActionInteractor },
             { fakeQSTileDataInteractor },

@@ -33,17 +33,17 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 
 /**
- * Factory to create an appropriate [BaseQSTileViewModel] instance depending on your circumstances.
+ * Factory to create an appropriate [QSTileViewModelImpl] instance depending on your circumstances.
  *
- * @see [QSViewModelFactory.Component]
- * @see [QSViewModelFactory.Static]
+ * @see [QSTileViewModelFactory.Component]
+ * @see [QSTileViewModelFactory.Static]
  */
-sealed interface QSViewModelFactory<T> {
+sealed interface QSTileViewModelFactory<T> {
 
     /**
      * This factory allows you to pass an instance of [QSTileComponent] to a view model effectively
      * binding them together. This achieves a DI scope that lives along the instance of
-     * [BaseQSTileViewModel].
+     * [QSTileViewModelImpl].
      */
     class Component<T>
     @Inject
@@ -55,14 +55,14 @@ sealed interface QSViewModelFactory<T> {
         private val qsTileLogger: QSTileLogger,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
-    ) : QSViewModelFactory<T> {
+    ) : QSTileViewModelFactory<T> {
 
         /**
-         * Creates [BaseQSTileViewModel] based on the interactors obtained from [component].
+         * Creates [QSTileViewModelImpl] based on the interactors obtained from [component].
          * Reference of that [component] is then stored along the view model.
          */
-        fun create(component: QSTileComponent<T>): BaseQSTileViewModel<T> =
-            BaseQSTileViewModel(
+        fun create(component: QSTileComponent<T>): QSTileViewModelImpl<T> =
+            QSTileViewModelImpl(
                 component::config,
                 component::userActionInteractor,
                 component::dataInteractor,
@@ -78,7 +78,7 @@ sealed interface QSViewModelFactory<T> {
     }
 
     /**
-     * This factory passes by necessary implementations to the [BaseQSTileViewModel]. This is a
+     * This factory passes by necessary implementations to the [QSTileViewModelImpl]. This is a
      * default choice for most of the tiles.
      */
     class Static<T>
@@ -91,7 +91,7 @@ sealed interface QSViewModelFactory<T> {
         private val qsTileLogger: QSTileLogger,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
-    ) : QSViewModelFactory<T> {
+    ) : QSTileViewModelFactory<T> {
 
         /**
          * @param config contains all the static information (like TileSpec) about the tile.
@@ -107,8 +107,8 @@ sealed interface QSViewModelFactory<T> {
             userActionInteractor: QSTileUserActionInteractor<T>,
             tileDataInteractor: QSTileDataInteractor<T>,
             mapper: QSTileDataToStateMapper<T>,
-        ): BaseQSTileViewModel<T> =
-            BaseQSTileViewModel(
+        ): QSTileViewModelImpl<T> =
+            QSTileViewModelImpl(
                 { config },
                 { userActionInteractor },
                 { tileDataInteractor },

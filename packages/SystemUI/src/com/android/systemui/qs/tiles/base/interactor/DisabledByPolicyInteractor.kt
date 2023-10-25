@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.base.interactor
 
 import android.content.Context
+import android.os.UserHandle
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.android.settingslib.RestrictedLockUtils
@@ -32,7 +33,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * Provides restrictions data for the tiles. This is used in
- * [com.android.systemui.qs.tiles.base.viewmodel.BaseQSTileViewModel] to determine if the tile is
+ * [com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelImpl] to determine if the tile is
  * disabled based on the [com.android.systemui.qs.tiles.viewmodel.QSTileConfig.policy].
  */
 interface DisabledByPolicyInteractor {
@@ -41,7 +42,7 @@ interface DisabledByPolicyInteractor {
      * Checks if the tile is restricted by the policy for a specific user. Pass the result to the
      * [handlePolicyResult] to let the user know that the tile is disable by the admin.
      */
-    suspend fun isDisabled(userId: Int, userRestriction: String?): PolicyResult
+    suspend fun isDisabled(user: UserHandle, userRestriction: String?): PolicyResult
 
     /**
      * Returns true when [policyResult] is [PolicyResult.TileDisabled] and has been handled by this
@@ -75,14 +76,14 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : DisabledByPolicyInteractor {
 
-    override suspend fun isDisabled(userId: Int, userRestriction: String?): PolicyResult =
+    override suspend fun isDisabled(user: UserHandle, userRestriction: String?): PolicyResult =
         withContext(backgroundDispatcher) {
             val admin: EnforcedAdmin =
-                restrictedLockProxy.getEnforcedAdmin(userId, userRestriction)
+                restrictedLockProxy.getEnforcedAdmin(user.identifier, userRestriction)
                     ?: return@withContext PolicyResult.TileEnabled
 
             return@withContext if (
-                !restrictedLockProxy.hasBaseUserRestriction(userId, userRestriction)
+                !restrictedLockProxy.hasBaseUserRestriction(user.identifier, userRestriction)
             ) {
                 PolicyResult.TileDisabled(admin)
             } else {
