@@ -8,3 +8,10 @@ flag {
     description: "Adjusts bounds to allow the floating menu to render on top of navigation bars."
     bug: "283768342"
 }
+
+flag {
+    name: "floating_menu_ime_displacement_animation"
+    namespace: "accessibility"
+    description: "Adds an animation for when the FAB is displaced by an IME becoming visible."
+    bug: "281150010"
+}
