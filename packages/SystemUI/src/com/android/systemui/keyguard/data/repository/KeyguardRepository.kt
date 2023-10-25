@@ -93,6 +93,12 @@ interface KeyguardRepository {
     val isKeyguardOccluded: Flow<Boolean>
 
     /**
+     * Whether the device is locked or unlocked right now. This is true when keyguard has been
+     * dismissed or can be dismissed by a swipe
+     */
+    val isKeyguardUnlocked: StateFlow<Boolean>
+
+    /**
      * Observable for the signal that keyguard is about to go away.
      *
      * TODO(b/278086361): Remove once KEYGUARD_WM_STATE_REFACTOR flag is removed.
@@ -331,6 +337,44 @@ constructor(
                 awaitClose { keyguardStateController.removeCallback(callback) }
             }
             .distinctUntilChanged()
+
+    override val isKeyguardUnlocked: StateFlow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : KeyguardStateController.Callback {
+                        override fun onUnlockedChanged() {
+                            trySendWithFailureLogging(
+                                keyguardStateController.isUnlocked,
+                                TAG,
+                                "updated isKeyguardUnlocked due to onUnlockedChanged"
+                            )
+                        }
+
+                        override fun onKeyguardShowingChanged() {
+                            trySendWithFailureLogging(
+                                keyguardStateController.isUnlocked,
+                                TAG,
+                                "updated isKeyguardUnlocked due to onKeyguardShowingChanged"
+                            )
+                        }
+                    }
+
+                keyguardStateController.addCallback(callback)
+                // Adding the callback does not send an initial update.
+                trySendWithFailureLogging(
+                    keyguardStateController.isUnlocked,
+                    TAG,
+                    "initial isKeyguardUnlocked"
+                )
+
+                awaitClose { keyguardStateController.removeCallback(callback) }
+            }
+            .distinctUntilChanged()
+            .stateIn(
+                scope,
+                SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
     override val isKeyguardGoingAway: Flow<Boolean> = conflatedCallbackFlow {
         val callback =
