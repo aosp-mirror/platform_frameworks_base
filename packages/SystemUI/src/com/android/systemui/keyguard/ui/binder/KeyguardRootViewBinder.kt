@@ -22,6 +22,8 @@ import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import android.view.ViewGroup.OnHierarchyChangeListener
+import android.view.WindowInsets
+import android.view.WindowInsets.Type
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.internal.jank.InteractionJankMonitor
@@ -242,11 +244,18 @@ object KeyguardRootViewBinder {
             }
         )
 
+        view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
+            val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+            viewModel.topInset = insets.getInsetsIgnoringVisibility(insetTypes).top
+            insets
+        }
+
         return object : DisposableHandle {
             override fun dispose() {
                 disposableHandle.dispose()
                 view.removeOnLayoutChangeListener(onLayoutChangeListener)
                 view.setOnHierarchyChangeListener(null)
+                view.setOnApplyWindowInsetsListener(null)
                 childViews.clear()
             }
         }
@@ -288,13 +297,17 @@ object KeyguardRootViewBinder {
             oldBottom: Int
         ) {
             val nsslPlaceholder = v.findViewById(R.id.nssl_placeholder) as View?
-
             if (nsslPlaceholder != null) {
                 // After layout, ensure the notifications are positioned correctly
                 viewModel.onSharedNotificationContainerPositionChanged(
                     nsslPlaceholder.top.toFloat(),
                     nsslPlaceholder.bottom.toFloat(),
                 )
+            }
+
+            val ksv = v.findViewById(R.id.keyguard_status_view) as View?
+            if (ksv != null) {
+                viewModel.statusViewTop = ksv.top
             }
         }
     }
