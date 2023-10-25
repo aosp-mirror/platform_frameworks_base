@@ -860,12 +860,23 @@ public abstract class Context {
      * <em>must</em> be sure to use {@link #unregisterComponentCallbacks} when
      * appropriate in the future; this will not be removed for you.
      * <p>
-     * After {@link Build.VERSION_CODES#S}, Registering the ComponentCallbacks to Context created
+     * After {@link Build.VERSION_CODES#S}, registering the ComponentCallbacks to Context created
      * via {@link #createWindowContext(int, Bundle)} or
      * {@link #createWindowContext(Display, int, Bundle)} will receive
      * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from Window Context rather
      * than its base application. It is helpful if you want to handle UI components that
      * associated with the Window Context when the Window Context has configuration changes.</p>
+     * <p>
+     * After {@link Build.VERSION_CODES#TIRAMISU}, registering the ComponentCallbacks to
+     * {@link Activity} context will receive
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from
+     * {@link Activity#onConfigurationChanged(Configuration)} rather than its base application.</p>
+     * <p>
+     * After {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, registering the ComponentCallbacks to
+     * {@link android.inputmethodservice.InputMethodService} will receive
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from InputmethodService
+     * rather than its base application. It is helpful if you want to handle UI components when the
+     * IME has configuration changes.</p>
      *
      * @param callback The interface to call.  This can be either a
      * {@link ComponentCallbacks} or {@link ComponentCallbacks2} interface.
