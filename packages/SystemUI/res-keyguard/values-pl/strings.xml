@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wolne ładowanie"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie zoptymalizowane w celu ochrony baterii"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem z akcesoriami do ładowania"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Naciśnij Menu, aby odblokować."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sieć zablokowana"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Brak karty SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Dodaj kartę SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Brak karty SIM lub nie można jej odczytać. Dodaj kartę SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Nie można użyć karty SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Karta SIM została trwale wyłączona.\n Skontaktuj się z dostawcą usług bezprzewodowych, aby uzyskać inną kartę SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Karta SIM jest zablokowana."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Karta SIM została zablokowana kodem PUK"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Odblokowuję kartę SIM…"</string>

@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • மெதுவாகச் சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • பேட்டரியைப் பாதுகாக்க சார்ஜிங் மேம்படுத்தப்பட்டுள்ளது"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • சார்ஜரில் சிக்கல் உள்ளது"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"அன்லாக் செய்ய மெனுவை அழுத்தவும்."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"நெட்வொர்க் பூட்டப்பட்டது"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"சிம் இல்லை"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"சிம்மைச் சேருங்கள்."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"சிம் இல்லை அல்லது படிக்கக்கூடியதாக இல்லை. சிம்மைச் சேருங்கள்."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"பயன்படுத்த முடியாத சிம்."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"உங்கள் சிம் நிரந்தரமாக முடக்கப்பட்டுள்ளது.\n மற்றொரு சிம்மிற்கான உங்கள் வயர்லெஸ் சேவை வழங்குநரைத் தொடர்புகொள்ளுங்கள்."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"சிம் லாக் செய்யப்பட்டுள்ளது."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"சிம் PUK-லாக் செய்யப்பட்டுள்ளது."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"சிம்மை அன்லாக் செய்கிறது…"</string>

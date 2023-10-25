@@ -79,7 +79,8 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
+import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -163,7 +164,9 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock lateinit var sysUIKeyEventHandler: SysUIKeyEventHandler
     @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
-    private val notificationExpansionRepository = NotificationExpansionRepository()
+    private val notificationLaunchAnimationRepository = NotificationLaunchAnimationRepository()
+    private val notificationLaunchAnimationInteractor =
+            NotificationLaunchAnimationInteractor(notificationLaunchAnimationRepository)
 
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
@@ -234,7 +237,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 primaryBouncerToGoneTransitionViewModel,
                 mCommunalViewModel,
                 mCommunalRepository,
-                notificationExpansionRepository,
+                notificationLaunchAnimationInteractor,
                 featureFlagsClassic,
                 fakeClock,
                 BouncerMessageInteractor(

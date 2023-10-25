@@ -20,6 +20,7 @@ import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.window.BackEvent.EDGE_RIGHT;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_CROSS_TASK;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
 import android.animation.Animator;
@@ -108,6 +109,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private final float[] mTmpTranslate = {0, 0, 0};
     private final BackAnimationRunner mBackAnimationRunner;
     private final BackAnimationBackground mBackground;
+    private final Context mContext;
     private RemoteAnimationTarget mEnteringTarget;
     private RemoteAnimationTarget mClosingTarget;
     private SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
@@ -120,8 +122,10 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     @Inject
     public CrossTaskBackAnimation(Context context, BackAnimationBackground background) {
+        mContext = context;
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
-        mBackAnimationRunner = new BackAnimationRunner(new Callback(), new Runner());
+        mBackAnimationRunner = new BackAnimationRunner(
+                new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_TASK);
         mBackground = background;
     }
 

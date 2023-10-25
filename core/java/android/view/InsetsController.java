@@ -1283,7 +1283,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
             boolean useInsetsAnimationThread, @Nullable ImeTracker.Token statsToken) {
-        ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_CONTROL_ANIMATION);
         if ((types & mTypesBeingCancelled) != 0) {
             final boolean monitoredAnimation =
                     animationType == ANIMATION_TYPE_SHOW || animationType == ANIMATION_TYPE_HIDE;
@@ -1295,12 +1294,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     ImeTracker.forLatency().onHideCancelled(statsToken,
                             PHASE_CLIENT_ANIMATION_CANCEL, ActivityThread::currentApplication);
                 }
+                ImeTracker.forLogging().onCancelled(statsToken,
+                        ImeTracker.PHASE_CLIENT_CONTROL_ANIMATION);
             }
             throw new IllegalStateException("Cannot start a new insets animation of "
                     + Type.toString(types)
                     + " while an existing " + Type.toString(mTypesBeingCancelled)
                     + " is being cancelled.");
         }
+        ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_CONTROL_ANIMATION);
         if (types == 0) {
             // nothing to animate.
             listener.onCancelled(null);
@@ -1309,8 +1311,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
             return;
         }
-        ImeTracker.forLogging().onProgress(statsToken,
-                ImeTracker.PHASE_CLIENT_DISABLED_USER_ANIMATION);
         if (DEBUG) Log.d(TAG, "controlAnimation types: " + types);
         mLastStartedAnimTypes |= types;
 

@@ -1184,6 +1184,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mCreateTask = false;
         private Task mParentTask;
         private int mActivityFlags;
+        private int mActivityTheme;
         private int mLaunchMode;
         private int mResizeMode = RESIZE_MODE_RESIZEABLE;
         private float mMaxAspectRatio;
@@ -1229,6 +1230,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         ActivityBuilder setTask(Task task) {
             mTask = task;
+            return this;
+        }
+
+        ActivityBuilder setActivityTheme(int theme) {
+            mActivityTheme = theme;
+            // Use the real package of test so it can get a valid context for theme.
+            mComponent = ComponentName.createRelative(mService.mContext.getPackageName(),
+                    DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
             return this;
         }
 
@@ -1380,6 +1389,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             aInfo.name = mComponent.getClassName();
             if (mTargetActivity != null) {
                 aInfo.targetActivity = mTargetActivity;
+            }
+            if (mActivityTheme != 0) {
+                aInfo.theme = mActivityTheme;
             }
             aInfo.flags |= mActivityFlags;
             aInfo.launchMode = mLaunchMode;

@@ -97,20 +97,20 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFaceAuthEnabledChanged_calledWhenFaceEnrollmentStateChanges() {
+    public void testFaceAuthEnrolleddChanged_calledWhenFaceEnrollmentStateChanges() {
         KeyguardStateController.Callback callback = mock(KeyguardStateController.Callback.class);
 
-        when(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(anyInt())).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isFaceEnrolled(anyInt())).thenReturn(false);
         verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
         mKeyguardStateController.addCallback(callback);
-        assertThat(mKeyguardStateController.isFaceAuthEnabled()).isFalse();
+        assertThat(mKeyguardStateController.isFaceEnrolled()).isFalse();
 
-        when(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(anyInt())).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFaceEnrolled(anyInt())).thenReturn(true);
         mUpdateCallbackCaptor.getValue().onBiometricEnrollmentStateChanged(
                 BiometricSourceType.FACE);
 
-        assertThat(mKeyguardStateController.isFaceAuthEnabled()).isTrue();
-        verify(callback).onFaceAuthEnabledChanged();
+        assertThat(mKeyguardStateController.isFaceEnrolled()).isTrue();
+        verify(callback).onFaceEnrolledChanged();
     }
 
     @Test

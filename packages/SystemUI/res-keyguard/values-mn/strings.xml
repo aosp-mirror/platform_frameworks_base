@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Удаан цэнэглэж байна"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батарейг хамгаалахын тулд цэнэглэх явцыг оновчилсон"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Цэнэглэх хэрэгсэлд асуудал гарлаа"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Түгжээг тайлах бол цэсийг дарна уу."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Сүлжээ түгжигдсэн"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM байхгүй"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM нэмнэ үү."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM дутуу эсвэл үүнийг унших боломжгүй байна. SIM нэмнэ үү."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Ашиглах боломжгүй SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Таны SIM-г бүрмөсөн идэвхгүй болгосон байна.\n Өөр SIM авах бол утасгүй үйлчилгээ үзүүлэгчтэйгээ холбогдоно уу."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-г түгжсэн байна."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-г PUK-р түгжсэн байна."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-н түгжээг тайлж байна…"</string>

@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് ഒപ്റ്റിമൈസ് ചെയ്തു"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജിംഗ് ആക്സസറിയുമായി ബന്ധപ്പെട്ട പ്രശ്നം"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"സിം ഇല്ല"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"സിം ചേർക്കുക."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"സിം കാണുന്നില്ല അല്ലെങ്കിൽ റീഡ് ചെയ്യാനായില്ല. സിം ചേർക്കുക."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ഉപയോഗശൂന്യമായ സിം."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"നിങ്ങളുടെ സിം ശാശ്വതമായി നിഷ്ക്രിയമാക്കി.\n മറ്റൊരു സിമ്മിന് നിങ്ങളുടെ വയർലെസ് സേവന ദാതാവിനെ ബന്ധപ്പെടുക."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"സിം ലോക്ക് ചെയ്തു."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"സിം PUK ലോക്ക് ചെയ്തു."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"സിം അൺലോക്ക് ചെയ്യുന്നു…"</string>

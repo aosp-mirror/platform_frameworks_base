@@ -18,6 +18,7 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import android.graphics.Rect
+import android.graphics.drawable.Icon
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.SysUITestModule
@@ -39,12 +40,19 @@ import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.HeadsUpNotificationIconViewStateRepository
+import com.android.systemui.statusbar.notification.shared.activeNotificationModel
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
 import com.android.systemui.statusbar.phone.data.repository.FakeDarkIconRepository
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
 import com.android.systemui.user.domain.UserDomainLayerModule
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.ui.isAnimating
+import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -327,6 +335,58 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun isolatedIcon_animateOnAppear_shadeCollapsed() =
+        with(testComponent) {
+            scope.runTest {
+                val icon: Icon = mock()
+                shadeRepository.setLegacyShadeExpansion(0f)
+                activeNotificationsRepository.activeNotifications.value =
+                    listOf(
+                            activeNotificationModel(
+                                key = "notif1",
+                                groupKey = "group",
+                                statusBarIcon = icon
+                            )
+                        )
+                        .associateBy { it.key }
+                val isolatedIcon by collectLastValue(underTest.isolatedIcon)
+                runCurrent()
+
+                headsUpViewStateRepository.isolatedNotification.value = "notif1"
+                runCurrent()
+
+                assertThat(isolatedIcon?.value?.notifKey).isEqualTo("notif1")
+                assertThat(isolatedIcon?.isAnimating).isTrue()
+            }
+        }
+
+    @Test
+    fun isolatedIcon_dontAnimateOnAppear_shadeExpanded() =
+        with(testComponent) {
+            scope.runTest {
+                val icon: Icon = mock()
+                shadeRepository.setLegacyShadeExpansion(.5f)
+                activeNotificationsRepository.activeNotifications.value =
+                    listOf(
+                            activeNotificationModel(
+                                key = "notif1",
+                                groupKey = "group",
+                                statusBarIcon = icon
+                            )
+                        )
+                        .associateBy { it.key }
+                val isolatedIcon by collectLastValue(underTest.isolatedIcon)
+                runCurrent()
+
+                headsUpViewStateRepository.isolatedNotification.value = "notif1"
+                runCurrent()
+
+                assertThat(isolatedIcon?.value?.notifKey).isEqualTo("notif1")
+                assertThat(isolatedIcon?.isAnimating).isFalse()
+            }
+        }
+
     @SysUISingleton
     @Component(
         modules =
@@ -340,11 +400,14 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
         val underTest: NotificationIconContainerStatusBarViewModel
 
+        val activeNotificationsRepository: ActiveNotificationListRepository
         val darkIconRepository: FakeDarkIconRepository
         val deviceProvisioningRepository: FakeDeviceProvisioningRepository
+        val headsUpViewStateRepository: HeadsUpNotificationIconViewStateRepository
         val keyguardTransitionRepository: FakeKeyguardTransitionRepository
         val keyguardRepository: FakeKeyguardRepository
         val powerRepository: FakePowerRepository
+        val shadeRepository: FakeShadeRepository
         val scope: TestScope
 
         @Component.Factory

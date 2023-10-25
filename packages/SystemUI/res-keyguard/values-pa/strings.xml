@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਹੌਲੀ-ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਬੈਟਰੀ ਦੀ ਸੁਰੱਖਿਆ ਲਈ ਚਾਰਜਿੰਗ ਨੂੰ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਚਾਰਜ ਕਰਨ ਵਾਲੀ ਐਕਸੈਸਰੀ ਸੰਬੰਧੀ ਸਮੱਸਿਆ"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ਅਣਲਾਕ ਕਰਨ ਲਈ \"ਮੀਨੂ\" ਦਬਾਓ।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ਨੈੱਟਵਰਕ  ਲਾਕ  ਕੀਤਾ ਗਿਆ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ਕੋਈ ਸਿਮ ਨਹੀਂ ਹੈ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"ਸਿਮ ਸ਼ਾਮਲ ਕਰੋ।"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"ਸਿਮ ਮੌਜੂਦ ਨਹੀਂ ਹੈ ਜਾਂ ਪੜ੍ਹਨਯੋਗ ਨਹੀਂ ਹੈ। ਸਿਮ ਸ਼ਾਮਲ ਕਰੋ।"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ਬੇਕਾਰ ਸਿਮ।"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ਤੁਹਾਡੇ ਸਿਮ ਨੂੰ ਪੱਕੇ ਤੌਰ \'ਤੇ ਅਕਿਰਿਆਸ਼ੀਲ ਕੀਤਾ ਗਿਆ ਹੈ।\n ਦੂਜੇ ਸਿਮ ਲਈ ਆਪਣੇ ਵਾਇਰਲੈੱਸ ਸੇਵਾ ਪ੍ਰਦਾਨਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"ਸਿਮ ਲਾਕ ਹੈ।"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"ਸਿਮ PUK-ਲਾਕ ਹੈ।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"ਸਿਮ ਨੂੰ ਅਣਲਾਕ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>

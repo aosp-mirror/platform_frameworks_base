@@ -857,7 +857,8 @@ public class NotificationTest {
             assertEquals(cDay.getPrimaryAccentColor(), cNight.getPrimaryAccentColor());
             assertEquals(cDay.getSecondaryAccentColor(), cNight.getSecondaryAccentColor());
             assertEquals(cDay.getTertiaryAccentColor(), cNight.getTertiaryAccentColor());
-            assertEquals(cDay.getOnAccentTextColor(), cNight.getOnAccentTextColor());
+            assertEquals(cDay.getOnTertiaryAccentTextColor(),
+                    cNight.getOnTertiaryAccentTextColor());
             assertEquals(cDay.getProtectionColor(), cNight.getProtectionColor());
             assertEquals(cDay.getContrastColor(), cNight.getContrastColor());
             assertEquals(cDay.getRippleAlpha(), cNight.getRippleAlpha());
@@ -1830,7 +1831,7 @@ public class NotificationTest {
         assertThat(c.getPrimaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getSecondaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getTertiaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
-        assertThat(c.getOnAccentTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getOnTertiaryAccentTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getErrorColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getContrastColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getRippleAlpha()).isAtLeast(0x00);
@@ -1848,7 +1849,7 @@ public class NotificationTest {
         assertContrastIsAtLeast(c.getTertiaryAccentColor(), c.getBackgroundColor(), 1);
 
         // The text that is used within the accent color DOES need to have contrast
-        assertContrastIsAtLeast(c.getOnAccentTextColor(), c.getTertiaryAccentColor(), 4.5);
+        assertContrastIsAtLeast(c.getOnTertiaryAccentTextColor(), c.getTertiaryAccentColor(), 4.5);
     }
 
     private void resolveColorsInNightMode(boolean nightMode, Notification.Colors c, int rawColor,

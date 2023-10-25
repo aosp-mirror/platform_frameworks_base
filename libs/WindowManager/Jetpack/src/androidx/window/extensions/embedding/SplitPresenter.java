@@ -388,11 +388,24 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             return;
         }
 
-        setTaskFragmentIsolatedNavigation(wct, secondaryContainer.getTaskFragmentToken(),
-                !isStacked /* isolatedNav */);
+        setTaskFragmentIsolatedNavigation(wct, secondaryContainer, !isStacked /* isolatedNav */);
         if (isStacked && !splitPinRule.isSticky()) {
             secondaryContainer.getTaskContainer().removeSplitPinContainer();
         }
+    }
+
+    /**
+     * Sets whether to enable isolated navigation for this {@link TaskFragmentContainer}
+     */
+    void setTaskFragmentIsolatedNavigation(@NonNull WindowContainerTransaction wct,
+                                           @NonNull TaskFragmentContainer taskFragmentContainer,
+                                           boolean isolatedNavigationEnabled) {
+        if (taskFragmentContainer.isIsolatedNavigationEnabled() == isolatedNavigationEnabled) {
+            return;
+        }
+        taskFragmentContainer.setIsolatedNavigationEnabled(isolatedNavigationEnabled);
+        setTaskFragmentIsolatedNavigation(wct, taskFragmentContainer.getTaskFragmentToken(),
+                isolatedNavigationEnabled);
     }
 
     /**

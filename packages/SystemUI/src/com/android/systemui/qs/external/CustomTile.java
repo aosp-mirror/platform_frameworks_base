@@ -48,6 +48,7 @@ import android.widget.Switch;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -538,12 +539,17 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
             Log.i(TAG, "Launching activity before click");
         } else {
             Log.i(TAG, "The activity is starting");
-            ActivityLaunchAnimator.Controller controller = mViewClicked == null
-                    ? null
-                    : ActivityLaunchAnimator.Controller.fromView(mViewClicked, 0);
-            mUiHandler.post(() ->
-                    mActivityStarter.startPendingIntentDismissingKeyguard(
-                            pendingIntent, null, controller)
+
+            ActivityLaunchAnimator.Controller controller =
+                    mViewClicked == null ? null :
+                    ActivityLaunchAnimator.Controller.fromView(
+                            mViewClicked,
+                            InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE
+                    );
+            mActivityStarter.startPendingIntentMaybeDismissingKeyguard(
+                    pendingIntent,
+                    /* intentSentUiThreadCallback= */ null,
+                    controller
             );
         }
     }

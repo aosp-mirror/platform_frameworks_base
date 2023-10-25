@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 慢速充電中"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 為保護電池，系統已優化充電"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電配件發生問題"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"按下 [選單] 即可解鎖。"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"網絡已鎖定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"沒有 SIM 卡"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"請新增 SIM 卡。"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"找不到 SIM 卡或 SIM 卡無法讀取，請新增 SIM 卡。"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM 卡無法使用。"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM 卡已永久停用。\n請向無線服務供應商索取其他 SIM 卡。"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM 卡已鎖定。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM 卡已使用 PUK 鎖定。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"正在解鎖 SIM 卡…"</string>

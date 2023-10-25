@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • සෙමින් ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • බැටරිය ආරක්ෂා කිරීම සඳහා ආරෝපණය ප්‍රශස්ත කර ඇත"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණ උපාංගයේ ගැටලුව"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"අගුලු හැරීමට මෙනුව ඔබන්න."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ජාලය අගුළු දමා ඇත"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM නැත"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM එකක් එක් කරන්න."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM අස්ථානගතයි හෝ කියවිය නොහැක. SIM එකක් එක් කරන්න."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"භාවිත කළ නොහැකි SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ඔබේ SIM ස්ථිරවම අක්‍රිය කර ඇත.\n වෙනත් SIM පතක් සඳහා ඔබේ රැහැන් රහිත සේවා සපයන්නා අමතන්න."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM අගුළු දමා ඇත."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM PUK-අගුළු දමා ඇත."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM අගුළු අරිමින්…"</string>

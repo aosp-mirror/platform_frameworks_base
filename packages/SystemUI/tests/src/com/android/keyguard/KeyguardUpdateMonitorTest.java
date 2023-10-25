@@ -414,6 +414,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void setupFingerprintAuth(boolean isClass3) throws RemoteException {
+        when(mAuthController.isFingerprintEnrolled(anyInt())).thenReturn(true);
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         mFingerprintSensorProperties = List.of(
@@ -2898,18 +2899,22 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testFaceSensorProperties() throws RemoteException {
+        // GIVEN no face sensor properties
+        when(mAuthController.isFaceAuthEnrolled(anyInt())).thenReturn(true);
         mFaceAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(new ArrayList<>());
 
-        assertThat(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(
+        // THEN face is not possible
+        assertThat(mKeyguardUpdateMonitor.isUnlockWithFacePossible(
                 mSelectedUserInteractor.getSelectedUserId())).isFalse();
 
+        // WHEN there are face sensor properties
         mFaceAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(mFaceSensorProperties);
-        biometricsEnabledForCurrentUser();
 
+        // THEN face is possible but face does NOT start listening immediately
+        assertThat(mKeyguardUpdateMonitor.isUnlockWithFacePossible(
+                mSelectedUserInteractor.getSelectedUserId())).isTrue();
         verifyFaceAuthenticateNeverCalled();
         verifyFaceDetectNeverCalled();
-        assertThat(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(
-                mSelectedUserInteractor.getSelectedUserId())).isTrue();
     }
 
     @Test
@@ -3167,10 +3172,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void mockCanBypassLockscreen(boolean canBypass) {
-        // force update the isFaceEnrolled cache:
-        mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(
-                mSelectedUserInteractor.getSelectedUserId());
-
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
         when(mKeyguardBypassController.canBypass()).thenReturn(canBypass);
     }

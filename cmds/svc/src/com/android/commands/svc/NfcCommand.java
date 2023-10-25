@@ -20,6 +20,7 @@ import android.app.ActivityThread;
 import android.content.Context;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
+import android.os.Looper;
 
 public class NfcCommand extends Svc.Command {
 
@@ -42,6 +43,8 @@ public class NfcCommand extends Svc.Command {
 
     @Override
     public void run(String[] args) {
+        Looper.prepareMainLooper();
+        ActivityThread.initializeMainlineModules();
         Context context = ActivityThread.systemMain().getSystemContext();
         NfcManager nfcManager = context.getSystemService(NfcManager.class);
         if (nfcManager == null) {

@@ -1016,8 +1016,8 @@ public class PackageInfoUtils {
             return;
         }
 
-        if (android.content.pm.Flags.nullableDataDir()
-                && !state.isInstalled() && !state.dataExists()) {
+        if (!state.isInstalled() && !state.dataExists()
+                && android.content.pm.Flags.nullableDataDir()) {
             // The data dir has been deleted
             output.dataDir = null;
             return;
@@ -1065,8 +1065,8 @@ public class PackageInfoUtils {
             return;
         }
 
-        if (android.content.pm.Flags.nullableDataDir()
-                && !state.isInstalled() && !state.dataExists()) {
+        if (!state.isInstalled() && !state.dataExists()
+                && android.content.pm.Flags.nullableDataDir()) {
             // The data dir has been deleted
             output.dataDir = null;
             return;
@@ -1113,9 +1113,9 @@ public class PackageInfoUtils {
             return Environment.getDataSystemDirectory();
         }
 
-        if (android.content.pm.Flags.nullableDataDir()
-                && !ps.getUserStateOrDefault(userId).isInstalled()
-                && !ps.getUserStateOrDefault(userId).dataExists()) {
+        if (!ps.getUserStateOrDefault(userId).isInstalled()
+                && !ps.getUserStateOrDefault(userId).dataExists()
+                && android.content.pm.Flags.nullableDataDir()) {
             // The app has been uninstalled for the user and the data dir has been deleted
             return null;
         }

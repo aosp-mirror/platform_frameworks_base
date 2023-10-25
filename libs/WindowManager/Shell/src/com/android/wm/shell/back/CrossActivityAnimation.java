@@ -19,6 +19,7 @@ package com.android.wm.shell.back;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY;
 import static com.android.wm.shell.back.BackAnimationConstants.PROGRESS_COMMIT_THRESHOLD;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
@@ -135,7 +136,8 @@ public class CrossActivityAnimation extends ShellBackAnimation {
     @Inject
     public CrossActivityAnimation(Context context, BackAnimationBackground background) {
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
-        mBackAnimationRunner = new BackAnimationRunner(new Callback(), new Runner());
+        mBackAnimationRunner = new BackAnimationRunner(
+                new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY);
         mBackground = background;
         mEnteringProgressSpring = new SpringAnimation(this, ENTER_PROGRESS_PROP);
         mEnteringProgressSpring.setSpring(new SpringForce()

@@ -21,7 +21,7 @@ import android.view.ViewGroup
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.LaunchAnimator
-import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -33,7 +33,7 @@ private const val TAG = "NotificationLaunchAnimatorController"
 
 /** A provider of [NotificationLaunchAnimatorController]. */
 class NotificationLaunchAnimatorControllerProvider(
-    private val notificationExpansionRepository: NotificationExpansionRepository,
+    private val notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManager,
     private val jankMonitor: InteractionJankMonitor
@@ -44,7 +44,7 @@ class NotificationLaunchAnimatorControllerProvider(
         onFinishAnimationCallback: Runnable? = null
     ): NotificationLaunchAnimatorController {
         return NotificationLaunchAnimatorController(
-            notificationExpansionRepository,
+            notificationLaunchAnimationInteractor,
             notificationListContainer,
             headsUpManager,
             notification,
@@ -60,7 +60,7 @@ class NotificationLaunchAnimatorControllerProvider(
  * notification expanding into an opening window.
  */
 class NotificationLaunchAnimatorController(
-    private val notificationExpansionRepository: NotificationExpansionRepository,
+    private val notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManager,
     private val notification: ExpandableNotificationRow,
@@ -143,7 +143,7 @@ class NotificationLaunchAnimatorController(
         if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
             Log.d(TAG, "onIntentStarted(willAnimate=$willAnimate)")
         }
-        notificationExpansionRepository.setIsExpandAnimationRunning(willAnimate)
+        notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(willAnimate)
         notificationEntry.isExpandAnimationRunning = willAnimate
 
         if (!willAnimate) {
@@ -180,7 +180,7 @@ class NotificationLaunchAnimatorController(
 
         // TODO(b/184121838): Should we call InteractionJankMonitor.cancel if the animation started
         // here?
-        notificationExpansionRepository.setIsExpandAnimationRunning(false)
+        notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
         removeHun(animate = true)
         onFinishAnimationCallback?.run()
@@ -200,7 +200,7 @@ class NotificationLaunchAnimatorController(
         jankMonitor.end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
 
         notification.isExpandAnimationRunning = false
-        notificationExpansionRepository.setIsExpandAnimationRunning(false)
+        notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
         notificationListContainer.setExpandingNotification(null)
         applyParams(null)

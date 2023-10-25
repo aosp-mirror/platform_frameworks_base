@@ -86,7 +86,8 @@ import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorCon
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
+import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -222,7 +223,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         HeadsUpManager headsUpManager = mock(HeadsUpManager.class);
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
                 new NotificationLaunchAnimatorControllerProvider(
-                        new NotificationExpansionRepository(),
+                        new NotificationLaunchAnimationInteractor(
+                                new NotificationLaunchAnimationRepository()),
                         mock(NotificationListContainer.class),
                         headsUpManager,
                         mJankMonitor);

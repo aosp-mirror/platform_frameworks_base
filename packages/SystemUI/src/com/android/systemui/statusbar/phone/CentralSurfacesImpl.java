@@ -202,7 +202,6 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -296,7 +295,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
     private final NotificationListContainer mNotifListContainer;
-    private final NotificationExpansionRepository mNotificationExpansionRepository;
     private boolean mIsShortcutListSearchEnabled;
 
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
@@ -650,7 +648,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<NotificationPresenter> notificationPresenterLazy,
             Lazy<NotificationActivityStarter> notificationActivityStarterLazy,
             NotificationLaunchAnimatorControllerProvider notifLaunchAnimatorControllerProvider,
-            NotificationExpansionRepository notificationExpansionRepository,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
@@ -759,7 +756,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mPresenterLazy = notificationPresenterLazy;
         mNotificationActivityStarterLazy = notificationActivityStarterLazy;
         mNotificationAnimationProvider = notifLaunchAnimatorControllerProvider;
-        mNotificationExpansionRepository = notificationExpansionRepository;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -812,6 +808,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         ShadeExpansionChangeEvent currentState =
                 mShadeExpansionStateManager.addExpansionListener(shadeExpansionListener);
         shadeExpansionListener.onPanelExpansionChanged(currentState);
+
+        mShadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
@@ -1396,6 +1394,20 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // SYSUI_STATE_QUICK_SETTINGS_EXPANDED
                 getShadeViewController().updateSystemUiStateFlags();
             }
+        }
+    }
+
+    @VisibleForTesting
+    void onShadeExpansionFullyChanged(Boolean isExpanded) {
+        if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
+            if (DEBUG) {
+                Log.v(TAG, "clearing notification effects from Height");
+            }
+            clearNotificationEffects();
+        }
+
+        if (!isExpanded) {
+            mRemoteInputManager.onPanelCollapsed();
         }
     }
 
@@ -2514,7 +2526,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                     && mFingerprintManager.get() != null
                                     && mFingerprintManager.get().isPowerbuttonFps()
                                     && mKeyguardUpdateMonitor
-                                    .getCachedIsUnlockWithFingerprintPossible(
+                                    .isUnlockWithFingerprintPossible(
                                             mUserTracker.getUserId())
                                     && !touchToUnlockAnytime;
                     if (DEBUG_WAKEUP_DELAY) {
@@ -3090,7 +3102,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
             // TODO: Bring these out of CentralSurfaces.
             mUserInfoControllerImpl.onDensityOrFontScaleChanged();
-            mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+            if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+                mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+            }
         }
 
         @Override

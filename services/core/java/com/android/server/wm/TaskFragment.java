@@ -103,7 +103,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -210,7 +209,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    Dimmer mDimmer = Flags.dimmerRefactor()
+    Dimmer mDimmer = Dimmer.DIMMER_REFACTOR
             ? new SmoothDimmer(this) : new LegacyDimmer(this);
 
     /** Apply the dim layer on the embedded TaskFragment. */
@@ -391,41 +390,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     private final EnsureActivitiesVisibleHelper mEnsureActivitiesVisibleHelper =
             new EnsureActivitiesVisibleHelper(this);
-    private final EnsureVisibleActivitiesConfigHelper mEnsureVisibleActivitiesConfigHelper =
-            new EnsureVisibleActivitiesConfigHelper();
-    private class EnsureVisibleActivitiesConfigHelper implements Predicate<ActivityRecord> {
-        private boolean mUpdateConfig;
-        private boolean mPreserveWindow;
-        private boolean mBehindFullscreen;
-
-        void reset(boolean preserveWindow) {
-            mPreserveWindow = preserveWindow;
-            mUpdateConfig = false;
-            mBehindFullscreen = false;
-        }
-
-        void process(ActivityRecord start, boolean preserveWindow) {
-            if (start == null || !start.isVisibleRequested()) {
-                return;
-            }
-            reset(preserveWindow);
-            forAllActivities(this, start, true /* includeBoundary */,
-                    true /* traverseTopToBottom */);
-
-            if (mUpdateConfig) {
-                // Ensure the resumed state of the focus activity if we updated the configuration of
-                // any activity.
-                mRootWindowContainer.resumeFocusedTasksTopActivities();
-            }
-        }
-
-        @Override
-        public boolean test(ActivityRecord r) {
-            mUpdateConfig |= r.ensureActivityConfiguration(0 /*globalChanges*/, mPreserveWindow);
-            mBehindFullscreen |= r.occludesParent();
-            return mBehindFullscreen;
-        }
-    }
 
     /** Creates an embedded task fragment. */
     TaskFragment(ActivityTaskManagerService atmService, IBinder fragmentToken,
@@ -2161,13 +2125,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     private int getTaskId() {
         return getTask() != null ? getTask().mTaskId : INVALID_TASK_ID;
-    }
-
-    /**
-     * Ensures all visible activities at or below the input activity have the right configuration.
-     */
-    void ensureVisibleActivitiesConfiguration(ActivityRecord start, boolean preserveWindow) {
-        mEnsureVisibleActivitiesConfigHelper.process(start, preserveWindow);
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,

@@ -36,6 +36,7 @@ import javax.inject.Inject
 class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
 
     private val expansionListeners = CopyOnWriteArrayList<ShadeExpansionListener>()
+    private val fullExpansionListeners = CopyOnWriteArrayList<ShadeFullExpansionListener>()
     private val qsExpansionListeners = CopyOnWriteArrayList<ShadeQsExpansionListener>()
     private val qsExpansionFractionListeners =
         CopyOnWriteArrayList<ShadeQsExpansionFractionListener>()
@@ -66,6 +67,15 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
         expansionListeners.remove(listener)
     }
 
+    fun addFullExpansionListener(listener: ShadeFullExpansionListener) {
+        fullExpansionListeners.add(listener)
+        listener.onShadeExpansionFullyChanged(qsExpanded)
+    }
+
+    fun removeFullExpansionListener(listener: ShadeFullExpansionListener) {
+        fullExpansionListeners.remove(listener)
+    }
+
     fun addQsExpansionListener(listener: ShadeQsExpansionListener) {
         qsExpansionListeners.add(listener)
         listener.onQsExpansionChanged(qsExpanded)
@@ -87,6 +97,11 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     /** Adds a listener that will be notified when the panel state has changed. */
     fun addStateListener(listener: ShadeStateListener) {
         stateListeners.add(listener)
+    }
+
+    /** Removes a state listener. */
+    fun removeStateListener(listener: ShadeStateListener) {
+        stateListeners.remove(listener)
     }
 
     override fun addShadeStateEventsListener(listener: ShadeStateEventsListener) {
@@ -179,6 +194,13 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
         qsExpansionFractionListeners.forEach {
             it.onQsExpansionFractionChanged(qsExpansionFraction)
         }
+    }
+
+    fun onShadeExpansionFullyChanged(isExpanded: Boolean) {
+        this.expanded = isExpanded
+
+        debugLog("expanded=$isExpanded")
+        fullExpansionListeners.forEach { it.onShadeExpansionFullyChanged(isExpanded) }
     }
 
     /** Updates the panel state if necessary. */

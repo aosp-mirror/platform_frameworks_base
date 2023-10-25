@@ -43,7 +43,6 @@ import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_ALTERNATE_BIOMET
 import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED
 import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
@@ -82,6 +81,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.FakeKeyguardStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
@@ -94,6 +94,8 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -116,8 +118,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
-import java.io.PrintWriter
-import java.io.StringWriter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -195,9 +195,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             }
 
         powerRepository = FakePowerRepository()
-        powerInteractor = PowerInteractorFactory.create(
-                repository = powerRepository,
-        ).powerInteractor
+        powerInteractor =
+            PowerInteractorFactory.create(
+                    repository = powerRepository,
+                )
+                .powerInteractor
 
         val withDeps =
             KeyguardInteractorFactory.create(
@@ -210,10 +212,10 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         keyguardTransitionInteractor =
-                KeyguardTransitionInteractorFactory.create(
-                        scope = testScope.backgroundScope,
-                        repository = keyguardTransitionRepository,
-                        keyguardInteractor = keyguardInteractor,
+            KeyguardTransitionInteractorFactory.create(
+                    scope = testScope.backgroundScope,
+                    repository = keyguardTransitionRepository,
+                    keyguardInteractor = keyguardInteractor,
                 )
                 .keyguardTransitionInteractor
 
@@ -635,11 +637,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
     @Test
     fun authenticateDoesNotRunWhenDeviceIsGoingToSleep() =
-        testScope.runTest {
-            testGatingCheckForFaceAuth {
-                powerInteractor.setAsleepForTest()
-            }
-        }
+        testScope.runTest { testGatingCheckForFaceAuth { powerInteractor.setAsleepForTest() } }
 
     @Test
     fun authenticateDoesNotRunWhenSecureCameraIsActive() =
@@ -736,17 +734,21 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             allPreconditionsToRunFaceAuthAreTrue()
 
             Log.i("TEST", "started waking")
-            keyguardTransitionRepository.sendTransitionStep(TransitionStep(
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.OFF,
                     transitionState = TransitionState.FINISHED,
-            ))
+                )
+            )
             runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(TransitionStep(
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
                     from = KeyguardState.OFF,
                     to = KeyguardState.LOCKSCREEN,
                     transitionState = TransitionState.STARTED,
-            ))
+                )
+            )
             runCurrent()
 
             Log.i("TEST", "sending display off")
@@ -766,11 +768,13 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             testGatingCheckForFaceAuth {
                 powerInteractor.onFinishedWakingUp()
-                keyguardTransitionRepository.sendTransitionStep(TransitionStep(
+                keyguardTransitionRepository.sendTransitionStep(
+                    TransitionStep(
                         from = KeyguardState.OFF,
                         to = KeyguardState.LOCKSCREEN,
                         transitionState = TransitionState.FINISHED,
-                ))
+                    )
+                )
                 runCurrent()
 
                 displayRepository.emit(
@@ -919,11 +923,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
     @Test
     fun detectDoesNotRunWhenDeviceSleepingStartingToSleep() =
-        testScope.runTest {
-            testGatingCheckForDetect {
-                powerInteractor.setAsleepForTest()
-            }
-        }
+        testScope.runTest { testGatingCheckForDetect { powerInteractor.setAsleepForTest() } }
 
     @Test
     fun detectDoesNotRunWhenSecureCameraIsActive() =
@@ -1113,6 +1113,32 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             biometricSettingsRepository.setIsFaceAuthCurrentlyAllowed(true)
             faceAuthenticateIsCalled()
+        }
+    @Test
+    fun authFailedCallAfterAuthLockedOutErrorShouldBeIgnored() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+            runCurrent()
+            assertThat(canFaceAuthRun()).isTrue()
+
+            underTest.requestAuthenticate(FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED, false)
+            runCurrent()
+
+            faceAuthenticateIsCalled()
+            authenticationCallback.value.onAuthenticationError(
+                FACE_ERROR_LOCKOUT_PERMANENT,
+                "Too many attempts, face not available"
+            )
+
+            val lockoutError = authStatus() as ErrorFaceAuthenticationStatus
+            assertThat(lockedOut()).isTrue()
+            assertThat(lockoutError.isLockoutError()).isTrue()
+
+            authenticationCallback.value.onAuthenticationFailed()
+            runCurrent()
+
+            assertThat(authStatus()).isEqualTo(lockoutError)
         }
 
     private suspend fun TestScope.testGatingCheckForFaceAuth(

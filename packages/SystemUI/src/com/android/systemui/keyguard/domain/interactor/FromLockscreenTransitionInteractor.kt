@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.util.TraceUtils.Companion.launch
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
@@ -136,7 +136,7 @@ constructor(
 
     private fun listenForLockscreenToDreaming() {
         val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToDreaming") {
             keyguardInteractor.isAbleToDream
                 .sample(
                     combine(
@@ -169,7 +169,7 @@ constructor(
     }
 
     private fun listenForLockscreenToPrimaryBouncer() {
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
                 .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
@@ -184,7 +184,7 @@ constructor(
     }
 
     private fun listenForLockscreenToAlternateBouncer() {
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToAlternateBouncer") {
             keyguardInteractor.alternateBouncerShowing
                 .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
@@ -202,7 +202,7 @@ constructor(
     /* Starts transitions when manually dragging up the bouncer from the lockscreen. */
     private fun listenForLockscreenToPrimaryBouncerDragging() {
         var transitionId: UUID? = null
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
             shadeRepository.shadeModel
                 .sample(
                     combine(
@@ -287,7 +287,7 @@ constructor(
             return
         }
 
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToGone") {
             keyguardInteractor.isKeyguardGoingAway
                 .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
@@ -304,7 +304,7 @@ constructor(
             return
         }
 
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToGoneDragging") {
             keyguardInteractor.isKeyguardGoingAway
                 .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
@@ -317,7 +317,7 @@ constructor(
     }
 
     private fun listenForLockscreenToOccluded() {
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToOccluded") {
             keyguardInteractor.isKeyguardOccluded
                 .sample(transitionInteractor.startedKeyguardState, ::Pair)
                 .collect { (isOccluded, keyguardState) ->
@@ -329,7 +329,7 @@ constructor(
     }
 
     private fun listenForLockscreenToAodOrDozing() {
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToAodOrDozing") {
             powerInteractor.isAsleep
                 .sample(
                     combine(
@@ -375,6 +375,7 @@ constructor(
     }
 
     companion object {
+        const val TAG = "FromLockscreenTransitionInteractor"
         private val DEFAULT_DURATION = 400.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds

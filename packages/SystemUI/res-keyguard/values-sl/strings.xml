@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • počasno polnjenje"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Polnjenje je optimizirano zaradi zaščite baterije"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • težava s pripomočkom za polnjenje"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Če želite odkleniti, pritisnite meni."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Omrežje je zaklenjeno"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ni kartice SIM."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Dodajte kartico SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Ni kartice SIM ali je ni mogoče prebrati. Dodajte kartico SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Kartica SIM je neuporabna."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Vaša kartica SIM je bila trajno deaktivirana.\n Za drugo kartico SIM se obrnite na ponudnika brezžičnih storitev."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Kartica SIM je zaklenjena."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Kartica SIM je zaklenjena s kodo PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Odklepanje kartice SIM …"</string>

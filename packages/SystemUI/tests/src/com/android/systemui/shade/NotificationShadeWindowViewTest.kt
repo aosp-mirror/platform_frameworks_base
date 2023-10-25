@@ -69,7 +69,8 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
+import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -226,7 +227,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 primaryBouncerToGoneTransitionViewModel,
                 mCommunalViewModel,
                 mCommunalRepository,
-                NotificationExpansionRepository(),
+                NotificationLaunchAnimationInteractor(NotificationLaunchAnimationRepository()),
                 featureFlags,
                 FakeSystemClock(),
                 BouncerMessageInteractor(

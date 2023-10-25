@@ -16,6 +16,7 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 
@@ -315,6 +316,43 @@ public class DynamicLayout extends Layout {
         }
 
         /**
+         * Set the minimum font metrics used for line spacing.
+         *
+         * <p>
+         * {@code null} is the default value. If {@code null} is set or left as default, the
+         * font metrics obtained by {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)} is
+         * used.
+         *
+         * <p>
+         * The minimum meaning here is the minimum value of line spacing: maximum value of
+         * {@link Paint#ascent()}, minimum value of {@link Paint#descent()}.
+         *
+         * <p>
+         * By setting this value, each line will have minimum line spacing regardless of the text
+         * rendered. For example, usually Japanese script has larger vertical metrics than Latin
+         * script. By setting the metrics obtained by
+         * {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)} for Japanese or leave it
+         * {@code null} if the Paint's locale is Japanese, the line spacing for Japanese is reserved
+         * if the text is an English text. If the vertical metrics of the text is larger than
+         * Japanese, for example Burmese, the bigger font metrics is used.
+         *
+         * @param minimumFontMetrics A minimum font metrics. Passing {@code null} for using the
+         *                          value obtained by
+         *                          {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)}
+         * @see android.widget.TextView#setMinimumFontMetrics(Paint.FontMetrics)
+         * @see android.widget.TextView#getMinimumFontMetrics()
+         * @see Layout#getMinimumFontMetrics()
+         * @see Layout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+         * @see StaticLayout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+         */
+        @NonNull
+        @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+        public Builder setMinimumFontMetrics(@Nullable Paint.FontMetrics minimumFontMetrics) {
+            mMinimumFontMetrics = minimumFontMetrics;
+            return this;
+        }
+
+        /**
          * Build the {@link DynamicLayout} after options have been set.
          *
          * <p>Note: the builder object must not be reused in any way after calling this method.
@@ -347,6 +385,7 @@ public class DynamicLayout extends Layout {
         private int mEllipsizedWidth;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
         private boolean mUseBoundsForWidth;
+        private @Nullable Paint.FontMetrics mMinimumFontMetrics;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -422,7 +461,7 @@ public class DynamicLayout extends Layout {
                 false /* fallbackLineSpacing */, ellipsizedWidth, ellipsize,
                 Integer.MAX_VALUE /* maxLines */, breakStrategy, hyphenationFrequency,
                 null /* leftIndents */, null /* rightIndents */, justificationMode,
-                lineBreakConfig, false /* useBoundsForWidth */);
+                lineBreakConfig, false /* useBoundsForWidth */, null /* minimumFontMetrics */);
 
         final Builder b = Builder.obtain(base, paint, width)
                 .setAlignment(align)
@@ -448,7 +487,7 @@ public class DynamicLayout extends Layout {
                 b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
                 Integer.MAX_VALUE /* maxLines */, b.mBreakStrategy, b.mHyphenationFrequency,
                 null /* leftIndents */, null /* rightIndents */, b.mJustificationMode,
-                b.mLineBreakConfig, b.mUseBoundsForWidth);
+                b.mLineBreakConfig, b.mUseBoundsForWidth, b.mMinimumFontMetrics);
 
         mDisplay = b.mDisplay;
         mIncludePad = b.mIncludePad;
@@ -476,6 +515,7 @@ public class DynamicLayout extends Layout {
         mBase = b.mBase;
         mFallbackLineSpacing = b.mFallbackLineSpacing;
         mUseBoundsForWidth = b.mUseBoundsForWidth;
+        mMinimumFontMetrics = b.mMinimumFontMetrics;
         if (b.mEllipsize != null) {
             mInts = new PackedIntVector(COLUMNS_ELLIPSIZE);
             mEllipsizedWidth = b.mEllipsizedWidth;
@@ -672,6 +712,7 @@ public class DynamicLayout extends Layout {
                 .setAddLastLineLineSpacing(!islast)
                 .setIncludePad(false)
                 .setUseBoundsForWidth(mUseBoundsForWidth)
+                .setMinimumFontMetrics(mMinimumFontMetrics)
                 .setCalculateBounds(true);
 
         reflowed = b.buildPartialStaticLayoutForDynamicLayout(true /* trackpadding */, reflowed);
@@ -1324,6 +1365,7 @@ public class DynamicLayout extends Layout {
     private Rect mTempRect = new Rect();
 
     private boolean mUseBoundsForWidth;
+    @Nullable Paint.FontMetrics mMinimumFontMetrics;
 
     @UnsupportedAppUsage
     private static StaticLayout sStaticLayout = null;

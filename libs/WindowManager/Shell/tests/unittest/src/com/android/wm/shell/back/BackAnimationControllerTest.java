@@ -568,8 +568,12 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     private void registerAnimation(int type) {
-        mController.registerAnimation(type,
-                new BackAnimationRunner(mAnimatorCallback, mBackAnimationRunner));
+        mController.registerAnimation(
+                type,
+                new BackAnimationRunner(
+                        mAnimatorCallback,
+                        mBackAnimationRunner,
+                        mContext));
     }
 
     private void unregisterAnimation(int type) {

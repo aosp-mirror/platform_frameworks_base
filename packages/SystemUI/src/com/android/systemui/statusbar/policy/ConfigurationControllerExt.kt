@@ -13,6 +13,7 @@
  */
 package com.android.systemui.statusbar.policy
 
+import android.content.res.Configuration
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +46,23 @@ val ConfigurationController.onThemeChanged: Flow<Unit>
             object : ConfigurationController.ConfigurationListener {
                 override fun onThemeChanged() {
                     trySend(Unit)
+                }
+            }
+        addCallback(listener)
+        awaitClose { removeCallback(listener) }
+    }
+
+/**
+ * A [Flow] that emits whenever the configuration has changed.
+ *
+ * @see ConfigurationController.ConfigurationListener.onConfigChanged
+ */
+val ConfigurationController.onConfigChanged: Flow<Configuration>
+    get() = conflatedCallbackFlow {
+        val listener =
+            object : ConfigurationController.ConfigurationListener {
+                override fun onConfigChanged(newConfig: Configuration) {
+                    trySend(newConfig)
                 }
             }
         addCallback(listener)

@@ -11026,6 +11026,16 @@ public abstract class PackageManager {
                 "makeUidVisible not implemented in subclass");
     }
 
+    /**
+     * Return archived package info for the package or null if the package is not installed.
+     * @see PackageInstaller#installPackageArchived
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public @Nullable ArchivedPackage getArchivedPackage(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "getArchivedPackage not implemented in subclass");
+    }
+
     // Some of the flags don't affect the query result, but let's be conservative and cache
     // each combination of flags separately.
 

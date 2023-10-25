@@ -38,9 +38,13 @@ import com.android.app.animation.Interpolators;
 import com.android.app.animation.InterpolatorsAndroidX;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
+import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.demomode.DemoMode;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FeatureFlagsClassic;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -52,8 +56,15 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger.DisableState;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarNotificationIconViewStore;
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel;
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
@@ -66,6 +77,7 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
@@ -83,6 +95,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
 import kotlin.Unit;
 
 /**
@@ -128,7 +141,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mLocationPublisher;
-    private final FeatureFlags mFeatureFlags;
+    private final FeatureFlagsClassic mFeatureFlags;
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
@@ -142,6 +155,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final DumpManager mDumpManager;
     private final StatusBarWindowStateController mStatusBarWindowStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final NotificationIconContainerViewModel mStatusBarIconsViewModel;
+    private final ConfigurationState mConfigurationState;
+    private final ConfigurationController mConfigurationController;
+    private final DozeParameters mDozeParameters;
+    private final ScreenOffAnimationController mScreenOffAnimationController;
+    private final NotificationIconContainerViewBinder.IconViewStore mStatusBarIconViewStore;
+    private final DemoModeController mDemoModeController;
 
     private List<String> mBlockedIcons = new ArrayList<>();
     private Map<Startable, Startable.State> mStartableStates = new ArrayMap<>();
@@ -211,9 +231,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarLocationPublisher locationPublisher,
             NotificationIconAreaController notificationIconAreaController,
             ShadeExpansionStateManager shadeExpansionStateManager,
-            FeatureFlags featureFlags,
+            FeatureFlagsClassic featureFlags,
             StatusBarIconController statusBarIconController,
-            StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
+            DarkIconManager.Factory darkIconManagerFactory,
             CollapsedStatusBarViewModel collapsedStatusBarViewModel,
             CollapsedStatusBarViewBinder collapsedStatusBarViewBinder,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
@@ -228,8 +248,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             @Main Executor mainExecutor,
             DumpManager dumpManager,
             StatusBarWindowStateController statusBarWindowStateController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor
-    ) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            NotificationIconContainerStatusBarViewModel statusBarIconsViewModel,
+            ConfigurationState configurationState,
+            ConfigurationController configurationController,
+            DozeParameters dozeParameters,
+            ScreenOffAnimationController screenOffAnimationController,
+            StatusBarNotificationIconViewStore statusBarIconViewStore,
+            DemoModeController demoModeController) {
         mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
@@ -254,18 +280,55 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mDumpManager = dumpManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mStatusBarIconsViewModel = statusBarIconsViewModel;
+        mConfigurationState = configurationState;
+        mConfigurationController = configurationController;
+        mDozeParameters = dozeParameters;
+        mScreenOffAnimationController = screenOffAnimationController;
+        mStatusBarIconViewStore = statusBarIconViewStore;
+        mDemoModeController = demoModeController;
     }
+
+    private final DemoMode mDemoModeCallback = new DemoMode() {
+        @Override
+        public List<String> demoCommands() {
+            return List.of(DemoMode.COMMAND_NOTIFICATIONS);
+        }
+
+        @Override
+        public void dispatchDemoCommand(String command, Bundle args) {
+            if (mNotificationIconAreaInner == null) return;
+            String visible = args.getString("visible");
+            if ("false".equals(visible)) {
+                mNotificationIconAreaInner.setVisibility(View.INVISIBLE);
+            } else {
+                mNotificationIconAreaInner.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        public void onDemoModeFinished() {
+            if (mNotificationIconAreaInner == null) return;
+            mNotificationIconAreaInner.setVisibility(View.VISIBLE);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mStatusBarWindowStateController.addListener(mStatusBarWindowStateListener);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            mDemoModeController.addCallback(mDemoModeCallback);
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         mStatusBarWindowStateController.removeListener(mStatusBarWindowStateListener);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            mDemoModeController.removeCallback(mDemoModeCallback);
+        }
     }
 
     @Override
@@ -405,14 +468,31 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     /** Initializes views related to the notification icon area. */
     public void initNotificationIconArea() {
-        ViewGroup notificationIconArea = mStatusBar.findViewById(R.id.notification_icon_area);
-        mNotificationIconAreaInner =
-                mNotificationIconAreaController.getNotificationInnerAreaView();
-        if (mNotificationIconAreaInner.getParent() != null) {
-            ((ViewGroup) mNotificationIconAreaInner.getParent())
-                    .removeView(mNotificationIconAreaInner);
+        ViewGroup notificationIconArea = mStatusBar.requireViewById(R.id.notification_icon_area);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            mNotificationIconAreaInner =
+                LayoutInflater.from(getContext())
+                        .inflate(R.layout.notification_icon_area, notificationIconArea, true);
+            NotificationIconContainer notificationIcons =
+                    notificationIconArea.requireViewById(R.id.notificationIcons);
+            NotificationIconContainerViewBinder.bind(
+                    notificationIcons,
+                    mStatusBarIconsViewModel,
+                    mConfigurationState,
+                    mConfigurationController,
+                    mDozeParameters,
+                    mFeatureFlags,
+                    mScreenOffAnimationController,
+                    mStatusBarIconViewStore);
+        } else {
+            mNotificationIconAreaInner =
+                    mNotificationIconAreaController.getNotificationInnerAreaView();
+            if (mNotificationIconAreaInner.getParent() != null) {
+                ((ViewGroup) mNotificationIconAreaInner.getParent())
+                        .removeView(mNotificationIconAreaInner);
+            }
+            notificationIconArea.addView(mNotificationIconAreaInner);
         }
-        notificationIconArea.addView(mNotificationIconAreaInner);
 
         updateNotificationIconAreaAndCallChip(/* animate= */ false);
     }

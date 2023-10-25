@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc chậm"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quá trình sạc được tối ưu hoá để bảo vệ pin"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Có vấn đề với phụ kiện sạc"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Nhấn vào Menu để mở khóa."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Mạng đã bị khóa"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Không có SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Hãy thêm SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Không tìm thấy hoặc không đọc được SIM. Hãy thêm SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM không sử dụng được."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM của bạn đã bị vô hiệu hoá vĩnh viễn.\n Hãy liên hệ với nhà cung cấp dịch vụ viễn thông không dây của bạn để yêu cầu cấp SIM khác."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM này đang bị khoá."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM này đang bị khoá PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Đang mở khoá SIM…"</string>

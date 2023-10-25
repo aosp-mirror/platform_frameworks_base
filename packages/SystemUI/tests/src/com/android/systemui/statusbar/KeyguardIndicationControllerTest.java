@@ -73,10 +73,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.TrustGrantFlags;
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.res.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
+import com.android.systemui.res.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1543,7 +1543,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     private void setupFingerprintUnlockPossible(boolean possible) {
         when(mKeyguardUpdateMonitor
-                .getCachedIsUnlockWithFingerprintPossible(getCurrentUser()))
+                .isUnlockWithFingerprintPossible(getCurrentUser()))
                 .thenReturn(possible);
     }
 

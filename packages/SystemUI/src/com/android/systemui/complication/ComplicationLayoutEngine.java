@@ -652,8 +652,7 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             CrossFadeHelper.fadeOut(
                     mLayout,
                     mFadeOutDuration,
-                    /* delay= */ 0,
-                    /* endRunnable= */ null);
+                    /* delay= */ 0);
         }
     }
 
