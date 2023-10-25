@@ -34,3 +34,10 @@ flag {
     description: "Introduce a constant as maximum value of bugreport mode."
     bug: "305067125"
 }
+
+flag {
+    name: "adpf_prefer_power_efficiency"
+    namespace: "game"
+    description: "Guards the ADPF power efficiency API"
+    bug: "288117936"
+}

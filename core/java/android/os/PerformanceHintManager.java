@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -231,6 +232,7 @@ public final class PerformanceHintManager {
          *
          * @param enabled The flag that sets whether this session uses power-efficient scheduling.
          */
+        @FlaggedApi(Flags.FLAG_ADPF_PREFER_POWER_EFFICIENCY)
         public void setPreferPowerEfficiency(boolean enabled) {
             nativeSetPreferPowerEfficiency(mNativeSessionPtr, enabled);
         }
