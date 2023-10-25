@@ -19,6 +19,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.shared.model.FingerprintSensorType
+import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
@@ -35,6 +41,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.util.mockito.mock
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -44,22 +51,34 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
     private lateinit var underTest: DreamingToLockscreenTransitionViewModel
     private lateinit var repository: FakeKeyguardTransitionRepository
+    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
 
     @Before
     fun setUp() {
         repository = FakeKeyguardTransitionRepository()
+        fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
         val interactor =
             KeyguardTransitionInteractorFactory.create(
                     scope = TestScope().backgroundScope,
                     repository = repository,
                 )
                 .keyguardTransitionInteractor
-        underTest = DreamingToLockscreenTransitionViewModel(interactor, mock())
+        underTest =
+            DreamingToLockscreenTransitionViewModel(
+                interactor,
+                mock(),
+                DeviceEntryUdfpsInteractor(
+                    fingerprintPropertyRepository = fingerprintPropertyRepository,
+                    fingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository(),
+                    biometricSettingsRepository = FakeBiometricSettingsRepository(),
+                ),
+            )
     }
 
     @Test
@@ -124,6 +143,78 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
             assertThat(values.size).isEqualTo(4)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
+
+            job.cancel()
+        }
+
+    @Test
+    fun deviceEntryParentViewFadeIn() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<Float>()
+
+            val job = underTest.deviceEntryParentViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, STARTED))
+            repository.sendTransitionStep(step(0f))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.2f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(1f))
+
+            assertThat(values.size).isEqualTo(4)
+            values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
+
+            job.cancel()
+        }
+
+    @Test
+    fun deviceEntryBackgroundViewAppear() =
+        runTest(UnconfinedTestDispatcher()) {
+            fingerprintPropertyRepository.setProperties(
+                sensorId = 0,
+                strength = SensorStrength.STRONG,
+                sensorType = FingerprintSensorType.UDFPS_OPTICAL,
+                sensorLocations = emptyMap(),
+            )
+            val values = mutableListOf<Float>()
+
+            val job =
+                underTest.deviceEntryBackgroundViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, STARTED))
+            repository.sendTransitionStep(step(0f))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.2f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(1f))
+
+            values.forEach { assertThat(it).isEqualTo(1f) }
+
+            job.cancel()
+        }
+
+    @Test
+    fun deviceEntryBackground_noUdfps_noUpdates() =
+        runTest(UnconfinedTestDispatcher()) {
+            fingerprintPropertyRepository.setProperties(
+                sensorId = 0,
+                strength = SensorStrength.STRONG,
+                sensorType = FingerprintSensorType.REAR,
+                sensorLocations = emptyMap(),
+            )
+            val values = mutableListOf<Float>()
+
+            val job =
+                underTest.deviceEntryBackgroundViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, STARTED))
+            repository.sendTransitionStep(step(0f))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.2f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(1f))
+
+            assertThat(values.size).isEqualTo(0) // no updates
 
             job.cancel()
         }

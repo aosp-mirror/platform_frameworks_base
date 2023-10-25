@@ -40,7 +40,10 @@ constructor(
     attrs: AttributeSet?,
     defStyleAttrs: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttrs) {
-    val longPressHandlingView: LongPressHandlingView = LongPressHandlingView(context, attrs)
+    val longPressHandlingView: LongPressHandlingView =
+        LongPressHandlingView(context, attrs) {
+            context.resources.getInteger(R.integer.config_lockIconLongPress).toLong()
+        }
     val iconView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_fg }
     val bgView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_bg }
     val aodFpDrawable: LottieDrawable = LottieDrawable()
@@ -105,7 +108,7 @@ constructor(
         // FINGERPRINT
         animatedIconDrawable.addState(
             getIconState(IconType.FINGERPRINT, false),
-            context.getDrawable(R.drawable.ic_kg_fingerprint)!!,
+            context.getDrawable(R.drawable.ic_fingerprint)!!,
             R.id.locked_fp,
         )
 
@@ -220,7 +223,7 @@ constructor(
         val lp = longPressHandlingView.layoutParams as LayoutParams
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
-        longPressHandlingView.setLayoutParams(lp)
+        longPressHandlingView.layoutParams = lp
     }
 
     private fun addIconImageView() {
@@ -231,7 +234,7 @@ constructor(
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
         lp.gravity = Gravity.CENTER
-        iconView.setLayoutParams(lp)
+        iconView.layoutParams = lp
     }
 
     private fun addBgImageView() {
@@ -240,7 +243,7 @@ constructor(
         val lp = bgView.layoutParams as LayoutParams
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
-        bgView.setLayoutParams(lp)
+        bgView.layoutParams = lp
     }
 
     fun getIconState(icon: IconType, aod: Boolean): IntArray {

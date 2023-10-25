@@ -19,6 +19,10 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -26,6 +30,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -35,22 +40,35 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     private lateinit var underTest: OccludedToLockscreenTransitionViewModel
     private lateinit var repository: FakeKeyguardTransitionRepository
+    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
     @Before
     fun setUp() {
         repository = FakeKeyguardTransitionRepository()
-        val interactor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = TestScope().backgroundScope,
-                    repository = repository,
-                )
-                .keyguardTransitionInteractor
-        underTest = OccludedToLockscreenTransitionViewModel(interactor)
+        fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
+        underTest =
+            OccludedToLockscreenTransitionViewModel(
+                interactor =
+                    KeyguardTransitionInteractorFactory.create(
+                            scope = TestScope().backgroundScope,
+                            repository = repository,
+                        )
+                        .keyguardTransitionInteractor,
+                deviceEntryUdfpsInteractor =
+                    DeviceEntryUdfpsInteractor(
+                        fingerprintPropertyRepository = fingerprintPropertyRepository,
+                        fingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository(),
+                        biometricSettingsRepository = biometricSettingsRepository,
+                    ),
+            )
     }
 
     @Test
@@ -109,6 +127,78 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(0.5f, TransitionState.CANCELED))
 
             assertThat(values.last()).isEqualTo(0f)
+
+            job.cancel()
+        }
+
+    @Test
+    fun deviceEntryParentViewFadeIn() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<Float>()
+
+            val job = underTest.deviceEntryParentViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            // Should start running here...
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.4f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            // ...up to here
+            repository.sendTransitionStep(step(0.8f))
+            repository.sendTransitionStep(step(1f))
+
+            assertThat(values.size).isEqualTo(5)
+            values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
+
+            job.cancel()
+        }
+
+    @Test
+    fun deviceEntryBackgroundViewShows() =
+        runTest(UnconfinedTestDispatcher()) {
+            fingerprintPropertyRepository.supportsUdfps()
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
+            val values = mutableListOf<Float>()
+
+            val job =
+                underTest.deviceEntryBackgroundViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.4f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            repository.sendTransitionStep(step(0.8f))
+            repository.sendTransitionStep(step(1f))
+
+            values.forEach { assertThat(it).isEqualTo(1f) }
+
+            job.cancel()
+        }
+
+    @Test
+    fun deviceEntryBackgroundView_noUdfpsEnrolled_noUpdates() =
+        runTest(UnconfinedTestDispatcher()) {
+            fingerprintPropertyRepository.supportsRearFps()
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
+            val values = mutableListOf<Float>()
+
+            val job =
+                underTest.deviceEntryBackgroundViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.4f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            repository.sendTransitionStep(step(0.8f))
+            repository.sendTransitionStep(step(1f))
+
+            assertThat(values).isEmpty() // no updates
 
             job.cancel()
         }

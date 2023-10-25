@@ -255,5 +255,7 @@ constructor(
         private val DEFAULT_DURATION = 300.milliseconds
         val TO_GONE_DURATION = 500.milliseconds
         val TO_GONE_SHORT_DURATION = 200.milliseconds
+        val TO_AOD_DURATION = DEFAULT_DURATION
+        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
     }
 }

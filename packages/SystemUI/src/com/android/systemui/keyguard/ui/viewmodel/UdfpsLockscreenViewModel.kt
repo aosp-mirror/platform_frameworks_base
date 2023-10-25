@@ -19,9 +19,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.content.Context
 import androidx.annotation.ColorInt
 import com.android.settingslib.Utils.getColorAttrDefaultColor
-import com.android.systemui.keyguard.domain.interactor.BurnInOffsets
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.Offsets
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -185,7 +185,7 @@ constructor(
         keyguardInteractor,
     ) {
     val dozeAmount: Flow<Float> = interactor.dozeAmount
-    val burnInOffsets: Flow<BurnInOffsets> = interactor.burnInOffsets
+    val burnInOffsets: Flow<Offsets> = interactor.burnInOffsets
 
     // Padding between the fingerprint icon and its bounding box in pixels.
     val padding: Flow<Int> =

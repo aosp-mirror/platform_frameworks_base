@@ -36,6 +36,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
@@ -56,12 +58,15 @@ constructor(
     private val featureFlags: FeatureFlags,
     private val lockIconViewController: Lazy<LockIconViewController>,
     private val deviceEntryIconViewModel: Lazy<DeviceEntryIconViewModel>,
+    private val deviceEntryForegroundViewModel: Lazy<DeviceEntryForegroundViewModel>,
+    private val deviceEntryBackgroundViewModel: Lazy<DeviceEntryBackgroundViewModel>,
     private val falsingManager: Lazy<FalsingManager>,
 ) : KeyguardSection() {
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!keyguardBottomAreaRefactor() &&
+        if (
+            !keyguardBottomAreaRefactor() &&
                 !featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)
         ) {
             return
@@ -87,6 +92,8 @@ constructor(
                 DeviceEntryIconViewBinder.bind(
                     it,
                     deviceEntryIconViewModel.get(),
+                    deviceEntryForegroundViewModel.get(),
+                    deviceEntryBackgroundViewModel.get(),
                     falsingManager.get(),
                 )
             }
