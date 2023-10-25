@@ -42,6 +42,8 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -96,18 +98,21 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
     @Mock private DozeHost.Callback mCallback;
-
     @Mock private DozeInteractor mDozeInteractor;
+
+    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mFeatureFlags.setDefault(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR);
         mDozeServiceHost = new DozeServiceHost(mDozeLog, mPowerManager, mWakefullnessLifecycle,
-                mStatusBarStateController, mDeviceProvisionedController, mHeadsUpManager,
-                mBatteryController, mScrimController, () -> mBiometricUnlockController,
-                () -> mAssistManager, mDozeScrimController,
-                mKeyguardUpdateMonitor, mPulseExpansionHandler,
-                mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mAuthController, mNotificationIconAreaController, mDozeInteractor);
+                mStatusBarStateController, mDeviceProvisionedController, mFeatureFlags,
+                mHeadsUpManager, mBatteryController, mScrimController,
+                () -> mBiometricUnlockController, () -> mAssistManager, mDozeScrimController,
+                mKeyguardUpdateMonitor, mPulseExpansionHandler, mNotificationShadeWindowController,
+                mNotificationWakeUpCoordinator, mAuthController, mNotificationIconAreaController,
+                mDozeInteractor);
 
         mDozeServiceHost.initialize(
                 mCentralSurfaces,

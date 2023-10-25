@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
+import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
@@ -75,6 +76,7 @@ data class TestMocksModule(
     @get:Provides val keyguardSecurityModel: KeyguardSecurityModel = mock(),
     @get:Provides val keyguardUpdateMonitor: KeyguardUpdateMonitor = mock(),
     @get:Provides val mediaHierarchyManager: MediaHierarchyManager = mock(),
+    @get:Provides val notifCollection: NotifCollection = mock(),
     @get:Provides val notificationListener: NotificationListener = mock(),
     @get:Provides val notificationLockscreenUserManager: NotificationLockscreenUserManager = mock(),
     @get:Provides val notificationMediaManager: NotificationMediaManager = mock(),

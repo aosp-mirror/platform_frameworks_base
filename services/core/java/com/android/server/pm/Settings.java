@@ -946,7 +946,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ret.setMimeGroups(p.getMimeGroups());
             ret.setAppMetadataFilePath(p.getAppMetadataFilePath());
             ret.getPkgState().setUpdatedSystemApp(false);
-            ret.setIsPersistent(p.isPersistent());
             ret.setTargetSdkVersion(p.getTargetSdkVersion());
             ret.setRestrictUpdateHash(p.getRestrictUpdateHash());
         }
@@ -1061,7 +1060,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             boolean virtualPreload, boolean isStoppedSystemApp, UserManagerService userManager,
             String[] usesSdkLibraries, long[] usesSdkLibrariesVersions,
             String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
-            Set<String> mimeGroupNames, @NonNull UUID domainSetId, boolean isPersistent,
+            Set<String> mimeGroupNames, @NonNull UUID domainSetId,
             int targetSdkVersion, byte[] restrictUpdatedHash) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
@@ -1083,7 +1082,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     // Update new package state.
                     .setLastModifiedTime(codePath.lastModified())
                     .setDomainSetId(domainSetId)
-                    .setIsPersistent(isPersistent)
                     .setTargetSdkVersion(targetSdkVersion)
                     .setRestrictUpdateHash(restrictUpdatedHash);
             pkgSetting.setFlags(pkgFlags)
@@ -1103,7 +1101,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setSecondaryCpuAbi(secondaryCpuAbi)
                     .setLongVersionCode(versionCode)
                     .setMimeGroups(createMimeGroups(mimeGroupNames))
-                    .setIsPersistent(isPersistent)
                     .setTargetSdkVersion(targetSdkVersion)
                     .setRestrictUpdateHash(restrictUpdatedHash)
                     .setLastModifiedTime(codePath.lastModified());
@@ -1219,7 +1216,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             int pkgPrivateFlags, @NonNull UserManagerService userManager,
             @Nullable String[] usesSdkLibraries, @Nullable long[] usesSdkLibrariesVersions,
             @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions,
-            @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId, boolean isPersistent,
+            @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId,
             int targetSdkVersion, byte[] restrictUpdatedHash)
                     throws PackageManagerException {
         final String pkgName = pkgSetting.getPackageName();
@@ -1273,7 +1270,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 .setSecondaryCpuAbi(secondaryCpuAbi)
                 .updateMimeGroups(mimeGroupNames)
                 .setDomainSetId(domainSetId)
-                .setIsPersistent(isPersistent)
                 .setTargetSdkVersion(targetSdkVersion)
                 .setRestrictUpdateHash(restrictUpdatedHash);
         // Update SDK library dependencies if needed.
@@ -3071,7 +3067,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
         serializer.attributeLong(null, "version", pkg.getVersionCode());
-        serializer.attributeBoolean(null, "isPersistent", pkg.isPersistent());
         serializer.attributeInt(null, "targetSdkVersion", pkg.getTargetSdkVersion());
         if (pkg.getRestrictUpdateHash() != null) {
             serializer.attributeBytesBase64(null, "restrictUpdateHash",
@@ -3140,7 +3135,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
         serializer.attributeLong(null, "version", pkg.getVersionCode());
-        serializer.attributeBoolean(null, "isPersistent", pkg.isPersistent());
         serializer.attributeInt(null, "targetSdkVersion", pkg.getTargetSdkVersion());
         if (pkg.getRestrictUpdateHash() != null) {
             serializer.attributeBytesBase64(null, "restrictUpdateHash",
@@ -3182,8 +3176,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if (pkg.getVolumeUuid() != null) {
             serializer.attribute(null, "volumeUuid", pkg.getVolumeUuid());
         }
-        serializer.attributeBoolean(null, "defaultToDeviceProtectedStorage",
-                pkg.isDefaultToDeviceProtectedStorage());
         if (pkg.getCategoryOverride() != ApplicationInfo.CATEGORY_UNDEFINED) {
             serializer.attributeInt(null, "categoryHint", pkg.getCategoryOverride());
         }
@@ -3878,7 +3870,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
 
         long versionCode = parser.getAttributeLong(null, "version", 0);
-        boolean isPersistent = parser.getAttributeBoolean(null, "isPersistent", false);
         int targetSdkVersion = parser.getAttributeInt(null, "targetSdkVersion", 0);
         byte[] restrictUpdateHash = parser.getAttributeBytesBase64(null, "restrictUpdateHash",
                 null);
@@ -3901,7 +3892,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 .setSecondaryCpuAbi(secondaryCpuAbiStr)
                 .setCpuAbiOverride(cpuAbiOverrideStr)
                 .setLongVersionCode(versionCode)
-                .setIsPersistent(isPersistent)
                 .setTargetSdkVersion(targetSdkVersion)
                 .setRestrictUpdateHash(restrictUpdateHash);
         long timeStamp = parser.getAttributeLongHex(null, "ft", 0);
@@ -3982,7 +3972,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         String installInitiatingPackageName = null;
         boolean installInitiatorUninstalled = false;
         String volumeUuid = null;
-        boolean defaultToDeviceProtectedStorage = false;
         boolean updateAvailable = false;
         int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
         int pkgFlags = 0;
@@ -3997,7 +3986,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         long loadingCompletedTime = 0;
         UUID domainSetId;
         String appMetadataFilePath = null;
-        boolean isPersistent = false;
         int targetSdkVersion = 0;
         byte[] restrictUpdateHash = null;
         try {
@@ -4023,7 +4011,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             }
 
             versionCode = parser.getAttributeLong(null, "version", 0);
-            isPersistent = parser.getAttributeBoolean(null, "isPersistent", false);
             targetSdkVersion = parser.getAttributeInt(null, "targetSdkVersion", 0);
             restrictUpdateHash = parser.getAttributeBytesBase64(null, "restrictUpdateHash", null);
             installerPackageName = parser.getAttributeValue(null, "installer");
@@ -4038,8 +4025,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             installInitiatorUninstalled = parser.getAttributeBoolean(null,
                     "installInitiatorUninstalled", false);
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
-            defaultToDeviceProtectedStorage = parser.getAttributeBoolean(
-                    null, "defaultToDeviceProtectedStorage", false);
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
             appMetadataFilePath = parser.getAttributeValue(null, "appMetadataFilePath");
@@ -4179,7 +4164,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     installInitiatorUninstalled);
             packageSetting.setInstallSource(installSource)
                     .setVolumeUuid(volumeUuid)
-                    .setDefaultToDeviceProtectedStorage(defaultToDeviceProtectedStorage)
                     .setCategoryOverride(categoryHint)
                     .setLegacyNativeLibraryPath(legacyNativeLibraryPathStr)
                     .setPrimaryCpuAbi(primaryCpuAbiString)
@@ -4189,7 +4173,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setLoadingProgress(loadingProgress)
                     .setLoadingCompletedTime(loadingCompletedTime)
                     .setAppMetadataFilePath(appMetadataFilePath)
-                    .setIsPersistent(isPersistent)
                     .setTargetSdkVersion(targetSdkVersion)
                     .setRestrictUpdateHash(restrictUpdateHash);
             // Handle legacy string here for single-user mode

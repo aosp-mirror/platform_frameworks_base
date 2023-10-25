@@ -1000,6 +1000,37 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Install package in an archived state.
+     *
+     * @param archivedPackage archived package data such as package name, signature etc.
+     * @param sessionParams used to create an underlying installation session
+     * @param statusReceiver Called when the state of the session changes. Intents
+     *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
+     *                       individual status codes on how to handle them.
+     * @see #createSession
+     * @see PackageInstaller.Session#commit
+     */
+    @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public void installPackageArchived(@NonNull ArchivedPackage archivedPackage,
+            @NonNull SessionParams sessionParams,
+            @NonNull IntentSender statusReceiver) {
+        Objects.requireNonNull(archivedPackage, "archivedPackage cannot be null");
+        Objects.requireNonNull(sessionParams, "sessionParams cannot be null");
+        Objects.requireNonNull(statusReceiver, "statusReceiver cannot be null");
+        try {
+            mInstaller.installPackageArchived(
+                    archivedPackage.getParcel(),
+                    sessionParams,
+                    statusReceiver,
+                    mInstallerPackageName,
+                    new UserHandle(mUserId));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** {@hide} */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)

@@ -37,7 +37,6 @@ import android.testing.TestableLooper
 import android.view.IWindowManager
 import android.view.View
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.view.LaunchableFrameLayout
@@ -48,6 +47,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.res.R
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -343,8 +343,7 @@ class CustomTileTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         verify(activityStarter, never())
-            .startPendingIntentDismissingKeyguard(
-                any(), any(), any(ActivityLaunchAnimator.Controller::class.java))
+            .startPendingIntentMaybeDismissingKeyguard(any(), nullable(), nullable())
     }
 
     @Test
@@ -357,8 +356,7 @@ class CustomTileTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         verify(activityStarter, never())
-            .startPendingIntentDismissingKeyguard(
-                any(), any(), any(ActivityLaunchAnimator.Controller::class.java))
+            .startPendingIntentMaybeDismissingKeyguard(any(), nullable(), nullable())
     }
 
     @Test
@@ -373,7 +371,7 @@ class CustomTileTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         verify(activityStarter)
-            .startPendingIntentDismissingKeyguard(
+            .startPendingIntentMaybeDismissingKeyguard(
                 eq(pi), nullable(), nullable<ActivityLaunchAnimator.Controller>())
     }
 

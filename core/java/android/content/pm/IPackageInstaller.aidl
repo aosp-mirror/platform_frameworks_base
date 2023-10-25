@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -82,4 +83,11 @@ interface IPackageInstaller {
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES,android.Manifest.permission.REQUEST_INSTALL_PACKAGES})")
     void requestUnarchive(String packageName, String callerPackageName, in UserHandle userHandle);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)")
+    void installPackageArchived(in ArchivedPackageParcel archivedPackageParcel,
+            in PackageInstaller.SessionParams params,
+            in IntentSender statusReceiver,
+            String installerPackageName, in UserHandle userHandle);
+
 }

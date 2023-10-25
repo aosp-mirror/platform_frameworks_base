@@ -17,14 +17,23 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.view.LayoutInflater
-import com.android.systemui.res.R
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationShelf
+import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
+import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
+import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.onDensityOrFontScaleChanged
+import com.android.systemui.statusbar.policy.onThemeChanged
+import com.android.systemui.util.traceSection
+import com.android.systemui.util.view.reinflateAndBindLatest
+import kotlinx.coroutines.flow.merge
 
 /** Binds a [NotificationStackScrollLayout] to its [view model][NotificationListViewModel]. */
 object NotificationListViewBinder {
@@ -33,8 +42,9 @@ object NotificationListViewBinder {
         view: NotificationStackScrollLayout,
         viewModel: NotificationListViewModel,
         falsingManager: FalsingManager,
-        featureFlags: FeatureFlags,
+        featureFlags: FeatureFlagsClassic,
         iconAreaController: NotificationIconAreaController,
+        configurationController: ConfigurationController,
     ) {
         val shelf =
             LayoutInflater.from(view.context)
@@ -47,5 +57,26 @@ object NotificationListViewBinder {
             iconAreaController
         )
         view.setShelf(shelf)
+
+        viewModel.footer.ifPresent { footerViewModel ->
+            // The footer needs to be re-inflated every time the theme or the font size changes.
+            view.repeatWhenAttached {
+                LayoutInflater.from(view.context).reinflateAndBindLatest(
+                    R.layout.status_bar_notification_footer,
+                    view,
+                    attachToRoot = false,
+                    // TODO(b/305930747): This may lead to duplicate invocations if both flows emit,
+                    // find a solution to only emit one event.
+                    merge(
+                        configurationController.onThemeChanged,
+                        configurationController.onDensityOrFontScaleChanged,
+                    ),
+                ) { view ->
+                    traceSection("bind FooterView") {
+                        FooterViewBinder.bind(view as FooterView, footerViewModel)
+                    }
+                }
+            }
+        }
     }
 }

@@ -364,14 +364,6 @@ public final class ContentCaptureManager {
             "enable_content_protection_receiver";
 
     /**
-     * Sets the size of the app blocklist for the content protection flow.
-     *
-     * @hide
-     */
-    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE =
-            "content_protection_apps_blocklist_size";
-
-    /**
      * Sets the size of the in-memory ring buffer for the content protection flow.
      *
      * @hide
@@ -439,8 +431,6 @@ public final class ContentCaptureManager {
     public static final boolean DEFAULT_ENABLE_CONTENT_CAPTURE_RECEIVER = true;
     /** @hide */
     public static final boolean DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER = false;
-    /** @hide */
-    public static final int DEFAULT_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE = 5000;
     /** @hide */
     public static final int DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE = 150;
     /** @hide */

@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +43,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
-import com.android.server.contentprotection.ContentProtectionBlocklistManager;
+import com.android.server.contentprotection.ContentProtectionAllowlistManager;
 import com.android.server.contentprotection.ContentProtectionConsentManager;
 import com.android.server.contentprotection.RemoteContentProtectionService;
 import com.android.server.pm.UserManagerInternal;
@@ -94,7 +93,7 @@ public class ContentCaptureManagerServiceTest {
 
     @Mock private UserManagerInternal mMockUserManagerInternal;
 
-    @Mock private ContentProtectionBlocklistManager mMockContentProtectionBlocklistManager;
+    @Mock private ContentProtectionAllowlistManager mMockContentProtectionAllowlistManager;
 
     @Mock private ContentCaptureServiceInfo mMockContentCaptureServiceInfo;
 
@@ -108,7 +107,7 @@ public class ContentCaptureManagerServiceTest {
 
     private List<List<String>> mDevCfgContentProtectionOptionalGroups = Collections.emptyList();
 
-    private int mContentProtectionBlocklistManagersCreated;
+    private int mContentProtectionAllowlistManagersCreated;
 
     private int mContentProtectionServiceInfosCreated;
 
@@ -132,10 +131,10 @@ public class ContentCaptureManagerServiceTest {
 
     @Test
     public void constructor_contentProtection_flagDisabled_noManagers() {
-        assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(0);
+        assertThat(mContentProtectionAllowlistManagersCreated).isEqualTo(0);
         assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
         assertThat(mContentProtectionConsentManagersCreated).isEqualTo(0);
-        verifyZeroInteractions(mMockContentProtectionBlocklistManager);
+        verifyZeroInteractions(mMockContentProtectionAllowlistManager);
         verifyZeroInteractions(mMockContentProtectionConsentManager);
     }
 
@@ -145,10 +144,10 @@ public class ContentCaptureManagerServiceTest {
 
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
-        assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(0);
+        assertThat(mContentProtectionAllowlistManagersCreated).isEqualTo(0);
         assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
         assertThat(mContentProtectionConsentManagersCreated).isEqualTo(0);
-        verifyZeroInteractions(mMockContentProtectionBlocklistManager);
+        verifyZeroInteractions(mMockContentProtectionAllowlistManager);
         verifyZeroInteractions(mMockContentProtectionConsentManager);
     }
 
@@ -158,10 +157,10 @@ public class ContentCaptureManagerServiceTest {
 
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
-        assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(0);
+        assertThat(mContentProtectionAllowlistManagersCreated).isEqualTo(0);
         assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
         assertThat(mContentProtectionConsentManagersCreated).isEqualTo(0);
-        verifyZeroInteractions(mMockContentProtectionBlocklistManager);
+        verifyZeroInteractions(mMockContentProtectionAllowlistManager);
         verifyZeroInteractions(mMockContentProtectionConsentManager);
     }
 
@@ -171,23 +170,10 @@ public class ContentCaptureManagerServiceTest {
 
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
-        assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(1);
+        assertThat(mContentProtectionAllowlistManagersCreated).isEqualTo(1);
         assertThat(mContentProtectionConsentManagersCreated).isEqualTo(1);
         assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
-        verify(mMockContentProtectionBlocklistManager).updateBlocklist(anyInt());
         verifyZeroInteractions(mMockContentProtectionConsentManager);
-    }
-
-    @Test
-    public void setFineTuneParamsFromDeviceConfig_doesNotUpdateContentProtectionBlocklist() {
-        mDevCfgEnableContentProtectionReceiver = true;
-        mContentCaptureManagerService = new TestContentCaptureManagerService();
-        mContentCaptureManagerService.mDevCfgContentProtectionAppsBlocklistSize += 100;
-        verify(mMockContentProtectionBlocklistManager).updateBlocklist(anyInt());
-
-        mContentCaptureManagerService.setFineTuneParamsFromDeviceConfig();
-
-        verifyNoMoreInteractions(mMockContentProtectionBlocklistManager);
     }
 
     @Test
@@ -201,13 +187,13 @@ public class ContentCaptureManagerServiceTest {
 
         assertThat(actual).isNull();
         verify(mMockContentProtectionConsentManager).isConsentGranted(USER_ID);
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
     public void getOptions_contentCaptureDisabled_contentProtectionEnabled() {
         when(mMockContentProtectionConsentManager.isConsentGranted(USER_ID)).thenReturn(true);
-        when(mMockContentProtectionBlocklistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
+        when(mMockContentProtectionAllowlistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
         mDevCfgEnableContentProtectionReceiver = true;
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
@@ -239,13 +225,13 @@ public class ContentCaptureManagerServiceTest {
         assertThat(actual.contentProtectionOptions.enableReceiver).isFalse();
         assertThat(actual.whitelistedComponents).isNull();
         verify(mMockContentProtectionConsentManager).isConsentGranted(USER_ID);
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
     public void getOptions_contentCaptureEnabled_contentProtectionEnabled() {
         when(mMockContentProtectionConsentManager.isConsentGranted(USER_ID)).thenReturn(true);
-        when(mMockContentProtectionBlocklistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
+        when(mMockContentProtectionAllowlistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
         mDevCfgEnableContentProtectionReceiver = true;
         mContentCaptureManagerService = new TestContentCaptureManagerService();
         mContentCaptureManagerService.mGlobalContentCaptureOptions.setWhitelist(
@@ -273,7 +259,7 @@ public class ContentCaptureManagerServiceTest {
 
         assertThat(actual).isFalse();
         verify(mMockContentProtectionConsentManager).isConsentGranted(USER_ID);
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
@@ -287,13 +273,13 @@ public class ContentCaptureManagerServiceTest {
                         USER_ID, PACKAGE_NAME);
 
         assertThat(actual).isFalse();
-        verify(mMockContentProtectionBlocklistManager).isAllowed(PACKAGE_NAME);
+        verify(mMockContentProtectionAllowlistManager).isAllowed(PACKAGE_NAME);
     }
 
     @Test
     public void isWhitelisted_packageName_contentCaptureDisabled_contentProtectionEnabled() {
         when(mMockContentProtectionConsentManager.isConsentGranted(USER_ID)).thenReturn(true);
-        when(mMockContentProtectionBlocklistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
+        when(mMockContentProtectionAllowlistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
         mDevCfgEnableContentProtectionReceiver = true;
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
@@ -317,7 +303,7 @@ public class ContentCaptureManagerServiceTest {
 
         assertThat(actual).isTrue();
         verify(mMockContentProtectionConsentManager, never()).isConsentGranted(anyInt());
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
@@ -331,7 +317,7 @@ public class ContentCaptureManagerServiceTest {
 
         assertThat(actual).isFalse();
         verify(mMockContentProtectionConsentManager).isConsentGranted(USER_ID);
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
@@ -345,13 +331,13 @@ public class ContentCaptureManagerServiceTest {
                         USER_ID, COMPONENT_NAME);
 
         assertThat(actual).isFalse();
-        verify(mMockContentProtectionBlocklistManager).isAllowed(PACKAGE_NAME);
+        verify(mMockContentProtectionAllowlistManager).isAllowed(PACKAGE_NAME);
     }
 
     @Test
     public void isWhitelisted_componentName_contentCaptureDisabled_contentProtectionEnabled() {
         when(mMockContentProtectionConsentManager.isConsentGranted(USER_ID)).thenReturn(true);
-        when(mMockContentProtectionBlocklistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
+        when(mMockContentProtectionAllowlistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
         mDevCfgEnableContentProtectionReceiver = true;
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
@@ -375,13 +361,13 @@ public class ContentCaptureManagerServiceTest {
 
         assertThat(actual).isTrue();
         verify(mMockContentProtectionConsentManager, never()).isConsentGranted(anyInt());
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
     public void isContentProtectionReceiverEnabled_true() {
         when(mMockContentProtectionConsentManager.isConsentGranted(USER_ID)).thenReturn(true);
-        when(mMockContentProtectionBlocklistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
+        when(mMockContentProtectionAllowlistManager.isAllowed(PACKAGE_NAME)).thenReturn(true);
         mDevCfgEnableContentProtectionReceiver = true;
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
@@ -400,7 +386,7 @@ public class ContentCaptureManagerServiceTest {
 
         assertThat(actual).isFalse();
         verify(mMockContentProtectionConsentManager, never()).isConsentGranted(anyInt());
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
@@ -415,7 +401,7 @@ public class ContentCaptureManagerServiceTest {
 
         assertThat(actual).isFalse();
         verify(mMockContentProtectionConsentManager, never()).isConsentGranted(anyInt());
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
@@ -431,7 +417,7 @@ public class ContentCaptureManagerServiceTest {
 
         assertThat(actual).isFalse();
         verify(mMockContentProtectionConsentManager, never()).isConsentGranted(anyInt());
-        verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
+        verify(mMockContentProtectionAllowlistManager, never()).isAllowed(anyString());
     }
 
     @Test
@@ -572,9 +558,9 @@ public class ContentCaptureManagerServiceTest {
         }
 
         @Override
-        protected ContentProtectionBlocklistManager createContentProtectionBlocklistManager() {
-            mContentProtectionBlocklistManagersCreated++;
-            return mMockContentProtectionBlocklistManager;
+        protected ContentProtectionAllowlistManager createContentProtectionAllowlistManager() {
+            mContentProtectionAllowlistManagersCreated++;
+            return mMockContentProtectionAllowlistManager;
         }
 
         @Override

@@ -29,8 +29,11 @@ import android.util.Log;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlagsClassic;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
+import com.android.systemui.statusbar.domain.interactor.SilentNotificationStatusIconsVisibilityInteractor;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
 import com.android.systemui.statusbar.notification.collection.PipelineDumper;
@@ -59,7 +62,9 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     private static final long MAX_RANKING_DELAY_MILLIS = 500L;
 
     private final Context mContext;
+    private final FeatureFlagsClassic mFeatureFlags;
     private final NotificationManager mNotificationManager;
+    private final SilentNotificationStatusIconsVisibilityInteractor mStatusIconInteractor;
     private final SystemClock mSystemClock;
     private final Executor mMainExecutor;
     private final List<NotificationHandler> mNotificationHandlers = new ArrayList<>();
@@ -75,13 +80,17 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     @Inject
     public NotificationListener(
             Context context,
+            FeatureFlagsClassic featureFlags,
             NotificationManager notificationManager,
+            SilentNotificationStatusIconsVisibilityInteractor statusIconInteractor,
             SystemClock systemClock,
             @Main Executor mainExecutor,
             PluginManager pluginManager) {
         super(pluginManager);
         mContext = context;
+        mFeatureFlags = featureFlags;
         mNotificationManager = notificationManager;
+        mStatusIconInteractor = statusIconInteractor;
         mSystemClock = systemClock;
         mMainExecutor = mainExecutor;
     }
@@ -95,6 +104,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     }
 
     /** Registers a listener that's notified when any notification-related settings change. */
+    @Deprecated
     public void addNotificationSettingsListener(NotificationSettingsListener listener) {
         mSettingsListeners.add(listener);
     }
@@ -230,8 +240,12 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
 
     @Override
     public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
-        for (NotificationSettingsListener listener : mSettingsListeners) {
-            listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            mStatusIconInteractor.setHideSilentStatusIcons(hideSilentStatusIcons);
+        } else {
+            for (NotificationSettingsListener listener : mSettingsListeners) {
+                listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
+            }
         }
     }
 
@@ -294,6 +308,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
         return ranking;
     }
 
+    @Deprecated
     public interface NotificationSettingsListener {
 
         default void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) { }

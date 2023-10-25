@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
 import static androidx.window.extensions.embedding.OverlayCreateParams.KEY_OVERLAY_CREATE_PARAMS;
 import static androidx.window.extensions.embedding.OverlayCreateParams.KEY_OVERLAY_CREATE_PARAMS_BOUNDS;
 import static androidx.window.extensions.embedding.OverlayCreateParams.KEY_OVERLAY_CREATE_PARAMS_TAG;
@@ -364,6 +365,54 @@ public class OverlayPresentationTest {
         assertThat(overlayContainer.getOverlayTag()).isEqualTo(TEST_OVERLAY_CREATE_PARAMS.getTag());
     }
 
+    @Test
+    public void testGetTopNonFishingTaskFragmentContainerWithOverlay() {
+        final TaskFragmentContainer overlayContainer =
+                createTestOverlayContainer(TASK_ID, "test1");
+
+        // Add a SplitPinContainer, the overlay should be on top
+        final Activity primaryActivity = createMockActivity();
+        final Activity secondaryActivity = createMockActivity();
+
+        final TaskFragmentContainer primaryContainer =
+                createMockTaskFragmentContainer(primaryActivity);
+        final TaskFragmentContainer secondaryContainer =
+                createMockTaskFragmentContainer(secondaryActivity);
+        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
+                activityActivityPair -> true /* activityPairPredicate */,
+                activityIntentPair -> true  /* activityIntentPairPredicate */,
+                parentWindowMetrics -> true /* parentWindowMetricsPredicate */).build();
+        mSplitController.registerSplit(mTransaction, primaryContainer, primaryActivity,
+                secondaryContainer, splitPairRule,  splitPairRule.getDefaultSplitAttributes());
+        SplitPinRule splitPinRule = new SplitPinRule.Builder(new SplitAttributes.Builder().build(),
+                parentWindowMetrics -> true /* parentWindowMetricsPredicate */).build();
+        mSplitController.pinTopActivityStack(TASK_ID, splitPinRule);
+        final TaskFragmentContainer topPinnedContainer = mSplitController.getTaskContainer(TASK_ID)
+                .getSplitPinContainer().getSecondaryContainer();
+
+        // Add a normal container after the overlay, the overlay should still on top,
+        // and the SplitPinContainer should also on top of the normal one.
+        final TaskFragmentContainer container = createMockTaskFragmentContainer(mActivity);
+
+        final TaskContainer taskContainer = mSplitController.getTaskContainer(TASK_ID);
+
+        assertThat(taskContainer.getTaskFragmentContainers())
+                .containsExactly(primaryContainer, container, secondaryContainer, overlayContainer)
+                .inOrder();
+
+        assertWithMessage("The pinned container must be returned excluding the overlay")
+                .that(taskContainer.getTopNonFinishingTaskFragmentContainer())
+                .isEqualTo(topPinnedContainer);
+
+        assertThat(taskContainer.getTopNonFinishingTaskFragmentContainer(false))
+                .isEqualTo(container);
+
+        assertWithMessage("The overlay container must be returned since it's always on top")
+                .that(taskContainer.getTopNonFinishingTaskFragmentContainer(
+                        false /* includePin */, true /* includeOverlay */))
+                .isEqualTo(overlayContainer);
+    }
+
     /**
      * A simplified version of {@link SplitController.ActivityStartMonitor
      * #createOrUpdateOverlayTaskFragmentIfNeeded}
@@ -373,6 +422,15 @@ public class OverlayPresentationTest {
             @NonNull OverlayCreateParams params, int taskId) {
         return mSplitController.createOrUpdateOverlayTaskFragmentIfNeeded(mTransaction, params,
                 taskId, mIntent, mActivity);
+    }
+
+    /** Creates a mock TaskFragment that has been registered and appeared in the organizer. */
+    @NonNull
+    private TaskFragmentContainer createMockTaskFragmentContainer(@NonNull Activity activity) {
+        final TaskFragmentContainer container = mSplitController.newContainer(activity,
+                activity.getTaskId());
+        setupTaskFragmentInfo(container, activity);
+        return container;
     }
 
     @NonNull

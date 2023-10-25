@@ -22,8 +22,15 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
+import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +38,7 @@ import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.res.R;
 
@@ -44,9 +52,13 @@ public class FooterViewTest extends SysuiTestCase {
 
     FooterView mView;
 
+    Context mSpyContext = spy(mContext);
+
     @Before
     public void setUp() {
-        mView = (FooterView) LayoutInflater.from(mContext).inflate(
+        mSetFlagsRule.enableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR);
+
+        mView = (FooterView) LayoutInflater.from(mSpyContext).inflate(
                 R.layout.status_bar_notification_footer, null, false);
         mView.setDuration(0);
     }
@@ -99,6 +111,37 @@ public class FooterViewTest extends SysuiTestCase {
         assertFalse(mView.isSecondaryVisible());
 
         mView.setSecondaryVisible(true /* visible */, true /* animate */);
+    }
+
+    @Test
+    public void testSetMessageString_resourceOnlyFetchedOnce() {
+        mView.setMessageString(R.string.unlock_to_see_notif_text);
+        verify(mSpyContext).getString(eq(R.string.unlock_to_see_notif_text));
+
+        clearInvocations(mSpyContext);
+
+        assertThat(((TextView) mView.findViewById(R.id.unlock_prompt_footer))
+                .getText().toString()).contains("Unlock");
+
+        // Set it a few more times, it shouldn't lead to the resource being fetched again
+        mView.setMessageString(R.string.unlock_to_see_notif_text);
+        mView.setMessageString(R.string.unlock_to_see_notif_text);
+
+        verify(mSpyContext, never()).getString(anyInt());
+    }
+
+    @Test
+    public void testSetMessageIcon_resourceOnlyFetchedOnce() {
+        mView.setMessageIcon(R.drawable.ic_friction_lock_closed);
+        verify(mSpyContext).getDrawable(eq(R.drawable.ic_friction_lock_closed));
+
+        clearInvocations(mSpyContext);
+
+        // Set it a few more times, it shouldn't lead to the resource being fetched again
+        mView.setMessageIcon(R.drawable.ic_friction_lock_closed);
+        mView.setMessageIcon(R.drawable.ic_friction_lock_closed);
+
+        verify(mSpyContext, never()).getDrawable(anyInt());
     }
 
     @Test

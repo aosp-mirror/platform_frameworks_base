@@ -22,22 +22,23 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 
 /**
- * This [NestedScrollConnection] waits for a child to scroll ([onPostScroll]), and then decides (via
- * [canStart]) if it should take over scrolling. If it does, it will scroll before its children,
- * until [canContinueScroll] allows it.
+ * This [NestedScrollConnection] waits for a child to scroll ([onPreScroll] or [onPostScroll]), and
+ * then decides (via [canStartPreScroll] or [canStartPostScroll]) if it should take over scrolling.
+ * If it does, it will scroll before its children, until [canContinueScroll] allows it.
  *
  * Note: Call [reset] before destroying this object to make sure you always get a call to [onStop]
  * after [onStart].
  *
  * @sample com.android.compose.animation.scene.rememberSwipeToSceneNestedScrollConnection
  */
-class PriorityPostNestedScrollConnection(
-    private val canStart: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
+class PriorityNestedScrollConnection(
+    private val canStartPreScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
+    private val canStartPostScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
+    private val canStartPostFling: (velocityAvailable: Velocity) -> Boolean,
     private val canContinueScroll: () -> Boolean,
     private val onStart: () -> Unit,
     private val onScroll: (offsetAvailable: Offset) -> Offset,
     private val onStop: (velocityAvailable: Velocity) -> Velocity,
-    private val onPostFling: suspend (velocityAvailable: Velocity) -> Velocity,
 ) : NestedScrollConnection {
 
     /** In priority mode [onPreScroll] events are first consumed by the parent, via [onScroll]. */
@@ -57,26 +58,21 @@ class PriorityPostNestedScrollConnection(
         if (
             isPriorityMode ||
                 source == NestedScrollSource.Fling ||
-                !canStart(available, offsetBeforeStart)
+                !canStartPostScroll(available, offsetBeforeStart)
         ) {
             // The priority mode cannot start so we won't consume the available offset.
             return Offset.Zero
         }
 
-        // Step 1: It's our turn! We start capturing scroll events when one of our children has an
-        // available offset following a scroll event.
-        isPriorityMode = true
-
-        // Note: onStop will be called if we cannot continue to scroll (step 3a), or the finger is
-        // lifted (step 3b), or this object has been destroyed (step 3c).
-        onStart()
-
-        return onScroll(available)
+        return onPriorityStart(available)
     }
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         if (!isPriorityMode) {
             if (source != NestedScrollSource.Fling) {
+                if (canStartPreScroll(available, offsetScrolledBeforePriorityMode)) {
+                    return onPriorityStart(available)
+                }
                 // We want to track the amount of offset consumed before entering priority mode
                 offsetScrolledBeforePriorityMode += available
             }
@@ -87,6 +83,11 @@ class PriorityPostNestedScrollConnection(
         if (!canContinueScroll()) {
             // Step 3a: We have lost priority and we no longer need to intercept scroll events.
             onPriorityStop(velocity = Velocity.Zero)
+
+            // We've just reset offsetScrolledBeforePriorityMode to Offset.Zero
+            // We want to track the amount of offset consumed before entering priority mode
+            offsetScrolledBeforePriorityMode += available
+
             return Offset.Zero
         }
 
@@ -101,7 +102,14 @@ class PriorityPostNestedScrollConnection(
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-        return onPostFling(available)
+        if (!canStartPostFling(available)) {
+            return Velocity.Zero
+        }
+
+        onPriorityStart(available = Offset.Zero)
+
+        // This is the last event of a scroll gesture.
+        return onPriorityStop(available)
     }
 
     /** Method to call before destroying the object or to reset the initial state. */
@@ -110,8 +118,23 @@ class PriorityPostNestedScrollConnection(
         onPriorityStop(velocity = Velocity.Zero)
     }
 
-    private fun onPriorityStop(velocity: Velocity): Velocity {
+    private fun onPriorityStart(available: Offset): Offset {
+        if (isPriorityMode) {
+            error("This should never happen, onPriorityStart() was called when isPriorityMode")
+        }
 
+        // Step 1: It's our turn! We start capturing scroll events when one of our children has an
+        // available offset following a scroll event.
+        isPriorityMode = true
+
+        // Note: onStop will be called if we cannot continue to scroll (step 3a), or the finger is
+        // lifted (step 3b), or this object has been destroyed (step 3c).
+        onStart()
+
+        return onScroll(available)
+    }
+
+    private fun onPriorityStop(velocity: Velocity): Velocity {
         // We can restart tracking the consumed offsets from scratch.
         offsetScrolledBeforePriorityMode = Offset.Zero
 

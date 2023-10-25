@@ -29,7 +29,7 @@ import com.android.window.flags.Flags;
  */
 public abstract class Dimmer {
 
-    static final boolean DIMMER_REFACTOR = Flags.dimmerRefactor();
+    static final boolean DIMMER_REFACTOR = Flags.introduceSmootherDimmer();
 
     /**
      * The {@link WindowContainer} that our Dims are bounded to. We may be dimming on behalf of the

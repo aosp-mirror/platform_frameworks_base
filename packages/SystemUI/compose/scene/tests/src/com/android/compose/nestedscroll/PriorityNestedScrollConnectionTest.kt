@@ -29,20 +29,22 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class PriorityPostNestedScrollConnectionTest {
-    private var canStart = false
+class PriorityNestedScrollConnectionTest {
+    private var canStartPreScroll = false
+    private var canStartPostScroll = false
+    private var canStartPostFling = false
     private var canContinueScroll = false
     private var isStarted = false
     private var lastScroll: Offset? = null
     private var returnOnScroll = Offset.Zero
     private var lastStop: Velocity? = null
     private var returnOnStop = Velocity.Zero
-    private var lastOnPostFling: Velocity? = null
-    private var returnOnPostFling = Velocity.Zero
 
     private val scrollConnection =
-        PriorityPostNestedScrollConnection(
-            canStart = { _, _ -> canStart },
+        PriorityNestedScrollConnection(
+            canStartPreScroll = { _, _ -> canStartPreScroll },
+            canStartPostScroll = { _, _ -> canStartPostScroll },
+            canStartPostFling = { canStartPostFling },
             canContinueScroll = { canContinueScroll },
             onStart = { isStarted = true },
             onScroll = {
@@ -53,10 +55,6 @@ class PriorityPostNestedScrollConnectionTest {
                 lastStop = it
                 returnOnStop
             },
-            onPostFling = {
-                lastOnPostFling = it
-                returnOnPostFling
-            },
         )
 
     private val offset1 = Offset(1f, 1f)
@@ -64,8 +62,29 @@ class PriorityPostNestedScrollConnectionTest {
     private val velocity1 = Velocity(1f, 1f)
     private val velocity2 = Velocity(2f, 2f)
 
-    private fun startPriorityMode() {
-        canStart = true
+    @Test
+    fun step1_priorityModeShouldStartOnlyOnPreScroll() = runTest {
+        canStartPreScroll = true
+
+        scrollConnection.onPostScroll(
+            consumed = Offset.Zero,
+            available = Offset.Zero,
+            source = NestedScrollSource.Drag
+        )
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPreFling(available = Velocity.Zero)
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
+        assertThat(isStarted).isEqualTo(true)
+    }
+
+    private fun startPriorityModePostScroll() {
+        canStartPostScroll = true
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
@@ -75,7 +94,7 @@ class PriorityPostNestedScrollConnectionTest {
 
     @Test
     fun step1_priorityModeShouldStartOnlyOnPostScroll() = runTest {
-        canStart = true
+        canStartPostScroll = true
 
         scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
         assertThat(isStarted).isEqualTo(false)
@@ -86,7 +105,7 @@ class PriorityPostNestedScrollConnectionTest {
         scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
         assertThat(isStarted).isEqualTo(false)
 
-        startPriorityMode()
+        startPriorityModePostScroll()
         assertThat(isStarted).isEqualTo(true)
     }
 
@@ -99,13 +118,13 @@ class PriorityPostNestedScrollConnectionTest {
         )
         assertThat(isStarted).isEqualTo(false)
 
-        startPriorityMode()
+        startPriorityModePostScroll()
         assertThat(isStarted).isEqualTo(true)
     }
 
     @Test
     fun step1_onPriorityModeStarted_receiveAvailableOffset() {
-        canStart = true
+        canStartPostScroll = true
 
         scrollConnection.onPostScroll(
             consumed = offset1,
@@ -118,7 +137,7 @@ class PriorityPostNestedScrollConnectionTest {
 
     @Test
     fun step2_onPriorityMode_shouldContinueIfAllowed() {
-        startPriorityMode()
+        startPriorityModePostScroll()
         canContinueScroll = true
 
         scrollConnection.onPreScroll(available = offset1, source = NestedScrollSource.Drag)
@@ -132,7 +151,7 @@ class PriorityPostNestedScrollConnectionTest {
 
     @Test
     fun step3a_onPriorityMode_shouldStopIfCannotContinue() {
-        startPriorityMode()
+        startPriorityModePostScroll()
         canContinueScroll = false
 
         scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
@@ -142,7 +161,7 @@ class PriorityPostNestedScrollConnectionTest {
 
     @Test
     fun step3b_onPriorityMode_shouldStopOnFling() = runTest {
-        startPriorityMode()
+        startPriorityModePostScroll()
         canContinueScroll = true
 
         scrollConnection.onPreFling(available = Velocity.Zero)
@@ -152,7 +171,7 @@ class PriorityPostNestedScrollConnectionTest {
 
     @Test
     fun step3c_onPriorityMode_shouldStopOnReset() {
-        startPriorityMode()
+        startPriorityModePostScroll()
         canContinueScroll = true
 
         scrollConnection.reset()
@@ -162,11 +181,34 @@ class PriorityPostNestedScrollConnectionTest {
 
     @Test
     fun receive_onPostFling() = runTest {
+        canStartPostFling = true
+
         scrollConnection.onPostFling(
             consumed = velocity1,
             available = velocity2,
         )
 
-        assertThat(lastOnPostFling).isEqualTo(velocity2)
+        assertThat(lastStop).isEqualTo(velocity2)
+    }
+
+    @Test
+    fun step1_priorityModeShouldStartOnlyOnPostFling() = runTest {
+        canStartPostFling = true
+
+        scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPostScroll(
+            consumed = Offset.Zero,
+            available = Offset.Zero,
+            source = NestedScrollSource.Drag
+        )
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPreFling(available = Velocity.Zero)
+        assertThat(isStarted).isEqualTo(false)
+
+        scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
+        assertThat(isStarted).isEqualTo(true)
     }
 }

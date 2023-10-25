@@ -179,8 +179,8 @@ public final class SingleKeyGestureDetector {
         }
     }
 
-    static SingleKeyGestureDetector get(Context context) {
-        SingleKeyGestureDetector detector = new SingleKeyGestureDetector();
+    static SingleKeyGestureDetector get(Context context, Looper looper) {
+        SingleKeyGestureDetector detector = new SingleKeyGestureDetector(looper);
         sDefaultLongPressTimeout = context.getResources().getInteger(
                 com.android.internal.R.integer.config_globalActionsKeyTimeout);
         sDefaultVeryLongPressTimeout = context.getResources().getInteger(
@@ -188,8 +188,8 @@ public final class SingleKeyGestureDetector {
         return detector;
     }
 
-    private SingleKeyGestureDetector() {
-        mHandler = new KeyHandler();
+    private SingleKeyGestureDetector(Looper looper) {
+        mHandler = new KeyHandler(looper);
     }
 
     void addRule(SingleKeyRule rule) {
@@ -417,8 +417,8 @@ public final class SingleKeyGestureDetector {
     }
 
     private class KeyHandler extends Handler {
-        KeyHandler() {
-            super(Looper.myLooper());
+        KeyHandler(Looper looper) {
+            super(looper);
         }
 
         @Override

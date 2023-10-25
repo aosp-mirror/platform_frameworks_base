@@ -41,7 +41,6 @@ import android.view.SurfaceSession;
 
 import com.android.server.testutils.StubTransaction;
 import com.android.server.wm.utils.MockAnimationAdapter;
-import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -150,7 +149,7 @@ public class DimmerTests extends WindowTestsBase {
         mHost = new MockSurfaceBuildingContainer(mWm);
         mTransaction = spy(StubTransaction.class);
         mChild = new TestWindowContainer(mWm);
-        if (Flags.dimmerRefactor()) {
+        if (Dimmer.DIMMER_REFACTOR) {
             sTestAnimation = spy(new MockAnimationAdapter());
             mDimmer = new SmoothDimmer(mHost, new MockAnimationAdapterFactory());
         } else {
@@ -177,7 +176,7 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testDimBelowWithChildSurfaceCreatesSurfaceBelowChild_Smooth() {
-        assumeTrue(Flags.dimmerRefactor());
+        assumeTrue(Dimmer.DIMMER_REFACTOR);
         final float alpha = 0.7f;
         final int blur = 50;
         mHost.addChild(mChild, 0);
@@ -197,7 +196,7 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testDimBelowWithChildSurfaceCreatesSurfaceBelowChild_Legacy() {
-        assumeFalse(Flags.dimmerRefactor());
+        assumeFalse(Dimmer.DIMMER_REFACTOR);
         final float alpha = 0.7f;
         mHost.addChild(mChild, 0);
         mDimmer.adjustAppearance(mChild, alpha, 20);
@@ -212,7 +211,7 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testDimBelowWithChildSurfaceDestroyedWhenReset_Smooth() {
-        assumeTrue(Flags.dimmerRefactor());
+        assumeTrue(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
 
         final float alpha = 0.8f;
@@ -232,7 +231,7 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testDimBelowWithChildSurfaceDestroyedWhenReset_Legacy() {
-        assumeFalse(Flags.dimmerRefactor());
+        assumeFalse(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
 
         final float alpha = 0.8f;
@@ -292,7 +291,7 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveDimImmediately_Smooth() {
-        assumeTrue(Flags.dimmerRefactor());
+        assumeTrue(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
         mDimmer.adjustAppearance(mChild, 1, 2);
         mDimmer.adjustRelativeLayer(mChild, -1);
@@ -312,7 +311,7 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveDimImmediately_Legacy() {
-        assumeFalse(Flags.dimmerRefactor());
+        assumeFalse(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
         mDimmer.adjustAppearance(mChild, 1, 0);
         mDimmer.adjustRelativeLayer(mChild, -1);
@@ -332,7 +331,7 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testDimmerWithBlurUpdatesTransaction_Legacy() {
-        assumeFalse(Flags.dimmerRefactor());
+        assumeFalse(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
 
         final int blurRadius = 50;

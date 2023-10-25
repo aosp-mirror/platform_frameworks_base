@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mabagal na nagcha-charge"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Naka-optimize ang pag-charge para protektahan ang baterya"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Isyu sa pag-charge ng accessory"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pindutin ang Menu upang i-unlock."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Naka-lock ang network"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Walang SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Magdagdag ng SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Wala o hindi nababasa ang SIM. Magdagdag ng SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Hindi magagamit na SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Permanenteng na-deactivate ang iyong SIM.\n Makipag-ugnayan sa iyong service provider ng wireless para sa isa pang SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Naka-lock ang SIM."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Naka-PUK lock ang SIM."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Ina-unlock ang SIM…"</string>

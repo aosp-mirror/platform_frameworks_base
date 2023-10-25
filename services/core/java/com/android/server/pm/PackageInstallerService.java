@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
+import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
 import static android.os.Process.INVALID_UID;
 
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
@@ -42,6 +43,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -621,6 +623,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public int createSession(SessionParams params, String installerPackageName,
             String callingAttributionTag, int userId) {
         try {
+            if (params.dataLoaderParams != null
+                    && mContext.checkCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("You need the "
+                        + "com.android.permission.USE_INSTALLER_V2 permission "
+                        + "to use a data loader");
+            }
+
             return createSessionInternal(params, installerPackageName, callingAttributionTag,
                     userId);
         } catch (IOException e) {
@@ -637,14 +647,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             throw new SecurityException("User restriction prevents installing");
-        }
-
-        if (params.dataLoaderParams != null
-                && mContext.checkCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2)
-                        != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("You need the "
-                    + "com.android.permission.USE_INSTALLER_V2 permission "
-                    + "to use a data loader");
         }
 
         // INSTALL_REASON_ROLLBACK allows an app to be rolled back without requiring the ROLLBACK
@@ -1043,7 +1045,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return false;
     }
 
-    private IPackageInstallerSession openSessionInternal(int sessionId) throws IOException {
+    private PackageInstallerSession openSessionInternal(int sessionId) throws IOException {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
             if (!checkOpenSessionAccess(session)) {
@@ -1521,6 +1523,61 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             @NonNull String callerPackageName,
             @NonNull UserHandle userHandle) {
         mPackageArchiver.requestUnarchive(packageName, callerPackageName, userHandle);
+    }
+
+    @Override
+    public void installPackageArchived(
+            @NonNull ArchivedPackageParcel archivedPackageParcel,
+            @NonNull SessionParams params,
+            @NonNull IntentSender statusReceiver,
+            @NonNull String installerPackageName,
+            @NonNull UserHandle userHandle) {
+        Objects.requireNonNull(params);
+        Objects.requireNonNull(archivedPackageParcel);
+        Objects.requireNonNull(statusReceiver);
+        Objects.requireNonNull(installerPackageName);
+        Objects.requireNonNull(userHandle);
+
+        final int callingUid = Binder.getCallingUid();
+        final int userId = userHandle.getIdentifier();
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, true,
+                "installPackageArchived");
+
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the "
+                    + "com.android.permission.INSTALL_PACKAGES permission "
+                    + "to request archived package install");
+        }
+
+        params.installFlags |= PackageManager.INSTALL_ARCHIVED;
+        if (params.dataLoaderParams != null) {
+            throw new IllegalArgumentException(
+                    "Incompatible session param: dataLoaderParams has to be null");
+        }
+
+        params.setDataLoaderParams(
+                PackageManagerShellCommandDataLoader.getStreamingDataLoaderParams(null));
+        var metadata = PackageManagerShellCommandDataLoader.Metadata.forArchived(
+                archivedPackageParcel);
+
+        // Create and commit install archived session.
+        PackageInstallerSession session = null;
+        try {
+            var sessionId = createSessionInternal(params, installerPackageName,
+                    null /*installerAttributionTag*/, userId);
+            session = openSessionInternal(sessionId);
+            session.addFile(LOCATION_DATA_APP, "base", 0 /*lengthBytes*/, metadata.toByteArray(),
+                    null /*signature*/);
+            session.commit(statusReceiver, false /*forTransfer*/);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
     }
 
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,

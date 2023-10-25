@@ -95,7 +95,7 @@ fun Flow<Boolean>.logDiffsForTable(
         tableLogBuffer.logChange(columnPrefix, columnName, initialValue, isInitial = true)
         initialValue
     }
-    return this.pairwiseBy(initialValueFun) { prevVal, newVal: Boolean ->
+    return this.pairwiseBy(initialValueFun) { prevVal: Boolean, newVal: Boolean ->
         if (prevVal != newVal) {
             tableLogBuffer.logChange(columnPrefix, columnName, newVal)
         }
@@ -114,7 +114,7 @@ fun Flow<Int>.logDiffsForTable(
         tableLogBuffer.logChange(columnPrefix, columnName, initialValue, isInitial = true)
         initialValue
     }
-    return this.pairwiseBy(initialValueFun) { prevVal, newVal: Int ->
+    return this.pairwiseBy(initialValueFun) { prevVal: Int, newVal: Int ->
         if (prevVal != newVal) {
             tableLogBuffer.logChange(columnPrefix, columnName, newVal)
         }
@@ -133,7 +133,7 @@ fun Flow<Int?>.logDiffsForTable(
         tableLogBuffer.logChange(columnPrefix, columnName, initialValue, isInitial = true)
         initialValue
     }
-    return this.pairwiseBy(initialValueFun) { prevVal, newVal: Int? ->
+    return this.pairwiseBy(initialValueFun) { prevVal: Int?, newVal: Int? ->
         if (prevVal != newVal) {
             tableLogBuffer.logChange(columnPrefix, columnName, newVal)
         }
@@ -152,7 +152,7 @@ fun Flow<String?>.logDiffsForTable(
         tableLogBuffer.logChange(columnPrefix, columnName, initialValue, isInitial = true)
         initialValue
     }
-    return this.pairwiseBy(initialValueFun) { prevVal, newVal: String? ->
+    return this.pairwiseBy(initialValueFun) { prevVal: String?, newVal: String? ->
         if (prevVal != newVal) {
             tableLogBuffer.logChange(columnPrefix, columnName, newVal)
         }
@@ -176,7 +176,7 @@ fun <T> Flow<List<T>>.logDiffsForTable(
         )
         initialValue
     }
-    return this.pairwiseBy(initialValueFun) { prevVal, newVal: List<T> ->
+    return this.pairwiseBy(initialValueFun) { prevVal: List<T>, newVal: List<T> ->
         if (prevVal != newVal) {
             // TODO(b/267761156): Can we log list changes without using toString?
             tableLogBuffer.logChange(columnPrefix, columnName, newVal.toString())

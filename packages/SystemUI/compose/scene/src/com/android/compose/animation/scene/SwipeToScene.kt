@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -36,7 +37,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.android.compose.nestedscroll.PriorityPostNestedScrollConnection
+import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -130,10 +131,12 @@ class SceneGestureHandler(
     internal val currentScene: Scene
         get() = layoutImpl.scene(transitionState.currentScene)
 
-    internal val isDrivingTransition
+    @VisibleForTesting
+    val isDrivingTransition
         get() = transitionState == swipeTransition
 
-    internal var isAnimatingOffset
+    @VisibleForTesting
+    var isAnimatingOffset
         get() = swipeTransition.isAnimatingOffset
         private set(value) {
             swipeTransition.isAnimatingOffset = value
@@ -154,20 +157,26 @@ class SceneGestureHandler(
      */
     private val positionalThreshold = with(layoutImpl.density) { 56.dp.toPx() }
 
+    internal var gestureWithPriority: Any? = null
+
     internal fun onDragStarted() {
         if (isDrivingTransition) {
             // This [transition] was already driving the animation: simply take over it.
-            if (isAnimatingOffset) {
-                // Stop animating and start from where the current offset. Setting the animation job
-                // to `null` will effectively cancel the animation.
-                swipeTransition.stopOffsetAnimation()
-                swipeTransition.dragOffset = swipeTransition.offsetAnimatable.value
-            }
-
+            // Stop animating and start from where the current offset.
+            swipeTransition.stopOffsetAnimation()
             return
         }
 
-        // TODO(b/290184746): Better handle interruptions here if state != idle.
+        val transition = transitionState
+        if (transition is TransitionState.Transition) {
+            // TODO(b/290184746): Better handle interruptions here if state != idle.
+            Log.w(
+                TAG,
+                "start from TransitionState.Transition is not fully supported: from" +
+                    " ${transition.fromScene} to ${transition.toScene} " +
+                    "(progress ${transition.progress})"
+            )
+        }
 
         val fromScene = currentScene
 
@@ -196,6 +205,8 @@ class SceneGestureHandler(
     }
 
     internal fun onDrag(delta: Float) {
+        if (delta == 0f) return
+
         swipeTransition.dragOffset += delta
 
         // First check transition.fromScene should be changed for the case where the user quickly
@@ -293,48 +304,77 @@ class SceneGestureHandler(
             return
         }
 
-        // We were not animating.
-        if (swipeTransition._fromScene == swipeTransition._toScene) {
-            transitionState = TransitionState.Idle(swipeTransition._fromScene.key)
-            return
+        fun animateTo(targetScene: Scene, targetOffset: Float) {
+            // If the effective current scene changed, it should be reflected right now in the
+            // current scene state, even before the settle animation is ongoing. That way all the
+            // swipeables and back handlers will be refreshed and the user can for instance quickly
+            // swipe vertically from A => B then horizontally from B => C, or swipe from A => B then
+            // immediately go back B => A.
+            if (targetScene != swipeTransition._currentScene) {
+                swipeTransition._currentScene = targetScene
+                layoutImpl.onChangeScene(targetScene.key)
+            }
+
+            animateOffset(
+                initialVelocity = velocity,
+                targetOffset = targetOffset,
+                targetScene = targetScene.key
+            )
         }
 
-        // Compute the destination scene (and therefore offset) to settle in.
-        val targetOffset: Float
-        val targetScene: Scene
-        val offset = swipeTransition.dragOffset
-        val distance = swipeTransition.distance
-        if (
-            canChangeScene &&
+        val fromScene = swipeTransition._fromScene
+        if (canChangeScene) {
+            // If we are halfway between two scenes, we check what the target will be based on the
+            // velocity and offset of the transition, then we launch the animation.
+
+            val toScene = swipeTransition._toScene
+            if (fromScene == toScene) {
+                // We were not animating.
+                transitionState = TransitionState.Idle(fromScene.key)
+                return
+            }
+
+            // Compute the destination scene (and therefore offset) to settle in.
+            val offset = swipeTransition.dragOffset
+            val distance = swipeTransition.distance
+            if (
                 shouldCommitSwipe(
                     offset,
                     distance,
                     velocity,
-                    wasCommitted = swipeTransition._currentScene == swipeTransition._toScene,
+                    wasCommitted = swipeTransition._currentScene == toScene,
                 )
-        ) {
-            targetOffset = distance
-            targetScene = swipeTransition._toScene
+            ) {
+                // Animate to the next scene
+                animateTo(targetScene = toScene, targetOffset = distance)
+            } else {
+                // Animate to the initial scene
+                animateTo(targetScene = fromScene, targetOffset = 0f)
+            }
         } else {
-            targetOffset = 0f
-            targetScene = swipeTransition._fromScene
-        }
+            // We are doing an overscroll animation between scenes. In this case, we can also start
+            // from the idle position.
 
-        // If the effective current scene changed, it should be reflected right now in the current
-        // scene state, even before the settle animation is ongoing. That way all the swipeables and
-        // back handlers will be refreshed and the user can for instance quickly swipe vertically
-        // from A => B then horizontally from B => C, or swipe from A => B then immediately go back
-        // B => A.
-        if (targetScene != swipeTransition._currentScene) {
-            swipeTransition._currentScene = targetScene
-            layoutImpl.onChangeScene(targetScene.key)
-        }
+            val startFromIdlePosition = swipeTransition.dragOffset == 0f
 
-        animateOffset(
-            initialVelocity = velocity,
-            targetOffset = targetOffset,
-            targetScene = targetScene.key
-        )
+            if (startFromIdlePosition) {
+                // If there is a next scene, we start the overscroll animation.
+                val target = fromScene.findTargetSceneAndDistance(velocity)
+                val isValidTarget = target.distance != 0f && target.sceneKey != fromScene.key
+                if (isValidTarget) {
+                    swipeTransition._toScene = layoutImpl.scene(target.sceneKey)
+                    swipeTransition._distance = target.distance
+
+                    animateTo(targetScene = fromScene, targetOffset = 0f)
+                } else {
+                    // We will not animate
+                    transitionState = TransitionState.Idle(fromScene.key)
+                }
+            } else {
+                // We were between two scenes: animate to the initial scene.
+                animateTo(targetScene = fromScene, targetOffset = 0f)
+            }
+        }
     }
 
     /**
@@ -378,74 +418,33 @@ class SceneGestureHandler(
         targetScene: SceneKey,
     ) {
         swipeTransition.startOffsetAnimation {
-            coroutineScope
-                .launch {
-                    if (!isAnimatingOffset) {
-                        swipeTransition.offsetAnimatable.snapTo(swipeTransition.dragOffset)
-                    }
-                    isAnimatingOffset = true
-
-                    swipeTransition.offsetAnimatable.animateTo(
-                        targetOffset,
-                        // TODO(b/290184746): Make this spring spec configurable.
-                        spring(
-                            stiffness = Spring.StiffnessMediumLow,
-                            visibilityThreshold = OffsetVisibilityThreshold
-                        ),
-                        initialVelocity = initialVelocity,
-                    )
-
-                    // Now that the animation is done, the state should be idle. Note that if the
-                    // state was changed since this animation started, some external code changed it
-                    // and we shouldn't do anything here. Note also that this job will be cancelled
-                    // in the case where the user intercepts this swipe.
-                    if (isDrivingTransition) {
-                        transitionState = TransitionState.Idle(targetScene)
-                    }
+            coroutineScope.launch {
+                if (!isAnimatingOffset) {
+                    swipeTransition.offsetAnimatable.snapTo(swipeTransition.dragOffset)
                 }
-                .also { it.invokeOnCompletion { isAnimatingOffset = false } }
-        }
-    }
+                isAnimatingOffset = true
 
-    internal fun animateOverscroll(velocity: Velocity): Velocity {
-        val velocityAmount =
-            when (orientation) {
-                Orientation.Vertical -> velocity.y
-                Orientation.Horizontal -> velocity.x
+                swipeTransition.offsetAnimatable.animateTo(
+                    targetOffset,
+                    // TODO(b/290184746): Make this spring spec configurable.
+                    spring(
+                        stiffness = Spring.StiffnessMediumLow,
+                        visibilityThreshold = OffsetVisibilityThreshold
+                    ),
+                    initialVelocity = initialVelocity,
+                )
+
+                isAnimatingOffset = false
+
+                // Now that the animation is done, the state should be idle. Note that if the state
+                // was changed since this animation started, some external code changed it and we
+                // shouldn't do anything here. Note also that this job will be cancelled in the case
+                // where the user intercepts this swipe.
+                if (isDrivingTransition) {
+                    transitionState = TransitionState.Idle(targetScene)
+                }
             }
-
-        if (velocityAmount == 0f) {
-            // There is no remaining velocity
-            return Velocity.Zero
         }
-
-        val fromScene = currentScene
-        val target = fromScene.findTargetSceneAndDistance(velocityAmount)
-        val isValidTarget = target.distance != 0f && target.sceneKey != fromScene.key
-
-        if (!isValidTarget || isDrivingTransition) {
-            // We have not found a valid target or we are already in a transition
-            return Velocity.Zero
-        }
-
-        swipeTransition._currentScene = fromScene
-        swipeTransition._fromScene = fromScene
-        swipeTransition._toScene = layoutImpl.scene(target.sceneKey)
-        swipeTransition._distance = target.distance
-        swipeTransition.absoluteDistance = target.distance.absoluteValue
-        swipeTransition.stopOffsetAnimation()
-        swipeTransition.dragOffset = 0f
-
-        transitionState = swipeTransition
-
-        animateOffset(
-            initialVelocity = velocityAmount,
-            targetOffset = 0f,
-            targetScene = fromScene.key
-        )
-
-        // The animateOffset animation consumes any remaining velocity.
-        return velocity
     }
 
     private class SwipeTransition(initialScene: Scene) : TransitionState.Transition {
@@ -500,6 +499,11 @@ class SceneGestureHandler(
         /** Stops any ongoing offset animation. */
         fun stopOffsetAnimation() {
             offsetAnimationJob?.cancel()
+
+            if (isAnimatingOffset) {
+                isAnimatingOffset = false
+                dragOffset = offsetAnimatable.value
+            }
         }
 
         /** The absolute distance between [fromScene] and [toScene]. */
@@ -513,21 +517,31 @@ class SceneGestureHandler(
         val distance: Float
             get() = _distance
     }
+
+    companion object {
+        private const val TAG = "SceneGestureHandler"
+    }
 }
 
 private class SceneDraggableHandler(
     private val gestureHandler: SceneGestureHandler,
 ) : DraggableHandler {
     override suspend fun onDragStarted(coroutineScope: CoroutineScope, startedPosition: Offset) {
+        gestureHandler.gestureWithPriority = this
         gestureHandler.onDragStarted()
     }
 
     override fun onDelta(pixels: Float) {
-        gestureHandler.onDrag(delta = pixels)
+        if (gestureHandler.gestureWithPriority == this) {
+            gestureHandler.onDrag(delta = pixels)
+        }
     }
 
     override suspend fun onDragStopped(coroutineScope: CoroutineScope, velocity: Float) {
-        gestureHandler.onDragStopped(velocity = velocity, canChangeScene = true)
+        if (gestureHandler.gestureWithPriority == this) {
+            gestureHandler.gestureWithPriority = null
+            gestureHandler.onDragStopped(velocity = velocity, canChangeScene = true)
+        }
     }
 }
 
@@ -535,7 +549,7 @@ private class SceneDraggableHandler(
 class SceneNestedScrollHandler(
     private val gestureHandler: SceneGestureHandler,
 ) : NestedScrollHandler {
-    override val connection: PriorityPostNestedScrollConnection = nestedScrollConnection()
+    override val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
     private fun Offset.toAmount() =
         when (gestureHandler.orientation) {
@@ -555,7 +569,7 @@ class SceneNestedScrollHandler(
             Orientation.Vertical -> Offset(x = 0f, y = this)
         }
 
-    private fun nestedScrollConnection(): PriorityPostNestedScrollConnection {
+    private fun nestedScrollConnection(): PriorityNestedScrollConnection {
         // The next potential scene is calculated during the canStart
         var nextScene: SceneKey? = null
 
@@ -566,29 +580,58 @@ class SceneNestedScrollHandler(
         // moving on to the next scene.
         var gestureStartedOnNestedChild = false
 
-        return PriorityPostNestedScrollConnection(
-            canStart = { offsetAvailable, offsetBeforeStart ->
-                val amount = offsetAvailable.toAmount()
-                if (amount == 0f) return@PriorityPostNestedScrollConnection false
+        fun findNextScene(amount: Float): SceneKey? {
+            val fromScene = gestureHandler.currentScene
+            return when {
+                amount < 0f -> fromScene.upOrLeft(gestureHandler.orientation)
+                amount > 0f -> fromScene.downOrRight(gestureHandler.orientation)
+                else -> null
+            }
+        }
 
+        return PriorityNestedScrollConnection(
+            canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
                 gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
 
-                val fromScene = gestureHandler.currentScene
-                nextScene =
-                    when {
-                        amount < 0f -> fromScene.upOrLeft(gestureHandler.orientation)
-                        amount > 0f -> fromScene.downOrRight(gestureHandler.orientation)
-                        else -> null
-                    }
+                val canInterceptPreScroll =
+                    gestureHandler.isDrivingTransition &&
+                        !gestureStartedOnNestedChild &&
+                        offsetAvailable.toAmount() != 0f
 
+                if (!canInterceptPreScroll) return@PriorityNestedScrollConnection false
+
+                nextScene = gestureHandler.swipeTransitionToScene.key
+
+                true
+            },
+            canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
+                val amount = offsetAvailable.toAmount()
+                if (amount == 0f) return@PriorityNestedScrollConnection false
+
+                gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
+                nextScene = findNextScene(amount)
+                nextScene != null
+            },
+            canStartPostFling = { velocityAvailable ->
+                val amount = velocityAvailable.toAmount()
+                if (amount == 0f) return@PriorityNestedScrollConnection false
+
+                // We could start an overscroll animation
+                gestureStartedOnNestedChild = true
+                nextScene = findNextScene(amount)
                 nextScene != null
             },
             canContinueScroll = { priorityScene == gestureHandler.swipeTransitionToScene.key },
             onStart = {
+                gestureHandler.gestureWithPriority = this
                 priorityScene = nextScene
                 gestureHandler.onDragStarted()
             },
             onScroll = { offsetAvailable ->
+                if (gestureHandler.gestureWithPriority != this) {
+                    return@PriorityNestedScrollConnection Offset.Zero
+                }
+
                 val amount = offsetAvailable.toAmount()
 
                 // TODO(b/297842071) We should handle the overscroll or slow drag if the gesture is
@@ -598,6 +641,10 @@ class SceneNestedScrollHandler(
                 amount.toOffset()
             },
             onStop = { velocityAvailable ->
+                if (gestureHandler.gestureWithPriority != this) {
+                    return@PriorityNestedScrollConnection Velocity.Zero
+                }
+
                 priorityScene = null
 
                 gestureHandler.onDragStopped(
@@ -607,11 +654,6 @@ class SceneNestedScrollHandler(
 
                 // The onDragStopped animation consumes any remaining velocity.
                 velocityAvailable
-            },
-            onPostFling = { velocityAvailable ->
-                // If there is any velocity left, we can try running an overscroll animation between
-                // scenes.
-                gestureHandler.animateOverscroll(velocity = velocityAvailable)
             },
         )
     }

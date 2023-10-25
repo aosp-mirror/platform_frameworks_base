@@ -67,23 +67,13 @@
     <!-- When the lock screen is showing and the phone plugged in with incompatible charger. -->
     <string name="keyguard_plugged_in_incompatible_charger"><xliff:g id="percentage">%s</xliff:g> • Issue with charging accessory</string>
 
-    <!-- On the keyguard screen, when pattern lock is disabled, only tell them to press menu to unlock.  This is shown in small font at the bottom. -->
-    <string name="keyguard_instructions_when_pattern_disabled">Press Menu to unlock.</string>
-
     <!-- SIM messages --><skip />
     <!-- When the user inserts a sim card from an unsupported network, it becomes network locked -->
     <string name="keyguard_network_locked_message">Network locked</string>
     <!-- Shown when there is no SIM. -->
     <string name="keyguard_missing_sim_message_short">No SIM</string>
-    <!-- Shown to ask the user to add a SIM. -->
-    <string name="keyguard_missing_sim_instructions">Add a SIM.</string>
-    <!-- Shown to ask the user to add a SIM when sim is missing or not readable. -->
-    <string name="keyguard_missing_sim_instructions_long">The SIM is missing or not readable. Add a SIM.</string>
     <!-- Shown when SIM is permanently disabled. -->
     <string name="keyguard_permanent_disabled_sim_message_short">Unusable SIM.</string>
-    <!-- Shown to inform the user to SIM is permanently deactivated. -->
-    <string name="keyguard_permanent_disabled_sim_instructions">Your SIM has been permanently deactivated.\n
-    Contact your wireless service provider for another SIM.</string>
     <!-- Shown to tell the user that their SIM is locked and they must unlock it. -->
     <string name="keyguard_sim_locked_message">SIM is locked.</string>
     <!-- When the user enters a wrong sim pin too many times, it becomes PUK locked (Pin Unlock Kode) -->

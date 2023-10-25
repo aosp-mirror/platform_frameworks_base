@@ -220,7 +220,7 @@ final class ScanPackageUtils {
                     UserManagerService.getInstance(), usesSdkLibraries,
                     parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
-                    newDomainSetId, parsedPackage.isPersistent(),
+                    newDomainSetId,
                     parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
         } else {
             // make a deep copy to avoid modifying any existing system state.
@@ -241,7 +241,7 @@ final class ScanPackageUtils {
                     UserManagerService.getInstance(),
                     usesSdkLibraries, parsedPackage.getUsesSdkLibrariesVersionsMajor(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
-                    parsedPackage.getMimeGroups(), newDomainSetId, parsedPackage.isPersistent(),
+                    parsedPackage.getMimeGroups(), newDomainSetId,
                     parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
         }
 
@@ -464,8 +464,6 @@ final class ScanPackageUtils {
                             + " to " + volumeUuid);
             pkgSetting.setVolumeUuid(volumeUuid);
         }
-        pkgSetting.setDefaultToDeviceProtectedStorage(
-                parsedPackage.isDefaultToDeviceProtectedStorage());
 
         SharedLibraryInfo sdkLibraryInfo = null;
         if (!TextUtils.isEmpty(parsedPackage.getSdkLibraryName())) {

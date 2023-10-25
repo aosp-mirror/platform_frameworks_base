@@ -203,9 +203,14 @@ enum class GetScreenState {
     UNLOCKED_AUTH_ENTRIES_ONLY,
 }
 
-// IMPORTANT: new invocation should be mindful that this method will throw if more than 1 remote
-// entry exists
-private fun toProviderDisplayInfo(
+
+/**
+ * IMPORTANT: new invocation should be mindful that this method will throw if more than 1 remote
+ * entry exists
+ *
+ * @hide
+ */
+fun toProviderDisplayInfo(
     providerInfoList: List<ProviderInfo>
 ): ProviderDisplayInfo {
     val userNameToCredentialEntryMap = mutableMapOf<String, MutableList<CredentialEntryInfo>>()

@@ -62,7 +62,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
@@ -206,7 +206,7 @@ public class NotificationStackScrollLayoutController {
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private boolean mIsInTransitionToAod = false;
 
-    private final FeatureFlags mFeatureFlags;
+    private final FeatureFlagsClassic mFeatureFlags;
     private final RefactorFlag mShelfRefactor;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
@@ -669,7 +669,7 @@ public class NotificationStackScrollLayoutController {
             NotificationStackScrollLogger logger,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
             NotificationIconAreaController notifIconAreaController,
-            FeatureFlags featureFlags,
+            FeatureFlagsClassic featureFlags,
             NotificationTargetsHelper notificationTargetsHelper,
             SecureSettings secureSettings,
             NotificationDismissibilityProvider dismissibilityProvider,
@@ -832,7 +832,8 @@ public class NotificationStackScrollLayoutController {
 
         mViewModel.ifPresent(
                 vm -> NotificationListViewBinder
-                        .bind(mView, vm, mFalsingManager, mFeatureFlags, mNotifIconAreaController));
+                        .bind(mView, vm, mFalsingManager, mFeatureFlags, mNotifIconAreaController,
+                                mConfigurationController));
 
         collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),
                 this::onKeyguardTransitionChanged);

@@ -40,6 +40,8 @@ import androidx.collection.ArrayMap;
 import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.settingslib.Utils;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
@@ -131,6 +133,9 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
+    private final RefactorFlag mIconContainerRefactorFlag =
+            RefactorFlag.forView(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR);
+
     /* Maximum number of icons on AOD when also showing overflow dot. */
     private int mMaxIconsOnAod;
 
@@ -156,7 +161,8 @@ public class NotificationIconContainer extends ViewGroup {
     private int mIconSize;
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
-    private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
+    private ArrayMap<String, StatusBarIcon> mReplacingIcons;
+    private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIconsLegacy;
     // Keep track of the last visible icon so collapsed container can report on its location
     private IconState mLastVisibleIconState;
     private IconState mFirstVisibleIconState;
@@ -167,6 +173,7 @@ public class NotificationIconContainer extends ViewGroup {
     private final int[] mAbsolutePosition = new int[2];
     private View mIsolatedIconForAnimation;
     private int mThemedTextColorPrimary;
+    private Runnable mIsolatedIconAnimationEndRunnable;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -339,23 +346,29 @@ public class NotificationIconContainer extends ViewGroup {
     }
 
     private boolean isReplacingIcon(View child) {
-        if (mReplacingIcons == null) {
-            return false;
-        }
         if (!(child instanceof StatusBarIconView)) {
             return false;
         }
         StatusBarIconView iconView = (StatusBarIconView) child;
         Icon sourceIcon = iconView.getSourceIcon();
         String groupKey = iconView.getNotification().getGroupKey();
-        ArrayList<StatusBarIcon> statusBarIcons = mReplacingIcons.get(groupKey);
-        if (statusBarIcons != null) {
-            StatusBarIcon replacedIcon = statusBarIcons.get(0);
-            if (sourceIcon.sameAs(replacedIcon.icon)) {
-                return true;
+        if (mIconContainerRefactorFlag.isEnabled()) {
+            if (mReplacingIcons == null) {
+                return false;
             }
+            StatusBarIcon replacedIcon = mReplacingIcons.get(groupKey);
+            return replacedIcon != null && sourceIcon.sameAs(replacedIcon.icon);
+        } else {
+            if (mReplacingIconsLegacy == null) {
+                return false;
+            }
+            ArrayList<StatusBarIcon> statusBarIcons = mReplacingIconsLegacy.get(groupKey);
+            if (statusBarIcons != null) {
+                StatusBarIcon replacedIcon = statusBarIcons.get(0);
+                return sourceIcon.sameAs(replacedIcon.icon);
+            }
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -681,14 +694,36 @@ public class NotificationIconContainer extends ViewGroup {
         mAnimationsEnabled = enabled;
     }
 
-    public void setReplacingIcons(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
+    public void setReplacingIconsLegacy(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
+        mIconContainerRefactorFlag.assertInLegacyMode();
+        mReplacingIconsLegacy = replacingIcons;
+    }
+
+    public void setReplacingIcons(ArrayMap<String, StatusBarIcon> replacingIcons) {
+        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
         mReplacingIcons = replacingIcons;
     }
 
+    @Deprecated
     public void showIconIsolated(StatusBarIconView icon, boolean animated) {
+        mIconContainerRefactorFlag.assertInLegacyMode();
         if (animated) {
-            mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
+            showIconIsolatedAnimated(icon, null);
+        } else {
+            showIconIsolated(icon);
         }
+    }
+
+    public void showIconIsolatedAnimated(StatusBarIconView icon,
+            @Nullable Runnable onAnimationEnd) {
+        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
+        mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
+        mIsolatedIconAnimationEndRunnable = onAnimationEnd;
+        showIconIsolated(icon);
+    }
+
+    public void showIconIsolated(StatusBarIconView icon) {
+        if (mIconContainerRefactorFlag.isUnexpectedlyInLegacyMode()) return;
         mIsolatedIcon = icon;
         updateState();
     }
@@ -813,6 +848,11 @@ public class NotificationIconContainer extends ViewGroup {
                             animationProperties = UNISOLATION_PROPERTY;
                             animationProperties.setDelay(
                                     mIsolatedIcon != null ? CONTENT_FADE_DELAY : 0);
+                            Consumer<Property> endAction = getEndAction();
+                            if (endAction != null) {
+                                animationProperties.setAnimationEndAction(endAction);
+                                animationProperties.setAnimationCancelAction(endAction);
+                            }
                         } else {
                             animationProperties = UNISOLATION_PROPERTY_OTHERS;
                             animationProperties.setDelay(
@@ -834,6 +874,18 @@ public class NotificationIconContainer extends ViewGroup {
             justAdded = false;
             justReplaced = false;
             needsCannedAnimation = false;
+        }
+
+        @Nullable
+        private Consumer<Property> getEndAction() {
+            if (mIsolatedIconAnimationEndRunnable == null) return null;
+            final Runnable endRunnable = mIsolatedIconAnimationEndRunnable;
+            return prop -> {
+                endRunnable.run();
+                if (mIsolatedIconAnimationEndRunnable == endRunnable) {
+                    mIsolatedIconAnimationEndRunnable = null;
+                }
+            };
         }
 
         @Override

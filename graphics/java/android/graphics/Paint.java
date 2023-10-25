@@ -2113,6 +2113,31 @@ public class Paint {
          * The recommended additional space to add between lines of text.
          */
         public float   leading;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || !(o instanceof FontMetrics)) return false;
+            FontMetrics that = (FontMetrics) o;
+            return that.top == top && that.ascent == ascent && that.descent == descent
+                    && that.bottom == bottom && that.leading == leading;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(top, ascent, descent, bottom, leading);
+        }
+
+        @Override
+        public String toString() {
+            return "FontMetrics{"
+                    + "top=" + top
+                    + ", ascent=" + ascent
+                    + ", descent=" + descent
+                    + ", bottom=" + bottom
+                    + ", leading=" + leading
+                    + '}';
+        }
     }
 
     /**
@@ -2308,6 +2333,33 @@ public class Paint {
          * The recommended additional space to add between lines of text.
          */
         public int   leading;
+
+        /**
+         * Set values from {@link FontMetricsInt}.
+         * @param fontMetricsInt a font metrics.
+         */
+        @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+        public void set(@NonNull FontMetricsInt fontMetricsInt) {
+            top = fontMetricsInt.top;
+            ascent = fontMetricsInt.ascent;
+            descent = fontMetricsInt.descent;
+            bottom = fontMetricsInt.bottom;
+            leading = fontMetricsInt.leading;
+        }
+
+        /**
+         * Set values from {@link FontMetrics} with rounding accordingly.
+         * @param fontMetrics a font metrics.
+         */
+        @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+        public void set(@NonNull FontMetrics fontMetrics) {
+            // See GraphicsJNI::set_metrics_int method for consistency.
+            top = (int) Math.floor(fontMetrics.top);
+            ascent = Math.round(fontMetrics.ascent);
+            descent = Math.round(fontMetrics.descent);
+            bottom = (int) Math.ceil(fontMetrics.bottom);
+            leading = Math.round(fontMetrics.leading);
+        }
 
         @Override public String toString() {
             return "FontMetricsInt: top=" + top + " ascent=" + ascent +

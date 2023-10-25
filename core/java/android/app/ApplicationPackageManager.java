@@ -48,6 +48,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApkChecksum;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackage;
 import android.content.pm.ChangedPackages;
 import android.content.pm.Checksum;
 import android.content.pm.ComponentInfo;
@@ -3930,6 +3931,19 @@ public class ApplicationPackageManager extends PackageManager {
     public void makeUidVisible(int recipientUid, int visibleUid) {
         try {
             mPM.makeUidVisible(recipientUid, visibleUid);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public @Nullable ArchivedPackage getArchivedPackage(@NonNull String packageName) {
+        try {
+            var parcel = mPM.getArchivedPackage(packageName, mContext.getUserId());
+            if (parcel == null) {
+                return null;
+            }
+            return new ArchivedPackage(parcel);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

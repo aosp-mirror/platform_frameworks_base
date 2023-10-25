@@ -17,9 +17,10 @@ license {
     ],
 }
 
-android_app {
-    name: "SettingsProvider",
+android_library {
+    name: "SettingsProviderLib",
     defaults: ["platform_app_defaults"],
+    manifest: "AndroidManifestLib.xml",
     resource_dirs: ["res"],
     srcs: [
         "src/**/*.java",
@@ -32,10 +33,17 @@ android_app {
     ],
     static_libs: [
         "device_config_service_flags_java",
-        "junit",
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibDisplayUtils",
     ],
+    platform_apis: true,
+}
+
+android_app {
+    name: "SettingsProvider",
+    defaults: ["platform_app_defaults"],
+    resource_dirs: [],
+    static_libs: ["SettingsProviderLib"],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
@@ -43,26 +51,18 @@ android_app {
 
 android_test {
     name: "SettingsProviderTest",
-    // Note we statically link several classes to do some unit tests.  It's not accessible otherwise
-    // because this test is not an instrumentation test. (because the target runs in the system process.)
     srcs: [
         "test/**/*.java",
-        "src/android/provider/settings/backup/*",
-        "src/android/provider/settings/validators/*",
-        "src/com/android/providers/settings/GenerationRegistry.java",
-        "src/com/android/providers/settings/SettingsBackupAgent.java",
-        "src/com/android/providers/settings/SettingsState.java",
-        "src/com/android/providers/settings/SettingsHelper.java",
-        "src/com/android/providers/settings/WifiSoftApConfigChangedNotifier.java",
     ],
     static_libs: [
+        // Note we statically link SettingsProviderLib to do some unit tests.  It's not accessible otherwise
+        // because this test is not an instrumentation test. (because the target runs in the system process.)
+        "SettingsProviderLib",
+
         "androidx.test.rules",
-        "device_config_service_flags_java",
         "flag-junit",
+        "junit",
         "mockito-target-minus-junit4",
-        "platform-test-annotations",
-        "SettingsLibDeviceStateRotationLock",
-        "SettingsLibDisplayUtils",
         "platform-test-annotations",
         "truth",
     ],
@@ -71,12 +71,7 @@ android_test {
         "android.test.mock",
         "unsupportedappusage",
     ],
-    resource_dirs: ["res"],
-    aaptflags: [
-        "--auto-add-overlay",
-        "--extra-packages",
-        "com.android.providers.settings",
-    ],
+    resource_dirs: [],
     platform_apis: true,
     certificate: "platform",
     test_suites: ["device-tests"],

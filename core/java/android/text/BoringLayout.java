@@ -190,7 +190,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             @Nullable TextUtils.TruncateAt ellipsize, @IntRange(from = 0) int ellipsizedWidth,
             boolean useFallbackLineSpacing) {
         return replaceOrMake(source, paint, outerWidth, align, 1.0f, 0.0f, metrics, includePad,
-                ellipsize, ellipsizedWidth, useFallbackLineSpacing, false /* useBoundsForWidth */);
+                ellipsize, ellipsizedWidth, useFallbackLineSpacing, false /* useBoundsForWidth */,
+                null /* minimumFontMetrics */);
     }
 
     /** @hide */
@@ -199,7 +200,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             @NonNull Alignment align, float spacingMultiplier, float spacingAmount,
             @NonNull BoringLayout.Metrics metrics, boolean includePad,
             @Nullable TextUtils.TruncateAt ellipsize, @IntRange(from = 0) int ellipsizedWidth,
-            boolean useFallbackLineSpacing, boolean useBoundsForWidth) {
+            boolean useFallbackLineSpacing, boolean useBoundsForWidth,
+            @Nullable Paint.FontMetrics minimumFontMetrics) {
         boolean trust;
 
         if (ellipsize == null || ellipsize == TextUtils.TruncateAt.MARQUEE) {
@@ -270,7 +272,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 spacingAdd, includePad, false /* fallbackLineSpacing */,
                 outerwidth /* ellipsizedWidth */, null /* ellipsize */, 1 /* maxLines */,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null /* leftIndents */,
-                null /* rightIndents */, JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false);
+                null /* rightIndents */, JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false,
+                null);
 
         mEllipsizedWidth = outerwidth;
         mEllipsizedStart = 0;
@@ -343,7 +346,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 ellipsizedWidth, ellipsize, 1 /* maxLines */,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null /* leftIndents */,
                 null /* rightIndents */, JUSTIFICATION_MODE_NONE,
-                LineBreakConfig.NONE, metrics, false /* useBoundsForWidth */);
+                LineBreakConfig.NONE, metrics, false /* useBoundsForWidth */, null);
     }
 
     /** @hide */
@@ -359,12 +362,13 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             int ellipsizedWidth,
             TextUtils.TruncateAt ellipsize,
             Metrics metrics,
-            boolean useBoundsForWidth) {
+            boolean useBoundsForWidth,
+            @Nullable Paint.FontMetrics minimumFontMetrics) {
         this(text, paint, width, align, TextDirectionHeuristics.LTR,
                 spacingMult, spacingAdd, includePad, fallbackLineSpacing, ellipsizedWidth,
                 ellipsize, 1 /* maxLines */, Layout.BREAK_STRATEGY_SIMPLE,
                 Layout.HYPHENATION_FREQUENCY_NONE, null, null, Layout.JUSTIFICATION_MODE_NONE,
-                LineBreakConfig.NONE, metrics, useBoundsForWidth);
+                LineBreakConfig.NONE, metrics, useBoundsForWidth, minimumFontMetrics);
     }
 
     /* package */ BoringLayout(
@@ -387,12 +391,13 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             int justificationMode,
             LineBreakConfig lineBreakConfig,
             Metrics metrics,
-            boolean useBoundsForWidth) {
+            boolean useBoundsForWidth,
+            @Nullable Paint.FontMetrics minimumFontMetrics) {
 
         super(text, paint, width, align, textDir, spacingMult, spacingAdd, includePad,
                 fallbackLineSpacing, ellipsizedWidth, ellipsize, maxLines, breakStrategy,
                 hyphenationFrequency, leftIndents, rightIndents, justificationMode,
-                lineBreakConfig, useBoundsForWidth);
+                lineBreakConfig, useBoundsForWidth, minimumFontMetrics);
 
 
         boolean trust;
@@ -548,6 +553,15 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     public static @Nullable Metrics isBoring(@NonNull CharSequence text, @NonNull TextPaint paint,
             @NonNull TextDirectionHeuristic textDir, boolean useFallbackLineSpacing,
             @Nullable Metrics metrics) {
+        return isBoring(text, paint, textDir, useFallbackLineSpacing, null, metrics);
+    }
+
+    /**
+     * @hide
+     */
+    public static @Nullable Metrics isBoring(@NonNull CharSequence text, @NonNull TextPaint paint,
+            @NonNull TextDirectionHeuristic textDir, boolean useFallbackLineSpacing,
+            @Nullable Paint.FontMetrics minimumFontMetrics, @Nullable Metrics metrics) {
         final int textLength = text.length();
         if (hasAnyInterestingChars(text, textLength)) {
            return null;  // There are some interesting characters. Not boring.
@@ -568,6 +582,19 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             fm = new Metrics();
         } else {
             fm.reset();
+        }
+
+        if (ClientFlags.fixLineHeightForLocale()) {
+            if (minimumFontMetrics == null) {
+                paint.getFontMetricsIntForLocale(fm);
+            } else {
+                fm.set(minimumFontMetrics);
+                // Because the font metrics is provided by public APIs, adjust the top/bottom with
+                // ascent/descent: top must be smaller than ascent, bottom must be larger than
+                // descent.
+                fm.top = Math.min(fm.top, fm.ascent);
+                fm.bottom = Math.max(fm.bottom, fm.descent);
+            }
         }
 
         TextLine line = TextLine.obtain();

@@ -140,7 +140,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
-        when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
+        when(mKeyguardStateController.isFaceEnrolled()).thenReturn(true);
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
         when(mKeyguardBypassController.onBiometricAuthenticated(any(), anyBoolean()))
                 .thenReturn(true);

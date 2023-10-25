@@ -34,11 +34,11 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.DisplayTracker
+import com.android.systemui.util.TraceUtils.Companion.launch
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -63,7 +63,9 @@ constructor(
         user: UserHandle,
         overrideTransition: Boolean,
     ) {
-        applicationScope.launch { launchIntent(intent, options, user, overrideTransition) }
+        applicationScope.launch("$TAG#launchIntentAsync") {
+            launchIntent(intent, options, user, overrideTransition)
+        }
     }
 
     suspend fun launchIntent(

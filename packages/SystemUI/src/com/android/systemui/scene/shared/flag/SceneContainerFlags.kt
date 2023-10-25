@@ -17,6 +17,8 @@
 package com.android.systemui.scene.shared.flag
 
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.FeatureFlags
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -47,15 +49,15 @@ interface SceneContainerFlags {
 class SceneContainerFlagsImpl
 @AssistedInject
 constructor(
-    private val featureFlags: FeatureFlagsClassic,
+    private val featureFlagsClassic: FeatureFlagsClassic,
+    featureFlags: FeatureFlags,
     @Assisted private val isComposeAvailable: Boolean,
 ) : SceneContainerFlags {
 
     companion object {
         @VisibleForTesting
-        val flags: List<Flag<Boolean>> =
+        val classicFlagTokens: List<Flag<Boolean>> =
             listOf(
-                Flags.SCENE_CONTAINER,
                 Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA,
                 Flags.MIGRATE_LOCK_ICON,
                 Flags.MIGRATE_NSSL,
@@ -67,7 +69,13 @@ constructor(
 
     /** The list of requirements, all must be met for the feature to be enabled. */
     private val requirements =
-        flags.map { FlagMustBeEnabled(it) } +
+        listOf(
+            AconfigFlagMustBeEnabled(
+                flagName = AConfigFlags.FLAG_SCENE_CONTAINER,
+                flagValue = featureFlags.sceneContainer(),
+            ),
+        ) +
+            classicFlagTokens.map { flagToken -> FlagMustBeEnabled(flagToken) } +
             listOf(ComposeMustBeAvailable(), CompileTimeFlagMustBeEnabled())
 
     override fun isEnabled(): Boolean {
@@ -115,11 +123,22 @@ constructor(
 
         override fun isMet(): Boolean {
             return when (flag) {
-                is ResourceBooleanFlag -> featureFlags.isEnabled(flag)
-                is ReleasedFlag -> featureFlags.isEnabled(flag)
-                is UnreleasedFlag -> featureFlags.isEnabled(flag)
+                is ResourceBooleanFlag -> featureFlagsClassic.isEnabled(flag)
+                is ReleasedFlag -> featureFlagsClassic.isEnabled(flag)
+                is UnreleasedFlag -> featureFlagsClassic.isEnabled(flag)
                 else -> error("Unsupported flag type ${flag.javaClass}")
             }
+        }
+    }
+
+    private inner class AconfigFlagMustBeEnabled(
+        flagName: String,
+        private val flagValue: Boolean,
+    ) : Requirement {
+        override val name: String = "Aconfig flag $flagName must be enabled"
+
+        override fun isMet(): Boolean {
+            return flagValue
         }
     }
 

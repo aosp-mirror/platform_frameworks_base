@@ -23,7 +23,7 @@ flag {
 }
 
 flag {
-  name: "dimmer_refactor"
+  name: "introduce_smoother_dimmer"
   namespace: "windowing_frontend"
   description: "Refactor dim to fix flickers"
   bug: "295291019"

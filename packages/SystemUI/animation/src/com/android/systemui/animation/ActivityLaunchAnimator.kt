@@ -290,9 +290,10 @@ class ActivityLaunchAnimator(
         controller: Controller?,
         animate: Boolean = true,
         packageName: String? = null,
+        showOverLockscreen: Boolean = false,
         intentStarter: PendingIntentStarter
     ) {
-        startIntentWithAnimation(controller, animate, packageName) {
+        startIntentWithAnimation(controller, animate, packageName, showOverLockscreen) {
             intentStarter.startPendingIntent(it)
         }
     }

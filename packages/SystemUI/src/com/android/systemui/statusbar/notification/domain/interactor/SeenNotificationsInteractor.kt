@@ -32,6 +32,7 @@ constructor(
     val hasFilteredOutSeenNotifications: StateFlow<Boolean> =
         notificationListRepository.hasFilteredOutSeenNotifications
 
+    /** Set whether already-seen notifications are currently filtered out of the shade. */
     fun setHasFilteredOutSeenNotifications(value: Boolean) {
         notificationListRepository.hasFilteredOutSeenNotifications.value = value
     }

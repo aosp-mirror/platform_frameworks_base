@@ -118,7 +118,7 @@ object Flags {
     // TODO(b/292213543): Tracking Bug
     @JvmField
     val NOTIFICATION_GROUP_EXPANSION_CHANGE =
-            unreleasedFlag("notification_group_expansion_change", teamfood = true)
+            releasedFlag("notification_group_expansion_change")
 
     // TODO(b/301955929)
     @JvmField

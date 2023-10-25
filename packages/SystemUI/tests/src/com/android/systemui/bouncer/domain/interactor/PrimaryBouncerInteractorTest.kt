@@ -423,7 +423,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         mainHandler.setMode(FakeHandler.Mode.QUEUEING)
 
         // GIVEN bouncer should be delayed due to face auth
-        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
+        whenever(keyguardStateController.isFaceEnrolled).thenReturn(true)
         whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
             .thenReturn(true)
         whenever(keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()).thenReturn(true)
@@ -449,7 +449,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
         // GIVEN bouncer should not be delayed because device isn't in the right posture for
         // face auth
-        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
+        whenever(keyguardStateController.isFaceEnrolled).thenReturn(true)
         whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
             .thenReturn(true)
         whenever(keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()).thenReturn(false)

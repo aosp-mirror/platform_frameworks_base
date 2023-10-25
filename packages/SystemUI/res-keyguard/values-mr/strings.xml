@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • सावकाश चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बॅटरीचे संरक्षण करण्यासाठी चार्जिंग ऑप्टिमाइझ केले आहे"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिंगच्या ॲक्सेसरीसंबंधित समस्या"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"अनलॉक करण्यासाठी मेनू प्रेस करा."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लॉक केले"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"सिम नाही"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"सिम जोडा."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"सिम गहाळ झाले आहे किंवा ते रीड करू शकत नाही. सिम जोडा."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"वापरण्यायोग्य नसलेले सिम."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"तुमचे सिम कायमचे डीॲक्टिव्हेट केले गेले आहे.\n दुसऱ्या सिमसाठी तुमच्या वायरलेस सेवा पुरवठादाराशी संपर्क साधा."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"सिम लॉक केलेले आहे."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"सिम PUK लॉक केलेले आहे."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"सिम अनलॉक करत आहे…"</string>

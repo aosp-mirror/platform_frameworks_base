@@ -17,6 +17,7 @@
 
 package android.companion;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -140,24 +141,28 @@ public abstract class CompanionDeviceService extends Service {
      * Companion app receives {@link #onDeviceEvent(AssociationInfo, int)} callback
      * with this event if the device comes into BLE range.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
     public static final int DEVICE_EVENT_BLE_APPEARED = 0;
 
     /**
      * Companion app receives {@link #onDeviceEvent(AssociationInfo, int)} callback
      * with this event if the device is no longer in BLE range.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
     public static final int DEVICE_EVENT_BLE_DISAPPEARED = 1;
 
     /**
      * Companion app receives {@link #onDeviceEvent(AssociationInfo, int)} callback
      * with this event when the bluetooth device is connected.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
     public static final int DEVICE_EVENT_BT_CONNECTED = 2;
 
     /**
      * Companion app receives {@link #onDeviceEvent(AssociationInfo, int)} callback
      * with this event if the bluetooth device is disconnected.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
     public static final int DEVICE_EVENT_BT_DISCONNECTED = 3;
 
     /**
@@ -165,6 +170,7 @@ public abstract class CompanionDeviceService extends Service {
      * {@link #onDeviceEvent(AssociationInfo, int)} if it reports that a device has appeared on its
      * own.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
     public static final int DEVICE_EVENT_SELF_MANAGED_APPEARED = 4;
 
     /**
@@ -172,6 +178,7 @@ public abstract class CompanionDeviceService extends Service {
      * {@link #onDeviceEvent(AssociationInfo, int)} if it reports that a device has disappeared on
      * its own.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
     public static final int DEVICE_EVENT_SELF_MANAGED_DISAPPEARED = 5;
 
     private final Stub mRemote = new Stub();
@@ -348,6 +355,7 @@ public abstract class CompanionDeviceService extends Service {
      * @param associationInfo A record for the companion device.
      * @param event Associated companion device's event.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
     @MainThread
     public void onDeviceEvent(@NonNull AssociationInfo associationInfo,
             @DeviceEvent int event) {

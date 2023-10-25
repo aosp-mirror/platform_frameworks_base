@@ -438,6 +438,9 @@ class ProcessRecord implements WindowProcessListener {
 
     final ProcessRecordNode[] mLinkedNodes = new ProcessRecordNode[NUM_NODE_TYPE];
 
+    /** Whether the app was launched from a stopped state and is being unstopped. */
+    volatile boolean mWasForceStopped;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startUptime, long startElapsedTime) {
         this.mStartUid = startUid;
@@ -1601,5 +1604,13 @@ class ProcessRecord implements WindowProcessListener {
     @VisibleForTesting
     List<ProcessRecord> getLruProcessList() {
         return mService.mProcessList.getLruProcessesLOSP();
+    }
+
+    public void setWasForceStopped(boolean stopped) {
+        mWasForceStopped = stopped;
+    }
+
+    public boolean wasForceStopped() {
+        return mWasForceStopped;
     }
 }
