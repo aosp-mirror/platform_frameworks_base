@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.di
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.qs.QSFactory
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModelAdapter
 import javax.inject.Inject
@@ -29,10 +30,18 @@ import javax.inject.Provider
 class NewQSTileFactory
 @Inject
 constructor(
+    qsTileConfigProvider: QSTileConfigProvider,
     private val adapterFactory: QSTileViewModelAdapter.Factory,
     private val tileMap:
         Map<String, @JvmSuppressWildcards Provider<@JvmSuppressWildcards QSTileViewModel>>,
 ) : QSFactory {
+
+    init {
+        for (viewModelTileSpec in tileMap.keys) {
+            // throws an exception when there is no config for a tileSpec of an injected viewModel
+            qsTileConfigProvider.getConfig(viewModelTileSpec)
+        }
+    }
 
     override fun createTile(tileSpec: String): QSTile? =
         tileMap[tileSpec]?.let {

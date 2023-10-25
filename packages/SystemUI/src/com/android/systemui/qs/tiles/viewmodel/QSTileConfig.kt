@@ -16,19 +16,48 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
+import android.content.res.Resources
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.android.internal.logging.InstanceId
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.qs.pipeline.shared.TileSpec
 
 data class QSTileConfig(
     val tileSpec: TileSpec,
-    val tileIcon: Icon,
-    @StringRes val tileLabelRes: Int,
+    val uiConfig: QSTileUIConfig,
     val instanceId: InstanceId,
     val metricsSpec: String = tileSpec.spec,
     val policy: QSTilePolicy = QSTilePolicy.NoRestrictions,
 )
+
+/**
+ * Static tile icon and label to be used when the fully operational tile isn't needed (ex. in edit
+ * mode). Icon and label are resources to better support config/locale changes.
+ */
+sealed interface QSTileUIConfig {
+
+    val tileIconRes: Int
+        @DrawableRes get
+    val tileLabelRes: Int
+        @StringRes get
+
+    /**
+     * Represents the absence of static UI state. This should be avoided by platform tiles in favour
+     * of [Resource]. Returns [Resources.ID_NULL] for each field.
+     */
+    data object Empty : QSTileUIConfig {
+        override val tileIconRes: Int
+            get() = Resources.ID_NULL
+        override val tileLabelRes: Int
+            get() = Resources.ID_NULL
+    }
+
+    /** Config containing actual icon and label resources. */
+    data class Resource(
+        @StringRes override val tileIconRes: Int,
+        @StringRes override val tileLabelRes: Int,
+    ) : QSTileUIConfig
+}
 
 /** Represents policy restrictions that may be imposed on the tile. */
 sealed interface QSTilePolicy {

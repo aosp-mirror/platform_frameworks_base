@@ -32,7 +32,6 @@ import com.android.systemui.qs.external.QSExternalModule;
 import com.android.systemui.qs.pipeline.dagger.QSPipelineModule;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.di.QSTilesModule;
-import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -72,13 +71,6 @@ public interface QSModule {
      */
     @Multibinds
     Map<String, QSTileImpl<?>> tileMap();
-
-    /**
-     * A map of internal QS tile ViewModels. Ensures that this can be injected even if
-     * it is empty
-     */
-    @Multibinds
-    Map<String, QSTileViewModel> tileViewModelMap();
 
     @Provides
     @SysUISingleton

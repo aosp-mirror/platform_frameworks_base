@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.base.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
@@ -25,7 +26,7 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
 import com.android.systemui.qs.tiles.impl.di.QSTileComponent
-import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
@@ -53,6 +54,7 @@ sealed interface QSTileViewModelFactory<T> {
         private val falsingManager: FalsingManager,
         private val qsTileAnalytics: QSTileAnalytics,
         private val qsTileLogger: QSTileLogger,
+        private val qsTileConfigProvider: QSTileConfigProvider,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
     ) : QSTileViewModelFactory<T> {
@@ -61,9 +63,9 @@ sealed interface QSTileViewModelFactory<T> {
          * Creates [QSTileViewModelImpl] based on the interactors obtained from [component].
          * Reference of that [component] is then stored along the view model.
          */
-        fun create(component: QSTileComponent<T>): QSTileViewModelImpl<T> =
+        fun create(tileSpec: TileSpec, component: QSTileComponent<T>): QSTileViewModelImpl<T> =
             QSTileViewModelImpl(
-                component::config,
+                qsTileConfigProvider.getConfig(tileSpec.spec),
                 component::userActionInteractor,
                 component::dataInteractor,
                 component::dataToStateMapper,
@@ -89,12 +91,13 @@ sealed interface QSTileViewModelFactory<T> {
         private val falsingManager: FalsingManager,
         private val qsTileAnalytics: QSTileAnalytics,
         private val qsTileLogger: QSTileLogger,
+        private val qsTileConfigProvider: QSTileConfigProvider,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
     ) : QSTileViewModelFactory<T> {
 
         /**
-         * @param config contains all the static information (like TileSpec) about the tile.
+         * @param tileSpec of the created tile.
          * @param userActionInteractor encapsulates user input processing logic. Use it to start
          *   activities, show dialogs or otherwise update the tile state.
          * @param tileDataInteractor provides [DATA_TYPE] and its availability.
@@ -103,13 +106,13 @@ sealed interface QSTileViewModelFactory<T> {
          *   operations there.
          */
         fun create(
-            config: QSTileConfig,
+            tileSpec: TileSpec,
             userActionInteractor: QSTileUserActionInteractor<T>,
             tileDataInteractor: QSTileDataInteractor<T>,
             mapper: QSTileDataToStateMapper<T>,
         ): QSTileViewModelImpl<T> =
             QSTileViewModelImpl(
-                { config },
+                qsTileConfigProvider.getConfig(tileSpec.spec),
                 { userActionInteractor },
                 { tileDataInteractor },
                 { mapper },

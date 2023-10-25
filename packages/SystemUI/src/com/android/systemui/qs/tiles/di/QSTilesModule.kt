@@ -17,7 +17,13 @@
 package com.android.systemui.qs.tiles.di
 
 import com.android.systemui.qs.tiles.impl.custom.di.CustomTileComponent
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProviderImpl
+import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
+import dagger.Binds
 import dagger.Module
+import dagger.multibindings.Multibinds
 
 /** Module listing subcomponents */
 @Module(
@@ -26,4 +32,17 @@ import dagger.Module
             CustomTileComponent::class,
         ]
 )
-interface QSTilesModule
+interface QSTilesModule {
+
+    /**
+     * A map of internal QS tile ViewModels. Ensures that this can be injected even if it is empty
+     */
+    @Multibinds fun tileViewModelConfigs(): Map<String, QSTileConfig>
+
+    /**
+     * A map of internal QS tile ViewModels. Ensures that this can be injected even if it is empty
+     */
+    @Multibinds fun tileViewModelMap(): Map<String, QSTileViewModel>
+
+    @Binds fun bindQSTileConfigProvider(impl: QSTileConfigProviderImpl): QSTileConfigProvider
+}
