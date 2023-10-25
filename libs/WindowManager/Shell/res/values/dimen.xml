@@ -473,4 +473,11 @@
     <item type="dimen" format="float" name="splash_icon_enlarge_foreground_threshold">0.44</item>
     <!-- Scaling factor applied to splash icons without provided background i.e. (192 / 160) -->
     <item type="dimen" format="float" name="splash_icon_no_background_scale_factor">1.2</item>
+
+    <!-- The margin between the entering window and the exiting window during cross task back -->
+    <dimen name="cross_task_back_inter_window_margin">14dp</dimen>
+    <!-- The vertical margin that needs to be preserved between the scaled window bounds and the
+    original window bounds (once the surface is scaled enough to do so) -->
+    <dimen name="cross_task_back_vertical_margin">8dp</dimen>
+
 </resources>
