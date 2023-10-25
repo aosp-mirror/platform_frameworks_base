@@ -53,6 +53,7 @@ aconfig_srcjars = [
     ":android.app.flags-aconfig-java{.generated_srcjars}",
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.server.flags.pinner-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.media.tv.flags-aconfig-java{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
@@ -536,6 +537,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.view.contentprotection.flags-aconfig-java",
     aconfig_declarations: "android.view.contentprotection.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Pinner Service
+aconfig_declarations {
+    name: "com.android.server.flags.pinner-aconfig",
+    package: "com.android.server.flags",
+    srcs: ["services/core/java/com/android/server/flags/pinner.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.server.flags.pinner-aconfig-java",
+    aconfig_declarations: "com.android.server.flags.pinner-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
