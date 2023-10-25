@@ -476,7 +476,6 @@ public class BubblesTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mScreenOffAnimationController,
                 mAuthController,
-                mShadeExpansionStateManager,
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor

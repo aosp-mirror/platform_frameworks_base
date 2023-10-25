@@ -19,9 +19,9 @@ package com.android.systemui.classifier;
 import android.content.res.Resources;
 import android.view.ViewConfiguration;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.statusbar.phone.NotificationTapHelper;
 
@@ -37,7 +37,7 @@ import java.util.Set;
 import javax.inject.Named;
 
 /** Dagger Module for Falsing. */
-@Module
+@Module(includes = {FalsingStartModule.class})
 public interface FalsingModule {
     String BRIGHT_LINE_GESTURE_CLASSIFERS = "bright_line_gesture_classifiers";
     String SINGLE_TAP_TOUCH_SLOP = "falsing_single_tap_touch_slop";

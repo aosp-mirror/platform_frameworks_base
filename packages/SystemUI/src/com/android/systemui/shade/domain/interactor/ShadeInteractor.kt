@@ -121,14 +121,35 @@ constructor(
 
     /**
      * The amount [0-1] QS has been opened. Normal shade with notifications (QQS) visible will
-     * report 0f.
+     * report 0f. If split shade is enabled, value matches shadeExpansion.
      */
     val qsExpansion: StateFlow<Float> =
         if (sceneContainerFlags.isEnabled()) {
-            sceneBasedExpansion(sceneInteractorProvider.get(), SceneKey.QuickSettings)
+            val qsExp = sceneBasedExpansion(sceneInteractorProvider.get(), SceneKey.QuickSettings)
+            combine(isSplitShadeEnabled, shadeExpansion, qsExp) {
+                    isSplitShadeEnabled,
+                    shadeExp,
+                    qsExp ->
+                    if (isSplitShadeEnabled) {
+                        shadeExp
+                    } else {
+                        qsExp
+                    }
+                }
                 .stateIn(scope, SharingStarted.Eagerly, 0f)
         } else {
             repository.qsExpansion
+        }
+
+    /** Whether Quick Settings is expanded a non-zero amount. */
+    val isQsExpanded: StateFlow<Boolean> =
+        if (sceneContainerFlags.isEnabled()) {
+            qsExpansion
+                .map { it > 0 }
+                .distinctUntilChanged()
+                .stateIn(scope, SharingStarted.Eagerly, false)
+        } else {
+            repository.legacyIsQsExpanded
         }
 
     /** The amount [0-1] either QS or the shade has been opened. */

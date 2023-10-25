@@ -32,13 +32,14 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 import com.android.systemui.util.sensors.ThresholdSensorEvent;
@@ -65,9 +66,11 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final ProximitySensor mProximitySensor;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
+    private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private final BatteryController mBatteryController;
     private final DockManager mDockManager;
     private final DelayableExecutor mMainExecutor;
+    private final JavaAdapter mJavaAdapter;
     private final SystemClock mSystemClock;
     private final Lazy<SelectedUserInteractor> mUserInteractor;
 
@@ -136,10 +139,11 @@ class FalsingCollectorImpl implements FalsingCollector {
             ProximitySensor proximitySensor,
             StatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
-            ShadeExpansionStateManager shadeExpansionStateManager,
+            Lazy<ShadeInteractor> shadeInteractorLazy,
             BatteryController batteryController,
             DockManager dockManager,
             @Main DelayableExecutor mainExecutor,
+            JavaAdapter javaAdapter,
             SystemClock systemClock,
             Lazy<SelectedUserInteractor> userInteractor) {
         mFalsingDataProvider = falsingDataProvider;
@@ -149,12 +153,17 @@ class FalsingCollectorImpl implements FalsingCollector {
         mProximitySensor = proximitySensor;
         mStatusBarStateController = statusBarStateController;
         mKeyguardStateController = keyguardStateController;
+        mShadeInteractorLazy = shadeInteractorLazy;
         mBatteryController = batteryController;
         mDockManager = dockManager;
         mMainExecutor = mainExecutor;
+        mJavaAdapter = javaAdapter;
         mSystemClock = systemClock;
         mUserInteractor = userInteractor;
+    }
 
+    @Override
+    public void init() {
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
         mProximitySensor.setDelay(SensorManager.SENSOR_DELAY_GAME);
 
@@ -163,7 +172,10 @@ class FalsingCollectorImpl implements FalsingCollector {
 
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
 
-        shadeExpansionStateManager.addQsExpansionListener(this::onQsExpansionChanged);
+        mJavaAdapter.alwaysCollectFlow(
+                mShadeInteractorLazy.get().isQsExpanded(),
+                this::onQsExpansionChanged
+        );
 
         mBatteryController.addCallback(mBatteryListener);
         mDockManager.addListener(mDockEventListener);
