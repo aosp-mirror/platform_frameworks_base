@@ -41,7 +41,7 @@ class CommunalLayoutEngineTest {
                 ),
             )
 
-        assertDistribution(cards, expected)
+        assertDistributionBySize(cards, expected)
     }
 
     @Test
@@ -71,10 +71,30 @@ class CommunalLayoutEngineTest {
                 ),
             )
 
-        assertDistribution(cards, expected)
+        assertDistributionBySize(cards, expected)
     }
 
-    private fun assertDistribution(
+    @Test
+    fun distribution_sortByPriority() {
+        val cards =
+            listOf(
+                generateCard(priority = 2),
+                generateCard(priority = 7),
+                generateCard(priority = 10),
+                generateCard(priority = 1),
+                generateCard(priority = 5),
+            )
+        val expected =
+            listOf(
+                listOf(10, 7),
+                listOf(5, 2),
+                listOf(1),
+            )
+
+        assertDistributionByPriority(cards, expected)
+    }
+
+    private fun assertDistributionBySize(
         cards: List<CommunalGridLayoutCard>,
         expected: List<List<CommunalGridLayoutCard.Size>>,
     ) {
@@ -87,9 +107,34 @@ class CommunalLayoutEngineTest {
         }
     }
 
+    private fun assertDistributionByPriority(
+        cards: List<CommunalGridLayoutCard>,
+        expected: List<List<Int>>,
+    ) {
+        val result = CommunalLayoutEngine.distributeCardsIntoColumns(cards)
+
+        for (c in expected.indices) {
+            for (r in expected[c].indices) {
+                assertThat(result[c][r].card.priority).isEqualTo(expected[c][r])
+            }
+        }
+    }
+
     private fun generateCard(size: CommunalGridLayoutCard.Size): CommunalGridLayoutCard {
         return object : CommunalGridLayoutCard() {
             override val supportedSizes = listOf(size)
+
+            @Composable
+            override fun Content(modifier: Modifier, size: SizeF) {
+                Card(modifier = modifier, content = {})
+            }
+        }
+    }
+
+    private fun generateCard(priority: Int): CommunalGridLayoutCard {
+        return object : CommunalGridLayoutCard() {
+            override val supportedSizes = listOf(Size.HALF)
+            override val priority = priority
 
             @Composable
             override fun Content(modifier: Modifier, size: SizeF) {
