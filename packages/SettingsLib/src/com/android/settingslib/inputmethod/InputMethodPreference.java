@@ -31,8 +31,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.preference.Preference;
@@ -138,7 +138,7 @@ public class InputMethodPreference extends PrimarySwitchPreference
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        final Switch switchWidget = getSwitch();
+        final CompoundButton switchWidget = getSwitch();
         if (switchWidget != null) {
             // Avoid default behavior in {@link PrimarySwitchPreference#onBindViewHolder}.
             switchWidget.setOnClickListener(v -> {

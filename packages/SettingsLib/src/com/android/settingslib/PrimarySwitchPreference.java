@@ -19,7 +19,7 @@ package com.android.settingslib;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.widget.Switch;
+import android.widget.CompoundButton;
 
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
@@ -35,7 +35,7 @@ import com.android.settingslib.core.instrumentation.SettingsJankMonitor;
  */
 public class PrimarySwitchPreference extends RestrictedPreference {
 
-    private Switch mSwitch;
+    private CompoundButton mSwitch;
     private boolean mChecked;
     private boolean mCheckedSet;
     private boolean mEnableSwitch = true;
@@ -65,7 +65,7 @@ public class PrimarySwitchPreference extends RestrictedPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        mSwitch = (Switch) holder.findViewById(R.id.switchWidget);
+        mSwitch = (CompoundButton) holder.findViewById(R.id.switchWidget);
         if (mSwitch != null) {
             mSwitch.setOnClickListener(v -> {
                 if (mSwitch != null && !mSwitch.isEnabled()) {
@@ -153,7 +153,7 @@ public class PrimarySwitchPreference extends RestrictedPreference {
         setSwitchEnabled(admin == null);
     }
 
-    public Switch getSwitch() {
+    public CompoundButton getSwitch() {
         return mSwitch;
     }
 
