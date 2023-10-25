@@ -2452,6 +2452,7 @@ package android.app.smartspace {
     method public int getFeatureType();
     method @Nullable public android.app.smartspace.SmartspaceAction getHeaderAction();
     method @NonNull public java.util.List<android.app.smartspace.SmartspaceAction> getIconGrid();
+    method @FlaggedApi("android.app.smartspace.flags.remote_views") @Nullable public android.widget.RemoteViews getRemoteViews();
     method public float getScore();
     method @Nullable public android.net.Uri getSliceUri();
     method @NonNull public String getSmartspaceTargetId();
@@ -2526,6 +2527,7 @@ package android.app.smartspace {
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setFeatureType(int);
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setHeaderAction(@NonNull android.app.smartspace.SmartspaceAction);
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setIconGrid(@NonNull java.util.List<android.app.smartspace.SmartspaceAction>);
+    method @FlaggedApi("android.app.smartspace.flags.remote_views") @NonNull public android.app.smartspace.SmartspaceTarget.Builder setRemoteViews(@NonNull android.widget.RemoteViews);
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setScore(float);
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setSensitive(boolean);
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setShouldShowExpanded(boolean);
