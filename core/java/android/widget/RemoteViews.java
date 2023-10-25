@@ -16,11 +16,14 @@
 
 package android.widget;
 
+import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
+
 import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.ColorRes;
 import android.annotation.DimenRes;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
@@ -92,6 +95,7 @@ import android.util.TypedValue.ComplexDimensionUnit;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
+import android.view.MotionEvent;
 import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewGroup;
@@ -239,6 +243,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG = 31;
     private static final int ATTRIBUTE_REFLECTION_ACTION_TAG = 32;
     private static final int SET_REMOTE_ADAPTER_TAG = 33;
+    private static final int SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG = 34;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -1522,6 +1527,53 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
             // TODO(b/281044385): Maybe visit intent URIs in the RemoteResponse.
+        }
+    }
+
+    /** Helper action to configure handwriting delegation via {@link PendingIntent}. */
+    private class SetOnStylusHandwritingResponse extends Action {
+        final PendingIntent mPendingIntent;
+
+        SetOnStylusHandwritingResponse(@IdRes int id, @Nullable PendingIntent pendingIntent) {
+            this.mViewId = id;
+            this.mPendingIntent = pendingIntent;
+        }
+
+        SetOnStylusHandwritingResponse(@NonNull Parcel parcel) {
+            mViewId = parcel.readInt();
+            mPendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
+        }
+
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mViewId);
+            PendingIntent.writePendingIntentOrNullToParcel(mPendingIntent, dest);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, ActionApplyParams params) {
+            final View target = root.findViewById(mViewId);
+            if (target == null) return;
+
+            if (hasFlags(FLAG_WIDGET_IS_COLLECTION_CHILD)) {
+                Log.w(LOG_TAG, "Cannot use setOnStylusHandwritingPendingIntent for collection item "
+                        + "(id: " + mViewId + ")");
+                return;
+            }
+
+            if (mPendingIntent != null) {
+                RemoteResponse response = RemoteResponse.fromPendingIntent(mPendingIntent);
+                target.setHandwritingDelegatorCallback(
+                        () -> response.handleViewInteraction(target, params.handler));
+                target.setAllowedHandwritingDelegatePackage(mPendingIntent.getCreatorPackage());
+            } else {
+                target.setHandwritingDelegatorCallback(null);
+                target.setAllowedHandwritingDelegatePackage(null);
+            }
+        }
+
+        @Override
+        public int getActionTag() {
+            return SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG;
         }
     }
 
@@ -4204,6 +4256,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new SetRemoteCollectionItemListAdapterAction(parcel);
             case ATTRIBUTE_REFLECTION_ACTION_TAG:
                 return new AttributeReflectionAction(parcel);
+            case SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG:
+                return new SetOnStylusHandwritingResponse(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -4754,6 +4808,33 @@ public class RemoteViews implements Parcelable, Filter {
                         viewId,
                         response.setInteractionType(
                                 RemoteResponse.INTERACTION_TYPE_CHECKED_CHANGE)));
+    }
+
+    /**
+     * Equivalent to calling {@link View#setHandwritingDelegatorCallback(Runnable)} to send the
+     * provided {@link PendingIntent}.
+     *
+     * <p>A common use case is a remote view which looks like a text editor but does not actually
+     * support text editing itself, and clicking on the remote view launches an activity containing
+     * an EditText. To support handwriting initiation in this case, this method can be called on the
+     * remote view to configure it as a handwriting delegator, meaning that stylus movement on the
+     * remote view triggers a {@link PendingIntent} and starts handwriting mode for the delegate
+     * EditText. The {@link PendingIntent} is typically the same as the one passed to {@link
+     * #setOnClickPendingIntent} which launches the activity containing the EditText. The EditText
+     * should call {@link View#setIsHandwritingDelegate} to set it as a delegate, and also use
+     * {@link View#setAllowedHandwritingDelegatorPackage} or {@link
+     * android.view.inputmethod.InputMethodManager#HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED}
+     * if necessary to support delegators from the package displaying the remote view.
+     *
+     * @param viewId identifier of the view that will trigger the {@link PendingIntent} when a
+     *     stylus {@link MotionEvent} occurs within the view's bounds
+     * @param pendingIntent the {@link PendingIntent} to send, or {@code null} to clear the
+     *     handwriting delegation
+     */
+    @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
+    public void setOnStylusHandwritingPendingIntent(
+            @IdRes int viewId, @Nullable PendingIntent pendingIntent) {
+        addAction(new SetOnStylusHandwritingResponse(viewId, pendingIntent));
     }
 
     /**
