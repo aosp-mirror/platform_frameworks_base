@@ -695,9 +695,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             return;
         }
 
-        if (isUserKeyUnlocked(userId)) {
-            // If storage is not locked, the user will be automatically unlocked so there is
-            // no need to show the notification.
+        if (isCeStorageUnlocked(userId)) {
+            // If the user's CE storage is already unlocked, then the user will be automatically
+            // unlocked, so there is no need to show the notification.
             return;
         }
 
@@ -1028,8 +1028,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             // they did have an SP then their CE key wasn't encrypted by it.
             //
             // If this gets interrupted (e.g. by the device powering off), there shouldn't be a
-            // problem since this will run again on the next boot, and setUserKeyProtection() is
-            // okay with the key being already protected by the given secret.
+            // problem since this will run again on the next boot, and setCeStorageProtection() is
+            // okay with the CE key being already protected by the given secret.
             if (getString(MIGRATED_SP_CE_ONLY, null, 0) == null) {
                 for (UserInfo user : mUserManager.getAliveUsers()) {
                     removeStateForReusedUserIdIfNecessary(user.id, user.serialNumber);
@@ -1064,7 +1064,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slogf.wtf(TAG, "Failed to unwrap synthetic password for unsecured user %d", userId);
                 return;
             }
-            setUserKeyProtection(userId, result.syntheticPassword);
+            setCeStorageProtection(userId, result.syntheticPassword);
         }
     }
 
@@ -2003,11 +2003,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.writeChildProfileLock(profileUserId, ArrayUtils.concat(iv, ciphertext));
     }
 
-    private void setUserKeyProtection(@UserIdInt int userId, SyntheticPassword sp) {
+    private void setCeStorageProtection(@UserIdInt int userId, SyntheticPassword sp) {
         final byte[] secret = sp.deriveFileBasedEncryptionKey();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mStorageManager.setUserKeyProtection(userId, secret);
+            mStorageManager.setCeStorageProtection(userId, secret);
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to protect CE key for user " + userId, e);
         } finally {
@@ -2015,11 +2015,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private boolean isUserKeyUnlocked(int userId) {
+    private boolean isCeStorageUnlocked(int userId) {
         try {
-            return mStorageManager.isUserKeyUnlocked(userId);
+            return mStorageManager.isCeStorageUnlocked(userId);
         } catch (RemoteException e) {
-            Slog.e(TAG, "failed to check user key locked state", e);
+            Slog.e(TAG, "Error checking whether CE storage is unlocked", e);
             return false;
         }
     }
@@ -2030,8 +2030,8 @@ public class LockSettingsService extends ILockSettings.Stub {
      * This method doesn't throw exceptions because it is called opportunistically whenever a user
      * is started.  Whether it worked or not can be detected by whether the key got unlocked or not.
      */
-    private void unlockUserKey(@UserIdInt int userId, SyntheticPassword sp) {
-        if (isUserKeyUnlocked(userId)) {
+    private void unlockCeStorage(@UserIdInt int userId, SyntheticPassword sp) {
+        if (isCeStorageUnlocked(userId)) {
             Slogf.d(TAG, "CE storage for user %d is already unlocked", userId);
             return;
         }
@@ -2039,7 +2039,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         final String userType = isUserSecure(userId) ? "secured" : "unsecured";
         final byte[] secret = sp.deriveFileBasedEncryptionKey();
         try {
-            mStorageManager.unlockUserKey(userId, userInfo.serialNumber, secret);
+            mStorageManager.unlockCeStorage(userId, userInfo.serialNumber, secret);
             Slogf.i(TAG, "Unlocked CE storage for %s user %d", userType, userId);
         } catch (RemoteException e) {
             Slogf.wtf(TAG, e, "Failed to unlock CE storage for %s user %d", userType, userId);
@@ -2052,8 +2052,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
         checkPasswordReadPermission();
         synchronized (mSpManager) {
-            if (isUserKeyUnlocked(userId)) {
+            if (isCeStorageUnlocked(userId)) {
                 Slogf.d(TAG, "CE storage for user %d is already unlocked", userId);
+                // This method actually does more than unlock CE storage.  However, if CE storage is
+                // already unlocked, then the other parts must have already been done too.
                 return;
             }
             if (isUserSecure(userId)) {
@@ -2070,7 +2072,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return;
             }
             onSyntheticPasswordUnlocked(userId, result.syntheticPassword);
-            unlockUserKey(userId, result.syntheticPassword);
+            unlockCeStorage(userId, result.syntheticPassword);
         }
     }
 
@@ -2773,7 +2775,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             final long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
                     LockscreenCredential.createNone(), sp, userId);
             setCurrentLskfBasedProtectorId(protectorId, userId);
-            setUserKeyProtection(userId, sp);
+            setCeStorageProtection(userId, sp);
             onSyntheticPasswordCreated(userId, sp);
             Slogf.i(TAG, "Successfully initialized synthetic password for user %d", userId);
             return sp;
@@ -2834,7 +2836,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         unlockKeystore(userId, sp);
 
-        unlockUserKey(userId, sp);
+        unlockCeStorage(userId, sp);
 
         unlockUser(userId);
 
@@ -2898,7 +2900,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
             mSpManager.clearSidForUser(userId);
             gateKeeperClearSecureUserId(userId);
-            unlockUserKey(userId, sp);
+            unlockCeStorage(userId, sp);
             unlockKeystore(userId, sp);
             setKeystorePassword(null, userId);
             removeBiometricsForUser(userId);
