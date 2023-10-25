@@ -34,7 +34,6 @@ import com.android.internal.content.om.OverlayConfig;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -93,7 +92,6 @@ public final class PackageManagerServiceTestParams {
     public @Nullable String systemTextClassifierPackage;
     public @Nullable String overlayConfigSignaturePackage;
     public @NonNull String requiredSdkSandboxPackage;
-    public ViewCompiler viewCompiler;
     public @Nullable String retailDemoPackage;
     public @Nullable String recentsPackage;
     public @Nullable String ambientContextDetectionPackage;

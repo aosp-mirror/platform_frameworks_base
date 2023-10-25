@@ -215,7 +215,6 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
@@ -811,8 +810,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // is used by other apps).
     private final DexManager mDexManager;
     private final DynamicCodeLogger mDynamicCodeLogger;
-
-    final ViewCompiler mViewCompiler;
 
     private final AtomicInteger mNextMoveId = new AtomicInteger();
     final MovePackageHelper.MoveCallbacks mMoveCallbacks;
@@ -1673,7 +1670,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new ArtManagerService(i.getContext(), i.getInstaller(),
                         i.getInstallLock()),
                 (i, pm) -> ApexManager.getInstance(),
-                (i, pm) -> new ViewCompiler(i.getInstallLock(), i.getInstaller()),
                 (i, pm) -> (IncrementalManager)
                         i.getContext().getSystemService(Context.INCREMENTAL_SERVICE),
                 (i, pm) -> new DefaultAppProvider(() -> context.getSystemService(RoleManager.class),
@@ -1884,7 +1880,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mProcessLoggingHandler = testParams.processLoggingHandler;
         mProtectedPackages = testParams.protectedPackages;
         mSeparateProcesses = testParams.separateProcesses;
-        mViewCompiler = testParams.viewCompiler;
         mRequiredVerifierPackages = testParams.requiredVerifierPackages;
         mRequiredInstallerPackage = testParams.requiredInstallerPackage;
         mRequiredUninstallerPackage = testParams.requiredUninstallerPackage;
@@ -2047,7 +2042,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mBackgroundDexOptService = injector.getBackgroundDexOptService();
         mArtManagerService = injector.getArtManagerService();
         mMoveCallbacks = new MovePackageHelper.MoveCallbacks(FgThread.get().getLooper());
-        mViewCompiler = injector.getViewCompiler();
         mSharedLibraries = mInjector.getSharedLibrariesImpl();
         mBackgroundHandler = injector.getBackgroundHandler();
 

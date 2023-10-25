@@ -540,44 +540,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     /**
-     * Compile layout resources in a given package.
-     */
-    public boolean compileLayouts(@NonNull PackageStateInternal ps, @NonNull AndroidPackage pkg) {
-        try {
-            if (ps.isPrivileged() || pkg.isUseEmbeddedDex()
-                    || pkg.isDefaultToDeviceProtectedStorage()) {
-                // Privileged apps prefer to load trusted code so they don't use compiled views.
-                // If the app is not privileged but prefers code integrity, also avoid compiling
-                // views.
-                // Also disable the view compiler for protected storage apps since there are
-                // selinux permissions required for writing to user_de.
-                return false;
-            }
-            final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getSplits().get(0).getPath();
-            final File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
-            if (dataDir == null) {
-                // The app is not installed on the target user and doesn't have a data dir
-                return false;
-            }
-            final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
-            Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
-                    ") to " + outDexFile);
-            final long callingId = Binder.clearCallingIdentity();
-            try {
-                return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                        pkg.getUid());
-            } finally {
-                Binder.restoreCallingIdentity(callingId);
-            }
-        }
-        catch (Throwable e) {
-            Log.e("PackageManager", "Failed to compile layouts", e);
-            return false;
-        }
-    }
-
-    /**
      * Build the profiles names for all the package code paths (excluding resource only paths).
      * Return the map [code path -> profile name].
      */
