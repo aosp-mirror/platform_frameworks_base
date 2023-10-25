@@ -23,6 +23,7 @@ import android.annotation.ColorInt;
 import android.annotation.ColorRes;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -4766,6 +4767,7 @@ public abstract class Context {
      * @see android.net.thread.ThreadNetworkManager
      * @hide
      */
+    @FlaggedApi("com.android.net.thread.flags.thread_enabled")
     @SystemApi
     public static final String THREAD_NETWORK_SERVICE = "thread_network";
 
