@@ -2653,6 +2653,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
+    "261227010": {
+      "message": "Content Recording: Unable to tell log windowing mode change: %s",
+      "level": "ERROR",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
     "269576220": {
       "message": "Resuming rotation after drag",
       "level": "DEBUG",
