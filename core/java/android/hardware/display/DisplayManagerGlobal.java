@@ -1423,12 +1423,10 @@ public final class DisplayManagerGlobal {
             sExtraDisplayListenerLogging = !TextUtils.isEmpty(EXTRA_LOGGING_PACKAGE_NAME)
                     && EXTRA_LOGGING_PACKAGE_NAME.equals(sCurrentPackageName);
         }
-        // TODO: b/306170135 - return sExtraDisplayListenerLogging instead
-        return true;
+        return sExtraDisplayListenerLogging;
     }
 
     private static boolean extraLogging() {
-        // TODO: b/306170135 - return sExtraDisplayListenerLogging & package name check instead
-        return true;
+        return sExtraDisplayListenerLogging;
     }
 }
