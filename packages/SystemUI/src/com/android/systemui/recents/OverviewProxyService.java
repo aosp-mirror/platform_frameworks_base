@@ -85,8 +85,10 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -102,14 +104,13 @@ import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.sysui.ShellInterface;
-
-import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -121,6 +122,8 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import dagger.Lazy;
 
 /**
  * Class to send information from overview to launcher with a binder.
@@ -160,7 +163,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ScreenshotHelper mScreenshotHelper;
     private final CommandQueue mCommandQueue;
     private final UserTracker mUserTracker;
-    private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
+    private final ISysuiUnlockAnimationController mSysuiUnlockAnimationController;
     private final Optional<UnfoldTransitionProgressForwarder> mUnfoldTransitionProgressForwarder;
     private final UiEventLogger mUiEventLogger;
     private final DisplayTracker mDisplayTracker;
@@ -580,6 +583,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             UiEventLogger uiEventLogger,
             DisplayTracker displayTracker,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
+            InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager,
             AssistUtils assistUtils,
             FeatureFlags featureFlags,
             SceneContainerFlags sceneContainerFlags,
@@ -613,7 +617,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mUiEventLogger = uiEventLogger;
         mDisplayTracker = displayTracker;
         mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
-        mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
+
+        if (!featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
+        } else {
+            mSysuiUnlockAnimationController = inWindowLauncherUnlockAnimationManager;
+        }
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 

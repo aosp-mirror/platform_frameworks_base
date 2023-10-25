@@ -27,7 +27,9 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
@@ -44,6 +46,7 @@ import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.model.ShadeModel
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
@@ -147,6 +150,15 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     flags = featureFlags,
                     shadeRepository = shadeRepository,
                     powerInteractor = powerInteractor,
+                    inWindowLauncherUnlockAnimationInteractor = {
+                        InWindowLauncherUnlockAnimationInteractor(
+                            InWindowLauncherUnlockAnimationRepository(),
+                            testScope,
+                            transitionInteractor,
+                            { FakeKeyguardSurfaceBehindRepository() },
+                            mock(),
+                        )
+                    },
                 )
                 .apply { start() }
 

@@ -47,6 +47,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder;
+import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
@@ -123,6 +124,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private View mSmartspaceView;
 
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    private final InWindowLauncherUnlockAnimationManager mInWindowLauncherUnlockAnimationManager;
 
     private boolean mShownOnSecondaryDisplay = false;
     private boolean mOnlyClock = false;
@@ -190,7 +192,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             AlwaysOnDisplayNotificationIconViewStore aodIconViewStore,
             KeyguardInteractor keyguardInteractor,
             KeyguardClockInteractor keyguardClockInteractor,
-            FeatureFlagsClassic featureFlags) {
+            FeatureFlagsClassic featureFlags,
+            InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mClockRegistry = clockRegistry;
@@ -214,6 +217,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mFeatureFlags = featureFlags;
         mKeyguardInteractor = keyguardInteractor;
         mKeyguardClockInteractor = keyguardClockInteractor;
+        mInWindowLauncherUnlockAnimationManager = inWindowLauncherUnlockAnimationManager;
 
         mClockChangedListener = new ClockRegistry.ClockChangeListener() {
             @Override
@@ -438,6 +442,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
 
         mKeyguardUnlockAnimationController.setLockscreenSmartspace(mSmartspaceView);
+        mInWindowLauncherUnlockAnimationManager.setLockscreenSmartspace(mSmartspaceView);
+
         mView.setSmartspace(mSmartspaceView);
     }
 

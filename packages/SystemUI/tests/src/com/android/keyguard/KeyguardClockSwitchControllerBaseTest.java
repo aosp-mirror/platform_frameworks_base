@@ -43,6 +43,7 @@ import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
+import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.plugins.ClockAnimations;
@@ -204,7 +205,8 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 mock(AlwaysOnDisplayNotificationIconViewStore.class),
                 KeyguardInteractorFactory.create(mFakeFeatureFlags).getKeyguardInteractor(),
                 mKeyguardClockInteractor,
-                mFakeFeatureFlags
+                mFakeFeatureFlags,
+                mock(InWindowLauncherUnlockAnimationManager.class)
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);

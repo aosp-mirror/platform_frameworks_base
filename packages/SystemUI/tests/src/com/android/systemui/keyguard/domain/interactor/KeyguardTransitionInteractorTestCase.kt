@@ -26,7 +26,7 @@ import kotlinx.coroutines.test.TestScope
 
 open class KeyguardTransitionInteractorTestCase : SysuiTestCase() {
     val testDispatcher = StandardTestDispatcher()
-    val testScope = TestScope(testDispatcher)
+    var testScope = TestScope(testDispatcher)
 
     lateinit var keyguardRepository: FakeKeyguardRepository
     lateinit var transitionRepository: FakeKeyguardTransitionRepository

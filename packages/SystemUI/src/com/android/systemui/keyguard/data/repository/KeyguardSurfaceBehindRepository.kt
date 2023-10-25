@@ -31,8 +31,14 @@ interface KeyguardSurfaceBehindRepository {
     /** Whether we're running animations on the surface. */
     val isAnimatingSurface: Flow<Boolean>
 
+    /** Whether we have a RemoteAnimationTarget to run animations on the surface. */
+    val isSurfaceRemoteAnimationTargetAvailable: Flow<Boolean>
+
     /** Set whether we're running animations on the surface. */
     fun setAnimatingSurface(animating: Boolean)
+
+    /** Set whether we have a RemoteAnimationTarget with which to run animations on the surface. */
+    fun setSurfaceRemoteAnimationTargetAvailable(available: Boolean)
 }
 
 @SysUISingleton
@@ -40,7 +46,15 @@ class KeyguardSurfaceBehindRepositoryImpl @Inject constructor() : KeyguardSurfac
     private val _isAnimatingSurface = MutableStateFlow(false)
     override val isAnimatingSurface = _isAnimatingSurface.asStateFlow()
 
+    private val _isSurfaceRemoteAnimationTargetAvailable = MutableStateFlow(false)
+    override val isSurfaceRemoteAnimationTargetAvailable =
+        _isSurfaceRemoteAnimationTargetAvailable.asStateFlow()
+
     override fun setAnimatingSurface(animating: Boolean) {
         _isAnimatingSurface.value = animating
+    }
+
+    override fun setSurfaceRemoteAnimationTargetAvailable(available: Boolean) {
+        _isSurfaceRemoteAnimationTargetAvailable.value = available
     }
 }

@@ -29,9 +29,12 @@ import com.android.systemui.common.ui.data.repository.FakeConfigurationRepositor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -131,7 +134,16 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
             keyguardInteractor,
             featureFlags,
             shadeRepository,
-            powerInteractor)
+            powerInteractor,
+            {
+                InWindowLauncherUnlockAnimationInteractor(
+                    InWindowLauncherUnlockAnimationRepository(),
+                    testScope,
+                    keyguardTransitionInteractor,
+                    { FakeKeyguardSurfaceBehindRepository() },
+                    mock(),
+                )
+            })
         fromPrimaryBouncerTransitionInteractor = FromPrimaryBouncerTransitionInteractor(
             keyguardTransitionRepository,
             keyguardTransitionInteractor,
