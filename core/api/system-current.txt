@@ -5584,7 +5584,8 @@ package android.hardware.radio {
     method public void addOnCompleteListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.radio.ProgramList.OnCompleteListener);
     method public void addOnCompleteListener(@NonNull android.hardware.radio.ProgramList.OnCompleteListener);
     method public void close();
-    method @Nullable public android.hardware.radio.RadioManager.ProgramInfo get(@NonNull android.hardware.radio.ProgramSelector.Identifier);
+    method @Deprecated @Nullable public android.hardware.radio.RadioManager.ProgramInfo get(@NonNull android.hardware.radio.ProgramSelector.Identifier);
+    method @FlaggedApi("android.hardware.radio.hd_radio_improved") @NonNull public java.util.List<android.hardware.radio.RadioManager.ProgramInfo> getProgramInfos(@NonNull android.hardware.radio.ProgramSelector.Identifier);
     method public void registerListCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.radio.ProgramList.ListCallback);
     method public void registerListCallback(@NonNull android.hardware.radio.ProgramList.ListCallback);
     method public void removeOnCompleteListener(@NonNull android.hardware.radio.ProgramList.OnCompleteListener);
@@ -5638,12 +5639,13 @@ package android.hardware.radio {
     field @Deprecated public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11; // 0xb
     field public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9; // 0x9
     field public static final int IDENTIFIER_TYPE_HD_STATION_ID_EXT = 3; // 0x3
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int IDENTIFIER_TYPE_HD_STATION_LOCATION = 15; // 0xf
     field public static final int IDENTIFIER_TYPE_HD_STATION_NAME = 10004; // 0x2714
     field @Deprecated public static final int IDENTIFIER_TYPE_HD_SUBCHANNEL = 4; // 0x4
     field public static final int IDENTIFIER_TYPE_INVALID = 0; // 0x0
     field public static final int IDENTIFIER_TYPE_RDS_PI = 2; // 0x2
-    field public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13; // 0xd
-    field public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12; // 0xc
+    field @Deprecated public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13; // 0xd
+    field @Deprecated public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12; // 0xc
     field public static final int IDENTIFIER_TYPE_VENDOR_END = 1999; // 0x7cf
     field @Deprecated public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = 1999; // 0x7cf
     field @Deprecated public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = 1000; // 0x3e8
@@ -5658,6 +5660,14 @@ package android.hardware.radio {
     field @Deprecated public static final int PROGRAM_TYPE_SXM = 7; // 0x7
     field @Deprecated public static final int PROGRAM_TYPE_VENDOR_END = 1999; // 0x7cf
     field @Deprecated public static final int PROGRAM_TYPE_VENDOR_START = 1000; // 0x3e8
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int SUB_CHANNEL_HD_1 = 1; // 0x1
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int SUB_CHANNEL_HD_2 = 2; // 0x2
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int SUB_CHANNEL_HD_3 = 4; // 0x4
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int SUB_CHANNEL_HD_4 = 8; // 0x8
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int SUB_CHANNEL_HD_5 = 16; // 0x10
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int SUB_CHANNEL_HD_6 = 32; // 0x20
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int SUB_CHANNEL_HD_7 = 64; // 0x40
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int SUB_CHANNEL_HD_8 = 128; // 0x80
   }
 
   public static final class ProgramSelector.Identifier implements android.os.Parcelable {
@@ -5670,7 +5680,7 @@ package android.hardware.radio {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector.Identifier> CREATOR;
   }
 
-  @IntDef(prefix={"IDENTIFIER_TYPE_"}, value={android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_INVALID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_RDS_PI, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_SUBCHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_NAME, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SCID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_MODULATION, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT}) @IntRange(from=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.IdentifierType {
+  @IntDef(prefix={"IDENTIFIER_TYPE_"}, value={android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_INVALID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_RDS_PI, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_SUBCHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_NAME, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SCID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_MODULATION, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION}) @IntRange(from=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.IdentifierType {
   }
 
   @Deprecated @IntDef(prefix={"PROGRAM_TYPE_"}, value={android.hardware.radio.ProgramSelector.PROGRAM_TYPE_INVALID, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_AM, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_FM, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_AM_HD, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_FM_HD, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_DAB, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_DRMO, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_SXM}) @IntRange(from=android.hardware.radio.ProgramSelector.PROGRAM_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.PROGRAM_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.ProgramType {
@@ -5694,7 +5704,9 @@ package android.hardware.radio {
     field public static final int CONFIG_DAB_DAB_SOFT_LINKING = 8; // 0x8
     field public static final int CONFIG_DAB_FM_LINKING = 7; // 0x7
     field public static final int CONFIG_DAB_FM_SOFT_LINKING = 9; // 0x9
-    field public static final int CONFIG_FORCE_ANALOG = 2; // 0x2
+    field @Deprecated public static final int CONFIG_FORCE_ANALOG = 2; // 0x2
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int CONFIG_FORCE_ANALOG_AM = 11; // 0xb
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int CONFIG_FORCE_ANALOG_FM = 10; // 0xa
     field public static final int CONFIG_FORCE_DIGITAL = 3; // 0x3
     field public static final int CONFIG_FORCE_MONO = 1; // 0x1
     field public static final int CONFIG_RDS_AF = 4; // 0x4
@@ -5822,8 +5834,11 @@ package android.hardware.radio {
     method @Deprecated public int getSubChannel();
     method @NonNull public java.util.Map<java.lang.String,java.lang.String> getVendorInfo();
     method @Deprecated public boolean isDigital();
+    method @FlaggedApi("android.hardware.radio.hd_radio_improved") public boolean isHdAudioAvailable();
+    method @FlaggedApi("android.hardware.radio.hd_radio_improved") public boolean isHdSisAvailable();
     method public boolean isLive();
     method public boolean isMuted();
+    method @FlaggedApi("android.hardware.radio.hd_radio_improved") public boolean isSignalAcquired();
     method public boolean isStereo();
     method public boolean isTrafficAnnouncementActive();
     method public boolean isTrafficProgram();
@@ -5839,6 +5854,7 @@ package android.hardware.radio {
     method public android.hardware.radio.RadioMetadata.Clock getClock(String);
     method public int getInt(String);
     method public String getString(String);
+    method @FlaggedApi("android.hardware.radio.hd_radio_improved") @NonNull public String[] getStringArray(@NonNull String);
     method public java.util.Set<java.lang.String> keySet();
     method public int size();
     method public void writeToParcel(android.os.Parcel, int);
@@ -5847,6 +5863,9 @@ package android.hardware.radio {
     field public static final String METADATA_KEY_ART = "android.hardware.radio.metadata.ART";
     field public static final String METADATA_KEY_ARTIST = "android.hardware.radio.metadata.ARTIST";
     field public static final String METADATA_KEY_CLOCK = "android.hardware.radio.metadata.CLOCK";
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final String METADATA_KEY_COMMENT_ACTUAL_TEXT = "android.hardware.radio.metadata.COMMENT_ACTUAL_TEXT";
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final String METADATA_KEY_COMMENT_SHORT_DESCRIPTION = "android.hardware.radio.metadata.COMMENT_SHORT_DESCRIPTION";
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final String METADATA_KEY_COMMERCIAL = "android.hardware.radio.metadata.COMMERCIAL";
     field public static final String METADATA_KEY_DAB_COMPONENT_NAME = "android.hardware.radio.metadata.DAB_COMPONENT_NAME";
     field public static final String METADATA_KEY_DAB_COMPONENT_NAME_SHORT = "android.hardware.radio.metadata.DAB_COMPONENT_NAME_SHORT";
     field public static final String METADATA_KEY_DAB_ENSEMBLE_NAME = "android.hardware.radio.metadata.DAB_ENSEMBLE_NAME";
@@ -5854,6 +5873,9 @@ package android.hardware.radio {
     field public static final String METADATA_KEY_DAB_SERVICE_NAME = "android.hardware.radio.metadata.DAB_SERVICE_NAME";
     field public static final String METADATA_KEY_DAB_SERVICE_NAME_SHORT = "android.hardware.radio.metadata.DAB_SERVICE_NAME_SHORT";
     field public static final String METADATA_KEY_GENRE = "android.hardware.radio.metadata.GENRE";
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final String METADATA_KEY_HD_STATION_NAME_LONG = "android.hardware.radio.metadata.HD_STATION_NAME_LONG";
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final String METADATA_KEY_HD_STATION_NAME_SHORT = "android.hardware.radio.metadata.HD_STATION_NAME_SHORT";
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final String METADATA_KEY_HD_SUBCHANNELS_AVAILABLE = "android.hardware.radio.metadata.HD_SUBCHANNELS_AVAILABLE";
     field public static final String METADATA_KEY_ICON = "android.hardware.radio.metadata.ICON";
     field public static final String METADATA_KEY_PROGRAM_NAME = "android.hardware.radio.metadata.PROGRAM_NAME";
     field public static final String METADATA_KEY_RBDS_PTY = "android.hardware.radio.metadata.RBDS_PTY";
@@ -5862,6 +5884,7 @@ package android.hardware.radio {
     field public static final String METADATA_KEY_RDS_PTY = "android.hardware.radio.metadata.RDS_PTY";
     field public static final String METADATA_KEY_RDS_RT = "android.hardware.radio.metadata.RDS_RT";
     field public static final String METADATA_KEY_TITLE = "android.hardware.radio.metadata.TITLE";
+    field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final String METADATA_KEY_UFIDS = "android.hardware.radio.metadata.UFIDS";
   }
 
   public static final class RadioMetadata.Builder {
@@ -5872,6 +5895,7 @@ package android.hardware.radio {
     method public android.hardware.radio.RadioMetadata.Builder putClock(String, long, int);
     method public android.hardware.radio.RadioMetadata.Builder putInt(String, int);
     method public android.hardware.radio.RadioMetadata.Builder putString(String, String);
+    method @FlaggedApi("android.hardware.radio.hd_radio_improved") @NonNull public android.hardware.radio.RadioMetadata.Builder putStringArray(@NonNull String, @NonNull String[]);
   }
 
   public static final class RadioMetadata.Clock implements android.os.Parcelable {
