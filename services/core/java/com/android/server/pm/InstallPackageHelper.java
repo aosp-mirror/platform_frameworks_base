@@ -2119,24 +2119,6 @@ final class InstallPackageHelper {
                             // ignore; not possible for non-system app
                         }
                     }
-                    // Successfully deleted the old package; proceed with replace.
-                    // Update the in-memory copy of the previous code paths.
-                    PackageSetting ps1 = mPm.mSettings.getPackageLPr(
-                            installRequest.getExistingPackageName());
-                    if ((installRequest.getInstallFlags() & PackageManager.DONT_KILL_APP)
-                            == 0) {
-                        Set<String> oldCodePaths = ps1.getOldCodePaths();
-                        if (oldCodePaths == null) {
-                            oldCodePaths = new ArraySet<>();
-                        }
-                        if (oldPackage != null) {
-                            Collections.addAll(oldCodePaths, oldPackage.getBaseApkPath());
-                            Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
-                        }
-                        ps1.setOldCodePaths(oldCodePaths);
-                    } else {
-                        ps1.setOldCodePaths(null);
-                    }
 
                     if (installRequest.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
                         PackageSetting ps2 = mPm.mSettings.getPackageLPr(
