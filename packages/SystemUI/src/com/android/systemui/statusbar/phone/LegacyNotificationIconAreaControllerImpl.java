@@ -481,7 +481,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
             hostLayout.addView(expected, i);
         }
         hostLayout.setChangingViewPositions(false);
-        hostLayout.setReplacingIcons(null);
+        hostLayout.setReplacingIconsLegacy(null);
     }
 
     /**
