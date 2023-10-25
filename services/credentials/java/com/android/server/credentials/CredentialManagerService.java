@@ -862,37 +862,41 @@ public final class CredentialManagerService
             Slog.i(TAG, "isEnabledCredentialProviderService with componentName: "
                     + componentName.flattenToString());
 
-            // TODO(253157366): Check additional set of services.
             final int userId = UserHandle.getCallingUserId();
             final int callingUid = Binder.getCallingUid();
             enforceCallingPackage(callingPackage, callingUid);
-            synchronized (mLock) {
-                final List<CredentialManagerServiceImpl> services =
-                        getServiceListForUserLocked(userId);
-                for (CredentialManagerServiceImpl s : services) {
-                    final ComponentName serviceComponentName = s.getServiceComponentName();
 
-                    if (serviceComponentName.equals(componentName)) {
-                        if (!s.getServicePackageName().equals(callingPackage)) {
-                            // The component name and the package name do not match.
-                            MetricUtilities.logApiCalledSimpleV2(
-                                    ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
-                                    ApiStatus.FAILURE, callingUid);
-                            Slog.w(
-                                    TAG,
-                                    "isEnabledCredentialProviderService: Component name does "
-                                            + "not match package name.");
-                            return false;
-                        }
-                        MetricUtilities.logApiCalledSimpleV2(
-                                ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
-                                ApiStatus.SUCCESS, callingUid);
-                        return true;
-                    }
-                }
+            if (componentName == null) {
+                Slog.w(TAG, "isEnabledCredentialProviderService componentName is null");
+                // If the component name was not specified then throw an error and
+                // record a failure because the request failed due to invalid input.
+                MetricUtilities.logApiCalledSimpleV2(
+                      ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
+                      ApiStatus.FAILURE, callingUid);
+                return false;
             }
 
-            return false;
+            if (!componentName.getPackageName().equals(callingPackage)) {
+                Slog.w(TAG, "isEnabledCredentialProviderService component name"
+                        + " does not match requested component");
+                // If the requested component name package name does not match
+                // the calling package then throw an error and record a failure
+                // metric (because the request failed due to invalid input).
+                MetricUtilities.logApiCalledSimpleV2(
+                      ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
+                      ApiStatus.FAILURE, callingUid);
+                throw new IllegalArgumentException("provided component name does not match"
+                        + " does not match requesting component");
+            }
+
+            final Set<ComponentName> enabledProviders = getEnabledProvidersForUser(userId);
+            MetricUtilities.logApiCalledSimpleV2(
+                ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
+                ApiStatus.SUCCESS, callingUid);
+            if (enabledProviders == null) {
+                return false;
+            }
+            return enabledProviders.contains(componentName);
         }
 
         @Override
