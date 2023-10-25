@@ -212,7 +212,8 @@ public class DisplayManagerServiceTest {
             new DisplayManagerService.Injector() {
                 @Override
                 VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot,
-                        Context context, Handler handler, DisplayAdapter.Listener listener) {
+                        Context context, Handler handler, DisplayAdapter.Listener listener,
+                        DisplayManagerFlags flags) {
                     return mMockVirtualDisplayAdapter;
                 }
 
@@ -251,7 +252,8 @@ public class DisplayManagerServiceTest {
 
         @Override
         VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot, Context context,
-                Handler handler, DisplayAdapter.Listener displayAdapterListener) {
+                Handler handler, DisplayAdapter.Listener displayAdapterListener,
+                DisplayManagerFlags flags) {
             return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
                     new VirtualDisplayAdapter.SurfaceControlDisplayFactory() {
                         @Override
@@ -263,7 +265,7 @@ public class DisplayManagerServiceTest {
                         @Override
                         public void destroyDisplay(IBinder displayToken) {
                         }
-                    });
+                    }, flags);
         }
 
         @Override
@@ -329,6 +331,7 @@ public class DisplayManagerServiceTest {
     @Mock SensorManager mSensorManager;
     @Mock DisplayDeviceConfig mMockDisplayDeviceConfig;
     @Mock PackageManagerInternal mMockPackageManagerInternal;
+    @Mock DisplayAdapter mMockDisplayAdapter;
 
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
     @Mock DisplayManagerFlags mMockFlags;
@@ -788,7 +791,8 @@ public class DisplayManagerServiceTest {
                 new DisplayManagerService.Injector() {
                     @Override
                     VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot,
-                            Context context, Handler handler, DisplayAdapter.Listener listener) {
+                            Context context, Handler handler, DisplayAdapter.Listener listener,
+                            DisplayManagerFlags flags) {
                         return null;  // return null for the adapter.  This should cause a failure.
                     }
 
@@ -3194,7 +3198,7 @@ public class DisplayManagerServiceTest {
         private DisplayDeviceInfo mDisplayDeviceInfo;
 
         FakeDisplayDevice() {
-            super(null, null, "", mContext);
+            super(mMockDisplayAdapter, /* displayToken= */ null, /* uniqueId= */ "", mContext);
         }
 
         public void setDisplayDeviceInfo(DisplayDeviceInfo displayDeviceInfo) {

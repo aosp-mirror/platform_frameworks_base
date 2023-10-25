@@ -94,6 +94,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_BRIGHTNESS_WEAR_BEDTIME_MODE_CLAMPER,
             Flags::brightnessWearBedtimeModeClamper);
 
+    private final FlagState mAutoBrightnessModesFlagState = new FlagState(
+            Flags.FLAG_AUTO_BRIGHTNESS_MODES,
+            Flags::autoBrightnessModes);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -187,6 +191,13 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return Whether generic auto-brightness modes are enabled
+     */
+    public boolean areAutoBrightnessModesEnabled() {
+        return mAutoBrightnessModesFlagState.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -206,6 +217,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
         pw.println(" " + mVsyncProximityVote);
         pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
+        pw.println(" " + mAutoBrightnessModesFlagState);
     }
 
     private static class FlagState {

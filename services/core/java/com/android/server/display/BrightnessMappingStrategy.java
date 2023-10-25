@@ -121,6 +121,7 @@ public abstract class BrightnessMappingStrategy {
 
         // Display independent, mode dependent values
         float[] brightnessLevelsNits;
+        float[] brightnessLevels = null;
         float[] luxLevels;
         if (isForIdleMode) {
             brightnessLevelsNits = getFloatArray(resources.obtainTypedArray(
@@ -130,11 +131,21 @@ public abstract class BrightnessMappingStrategy {
         } else {
             brightnessLevelsNits = displayDeviceConfig.getAutoBrightnessBrighteningLevelsNits();
             luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux();
+
+            brightnessLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevels();
+            if (brightnessLevels == null || brightnessLevels.length == 0) {
+                // Load the old configuration in the range [0, 255]. The values need to be
+                // normalized to the range [0, 1].
+                int[] brightnessLevelsInt = resources.getIntArray(
+                        com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
+                brightnessLevels = new float[brightnessLevelsInt.length];
+                for (int i = 0; i < brightnessLevels.length; i++) {
+                    brightnessLevels[i] = normalizeAbsoluteBrightness(brightnessLevelsInt[i]);
+                }
+            }
         }
 
         // Display independent, mode independent values
-        int[] brightnessLevelsBacklight = resources.getIntArray(
-                com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
         float autoBrightnessAdjustmentMaxGamma = resources.getFraction(
                 com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma,
                 1, 1);
@@ -155,8 +166,8 @@ public abstract class BrightnessMappingStrategy {
             builder.setShortTermModelUpperLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, brightnessRange,
                     autoBrightnessAdjustmentMaxGamma, isForIdleMode, displayWhiteBalanceController);
-        } else if (isValidMapping(luxLevels, brightnessLevelsBacklight) && !isForIdleMode) {
-            return new SimpleMappingStrategy(luxLevels, brightnessLevelsBacklight,
+        } else if (isValidMapping(luxLevels, brightnessLevels)) {
+            return new SimpleMappingStrategy(luxLevels, brightnessLevels,
                     autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout);
         } else {
             return null;
@@ -620,7 +631,7 @@ public abstract class BrightnessMappingStrategy {
         private float mUserBrightness;
         private long mShortTermModelTimeout;
 
-        private SimpleMappingStrategy(float[] lux, int[] brightness, float maxGamma,
+        private SimpleMappingStrategy(float[] lux, float[] brightness, float maxGamma,
                 long timeout) {
             Preconditions.checkArgument(lux.length != 0 && brightness.length != 0,
                     "Lux and brightness arrays must not be empty!");
@@ -635,7 +646,7 @@ public abstract class BrightnessMappingStrategy {
             mBrightness = new float[N];
             for (int i = 0; i < N; i++) {
                 mLux[i] = lux[i];
-                mBrightness[i] = normalizeAbsoluteBrightness(brightness[i]);
+                mBrightness[i] = brightness[i];
             }
 
             mMaxGamma = maxGamma;

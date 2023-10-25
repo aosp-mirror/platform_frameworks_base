@@ -84,8 +84,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final boolean mIsBootDisplayModeSupported;
 
-    private final DisplayManagerFlags mFlags;
-
     private final DisplayNotificationManager mDisplayNotificationManager;
 
     private Context mOverlayContext;
@@ -103,12 +101,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             Listener listener, DisplayManagerFlags flags,
             DisplayNotificationManager displayNotificationManager,
             Injector injector) {
-        super(syncRoot, context, handler, listener, TAG);
+        super(syncRoot, context, handler, listener, TAG, flags);
         mDisplayNotificationManager = displayNotificationManager;
         mInjector = injector;
         mSurfaceControlProxy = mInjector.getSurfaceControlProxy();
         mIsBootDisplayModeSupported = mSurfaceControlProxy.getBootDisplayModeSupport();
-        mFlags = flags;
     }
 
     @Override
@@ -510,7 +507,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             // Load display device config
             final Context context = getOverlayContext();
             mDisplayDeviceConfig = mInjector.createDisplayDeviceConfig(context, mPhysicalDisplayId,
-                    mIsFirstDisplay);
+                    mIsFirstDisplay, getFeatureFlags());
 
             // Load brightness HWC quirk
             mBacklightAdapter.setForceSurfaceControl(mDisplayDeviceConfig.hasQuirk(
@@ -831,7 +828,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     + ", state=" + Display.stateToString(state) + ")");
                         }
 
-                        boolean isDisplayOffloadEnabled = mFlags.isDisplayOffloadEnabled();
+                        boolean isDisplayOffloadEnabled =
+                                getFeatureFlags().isDisplayOffloadEnabled();
 
                         // We must tell sidekick/displayoffload to stop controlling the display
                         // before we can change its power mode, so do that first.
@@ -1377,8 +1375,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         public DisplayDeviceConfig createDisplayDeviceConfig(Context context,
-                long physicalDisplayId, boolean isFirstDisplay) {
-            return DisplayDeviceConfig.create(context, physicalDisplayId, isFirstDisplay);
+                long physicalDisplayId, boolean isFirstDisplay, DisplayManagerFlags flags) {
+            return DisplayDeviceConfig.create(context, physicalDisplayId, isFirstDisplay, flags);
         }
     }
 
