@@ -17,7 +17,6 @@
 package android.hardware.biometrics;
 
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
-import android.hardware.biometrics.IBiometricPromptStatusListener;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IInvalidationCallback;
@@ -68,10 +67,6 @@ interface IBiometricService {
     // Register callback for when keyguard biometric eligibility changes.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
-
-    // Register a callback for biometric prompt status on keyguard.
-    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void registerBiometricPromptStatusListener(IBiometricPromptStatusListener callback);
 
     // Notify BiometricService when <Biometric>Service is ready to start the prepared client.
     // Client lifecycle is still managed in <Biometric>Service.
