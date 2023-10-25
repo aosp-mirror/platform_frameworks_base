@@ -182,4 +182,42 @@ public class PerformanceHintManagerTest {
         s.setPreferPowerEfficiency(true);
         s.setPreferPowerEfficiency(true);
     }
+
+    @Test
+    public void testReportActualWorkDurationWithWorkDurationClass() {
+        Session s = createSession();
+        assumeNotNull(s);
+        s.updateTargetWorkDuration(16);
+        s.reportActualWorkDuration(new WorkDuration(1, 12, 8, 6));
+        s.reportActualWorkDuration(new WorkDuration(1, 33, 14, 20));
+        s.reportActualWorkDuration(new WorkDuration(1, 14, 10, 6));
+    }
+
+    @Test
+    public void testReportActualWorkDurationWithWorkDurationClass_IllegalArgument() {
+        Session s = createSession();
+        assumeNotNull(s);
+        s.updateTargetWorkDuration(16);
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.reportActualWorkDuration(new WorkDuration(-1, 12, 8, 6));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.reportActualWorkDuration(new WorkDuration(0, 12, 8, 6));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.reportActualWorkDuration(new WorkDuration(1, -1, 8, 6));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.reportActualWorkDuration(new WorkDuration(1, 0, 8, 6));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.reportActualWorkDuration(new WorkDuration(1, 12, -1, 6));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.reportActualWorkDuration(new WorkDuration(1, 12, 0, 6));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.reportActualWorkDuration(new WorkDuration(1, 12, 8, -1));
+        });
+    }
 }

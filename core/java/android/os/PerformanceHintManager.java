@@ -103,7 +103,7 @@ public final class PerformanceHintManager {
      * Any call in this class will change its internal data, so you must do your own thread
      * safety to protect from racing.
      *
-     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public static class Session implements Closeable {
         private long mNativeSessionPtr;
@@ -269,6 +269,40 @@ public final class PerformanceHintManager {
         public @Nullable int[] getThreadIds() {
             return nativeGetThreadIds(mNativeSessionPtr);
         }
+
+        /**
+         * Reports the work duration for the last cycle of work.
+         *
+         * The system will attempt to adjust the core placement of the threads within the thread
+         * group and/or the frequency of the core on which they are run to bring the actual duration
+         * close to the target duration.
+         *
+         * @param workDuration the work duration of each component.
+         * @throws IllegalArgumentException if work period start timestamp is not positive, or
+         *         actual total duration is not positive, or actual CPU duration is not positive,
+         *         or actual GPU duration is negative.
+         */
+        @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
+        public void reportActualWorkDuration(@NonNull WorkDuration workDuration) {
+            if (workDuration.mWorkPeriodStartTimestampNanos <= 0) {
+                throw new IllegalArgumentException(
+                    "the work period start timestamp should be positive.");
+            }
+            if (workDuration.mActualTotalDurationNanos <= 0) {
+                throw new IllegalArgumentException("the actual total duration should be positive.");
+            }
+            if (workDuration.mActualCpuDurationNanos <= 0) {
+                throw new IllegalArgumentException("the actual CPU duration should be positive.");
+            }
+            if (workDuration.mActualGpuDurationNanos < 0) {
+                throw new IllegalArgumentException(
+                    "the actual GPU duration should be non negative.");
+            }
+            nativeReportActualWorkDuration(mNativeSessionPtr,
+                    workDuration.mWorkPeriodStartTimestampNanos,
+                    workDuration.mActualTotalDurationNanos,
+                    workDuration.mActualCpuDurationNanos, workDuration.mActualGpuDurationNanos);
+        }
     }
 
     private static native long nativeAcquireManager();
@@ -285,4 +319,7 @@ public final class PerformanceHintManager {
     private static native void nativeSetThreads(long nativeSessionPtr, int[] tids);
     private static native void nativeSetPreferPowerEfficiency(long nativeSessionPtr,
             boolean enabled);
+    private static native void nativeReportActualWorkDuration(long nativeSessionPtr,
+            long workPeriodStartTimestampNanos, long actualTotalDurationNanos,
+            long actualCpuDurationNanos, long actualGpuDurationNanos);
 }
