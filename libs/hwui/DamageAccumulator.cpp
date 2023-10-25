@@ -242,6 +242,47 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
     }
 }
 
+SkRect DamageAccumulator::computeClipAndTransform(const SkRect& bounds, Matrix4* outMatrix) const {
+    const DirtyStack* frame = mHead;
+    Matrix4 transform;
+    SkRect pretransformResult = bounds;
+    while (true) {
+        SkRect currentBounds = pretransformResult;
+        pretransformResult.setEmpty();
+        switch (frame->type) {
+            case TransformRenderNode: {
+                const RenderProperties& props = frame->renderNode->properties();
+                // Perform clipping
+                if (props.getClipDamageToBounds() && !currentBounds.isEmpty()) {
+                    if (!currentBounds.intersect(
+                                SkRect::MakeIWH(props.getWidth(), props.getHeight()))) {
+                        currentBounds.setEmpty();
+                    }
+                }
+
+                // apply all transforms
+                mapRect(props, currentBounds, &pretransformResult);
+                frame->renderNode->applyViewPropertyTransforms(transform);
+            } break;
+            case TransformMatrix4:
+                mapRect(frame->matrix4, currentBounds, &pretransformResult);
+                transform.multiply(*frame->matrix4);
+                break;
+            default:
+                pretransformResult = currentBounds;
+                break;
+        }
+        if (frame->prev == frame) break;
+        frame = frame->prev;
+    }
+    SkRect result;
+    Matrix4 globalToLocal;
+    globalToLocal.loadInverse(transform);
+    mapRect(&globalToLocal, pretransformResult, &result);
+    *outMatrix = transform;
+    return result;
+}
+
 void DamageAccumulator::dirty(float left, float top, float right, float bottom) {
     mHead->pendingDirty.join({left, top, right, bottom});
 }
