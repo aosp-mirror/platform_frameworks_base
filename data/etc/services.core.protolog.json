@@ -2365,6 +2365,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
+    "33989965": {
+      "message": " Met condition %s for #%d (%d left)",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "34106798": {
       "message": "Content Recording: Display %d state was (%d), is now (%d), so update recording?",
       "level": "VERBOSE",
@@ -4483,6 +4489,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "2053743391": {
+      "message": " Add condition %s for #%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "2060978050": {
       "message": "moveWindowTokenToDisplay: Attempted to move token: %s to non-exiting displayId=%d",
       "level": "WARN",
@@ -4542,6 +4554,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "2124732293": {
+      "message": "#%d: Met condition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "2128917433": {
       "message": "onProposedRotationChanged, rotation=%d",

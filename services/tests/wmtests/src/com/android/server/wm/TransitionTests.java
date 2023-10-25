@@ -2475,6 +2475,46 @@ public class TransitionTests extends WindowTestsBase {
         verify(session).close();
     }
 
+    @Test
+    public void testReadyTrackerBasics() {
+        final TransitionController controller = new TestTransitionController(
+                mock(ActivityTaskManagerService.class));
+        controller.setFullReadyTrackingForTest(true);
+        Transition transit = createTestTransition(TRANSIT_OPEN, controller);
+        // Not ready if nothing has happened yet
+        assertFalse(transit.mReadyTracker.isReady());
+
+        Transition.ReadyCondition condition1 = new Transition.ReadyCondition("c1");
+        transit.mReadyTracker.add(condition1);
+        assertFalse(transit.mReadyTracker.isReady());
+
+        Transition.ReadyCondition condition2 = new Transition.ReadyCondition("c2");
+        transit.mReadyTracker.add(condition2);
+        assertFalse(transit.mReadyTracker.isReady());
+
+        condition2.meet();
+        assertFalse(transit.mReadyTracker.isReady());
+
+        condition1.meet();
+        assertTrue(transit.mReadyTracker.isReady());
+    }
+
+    @Test
+    public void testReadyTrackerAlternate() {
+        final TransitionController controller = new TestTransitionController(
+                mock(ActivityTaskManagerService.class));
+        controller.setFullReadyTrackingForTest(true);
+        Transition transit = createTestTransition(TRANSIT_OPEN, controller);
+
+        Transition.ReadyCondition condition1 = new Transition.ReadyCondition("c1");
+        transit.mReadyTracker.add(condition1);
+        assertFalse(transit.mReadyTracker.isReady());
+
+        condition1.meetAlternate("reason1");
+        assertTrue(transit.mReadyTracker.isReady());
+        assertEquals("reason1", condition1.mAlternate);
+    }
+
     private static void makeTaskOrganized(Task... tasks) {
         final ITaskOrganizer organizer = mock(ITaskOrganizer.class);
         for (Task t : tasks) {
