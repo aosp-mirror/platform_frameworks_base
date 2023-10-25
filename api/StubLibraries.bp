@@ -36,7 +36,6 @@ droidstubs {
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args,
     check_api: {
         current: {
             api_file: ":non-updatable-current.txt",
@@ -70,19 +69,25 @@ droidstubs {
     api_surface: "public",
 }
 
-priv_apps = " --show-annotation android.annotation.SystemApi\\(" +
-    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
-    "\\)"
+priv_apps = [
+    "--show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+        "\\)",
+]
 
-priv_apps_in_stubs = " --show-for-stub-purposes-annotation android.annotation.SystemApi\\(" +
-    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
-    "\\)"
+priv_apps_in_stubs = [
+    "--show-for-stub-purposes-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+        "\\)",
+]
 
-test = " --show-annotation android.annotation.TestApi"
+test = ["--show-annotation android.annotation.TestApi"]
 
-module_libs = " --show-annotation android.annotation.SystemApi\\(" +
-    "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
-    "\\)"
+module_libs = [
+    "--show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+        "\\)",
+]
 
 droidstubs {
     name: "system-api-stubs-docs-non-updatable",
@@ -93,7 +98,7 @@ droidstubs {
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args + priv_apps,
+    flags: priv_apps,
     check_api: {
         current: {
             api_file: ":non-updatable-system-current.txt",
@@ -136,7 +141,7 @@ droidstubs {
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args + test + priv_apps_in_stubs,
+    flags: test + priv_apps_in_stubs,
     check_api: {
         current: {
             api_file: ":non-updatable-test-current.txt",
@@ -186,7 +191,7 @@ droidstubs {
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args + priv_apps_in_stubs + module_libs,
+    flags: priv_apps_in_stubs + module_libs,
     check_api: {
         current: {
             api_file: ":non-updatable-module-lib-current.txt",
@@ -972,7 +977,7 @@ droidstubs {
     merge_annotations_dirs: [
         "metalava-manual",
     ],
-    args: priv_apps,
+    flags: priv_apps,
 }
 
 java_library {
