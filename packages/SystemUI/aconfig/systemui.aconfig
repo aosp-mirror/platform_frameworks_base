@@ -23,6 +23,14 @@ flag {
 }
 
 flag {
+    name: "notifications_icon_container_refactor"
+    namespace: "systemui"
+    description: "Enables the refactored version of the notification icon container in StatusBar, "
+        "AOD, and the notification shelf. Should not bring any behavioral changes."
+    bug: "278765923"
+}
+
+flag {
     name: "notification_lifetime_extension_refactor"
     namespace: "systemui"
     description: "Enables moving notification lifetime extension management from SystemUI to "
