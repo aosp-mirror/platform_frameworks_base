@@ -335,6 +335,13 @@ LIBANDROID {
     APerformanceHint_closeSession; # introduced=Tiramisu
     APerformanceHint_setThreads; # introduced=UpsideDownCake
     APerformanceHint_setPreferPowerEfficiency; # introduced=VanillaIceCream
+    APerformanceHint_reportActualWorkDuration2; # introduced=VanillaIceCream
+    AWorkDuration_create; # introduced=VanillaIceCream
+    AWorkDuration_release; # introduced=VanillaIceCream
+    AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
+    AWorkDuration_setActualTotalDurationNanos; # introduced=VanillaIceCream
+    AWorkDuration_setActualCpuDurationNanos; # introduced=VanillaIceCream
+    AWorkDuration_setActualGpuDurationNanos; # introduced=VanillaIceCream
   local:
     *;
 };
