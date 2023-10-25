@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -43,6 +44,7 @@ import com.android.i18n.phonenumbers.NumberParseException;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -2957,7 +2959,8 @@ public class PhoneNumberUtils {
      * @param number  The phone number used for WPS call.
      * @return {@code true} if number matches WPS pattern and {@code false} otherwise.
      */
-    public static boolean isWpsCallNumber(@Nullable String number) {
+    @FlaggedApi(Flags.FLAG_ENABLE_WPS_CHECK_API_FLAG)
+    public static boolean isWpsCallNumber(@NonNull String number) {
         return (number != null) && (number.startsWith(PREFIX_WPS)
                 || number.startsWith(PREFIX_WPS_CLIR_ACTIVATE)
                 || number.startsWith(PREFIX_WPS_CLIR_DEACTIVATE));
