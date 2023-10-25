@@ -528,9 +528,15 @@ public abstract class BaseAbsoluteVolumeBehaviorTest {
         clearInvocations(mAudioManager);
 
         // Repeat of earlier message: sets neither volume nor mute
+        // Exception: On TV, volume is set to ensure that UI is shown
         receiveReportAudioStatus(32, false);
-        verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(8),
-                anyInt());
+        if (getDeviceType() == HdmiDeviceInfo.DEVICE_TV) {
+            verify(mAudioManager).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(8),
+                    anyInt());
+        } else {
+            verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(8),
+                    anyInt());
+        }
         verify(mAudioManager, never()).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC),
                 eq(AudioManager.ADJUST_UNMUTE), anyInt());
         clearInvocations(mAudioManager);
