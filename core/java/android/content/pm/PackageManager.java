@@ -8910,6 +8910,20 @@ public abstract class PackageManager {
     }
 
     /**
+     * Returns true if an app is archivable.
+     *
+     * @throws NameNotFoundException if the given package name is not available to the caller.
+     * @see PackageInstaller#requestArchive(String, IntentSender)
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public boolean isAppArchivable(@NonNull String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException("isAppArchivable not implemented");
+    }
+
+    /**
      * Attempts to clear the user data directory of an application.
      * Since this may take a little while, the result will
      * be posted back to the given observer.  A deletion will fail if the

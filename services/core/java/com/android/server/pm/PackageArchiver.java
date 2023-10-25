@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.pm.ArchivedActivity.bytesFromBitmap;
 import static android.content.pm.ArchivedActivity.drawableToBitmap;
@@ -106,6 +107,9 @@ public class PackageArchiver {
     @Nullable
     private LauncherApps mLauncherApps;
 
+    @Nullable
+    private AppOpsManager mAppOpsManager;
+
     PackageArchiver(Context context, PackageManagerService mPm) {
         this.mContext = context;
         this.mPm = mPm;
@@ -178,6 +182,8 @@ public class PackageArchiver {
                 Binder.getCallingUid(), userId);
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
         verifyInstaller(responsibleInstallerPackage, userId);
+        verifyOptOutStatus(packageName,
+                UserHandle.getUid(userId, UserHandle.getUid(userId, ps.getAppId())));
 
         List<LauncherActivityInfo> mainActivities = getLauncherActivityInfos(ps.getPackageName(),
                 userId);
@@ -306,6 +312,59 @@ public class PackageArchiver {
                         () -> mPm.queryIntentReceivers(mPm.snapshotComputer(),
                                 intent, /* resolvedType= */ null, /* flags= */ 0, userId));
         return intentReceivers != null && !intentReceivers.getList().isEmpty();
+    }
+
+    /**
+     * Returns true if the app is archivable.
+     */
+    // TODO(b/299299569) Exclude system apps
+    public boolean isAppArchivable(@NonNull String packageName, @NonNull UserHandle user) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(user);
+
+        Computer snapshot = mPm.snapshotComputer();
+        int userId = user.getIdentifier();
+        int binderUid = Binder.getCallingUid();
+        snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
+                "isAppArchivable");
+        PackageStateInternal ps;
+        try {
+            ps = getPackageState(packageName, mPm.snapshotComputer(),
+                    Binder.getCallingUid(), userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new ParcelableException(e);
+        }
+
+        if (isAppOptedOutOfArchiving(packageName, ps.getAppId())) {
+            return false;
+        }
+
+        try {
+            verifyInstaller(getResponsibleInstallerPackage(ps), userId);
+            getLauncherActivityInfos(packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if user has opted the app out of archiving through system settings.
+     */
+    // TODO(b/304256918) Switch this to a separate OP code for archiving.
+    private boolean isAppOptedOutOfArchiving(String packageName, int uid) {
+        return Binder.withCleanCallingIdentity(() ->
+                getAppOpsManager().checkOp(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
+                        uid, packageName) == MODE_IGNORED);
+    }
+
+    private void verifyOptOutStatus(String packageName, int uid)
+            throws PackageManager.NameNotFoundException {
+        if (isAppOptedOutOfArchiving(packageName, uid)) {
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("The app %s is opted out of archiving.", packageName));
+        }
     }
 
     void requestUnarchive(
@@ -508,6 +567,13 @@ public class PackageArchiver {
             mLauncherApps = mContext.getSystemService(LauncherApps.class);
         }
         return mLauncherApps;
+    }
+
+    private AppOpsManager getAppOpsManager() {
+        if (mAppOpsManager == null) {
+            mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
+        }
+        return mAppOpsManager;
     }
 
     private void storeArchiveState(String packageName, ArchiveState archiveState, int userId)

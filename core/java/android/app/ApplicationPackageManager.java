@@ -2586,6 +2586,16 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean isAppArchivable(String packageName) throws NameNotFoundException {
+        try {
+            Objects.requireNonNull(packageName);
+            return mPM.isAppArchivable(packageName, new UserHandle(getUserId()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public int getMoveStatus(int moveId) {
         try {
             return mPM.getMoveStatus(moveId);
