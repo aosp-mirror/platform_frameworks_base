@@ -321,7 +321,7 @@ private fun TextButton(
         shape = CircleShape,
         color = colorAttr(R.attr.underSurface),
         contentColor = LocalAndroidColorScheme.current.onSurfaceVariant,
-        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.onShadeActive)),
+        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.shadeInactive)),
         modifier = modifier.padding(horizontal = 4.dp),
         onClick = onClick,
     ) {
