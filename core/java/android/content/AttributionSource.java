@@ -155,6 +155,7 @@ public final class AttributionSource implements Parcelable {
 
     /** @hide */
     @TestApi
+    @FlaggedApi(Flags.FLAG_ATTRIBUTION_SOURCE_CONSTRUCTOR)
     public AttributionSource(int uid, int pid, @Nullable String packageName,
             @Nullable String attributionTag, @NonNull IBinder token,
             @Nullable String[] renouncedPermissions,
