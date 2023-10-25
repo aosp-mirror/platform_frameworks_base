@@ -639,8 +639,8 @@ class UserController implements Handler.Callback {
         mInjector.getUserJourneyLogger()
                 .logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_UNLOCKING_USER,
                 EVENT_STATE_BEGIN);
-        // If the user key hasn't been unlocked yet, we cannot proceed.
-        if (!StorageManager.isUserKeyUnlocked(userId)) return false;
+        // If the user's CE storage hasn't been unlocked yet, we cannot proceed.
+        if (!StorageManager.isCeStorageUnlocked(userId)) return false;
         synchronized (mLock) {
             // Do not proceed if unexpected state or a stale user
             if (mStartedUsers.get(userId) != uss || uss.state != STATE_RUNNING_LOCKED) {
@@ -655,8 +655,8 @@ class UserController implements Handler.Callback {
 
         // Call onBeforeUnlockUser on a worker thread that allows disk I/O
         FgThread.getHandler().post(() -> {
-            if (!StorageManager.isUserKeyUnlocked(userId)) {
-                Slogf.w(TAG, "User key got locked unexpectedly, leaving user locked.");
+            if (!StorageManager.isCeStorageUnlocked(userId)) {
+                Slogf.w(TAG, "User's CE storage got locked unexpectedly, leaving user locked.");
                 return;
             }
 
@@ -690,8 +690,8 @@ class UserController implements Handler.Callback {
     private void finishUserUnlocked(final UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         EventLog.writeEvent(EventLogTags.UC_FINISH_USER_UNLOCKED, userId);
-        // Only keep marching forward if user is actually unlocked
-        if (!StorageManager.isUserKeyUnlocked(userId)) return;
+        // Only keep marching forward if the user's CE storage is unlocked.
+        if (!StorageManager.isCeStorageUnlocked(userId)) return;
         synchronized (mLock) {
             // Bail if we ended up with a stale user
             if (mStartedUsers.get(uss.mHandle.getIdentifier()) != uss) return;
@@ -777,8 +777,8 @@ class UserController implements Handler.Callback {
         if (userInfo == null) {
             return;
         }
-        // Only keep marching forward if user is actually unlocked
-        if (!StorageManager.isUserKeyUnlocked(userId)) return;
+        // Only keep marching forward if the user's CE storage is unlocked.
+        if (!StorageManager.isCeStorageUnlocked(userId)) return;
 
         // Remember that we logged in
         mInjector.getUserManager().onUserLoggedIn(userId);
@@ -1256,7 +1256,7 @@ class UserController implements Handler.Callback {
             }
             try {
                 Slogf.i(TAG, "Locking CE storage for user #" + userId);
-                mInjector.getStorageManager().lockUserKey(userId);
+                mInjector.getStorageManager().lockCeStorage(userId);
             } catch (RemoteException re) {
                 throw re.rethrowAsRuntimeException();
             }
@@ -1874,8 +1874,8 @@ class UserController implements Handler.Callback {
         }
 
         UserState uss;
-        if (!StorageManager.isUserKeyUnlocked(userId)) {
-            // We always want to try to unlock the user key, even if the user is not started yet.
+        if (!StorageManager.isCeStorageUnlocked(userId)) {
+            // We always want to try to unlock CE storage, even if the user is not started yet.
             mLockPatternUtils.unlockUserKeyIfUnsecured(userId);
         }
         synchronized (mLock) {
@@ -2662,10 +2662,10 @@ class UserController implements Handler.Callback {
                 case UserState.STATE_RUNNING_UNLOCKING:
                 case UserState.STATE_RUNNING_UNLOCKED:
                     return true;
-                // In the stopping/shutdown state return unlock state of the user key
+                // In the stopping/shutdown state, return unlock state of the user's CE storage.
                 case UserState.STATE_STOPPING:
                 case UserState.STATE_SHUTDOWN:
-                    return StorageManager.isUserKeyUnlocked(userId);
+                    return StorageManager.isCeStorageUnlocked(userId);
                 default:
                     return false;
             }
@@ -2674,10 +2674,10 @@ class UserController implements Handler.Callback {
             switch (state.state) {
                 case UserState.STATE_RUNNING_UNLOCKED:
                     return true;
-                // In the stopping/shutdown state return unlock state of the user key
+                // In the stopping/shutdown state, return unlock state of the user's CE storage.
                 case UserState.STATE_STOPPING:
                 case UserState.STATE_SHUTDOWN:
-                    return StorageManager.isUserKeyUnlocked(userId);
+                    return StorageManager.isCeStorageUnlocked(userId);
                 default:
                     return false;
             }
