@@ -34,3 +34,10 @@ flag {
     description: "Fallbacks to the default handling for volume adjustment when media session has fixed volume handling and its app is in the foreground and setting a media controller."
     bug: "293743975"
 }
+
+flag {
+    namespace: "media_solutions"
+    name: "enable_waiting_state_for_system_session_creation_request"
+    description: "Introduces a waiting state for the session creation request and prevents it from early failing when the selectedRoute from the bluetooth stack doesn't match the pending request route id."
+    bug: "307723189"
+}
