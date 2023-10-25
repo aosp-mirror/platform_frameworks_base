@@ -17,11 +17,17 @@
 package android.graphics.text;
 
 import static com.android.text.flags.Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN;
+import static com.android.text.flags.Flags.FLAG_WORD_STYLE_AUTO;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.os.Build;
+import android.os.LocaleList;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,6 +41,14 @@ import java.util.Objects;
  * line-break property</a> for more information.
  */
 public final class LineBreakConfig {
+
+    /**
+     * A feature ID for automatic line break word style.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long WORD_STYLE_AUTO = 280005585L;
 
     /**
      * No hyphenation preference is specified.
@@ -112,8 +126,11 @@ public final class LineBreakConfig {
      * </pre>
      *
      * <p>
-     * This value is resolved to {@link #LINE_BREAK_STYLE_NONE} if this value is used for text
-     * layout/rendering.
+     * This value is resolved to {@link #LINE_BREAK_STYLE_NONE} if the target SDK version is API
+     * {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or before and this value is used for text
+     * layout/rendering. This value is resolved to {@link #LINE_BREAK_STYLE_AUTO} if the target SDK
+     * version is API {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or after and this value is
+     * used for text layout/rendering.
      */
     @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public static final int LINE_BREAK_STYLE_UNSPECIFIED = -1;
@@ -154,10 +171,29 @@ public final class LineBreakConfig {
     @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public static final int LINE_BREAK_STYLE_NO_BREAK = 4;
 
+    /**
+     * A special value for the line breaking style option.
+     *
+     * <p>
+     * The auto option for the line break style set the line break style based on the locale of the
+     * text rendering context. You can specify the context locale by
+     * {@link android.widget.TextView#setTextLocales(LocaleList)} or
+     * {@link android.graphics.Paint#setTextLocales(LocaleList)}.
+     *
+     * <p>
+     * In the API {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, auto option does followings:
+     * - If at least one locale in the locale list contains Japanese script, this option is
+     * equivalent to {@link #LINE_BREAK_STYLE_STRICT}.
+     * - Otherwise, this option is equivalent to {@link #LINE_BREAK_STYLE_NONE}.
+     */
+    @FlaggedApi(FLAG_WORD_STYLE_AUTO)
+    public static final int LINE_BREAK_STYLE_AUTO = 5;
+
     /** @hide */
     @IntDef(prefix = { "LINE_BREAK_STYLE_" }, value = {
             LINE_BREAK_STYLE_NONE, LINE_BREAK_STYLE_LOOSE, LINE_BREAK_STYLE_NORMAL,
-            LINE_BREAK_STYLE_STRICT, LINE_BREAK_STYLE_UNSPECIFIED, LINE_BREAK_STYLE_NO_BREAK
+            LINE_BREAK_STYLE_STRICT, LINE_BREAK_STYLE_UNSPECIFIED, LINE_BREAK_STYLE_NO_BREAK,
+            LINE_BREAK_STYLE_AUTO
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LineBreakStyle {}
@@ -183,8 +219,11 @@ public final class LineBreakConfig {
      *     // LINE_BREAK_WORD_STYLE_PHRASE for line break word style.
      * </pre>
      *
-     * This value is resolved to {@link #LINE_BREAK_WORD_STYLE_NONE} if this value is used for
-     * text layout/rendering.
+     * This value is resolved to {@link #LINE_BREAK_WORD_STYLE_NONE} if the target SDK version is
+     * API {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or before and this value is used for text
+     * layout/rendering. This value is resolved to {@link #LINE_BREAK_WORD_STYLE_AUTO} if the target
+     * SDK version is API {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or after and this value is
+     * used for text layout/rendering.
      */
     @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public static final int LINE_BREAK_WORD_STYLE_UNSPECIFIED = -1;
@@ -204,9 +243,29 @@ public final class LineBreakConfig {
      */
     public static final int LINE_BREAK_WORD_STYLE_PHRASE = 1;
 
+    /**
+     * A special value for the line breaking word style option.
+     *
+     * <p>
+     * The auto option for the line break word style does some heuristics based on locales and line
+     * count.
+     *
+     * <p>
+     * In the API {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, auto option does followings:
+     * - If at least one locale in the locale list contains Korean script, this option is equivalent
+     * to {@link #LINE_BREAK_WORD_STYLE_PHRASE}.
+     * - If not, then if at least one locale in the locale list contains Japanese script, this
+     * option is equivalent to {@link #LINE_BREAK_WORD_STYLE_PHRASE} if the result of its line
+     * count is less than 5 lines.
+     * - Otherwise, this option is equivalent to {@link #LINE_BREAK_WORD_STYLE_NONE}.
+     */
+    @FlaggedApi(FLAG_WORD_STYLE_AUTO)
+    public static final int LINE_BREAK_WORD_STYLE_AUTO = 2;
+
     /** @hide */
     @IntDef(prefix = { "LINE_BREAK_WORD_STYLE_" }, value = {
-        LINE_BREAK_WORD_STYLE_NONE, LINE_BREAK_WORD_STYLE_PHRASE, LINE_BREAK_WORD_STYLE_UNSPECIFIED
+        LINE_BREAK_WORD_STYLE_NONE, LINE_BREAK_WORD_STYLE_PHRASE, LINE_BREAK_WORD_STYLE_UNSPECIFIED,
+            LINE_BREAK_WORD_STYLE_AUTO
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LineBreakWordStyle {}
@@ -425,11 +484,13 @@ public final class LineBreakConfig {
      * @hide
      */
     public static @LineBreakStyle int getResolvedLineBreakStyle(@Nullable LineBreakConfig config) {
+        final int defaultStyle = CompatChanges.isChangeEnabled(WORD_STYLE_AUTO)
+                ? LINE_BREAK_STYLE_AUTO : LINE_BREAK_STYLE_NONE;
         if (config == null) {
-            return LINE_BREAK_STYLE_NONE;
+            return defaultStyle;
         }
         return config.mLineBreakStyle == LINE_BREAK_STYLE_UNSPECIFIED
-                ? LINE_BREAK_STYLE_NONE : config.mLineBreakStyle;
+                ? defaultStyle : config.mLineBreakStyle;
     }
 
     /**
@@ -451,11 +512,13 @@ public final class LineBreakConfig {
      */
     public static @LineBreakWordStyle int getResolvedLineBreakWordStyle(
             @Nullable LineBreakConfig config) {
+        final int defaultWordStyle = CompatChanges.isChangeEnabled(WORD_STYLE_AUTO)
+                ? LINE_BREAK_WORD_STYLE_AUTO : LINE_BREAK_WORD_STYLE_NONE;
         if (config == null) {
-            return LINE_BREAK_WORD_STYLE_NONE;
+            return defaultWordStyle;
         }
         return config.mLineBreakWordStyle == LINE_BREAK_WORD_STYLE_UNSPECIFIED
-                ? LINE_BREAK_WORD_STYLE_NONE : config.mLineBreakWordStyle;
+                ? defaultWordStyle : config.mLineBreakWordStyle;
     }
 
     /**

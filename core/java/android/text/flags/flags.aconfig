@@ -68,3 +68,10 @@ flag {
   description: "Feature flag for deprecating UI fonts. By setting true for this feature flag, the elegant text height of will be turned on by default unless explicitly setting it to false by attribute or Java API call."
   bug: "279646685"
 }
+
+flag {
+  name: "word_style_auto"
+  namespace: "text"
+  description: "A feature flag that implements line break word style auto."
+  bug: "280005585"
+}
