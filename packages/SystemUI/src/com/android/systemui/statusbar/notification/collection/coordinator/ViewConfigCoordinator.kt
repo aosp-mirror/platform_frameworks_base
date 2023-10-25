@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Compile
-import com.android.systemui.util.traceSection
+import com.android.systemui.tracing.traceSection
 import javax.inject.Inject
 
 /**

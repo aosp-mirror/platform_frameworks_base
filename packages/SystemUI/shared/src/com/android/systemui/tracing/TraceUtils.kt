@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util
+package com.android.systemui.tracing
 
 import android.os.Trace
 import android.os.TraceNameSupplier
 import android.util.Log
-import com.android.systemui.util.tracing.TraceContextElement
-import com.android.systemui.util.tracing.TraceData
-import com.android.systemui.util.tracing.TraceData.Companion.FIRST_VALID_SPAN
-import com.android.systemui.util.tracing.TraceData.Companion.INVALID_SPAN
-import com.android.systemui.util.tracing.threadLocalTrace
+import com.android.systemui.tracing.TraceData.Companion.FIRST_VALID_SPAN
+import com.android.systemui.tracing.TraceData.Companion.INVALID_SPAN
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext

@@ -25,7 +25,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shade.ShadeExpansionStateManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import com.android.systemui.util.TraceUtils.Companion.launch
+import com.android.systemui.tracing.TraceUtils.Companion.launch
 import kotlinx.coroutines.withContext
 
 /** Provides state from the main SystemUI process on behalf of the Screenshot process. */

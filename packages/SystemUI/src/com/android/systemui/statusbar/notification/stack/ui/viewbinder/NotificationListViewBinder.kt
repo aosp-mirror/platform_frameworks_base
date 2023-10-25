@@ -31,7 +31,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.traceSection
+import com.android.systemui.tracing.traceSection
 
 /** Binds a [NotificationStackScrollLayout] to its [view model][NotificationListViewModel]. */
 object NotificationListViewBinder {

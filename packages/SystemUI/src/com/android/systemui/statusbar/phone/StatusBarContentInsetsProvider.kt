@@ -26,9 +26,9 @@ import android.view.DisplayCutout
 import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE
@@ -38,8 +38,7 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
 import com.android.systemui.util.leak.RotationUtils.getExactRotation
 import com.android.systemui.util.leak.RotationUtils.getResourcesForRotation
-import com.android.systemui.util.traceSection
-
+import com.android.systemui.tracing.traceSection
 import java.io.PrintWriter
 import java.lang.Math.max
 import javax.inject.Inject
@@ -134,8 +133,10 @@ class StatusBarContentInsetsProvider @Inject constructor(
      *      (i.e., ROTATION_NONE will always return the same bounds regardless of the context
      *      from which this method is called)
      */
-    fun getBoundingRectForPrivacyChipForRotation(@Rotation rotation: Int,
-                                                 displayCutout: DisplayCutout?): Rect {
+    fun getBoundingRectForPrivacyChipForRotation(
+        @Rotation rotation: Int,
+        displayCutout: DisplayCutout?
+    ): Rect {
         val key = getCacheKey(rotation, displayCutout)
         var insets = insetsCache[key]
         if (insets == null) {
@@ -276,7 +277,8 @@ class StatusBarContentInsetsProvider @Inject constructor(
 
     private fun getCacheKey(
             @Rotation rotation: Int,
-            displayCutout: DisplayCutout?): CacheKey =
+            displayCutout: DisplayCutout?
+        ): CacheKey =
         CacheKey(
             rotation = rotation,
             displaySize = Rect(context.resources.configuration.windowConfiguration.maxBounds),
@@ -411,7 +413,6 @@ private fun getStatusBarLeftRight(
     @Rotation targetRotation: Int,
     @Rotation currentRotation: Int
 ): Rect {
-
     val logicalDisplayWidth = if (targetRotation.isHorizontal()) height else width
 
     val cutoutRects = displayCutout?.boundingRects

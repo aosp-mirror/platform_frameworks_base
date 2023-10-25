@@ -48,7 +48,7 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionPr
 import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider.Companion.areAnimationsEnabled
 import com.android.systemui.util.concurrency.ThreadFactory
-import com.android.systemui.util.traceSection
+import com.android.systemui.tracing.traceSection
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper
 import java.util.Optional
 import java.util.concurrent.Executor

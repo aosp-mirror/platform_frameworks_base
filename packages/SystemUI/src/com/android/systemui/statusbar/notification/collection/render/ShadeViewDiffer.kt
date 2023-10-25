@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import android.annotation.MainThread
 import android.view.View
-import com.android.systemui.util.traceSection
+import com.android.systemui.tracing.traceSection
 
 /**
  * Given a "spec" that describes a "tree" of views, adds and removes views from the
