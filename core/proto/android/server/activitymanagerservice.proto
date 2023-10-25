@@ -20,6 +20,7 @@ package com.android.server.am;
 
 import "frameworks/base/core/proto/android/app/activitymanager.proto";
 import "frameworks/base/core/proto/android/app/appexitinfo.proto";
+import "frameworks/base/core/proto/android/app/appstartinfo.proto";
 import "frameworks/base/core/proto/android/app/notification.proto";
 import "frameworks/base/core/proto/android/app/profilerinfo.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
@@ -1036,6 +1037,26 @@ message AppsExitInfoProto {
             optional int32 uid = 1;
             repeated .android.app.ApplicationExitInfoProto app_exit_info = 2;
             repeated .android.app.ApplicationExitInfoProto app_recoverable_crash = 3;
+        }
+        repeated User users = 2;
+    }
+    repeated Package packages = 2;
+}
+
+// sync with com.android.server.am.am.ProcessList.java
+message AppsStartInfoProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int64 last_update_timestamp = 1;
+    message Package {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string package_name = 1;
+        message User {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 uid = 1;
+            repeated .android.app.ApplicationStartInfoProto app_start_info = 2;
         }
         repeated User users = 2;
     }

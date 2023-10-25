@@ -9718,9 +9718,29 @@ public class ActivityManagerService extends IActivityManager.Stub
     public ParceledListSlice<ApplicationStartInfo> getHistoricalProcessStartReasons(
             String packageName, int maxNum, int userId) {
         enforceNotIsolatedCaller("getHistoricalProcessStartReasons");
+        // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
+        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
+            throw new IllegalArgumentException("Unsupported userId");
+        }
+
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        mUserController.handleIncomingUser(callingPid, callingUid, userId, true, ALLOW_NON_FULL,
+                "getHistoricalProcessStartReasons", null);
 
         final ArrayList<ApplicationStartInfo> results = new ArrayList<ApplicationStartInfo>();
-
+        if (!TextUtils.isEmpty(packageName)) {
+            final int uid = enforceDumpPermissionForPackage(packageName, userId, callingUid,
+                        "getHistoricalProcessStartReasons");
+            if (uid != INVALID_UID) {
+                mProcessList.mAppStartInfoTracker.getStartInfo(
+                        packageName, userId, callingPid, maxNum, results);
+            }
+        } else {
+            // If no package name is given, use the caller's uid as the filter uid.
+            mProcessList.mAppStartInfoTracker.getStartInfo(
+                    packageName, callingUid, callingPid, maxNum, results);
+        }
         return new ParceledListSlice<ApplicationStartInfo>(results);
     }
 
@@ -9729,6 +9749,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setApplicationStartInfoCompleteListener(
             IApplicationStartInfoCompleteListener listener, int userId) {
         enforceNotIsolatedCaller("setApplicationStartInfoCompleteListener");
+
+        // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
+        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
+            throw new IllegalArgumentException("Unsupported userId");
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        mProcessList.mAppStartInfoTracker.addStartInfoCompleteListener(listener, callingUid);
     }
 
 
@@ -9742,6 +9770,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final int callingUid = Binder.getCallingUid();
+        mProcessList.mAppStartInfoTracker.clearStartInfoCompleteListener(callingUid, true);
     }
 
     @Override
@@ -10042,6 +10071,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.println();
             if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+                mProcessList.mAppStartInfoTracker.dumpHistoryProcessStartInfo(pw, dumpPackage);
                 pw.println("-------------------------------------------------------------------------------");
                 mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
             }
@@ -10439,6 +10470,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 LockGuard.dump(fd, pw, args);
             } else if ("users".equals(cmd)) {
                 dumpUsers(pw);
+            } else if ("start-info".equals(cmd)) {
+                if (opti < args.length) {
+                    dumpPackage = args[opti];
+                    opti++;
+                }
+                mProcessList.mAppStartInfoTracker.dumpHistoryProcessStartInfo(pw, dumpPackage);
             } else if ("exit-info".equals(cmd)) {
                 if (opti < args.length) {
                     dumpPackage = args[opti];

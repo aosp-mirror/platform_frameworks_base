@@ -27,7 +27,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.WireTypeMismatchException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -607,6 +615,103 @@ public final class ApplicationStartInfo implements Parcelable {
                     return new ApplicationStartInfo[size];
                 }
             };
+
+    /**
+     * Write to a protocol buffer output stream. Protocol buffer message definition at {@link
+     * android.app.ApplicationStartInfoProto}
+     *
+     * @param proto Stream to write the ApplicationStartInfo object to.
+     * @param fieldId Field Id of the ApplicationStartInfo as defined in the parent message
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) throws IOException {
+        final long token = proto.start(fieldId);
+        proto.write(ApplicationStartInfoProto.PID, mPid);
+        proto.write(ApplicationStartInfoProto.REAL_UID, mRealUid);
+        proto.write(ApplicationStartInfoProto.PACKAGE_UID, mPackageUid);
+        proto.write(ApplicationStartInfoProto.DEFINING_UID, mDefiningUid);
+        proto.write(ApplicationStartInfoProto.PROCESS_NAME, mProcessName);
+        proto.write(ApplicationStartInfoProto.STARTUP_STATE, mStartupState);
+        proto.write(ApplicationStartInfoProto.REASON, mReason);
+        if (mStartupTimestampsNs != null && mStartupTimestampsNs.size() > 0) {
+            ByteArrayOutputStream timestampsBytes = new ByteArrayOutputStream();
+            ObjectOutputStream timestampsOut = new ObjectOutputStream(timestampsBytes);
+            timestampsOut.writeObject(mStartupTimestampsNs);
+            proto.write(ApplicationStartInfoProto.STARTUP_TIMESTAMPS,
+                    timestampsBytes.toByteArray());
+        }
+        proto.write(ApplicationStartInfoProto.START_TYPE, mStartType);
+        if (mStartIntent != null) {
+            Parcel parcel = Parcel.obtain();
+            mStartIntent.writeToParcel(parcel, 0);
+            proto.write(ApplicationStartInfoProto.START_INTENT, parcel.marshall());
+            parcel.recycle();
+        }
+        proto.write(ApplicationStartInfoProto.LAUNCH_MODE, mLaunchMode);
+        proto.end(token);
+    }
+
+    /**
+     * Read from a protocol buffer input stream. Protocol buffer message definition at {@link
+     * android.app.ApplicationStartInfoProto}
+     *
+     * @param proto Stream to read the ApplicationStartInfo object from.
+     * @param fieldId Field Id of the ApplicationStartInfo as defined in the parent message
+     * @hide
+     */
+    public void readFromProto(ProtoInputStream proto, long fieldId)
+            throws IOException, WireTypeMismatchException, ClassNotFoundException {
+        final long token = proto.start(fieldId);
+        while (proto.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (proto.getFieldNumber()) {
+                case (int) ApplicationStartInfoProto.PID:
+                    mPid = proto.readInt(ApplicationStartInfoProto.PID);
+                    break;
+                case (int) ApplicationStartInfoProto.REAL_UID:
+                    mRealUid = proto.readInt(ApplicationStartInfoProto.REAL_UID);
+                    break;
+                case (int) ApplicationStartInfoProto.PACKAGE_UID:
+                    mPackageUid = proto.readInt(ApplicationStartInfoProto.PACKAGE_UID);
+                    break;
+                case (int) ApplicationStartInfoProto.DEFINING_UID:
+                    mDefiningUid = proto.readInt(ApplicationStartInfoProto.DEFINING_UID);
+                    break;
+                case (int) ApplicationStartInfoProto.PROCESS_NAME:
+                    mProcessName = intern(proto.readString(ApplicationStartInfoProto.PROCESS_NAME));
+                    break;
+                case (int) ApplicationStartInfoProto.STARTUP_STATE:
+                    mStartupState = proto.readInt(ApplicationStartInfoProto.STARTUP_STATE);
+                    break;
+                case (int) ApplicationStartInfoProto.REASON:
+                    mReason = proto.readInt(ApplicationStartInfoProto.REASON);
+                    break;
+                case (int) ApplicationStartInfoProto.STARTUP_TIMESTAMPS:
+                    ByteArrayInputStream timestampsBytes = new ByteArrayInputStream(proto.readBytes(
+                            ApplicationStartInfoProto.STARTUP_TIMESTAMPS));
+                    ObjectInputStream timestampsIn = new ObjectInputStream(timestampsBytes);
+                    mStartupTimestampsNs = (ArrayMap<Integer, Long>) timestampsIn.readObject();
+                    break;
+                case (int) ApplicationStartInfoProto.START_TYPE:
+                    mStartType = proto.readInt(ApplicationStartInfoProto.START_TYPE);
+                    break;
+                case (int) ApplicationStartInfoProto.START_INTENT:
+                    byte[] startIntentBytes = proto.readBytes(
+                        ApplicationStartInfoProto.START_INTENT);
+                    if (startIntentBytes.length > 0) {
+                        Parcel parcel = Parcel.obtain();
+                        parcel.unmarshall(startIntentBytes, 0, startIntentBytes.length);
+                        parcel.setDataPosition(0);
+                        mStartIntent = Intent.CREATOR.createFromParcel(parcel);
+                        parcel.recycle();
+                    }
+                    break;
+                case (int) ApplicationStartInfoProto.LAUNCH_MODE:
+                    mLaunchMode = proto.readInt(ApplicationStartInfoProto.LAUNCH_MODE);
+                    break;
+            }
+        }
+        proto.end(token);
+    }
 
     /** @hide */
     public void dump(@NonNull PrintWriter pw, @Nullable String prefix, @Nullable String seqSuffix,
