@@ -1159,9 +1159,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: {
                 final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
-                if (container == null || container.asDisplayArea() == null
-                        || !container.isAttached()) {
-                    Slog.e(TAG, "Attempt to operate on unknown or detached display area: "
+                if (container == null || !container.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + container);
+                    break;
+                }
+                if (container.asTask() == null && container.asDisplayArea() == null) {
+                    Slog.e(TAG, "Cannot set always-on-top on non-task or non-display area: "
                             + container);
                     break;
                 }
