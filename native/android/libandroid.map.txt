@@ -327,6 +327,7 @@ LIBANDROID {
     AThermal_registerThermalStatusListener; # introduced=30
     AThermal_unregisterThermalStatusListener; # introduced=30
     AThermal_getThermalHeadroom; # introduced=31
+    AThermal_getThermalHeadroomThresholds; # introduced=VanillaIceCream
     APerformanceHint_getManager; # introduced=Tiramisu
     APerformanceHint_createSession; # introduced=Tiramisu
     APerformanceHint_getPreferredUpdateRateNanos; # introduced=Tiramisu
@@ -341,6 +342,7 @@ LIBANDROID {
 
 LIBANDROID_PLATFORM {
   global:
+    AThermal_setIThermalServiceForTesting;
     APerformanceHint_setIHintManagerForTesting;
     APerformanceHint_sendHint;
     APerformanceHint_getThreadIds;
