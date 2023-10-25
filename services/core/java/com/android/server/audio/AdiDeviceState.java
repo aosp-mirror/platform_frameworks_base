@@ -165,7 +165,8 @@ import java.util.Objects;
 
     @Override
     public String toString() {
-        return "type: " + mDeviceType + "internal type: " + mInternalDeviceType
+        return "type: " + mDeviceType
+                + " internal type: 0x" + Integer.toHexString(mInternalDeviceType)
                 + " addr: " + mDeviceAddress + " bt audio type: "
                 + AudioManager.audioDeviceCategoryToString(mAudioDeviceCategory)
                 + " enabled: " + mSAEnabled + " HT: " + mHasHeadTracker
