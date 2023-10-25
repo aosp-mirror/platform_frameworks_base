@@ -2680,8 +2680,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                 .filterAppAccess(packageName, callingUid, userId);
     }
 
+    /** @deprecated Use {@link #noteProxyOperationWithState} instead. */
     @Override
     public SyncNotedAppOp noteProxyOperation(int code,
+            AttributionSource attributionSource, boolean shouldCollectAsyncNotedOp,
+            String message, boolean shouldCollectMessage, boolean skipProxyOperation) {
+        return mCheckOpsDelegateDispatcher.noteProxyOperation(code, attributionSource,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
+    }
+
+    @Override
+    public SyncNotedAppOp noteProxyOperationWithState(int code,
             AttributionSourceState attributionSourceState, boolean shouldCollectAsyncNotedOp,
             String message, boolean shouldCollectMessage, boolean skipProxyOperation) {
         AttributionSource attributionSource = new AttributionSource(attributionSourceState);
@@ -3212,8 +3221,21 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributionChainId);
     }
 
+    /** @deprecated Use {@link #startProxyOperationWithState} instead. */
     @Override
     public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
+            @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
+            @AttributionFlags int proxiedAttributionFlags, int attributionChainId) {
+        return mCheckOpsDelegateDispatcher.startProxyOperation(clientId, code, attributionSource,
+                startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                skipProxyOperation, proxyAttributionFlags, proxiedAttributionFlags,
+                attributionChainId);
+    }
+
+    @Override
+    public SyncNotedAppOp startProxyOperationWithState(@NonNull IBinder clientId, int code,
             @NonNull AttributionSourceState attributionSourceState, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
@@ -3513,8 +3535,16 @@ public class AppOpsService extends IAppOpsService.Stub {
         finishOperationUnchecked(clientId, code, uid, resolvedPackageName, attributionTag);
     }
 
+    /** @deprecated Use {@link #finishProxyOperationWithState} instead. */
     @Override
     public void finishProxyOperation(@NonNull IBinder clientId, int code,
+            @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
+        mCheckOpsDelegateDispatcher.finishProxyOperation(clientId, code, attributionSource,
+                skipProxyOperation);
+    }
+
+    @Override
+    public void finishProxyOperationWithState(@NonNull IBinder clientId, int code,
             @NonNull AttributionSourceState attributionSourceState, boolean skipProxyOperation) {
         AttributionSource attributionSource = new AttributionSource(attributionSourceState);
         mCheckOpsDelegateDispatcher.finishProxyOperation(clientId, code, attributionSource,
