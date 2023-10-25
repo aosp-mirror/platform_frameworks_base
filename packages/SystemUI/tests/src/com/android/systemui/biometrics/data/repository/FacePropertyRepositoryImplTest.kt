@@ -32,6 +32,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -54,18 +56,20 @@ class FacePropertyRepositoryImplTest : SysuiTestCase() {
     @JvmField @Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     private lateinit var underTest: FacePropertyRepository
+    private lateinit var dispatcher: TestDispatcher
     private lateinit var testScope: TestScope
 
     @Captor private lateinit var callback: ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback>
     @Mock private lateinit var faceManager: FaceManager
     @Before
     fun setup() {
-        testScope = TestScope()
+        dispatcher = StandardTestDispatcher()
+        testScope = TestScope(dispatcher)
         underTest = createRepository(faceManager)
     }
 
     private fun createRepository(manager: FaceManager? = faceManager) =
-        FacePropertyRepositoryImpl(testScope.backgroundScope, manager)
+        FacePropertyRepositoryImpl(testScope.backgroundScope, dispatcher, manager)
 
     @Test
     fun whenFaceManagerIsNotPresentIsNull() =

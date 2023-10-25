@@ -33,7 +33,9 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +43,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /**
  * A repository for the global state of FingerprintProperty.
@@ -67,6 +70,7 @@ class FingerprintPropertyRepositoryImpl
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val fingerprintManager: FingerprintManager?,
 ) : FingerprintPropertyRepository {
 
@@ -93,7 +97,9 @@ constructor(
                             }
                         }
                     }
-                fingerprintManager?.addAuthenticatorsRegisteredCallback(callback)
+                withContext(backgroundDispatcher) {
+                    fingerprintManager?.addAuthenticatorsRegisteredCallback(callback)
+                }
                 awaitClose {}
             }
             .stateIn(

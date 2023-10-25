@@ -29,13 +29,16 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** A repository for the global state of Face sensor. */
 interface FacePropertyRepository {
@@ -56,7 +59,8 @@ class FacePropertyRepositoryImpl
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val faceManager: FaceManager?
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val faceManager: FaceManager?,
 ) : FacePropertyRepository {
 
     override val sensorInfo: StateFlow<FaceSensorInfo?> =
@@ -77,7 +81,9 @@ constructor(
                             )
                         }
                     }
-                faceManager?.addAuthenticatorsRegisteredCallback(callback)
+                withContext(backgroundDispatcher) {
+                    faceManager?.addAuthenticatorsRegisteredCallback(callback)
+                }
                 awaitClose {}
             }
             .onEach { Log.d(TAG, "sensorProps changed: $it") }

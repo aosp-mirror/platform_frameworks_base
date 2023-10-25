@@ -65,7 +65,11 @@ class FingerprintRepositoryImplTest : SysuiTestCase() {
         val dispatcher = StandardTestDispatcher()
         testScope = TestScope(dispatcher)
         repository =
-            FingerprintPropertyRepositoryImpl(testScope.backgroundScope, fingerprintManager)
+            FingerprintPropertyRepositoryImpl(
+                testScope.backgroundScope,
+                dispatcher,
+                fingerprintManager
+            )
         testScope.runCurrent()
 
         verify(fingerprintManager)
