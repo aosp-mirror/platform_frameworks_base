@@ -2372,14 +2372,14 @@ public final class StrictMode {
     }
 
     /** Assume locked until we hear otherwise */
-    private static volatile boolean sUserKeyUnlocked = false;
+    private static volatile boolean sCeStorageUnlocked = false;
 
-    private static boolean isUserKeyUnlocked(int userId) {
+    private static boolean isCeStorageUnlocked(int userId) {
         final IStorageManager storage = IStorageManager.Stub
                 .asInterface(ServiceManager.getService("mount"));
         if (storage != null) {
             try {
-                return storage.isUserKeyUnlocked(userId);
+                return storage.isCeStorageUnlocked(userId);
             } catch (RemoteException ignored) {
             }
         }
@@ -2392,13 +2392,13 @@ public final class StrictMode {
         // since any relocking of that user will always result in our
         // process being killed to release any CE FDs we're holding onto.
         if (userId == UserHandle.myUserId()) {
-            if (sUserKeyUnlocked) {
+            if (sCeStorageUnlocked) {
                 return;
-            } else if (isUserKeyUnlocked(userId)) {
-                sUserKeyUnlocked = true;
+            } else if (isCeStorageUnlocked(userId)) {
+                sCeStorageUnlocked = true;
                 return;
             }
-        } else if (isUserKeyUnlocked(userId)) {
+        } else if (isCeStorageUnlocked(userId)) {
             return;
         }
 
