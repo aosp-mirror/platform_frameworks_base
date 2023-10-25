@@ -170,6 +170,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     private CommandQueue mCommandQueue;
 
     private View mRootView;
+    private View mFooterActionsView;
 
     @Inject
     public QSImpl(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -285,6 +286,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         if (!mFeatureFlags.isEnabled(Flags.COMPOSE_QS_FOOTER_ACTIONS)
                 || !ComposeFacade.INSTANCE.isComposeAvailable()) {
             Log.d(TAG, "Binding the View implementation of the QS footer actions");
+            mFooterActionsView = footerActionsView;
             mFooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
                     mListeningAndVisibilityLifecycleOwner);
             return;
@@ -294,6 +296,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         Log.d(TAG, "Binding the Compose implementation of the QS footer actions");
         View composeView = ComposeFacade.INSTANCE.createFooterActionsView(root.getContext(),
                 mQSFooterActionsViewModel, mListeningAndVisibilityLifecycleOwner);
+        mFooterActionsView = composeView;
 
         // The id R.id.qs_footer_actions is used by QSContainerImpl to set the horizontal margin
         // to all views except for qs_footer_actions, so we set it to the Compose view.
@@ -472,7 +475,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         boolean footerVisible = qsPanelVisible && (mQsExpanded || !keyguardShowing
                 || mHeaderAnimating || mShowCollapsedOnKeyguard);
         mFooter.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
-        mQSFooterActionsViewModel.onVisibilityChangeRequested(footerVisible);
+        mFooterActionsView.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
         mFooter.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
                 || (mQsExpanded && !mStackScrollerOverscrolling));
         mQSPanelController.setVisibility(qsPanelVisible ? View.VISIBLE : View.INVISIBLE);
@@ -856,7 +859,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         boolean customizing = isCustomizing();
         mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         mFooter.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
-        mQSFooterActionsViewModel.onVisibilityChangeRequested(!customizing);
+        mFooterActionsView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         mHeader.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
