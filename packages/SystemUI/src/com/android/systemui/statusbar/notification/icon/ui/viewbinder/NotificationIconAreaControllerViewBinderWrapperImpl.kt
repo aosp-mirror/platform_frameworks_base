@@ -18,21 +18,14 @@ package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 import android.content.Context
 import android.graphics.Rect
 import android.view.View
-import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.ListEntry
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
-import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
-import kotlinx.coroutines.DisposableHandle
 
 /**
  * Controller class for [NotificationIconContainer]. This implementation serves as a temporary
@@ -42,43 +35,11 @@ import kotlinx.coroutines.DisposableHandle
  * can be used directly.
  */
 @SysUISingleton
-class NotificationIconAreaControllerViewBinderWrapperImpl
-@Inject
-constructor(
-    private val configuration: ConfigurationState,
-    private val configurationController: ConfigurationController,
-    private val dozeParameters: DozeParameters,
-    private val featureFlags: FeatureFlagsClassic,
-    private val screenOffAnimationController: ScreenOffAnimationController,
-    private val aodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
-    private val aodIconsViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
-) : NotificationIconAreaController {
-
-    private var aodIcons: NotificationIconContainer? = null
-    private var aodBindJob: DisposableHandle? = null
+class NotificationIconAreaControllerViewBinderWrapperImpl @Inject constructor() :
+    NotificationIconAreaController {
 
     /** Called by the Keyguard*ViewController whose view contains the aod icons. */
-    override fun setupAodIcons(aodIcons: NotificationIconContainer) {
-        val changed = this.aodIcons != null && aodIcons !== this.aodIcons
-        if (changed) {
-            this.aodIcons!!.setAnimationsEnabled(false)
-            this.aodIcons!!.removeAllViews()
-            aodBindJob?.dispose()
-        }
-        this.aodIcons = aodIcons
-        this.aodIcons!!.setOnLockScreen(true)
-        aodBindJob =
-            NotificationIconContainerViewBinder.bind(
-                aodIcons,
-                aodIconsViewModel,
-                configuration,
-                configurationController,
-                dozeParameters,
-                featureFlags,
-                screenOffAnimationController,
-                aodIconViewStore,
-            )
-    }
+    override fun setupAodIcons(aodIcons: NotificationIconContainer?) = unsupported
 
     override fun setupShelf(notificationShelfController: NotificationShelfController) =
         NotificationShelfViewBinderWrapperControllerImpl.unsupported
@@ -104,9 +65,7 @@ constructor(
 
     override fun onThemeChanged() = unsupported
 
-    override fun getHeight(): Int {
-        return if (aodIcons == null) 0 else aodIcons!!.height
-    }
+    override fun getHeight(): Int = unsupported
 
     companion object {
         val unsupported: Nothing
