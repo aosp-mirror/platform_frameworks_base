@@ -2713,10 +2713,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @AnyThread
-    void schedulePrepareStylusHandwritingDelegation(
+    void schedulePrepareStylusHandwritingDelegation(@UserIdInt int userId,
             @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
         mHandler.obtainMessage(
-                MSG_PREPARE_HANDWRITING_DELEGATION,
+                MSG_PREPARE_HANDWRITING_DELEGATION, userId, 0 /* unused */,
                 new Pair<>(delegatePackageName, delegatorPackageName)).sendToTarget();
     }
 
@@ -3433,7 +3433,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.w(TAG, "prepareStylusHandwritingDelegation() fail");
             throw new IllegalArgumentException("Delegator doesn't match Uid");
         }
-        schedulePrepareStylusHandwritingDelegation(delegatePackageName, delegatorPackageName);
+        schedulePrepareStylusHandwritingDelegation(
+                userId, delegatePackageName, delegatorPackageName);
     }
 
     @Override
@@ -3441,13 +3442,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @NonNull IInputMethodClient client,
             @UserIdInt int userId,
             @NonNull String delegatePackageName,
-            @NonNull String delegatorPackageName) {
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
         if (!isStylusHandwritingEnabled(mContext, userId)) {
             Slog.w(TAG, "Can not accept stylus handwriting delegation. Stylus handwriting"
                     + " pref is disabled for user: " + userId);
             return false;
         }
-        if (!verifyDelegator(client, delegatePackageName, delegatorPackageName)) {
+        if (!verifyDelegator(client, delegatePackageName, delegatorPackageName, flags)) {
             return false;
         }
 
@@ -3471,14 +3473,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean verifyDelegator(
             @NonNull IInputMethodClient client,
             @NonNull String delegatePackageName,
-            @NonNull String delegatorPackageName) {
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
         if (!verifyClientAndPackageMatch(client, delegatePackageName)) {
             Slog.w(TAG, "Delegate package does not belong to the same user. Ignoring"
                     + " startStylusHandwriting");
             return false;
         }
         synchronized (ImfLock.class) {
-            if (!delegatorPackageName.equals(mHwController.getDelegatorPackageName())) {
+            boolean homeDelegatorAllowed =
+                    (flags & InputMethodManager.HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED)
+                            != 0;
+            if (!delegatorPackageName.equals(mHwController.getDelegatorPackageName())
+                    && !(homeDelegatorAllowed
+                            && mHwController.isDelegatorFromDefaultHomePackage())) {
                 Slog.w(TAG,
                         "Delegator package does not match. Ignoring startStylusHandwriting");
                 return false;
@@ -4924,9 +4932,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             case MSG_PREPARE_HANDWRITING_DELEGATION:
                 synchronized (ImfLock.class) {
+                    int userId = msg.arg1;
                     String delegate = (String) ((Pair) msg.obj).first;
                     String delegator = (String) ((Pair) msg.obj).second;
-                    mHwController.prepareStylusHandwritingDelegation(delegate, delegator);
+                    mHwController.prepareStylusHandwritingDelegation(userId, delegate, delegator);
                 }
                 return true;
             case MSG_START_HANDWRITING:
