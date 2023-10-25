@@ -24,13 +24,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
@@ -42,8 +37,6 @@ import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
-import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -283,15 +276,15 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
     }
 
     @Test
@@ -323,7 +316,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.INVISIBLE, getClockView().getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -339,7 +332,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -356,7 +349,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.INVISIBLE, getClockView().getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
 
         // WHEN the shade is updated to no longer be open
@@ -367,7 +360,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -381,7 +374,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -395,7 +388,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.GONE, getClockView().getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -409,7 +402,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.GONE, getClockView().getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
 
         // WHEN the transition has finished
@@ -418,7 +411,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -451,7 +444,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         assertEquals(View.VISIBLE,
                 mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
-        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
     }
 
     @Test
@@ -729,18 +722,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private void setUpNotificationIconAreaController() {
         mMockNotificationAreaController = mock(NotificationIconAreaController.class);
 
-        mNotificationAreaInner = mock(View.class);
-
-        when(mNotificationAreaInner.getLayoutParams()).thenReturn(
-                new FrameLayout.LayoutParams(100, 100));
-        // We should probably start using a real view so that we don't need to mock these methods.
-        ViewPropertyAnimator viewPropertyAnimator = mock(ViewPropertyAnimator.class);
-        when(mNotificationAreaInner.animate()).thenReturn(viewPropertyAnimator);
-        when(viewPropertyAnimator.alpha(anyFloat())).thenReturn(viewPropertyAnimator);
-        when(viewPropertyAnimator.setDuration(anyLong())).thenReturn(viewPropertyAnimator);
-        when(viewPropertyAnimator.setInterpolator(any())).thenReturn(viewPropertyAnimator);
-        when(viewPropertyAnimator.setStartDelay(anyLong())).thenReturn(viewPropertyAnimator);
-        when(viewPropertyAnimator.withEndAction(any())).thenReturn(viewPropertyAnimator);
+        mNotificationAreaInner = new View(mContext);
 
         when(mMockNotificationAreaController.getNotificationInnerAreaView()).thenReturn(
                 mNotificationAreaInner);
