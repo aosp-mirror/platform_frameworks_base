@@ -22,6 +22,7 @@ import android.credentials.CredentialProviderInfo;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCandidateCredentialsRequest;
+import android.view.autofill.IAutoFillManagerClient;
 import android.credentials.GetCredentialRequest;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
@@ -47,7 +48,7 @@ interface ICredentialManager {
 
     @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback, String callingPackage);
 
-    @nullable ICancellationSignal getCandidateCredentials(in GetCredentialRequest request, in IGetCandidateCredentialsCallback callback, String callingPackage);
+    @nullable ICancellationSignal getCandidateCredentials(in GetCredentialRequest request, in IGetCandidateCredentialsCallback callback, in IAutoFillManagerClient clientCallback, String callingPackage);
 
     @nullable ICancellationSignal clearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback, String callingPackage);
 

@@ -37,6 +37,7 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -621,6 +622,23 @@ public abstract class AutofillService extends Service {
                     new FillCallback(callback, request.getId())));
         }
 
+
+        @Override
+        public void onFillCredentialRequest(FillRequest request, IFillCallback callback,
+                IAutoFillManagerClient autofillClientCallback) {
+            ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onFillCredentialRequest,
+                    AutofillService.this, request, CancellationSignal.fromTransport(transport),
+                    new FillCallback(callback, request.getId()),
+                    autofillClientCallback));
+        }
+
         @Override
         public void onSaveRequest(SaveRequest request, ISaveCallback callback) {
             mHandler.sendMessage(obtainMessage(
@@ -681,6 +699,15 @@ public abstract class AutofillService extends Service {
      */
     public abstract void onFillRequest(@NonNull FillRequest request,
             @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback);
+
+    /**
+     * Variant of onFillRequest for internal credential manager proxy autofill service only.
+     *
+     * @hide
+     */
+    public void onFillCredentialRequest(@NonNull FillRequest request,
+            @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback,
+            IAutoFillManagerClient autofillClientCallback) {}
 
     /**
      * Called when the user requests the service to save the contents of a screen.

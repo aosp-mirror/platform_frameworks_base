@@ -233,6 +233,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             new ComponentName("com.android.credentialmanager",
                     "com.android.credentialmanager.autofill.CredentialAutofillService");
 
+    static final String SESSION_ID_KEY = "session_id";
+
     final Object mLock;
 
     private final AutofillManagerServiceImpl mService;
@@ -382,7 +384,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     private boolean mHasCallback;
 
-    /** Whether the session has credential provider as the primary provider. */
+    /** Whether the session has credential manager provider as the primary provider. */
     private boolean mIsPrimaryCredential;
 
     @GuardedBy("mLock")
@@ -720,9 +722,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     && mSecondaryProviderHandler != null) {
                 Slog.v(TAG, "Requesting fill response to secondary provider.");
                 mSecondaryProviderHandler.onFillRequest(mPendingFillRequest,
-                        mPendingFillRequest.getFlags());
+                        mPendingInlineSuggestionsRequest,
+                        mPendingFillRequest.getFlags(), id, mClient);
             } else if (mRemoteFillService != null) {
-                mRemoteFillService.onFillRequest(mPendingFillRequest);
+                if (mIsPrimaryCredential) {
+                    mPendingFillRequest = addSessionIdToClientState(mPendingFillRequest,
+                            mPendingInlineSuggestionsRequest, id);
+                    mRemoteFillService.onFillCredentialRequest(mPendingFillRequest, mClient);
+                } else {
+                    mRemoteFillService.onFillRequest(mPendingFillRequest);
+                }
             }
             mPendingInlineSuggestionsRequest = null;
             mWaitForInlineRequest = false;
@@ -863,6 +872,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         mService.getServicePackageName(), mLastFillRequest.getFlags());
             }
         }
+    }
+
+    private FillRequest addSessionIdToClientState(FillRequest pendingFillRequest,
+            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int id) {
+        if (pendingFillRequest.getClientState() == null) {
+            pendingFillRequest = new FillRequest(pendingFillRequest.getId(),
+                    pendingFillRequest.getFillContexts(),
+                    pendingFillRequest.getHints(),
+                    new Bundle(),
+                    pendingFillRequest.getFlags(),
+                    pendingInlineSuggestionsRequest,
+                    pendingFillRequest.getDelayedFillIntentSender());
+        }
+        pendingFillRequest.getClientState().putInt(SESSION_ID_KEY, id);
+        return pendingFillRequest;
     }
 
     /**
