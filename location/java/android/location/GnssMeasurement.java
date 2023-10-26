@@ -502,7 +502,7 @@ public final class GnssMeasurement implements Parcelable {
      *       <td colspan="4"><strong>BDS</strong></td>
      *       <td colspan="3"><strong>GAL</strong></td>
      *       <td><strong>SBAS</strong></td>
-     *       <td><strong>IRNSS</strong></td>
+     *       <td><strong>NavIC</strong></td>
      *     </tr>
      *     <tr>
      *       <td><strong>State Flag</strong></td>
@@ -1528,17 +1528,17 @@ public final class GnssMeasurement implements Parcelable {
      * <p>Similar to the Attribute field described in RINEX 4.00, e.g., in Tables 9-16 (see
      * https://igs.org/wg/rinex/#documents-formats).
      *
-     * <p>Returns "A" for GALILEO E1A, GALILEO E6A, IRNSS L5A SPS, IRNSS SA SPS, GLONASS G1a L1OCd,
+     * <p>Returns "A" for GALILEO E1A, GALILEO E6A, NavIC L5A SPS, NavIC SA SPS, GLONASS G1a L1OCd,
      * GLONASS G2a L2CSI.
      *
-     * <p>Returns "B" for GALILEO E1B, GALILEO E6B, IRNSS L5B RS (D), IRNSS SB RS (D), GLONASS G1a
+     * <p>Returns "B" for GALILEO E1B, GALILEO E6B, NavIC L5B RS (D), NavIC SB RS (D), GLONASS G1a
      * L1OCp, GLONASS G2a L2OCp, QZSS L1Sb.
      *
      * <p>Returns "C" for GPS L1 C/A, GPS L2 C/A, GLONASS G1 C/A, GLONASS G2 C/A, GALILEO E1C,
-     * GALILEO E6C, SBAS L1 C/A, QZSS L1 C/A, IRNSS L5C RS (P), IRNSS SC RS (P).
+     * GALILEO E6C, SBAS L1 C/A, QZSS L1 C/A, NavIC L5C RS (P), NavIC SC RS (P).
      *
      * <p>Returns "D" for GPS L2 (L1(C/A) + (P2-P1) (semi-codeless)), QZSS L5S(I), BDS B1C Data,
-     * BDS B2a Data, BDS B2b Data, BDS B2 (B2a+B2b) Data, BDS B3a Data.
+     * BDS B2a Data, BDS B2b Data, BDS B2 (B2a+B2b) Data, BDS B3a Data, NavIC L1 Data.
      *
      * <p>Returns “E” for QZSS L1 C/B, QZSS L6E.
      *
@@ -1553,7 +1553,7 @@ public final class GnssMeasurement implements Parcelable {
      * <p>Returns "N" for GPS L1 codeless, GPS L2 codeless.
      *
      * <p>Returns "P" for GPS L1P, GPS L2P, GLONASS G1P, GLONASS G2P, BDS B1C Pilot, BDS B2a Pilot,
-     * BDS B2b Pilot, BDS B2 (B2a+B2b) Pilot, BDS B3a Pilot, QZSS L5S(Q).
+     * BDS B2b Pilot, BDS B2 (B2a+B2b) Pilot, BDS B3a Pilot, QZSS L5S(Q), NavIC L1 Pilot.
      *
      * <p>Returns "Q" for GPS L5 Q, GLONASS G3 Q, GALILEO E5a Q, GALILEO E5b Q, GALILEO E5a+b Q,
      * SBAS L5 Q, QZSS L5 Q, BDS B1 Q, BDS B2 Q, BDS B3 Q.
@@ -1567,7 +1567,8 @@ public final class GnssMeasurement implements Parcelable {
      * GLONASS G2a L2CSI+L2OCp, GLONASS G3 (I+Q), GALILEO E1 (B+C), GALILEO E5a (I+Q), GALILEO
      * E5b (I+Q), GALILEO E5a+b (I+Q), GALILEO E6 (B+C), SBAS L5 (I+Q), QZSS L1C (D+P), QZSS L2C
      * (M+L), QZSS L5 (I+Q), QZSS L6 (D+P), BDS B1 (I+Q), BDS B1C Data+Pilot, BDS B2a Data+Pilot,
-     * BDS B2 (I+Q), BDS B2 (B2a+B2b) Data+Pilot, BDS B3 (I+Q), IRNSS L5 (B+C), IRNSS S (B+C).
+     * BDS B2 (I+Q), BDS B2 (B2a+B2b) Data+Pilot, BDS B3 (I+Q), NavIC L5 (B+C), NavIC S (B+C),
+     * NavIC L1 Data+Pilot.
      *
      * <p>Returns "Y" for GPS L1Y, GPS L2Y.
      *
