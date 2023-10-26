@@ -16,8 +16,6 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -58,7 +56,6 @@ public class DismissAnimationControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        setFlagDefaults(mSetFlagsRule);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
                 mock(SecureSettings.class));

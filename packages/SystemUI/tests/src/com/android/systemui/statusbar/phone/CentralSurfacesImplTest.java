@@ -21,7 +21,6 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 
-import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
@@ -164,7 +163,6 @@ import com.android.systemui.statusbar.notification.interruption.KeyguardNotifica
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
@@ -337,7 +335,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI, false);
         // Set default value to avoid IllegalStateException.
         mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
-        setFlagDefault(mSetFlagsRule, NotificationIconContainerRefactor.FLAG_NAME);
         // For the Shade to respond to Back gesture, we must enable the event routing
         mFeatureFlags.set(Flags.WM_SHADE_ALLOW_BACK_GESTURE, true);
         // For the Shade to animate during the Back gesture, we must enable the animation flag.
