@@ -34,6 +34,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -46,7 +47,9 @@ constructor(
     private val bluetoothToggleInitialValue: Boolean,
     private val subtitleResIdInitialValue: Int,
     private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
+    private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger,
+    private val logger: BluetoothTileDialogLogger,
     context: Context,
 ) : SystemUIDialog(context, DEFAULT_THEME, DEFAULT_DISMISS_ON_DEVICE_LOCK) {
 
@@ -102,9 +105,11 @@ constructor(
         showSeeAll: Boolean,
         showPairNewDevice: Boolean
     ) {
+        val start = systemClock.elapsedRealtime()
         deviceItemAdapter.refreshDeviceItemList(deviceItem) {
             seeAllViewGroup.visibility = if (showSeeAll) VISIBLE else GONE
             pairNewDeviceViewGroup.visibility = if (showPairNewDevice) VISIBLE else GONE
+            logger.logDeviceUiUpdate(systemClock.elapsedRealtime() - start)
         }
     }
 
@@ -117,6 +122,7 @@ constructor(
         toggleView.isChecked = bluetoothToggleInitialValue
         toggleView.setOnCheckedChangeListener { _, isChecked ->
             mutableBluetoothStateToggle.value = isChecked
+            logger.logBluetoothState(BluetoothStateStage.USER_TOGGLED, isChecked.toString())
             uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_TOGGLE_CLICKED)
         }
     }

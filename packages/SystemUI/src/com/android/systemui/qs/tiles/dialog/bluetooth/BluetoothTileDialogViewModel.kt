@@ -35,10 +35,12 @@ import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Compan
 import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.MAX_DEVICE_ITEM_ENTRY
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -53,7 +55,9 @@ constructor(
     private val bluetoothStateInteractor: BluetoothStateInteractor,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val activityStarter: ActivityStarter,
+    private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger,
+    private val logger: BluetoothTileDialogLogger,
     @Application private val coroutineScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
 ) : BluetoothTileDialogCallback {
@@ -90,7 +94,11 @@ constructor(
                 }
                     ?: dialog!!.show()
                 updateDeviceItemJob?.cancel()
-                updateDeviceItemJob = launch { deviceItemInteractor.updateDeviceItems(context) }
+                updateDeviceItemJob = launch {
+                    // Add a slight delay for smoother dialog bounds change
+                    delay(FIRST_LOAD_DELAY_MS)
+                    deviceItemInteractor.updateDeviceItems(context, DeviceFetchTrigger.FIRST_LOAD)
+                }
 
                 bluetoothStateInteractor.bluetoothStateUpdate
                     .filterNotNull()
@@ -98,7 +106,10 @@ constructor(
                         dialog!!.onBluetoothStateUpdated(it, getSubtitleResId(it))
                         updateDeviceItemJob?.cancel()
                         updateDeviceItemJob = launch {
-                            deviceItemInteractor.updateDeviceItems(context)
+                            deviceItemInteractor.updateDeviceItems(
+                                context,
+                                DeviceFetchTrigger.BLUETOOTH_STATE_CHANGE_RECEIVED
+                            )
                         }
                     }
                     .launchIn(this)
@@ -107,7 +118,10 @@ constructor(
                     .onEach {
                         updateDeviceItemJob?.cancel()
                         updateDeviceItemJob = launch {
-                            deviceItemInteractor.updateDeviceItems(context)
+                            deviceItemInteractor.updateDeviceItems(
+                                context,
+                                DeviceFetchTrigger.BLUETOOTH_CALLBACK_RECEIVED
+                            )
                         }
                     }
                     .launchIn(this)
@@ -139,7 +153,9 @@ constructor(
                 bluetoothStateInteractor.isBluetoothEnabled,
                 getSubtitleResId(bluetoothStateInteractor.isBluetoothEnabled),
                 this@BluetoothTileDialogViewModel,
+                systemClock,
                 uiEventLogger,
+                logger,
                 context
             )
             .apply { SystemUIDialog.registerDismissListener(this) { dismissDialog() } }
@@ -189,6 +205,7 @@ constructor(
 
     companion object {
         private const val INTERACTION_JANK_TAG = "bluetooth_tile_dialog"
+        private const val FIRST_LOAD_DELAY_MS = 500L
         private fun getSubtitleResId(isBluetoothEnabled: Boolean) =
             if (isBluetoothEnabled) R.string.quick_settings_bluetooth_tile_subtitle
             else R.string.bt_is_off

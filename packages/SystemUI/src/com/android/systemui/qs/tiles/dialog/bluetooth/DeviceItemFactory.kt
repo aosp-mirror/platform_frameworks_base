@@ -39,12 +39,38 @@ internal abstract class DeviceItemFactory {
     abstract fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem
 }
 
+internal class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
+    override fun isFilterMatched(
+        cachedDevice: CachedBluetoothDevice,
+        audioManager: AudioManager?
+    ): Boolean {
+        return BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
+            BluetoothUtils.isAvailableMediaBluetoothDevice(cachedDevice, audioManager)
+    }
+
+    override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
+        return DeviceItem(
+            type = DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
+            cachedBluetoothDevice = cachedDevice,
+            deviceName = cachedDevice.name,
+            connectionSummary = cachedDevice.connectionSummary ?: "",
+            iconWithDescription =
+                BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
+                    Pair(p.first, p.second)
+                },
+            background = backgroundOn,
+            isEnabled = !cachedDevice.isBusy,
+        )
+    }
+}
+
 internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager?
     ): Boolean {
-        return BluetoothUtils.isAvailableMediaBluetoothDevice(cachedDevice, audioManager)
+        return !BluetoothUtils.isActiveMediaDevice(cachedDevice) &&
+            BluetoothUtils.isAvailableMediaBluetoothDevice(cachedDevice, audioManager)
     }
 
     // TODO(b/298124674): move create() to the abstract class to reduce duplicate code
@@ -59,7 +85,7 @@ internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
                 BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
                     Pair(p.first, p.second)
                 },
-            background = backgroundOn,
+            background = if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             isEnabled = !cachedDevice.isBusy,
         )
     }
@@ -84,7 +110,7 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
                 BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let { p ->
                     Pair(p.first, p.second)
                 },
-            background = backgroundOn,
+            background = if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             isEnabled = !cachedDevice.isBusy,
         )
     }

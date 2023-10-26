@@ -629,7 +629,7 @@
     <!-- QuickSettings: Bluetooth detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_detail_empty_text">No paired devices available</string>
     <!-- QuickSettings: Bluetooth dialog subtitle [CHAR LIMIT=NONE]-->
-    <string name="quick_settings_bluetooth_tile_subtitle">Tap a device to connect</string>
+    <string name="quick_settings_bluetooth_tile_subtitle">Tap to connect or disconnect a device </string>
     <!-- QuickSettings: Bluetooth dialog pair new devices [CHAR LIMIT=NONE]-->
     <string name="pair_new_bluetooth_devices">Pair new device</string>
     <!-- QuickSettings: Bluetooth dialog see all devices [CHAR LIMIT=NONE]-->
