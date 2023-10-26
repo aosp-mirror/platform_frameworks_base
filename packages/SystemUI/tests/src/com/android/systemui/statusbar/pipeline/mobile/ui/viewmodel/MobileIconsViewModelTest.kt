@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.TelephonyIcons
@@ -102,6 +103,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
                         subscriptionId = 1,
                         isOpportunistic = false,
                         carrierName = "Carrier 1",
+                        profileClass = PROFILE_CLASS_UNSET,
                     ),
                 )
             assertThat(latest).isEqualTo(listOf(1))
@@ -112,16 +114,19 @@ class MobileIconsViewModelTest : SysuiTestCase() {
                         subscriptionId = 2,
                         isOpportunistic = false,
                         carrierName = "Carrier 2",
+                        profileClass = PROFILE_CLASS_UNSET,
                     ),
                     SubscriptionModel(
                         subscriptionId = 5,
                         isOpportunistic = true,
                         carrierName = "Carrier 5",
+                        profileClass = PROFILE_CLASS_UNSET,
                     ),
                     SubscriptionModel(
                         subscriptionId = 7,
                         isOpportunistic = true,
                         carrierName = "Carrier 7",
+                        profileClass = PROFILE_CLASS_UNSET,
                     ),
                 )
             assertThat(latest).isEqualTo(listOf(2, 5, 7))
@@ -335,18 +340,21 @@ class MobileIconsViewModelTest : SysuiTestCase() {
                 subscriptionId = 1,
                 isOpportunistic = false,
                 carrierName = "Carrier 1",
+                profileClass = PROFILE_CLASS_UNSET,
             )
         private val SUB_2 =
             SubscriptionModel(
                 subscriptionId = 2,
                 isOpportunistic = false,
                 carrierName = "Carrier 2",
+                profileClass = PROFILE_CLASS_UNSET,
             )
         private val SUB_3 =
             SubscriptionModel(
                 subscriptionId = 3,
                 isOpportunistic = false,
                 carrierName = "Carrier 3",
+                profileClass = PROFILE_CLASS_UNSET,
             )
     }
 }

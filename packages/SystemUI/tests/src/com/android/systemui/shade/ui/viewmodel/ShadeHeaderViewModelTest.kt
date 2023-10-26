@@ -1,5 +1,6 @@
 package com.android.systemui.shade.ui.viewmodel
 
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -151,12 +152,14 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                 subscriptionId = 1,
                 isOpportunistic = false,
                 carrierName = "Carrier 1",
+                profileClass = PROFILE_CLASS_UNSET,
             )
         private val SUB_2 =
             SubscriptionModel(
                 subscriptionId = 2,
                 isOpportunistic = false,
                 carrierName = "Carrier 2",
+                profileClass = PROFILE_CLASS_UNSET,
             )
     }
 }

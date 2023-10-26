@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.net.ConnectivityManager
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
@@ -88,6 +89,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             SubscriptionModel(
                 subscriptionId = SUB_ID,
                 carrierName = DEFAULT_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
         )
 
@@ -737,7 +739,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
     private companion object {
         const val SUB_ID = 42
-        private val DEFAULT_NAME = "default name"
+        private const val DEFAULT_NAME = "default name"
         private val DEFAULT_NAME_MODEL = NetworkNameModel.Default(DEFAULT_NAME)
         private const val SEP = "-"
         private const val BUFFER_SEPARATOR = "|"

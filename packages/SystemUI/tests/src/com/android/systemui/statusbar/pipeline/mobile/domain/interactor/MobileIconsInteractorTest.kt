@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.os.ParcelUuid
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
@@ -806,7 +807,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 subscriptionId = subscriptionIds.first,
                 isOpportunistic = opportunistic.first,
                 groupUuid = groupUuid,
-                carrierName = "Carrier ${subscriptionIds.first}"
+                carrierName = "Carrier ${subscriptionIds.first}",
+                profileClass = PROFILE_CLASS_UNSET,
             )
 
         val sub2 =
@@ -814,7 +816,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 subscriptionId = subscriptionIds.second,
                 isOpportunistic = opportunistic.second,
                 groupUuid = groupUuid,
-                carrierName = "Carrier ${opportunistic.second}"
+                carrierName = "Carrier ${opportunistic.second}",
+                profileClass = PROFILE_CLASS_UNSET,
             )
 
         return Pair(sub1, sub2)
@@ -824,12 +827,20 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
         private const val SUB_1_ID = 1
         private val SUB_1 =
-            SubscriptionModel(subscriptionId = SUB_1_ID, carrierName = "Carrier $SUB_1_ID")
+            SubscriptionModel(
+                subscriptionId = SUB_1_ID,
+                carrierName = "Carrier $SUB_1_ID",
+                profileClass = PROFILE_CLASS_UNSET,
+            )
         private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID, mock())
 
         private const val SUB_2_ID = 2
         private val SUB_2 =
-            SubscriptionModel(subscriptionId = SUB_2_ID, carrierName = "Carrier $SUB_2_ID")
+            SubscriptionModel(
+                subscriptionId = SUB_2_ID,
+                carrierName = "Carrier $SUB_2_ID",
+                profileClass = PROFILE_CLASS_UNSET,
+            )
         private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID, mock())
 
         private const val SUB_3_ID = 3
@@ -838,7 +849,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 subscriptionId = SUB_3_ID,
                 isOpportunistic = true,
                 groupUuid = ParcelUuid(UUID.randomUUID()),
-                carrierName = "Carrier $SUB_3_ID"
+                carrierName = "Carrier $SUB_3_ID",
+                profileClass = PROFILE_CLASS_UNSET,
             )
         private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID, mock())
 
@@ -848,7 +860,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 subscriptionId = SUB_4_ID,
                 isOpportunistic = true,
                 groupUuid = ParcelUuid(UUID.randomUUID()),
-                carrierName = "Carrier $SUB_4_ID"
+                carrierName = "Carrier $SUB_4_ID",
+                profileClass = PROFILE_CLASS_UNSET,
             )
         private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID, mock())
     }
