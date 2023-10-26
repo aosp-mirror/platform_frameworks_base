@@ -101,6 +101,7 @@ import org.mockito.ArgumentCaptor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * Test class for {@link ITaskOrganizer} and {@link android.window.ITaskOrganizerController}.
@@ -583,7 +584,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testTaskFragmentHiddenAndFocusableChanges() {
+    public void testTaskFragmentHiddenFocusableTranslucentChanges() {
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
@@ -605,10 +606,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(taskFragment.shouldBeVisible(null));
         assertTrue(taskFragment.isFocusable());
         assertTrue(taskFragment.isTopActivityFocusable());
+        assertFalse(taskFragment.isForceTranslucent());
 
         // Apply transaction to the TaskFragment hidden and not focusable.
         t.setHidden(taskFragment.mRemoteToken.toWindowContainerToken(), true);
         t.setFocusable(taskFragment.mRemoteToken.toWindowContainerToken(), false);
+        t.setForceTranslucent(taskFragment.mRemoteToken.toWindowContainerToken(), true);
         mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
                 t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
                 false /* shouldApplyIndependently */);
@@ -617,10 +620,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertFalse(taskFragment.shouldBeVisible(null));
         assertFalse(taskFragment.isFocusable());
         assertFalse(taskFragment.isTopActivityFocusable());
+        assertTrue(taskFragment.isForceTranslucent());
 
         // Apply transaction to the TaskFragment not hidden and focusable.
         t.setHidden(taskFragment.mRemoteToken.toWindowContainerToken(), false);
         t.setFocusable(taskFragment.mRemoteToken.toWindowContainerToken(), true);
+        t.setForceTranslucent(taskFragment.mRemoteToken.toWindowContainerToken(), false);
         mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
                 t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
                 false /* shouldApplyIndependently */);
@@ -629,10 +634,32 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(taskFragment.shouldBeVisible(null));
         assertTrue(taskFragment.isFocusable());
         assertTrue(taskFragment.isTopActivityFocusable());
+        assertFalse(taskFragment.isForceTranslucent());
     }
 
     @Test
-    public void testTaskFragmentHiddenAndFocusableChanges_throwsWhenNotSystemOrganizer() {
+    public void testTaskFragmentChangeHidden_throwsWhenNotSystemOrganizer() {
+        // Non-system organizers are not allow to update the hidden state.
+        testTaskFragmentChangesWithoutSystemOrganizerThrowException(
+                (t, windowContainerToken) -> t.setHidden(windowContainerToken, true));
+    }
+
+    @Test
+    public void testTaskFragmentChangeFocusable_throwsWhenNotSystemOrganizer() {
+        // Non-system organizers are not allow to update the focusable state.
+        testTaskFragmentChangesWithoutSystemOrganizerThrowException(
+                (t, windowContainerToken) -> t.setFocusable(windowContainerToken, false));
+    }
+
+    @Test
+    public void testTaskFragmentChangeTranslucent_throwsWhenNotSystemOrganizer() {
+        // Non-system organizers are not allow to update the translucent state.
+        testTaskFragmentChangesWithoutSystemOrganizerThrowException(
+                (t, windowContainerToken) -> t.setForceTranslucent(windowContainerToken, true));
+    }
+
+    private void testTaskFragmentChangesWithoutSystemOrganizerThrowException(
+            BiConsumer<WindowContainerTransaction, WindowContainerToken> addOp) {
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
@@ -641,21 +668,15 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final TaskFragmentOrganizer organizer =
                 createTaskFragmentOrganizer(t, false /* isSystemOrganizer */);
 
-        final IBinder token = new Binder();
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(rootTask)
-                .setFragmentToken(token)
+                .setFragmentToken(new Binder())
                 .setOrganizer(organizer)
                 .createActivityCount(1)
                 .build();
 
-        assertTrue(rootTask.shouldBeVisible(null));
-        assertTrue(taskFragment.shouldBeVisible(null));
+        addOp.accept(t, taskFragment.mRemoteToken.toWindowContainerToken());
 
-        t.setHidden(taskFragment.mRemoteToken.toWindowContainerToken(), true);
-        t.setFocusable(taskFragment.mRemoteToken.toWindowContainerToken(), false);
-
-        // Non-system organizers are not allow to update the hidden and focusable states.
         assertThrows(SecurityException.class, () ->
                 mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
                         t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
