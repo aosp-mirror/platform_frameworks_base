@@ -37,8 +37,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
 
     private val expansionListeners = CopyOnWriteArrayList<ShadeExpansionListener>()
     private val qsExpansionListeners = CopyOnWriteArrayList<ShadeQsExpansionListener>()
-    private val qsExpansionFractionListeners =
-        CopyOnWriteArrayList<ShadeQsExpansionFractionListener>()
     private val stateListeners = CopyOnWriteArrayList<ShadeStateListener>()
     private val shadeStateEventsListeners = CopyOnWriteArrayList<ShadeStateEventsListener>()
 
@@ -73,15 +71,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
 
     fun removeQsExpansionListener(listener: ShadeQsExpansionListener) {
         qsExpansionListeners.remove(listener)
-    }
-
-    fun addQsExpansionFractionListener(listener: ShadeQsExpansionFractionListener) {
-        qsExpansionFractionListeners.add(listener)
-        listener.onQsExpansionFractionChanged(qsExpansionFraction)
-    }
-
-    fun removeQsExpansionFractionListener(listener: ShadeQsExpansionFractionListener) {
-        qsExpansionFractionListeners.remove(listener)
     }
 
     /** Adds a listener that will be notified when the panel state has changed. */
@@ -170,15 +159,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
 
         debugLog("qsExpanded=$qsExpanded")
         qsExpansionListeners.forEach { it.onQsExpansionChanged(qsExpanded) }
-    }
-
-    fun onQsExpansionFractionChanged(qsExpansionFraction: Float) {
-        this.qsExpansionFraction = qsExpansionFraction
-
-        debugLog("qsExpansionFraction=$qsExpansionFraction")
-        qsExpansionFractionListeners.forEach {
-            it.onQsExpansionFractionChanged(qsExpansionFraction)
-        }
     }
 
     /** Updates the panel state if necessary. */

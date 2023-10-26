@@ -65,7 +65,6 @@ import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
@@ -77,6 +76,7 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -1026,7 +1026,6 @@ public class QuickSettingsController implements Dumpable {
                 && mPanelViewControllerLazy.get().mAnimateBack) {
             mPanelViewControllerLazy.get().adjustBackAnimationScale(adjustedExpansionFraction);
         }
-        mShadeExpansionStateManager.onQsExpansionFractionChanged(qsExpansionFraction);
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateBottomPosition(qsExpansionFraction);
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
