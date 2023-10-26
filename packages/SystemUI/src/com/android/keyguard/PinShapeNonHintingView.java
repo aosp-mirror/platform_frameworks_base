@@ -64,8 +64,9 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
         if (getChildCount() > 2) {
             View firstChild = getChildAt(0);
             boolean isVisible = firstChild.getLocalVisibleRect(mFirstChildVisibleRect);
-            boolean clipped = mFirstChildVisibleRect.left > 0
-                    || mFirstChildVisibleRect.right < firstChild.getWidth();
+            boolean clipped = mFirstChildVisibleRect.right - mFirstChildVisibleRect.left
+                    < firstChild.getWidth() && firstChild.getScaleX()
+                    == 1f; // Ensure that dot is not undergoing delete animation.
             if (!isVisible || clipped) {
                 setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
                 return;
