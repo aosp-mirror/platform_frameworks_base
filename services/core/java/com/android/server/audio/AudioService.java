@@ -16,8 +16,8 @@
 
 package com.android.server.audio;
 
-import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED;
 import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
+import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED;
 import static android.media.AudioDeviceInfo.TYPE_BLE_HEADSET;
 import static android.media.AudioDeviceInfo.TYPE_BLE_SPEAKER;
 import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
@@ -150,6 +150,7 @@ import android.media.permission.SafeCloseable;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionManager;
+import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -308,6 +309,9 @@ public class AudioService extends IAudioService.Stub
     final Context mContext;
     private final ContentResolver mContentResolver;
     private final AppOpsManager mAppOps;
+
+    /** do not use directly, use getMediaSessionManager() which handles lazy initialization */
+    @Nullable private volatile MediaSessionManager mMediaSessionManager;
 
     // the platform type affects volume and silent mode behavior
     private final int mPlatformType;
@@ -940,6 +944,8 @@ public class AudioService extends IAudioService.Stub
 
     private final SoundDoseHelper mSoundDoseHelper;
 
+    private final HardeningEnforcer mHardeningEnforcer;
+
     private final Object mSupportedSystemUsagesLock = new Object();
     @GuardedBy("mSupportedSystemUsagesLock")
     private @AttributeSystemUsage int[] mSupportedSystemUsages =
@@ -1314,6 +1320,8 @@ public class AudioService extends IAudioService.Stub
         mDisplayManager = context.getSystemService(DisplayManager.class);
 
         mMusicFxHelper = new MusicFxHelper(mContext, mAudioHandler);
+
+        mHardeningEnforcer = new HardeningEnforcer(mContext, isPlatformAutomotive());
     }
 
     private void initVolumeStreamStates() {
@@ -1383,7 +1391,6 @@ public class AudioService extends IAudioService.Stub
 
         // check on volume initialization
         checkVolumeRangeInitialization("AudioService()");
-
     }
 
     private SubscriptionManager.OnSubscriptionsChangedListener mSubscriptionChangedListener =
@@ -1395,6 +1402,14 @@ public class AudioService extends IAudioService.Stub
                             0, 0, null, 0);
                 }
             };
+
+    private MediaSessionManager getMediaSessionManager() {
+        if (mMediaSessionManager == null) {
+            mMediaSessionManager = (MediaSessionManager) mContext
+                    .getSystemService(Context.MEDIA_SESSION_SERVICE);
+        }
+        return mMediaSessionManager;
+    }
 
     /**
      * Initialize intent receives and settings observers for this service.
@@ -3424,6 +3439,10 @@ public class AudioService extends IAudioService.Stub
      * Part of service interface, check permissions here */
     public void adjustStreamVolumeWithAttribution(int streamType, int direction, int flags,
             String callingPackage, String attributionTag) {
+        if (mHardeningEnforcer.blockVolumeMethod(
+                HardeningEnforcer.METHOD_AUDIO_MANAGER_ADJUST_STREAM_VOLUME)) {
+            return;
+        }
         if ((streamType == AudioManager.STREAM_ACCESSIBILITY) && !canChangeAccessibilityVolume()) {
             Log.w(TAG, "Trying to call adjustStreamVolume() for a11y without"
                     + "CHANGE_ACCESSIBILITY_VOLUME / callingPackage=" + callingPackage);
@@ -4200,6 +4219,10 @@ public class AudioService extends IAudioService.Stub
      * Part of service interface, check permissions here */
     public void setStreamVolumeWithAttribution(int streamType, int index, int flags,
             String callingPackage, String attributionTag) {
+        if (mHardeningEnforcer.blockVolumeMethod(
+                HardeningEnforcer.METHOD_AUDIO_MANAGER_SET_STREAM_VOLUME)) {
+            return;
+        }
         setStreamVolumeWithAttributionInt(streamType, index, flags, /*device*/ null,
                 callingPackage, attributionTag);
     }
@@ -5052,6 +5075,7 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#setMasterMute(boolean, int) */
     public void setMasterMute(boolean mute, int flags, String callingPackage, int userId,
             String attributionTag) {
+
         super.setMasterMute_enforcePermission();
 
         setMasterMuteInternal(mute, flags, callingPackage,
@@ -5417,6 +5441,10 @@ public class AudioService extends IAudioService.Stub
     }
 
     public void setRingerModeExternal(int ringerMode, String caller) {
+        if (mHardeningEnforcer.blockVolumeMethod(
+                HardeningEnforcer.METHOD_AUDIO_MANAGER_SET_RINGER_MODE)) {
+            return;
+        }
         if (isAndroidNPlus(caller) && wouldToggleZenMode(ringerMode)
                 && !mNm.isNotificationPolicyAccessGrantedForPackage(caller)) {
             throw new SecurityException("Not allowed to change Do Not Disturb state");
@@ -6167,6 +6195,35 @@ public class AudioService extends IAudioService.Stub
         adjustStreamVolume(streamType, direction, flags, packageName, packageName, uid, pid,
                 null, hasAudioSettingsPermission(uid, pid),
                 AudioDeviceVolumeManager.ADJUST_MODE_NORMAL);
+    }
+
+    /**
+      * @see AudioManager#adjustVolume(int, int)
+      * This method is redirected from AudioManager to AudioService for API hardening rules
+      * enforcement then to MediaSession for implementation.
+      */
+    @Override
+    public void adjustVolume(int direction, int flags) {
+        if (mHardeningEnforcer.blockVolumeMethod(
+                HardeningEnforcer.METHOD_AUDIO_MANAGER_ADJUST_VOLUME)) {
+            return;
+        }
+        getMediaSessionManager().dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
+                    direction, flags);
+    }
+
+    /**
+     * @see AudioManager#adjustSuggestedStreamVolume(int, int, int)
+     * This method is redirected from AudioManager to AudioService for API hardening rules
+     * enforcement then to MediaSession for implementation.
+     */
+    @Override
+    public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
+        if (mHardeningEnforcer.blockVolumeMethod(
+                HardeningEnforcer.METHOD_AUDIO_MANAGER_ADJUST_SUGGESTED_STREAM_VOLUME)) {
+            return;
+        }
+        getMediaSessionManager().dispatchAdjustVolume(suggestedStreamType, direction, flags);
     }
 
     /** @see AudioManager#setStreamVolumeForUid(int, int, int, String, int, int, int) */
