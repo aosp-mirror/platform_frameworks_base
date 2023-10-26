@@ -42,9 +42,13 @@ import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepositor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
@@ -155,12 +159,16 @@ class SceneTestUtils(
         repository: DeviceEntryRepository = deviceEntryRepository,
         authenticationInteractor: AuthenticationInteractor,
         sceneInteractor: SceneInteractor,
+        faceAuthRepository: DeviceEntryFaceAuthRepository = FakeDeviceEntryFaceAuthRepository(),
+        trustRepository: TrustRepository = FakeTrustRepository(),
     ): DeviceEntryInteractor {
         return DeviceEntryInteractor(
             applicationScope = applicationScope(),
             repository = repository,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
+            deviceEntryFaceAuthRepository = faceAuthRepository,
+            trustRepository = trustRepository,
         )
     }
 

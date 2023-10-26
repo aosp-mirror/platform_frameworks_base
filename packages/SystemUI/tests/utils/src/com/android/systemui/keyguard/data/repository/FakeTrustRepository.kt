@@ -18,13 +18,18 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.keyguard.TrustGrantFlags
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.TrustModel
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeTrustRepository : TrustRepository {
+@SysUISingleton
+class FakeTrustRepository @Inject constructor() : TrustRepository {
     private val _isTrustUsuallyManaged = MutableStateFlow(false)
     override val isCurrentUserTrustUsuallyManaged: StateFlow<Boolean>
         get() = _isTrustUsuallyManaged
@@ -62,4 +67,9 @@ class FakeTrustRepository : TrustRepository {
     fun setTrustUsuallyManaged(value: Boolean) {
         _isTrustUsuallyManaged.value = value
     }
+}
+
+@Module
+interface FakeTrustRepositoryModule {
+    @Binds fun bindFake(fake: FakeTrustRepository): TrustRepository
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.deviceentry.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -6,6 +22,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -24,6 +42,8 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val repository: FakeDeviceEntryRepository = utils.deviceEntryRepository
+    private val faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
+    private val trustRepository = FakeTrustRepository()
     private val sceneInteractor = utils.sceneInteractor()
     private val authenticationInteractor = utils.authenticationInteractor()
     private val underTest =
@@ -31,6 +51,8 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             repository = repository,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
+            faceAuthRepository = faceAuthRepository,
+            trustRepository = trustRepository,
         )
 
     @Test
@@ -168,6 +190,40 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
             val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
             assertThat(canSwipeToEnter).isFalse()
+        }
+
+    @Test
+    fun canSwipeToEnter_whenTrustedByTrustManager_isTrue() =
+        testScope.runTest {
+            val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Password
+            )
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(canSwipeToEnter).isFalse()
+
+            trustRepository.setCurrentUserTrusted(true)
+            runCurrent()
+            faceAuthRepository.isAuthenticated.value = false
+
+            assertThat(canSwipeToEnter).isTrue()
+        }
+
+    @Test
+    fun canSwipeToEnter_whenAuthenticatedByFace_isTrue() =
+        testScope.runTest {
+            val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Password
+            )
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(canSwipeToEnter).isFalse()
+
+            faceAuthRepository.isAuthenticated.value = true
+            runCurrent()
+            trustRepository.setCurrentUserTrusted(false)
+
+            assertThat(canSwipeToEnter).isTrue()
         }
 
     @Test
