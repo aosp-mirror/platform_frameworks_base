@@ -47,9 +47,11 @@ import com.android.systemui.res.R;
  * non six digit pin on their device
  */
 public class PinShapeNonHintingView extends LinearLayout implements PinShapeInput {
-
+    private static final int RESET_STAGGER_DELAY = 40;
+    private static final int RESET_MAX_DELAY = 200;
     private int mColor = Utils.getColorAttr(getContext(), PIN_SHAPES).getDefaultColor();
     private int mPosition = 0;
+    private boolean mIsAnimatingReset = false;
     private final PinShapeAdapter mPinShapeAdapter;
     private ValueAnimator mValueAnimator = ValueAnimator.ofFloat(1f, 0f);
     private Rect mFirstChildVisibleRect = new Rect();
@@ -78,6 +80,9 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
 
     @Override
     public void append() {
+        if (mIsAnimatingReset) {
+            return;
+        }
         int size = getResources().getDimensionPixelSize(R.dimen.password_shape_size);
         ImageView pinDot = new ImageView(getContext());
         pinDot.setLayoutParams(new LayoutParams(size, size));
@@ -131,9 +136,20 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
 
     @Override
     public void reset() {
+        if (mPosition == 0) {
+            return;
+        }
         final int position = mPosition;
+        float baseDelay = Math.min(RESET_MAX_DELAY / position, RESET_STAGGER_DELAY);
+        mIsAnimatingReset = true;
         for (int i = 0; i < position; i++) {
-            delete();
+            int delayMillis = (int) (baseDelay * i);
+            postDelayed(this::delete, delayMillis);
+            // When we reach the last index, we want to send a signal that the animation is
+            // complete.
+            if (i == position - 1) {
+                postDelayed(() -> mIsAnimatingReset = false, delayMillis);
+            }
         }
     }
 
