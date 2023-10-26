@@ -39,14 +39,22 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
+import android.content.Context;
+import android.os.BatteryConsumer;
+import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
 import android.os.BluetoothBatteryStats;
+import android.os.ConditionVariable;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Parcel;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
 import android.util.SparseArray;
 import android.view.Display;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -65,6 +73,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
+import java.time.Instant;
 import java.util.List;
 
 @LargeTest
@@ -93,6 +103,9 @@ public class BatteryStatsImplTest {
 
     private final MockClock mMockClock = new MockClock();
     private MockBatteryStatsImpl mBatteryStatsImpl;
+    private Handler mHandler;
+    private PowerStatsStore mPowerStatsStore;
+    private BatteryUsageStatsProvider mBatteryUsageStatsProvider;
 
     @Before
     public void setUp() {
@@ -103,12 +116,22 @@ public class BatteryStatsImplTest {
         when(mKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
         when(mKernelWakelockReader.readKernelWakelockStats(
                 any(KernelWakelockStats.class))).thenReturn(mKernelWakelockStats);
-        mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock)
+        HandlerThread bgThread = new HandlerThread("bg thread");
+        bgThread.start();
+        mHandler = new Handler(bgThread.getLooper());
+        mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock, null, mHandler)
                 .setPowerProfile(mPowerProfile)
                 .setCpuScalingPolicies(mCpuScalingPolicies)
                 .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
                 .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader)
                 .setKernelWakelockReader(mKernelWakelockReader);
+
+        final Context context = InstrumentationRegistry.getContext();
+        File systemDir = context.getCacheDir();
+        mPowerStatsStore = new PowerStatsStore(systemDir, mHandler,
+                new AggregatedPowerStatsConfig());
+        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerProfile,
+                mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore, mMockClock);
     }
 
     @Test
@@ -753,5 +776,77 @@ public class BatteryStatsImplTest {
                 BluetoothActivityEnergyInfo.CREATOR.createFromParcel(parcel);
         parcel.recycle();
         return info;
+    }
+
+    @Test
+    public void storeBatteryUsageStatsOnReset() {
+        mBatteryStatsImpl.forceRecordAllHistory();
+
+        mMockClock.currentTime = Instant.parse("2023-01-02T03:04:05.00Z").toEpochMilli();
+        mMockClock.realtime = 7654321;
+
+        synchronized (mBatteryStatsImpl) {
+            mBatteryStatsImpl.setOnBatteryLocked(mMockClock.realtime, mMockClock.uptime, true,
+                    BatteryManager.BATTERY_STATUS_DISCHARGING, 50, 0);
+            // Will not save to PowerStatsStore because "saveBatteryUsageStatsOnReset" has not
+            // been called yet.
+            mBatteryStatsImpl.resetAllStatsAndHistoryLocked(
+                    BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        }
+
+        assertThat(mPowerStatsStore.getTableOfContents()).isEmpty();
+
+        mBatteryStatsImpl.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider,
+                mPowerStatsStore);
+
+        synchronized (mBatteryStatsImpl) {
+            mBatteryStatsImpl.noteFlashlightOnLocked(42, mMockClock.realtime, mMockClock.uptime);
+        }
+
+        mMockClock.realtime += 60000;
+        mMockClock.currentTime += 60000;
+
+        synchronized (mBatteryStatsImpl) {
+            mBatteryStatsImpl.noteFlashlightOffLocked(42, mMockClock.realtime, mMockClock.uptime);
+        }
+
+        mMockClock.realtime += 60000;
+        mMockClock.currentTime += 60000;
+
+        // Battery stats reset should have the side-effect of saving accumulated battery usage stats
+        synchronized (mBatteryStatsImpl) {
+            mBatteryStatsImpl.resetAllStatsAndHistoryLocked(
+                    BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        }
+
+        // Await completion
+        ConditionVariable done = new ConditionVariable();
+        mHandler.post(done::open);
+        done.block();
+
+        List<PowerStatsSpan.Metadata> contents = mPowerStatsStore.getTableOfContents();
+        assertThat(contents).hasSize(1);
+
+        PowerStatsSpan.Metadata metadata = contents.get(0);
+
+        PowerStatsSpan span = mPowerStatsStore.loadPowerStatsSpan(metadata.getId(),
+                BatteryUsageStatsSection.TYPE);
+        assertThat(span).isNotNull();
+
+        List<PowerStatsSpan.TimeFrame> timeFrames = span.getMetadata().getTimeFrames();
+        assertThat(timeFrames).hasSize(1);
+        assertThat(timeFrames.get(0).startMonotonicTime).isEqualTo(7654321);
+        assertThat(timeFrames.get(0).duration).isEqualTo(120000);
+
+        List<PowerStatsSpan.Section> sections = span.getSections();
+        assertThat(sections).hasSize(1);
+
+        PowerStatsSpan.Section section = sections.get(0);
+        assertThat(section.getType()).isEqualTo(BatteryUsageStatsSection.TYPE);
+        BatteryUsageStats bus = ((BatteryUsageStatsSection) section).getBatteryUsageStats();
+        assertThat(bus.getAggregateBatteryConsumer(
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
+                .isEqualTo(60000);
     }
 }

@@ -61,6 +61,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     MockBatteryStatsImpl(Clock clock, File historyDirectory) {
+        this(clock, historyDirectory, new Handler(Looper.getMainLooper()));
+    }
+
+    MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler) {
         super(clock, historyDirectory);
         initTimersAndCounters();
         setMaxHistoryBuffer(128 * 1024);
@@ -68,9 +72,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         setExternalStatsSyncLocked(mExternalStatsSync);
         informThatAllExternalStatsAreFlushed();
 
-        // A no-op handler.
-        mHandler = new Handler(Looper.getMainLooper()) {
-        };
+        mHandler = handler;
 
         mCpuUidFreqTimeReader = mock(KernelCpuUidFreqTimeReader.class);
         mKernelWakelockReader = null;

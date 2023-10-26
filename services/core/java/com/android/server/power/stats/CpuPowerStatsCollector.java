@@ -409,13 +409,13 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         setEnabled(Flags.streamlinedBatteryStats());
     }
 
-    private void ensureInitialized() {
+    private boolean ensureInitialized() {
         if (mIsInitialized) {
-            return;
+            return true;
         }
 
         if (!isEnabled()) {
-            return;
+            return false;
         }
 
         mIsPerUidTimeInStateSupported = mKernelCpuStatsReader.nativeIsSupportedFeature();
@@ -451,6 +451,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mTempUidStats = new long[mLayout.getCpuPowerBracketCount()];
 
         mIsInitialized = true;
+        return true;
     }
 
     private void readCpuEnergyConsumerIds() {
@@ -590,7 +591,9 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
      * Prints the definitions of power brackets.
      */
     public void dumpCpuPowerBracketsLocked(PrintWriter pw) {
-        ensureInitialized();
+        if (!ensureInitialized()) {
+            return;
+        }
 
         if (mLayout == null) {
             return;
@@ -610,7 +613,9 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
      */
     @VisibleForTesting
     public String getCpuPowerBracketDescription(int powerBracket) {
-        ensureInitialized();
+        if (!ensureInitialized()) {
+            return "";
+        }
 
         int[] stepToPowerBracketMap = mLayout.getScalingStepToPowerBracketMap();
         StringBuilder sb = new StringBuilder();
@@ -647,14 +652,18 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
      */
     @VisibleForTesting
     public PowerStats.Descriptor getPowerStatsDescriptor() {
-        ensureInitialized();
+        if (!ensureInitialized()) {
+            return null;
+        }
 
         return mPowerStatsDescriptor;
     }
 
     @Override
     protected PowerStats collectStats() {
-        ensureInitialized();
+        if (!ensureInitialized()) {
+            return null;
+        }
 
         if (!mIsPerUidTimeInStateSupported) {
             return null;

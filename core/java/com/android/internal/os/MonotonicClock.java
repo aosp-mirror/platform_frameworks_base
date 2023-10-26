@@ -49,6 +49,8 @@ public class MonotonicClock {
     private final Clock mClock;
     private long mTimeshift;
 
+    public static final long UNDEFINED = -1;
+
     public MonotonicClock(File file) {
         mFile = new AtomicFile(file);
         mClock = Clock.SYSTEM_CLOCK;

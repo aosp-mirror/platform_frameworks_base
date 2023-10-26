@@ -28,9 +28,7 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.os.ConditionVariable;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
@@ -40,7 +38,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistoryIterator;
-import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 
 import org.junit.Rule;
@@ -72,10 +69,11 @@ public class BatteryUsageStatsProviderTest {
         BatteryStatsImpl batteryStats = prepareBatteryStats();
 
         Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, batteryStats);
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
-                provider.getBatteryUsageStats(BatteryUsageStatsQuery.DEFAULT);
+                provider.getBatteryUsageStats(batteryStats, BatteryUsageStatsQuery.DEFAULT);
 
         final List<UidBatteryConsumer> uidBatteryConsumers =
                 batteryUsageStats.getUidBatteryConsumers();
@@ -99,10 +97,11 @@ public class BatteryUsageStatsProviderTest {
         BatteryStatsImpl batteryStats = prepareBatteryStats();
 
         Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, batteryStats);
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
-                provider.getBatteryUsageStats(
+                provider.getBatteryUsageStats(batteryStats,
                         new BatteryUsageStatsQuery.Builder()
                                 .includePowerComponents(
                                         new int[]{BatteryConsumer.POWER_COMPONENT_AUDIO})
@@ -204,10 +203,11 @@ public class BatteryUsageStatsProviderTest {
         }
 
         Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, batteryStats);
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
-                provider.getBatteryUsageStats(
+                provider.getBatteryUsageStats(batteryStats,
                         new BatteryUsageStatsQuery.Builder().includeBatteryHistory().build());
 
         Parcel in = Parcel.obtain();
@@ -292,11 +292,11 @@ public class BatteryUsageStatsProviderTest {
         }
 
         Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider
-                provider = new BatteryUsageStatsProvider(context, batteryStats);
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
-                provider.getBatteryUsageStats(
+                provider.getBatteryUsageStats(batteryStats,
                         new BatteryUsageStatsQuery.Builder().includeBatteryHistory().build());
 
         Parcel parcel = Parcel.obtain();
@@ -352,27 +352,22 @@ public class BatteryUsageStatsProviderTest {
 
     @Test
     public void shouldUpdateStats() {
-        Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
-                mStatsRule.getBatteryStats());
-
         final List<BatteryUsageStatsQuery> queries = List.of(
                 new BatteryUsageStatsQuery.Builder().setMaxStatsAgeMs(1000).build(),
                 new BatteryUsageStatsQuery.Builder().setMaxStatsAgeMs(2000).build()
         );
 
-        mStatsRule.setTime(10500, 0);
-        assertThat(provider.shouldUpdateStats(queries, 10000)).isFalse();
+        assertThat(BatteryUsageStatsProvider.shouldUpdateStats(queries,
+                10500, 10000)).isFalse();
 
-        mStatsRule.setTime(11500, 0);
-        assertThat(provider.shouldUpdateStats(queries, 10000)).isTrue();
+        assertThat(BatteryUsageStatsProvider.shouldUpdateStats(queries,
+                11500, 10000)).isTrue();
     }
 
     @Test
     public void testAggregateBatteryStats() {
         Context context = InstrumentationRegistry.getContext();
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
-        MonotonicClock monotonicClock = new MonotonicClock(0, mStatsRule.getMockClock());
 
         setTime(5 * MINUTE_IN_MS);
         synchronized (batteryStats) {
@@ -381,14 +376,17 @@ public class BatteryUsageStatsProviderTest {
 
         PowerStatsStore powerStatsStore = new PowerStatsStore(
                 new File(context.getCacheDir(), "BatteryUsageStatsProviderTest"),
-                new TestHandler(), null);
+                mStatsRule.getHandler(), null);
+        powerStatsStore.reset();
 
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
-                batteryStats, powerStatsStore);
+                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), powerStatsStore,
+                mMockClock);
 
-        batteryStats.setBatteryResetListener(reason ->
-                powerStatsStore.storeBatteryUsageStats(monotonicClock.monotonicTime(),
-                        provider.getBatteryUsageStats(BatteryUsageStatsQuery.DEFAULT)));
+        batteryStats.saveBatteryUsageStatsOnReset(provider, powerStatsStore);
+        synchronized (batteryStats) {
+            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        }
 
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
@@ -441,11 +439,16 @@ public class BatteryUsageStatsProviderTest {
         }
         setTime(95 * MINUTE_IN_MS);
 
+        // Await completion
+        ConditionVariable done = new ConditionVariable();
+        mStatsRule.getHandler().post(done::open);
+        done.block();
+
         // Include the first and the second snapshot, but not the third or current
         BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
                 .aggregateSnapshots(20 * MINUTE_IN_MS, 60 * MINUTE_IN_MS)
                 .build();
-        final BatteryUsageStats stats = provider.getBatteryUsageStats(query);
+        final BatteryUsageStats stats = provider.getBatteryUsageStats(batteryStats, query);
 
         assertThat(stats.getStatsStartTimestamp()).isEqualTo(5 * MINUTE_IN_MS);
         assertThat(stats.getStatsEndTimestamp()).isEqualTo(55 * MINUTE_IN_MS);
@@ -500,27 +503,16 @@ public class BatteryUsageStatsProviderTest {
                 .thenReturn(span1);
 
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
-                batteryStats, powerStatsStore);
+                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), powerStatsStore,
+                mMockClock);
 
         BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
                 .aggregateSnapshots(0, 3000)
                 .build();
-        final BatteryUsageStats stats = provider.getBatteryUsageStats(query);
+        final BatteryUsageStats stats = provider.getBatteryUsageStats(batteryStats, query);
         assertThat(stats.getCustomPowerComponentNames())
                 .isEqualTo(batteryStats.getCustomEnergyConsumerNames());
         assertThat(stats.getStatsDuration()).isEqualTo(1234);
-    }
-
-    private static class TestHandler extends Handler {
-        TestHandler() {
-            super(Looper.getMainLooper());
-        }
-
-        @Override
-        public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
-            msg.getCallback().run();
-            return true;
-        }
     }
 
     private static final Random sRandom = new Random();

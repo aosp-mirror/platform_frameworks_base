@@ -16,6 +16,7 @@
 
 package com.android.server.power.stats;
 
+import android.annotation.Nullable;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.util.FastImmutableArraySet;
@@ -141,6 +142,7 @@ public abstract class PowerStatsCollector {
         return true;
     }
 
+    @Nullable
     protected abstract PowerStats collectStats();
 
     /**
