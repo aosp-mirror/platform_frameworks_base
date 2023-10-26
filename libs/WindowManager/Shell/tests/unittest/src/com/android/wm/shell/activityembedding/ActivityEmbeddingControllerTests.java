@@ -187,6 +187,25 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         verifyNoMoreInteractions(mFinishTransaction);
     }
 
+    @Test
+    public void testShouldAnimate_containsAnimationOptions() {
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CLOSE, 0)
+                .addChange(createEmbeddedChange(EMBEDDED_RIGHT_BOUNDS, TASK_BOUNDS, TASK_BOUNDS))
+                .build();
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("packageName", 0 /* enterResId */, 0 /* exitResId */,
+                        0 /* backgroundColor */, false /* overrideTaskTransition */));
+        assertTrue(mController.shouldAnimate(info));
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions
+                .makeSceneTransitionAnimOptions());
+        assertFalse(mController.shouldAnimate(info));
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions.makeCrossProfileAnimOptions());
+        assertFalse(mController.shouldAnimate(info));
+    }
+
     @UiThreadTest
     @Test
     public void testMergeAnimation() {
