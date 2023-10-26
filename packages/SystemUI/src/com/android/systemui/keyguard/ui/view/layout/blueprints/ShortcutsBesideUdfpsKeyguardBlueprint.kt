@@ -23,8 +23,8 @@ import com.android.systemui.keyguard.ui.view.layout.sections.AlignShortcutsToUdf
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
@@ -38,7 +38,7 @@ class ShortcutsBesideUdfpsKeyguardBlueprint
 @Inject
 constructor(
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
-    defaultLockIconSection: DefaultLockIconSection,
+    defaultDeviceEntryIconSection: DefaultDeviceEntryIconSection,
     defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
     alignShortcutsToUdfpsSection: AlignShortcutsToUdfpsSection,
@@ -54,7 +54,7 @@ constructor(
     override val sections =
         setOf(
             defaultIndicationAreaSection,
-            defaultLockIconSection,
+            defaultDeviceEntryIconSection,
             defaultAmbientIndicationAreaSection,
             defaultSettingsPopupMenuSection,
             alignShortcutsToUdfpsSection,

@@ -11653,6 +11653,15 @@ public final class Settings {
                 "accessibility_magnification_joystick_enabled";
 
         /**
+         * Setting that specifies whether the display magnification is enabled via a system-wide
+         * two fingers triple tap gesture.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED =
+                "accessibility_magnification_two_finger_triple_tap_enabled";
+
+        /**
          * Controls magnification enable gesture. Accessibility magnification can have one or more
          * enable gestures.
          *
@@ -12056,6 +12065,13 @@ public final class Settings {
          *  @hide
          */
         public static final String DND_CONFIGS_MIGRATED = "dnd_settings_migrated";
+
+        /**
+         * Controls whether to hide private space entry point in All Apps
+         *
+         * @hide
+         */
+        public static final String HIDE_PRIVATESPACE_ENTRY_POINT = "hide_privatespace_entry_point";
 
         /**
          * These entries are considered common between the personal and the managed profile,

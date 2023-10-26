@@ -71,10 +71,13 @@ class HandleMenu {
     private int mMenuHeight;
     private int mMenuWidth;
 
+    private final int mCaptionHeight;
+
 
     HandleMenu(WindowDecoration parentDecor, int layoutResId, int captionX, int captionY,
             View.OnClickListener onClickListener, View.OnTouchListener onTouchListener,
-            Drawable appIcon, CharSequence appName, boolean shouldShowWindowingPill) {
+            Drawable appIcon, CharSequence appName, boolean shouldShowWindowingPill,
+            int captionHeight) {
         mParentDecor = parentDecor;
         mContext = mParentDecor.mDecorWindowContext;
         mTaskInfo = mParentDecor.mTaskInfo;
@@ -86,6 +89,7 @@ class HandleMenu {
         mAppIcon = appIcon;
         mAppName = appName;
         mShouldShowWindowingPill = shouldShowWindowingPill;
+        mCaptionHeight = captionHeight;
         loadHandleMenuDimensions();
         updateHandleMenuPillPositions();
     }
@@ -98,6 +102,7 @@ class HandleMenu {
         ssg.addTransaction(t);
         ssg.markSyncReady();
         setupHandleMenu();
+        animateHandleMenu();
     }
 
     private void createHandleMenuWindow(SurfaceControl.Transaction t, SurfaceSyncGroup ssg) {
@@ -106,6 +111,21 @@ class HandleMenu {
         mHandleMenuWindow = mParentDecor.addWindow(
                 R.layout.desktop_mode_window_decor_handle_menu, "Handle Menu",
                 t, ssg, x, y, mMenuWidth, mMenuHeight);
+    }
+
+    /**
+     * Animates the appearance of the handle menu and its three pills.
+     */
+    private void animateHandleMenu() {
+        final View handleMenuView = mHandleMenuWindow.mWindowViewHost.getView();
+        final HandleMenuAnimator handleMenuAnimator = new HandleMenuAnimator(handleMenuView,
+                mMenuWidth, mCaptionHeight);
+        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                || mTaskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
+            handleMenuAnimator.animateCaptionHandleExpandToOpen();
+        } else {
+            handleMenuAnimator.animateOpen();
+        }
     }
 
     /**
@@ -322,6 +342,7 @@ class HandleMenu {
         private int mCaptionX;
         private int mCaptionY;
         private boolean mShowWindowingPill;
+        private int mCaptionHeight;
 
 
         Builder(@NonNull WindowDecoration parent) {
@@ -364,9 +385,14 @@ class HandleMenu {
             return this;
         }
 
+        Builder setCaptionHeight(int captionHeight) {
+            mCaptionHeight = captionHeight;
+            return this;
+        }
+
         HandleMenu build() {
             return new HandleMenu(mParent, mLayoutId, mCaptionX, mCaptionY, mOnClickListener,
-                    mOnTouchListener, mAppIcon, mName, mShowWindowingPill);
+                    mOnTouchListener, mAppIcon, mName, mShowWindowingPill, mCaptionHeight);
         }
     }
 }

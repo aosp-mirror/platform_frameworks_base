@@ -214,7 +214,6 @@ final class HotwordDetectionConnection {
                 new ServiceConnectionFactory(visualQueryDetectionServiceIntent,
                         bindInstantServiceAllowed, DETECTION_SERVICE_TYPE_VISUAL_QUERY);
 
-
         mLastRestartInstant = Instant.now();
 
         if (mReStartPeriodSeconds <= 0) {
@@ -918,7 +917,8 @@ final class HotwordDetectionConnection {
             session = new SoftwareTrustedHotwordDetectorSession(
                     mRemoteHotwordDetectionService, mLock, mContext, token, callback,
                     mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
-                    mScheduledExecutorService, mDebugHotwordLogging, mRemoteExceptionListener);
+                    mScheduledExecutorService, mDebugHotwordLogging,
+                    mRemoteExceptionListener);
         }
         mHotwordRecognitionCallback = callback;
         mDetectorSessions.put(detectorType, session);

@@ -41,6 +41,9 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             return mView.onKeyDown(keyCode, event);
         }
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            return mView.onKeyUp(keyCode, event);
+        }
         return false;
     };
 

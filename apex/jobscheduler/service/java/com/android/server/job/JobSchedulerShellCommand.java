@@ -180,7 +180,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
                 case "-u":
                 case "--user":
-                    userId = Integer.parseInt(getNextArgRequired());
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
                     break;
 
                 case "-n":
@@ -197,6 +197,10 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         if (force && satisfied) {
             pw.println("Cannot specify both --force and --satisfied");
             return -1;
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
         }
 
         final String pkgName = getNextArgRequired();

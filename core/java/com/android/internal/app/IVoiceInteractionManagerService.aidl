@@ -359,6 +359,12 @@ interface IVoiceInteractionManagerService {
             in IHotwordRecognitionStatusCallback callback);
 
     /**
+     * Test API to reset training data egress count for test.
+     */
+    @EnforcePermission("RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT")
+    void resetHotwordTrainingDataEgressCountForTest();
+
+    /**
      * Starts to listen the status of visible activity.
      */
     void startListeningVisibleActivityChanged(in IBinder token);

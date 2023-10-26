@@ -15,6 +15,7 @@
  */
 package android.hardware.radio;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -30,6 +31,7 @@ import android.util.SparseArray;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -142,12 +144,84 @@ public final class RadioMetadata implements Parcelable {
     public static final String METADATA_KEY_DAB_COMPONENT_NAME_SHORT =
             "android.hardware.radio.metadata.DAB_COMPONENT_NAME_SHORT";
 
+    /**
+     * Short context description of comment
+     *
+     * <p>Comment could relate to the current audio program content, or it might
+     * be unrelated information that the station chooses to send. It is composed
+     * of short content description and actual text (see NRSC-G200-A and id3v2.3.0
+     * for more info).
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final String METADATA_KEY_COMMENT_SHORT_DESCRIPTION =
+            "android.hardware.radio.metadata.COMMENT_SHORT_DESCRIPTION";
+
+    /**
+     * Actual text of comment
+     *
+     * @see #METADATA_KEY_COMMENT_SHORT_DESCRIPTION
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final String METADATA_KEY_COMMENT_ACTUAL_TEXT =
+            "android.hardware.radio.metadata.COMMENT_ACTUAL_TEXT";
+
+    /**
+     * Commercial
+     *
+     * <p>Commercial is application specific and generally used to facilitate the
+     * sale of products and services (see NRSC-G200-A and id3v2.3.0 for more info).
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final String METADATA_KEY_COMMERCIAL =
+            "android.hardware.radio.metadata.COMMERCIAL";
+
+    /**
+     * Array of Unique File Identifiers
+     *
+     * <p>Unique File Identifier (UFID) can be used to transmit an alphanumeric
+     * identifier of the current content, or of an advertised product or
+     * service (see NRSC-G200-A and id3v2.3.0 for more info).
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final String METADATA_KEY_UFIDS = "android.hardware.radio.metadata.UFIDS";
+
+    /**
+     * HD short station name or HD universal short station name
+     *
+     * <p>It can be up to 12 characters (see SY_IDD_1020s for more info).
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final String METADATA_KEY_HD_STATION_NAME_SHORT =
+            "android.hardware.radio.metadata.HD_STATION_NAME_SHORT";
+
+    /**
+     * HD long station name, HD station slogan or HD station message
+     *
+     * <p>(see SY_IDD_1020s for more info)
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final String METADATA_KEY_HD_STATION_NAME_LONG =
+            "android.hardware.radio.metadata.HD_STATION_NAME_LONG";
+
+    /**
+     * Bit mask of all HD Radio subchannels available
+     *
+     * <p>Bit {@link ProgramSelector#SUB_CHANNEL_HD_1} from LSB represents the
+     * availability of HD-1 subchannel (main program service, MPS). Bits
+     * {@link ProgramSelector#SUB_CHANNEL_HD_2} to {@link ProgramSelector#SUB_CHANNEL_HD_8}
+     * from LSB represent HD-2 to HD-8 subchannel (supplemental program services, SPS)
+     * respectively.
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final String METADATA_KEY_HD_SUBCHANNELS_AVAILABLE =
+            "android.hardware.radio.metadata.HD_SUBCHANNELS_AVAILABLE";
 
     private static final int METADATA_TYPE_INVALID = -1;
     private static final int METADATA_TYPE_INT = 0;
     private static final int METADATA_TYPE_TEXT = 1;
     private static final int METADATA_TYPE_BITMAP = 2;
     private static final int METADATA_TYPE_CLOCK = 3;
+    private static final int METADATA_TYPE_TEXT_ARRAY = 4;
 
     private static final ArrayMap<String, Integer> METADATA_KEYS_TYPE;
 
@@ -172,6 +246,13 @@ public final class RadioMetadata implements Parcelable {
         METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_SERVICE_NAME_SHORT, METADATA_TYPE_TEXT);
         METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_COMPONENT_NAME, METADATA_TYPE_TEXT);
         METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_COMPONENT_NAME_SHORT, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_COMMENT_SHORT_DESCRIPTION, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_COMMENT_ACTUAL_TEXT, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_COMMERCIAL, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_UFIDS, METADATA_TYPE_TEXT_ARRAY);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_HD_STATION_NAME_SHORT, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_HD_STATION_NAME_LONG, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_HD_SUBCHANNELS_AVAILABLE, METADATA_TYPE_INT);
     }
 
     // keep in sync with: system/media/radio/include/system/radio_metadata.h
@@ -288,9 +369,12 @@ public final class RadioMetadata implements Parcelable {
             return false;
         }
         for (String key : mBundle.keySet()) {
-            // This logic will return a false negative if we ever put Bundles into mBundle. As of
-            // 2019-04-09, we only put ints, Strings, and Parcelables in, so it's fine for now.
-            if (!mBundle.get(key).equals(otherBundle.get(key))) {
+            if (Flags.hdRadioImproved() && Objects.equals(METADATA_KEYS_TYPE.get(key),
+                    METADATA_TYPE_TEXT_ARRAY)) {
+                if (!Arrays.equals(mBundle.getStringArray(key), otherBundle.getStringArray(key))) {
+                    return false;
+                }
+            } else if (!Objects.equals(mBundle.get(key), otherBundle.get(key))) {
                 return false;
             }
         }
@@ -326,7 +410,21 @@ public final class RadioMetadata implements Parcelable {
 
             sb.append(keyDisp);
             sb.append('=');
-            sb.append(mBundle.get(key));
+            if (Flags.hdRadioImproved() && Objects.equals(METADATA_KEYS_TYPE.get(key),
+                    METADATA_TYPE_TEXT_ARRAY)) {
+                String[] stringArrayValue = mBundle.getStringArray(key);
+                sb.append('[');
+                for (int i = 0; i < stringArrayValue.length; i++) {
+                    if (i != 0) {
+                        sb.append(',');
+                    }
+                    sb.append(stringArrayValue[i]);
+                }
+                sb.append(']');
+            } else {
+                sb.append(mBundle.get(key));
+            }
+
         }
 
         sb.append("]");
@@ -425,6 +523,36 @@ public final class RadioMetadata implements Parcelable {
             Log.w(TAG, "Failed to retrieve a key as Clock.", e);
         }
         return clock;
+    }
+
+    /**
+     * Gets the string array value associated with the given key as a string
+     * array.
+     *
+     * <p>Only string array keys may be used with this method:
+     * <ul>
+     * <li>{@link #METADATA_KEY_UFIDS}</li>
+     * </ul>
+     *
+     * @param key The key the value is stored under
+     * @return String array of the given string-array-type key
+     * @throws NullPointerException if metadata key is {@code null}
+     * @throws IllegalArgumentException if the metadata with the key is not found in
+     * metadata or the key is not of string-array type
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    @NonNull
+    public String[] getStringArray(@NonNull String key) {
+        Objects.requireNonNull(key, "Metadata key can not be null");
+        if (!Objects.equals(METADATA_KEYS_TYPE.get(key), METADATA_TYPE_TEXT_ARRAY)) {
+            throw new IllegalArgumentException("Failed to retrieve key " + key
+                    + " as string array");
+        }
+        String[] stringArrayValue = mBundle.getStringArray(key);
+        if (stringArrayValue == null) {
+            throw new IllegalArgumentException("Key " + key + " is not found in metadata");
+        }
+        return stringArrayValue;
     }
 
     @Override
@@ -539,6 +667,11 @@ public final class RadioMetadata implements Parcelable {
          * <li>{@link #METADATA_KEY_ARTIST}</li>
          * <li>{@link #METADATA_KEY_ALBUM}</li>
          * <li>{@link #METADATA_KEY_GENRE}</li>
+         * <li>{@link #METADATA_KEY_COMMENT_SHORT_DESCRIPTION}</li>
+         * <li>{@link #METADATA_KEY_COMMENT_ACTUAL_TEXT}</li>
+         * <li>{@link #METADATA_KEY_COMMERCIAL}</li>
+         * <li>{@link #METADATA_KEY_HD_STATION_NAME_SHORT}</li>
+         * <li>{@link #METADATA_KEY_HD_STATION_NAME_LONG}</li>
          * </ul>
          *
          * @param key The key for referencing this value
@@ -563,6 +696,7 @@ public final class RadioMetadata implements Parcelable {
          * <li>{@link #METADATA_KEY_RDS_PI}</li>
          * <li>{@link #METADATA_KEY_RDS_PTY}</li>
          * <li>{@link #METADATA_KEY_RBDS_PTY}</li>
+         * <li>{@link #METADATA_KEY_HD_SUBCHANNELS_AVAILABLE}</li>
          * </ul>
          * or any bitmap represented by its identifier.
          *
@@ -619,6 +753,35 @@ public final class RadioMetadata implements Parcelable {
             mBundle.putParcelable(key, new Clock(utcSecondsSinceEpoch, timezoneOffsetMinutes));
             return this;
         }
+
+        /**
+         * Put a String array into the meta data. Custom keys may be used, but if
+         * the METADATA_KEYs defined in this class are used they may only be one
+         * of the following:
+         * <ul>
+         * <li>{@link #METADATA_KEY_UFIDS}</li>
+         * </ul>
+         *
+         * @param key The key for referencing this value
+         * @param value The String value to store
+         * @return the same Builder instance
+         * @throws NullPointerException if key or value is null
+         * @throws IllegalArgumentException if the key is not string-array-type key
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        @NonNull
+        public Builder putStringArray(@NonNull String key, @NonNull String[] value) {
+            Objects.requireNonNull(key, "Key can not be null");
+            Objects.requireNonNull(value, "Value can not be null");
+            if (!METADATA_KEYS_TYPE.containsKey(key)
+                    || !Objects.equals(METADATA_KEYS_TYPE.get(key), METADATA_TYPE_TEXT_ARRAY)) {
+                throw new IllegalArgumentException("The " + key
+                        + " key cannot be used to put a RadioMetadata String Array.");
+            }
+            mBundle.putStringArray(key, value);
+            return this;
+        }
+
 
         /**
          * Creates a {@link RadioMetadata} instance with the specified fields.

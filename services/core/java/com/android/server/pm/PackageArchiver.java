@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.content.Context;
@@ -214,10 +215,13 @@ public class PackageArchiver {
     ArchiveState createArchiveStateInternal(String packageName, int userId,
             List<LauncherActivityInfo> mainActivities, String installerPackage)
             throws IOException {
+        final int iconSize = mContext.getSystemService(
+                ActivityManager.class).getLauncherLargeIconSize();
+
         List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>(mainActivities.size());
         for (int i = 0, size = mainActivities.size(); i < size; i++) {
             LauncherActivityInfo mainActivity = mainActivities.get(i);
-            Path iconPath = storeIcon(packageName, mainActivity, userId, i);
+            Path iconPath = storeIcon(packageName, mainActivity, userId, i, iconSize);
             ArchiveActivityInfo activityInfo =
                     new ArchiveActivityInfo(
                             mainActivity.getLabel().toString(),
@@ -247,7 +251,7 @@ public class PackageArchiver {
 
     @VisibleForTesting
     Path storeIcon(String packageName, LauncherActivityInfo mainActivity,
-            @UserIdInt int userId, int index) throws IOException {
+            @UserIdInt int userId, int index, int iconSize) throws IOException {
         int iconResourceId = mainActivity.getActivityInfo().getIconResource();
         if (iconResourceId == 0) {
             // The app doesn't define an icon. No need to store anything.
@@ -255,7 +259,7 @@ public class PackageArchiver {
         }
         File iconsDir = createIconsDir(userId);
         File iconFile = new File(iconsDir, packageName + "-" + index + ".png");
-        Bitmap icon = drawableToBitmap(mainActivity.getIcon(/* density= */ 0));
+        Bitmap icon = drawableToBitmap(mainActivity.getIcon(/* density= */ 0), iconSize);
         try (FileOutputStream out = new FileOutputStream(iconFile)) {
             // Note: Quality is ignored for PNGs.
             if (!icon.compress(Bitmap.CompressFormat.PNG, /* quality= */ 100, out)) {
@@ -590,8 +594,8 @@ public class PackageArchiver {
     /**
      * Creates serializable archived activities from launcher activities.
      */
-    static ArchivedActivityParcel[] createArchivedActivities(List<LauncherActivityInfo> infos)
-            throws IOException {
+    static ArchivedActivityParcel[] createArchivedActivities(List<LauncherActivityInfo> infos,
+            int iconSize) throws IOException {
         if (infos == null || infos.isEmpty()) {
             throw new IllegalArgumentException("No launcher activities");
         }
@@ -606,7 +610,7 @@ public class PackageArchiver {
             archivedActivity.title = info.getLabel().toString();
             archivedActivity.originalComponentName = info.getComponentName();
             archivedActivity.iconBitmap = info.getActivityInfo().getIconResource() == 0 ? null :
-                    bytesFromBitmap(drawableToBitmap(info.getIcon(/* density= */ 0)));
+                    bytesFromBitmap(drawableToBitmap(info.getIcon(/* density= */ 0), iconSize));
             // TODO(b/298452477) Handle monochrome icons.
             archivedActivity.monochromeIconBitmap = null;
             activities.add(archivedActivity);

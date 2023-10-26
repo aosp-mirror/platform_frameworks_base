@@ -253,7 +253,12 @@ public final class JobStatus {
     /** An ID that can be used to uniquely identify the job when logging statsd metrics. */
     private final long mLoggingJobId;
 
-    final String tag;
+    /**
+     * Tag to identify the wakelock held for this job. Lazily loaded in
+     * {@link #getWakelockTag()} since it's not typically needed until the job is about to run.
+     */
+    @Nullable
+    private String mWakelockTag;
 
     /** Whether this job was scheduled by one app on behalf of another. */
     final boolean mIsProxyJob;
@@ -627,7 +632,6 @@ public final class JobStatus {
         this.batteryName = this.sourceTag != null
                 ? bnNamespace + this.sourceTag + ":" + job.getService().getPackageName()
                 : bnNamespace + job.getService().flattenToShortString();
-        this.tag = "*job*/" + this.batteryName + "#" + job.getId();
 
         final String componentPackage = job.getService().getPackageName();
         mIsProxyJob = !this.sourcePackageName.equals(componentPackage);
@@ -1321,8 +1325,13 @@ public final class JobStatus {
         return batteryName;
     }
 
-    public String getTag() {
-        return tag;
+    /** Return the String to be used as the tag for the wakelock held for this job. */
+    @NonNull
+    public String getWakelockTag() {
+        if (mWakelockTag == null) {
+            mWakelockTag = "*job*/" + this.batteryName;
+        }
+        return mWakelockTag;
     }
 
     public int getBias() {
@@ -2639,7 +2648,7 @@ public final class JobStatus {
     @NeverCompile // Avoid size overhead of debugging code.
     public void dump(IndentingPrintWriter pw,  boolean full, long nowElapsed) {
         UserHandle.formatUid(pw, callingUid);
-        pw.print(" tag="); pw.println(tag);
+        pw.print(" tag="); pw.println(getWakelockTag());
 
         pw.print("Source: uid="); UserHandle.formatUid(pw, getSourceUid());
         pw.print(" user="); pw.print(getSourceUserId());
@@ -2955,7 +2964,7 @@ public final class JobStatus {
         final long token = proto.start(fieldId);
 
         proto.write(JobStatusDumpProto.CALLING_UID, callingUid);
-        proto.write(JobStatusDumpProto.TAG, tag);
+        proto.write(JobStatusDumpProto.TAG, getWakelockTag());
         proto.write(JobStatusDumpProto.SOURCE_UID, getSourceUid());
         proto.write(JobStatusDumpProto.SOURCE_USER_ID, getSourceUserId());
         proto.write(JobStatusDumpProto.SOURCE_PACKAGE_NAME, getSourcePackageName());

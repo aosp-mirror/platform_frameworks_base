@@ -21,23 +21,25 @@ package com.android.systemui.statusbar.notification.shelf.ui.viewmodel
 import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.SysUITestModule
+import com.android.TestMocksModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.accessibility.data.repository.FakeAccessibilityRepository
-import com.android.systemui.accessibility.domain.interactor.AccessibilityInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModel
-import com.android.systemui.statusbar.notification.shelf.domain.interactor.NotificationShelfInteractor
+import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import dagger.BindsInstance
+import dagger.Component
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -55,98 +57,118 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
 
     @Rule @JvmField val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    // mocks
     @Mock private lateinit var keyguardTransitionController: LockscreenShadeTransitionController
     @Mock private lateinit var screenOffAnimationController: ScreenOffAnimationController
-    @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
 
-    // fakes
-    private val keyguardRepository = FakeKeyguardRepository()
-    private val deviceEntryFaceAuthRepository = FakeDeviceEntryFaceAuthRepository()
-    private val a11yRepo = FakeAccessibilityRepository()
-    private val powerRepository = FakePowerRepository()
-    private val powerInteractor by lazy {
-        PowerInteractorFactory.create(
-                repository = powerRepository,
-                screenOffAnimationController = screenOffAnimationController,
-                statusBarStateController = statusBarStateController,
-            )
-            .powerInteractor
-    }
-
-    // real impls
-    private val a11yInteractor = AccessibilityInteractor(a11yRepo)
-    private val activatableViewModel = ActivatableNotificationViewModel(a11yInteractor)
-    private val interactor by lazy {
-        NotificationShelfInteractor(
-            keyguardRepository,
-            deviceEntryFaceAuthRepository,
-            powerInteractor,
-            keyguardTransitionController,
-        )
-    }
-    private val underTest by lazy { NotificationShelfViewModel(interactor, activatableViewModel) }
+    private lateinit var testComponent: TestComponent
 
     @Before
     fun setUp() {
         whenever(screenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true)
+        testComponent =
+            DaggerNotificationShelfViewModelTest_TestComponent.factory()
+                .create(
+                    test = this,
+                    mocks =
+                        TestMocksModule(
+                            lockscreenShadeTransitionController = keyguardTransitionController,
+                            screenOffAnimationController = screenOffAnimationController,
+                            statusBarStateController = statusBarStateController,
+                        )
+                )
     }
 
     @Test
-    fun canModifyColorOfNotifications_whenKeyguardNotShowing() = runTest {
-        val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
+    fun canModifyColorOfNotifications_whenKeyguardNotShowing() =
+        with(testComponent) {
+            testScope.runTest {
+                val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
 
-        keyguardRepository.setKeyguardShowing(false)
+                keyguardRepository.setKeyguardShowing(false)
 
-        assertThat(canModifyNotifColor).isTrue()
-    }
-
-    @Test
-    fun canModifyColorOfNotifications_whenKeyguardShowingAndNotBypass() = runTest {
-        val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
-
-        keyguardRepository.setKeyguardShowing(true)
-        deviceEntryFaceAuthRepository.isBypassEnabled.value = false
-
-        assertThat(canModifyNotifColor).isTrue()
-    }
+                assertThat(canModifyNotifColor).isTrue()
+            }
+        }
 
     @Test
-    fun cannotModifyColorOfNotifications_whenBypass() = runTest {
-        val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
+    fun canModifyColorOfNotifications_whenKeyguardShowingAndNotBypass() =
+        with(testComponent) {
+            testScope.runTest {
+                val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
 
-        keyguardRepository.setKeyguardShowing(true)
-        deviceEntryFaceAuthRepository.isBypassEnabled.value = true
+                keyguardRepository.setKeyguardShowing(true)
+                deviceEntryFaceAuthRepository.isBypassEnabled.value = false
 
-        assertThat(canModifyNotifColor).isFalse()
-    }
-
-    @Test
-    fun isClickable_whenKeyguardShowing() = runTest {
-        val isClickable by collectLastValue(underTest.isClickable)
-
-        keyguardRepository.setKeyguardShowing(true)
-
-        assertThat(isClickable).isTrue()
-    }
+                assertThat(canModifyNotifColor).isTrue()
+            }
+        }
 
     @Test
-    fun isNotClickable_whenKeyguardNotShowing() = runTest {
-        val isClickable by collectLastValue(underTest.isClickable)
+    fun cannotModifyColorOfNotifications_whenBypass() =
+        with(testComponent) {
+            testScope.runTest {
+                val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
 
-        keyguardRepository.setKeyguardShowing(false)
+                keyguardRepository.setKeyguardShowing(true)
+                deviceEntryFaceAuthRepository.isBypassEnabled.value = true
 
-        assertThat(isClickable).isFalse()
-    }
+                assertThat(canModifyNotifColor).isFalse()
+            }
+        }
 
     @Test
-    fun onClicked_goesToLockedShade() {
-        whenever(statusBarStateController.isDozing).thenReturn(true)
+    fun isClickable_whenKeyguardShowing() =
+        with(testComponent) {
+            testScope.runTest {
+                val isClickable by collectLastValue(underTest.isClickable)
 
-        underTest.onShelfClicked()
+                keyguardRepository.setKeyguardShowing(true)
 
-        assertThat(powerRepository.lastWakeReason).isNotNull()
-        assertThat(powerRepository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_GESTURE)
-        verify(keyguardTransitionController).goToLockedShade(Mockito.isNull(), eq(true))
+                assertThat(isClickable).isTrue()
+            }
+        }
+
+    @Test
+    fun isNotClickable_whenKeyguardNotShowing() =
+        with(testComponent) {
+            testScope.runTest {
+                val isClickable by collectLastValue(underTest.isClickable)
+
+                keyguardRepository.setKeyguardShowing(false)
+
+                assertThat(isClickable).isFalse()
+            }
+        }
+
+    @Test
+    fun onClicked_goesToLockedShade() =
+        with(testComponent) {
+            whenever(statusBarStateController.isDozing).thenReturn(true)
+
+            underTest.onShelfClicked()
+
+            assertThat(powerRepository.lastWakeReason).isNotNull()
+            assertThat(powerRepository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_GESTURE)
+            verify(keyguardTransitionController).goToLockedShade(Mockito.isNull(), eq(true))
+        }
+
+    @Component(modules = [SysUITestModule::class, ActivatableNotificationViewModelModule::class])
+    @SysUISingleton
+    interface TestComponent {
+
+        val underTest: NotificationShelfViewModel
+        val deviceEntryFaceAuthRepository: FakeDeviceEntryFaceAuthRepository
+        val keyguardRepository: FakeKeyguardRepository
+        val powerRepository: FakePowerRepository
+        val testScope: TestScope
+
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
     }
 }

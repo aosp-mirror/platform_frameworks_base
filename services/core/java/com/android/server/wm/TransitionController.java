@@ -62,6 +62,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.FgThread;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -131,6 +132,7 @@ class TransitionController {
     TransitionTracer mTransitionTracer;
 
     private SystemPerformanceHinter mSystemPerformanceHinter;
+    private boolean mFullReadyTracking = false;
 
     private final ArrayList<WindowManagerInternal.AppTransitionListener> mLegacyListeners =
             new ArrayList<>();
@@ -281,6 +283,7 @@ class TransitionController {
         registerLegacyListener(wms.mActivityManagerAppTransitionNotifier);
         setSyncEngine(wms.mSyncEngine);
         setSystemPerformanceHinter(wms.mSystemPerformanceHinter);
+        mFullReadyTracking = Flags.transitReadyTracking();
     }
 
     @VisibleForTesting
@@ -395,6 +398,14 @@ class TransitionController {
     /** @return {@code true} if using shell-transitions rotation instead of fixed-rotation. */
     boolean useShellTransitionsRotation() {
         return isShellTransitionsEnabled() && SHELL_TRANSITIONS_ROTATION;
+    }
+
+    boolean useFullReadyTracking() {
+        return mFullReadyTracking;
+    }
+
+    void setFullReadyTrackingForTest(boolean enabled) {
+        mFullReadyTracking = enabled;
     }
 
     /**
@@ -1473,6 +1484,19 @@ class TransitionController {
         }
         mSyncEngine.startSyncSet(syncGroup);
         applySync.accept(false /* deferred */);
+    }
+
+    /**
+     * Instructs the collecting transition to wait until `condition` is met before it is
+     * considered ready.
+     */
+    void waitFor(@NonNull Transition.ReadyCondition condition) {
+        if (mCollectingTransition == null) {
+            Slog.e(TAG, "No collecting transition available to wait for " + condition);
+            condition.mTracker = Transition.ReadyTracker.NULL_TRACKER;
+            return;
+        }
+        mCollectingTransition.mReadyTracker.add(condition);
     }
 
     interface OnStartCollect {

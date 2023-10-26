@@ -7,3 +7,11 @@ flag {
   bug: "284297289"
 }
 
+flag {
+  name: "notification_lifetime_extension_refactor"
+    namespace: "systemui"
+    description: "Enables moving notification lifetime extension management from SystemUI to "
+        "Notification Manager Service"
+    bug: "299448097"
+}
+

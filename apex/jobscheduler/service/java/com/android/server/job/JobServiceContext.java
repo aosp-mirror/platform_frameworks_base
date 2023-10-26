@@ -398,7 +398,8 @@ public final class JobServiceContext implements ServiceConnection {
             // it was inflated from disk with not-yet-coherent delay/deadline bounds.
             job.clearPersistedUtcTimes();
 
-            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, job.getTag());
+            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    job.getWakelockTag());
             mWakeLock.setWorkSource(
                     mService.deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
             mWakeLock.setReferenceCounted(false);

@@ -54,7 +54,6 @@ class MenuView extends FrameLayout implements
     private final List<AccessibilityTarget> mTargetFeatures = new ArrayList<>();
     private final AccessibilityTargetAdapter mAdapter;
     private final MenuViewModel mMenuViewModel;
-    private final MenuAnimationController mMenuAnimationController;
     private final Rect mBoundsInParent = new Rect();
     private final RecyclerView mTargetFeaturesView;
     private final ViewTreeObserver.OnDrawListener mSystemGestureExcludeUpdater =
@@ -70,6 +69,7 @@ class MenuView extends FrameLayout implements
 
     private boolean mIsMoveToTucked;
 
+    private final MenuAnimationController mMenuAnimationController;
     private OnTargetFeaturesChangeListener mFeaturesChangeListener;
 
     MenuView(Context context, MenuViewModel menuViewModel, MenuViewAppearance menuViewAppearance) {
@@ -197,8 +197,30 @@ class MenuView extends FrameLayout implements
     }
 
     void onPositionChanged() {
-        final PointF position = mMenuViewAppearance.getMenuPosition();
-        mMenuAnimationController.moveToPosition(position);
+        onPositionChanged(/* animateMovement = */ false);
+    }
+
+    void onPositionChanged(boolean animateMovement) {
+        final PointF position;
+        if (isMoveToTucked()) {
+            position = mMenuAnimationController.getTuckedMenuPosition();
+        } else {
+            position = getMenuPosition();
+        }
+
+        // We can skip animating if FAB is not visible
+        if (Flags.floatingMenuImeDisplacementAnimation()
+                && animateMovement && getVisibility() == VISIBLE) {
+            mMenuAnimationController.moveToPosition(position, /* animateMovement = */ true);
+            // onArrivalAtPosition() is called at the end of the animation.
+        } else {
+            mMenuAnimationController.moveToPosition(position);
+            onArrivalAtPosition(); // no animation, so we call this immediately.
+        }
+    }
+
+    void onArrivalAtPosition() {
+        final PointF position = getMenuPosition();
         onBoundsInParentChanged((int) position.x, (int) position.y);
 
         if (isMoveToTucked()) {

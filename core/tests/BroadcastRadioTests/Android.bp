@@ -40,6 +40,8 @@ android_test {
         "androidx.test.rules",
         "truth",
         "testng",
+        "android.hardware.radio.flags-aconfig-java",
+        "flag-junit",
         "mockito-target-extended",
     ],
     libs: ["android.test.base"],

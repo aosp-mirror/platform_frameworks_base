@@ -35,6 +35,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -100,6 +101,8 @@ public class PackageArchiverTest {
     @Mock
     private LauncherApps mLauncherApps;
     @Mock
+    private ActivityManager mActivityManager;
+    @Mock
     private PackageManager mPackageManager;
     @Mock
     private PackageInstallerService mInstallerService;
@@ -159,6 +162,10 @@ public class PackageArchiverTest {
         when(mContext.getSystemService(LauncherApps.class)).thenReturn(mLauncherApps);
         when(mLauncherApps.getActivityList(eq(PACKAGE), eq(UserHandle.CURRENT))).thenReturn(
                 mLauncherActivityInfos);
+
+        when(mContext.getSystemService(ActivityManager.class)).thenReturn(mActivityManager);
+        when(mActivityManager.getLauncherLargeIconDensity()).thenReturn(100);
+
         doReturn(mComputer).when(mPackageManagerService).snapshotComputer();
         when(mComputer.getPackageUid(eq(CALLER_PACKAGE), eq(0L), eq(mUserId))).thenReturn(
                 Binder.getCallingUid());
@@ -172,7 +179,7 @@ public class PackageArchiverTest {
 
         mArchiveManager = spy(new PackageArchiver(mContext, mPackageManagerService));
         doReturn(ICON_PATH).when(mArchiveManager).storeIcon(eq(PACKAGE),
-                any(LauncherActivityInfo.class), eq(mUserId), anyInt());
+                any(LauncherActivityInfo.class), eq(mUserId), anyInt(), anyInt());
         doReturn(mIcon).when(mArchiveManager).decodeIcon(
                 any(ArchiveState.ArchiveActivityInfo.class));
     }
@@ -277,7 +284,7 @@ public class PackageArchiverTest {
     public void archiveApp_storeIconFails() throws IntentSender.SendIntentException, IOException {
         IOException e = new IOException("IO");
         doThrow(e).when(mArchiveManager).storeIcon(eq(PACKAGE),
-                any(LauncherActivityInfo.class), eq(mUserId), anyInt());
+                any(LauncherActivityInfo.class), eq(mUserId), anyInt(), anyInt());
 
         mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
         rule.mocks().getHandler().flush();

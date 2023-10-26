@@ -932,7 +932,9 @@ public final class ConnectivityController extends RestrictingController implemen
             return false;
         }
         if (relaxPrefetchConnectivityConstraintOnlyOnCharger()) {
-            if (!mService.isBatteryCharging()) {
+            // Since the constraint relaxation isn't required by the job, only do it when the
+            // device is charging and the battery level is above the "low battery" threshold.
+            if (!mService.isBatteryCharging() || !mService.isBatteryNotLow()) {
                 return false;
             }
         }

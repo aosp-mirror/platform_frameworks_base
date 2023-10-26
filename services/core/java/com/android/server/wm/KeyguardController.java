@@ -87,6 +87,7 @@ class KeyguardController {
     private RootWindowContainer mRootWindowContainer;
     private final ActivityTaskManagerInternal.SleepTokenAcquirer mSleepTokenAcquirer;
     private boolean mWaitingForWakeTransition;
+    private Transition.ReadyCondition mWaitAodHide = null;
 
     KeyguardController(ActivityTaskManagerService service,
             ActivityTaskSupervisor taskSupervisor) {
@@ -565,8 +566,14 @@ class KeyguardController {
 
     // Defer transition until AOD dismissed.
     void updateDeferTransitionForAod(boolean waiting) {
-        if (waiting == mWaitingForWakeTransition) {
-            return;
+        if (mService.getTransitionController().useFullReadyTracking()) {
+            if (waiting == (mWaitAodHide != null)) {
+                return;
+            }
+        } else {
+            if (waiting == mWaitingForWakeTransition) {
+                return;
+            }
         }
         if (!mService.getTransitionController().isCollecting()) {
             return;
@@ -575,12 +582,17 @@ class KeyguardController {
         if (waiting && isAodShowing(DEFAULT_DISPLAY)) {
             mWaitingForWakeTransition = true;
             mWindowManager.mAtmService.getTransitionController().deferTransitionReady();
+            mWaitAodHide = new Transition.ReadyCondition("AOD hidden");
+            mWindowManager.mAtmService.getTransitionController().waitFor(mWaitAodHide);
             mWindowManager.mH.postDelayed(mResetWaitTransition, DEFER_WAKE_TRANSITION_TIMEOUT_MS);
         } else if (!waiting) {
             // dismiss the deferring if the AOD state change or cancel awake.
             mWaitingForWakeTransition = false;
             mWindowManager.mAtmService.getTransitionController().continueTransitionReady();
             mWindowManager.mH.removeCallbacks(mResetWaitTransition);
+            final Transition.ReadyCondition waitAodHide = mWaitAodHide;
+            mWaitAodHide = null;
+            waitAodHide.meet();
         }
     }
 

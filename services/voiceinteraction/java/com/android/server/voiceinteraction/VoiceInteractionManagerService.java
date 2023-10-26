@@ -1541,7 +1541,31 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
         }
-        //----------------- Model management APIs --------------------------------//
+
+        @Override
+        @android.annotation.EnforcePermission(
+                android.Manifest.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT)
+        public void resetHotwordTrainingDataEgressCountForTest() {
+            super.resetHotwordTrainingDataEgressCountForTest_enforcePermission();
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                if (mImpl == null) {
+                    Slog.w(TAG, "resetHotwordTrainingDataEgressCountForTest without running"
+                            + " voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.resetHotwordTrainingDataEgressCountForTest();
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+
+            }
+        }
+
+      //----------------- Model management APIs --------------------------------//
 
         @Override
         public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, String bcp47Locale) {

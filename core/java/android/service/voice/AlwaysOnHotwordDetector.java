@@ -306,6 +306,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private static final int MSG_DETECTION_HOTWORD_DETECTION_SERVICE_FAILURE = 9;
     private static final int MSG_DETECTION_SOUND_TRIGGER_FAILURE = 10;
     private static final int MSG_DETECTION_UNKNOWN_FAILURE = 11;
+    private static final int MSG_HOTWORD_TRAINING_DATA = 12;
 
     private final String mText;
     private final Locale mLocale;
@@ -1653,6 +1654,16 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
 
         @Override
+        public void onTrainingData(@NonNull HotwordTrainingData data) {
+            if (DBG) {
+                Slog.d(TAG, "onTrainingData(" + data + ")");
+            } else {
+                Slog.i(TAG, "onTrainingData");
+            }
+            Message.obtain(mHandler, MSG_HOTWORD_TRAINING_DATA, data).sendToTarget();
+        }
+
+        @Override
         public void onHotwordDetectionServiceFailure(
                 HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
             Slog.v(TAG, "onHotwordDetectionServiceFailure: " + hotwordDetectionServiceFailure);
@@ -1782,6 +1793,9 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                         break;
                     case MSG_DETECTION_UNKNOWN_FAILURE:
                         mExternalCallback.onUnknownFailure((String) message.obj);
+                        break;
+                    case MSG_HOTWORD_TRAINING_DATA:
+                        mExternalCallback.onTrainingData((HotwordTrainingData) message.obj);
                         break;
                     default:
                         super.handleMessage(message);

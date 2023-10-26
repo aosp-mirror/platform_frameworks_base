@@ -272,6 +272,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetWatchHeap(pw);
                 case "clear-watch-heap":
                     return runClearWatchHeap(pw);
+                case "clear-start-info":
+                    return runClearStartInfo(pw);
                 case "clear-exit-info":
                     return runClearExitInfo(pw);
                 case "bug-report":
@@ -1336,6 +1338,31 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runClearWatchHeap(PrintWriter pw) throws RemoteException {
         String proc = getNextArgRequired();
         mInterface.setDumpHeapDebugLimit(proc, 0, -1, null);
+        return 0;
+    }
+
+    int runClearStartInfo(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
+                "runClearStartInfo()");
+        String opt;
+        int userId = UserHandle.USER_CURRENT;
+        String packageName = null;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                packageName = opt;
+            }
+        }
+        if (userId == UserHandle.USER_CURRENT) {
+            UserInfo user = mInterface.getCurrentUser();
+            if (user == null) {
+                return -1;
+            }
+            userId = user.id;
+        }
+        mInternal.mProcessList.mAppStartInfoTracker
+                .clearHistoryProcessStartInfo(packageName, userId);
         return 0;
     }
 
@@ -4090,6 +4117,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    s[ervices] [COMP_SPEC ...]: service state");
             pw.println("    allowed-associations: current package association restrictions");
             pw.println("    as[sociations]: tracked app associations");
+            pw.println("    start-info [PACKAGE_NAME]: historical process start information");
             pw.println("    exit-info [PACKAGE_NAME]: historical process exit information");
             pw.println("    lmk: stats on low memory killer");
             pw.println("    lru: raw LRU process list");
@@ -4265,6 +4293,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      above <HEAP-LIMIT> then a heap dump is collected for the user to report.");
             pw.println("  clear-watch-heap");
             pw.println("      Clear the previously set-watch-heap.");
+            pw.println("  clear-start-info [--user <USER_ID> | all | current] [package]");
+            pw.println("      Clear the process start-info for given package");
             pw.println("  clear-exit-info [--user <USER_ID> | all | current] [package]");
             pw.println("      Clear the process exit-info for given package");
             pw.println("  bug-report [--progress | --telephony]");

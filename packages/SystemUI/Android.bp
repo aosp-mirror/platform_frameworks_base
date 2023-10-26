@@ -485,6 +485,8 @@ android_library {
         "motion_tool_lib",
         "androidx.core_core-animation-testing-nodeps",
         "androidx.compose.ui_ui",
+        "flag-junit",
+        "platform-test-annotations",
     ],
 }
 

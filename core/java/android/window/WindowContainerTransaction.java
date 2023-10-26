@@ -804,7 +804,7 @@ public final class WindowContainerTransaction implements Parcelable {
      * Sets/removes the always on top flag for this {@code windowContainer}. See
      * {@link com.android.server.wm.ConfigurationContainer#setAlwaysOnTop(boolean)}.
      * Please note that this method is only intended to be used for a
-     * {@link com.android.server.wm.DisplayArea}.
+     * {@link com.android.server.wm.Task} or {@link com.android.server.wm.DisplayArea}.
      *
      * <p>
      *     Setting always on top to {@code True} will also make the {@code windowContainer} to move

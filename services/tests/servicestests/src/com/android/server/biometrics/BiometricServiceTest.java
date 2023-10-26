@@ -47,7 +47,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -65,7 +64,6 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
-import android.hardware.biometrics.IBiometricPromptStatusListener;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -1751,45 +1749,6 @@ public class BiometricServiceTest {
         verify(callback).onChanged(true, userInfo1.id);
         verify(callback).onChanged(false, userInfo2.id);
         verifyNoMoreInteractions(callback);
-    }
-
-    @Test
-    public void testRegisterBiometricPromptOnKeyguardCallback_authenticationAlreadyStarted()
-            throws Exception {
-        final IBiometricPromptStatusListener callback =
-                mock(IBiometricPromptStatusListener.class);
-
-        setupAuthForOnly(TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
-        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                true /* requireConfirmation */, null /* authenticators */);
-        mBiometricService.mImpl.registerBiometricPromptStatusListener(callback);
-
-        verify(callback).onBiometricPromptShowing();
-    }
-
-    @Test
-    public void testRegisterBiometricPromptOnKeyguardCallback_startAuth_dismissDialog()
-            throws Exception {
-        final IBiometricPromptStatusListener listener =
-                mock(IBiometricPromptStatusListener.class);
-        setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
-        mBiometricService.mImpl.registerBiometricPromptStatusListener(listener);
-        waitForIdle();
-
-        verify(listener).onBiometricPromptIdle();
-
-        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                true /* requireConfirmation */, null /* authenticators */);
-        waitForIdle();
-
-        verify(listener).onBiometricPromptShowing();
-
-        final byte[] hat = generateRandomHAT();
-        mBiometricService.mAuthSession.mSysuiReceiver.onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED, hat);
-        waitForIdle();
-
-        verify(listener, times(2)).onBiometricPromptIdle();
     }
 
     // Helper methods

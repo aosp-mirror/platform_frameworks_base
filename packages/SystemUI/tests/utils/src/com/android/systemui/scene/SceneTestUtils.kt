@@ -185,7 +185,6 @@ class SceneTestUtils(
             commandQueue = FakeCommandQueue(),
             featureFlags = featureFlags,
             sceneContainerFlags = sceneContainerFlags,
-            deviceEntryRepository = FakeDeviceEntryRepository(),
             bouncerRepository = FakeKeyguardBouncerRepository(),
             configurationRepository = FakeConfigurationRepository(),
             shadeRepository = FakeShadeRepository(),

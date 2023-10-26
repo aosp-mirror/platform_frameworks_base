@@ -1518,8 +1518,8 @@ class JobConcurrencyManager {
             @WorkType final int workType) {
         final List<StateController> controllers = mService.mControllers;
         final int numControllers = controllers.size();
-        final PowerManager.WakeLock wl =
-                mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, jobStatus.getTag());
+        final PowerManager.WakeLock wl = mPowerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, jobStatus.getWakelockTag());
         wl.setWorkSource(mService.deriveWorkSource(
                 jobStatus.getSourceUid(), jobStatus.getSourcePackageName()));
         wl.setReferenceCounted(false);

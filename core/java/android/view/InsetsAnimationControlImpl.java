@@ -28,6 +28,7 @@ import static android.view.InsetsAnimationControlImplProto.PENDING_FRACTION;
 import static android.view.InsetsAnimationControlImplProto.PENDING_INSETS;
 import static android.view.InsetsAnimationControlImplProto.SHOWN_ON_FINISH;
 import static android.view.InsetsAnimationControlImplProto.TMP_MATRIX;
+import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
@@ -469,8 +470,10 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             }
             addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
 
-            final boolean visible = mPendingFraction == 0 && source != null
-                    ? source.isVisible()
+            // The first frame of ANIMATION_TYPE_SHOW should be invisible since it is animated from
+            // the hidden state.
+            final boolean visible = mPendingFraction == 0
+                    ? mAnimationType != ANIMATION_TYPE_SHOW
                     : !mFinished || mShownOnFinish;
 
             if (outState != null && source != null) {

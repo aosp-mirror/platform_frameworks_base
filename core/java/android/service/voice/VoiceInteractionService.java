@@ -18,6 +18,7 @@ package android.service.voice;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -48,6 +49,7 @@ import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.service.voice.flags.Flags;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -438,6 +440,20 @@ public class VoiceInteractionService extends Service {
         identity.packageName = ActivityThread.currentOpPackageName();
         try {
             return mSystemService.listModuleProperties(identity);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Reset hotword training data egressed count.
+     *  @hide */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+    @RequiresPermission(Manifest.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT)
+    public final void resetHotwordTrainingDataEgressCountForTest() {
+        Log.i(TAG, "Resetting hotword training data egress count for test.");
+        try {
+            mSystemService.resetHotwordTrainingDataEgressCountForTest();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

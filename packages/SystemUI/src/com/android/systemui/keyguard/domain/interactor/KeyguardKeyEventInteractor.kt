@@ -29,8 +29,10 @@ import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Handles key events arriving when the keyguard is showing or device is dozing. */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class KeyguardKeyEventInteractor
 @Inject
@@ -53,9 +55,14 @@ constructor(
         }
 
         if (event.handleAction()) {
+            if (KeyEvent.isConfirmKey(event.keyCode)) {
+                if (isDeviceAwake()) {
+                    return collapseShadeLockedOrShowPrimaryBouncer()
+                }
+            }
+
             when (event.keyCode) {
                 KeyEvent.KEYCODE_MENU -> return dispatchMenuKeyEvent()
-                KeyEvent.KEYCODE_SPACE -> return dispatchSpaceEvent()
             }
         }
         return false
@@ -91,16 +98,22 @@ constructor(
                 (statusBarStateController.state != StatusBarState.SHADE) &&
                 statusBarKeyguardViewManager.shouldDismissOnMenuPressed()
         if (shouldUnlockOnMenuPressed) {
-            shadeController.animateCollapseShadeForced()
-            return true
+            return collapseShadeLockedOrShowPrimaryBouncer()
         }
         return false
     }
 
-    private fun dispatchSpaceEvent(): Boolean {
-        if (isDeviceAwake() && statusBarStateController.state != StatusBarState.SHADE) {
-            shadeController.animateCollapseShadeForced()
-            return true
+    private fun collapseShadeLockedOrShowPrimaryBouncer(): Boolean {
+        when (statusBarStateController.state) {
+            StatusBarState.SHADE -> return false
+            StatusBarState.SHADE_LOCKED -> {
+                shadeController.animateCollapseShadeForced()
+                return true
+            }
+            StatusBarState.KEYGUARD -> {
+                statusBarKeyguardViewManager.showPrimaryBouncer(true)
+                return true
+            }
         }
         return false
     }

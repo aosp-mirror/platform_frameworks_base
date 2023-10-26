@@ -457,12 +457,21 @@ public class PrecomputedText implements Spannable {
         } else {
             hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
         }
+        LineBreakConfig config = params.getLineBreakConfig();
+        if (config.getLineBreakWordStyle() == LineBreakConfig.LINE_BREAK_WORD_STYLE_AUTO
+                && pct.getParagraphCount() != 1) {
+            // If the text has multiple paragraph, resolve line break word style auto to none.
+            config = new LineBreakConfig.Builder()
+                    .merge(config)
+                    .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                    .build();
+        }
         ArrayList<ParagraphInfo> result = new ArrayList<>();
         for (int i = 0; i < pct.getParagraphCount(); ++i) {
             final int paraStart = pct.getParagraphStart(i);
             final int paraEnd = pct.getParagraphEnd(i);
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
-                    params.getTextPaint(), params.getLineBreakConfig(), pct, paraStart, paraEnd,
+                    params.getTextPaint(), config, pct, paraStart, paraEnd,
                     params.getTextDirection(), hyphenationMode, computeLayout, true,
                     pct.getMeasuredParagraph(i), null /* no recycle */)));
         }
@@ -489,6 +498,7 @@ public class PrecomputedText implements Spannable {
             hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
         }
 
+        LineBreakConfig config = null;
         int paraEnd = 0;
         for (int paraStart = start; paraStart < end; paraStart = paraEnd) {
             paraEnd = TextUtils.indexOf(text, LINE_FEED, paraStart, end);
@@ -500,8 +510,21 @@ public class PrecomputedText implements Spannable {
                 paraEnd++;  // Includes LINE_FEED(U+000A) to the prev paragraph.
             }
 
+            if (config == null) {
+                config = params.getLineBreakConfig();
+                if (config.getLineBreakWordStyle() == LineBreakConfig.LINE_BREAK_WORD_STYLE_AUTO
+                        && !(paraStart == start && paraEnd == end)) {
+                    // If the text has multiple paragraph, resolve line break word style auto to
+                    // none.
+                    config = new LineBreakConfig.Builder()
+                            .merge(config)
+                            .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                            .build();
+                }
+            }
+
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
-                    params.getTextPaint(), params.getLineBreakConfig(), text, paraStart, paraEnd,
+                    params.getTextPaint(), config, text, paraStart, paraEnd,
                     params.getTextDirection(), hyphenationMode, computeLayout, computeBounds,
                     null /* no hint */,
                     null /* no recycle */)));
