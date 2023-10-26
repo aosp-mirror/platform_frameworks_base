@@ -3715,6 +3715,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
+        if (mQsHeader == null) {
+            Log.wtf(TAG, "qsHeader is null while NSSL is handling a touch");
+            return false;
+        }
+
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
         /**
          * One-handed mode defines a feature FEATURE_ONE_HANDED of DisplayArea {@link DisplayArea}
