@@ -24,7 +24,7 @@ public class FakeStorageManager {
 
     private final ArrayMap<Integer, byte[]> mUserSecrets = new ArrayMap<>();
 
-    public void setUserKeyProtection(int userId, byte[] secret) {
+    public void setCeStorageProtection(int userId, byte[] secret) {
         assertThat(mUserSecrets).doesNotContainKey(userId);
         mUserSecrets.put(userId, secret);
     }
@@ -35,7 +35,7 @@ public class FakeStorageManager {
         return secret;
     }
 
-    public void unlockUserKey(int userId, byte[] secret) {
+    public void unlockCeStorage(int userId, byte[] secret) {
         assertThat(mUserSecrets.get(userId)).isEqualTo(secret);
     }
 }
