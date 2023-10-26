@@ -1010,15 +1010,15 @@ public class BubbleStackView extends FrameLayout
                     }
 
                     if (mIsExpanded) {
-                        // Re-draw bubble row and pointer for new orientation.
-                        beforeExpandedViewAnimation();
+                        // update the expanded view and pointer location for the new orientation.
+                        hideFlyoutImmediate();
+                        mExpandedViewContainer.setAlpha(0f);
+                        updateExpandedView();
                         updateOverflowVisibility();
-                        updatePointerPosition(false /* forIme */);
-                        mExpandedAnimationController.expandFromStack(() -> {
-                            afterExpandedViewAnimation();
-                            mExpandedViewContainer.setVisibility(VISIBLE);
-                            showManageMenu(mShowingManage);
-                        } /* after */);
+                        updatePointerPosition(false);
+                        requestUpdate();
+                        showManageMenu(mShowingManage);
+
                         PointF p = mPositioner.getExpandedBubbleXY(getBubbleIndex(mExpandedBubble),
                                 getState());
                         final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
@@ -1027,6 +1027,7 @@ public class BubbleStackView extends FrameLayout
                         mExpandedViewContainer.setTranslationY(translationY);
                         mExpandedViewContainer.setAlpha(1f);
                     }
+
                     removeOnLayoutChangeListener(mOrientationChangedListener);
                 };
         final float maxDismissSize = getResources().getDimensionPixelSize(
