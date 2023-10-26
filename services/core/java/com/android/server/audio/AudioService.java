@@ -2936,11 +2936,11 @@ public class AudioService extends IAudioService.Stub
         super.removePreferredDevicesForStrategy_enforcePermission();
 
         final String logString =
-                String.format("removePreferredDeviceForStrategy strat:%d", strategy);
+                String.format("removePreferredDevicesForStrategy strat:%d", strategy);
         sDeviceLogger.enqueue(new EventLogger.StringEvent(logString).printLog(TAG));
 
         final int status = mDeviceBroker.removePreferredDevicesForStrategySync(strategy);
-        if (status != AudioSystem.SUCCESS) {
+        if (status != AudioSystem.SUCCESS && status != AudioSystem.BAD_VALUE) {
             Log.e(TAG, String.format("Error %d in %s)", status, logString));
         }
         return status;
@@ -3024,7 +3024,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         final int status = mDeviceBroker.removeDeviceAsNonDefaultForStrategySync(strategy, device);
-        if (status != AudioSystem.SUCCESS) {
+        if (status != AudioSystem.SUCCESS && status != AudioSystem.BAD_VALUE) {
             Log.e(TAG, String.format("Error %d in %s)", status, logString));
         }
         return status;
@@ -3144,7 +3144,7 @@ public class AudioService extends IAudioService.Stub
         sDeviceLogger.enqueue(new EventLogger.StringEvent(logString).printLog(TAG));
 
         final int status = mDeviceBroker.clearPreferredDevicesForCapturePresetSync(capturePreset);
-        if (status != AudioSystem.SUCCESS) {
+        if (status != AudioSystem.SUCCESS && status != AudioSystem.BAD_VALUE) {
             Log.e(TAG, String.format("Error %d in %s", status, logString));
         }
         return status;
