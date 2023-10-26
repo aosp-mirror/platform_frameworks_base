@@ -15,6 +15,7 @@
 aconfig_srcjars = [
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
+    ":android.net.vcn.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
@@ -195,5 +196,18 @@ java_aconfig_library {
 java_aconfig_library {
     name: "com.android.net.flags-aconfig-java",
     aconfig_declarations: "com.android.net.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// VCN
+aconfig_declarations {
+    name: "android.net.vcn.flags-aconfig",
+    package: "android.net.vcn",
+    srcs: ["core/java/android/net/vcn/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.net.vcn.flags-aconfig-java",
+    aconfig_declarations: "android.net.vcn.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
