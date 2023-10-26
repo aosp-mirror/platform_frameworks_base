@@ -2725,7 +2725,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Receive the splash screen data from shell, sending to client.
      * @param parcelable The data to reconstruct the splash screen view, null mean unable to copy.
      */
-    void onCopySplashScreenFinish(SplashScreenViewParcelable parcelable) {
+    void onCopySplashScreenFinish(@Nullable SplashScreenViewParcelable parcelable) {
         removeTransferSplashScreenTimeout();
         final SurfaceControl windowAnimationLeash = (parcelable == null
                 || mTransferringSplashScreenState != TRANSFER_SPLASH_SCREEN_COPYING

@@ -3608,8 +3608,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * @hide
      */
     @Override
-    public void onSplashScreenViewCopyFinished(int taskId, SplashScreenViewParcelable parcelable)
-            throws RemoteException {
+    public void onSplashScreenViewCopyFinished(int taskId,
+            @Nullable SplashScreenViewParcelable parcelable)
+                throws RemoteException {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_TASKS,
                 "copySplashScreenViewFinish()");
         synchronized (mGlobalLock) {
