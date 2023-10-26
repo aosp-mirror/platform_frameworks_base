@@ -17,11 +17,13 @@ package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.graphics.Color
 import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
 import androidx.collection.ArrayMap
 import androidx.lifecycle.lifecycleScope
 import com.android.app.animation.Interpolators
@@ -56,6 +58,7 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
+import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -64,7 +67,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** Binds a view-model to a [NotificationIconContainer]. */
 object NotificationIconContainerViewBinder {
@@ -120,7 +122,6 @@ object NotificationIconContainerViewBinder {
         screenOffAnimationController: ScreenOffAnimationController,
         viewStore: IconViewStore,
     ): DisposableHandle {
-        val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
         return view.repeatWhenAttached {
             lifecycleScope.launch {
                 launch {
@@ -143,7 +144,11 @@ object NotificationIconContainerViewBinder {
                         screenOffAnimationController,
                     )
                 }
-                launch { viewModel.iconColors.bindIconColors(view, contrastColorUtil) }
+                launch {
+                    configuration
+                        .getColorAttr(R.attr.wallpaperTextColor, DEFAULT_AOD_ICON_COLOR)
+                        .bindIconColors(view)
+                }
             }
         }
     }
@@ -163,6 +168,19 @@ object NotificationIconContainerViewBinder {
     ) {
         mapNotNull { lookup -> lookup.iconColors(view.viewBounds) }
             .collect { iconLookup -> view.applyTint(iconLookup, contrastColorUtil) }
+    }
+
+    /**
+     * Binds to the [StatusBarIconView.setStaticDrawableColor] and [StatusBarIconView.setDecorColor]
+     * of the [children] of an [NotificationIconContainer].
+     */
+    private suspend fun Flow<Int>.bindIconColors(view: NotificationIconContainer) {
+        collect { tint ->
+            view.children.filterIsInstance<StatusBarIconView>().forEach { icon ->
+                icon.staticDrawableColor = tint
+                icon.setDecorColor(tint)
+            }
+        }
     }
 
     private suspend fun Flow<AnimatedValue<Boolean>>.bindIsDozing(
@@ -415,6 +433,7 @@ object NotificationIconContainerViewBinder {
     }
 
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200
+    @ColorInt private val DEFAULT_AOD_ICON_COLOR = Color.WHITE
 }
 
 /** [IconViewStore] for the [com.android.systemui.statusbar.NotificationShelf] */

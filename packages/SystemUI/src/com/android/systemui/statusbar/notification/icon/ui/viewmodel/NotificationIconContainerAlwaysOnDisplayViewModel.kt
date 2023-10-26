@@ -15,10 +15,7 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
-import android.graphics.Color
 import android.graphics.Rect
-import androidx.annotation.ColorInt
-import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -27,7 +24,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.notification.icon.domain.interactor.AlwaysOnDisplayNotificationIconsInteractor
@@ -50,7 +46,6 @@ import kotlinx.coroutines.flow.map
 class NotificationIconContainerAlwaysOnDisplayViewModel
 @Inject
 constructor(
-    configuration: ConfigurationState,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val featureFlags: FeatureFlagsClassic,
@@ -61,12 +56,6 @@ constructor(
     screenOffAnimationController: ScreenOffAnimationController,
     shadeInteractor: ShadeInteractor,
 ) {
-
-    /** The colors with which to display the notification icons. */
-    val iconColors: Flow<NotificationIconColorLookup> =
-        configuration.getColorAttr(R.attr.wallpaperTextColor, DEFAULT_AOD_ICON_COLOR).map { tint ->
-            NotificationIconColorLookup { IconColorsImpl(tint) }
-        }
 
     /** Are changes to the icon container animated? */
     val animationsEnabled: Flow<Boolean> =
@@ -179,9 +168,5 @@ constructor(
 
     private class IconColorsImpl(override val tint: Int) : NotificationIconColors {
         override fun staticDrawableColor(viewBounds: Rect, isColorized: Boolean): Int = tint
-    }
-
-    companion object {
-        @ColorInt private val DEFAULT_AOD_ICON_COLOR = Color.WHITE
     }
 }
