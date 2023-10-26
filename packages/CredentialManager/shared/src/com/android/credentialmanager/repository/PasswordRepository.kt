@@ -25,8 +25,11 @@ import android.util.Log
 import com.android.credentialmanager.TAG
 import com.android.credentialmanager.model.Password
 import com.android.credentialmanager.model.Request
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class PasswordRepository {
+@Singleton
+class PasswordRepository @Inject constructor() {
 
     suspend fun selectPassword(
         password: Password,

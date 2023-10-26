@@ -18,20 +18,20 @@ package com.android.credentialmanager
 
 import android.content.Intent
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.repository.RequestRepository
 import com.android.credentialmanager.ui.mappers.toGet
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CredentialSelectorViewModel(
+@HiltViewModel
+class CredentialSelectorViewModel @Inject constructor(
     private val requestRepository: RequestRepository,
 ) : ViewModel() {
 
@@ -54,22 +54,6 @@ class CredentialSelectorViewModel(
     fun onNewIntent(intent: Intent, previousIntent: Intent? = null) {
         viewModelScope.launch {
             requestRepository.processRequest(intent = intent, previousIntent = previousIntent)
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
-            ): T {
-                val application = checkNotNull(extras[APPLICATION_KEY])
-
-                return CredentialSelectorViewModel(
-                    requestRepository = (application as CredentialSelectorApp).requestRepository,
-                ) as T
-            }
         }
     }
 }

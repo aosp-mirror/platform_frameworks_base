@@ -29,13 +29,13 @@ import com.android.credentialmanager.ui.WearApp
 import com.android.credentialmanager.ui.screens.single.password.SinglePasswordScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.belowTimeTextPreview
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-class CredentialSelectorActivity : ComponentActivity() {
+@AndroidEntryPoint(ComponentActivity::class)
+class CredentialSelectorActivity : Hilt_CredentialSelectorActivity() {
 
-    private val viewModel: CredentialSelectorViewModel by viewModels {
-        CredentialSelectorViewModel.Factory
-    }
+    private val viewModel: CredentialSelectorViewModel by viewModels()
 
     @OptIn(ExperimentalHorologistApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
