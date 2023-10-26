@@ -37,7 +37,7 @@ object SettingsJankMonitor {
     const val MONITORED_ANIMATION_DURATION_MS = 300L
 
     /**
-     * Detects the jank when click on a SwitchPreference.
+     * Detects the jank when click on a TwoStatePreference.
      *
      * @param recyclerView the recyclerView contains the preference
      * @param preference the clicked preference
