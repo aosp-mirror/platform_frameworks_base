@@ -21,6 +21,7 @@ import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.server.display.feature.flags.Flags;
+import com.android.server.display.utils.DebugUtils;
 
 import java.util.function.Supplier;
 
@@ -28,8 +29,12 @@ import java.util.function.Supplier;
  * Utility class to read the flags used in the display manager server.
  */
 public class DisplayManagerFlags {
-    private static final boolean DEBUG = false;
     private static final String TAG = "DisplayManagerFlags";
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayManagerFlags DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
+
 
     private final FlagState mConnectedDisplayManagementFlagState = new FlagState(
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_MANAGEMENT,

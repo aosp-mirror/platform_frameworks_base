@@ -81,7 +81,9 @@ public final class DisplayManagerGlobal {
     private static String sCurrentPackageName = ActivityThread.currentPackageName();
     private static boolean sExtraDisplayListenerLogging = initExtraLogging();
 
-    private static final boolean DEBUG = false || sExtraDisplayListenerLogging;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayManager DEBUG && adb reboot'
+    private static final boolean DEBUG = DisplayManager.DEBUG || sExtraDisplayListenerLogging;
 
     // True if display info and display ids should be cached.
     //

@@ -46,6 +46,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -71,7 +72,11 @@ import java.util.function.Predicate;
 @SystemService(Context.DISPLAY_SERVICE)
 public final class DisplayManager {
     private static final String TAG = "DisplayManager";
-    private static final boolean DEBUG = false;
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayManager DEBUG && adb reboot'
+    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG)
+            || Log.isLoggable("DisplayManager_All", Log.DEBUG);
     private static final boolean ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE = true;
 
     /**

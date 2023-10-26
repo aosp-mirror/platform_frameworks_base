@@ -38,6 +38,7 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
 import com.android.server.display.DisplayManagerService.Clock;
+import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -54,7 +55,9 @@ import java.util.Iterator;
 class HighBrightnessModeController {
     private static final String TAG = "HighBrightnessModeController";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.HighBrightnessModeController DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     @VisibleForTesting
     static final float HBM_TRANSITION_POINT_INVALID = Float.POSITIVE_INFINITY;

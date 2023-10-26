@@ -42,6 +42,7 @@ import android.window.ScreenCapture;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.display.utils.DebugUtils;
 import com.android.server.policy.WindowManagerPolicy;
 
 import libcore.io.Streams;
@@ -66,7 +67,9 @@ import java.nio.FloatBuffer;
 final class ColorFade {
     private static final String TAG = "ColorFade";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.ColorFade DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     // The layer for the electron beam surface.
     // This is currently hardcoded to be one layer above the boot animation.
