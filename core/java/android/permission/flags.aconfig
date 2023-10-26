@@ -35,3 +35,10 @@ flag {
     description: "enable the shouldRegisterAttributionSource API"
     bug: "305057691"
 }
+
+flag {
+  name: "attribution_source_constructor"
+  namespace: "permissions"
+  description: "enable AttributionSource(int, int, String, String, IBinder, String[], AttributionSource)"
+  bug: "304478648"
+}
