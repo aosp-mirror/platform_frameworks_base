@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsScope
 import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
+import com.android.settingslib.spaprivileged.model.enterprise.BlockedByEcm
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
@@ -47,6 +48,7 @@ internal fun MoreOptionsScope.RestrictedMenuItemImpl(
     MenuItem(text = text, enabled = restrictedMode !== BaseUserRestricted) {
         when (restrictedMode) {
             is BlockedByAdmin -> restrictedMode.sendShowAdminSupportDetailsIntent()
+            is BlockedByEcm -> restrictedMode.showRestrictedSettingsDetails()
             else -> onClick()
         }
     }
