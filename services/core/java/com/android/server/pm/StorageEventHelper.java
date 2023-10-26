@@ -183,7 +183,7 @@ public final class StorageEventHelper extends StorageEventListener {
                 StorageManagerInternal.class);
         for (UserInfo user : mPm.mUserManager.getUsers(false /* includeDying */)) {
             final int flags;
-            if (StorageManager.isUserKeyUnlocked(user.id)
+            if (StorageManager.isCeStorageUnlocked(user.id)
                     && smInternal.isCeStoragePrepared(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
