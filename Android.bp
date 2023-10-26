@@ -603,30 +603,6 @@ java_library {
     ],
 }
 
-// TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
-metalava_framework_docs_args = "" +
-    "--api-lint-ignore-prefix android.icu. " +
-    "--api-lint-ignore-prefix java. " +
-    "--api-lint-ignore-prefix junit. " +
-    "--api-lint-ignore-prefix org. " +
-    "--error NoSettingsProvider " +
-    "--error UnhiddenSystemApi " +
-    "--error UnflaggedApi " +
-    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
-    "--hide BroadcastBehavior " +
-    "--hide CallbackInterface " +
-    "--hide DeprecationMismatch " +
-    "--hide HiddenSuperclass " +
-    "--hide HiddenTypeParameter " +
-    "--hide MissingPermission " +
-    "--hide-package android.audio.policy.configuration.V7_0 " +
-    "--hide-package com.android.server " +
-    "--hide RequiresPermission " +
-    "--hide SdkConstant " +
-    "--hide Todo " +
-    "--hide UnavailableSymbol " +
-    "--manifest $(location :frameworks-base-core-AndroidManifest.xml) "
-
 packages_to_document = [
     "android",
     "dalvik",
@@ -696,6 +672,29 @@ stubs_defaults {
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
+    ],
+    flags: [
+        "--api-lint-ignore-prefix android.icu.",
+        "--api-lint-ignore-prefix java.",
+        "--api-lint-ignore-prefix junit.",
+        "--api-lint-ignore-prefix org.",
+        "--error NoSettingsProvider",
+        "--error UnhiddenSystemApi",
+        "--error UnflaggedApi",
+        "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*",
+        "--hide BroadcastBehavior",
+        "--hide CallbackInterface",
+        "--hide DeprecationMismatch",
+        "--hide HiddenSuperclass",
+        "--hide HiddenTypeParameter",
+        "--hide MissingPermission",
+        "--hide RequiresPermission",
+        "--hide SdkConstant",
+        "--hide Todo",
+        "--hide UnavailableSymbol",
+        "--hide-package android.audio.policy.configuration.V7_0",
+        "--hide-package com.android.server",
+        "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
     ],
     filter_packages: packages_to_document,
     high_mem: true, // Lots of sources => high memory use, see b/170701554

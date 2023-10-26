@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.LongDef;
@@ -3651,6 +3652,7 @@ public abstract class PackageManager {
      * The device is capable of communicating with other devices via
      * <a href="https://www.threadgroup.org">Thread</a> networking protocol.
      */
+    @FlaggedApi("com.android.net.thread.flags.thread_enabled")
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_THREAD_NETWORK = "android.hardware.thread_network";
 
