@@ -16,6 +16,9 @@
 
 package android.graphics;
 
+import com.android.graphics.flags.Flags;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import java.io.OutputStream;
@@ -243,6 +246,36 @@ public class YuvImage {
                 new byte[WORKING_COMPRESS_STORAGE]);
     }
 
+  /**
+   * Compress the HDR image into JPEG/R format.
+   *
+   * Sample usage:
+   *     hdr_image.compressToJpegR(sdr_image, 90, stream);
+   *
+   * For the SDR image, only YUV_420_888 image format is supported, and the following
+   * color spaces are supported:
+   *     ColorSpace.Named.SRGB,
+   *     ColorSpace.Named.DISPLAY_P3
+   *
+   * For the HDR image, only YCBCR_P010 image format is supported, and the following
+   * color spaces are supported:
+   *     ColorSpace.Named.BT2020_HLG,
+   *     ColorSpace.Named.BT2020_PQ
+   *
+   * @param sdr       The SDR image, only ImageFormat.YUV_420_888 is supported.
+   * @param quality   Hint to the compressor, 0-100. 0 meaning compress for
+   *                  small size, 100 meaning compress for max quality.
+   * @param stream    OutputStream to write the compressed data.
+   * @return          True if the compression is successful.
+   * @throws IllegalArgumentException if input images are invalid; quality is not within [0,
+   *                  100]; or stream is null.
+   */
+    public boolean compressToJpegR(@NonNull YuvImage sdr, int quality,
+            @NonNull OutputStream stream) {
+        byte[] emptyExif = new byte[0];
+        return compressToJpegR(sdr, quality, stream, emptyExif);
+    }
+
     /**
      * Compress the HDR image into JPEG/R format.
      *
@@ -263,12 +296,14 @@ public class YuvImage {
      * @param quality   Hint to the compressor, 0-100. 0 meaning compress for
      *                  small size, 100 meaning compress for max quality.
      * @param stream    OutputStream to write the compressed data.
+     * @param exif      Exchangeable image file format.
      * @return          True if the compression is successful.
      * @throws IllegalArgumentException if input images are invalid; quality is not within [0,
      *                  100]; or stream is null.
      */
+    @FlaggedApi(Flags.FLAG_YUV_IMAGE_COMPRESS_TO_ULTRA_HDR)
     public boolean compressToJpegR(@NonNull YuvImage sdr, int quality,
-            @NonNull OutputStream stream) {
+            @NonNull OutputStream stream, @NonNull byte[] exif) {
         if (sdr == null) {
             throw new IllegalArgumentException("SDR input cannot be null");
         }
@@ -304,7 +339,7 @@ public class YuvImage {
       return nativeCompressToJpegR(mData, mColorSpace.getDataSpace(),
                                    sdr.getYuvData(), sdr.getColorSpace().getDataSpace(),
                                    mWidth, mHeight, quality, stream,
-                                   new byte[WORKING_COMPRESS_STORAGE]);
+                                   new byte[WORKING_COMPRESS_STORAGE], exif);
   }
 
 
@@ -416,5 +451,5 @@ public class YuvImage {
 
     private static native boolean nativeCompressToJpegR(byte[] hdr, int hdrColorSpaceId,
             byte[] sdr, int sdrColorSpaceId, int width, int height, int quality,
-            OutputStream stream, byte[] tempStorage);
+            OutputStream stream, byte[] tempStorage, byte[] exif);
 }

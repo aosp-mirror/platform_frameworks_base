@@ -332,7 +332,7 @@ ultrahdr_transfer_function P010Yuv420ToJpegREncoder::findHdrTransferFunction(JNI
 
 bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
         SkWStream* stream, void* hdr, int hdrColorSpace, void* sdr, int sdrColorSpace,
-        int width, int height, int jpegQuality) {
+        int width, int height, int jpegQuality, ScopedByteArrayRO* jExif) {
     // Check SDR color space. Now we only support SRGB transfer function
     if ((sdrColorSpace & ADataSpace::TRANSFER_MASK) !=  ADataSpace::TRANSFER_SRGB) {
         jclass IllegalArgumentException = env->FindClass("java/lang/IllegalArgumentException");
@@ -365,6 +365,10 @@ bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
     yuv420.height = height;
     yuv420.colorGamut = sdrColorGamut;
 
+    jpegr_exif_struct exif;
+    exif.data = const_cast<void*>(reinterpret_cast<const void*>(jExif->get()));
+    exif.length = jExif->size();
+
     jpegr_compressed_struct jpegR;
     jpegR.maxLength = width * height * sizeof(uint8_t);
 
@@ -373,7 +377,8 @@ bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
 
     if (int success = jpegREncoder.encodeJPEGR(&p010, &yuv420,
             hdrTransferFunction,
-            &jpegR, jpegQuality, nullptr); success != android::OK) {
+            &jpegR, jpegQuality,
+            exif.length > 0 ? &exif : NULL); success != android::OK) {
         ALOGW("Encode JPEG/R failed, error code: %d.", success);
         return false;
     }
@@ -415,15 +420,17 @@ static jboolean YuvImage_compressToJpeg(JNIEnv* env, jobject, jbyteArray inYuv,
 static jboolean YuvImage_compressToJpegR(JNIEnv* env, jobject, jbyteArray inHdr,
         jint hdrColorSpace, jbyteArray inSdr, jint sdrColorSpace,
         jint width, jint height, jint quality, jobject jstream,
-        jbyteArray jstorage) {
+        jbyteArray jstorage, jbyteArray jExif) {
     jbyte* hdr = env->GetByteArrayElements(inHdr, NULL);
     jbyte* sdr = env->GetByteArrayElements(inSdr, NULL);
+    ScopedByteArrayRO exif(env, jExif);
+
     SkWStream* strm = CreateJavaOutputStreamAdaptor(env, jstream, jstorage);
     P010Yuv420ToJpegREncoder encoder;
 
     jboolean result = JNI_FALSE;
     if (encoder.encode(env, strm, hdr, hdrColorSpace, sdr, sdrColorSpace,
-                       width, height, quality)) {
+                       width, height, quality, &exif)) {
         result = JNI_TRUE;
     }
 
@@ -437,7 +444,7 @@ static jboolean YuvImage_compressToJpegR(JNIEnv* env, jobject, jbyteArray inHdr,
 static const JNINativeMethod gYuvImageMethods[] = {
     {   "nativeCompressToJpeg",  "([BIII[I[IILjava/io/OutputStream;[B)Z",
         (void*)YuvImage_compressToJpeg },
-    {   "nativeCompressToJpegR",  "([BI[BIIIILjava/io/OutputStream;[B)Z",
+    {   "nativeCompressToJpegR",  "([BI[BIIIILjava/io/OutputStream;[B[B)Z",
         (void*)YuvImage_compressToJpegR }
 };
 
