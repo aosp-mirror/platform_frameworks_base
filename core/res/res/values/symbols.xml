@@ -1267,6 +1267,7 @@
   <java-symbol type="array" name="policy_exempt_apps" />
   <java-symbol type="array" name="vendor_policy_exempt_apps" />
   <java-symbol type="array" name="cloneable_apps" />
+  <java-symbol type="array" name="config_securityStatePackages" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="default_lock_wallpaper" />

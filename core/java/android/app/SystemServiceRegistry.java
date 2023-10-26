@@ -174,6 +174,7 @@ import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IPowerStatsService;
 import android.os.IRecoverySystem;
+import android.os.ISecurityStateManager;
 import android.os.ISystemUpdateManager;
 import android.os.IThermalService;
 import android.os.IUserManager;
@@ -182,6 +183,7 @@ import android.os.PerformanceHintManager;
 import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.RecoverySystem;
+import android.os.SecurityStateManager;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StatsFrameworkInitializer;
@@ -627,6 +629,17 @@ public final class SystemServiceRegistry {
                 return new SearchManager(ctx.getOuterContext(),
                         ctx.mMainThread.getHandler());
             }});
+
+        registerService(Context.SECURITY_STATE_SERVICE, SecurityStateManager.class,
+                new CachedServiceFetcher<SecurityStateManager>() {
+                    @Override
+                    public SecurityStateManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.SECURITY_STATE_SERVICE);
+                        ISecurityStateManager service = ISecurityStateManager.Stub.asInterface(b);
+                        return new SecurityStateManager(service);
+                    }});
 
         registerService(Context.SENSOR_SERVICE, SensorManager.class,
                 new CachedServiceFetcher<SensorManager>() {

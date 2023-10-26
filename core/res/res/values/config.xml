@@ -4986,6 +4986,11 @@
     <!-- Component name for the default module metadata provider on this device -->
     <string name="config_defaultModuleMetadataProvider" translatable="false">com.android.modulemetadata</string>
 
+    <!-- Packages that contain a security state.
+         {@link SecurityStateManager#getGlobalSecurityState} will read and report the state/version
+          of these packages. -->
+    <string-array name="config_securityStatePackages" translatable="false" />
+
     <!-- Package name for the default Health Connect app.
          OEMs can set this with their own health app package name to define a default app with high
          priority for the app to store the health data. If set the app always has priority of 1

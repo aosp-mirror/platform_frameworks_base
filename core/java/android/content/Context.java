@@ -72,6 +72,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -4214,6 +4215,7 @@ public abstract class Context {
             DEVICE_LOCK_SERVICE,
             VIRTUALIZATION_SERVICE,
             GRAMMATICAL_INFLECTION_SERVICE,
+            SECURITY_STATE_SERVICE,
 
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -6476,6 +6478,16 @@ public abstract class Context {
      */
     @SystemApi
     public static final String SHARED_CONNECTIVITY_SERVICE = "shared_connectivity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.SecurityStateManager} for accessing the security state manager service.
+     *
+     * @see #getSystemService(String)
+     * @see android.os.SecurityStateManager
+     */
+    @FlaggedApi(Flags.FLAG_SECURITY_STATE_SERVICE)
+    public static final String SECURITY_STATE_SERVICE = "security_state";
 
     /**
      * Determine whether the given permission is allowed for a particular
