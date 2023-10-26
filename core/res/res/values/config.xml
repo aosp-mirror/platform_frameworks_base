@@ -1256,6 +1256,11 @@
     -->
     <bool name="config_shortPressEarlyOnPower">false</bool>
 
+    <!-- Whether a single short press on STEM_PRIMARY should be launched without multi-press delay.
+        This works similarly as config_shortPressEarlyOnPower but for STEM_PRIMARY.
+    -->
+    <bool name="config_shortPressEarlyOnStemPrimary">false</bool>
+
     <!-- Control the behavior of the search key.
             0 - Launch default search activity
             1 - Launch target activity defined by config_searchKeyTargetActivity

@@ -473,6 +473,7 @@
   <java-symbol type="integer" name="config_doublePressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_triplePressOnStemPrimaryBehavior" />
   <java-symbol type="bool" name="config_shortPressEarlyOnPower" />
+  <java-symbol type="bool" name="config_shortPressEarlyOnStemPrimary" />
   <java-symbol type="string" name="config_doublePressOnPowerTargetActivity" />
   <java-symbol type="integer" name="config_searchKeyBehavior" />
   <java-symbol type="string" name="config_searchKeyTargetActivity" />
