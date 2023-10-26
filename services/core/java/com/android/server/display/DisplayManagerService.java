@@ -590,8 +590,7 @@ public final class DisplayManagerService extends SystemService {
         mSystemReady = false;
         mConfigParameterProvider = new DeviceConfigParameterProvider(DeviceConfigInterface.REAL);
         mExtraDisplayLoggingPackageName = DisplayProperties.debug_vri_package().orElse(null);
-        // TODO: b/306170135 - return TextUtils package name check instead
-        mExtraDisplayEventLogging = true;
+        mExtraDisplayEventLogging = !TextUtils.isEmpty(mExtraDisplayLoggingPackageName);
     }
 
     public void setupSchedulerPolicies() {
@@ -3048,8 +3047,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private boolean extraLogging(String packageName) {
-        // TODO: b/306170135 - return mExtraDisplayLoggingPackageName & package name check instead
-        return true;
+        return mExtraDisplayEventLogging && mExtraDisplayLoggingPackageName.equals(packageName);
     }
 
     // Runs on Handler thread.
