@@ -189,7 +189,13 @@ constructor(
 
     override fun getInstanceId(): InstanceId = qsTileViewModel.config.instanceId
     override fun getTileLabel(): CharSequence =
-        context.getString(qsTileViewModel.config.tileLabelRes)
+        with(qsTileViewModel.config.uiConfig) {
+            when (this) {
+                is QSTileUIConfig.Empty -> qsTileViewModel.currentState?.label ?: ""
+                is QSTileUIConfig.Resource -> context.getString(tileLabelRes)
+            }
+        }
+
     override fun getTileSpec(): String = qsTileViewModel.config.tileSpec.spec
 
     private companion object {

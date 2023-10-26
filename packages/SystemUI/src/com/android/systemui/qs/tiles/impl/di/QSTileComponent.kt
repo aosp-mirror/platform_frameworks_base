@@ -19,7 +19,6 @@ package com.android.systemui.qs.tiles.impl.di
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
-import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 
 /**
  * Base QS tile component. It should be used with [QSTileScope] to create a custom tile scoped
@@ -31,8 +30,6 @@ interface QSTileComponent<T> {
     fun dataInteractor(): QSTileDataInteractor<T>
 
     fun userActionInteractor(): QSTileUserActionInteractor<T>
-
-    fun config(): QSTileConfig
 
     fun dataToStateMapper(): QSTileDataToStateMapper<T>
 }

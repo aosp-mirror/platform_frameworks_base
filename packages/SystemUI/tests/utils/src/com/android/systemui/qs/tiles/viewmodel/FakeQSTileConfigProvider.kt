@@ -16,28 +16,17 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
-import com.android.internal.logging.InstanceId
 import com.android.systemui.qs.pipeline.shared.TileSpec
 
-object QSTileConfigTestBuilder {
+class FakeQSTileConfigProvider : QSTileConfigProvider {
 
-    fun build(configure: BuildingScope.() -> Unit = {}): QSTileConfig =
-        BuildingScope().apply(configure).build()
+    private val configs: MutableMap<String, QSTileConfig> = mutableMapOf()
 
-    class BuildingScope {
-        var tileSpec: TileSpec = TileSpec.create("test_spec")
-        var uiConfig: QSTileUIConfig = QSTileUIConfig.Empty
-        var instanceId: InstanceId = InstanceId.fakeInstanceId(0)
-        var metricsSpec: String = tileSpec.spec
-        var policy: QSTilePolicy = QSTilePolicy.NoRestrictions
+    override fun getConfig(tileSpec: String): QSTileConfig = configs.getValue(tileSpec)
 
-        fun build() =
-            QSTileConfig(
-                tileSpec,
-                uiConfig,
-                instanceId,
-                metricsSpec,
-                policy,
-            )
+    fun putConfig(tileSpec: TileSpec, config: QSTileConfig) {
+        configs[tileSpec.spec] = config
     }
+
+    fun removeConfig(tileSpec: TileSpec): QSTileConfig? = configs.remove(tileSpec.spec)
 }

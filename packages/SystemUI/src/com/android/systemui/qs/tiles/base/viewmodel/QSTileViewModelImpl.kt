@@ -67,7 +67,7 @@ import kotlinx.coroutines.flow.stateIn
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class QSTileViewModelImpl<DATA_TYPE>(
-    val tileConfig: () -> QSTileConfig,
+    override val config: QSTileConfig,
     private val userActionInteractor: () -> QSTileUserActionInteractor<DATA_TYPE>,
     private val tileDataInteractor: () -> QSTileDataInteractor<DATA_TYPE>,
     private val mapper: () -> QSTileDataToStateMapper<DATA_TYPE>,
@@ -92,8 +92,6 @@ class QSTileViewModelImpl<DATA_TYPE>(
 
     private val tileData: SharedFlow<DATA_TYPE> = createTileDataFlow()
 
-    override val config
-        get() = tileConfig()
     override val state: SharedFlow<QSTileState> =
         tileData
             .map { data ->

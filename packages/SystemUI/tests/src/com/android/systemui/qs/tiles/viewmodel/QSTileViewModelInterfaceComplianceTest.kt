@@ -20,12 +20,10 @@ import android.os.UserHandle
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.FakeDisabledByPolicyInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileDataInteractor
@@ -93,7 +91,7 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
         config: QSTileConfig = TEST_QS_TILE_CONFIG,
     ): QSTileViewModel =
         QSTileViewModelImpl(
-            { config },
+            config,
             { fakeQSTileUserActionInteractor },
             { fakeQSTileDataInteractor },
             {
@@ -114,12 +112,6 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
 
     private companion object {
 
-        val TEST_QS_TILE_CONFIG =
-            QSTileConfig(
-                TileSpec.create("default"),
-                Icon.Resource(0, null),
-                0,
-                InstanceId.fakeInstanceId(0),
-            )
+        val TEST_QS_TILE_CONFIG = QSTileConfigTestBuilder.build {}
     }
 }
