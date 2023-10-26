@@ -49,6 +49,7 @@ import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
+import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -17135,5 +17136,15 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    // TODO(b/308755220): Remove once the build is finalised.
+    /**
+     * Returns true if the flag for the onboarding bugreport V2 is enabled.
+     *
+     * @hide
+     */
+    public boolean isOnboardingBugreportV2FlagEnabled() {
+        return onboardingBugreportV2Enabled();
     }
 }
