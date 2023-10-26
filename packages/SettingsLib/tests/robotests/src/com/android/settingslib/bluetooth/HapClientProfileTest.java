@@ -26,10 +26,12 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHapClient;
+import android.bluetooth.BluetoothHapPresetInfo;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
@@ -47,10 +49,15 @@ import org.robolectric.shadow.api.Shadow;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class HapClientProfileTest {
+
+    private static final int TEST_GROUP_ID = 1;
+    private static final int TEST_PRESET_INDEX = 1;
+    private static final String TEST_DEVICE_NAME = "test_device";
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -63,6 +70,8 @@ public class HapClientProfileTest {
     private BluetoothDevice mBluetoothDevice;
     @Mock
     private BluetoothHapClient mService;
+    @Mock
+    private BluetoothHapPresetInfo mPresetInfo;
 
     private final Context mContext = ApplicationProvider.getApplicationContext();
     private BluetoothProfile.ServiceListener mServiceListener;
@@ -205,5 +214,276 @@ public class HapClientProfileTest {
                 .thenReturn(connectableList);
 
         assertThat(mProfile.getConnectableDevices().size()).isEqualTo(connectableList.size());
+    }
+
+    /**
+     * Verify registerCallback() call is correctly delegated to {@link BluetoothHapClient} service.
+     */
+    @Test
+    public void registerCallback_verifyIsCalled() {
+        final Executor executor = (command -> new Thread(command).start());
+        final BluetoothHapClient.Callback callback = new BluetoothHapClient.Callback() {
+            @Override
+            public void onPresetSelected(@NonNull BluetoothDevice device, int presetIndex,
+                    int reason) {
+
+            }
+
+            @Override
+            public void onPresetSelectionFailed(@NonNull BluetoothDevice device, int reason) {
+
+            }
+
+            @Override
+            public void onPresetSelectionForGroupFailed(int hapGroupId, int reason) {
+
+            }
+
+            @Override
+            public void onPresetInfoChanged(@NonNull BluetoothDevice device,
+                    @NonNull List<BluetoothHapPresetInfo> presetInfoList, int reason) {
+
+            }
+
+            @Override
+            public void onSetPresetNameFailed(@NonNull BluetoothDevice device, int reason) {
+
+            }
+
+            @Override
+            public void onSetPresetNameForGroupFailed(int hapGroupId, int reason) {
+
+            }
+        };
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.registerCallback(executor, callback);
+
+        verify(mService).registerCallback(executor, callback);
+    }
+
+    /**
+     * Verify unregisterCallback() call is correctly delegated to {@link BluetoothHapClient}
+     * service.
+     */
+    @Test
+    public void unregisterCallback_verifyIsCalled() {
+        final BluetoothHapClient.Callback callback = new BluetoothHapClient.Callback() {
+            @Override
+            public void onPresetSelected(@NonNull BluetoothDevice device, int presetIndex,
+                    int reason) {
+
+            }
+
+            @Override
+            public void onPresetSelectionFailed(@NonNull BluetoothDevice device, int reason) {
+
+            }
+
+            @Override
+            public void onPresetSelectionForGroupFailed(int hapGroupId, int reason) {
+
+            }
+
+            @Override
+            public void onPresetInfoChanged(@NonNull BluetoothDevice device,
+                    @NonNull List<BluetoothHapPresetInfo> presetInfoList, int reason) {
+
+            }
+
+            @Override
+            public void onSetPresetNameFailed(@NonNull BluetoothDevice device, int reason) {
+
+            }
+
+            @Override
+            public void onSetPresetNameForGroupFailed(int hapGroupId, int reason) {
+
+            }
+        };
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.unregisterCallback(callback);
+
+        verify(mService).unregisterCallback(callback);
+    }
+
+    /**
+     * Verify getHapGroup() call is correctly delegated to {@link BluetoothHapClient} service
+     * and return correct value.
+     */
+    @Test
+    public void getHapGroup_verifyIsCalledAndReturnCorrectValue() {
+        when(mService.getHapGroup(mBluetoothDevice)).thenReturn(TEST_GROUP_ID);
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        final int groupId = mProfile.getHapGroup(mBluetoothDevice);
+
+        verify(mService).getHapGroup(mBluetoothDevice);
+        assertThat(groupId).isEqualTo(TEST_GROUP_ID);
+    }
+
+    /**
+     * Verify getActivePresetIndex() call is correctly delegated to {@link BluetoothHapClient}
+     * service and return correct index.
+     */
+    @Test
+    public void getActivePresetIndex_verifyIsCalledAndReturnCorrectValue() {
+        when(mService.getActivePresetIndex(mBluetoothDevice)).thenReturn(TEST_PRESET_INDEX);
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        final int activeIndex = mProfile.getActivePresetIndex(mBluetoothDevice);
+
+        verify(mService).getActivePresetIndex(mBluetoothDevice);
+        assertThat(activeIndex).isEqualTo(TEST_PRESET_INDEX);
+    }
+
+    /**
+     * Verify getActivePresetInfo() call is correctly delegated to {@link BluetoothHapClient}
+     * service and return correct object.
+     */
+    @Test
+    public void getActivePresetInfo_verifyIsCalledAndReturnCorrectObject() {
+        when(mService.getActivePresetInfo(mBluetoothDevice)).thenReturn(mPresetInfo);
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        final BluetoothHapPresetInfo activeInfo = mProfile.getActivePresetInfo(mBluetoothDevice);
+
+        verify(mService).getActivePresetInfo(mBluetoothDevice);
+        assertThat(activeInfo).isEqualTo(mPresetInfo);
+    }
+
+    /**
+     * Verify selectPreset() call is correctly delegated to {@link BluetoothHapClient} service.
+     */
+    @Test
+    public void selectPreset_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.selectPreset(mBluetoothDevice, TEST_PRESET_INDEX);
+
+        verify(mService).selectPreset(mBluetoothDevice, TEST_PRESET_INDEX);
+    }
+
+    /**
+     * Verify selectPresetForGroup() call is correctly delegated to {@link BluetoothHapClient}
+     * service.
+     */
+    @Test
+    public void selectPresetForGroup_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.selectPresetForGroup(TEST_GROUP_ID, TEST_PRESET_INDEX);
+
+        verify(mService).selectPresetForGroup(TEST_GROUP_ID, TEST_PRESET_INDEX);
+    }
+
+    /**
+     * Verify switchToNextPreset() call is correctly delegated to {@link BluetoothHapClient}
+     * service.
+     */
+    @Test
+    public void switchToNextPreset_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.switchToNextPreset(mBluetoothDevice);
+
+        verify(mService).switchToNextPreset(mBluetoothDevice);
+    }
+
+    /**
+     * Verify switchToNextPresetForGroup() call is correctly delegated to {@link BluetoothHapClient}
+     * service.
+     */
+    @Test
+    public void switchToNextPresetForGroup_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.switchToNextPresetForGroup(TEST_GROUP_ID);
+
+        verify(mService).switchToNextPresetForGroup(TEST_GROUP_ID);
+    }
+
+    /**
+     * Verify switchToPreviousPreset() call is correctly delegated to {@link BluetoothHapClient}
+     * service.
+     */
+    @Test
+    public void switchToPreviousPreset_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.switchToPreviousPreset(mBluetoothDevice);
+
+        verify(mService).switchToPreviousPreset(mBluetoothDevice);
+    }
+
+    /**
+     * Verify switchToPreviousPresetForGroup() call is correctly delegated to
+     * {@link BluetoothHapClient} service.
+     */
+    @Test
+    public void switchToPreviousPresetForGroup_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.switchToPreviousPresetForGroup(TEST_GROUP_ID);
+
+        verify(mService).switchToPreviousPresetForGroup(TEST_GROUP_ID);
+    }
+
+    /**
+     * Verify getPresetInfo() call is correctly delegated to {@link BluetoothHapClient} service and
+     * return correct object.
+     */
+    @Test
+    public void getPresetInfo_verifyIsCalledAndReturnCorrectObject() {
+        when(mService.getPresetInfo(mBluetoothDevice, TEST_PRESET_INDEX)).thenReturn(mPresetInfo);
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        final BluetoothHapPresetInfo info = mProfile.getPresetInfo(mBluetoothDevice,
+                TEST_PRESET_INDEX);
+
+        verify(mService).getPresetInfo(mBluetoothDevice, TEST_PRESET_INDEX);
+        assertThat(info).isEqualTo(mPresetInfo);
+    }
+
+    /**
+     * Verify getAllPresetInfo() call is correctly delegated to {@link BluetoothHapClient} service
+     * and return correct list.
+     */
+    @Test
+    public void getAllPresetInfo_verifyIsCalledAndReturnCorrectList() {
+        final List<BluetoothHapPresetInfo> testList = Arrays.asList(mPresetInfo, mPresetInfo);
+        when(mService.getAllPresetInfo(mBluetoothDevice)).thenReturn(testList);
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        final List<BluetoothHapPresetInfo> infoList = mProfile.getAllPresetInfo(mBluetoothDevice);
+
+        verify(mService).getAllPresetInfo(mBluetoothDevice);
+        assertThat(infoList.size()).isEqualTo(testList.size());
+    }
+
+    /**
+     * Verify setPresetName() call is correctly delegated to {@link BluetoothHapClient} service.
+     */
+    @Test
+    public void setPresetName_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.setPresetName(mBluetoothDevice, TEST_PRESET_INDEX, TEST_DEVICE_NAME);
+
+        verify(mService).setPresetName(mBluetoothDevice, TEST_PRESET_INDEX, TEST_DEVICE_NAME);
+    }
+
+    /**
+     * Verify setPresetNameForGroup() call is correctly delegated to {@link BluetoothHapClient}
+     * service.
+     */
+    @Test
+    public void setPresetNameForGroup_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.HAP_CLIENT, mService);
+
+        mProfile.setPresetNameForGroup(TEST_GROUP_ID, TEST_PRESET_INDEX, TEST_DEVICE_NAME);
+
+        verify(mService).setPresetNameForGroup(TEST_GROUP_ID, TEST_PRESET_INDEX, TEST_DEVICE_NAME);
     }
 }
