@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.text.LineBreakConfig;
 import android.text.Annotation;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -35,6 +36,7 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.LineBreakConfigSpan;
 import android.text.style.LineHeightSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
@@ -176,6 +178,10 @@ public final class StringBlock implements Closeable {
                         mStyleIDs.listItemId = styleId;
                     } else if (styleTag.equals("marquee")) {
                         mStyleIDs.marqueeId = styleId;
+                    } else if (styleTag.equals("nobreak")) {
+                        mStyleIDs.mNoBreakId = styleId;
+                    } else if (styleTag.equals("nohyphen")) {
+                        mStyleIDs.mNoHyphenId = styleId;
                     }
                 }
 
@@ -224,6 +230,8 @@ public final class StringBlock implements Closeable {
         private int strikeId = -1;
         private int listItemId = -1;
         private int marqueeId = -1;
+        private int mNoBreakId = -1;
+        private int mNoHyphenId = -1;
     }
 
     @Nullable
@@ -285,12 +293,19 @@ public final class StringBlock implements Closeable {
                 buffer.setSpan(TextUtils.TruncateAt.MARQUEE,
                                style[i+1], style[i+2]+1,
                                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            } else if (type == ids.mNoBreakId) {
+                buffer.setSpan(LineBreakConfigSpan.createNoBreakSpan(),
+                        style[i + 1], style[i + 2] + 1,
+                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+            } else if (type == ids.mNoHyphenId) {
+                buffer.setSpan(LineBreakConfigSpan.createNoHyphenationSpan(),
+                        style[i + 1], style[i + 2] + 1,
+                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
             } else {
                 String tag = nativeGetString(mNative, type);
                 if (tag == null) {
                     return null;
                 }
-
                 if (tag.startsWith("font;")) {
                     String sub;
 
@@ -366,6 +381,44 @@ public final class StringBlock implements Closeable {
                         buffer.setSpan(new Annotation(key, value),
                                        style[i+1], style[i+2]+1,
                                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                } else if (tag.startsWith("lineBreakConfig;")) {
+                    String lbStyleStr = subtag(tag, ";style=");
+                    int lbStyle = LineBreakConfig.LINE_BREAK_STYLE_UNSPECIFIED;
+                    if (lbStyleStr != null) {
+                        if (lbStyleStr.equals("none")) {
+                            lbStyle = LineBreakConfig.LINE_BREAK_STYLE_NONE;
+                        } else if (lbStyleStr.equals("normal")) {
+                            lbStyle = LineBreakConfig.LINE_BREAK_STYLE_NORMAL;
+                        } else if (lbStyleStr.equals("loose")) {
+                            lbStyle = LineBreakConfig.LINE_BREAK_STYLE_LOOSE;
+                        } else if (lbStyleStr.equals("strict")) {
+                            lbStyle = LineBreakConfig.LINE_BREAK_STYLE_STRICT;
+                        } else {
+                            Log.w(TAG, "Unknown LineBreakConfig style: " + lbStyleStr);
+                        }
+                    }
+
+                    String lbWordStyleStr = subtag(tag, ";wordStyle=");
+                    int lbWordStyle = LineBreakConfig.LINE_BREAK_STYLE_UNSPECIFIED;
+                    if (lbWordStyleStr != null) {
+                        if (lbWordStyleStr.equals("none")) {
+                            lbWordStyle = LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
+                        } else if (lbWordStyleStr.equals("phrase")) {
+                            lbWordStyle = LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE;
+                        } else {
+                            Log.w(TAG, "Unknown LineBreakConfig word style: " + lbWordStyleStr);
+                        }
+                    }
+
+                    // Attach span only when the both lbStyle and lbWordStyle are valid.
+                    if (lbStyle != LineBreakConfig.LINE_BREAK_STYLE_UNSPECIFIED
+                            || lbWordStyle != LineBreakConfig.LINE_BREAK_WORD_STYLE_UNSPECIFIED) {
+                        buffer.setSpan(new LineBreakConfigSpan(
+                                new LineBreakConfig(lbStyle, lbWordStyle,
+                                        LineBreakConfig.HYPHENATION_UNSPECIFIED)),
+                                style[i + 1], style[i + 2] + 1,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                 }
             }
