@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -1940,6 +1941,7 @@ public final class PowerManager {
      *
      * @hide
      */
+    @FlaggedApi(android.os.Flags.FLAG_BATTERY_SAVER_SUPPORTED_CHECK_API)
     @TestApi
     public boolean isBatterySaverSupported() {
         try {
