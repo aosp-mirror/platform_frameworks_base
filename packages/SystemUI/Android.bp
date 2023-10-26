@@ -365,6 +365,7 @@ filegroup {
         "tests/src/com/android/systemui/qs/pipeline/shared/TileSpecTest.kt",
         "tests/src/com/android/systemui/qs/tiles/base/**/*.kt",
         "tests/src/com/android/systemui/qs/tiles/viewmodel/**/*.kt",
+        "tests/src/com/android/systemui/qs/tiles/impl/**/*.kt",
 
         /* Authentication */
         "tests/src/com/android/systemui/authentication/data/repository/AuthenticationRepositoryTest.kt",
