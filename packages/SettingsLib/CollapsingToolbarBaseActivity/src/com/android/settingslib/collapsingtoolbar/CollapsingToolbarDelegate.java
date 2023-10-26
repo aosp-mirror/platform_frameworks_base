@@ -173,13 +173,12 @@ public class CollapsingToolbarDelegate {
         return mCoordinatorLayout;
     }
 
-    /** Sets the title on the collapsing layout, delegating to host if needed. */
+    /** Sets the title on the collapsing layout and delegates to host. */
     public void setTitle(CharSequence title) {
         if (mCollapsingToolbarLayout != null) {
             mCollapsingToolbarLayout.setTitle(title);
-        } else {
-            mHostCallback.setOuterTitle(title);
         }
+        mHostCallback.setOuterTitle(title);
     }
 
     /** Returns an instance of collapsing toolbar. */
