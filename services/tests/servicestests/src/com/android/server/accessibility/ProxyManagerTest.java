@@ -29,6 +29,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +40,7 @@ import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.MagnificationConfig;
+import android.companion.virtual.IVirtualDeviceListener;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
@@ -50,6 +53,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -74,6 +78,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -93,6 +98,9 @@ public class ProxyManagerTest {
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock private Context mMockContext;
     @Mock private AccessibilitySecurityPolicy mMockSecurityPolicy;
@@ -114,6 +122,8 @@ public class ProxyManagerTest {
 
     @Before
     public void setup() throws RemoteException {
+        mSetFlagsRule.initAllFlagsToReleaseConfigDefault();
+
         MockitoAnnotations.initMocks(this);
         final Resources resources = InstrumentationRegistry.getContext().getResources();
 
@@ -121,6 +131,8 @@ public class ProxyManagerTest {
                 resources.getDimensionPixelSize(R.dimen.accessibility_focus_highlight_stroke_width);
         mFocusColorDefaultValue = resources.getColor(R.color.accessibility_focus_highlight_color);
         when(mMockContext.getResources()).thenReturn(resources);
+        when(mMockContext.getMainExecutor())
+                .thenReturn(InstrumentationRegistry.getTargetContext().getMainExecutor());
 
         when(mMockVirtualDeviceManagerInternal.getDeviceIdsForUid(anyInt())).thenReturn(
                 new ArraySet(Set.of(DEVICE_ID)));
@@ -414,6 +426,101 @@ public class ProxyManagerTest {
         registerProxy(DISPLAY_ID);
         final int focusStrokeWidth = mProxyManager.getFocusStrokeWidthLocked(DEVICE_ID);
         assertThat(focusStrokeWidth).isEqualTo(mFocusStrokeWidthDefaultValue);
+    }
+
+    @Test
+    public void testRegisterProxy_registersVirtualDeviceListener() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS);
+        registerProxy(DISPLAY_ID);
+
+        verify(mMockIVirtualDeviceManager, times(1)).registerVirtualDeviceListener(any());
+    }
+
+    @Test
+    public void testRegisterMultipleProxies_registersOneVirtualDeviceListener()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS);
+        registerProxy(DISPLAY_ID);
+        registerProxy(DISPLAY_2_ID);
+
+        verify(mMockIVirtualDeviceManager, times(1)).registerVirtualDeviceListener(any());
+    }
+
+    @Test
+    public void testUnregisterProxy_unregistersVirtualDeviceListener() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS);
+        registerProxy(DISPLAY_ID);
+
+        mProxyManager.unregisterProxy(DISPLAY_ID);
+
+        verify(mMockIVirtualDeviceManager, times(1)).unregisterVirtualDeviceListener(any());
+    }
+
+    @Test
+    public void testUnregisterProxy_onlyUnregistersVirtualDeviceListenerOnLastProxyRemoval()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS);
+        registerProxy(DISPLAY_ID);
+        registerProxy(DISPLAY_2_ID);
+
+        mProxyManager.unregisterProxy(DISPLAY_ID);
+        verify(mMockIVirtualDeviceManager, never()).unregisterVirtualDeviceListener(any());
+
+        mProxyManager.unregisterProxy(DISPLAY_2_ID);
+        verify(mMockIVirtualDeviceManager, times(1)).unregisterVirtualDeviceListener(any());
+    }
+
+    @Test
+    public void testRegisteredProxy_virtualDeviceClosed_proxyClosed()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS);
+        registerProxy(DISPLAY_ID);
+
+        assertThat(mProxyManager.isProxyedDeviceId(DEVICE_ID)).isTrue();
+        assertThat(mProxyManager.isProxyedDisplay(DISPLAY_ID)).isTrue();
+
+        ArgumentCaptor<IVirtualDeviceListener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(IVirtualDeviceListener.class);
+        verify(mMockIVirtualDeviceManager, times(1))
+                .registerVirtualDeviceListener(listenerArgumentCaptor.capture());
+
+        listenerArgumentCaptor.getValue().onVirtualDeviceClosed(DEVICE_ID);
+
+        verify(mMockProxySystemSupport, timeout(5_000)).removeDeviceIdLocked(DEVICE_ID);
+
+        assertThat(mProxyManager.isProxyedDeviceId(DEVICE_ID)).isFalse();
+        assertThat(mProxyManager.isProxyedDisplay(DISPLAY_ID)).isFalse();
+    }
+
+    @Test
+    public void testRegisteredProxy_unrelatedVirtualDeviceClosed_proxyNotClosed()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS);
+        registerProxy(DISPLAY_ID);
+
+        assertThat(mProxyManager.isProxyedDeviceId(DEVICE_ID)).isTrue();
+        assertThat(mProxyManager.isProxyedDisplay(DISPLAY_ID)).isTrue();
+
+        ArgumentCaptor<IVirtualDeviceListener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(IVirtualDeviceListener.class);
+        verify(mMockIVirtualDeviceManager, times(1))
+                .registerVirtualDeviceListener(listenerArgumentCaptor.capture());
+
+        listenerArgumentCaptor.getValue().onVirtualDeviceClosed(DEVICE_ID + 1);
+
+        assertThat(mProxyManager.isProxyedDeviceId(DEVICE_ID)).isTrue();
+        assertThat(mProxyManager.isProxyedDisplay(DISPLAY_ID)).isTrue();
+    }
+
+    @Test
+    public void testRegisterProxy_doesNotRegisterVirtualDeviceListener_flagDisabled()
+            throws RemoteException {
+        mSetFlagsRule.disableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS);
+        registerProxy(DISPLAY_ID);
+        mProxyManager.unregisterProxy(DISPLAY_ID);
+
+        verify(mMockIVirtualDeviceManager, never()).registerVirtualDeviceListener(any());
+        verify(mMockIVirtualDeviceManager, never()).unregisterVirtualDeviceListener(any());
     }
 
     private void registerProxy(int displayId) {
