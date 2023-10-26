@@ -778,7 +778,9 @@ class BackNavigationController {
                 closeTarget = close.asActivityRecord();
             } else if (isTaskSwitch(close, open)) {
                 mSwitchType = TASK_SWITCH;
-                closeTarget = close.asTask().getTopNonFinishingActivity();
+                // The transition target must be activity in legacy transition.
+                closeTarget = WindowManagerService.sEnableShellTransitions ? close
+                        : close.asTask().getTopNonFinishingActivity();
             } else {
                 mSwitchType = UNKNOWN;
                 return;
