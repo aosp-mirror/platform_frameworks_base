@@ -175,3 +175,74 @@ android_library {
     plugins: ["dagger2-compiler"],
     use_resource_processor: true,
 }
+
+android_app {
+    name: "WindowManagerShellRobolectric",
+    platform_apis: true,
+    static_libs: [
+        "WindowManager-Shell",
+    ],
+    manifest: "multivalentTests/AndroidManifestRobolectric.xml",
+    use_resource_processor: true,
+}
+
+android_robolectric_test {
+    name: "WMShellRobolectricTests",
+    instrumentation_for: "WindowManagerShellRobolectric",
+    upstream: true,
+    java_resource_dirs: [
+        "multivalentTests/robolectric/config",
+    ],
+    srcs: [
+        "multivalentTests/src/**/*.kt",
+    ],
+    static_libs: [
+        "junit",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "mockito-robolectric-prebuilt",
+        "mockito-kotlin2",
+        "truth",
+    ],
+}
+
+android_test {
+    name: "WMShellMultivalentTestsOnDevice",
+    srcs: [
+        "multivalentTests/src/**/*.kt",
+    ],
+    static_libs: [
+        "WindowManager-Shell",
+        "junit",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "frameworks-base-testutils",
+        "mockito-kotlin2",
+        "mockito-target-extended-minus-junit4",
+        "truth",
+        "platform-test-annotations",
+        "platform-test-rules",
+    ],
+    libs: [
+        "android.test.base",
+        "android.test.runner",
+    ],
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+    kotlincflags: ["-Xjvm-default=all"],
+    optimize: {
+        enabled: false,
+    },
+    test_suites: ["device-tests"],
+    platform_apis: true,
+    certificate: "platform",
+    aaptflags: [
+        "--extra-packages",
+        "com.android.wm.shell",
+    ],
+    manifest: "multivalentTests/AndroidManifest.xml",
+}
