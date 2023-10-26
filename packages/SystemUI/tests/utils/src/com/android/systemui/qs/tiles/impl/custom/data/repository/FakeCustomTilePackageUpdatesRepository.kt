@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.impl.custom.di.bound
+package com.android.systemui.qs.tiles.impl.custom.data.repository
 
-import android.os.UserHandle
-import dagger.BindsInstance
-import dagger.Subcomponent
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 
-/** @see CustomTileBoundScope */
-@CustomTileBoundScope
-@Subcomponent(modules = [CustomTileBoundModule::class])
-interface CustomTileBoundComponent {
+class FakeCustomTilePackageUpdatesRepository : CustomTilePackageUpdatesRepository {
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance fun user(@CustomTileUser user: UserHandle): Builder
-        @BindsInstance fun coroutineScope(@CustomTileBoundScope scope: CoroutineScope): Builder
+    private val mutablePackageChanges = MutableSharedFlow<Unit>()
 
-        fun build(): CustomTileBoundComponent
+    override val packageChanges: Flow<Unit>
+        get() = mutablePackageChanges
+
+    suspend fun emitPackageChange() {
+        mutablePackageChanges.emit(Unit)
     }
 }
