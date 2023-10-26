@@ -17,6 +17,7 @@
 package android.hardware.radio;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -45,7 +46,7 @@ public final class ProgramList implements AutoCloseable {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private final Map<ProgramSelector.Identifier, Map<UniqueProgramIdentifier,
+    private final ArrayMap<ProgramSelector.Identifier, ArrayMap<UniqueProgramIdentifier,
             RadioManager.ProgramInfo>> mPrograms = new ArrayMap<>();
 
     @GuardedBy("mLock")
@@ -203,11 +204,11 @@ public final class ProgramList implements AutoCloseable {
             listCallbacksCopied = new ArrayList<>(mListCallbacks);
 
             if (chunk.isPurge()) {
-                Iterator<Map.Entry<ProgramSelector.Identifier, Map<UniqueProgramIdentifier,
-                        RadioManager.ProgramInfo>>> programsIterator =
-                        mPrograms.entrySet().iterator();
+                Iterator<Map.Entry<ProgramSelector.Identifier,
+                        ArrayMap<UniqueProgramIdentifier, RadioManager.ProgramInfo>>>
+                        programsIterator = mPrograms.entrySet().iterator();
                 while (programsIterator.hasNext()) {
-                    Map.Entry<ProgramSelector.Identifier, Map<UniqueProgramIdentifier,
+                    Map.Entry<ProgramSelector.Identifier, ArrayMap<UniqueProgramIdentifier,
                             RadioManager.ProgramInfo>> removed = programsIterator.next();
                     if (removed.getValue() != null) {
                         removedList.add(removed.getKey());
@@ -270,8 +271,7 @@ public final class ProgramList implements AutoCloseable {
         if (!mPrograms.containsKey(primaryKey)) {
             return;
         }
-        Map<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries = mPrograms
-                .get(primaryKey);
+        Map<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries = mPrograms.get(primaryKey);
         RadioManager.ProgramInfo removed = entries.remove(Objects.requireNonNull(key));
         if (removed == null) return;
         if (entries.size() == 0) {
@@ -287,15 +287,10 @@ public final class ProgramList implements AutoCloseable {
     public @NonNull List<RadioManager.ProgramInfo> toList() {
         List<RadioManager.ProgramInfo> list = new ArrayList<>();
         synchronized (mLock) {
-            Iterator<Map.Entry<ProgramSelector.Identifier, Map<UniqueProgramIdentifier,
-                    RadioManager.ProgramInfo>>> listIterator = mPrograms.entrySet().iterator();
-            while (listIterator.hasNext()) {
-                Iterator<Map.Entry<UniqueProgramIdentifier,
-                        RadioManager.ProgramInfo>> prorgramsIterator = listIterator.next()
-                        .getValue().entrySet().iterator();
-                while (prorgramsIterator.hasNext()) {
-                    list.add(prorgramsIterator.next().getValue());
-                }
+            for (int index = 0; index < mPrograms.size(); index++) {
+                ArrayMap<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries =
+                        mPrograms.valueAt(index);
+                list.addAll(entries.values());
             }
         }
         return list;
@@ -304,9 +299,16 @@ public final class ProgramList implements AutoCloseable {
     /**
      * Returns the program with a specified primary identifier.
      *
+     * <p>This method only returns the first program from the list return from
+     * {@link #getProgramInfos}
+     *
      * @param id primary identifier of a program to fetch
      * @return the program info, or null if there is no such program on the list
+     *
+     * @deprecated Use {@link #getProgramInfos(ProgramSelector.Identifier)} to get all programs
+     * with the given primary identifier
      */
+    @Deprecated
     public @Nullable RadioManager.ProgramInfo get(@NonNull ProgramSelector.Identifier id) {
         Map<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries;
         synchronized (mLock) {
@@ -317,6 +319,29 @@ public final class ProgramList implements AutoCloseable {
             return null;
         }
         return entries.entrySet().iterator().next().getValue();
+    }
+
+    /**
+     * Returns the program list with a specified primary identifier.
+     *
+     * @param id primary identifier of a program to fetch
+     * @return the program info list with the primary identifier, or empty list if there is no such
+     * program identifier on the list
+     * @throws NullPointerException if primary identifier is {@code null}
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public @NonNull List<RadioManager.ProgramInfo> getProgramInfos(
+            @NonNull ProgramSelector.Identifier id) {
+        Objects.requireNonNull(id, "Primary identifier can not be null");
+        ArrayMap<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries;
+        synchronized (mLock) {
+            entries = mPrograms.get(id);
+        }
+
+        if (entries == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(entries.values());
     }
 
     /**

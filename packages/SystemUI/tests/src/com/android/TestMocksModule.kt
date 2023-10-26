@@ -19,6 +19,7 @@ import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
 import android.os.UserManager
 import android.util.DisplayMetrics
+import android.view.LayoutInflater
 import com.android.internal.logging.MetricsLogger
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -37,6 +38,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationMediaManager
@@ -75,6 +77,9 @@ data class TestMocksModule(
     @get:Provides val keyguardBypassController: KeyguardBypassController = mock(),
     @get:Provides val keyguardSecurityModel: KeyguardSecurityModel = mock(),
     @get:Provides val keyguardUpdateMonitor: KeyguardUpdateMonitor = mock(),
+    @get:Provides val layoutInflater: LayoutInflater = mock(),
+    @get:Provides
+    val lockscreenShadeTransitionController: LockscreenShadeTransitionController = mock(),
     @get:Provides val mediaHierarchyManager: MediaHierarchyManager = mock(),
     @get:Provides val notifCollection: NotifCollection = mock(),
     @get:Provides val notificationListener: NotificationListener = mock(),

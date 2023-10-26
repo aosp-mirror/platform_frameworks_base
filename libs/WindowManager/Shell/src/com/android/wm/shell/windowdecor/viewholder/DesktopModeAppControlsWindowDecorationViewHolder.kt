@@ -48,7 +48,6 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
     }
 
     override fun bindData(taskInfo: RunningTaskInfo) {
-
         val captionDrawable = captionView.background as GradientDrawable
         taskInfo.taskDescription?.statusBarColor?.let {
             captionDrawable.setColor(it)
@@ -62,6 +61,10 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
                 getCaptionExpandButtonColor(taskInfo))
         appNameTextView.setTextColor(getCaptionAppNameTextColor(taskInfo))
     }
+
+    override fun onHandleMenuOpened() {}
+
+    override fun onHandleMenuClosed() {}
 
     private fun getCaptionAppNameTextColor(taskInfo: RunningTaskInfo): Int {
         return if (shouldUseLightCaptionColors(taskInfo)) {

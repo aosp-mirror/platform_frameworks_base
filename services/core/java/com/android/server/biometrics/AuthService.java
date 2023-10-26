@@ -41,7 +41,6 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IAuthService;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
-import android.hardware.biometrics.IBiometricPromptStatusListener;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IInvalidationCallback;
@@ -352,18 +351,6 @@ public class AuthService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 mBiometricService.registerEnabledOnKeyguardCallback(callback);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public void registerBiometricPromptStatusListener(
-                IBiometricPromptStatusListener listener) throws RemoteException {
-            checkInternalPermission();
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mBiometricService.registerBiometricPromptStatusListener(listener);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

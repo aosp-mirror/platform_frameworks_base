@@ -31,5 +31,6 @@ public class FlagUtils {
      */
     public static void setFlagDefaults(SetFlagsRule setFlagsRule) {
         setFlagDefault(setFlagsRule, Flags.FLAG_FLOATING_MENU_OVERLAPS_NAV_BARS_FLAG);
+        setFlagDefault(setFlagsRule, Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION);
     }
 }

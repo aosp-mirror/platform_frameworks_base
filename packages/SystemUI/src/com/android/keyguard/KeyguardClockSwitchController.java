@@ -38,10 +38,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
+import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -50,14 +50,21 @@ import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.log.dagger.KeyguardClockLog;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.shared.regionsampling.RegionSampler;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder;
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -67,6 +74,8 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.DisposableHandle;
 
 /**
  * Injectable controller for {@link KeyguardClockSwitch}.
@@ -84,6 +93,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final DumpManager mDumpManager;
     private final ClockEventController mClockEventController;
     private final LogBuffer mLogBuffer;
+    private final NotificationIconContainerAlwaysOnDisplayViewModel mAodIconsViewModel;
+    private final ConfigurationState mConfigurationState;
+    private final ConfigurationController mConfigurationController;
+    private final DozeParameters mDozeParameters;
+    private final ScreenOffAnimationController mScreenOffAnimationController;
+    private final AlwaysOnDisplayNotificationIconViewStore mAodIconViewStore;
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
 
@@ -107,10 +122,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private boolean mShownOnSecondaryDisplay = false;
     private boolean mOnlyClock = false;
     private boolean mIsActiveDreamLockscreenHosted = false;
-    private FeatureFlags mFeatureFlags;
+    private final FeatureFlagsClassic mFeatureFlags;
     private KeyguardInteractor mKeyguardInteractor;
     private final DelayableExecutor mUiExecutor;
     private boolean mCanShowDoubleLineClock = true;
+    private DisposableHandle mAodIconsBindJob;
+    @Nullable private NotificationIconContainer mAodIconContainer;
+
     @VisibleForTesting
     final Consumer<Boolean> mIsActiveDreamLockscreenHostedCallback =
             (Boolean isLockscreenHosted) -> {
@@ -151,26 +169,38 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             KeyguardSliceViewController keyguardSliceViewController,
             NotificationIconAreaController notificationIconAreaController,
             LockscreenSmartspaceController smartspaceController,
+            ConfigurationController configurationController,
+            ScreenOffAnimationController screenOffAnimationController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SecureSettings secureSettings,
             @Main DelayableExecutor uiExecutor,
             DumpManager dumpManager,
             ClockEventController clockEventController,
             @KeyguardClockLog LogBuffer logBuffer,
+            NotificationIconContainerAlwaysOnDisplayViewModel aodIconsViewModel,
+            ConfigurationState configurationState,
+            DozeParameters dozeParameters,
+            AlwaysOnDisplayNotificationIconViewStore aodIconViewStore,
             KeyguardInteractor keyguardInteractor,
-            FeatureFlags featureFlags) {
+            FeatureFlagsClassic featureFlags) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mClockRegistry = clockRegistry;
         mKeyguardSliceViewController = keyguardSliceViewController;
         mNotificationIconAreaController = notificationIconAreaController;
         mSmartspaceController = smartspaceController;
+        mConfigurationController = configurationController;
+        mScreenOffAnimationController = screenOffAnimationController;
         mSecureSettings = secureSettings;
         mUiExecutor = uiExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mDumpManager = dumpManager;
         mClockEventController = clockEventController;
         mLogBuffer = logBuffer;
+        mAodIconsViewModel = aodIconsViewModel;
+        mConfigurationState = configurationState;
+        mDozeParameters = dozeParameters;
+        mAodIconViewStore = aodIconViewStore;
         mView.setLogBuffer(mLogBuffer);
         mFeatureFlags = featureFlags;
         mKeyguardInteractor = keyguardInteractor;
@@ -316,6 +346,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     int getNotificationIconAreaHeight() {
         if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
             return 0;
+        } else if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            return mAodIconContainer != null ? mAodIconContainer.getHeight() : 0;
         } else {
             return mNotificationIconAreaController.getHeight();
         }
@@ -533,7 +565,27 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             NotificationIconContainer nic = (NotificationIconContainer)
                     mView.findViewById(
                             com.android.systemui.res.R.id.left_aligned_notification_icon_container);
-            mNotificationIconAreaController.setupAodIcons(nic);
+            if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+                if (mAodIconsBindJob != null) {
+                    mAodIconsBindJob.dispose();
+                }
+                if (nic != null) {
+                    nic.setOnLockScreen(true);
+                    mAodIconsBindJob = NotificationIconContainerViewBinder.bind(
+                        nic,
+                        mAodIconsViewModel,
+                        mConfigurationState,
+                        mConfigurationController,
+                        mDozeParameters,
+                        mFeatureFlags,
+                        mScreenOffAnimationController,
+                        mAodIconViewStore
+                    );
+                    mAodIconContainer = nic;
+                }
+            } else {
+                mNotificationIconAreaController.setupAodIcons(nic);
+            }
         }
     }
 

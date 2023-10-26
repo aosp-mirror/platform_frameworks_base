@@ -469,6 +469,9 @@ oneway interface ISatellite {
      * The satellite service should report the NTN signal strength via
      * ISatelliteListener#onNtnSignalStrengthChanged when the NTN signal strength changes.
      *
+     * Note: This API can be invoked multiple times. If the modem is already in the expected
+     * state from a previous request, subsequent invocations may be ignored.
+     *
      * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid result codes returned:
@@ -484,6 +487,9 @@ oneway interface ISatellite {
      * The satellite service should stop reporting NTN signal strength to the framework. This will
      * be called when device is screen off to save power by not letting signal strength updates to
      * wake up application processor.
+     *
+     * Note: This API can be invoked multiple times. If the modem is already in the expected
+     * state from a previous request, subsequent invocations may be ignored.
      *
      * @param resultCallback The callback to receive the error code result of the operation.
      *

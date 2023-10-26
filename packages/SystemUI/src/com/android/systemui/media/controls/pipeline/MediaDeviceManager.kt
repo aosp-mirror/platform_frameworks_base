@@ -47,6 +47,7 @@ import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
+import dagger.Lazy
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -62,10 +63,10 @@ constructor(
     private val context: Context,
     private val controllerFactory: MediaControllerFactory,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
-    private val mr2manager: MediaRouter2Manager,
+    private val mr2manager: Lazy<MediaRouter2Manager>,
     private val muteAwaitConnectionManagerFactory: MediaMuteAwaitConnectionManagerFactory,
     private val configurationController: ConfigurationController,
-    private val localBluetoothManager: LocalBluetoothManager?,
+    private val localBluetoothManager: Lazy<LocalBluetoothManager?>,
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
     dumpManager: DumpManager,
@@ -210,8 +211,8 @@ constructor(
 
         fun dump(pw: PrintWriter) {
             val routingSession =
-                controller?.let { mr2manager.getRoutingSessionForMediaController(it) }
-            val selectedRoutes = routingSession?.let { mr2manager.getSelectedRoutes(it) }
+                controller?.let { mr2manager.get().getRoutingSessionForMediaController(it) }
+            val selectedRoutes = routingSession?.let { mr2manager.get().getSelectedRoutes(it) }
             with(pw) {
                 println("    current device is ${current?.name}")
                 val type = controller?.playbackInfo?.playbackType
@@ -355,7 +356,7 @@ constructor(
                 val device =
                     aboutToConnect?.fullMediaDevice ?: localMediaManager.currentConnectedDevice
                 val routingSession =
-                    controller?.let { mr2manager.getRoutingSessionForMediaController(it) }
+                    controller?.let { mr2manager.get().getRoutingSessionForMediaController(it) }
 
                 // If we have a controller but get a null route, then don't trust the device
                 val enabled = device != null && (controller == null || routingSession != null)
@@ -380,7 +381,7 @@ constructor(
             device: MediaDevice?,
             routingSession: RoutingSessionInfo?,
         ): String? {
-            val selectedRoutes = routingSession?.let { mr2manager.getSelectedRoutes(it) }
+            val selectedRoutes = routingSession?.let { mr2manager.get().getSelectedRoutes(it) }
 
             if (DEBUG) {
                 Log.d(
@@ -426,7 +427,9 @@ constructor(
             return null
         }
 
+        @WorkerThread
         private fun isLeAudioBroadcastEnabled(): Boolean {
+            val localBluetoothManager = localBluetoothManager.get()
             if (localBluetoothManager != null) {
                 val profileManager = localBluetoothManager.profileManager
                 if (profileManager != null) {
@@ -446,19 +449,20 @@ constructor(
             return false
         }
 
+        @WorkerThread
         private fun getBroadcastingInfo(bluetoothLeBroadcast: LocalBluetoothLeBroadcast) {
-            var currentBroadcastedApp = bluetoothLeBroadcast.appSourceName
+            val currentBroadcastedApp = bluetoothLeBroadcast.appSourceName
             // TODO(b/233698402): Use the package name instead of app label to avoid the
             // unexpected result.
             // Check the current media app's name is the same with current broadcast app's name
             // or not.
-            var mediaApp =
+            val mediaApp =
                 MediaDataUtils.getAppLabel(
                     context,
                     localMediaManager.packageName,
                     context.getString(R.string.bt_le_audio_broadcast_dialog_unknown_name)
                 )
-            var isCurrentBroadcastedApp = TextUtils.equals(mediaApp, currentBroadcastedApp)
+            val isCurrentBroadcastedApp = TextUtils.equals(mediaApp, currentBroadcastedApp)
             if (isCurrentBroadcastedApp) {
                 broadcastDescription =
                     context.getString(R.string.broadcasting_description_is_broadcasting)

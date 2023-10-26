@@ -32,7 +32,6 @@ import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -112,7 +111,6 @@ public class PackageManagerServiceInjector {
     private final Singleton<ArtManagerService>
             mArtManagerServiceProducer;
     private final Singleton<ApexManager> mApexManagerProducer;
-    private final Singleton<ViewCompiler> mViewCompilerProducer;
     private final Singleton<IncrementalManager>
             mIncrementalManagerProducer;
     private final Singleton<DefaultAppProvider>
@@ -164,7 +162,6 @@ public class PackageManagerServiceInjector {
             Producer<DynamicCodeLogger> dynamicCodeLoggerProducer,
             Producer<ArtManagerService> artManagerServiceProducer,
             Producer<ApexManager> apexManagerProducer,
-            Producer<ViewCompiler> viewCompilerProducer,
             Producer<IncrementalManager> incrementalManagerProducer,
             Producer<DefaultAppProvider> defaultAppProviderProducer,
             Producer<DisplayMetrics> displayMetricsProducer,
@@ -214,7 +211,6 @@ public class PackageManagerServiceInjector {
         mArtManagerServiceProducer = new Singleton<>(
                 artManagerServiceProducer);
         mApexManagerProducer = new Singleton<>(apexManagerProducer);
-        mViewCompilerProducer = new Singleton<>(viewCompilerProducer);
         mIncrementalManagerProducer = new Singleton<>(
                 incrementalManagerProducer);
         mDefaultAppProviderProducer = new Singleton<>(
@@ -337,10 +333,6 @@ public class PackageManagerServiceInjector {
 
     public ApexManager getApexManager() {
         return mApexManagerProducer.get(this, mPackageManager);
-    }
-
-    public ViewCompiler getViewCompiler() {
-        return mViewCompilerProducer.get(this, mPackageManager);
     }
 
     public Handler getBackgroundHandler() {

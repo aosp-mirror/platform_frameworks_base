@@ -455,7 +455,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
-     * Create and display handle menu window
+     * Create and display handle menu window.
      */
     void createHandleMenu() {
         mHandleMenu = new HandleMenu.Builder(this)
@@ -466,15 +466,18 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .setLayoutId(mRelayoutParams.mLayoutResId)
                 .setCaptionPosition(mRelayoutParams.mCaptionX, mRelayoutParams.mCaptionY)
                 .setWindowingButtonsVisible(DesktopModeStatus.isEnabled())
+                .setCaptionHeight(mResult.mCaptionHeight)
                 .build();
+        mWindowDecorViewHolder.onHandleMenuOpened();
         mHandleMenu.show();
     }
 
     /**
-     * Close the handle menu window
+     * Close the handle menu window.
      */
     void closeHandleMenu() {
         if (!isHandleMenuActive()) return;
+        mWindowDecorViewHolder.onHandleMenuClosed();
         mHandleMenu.close();
         mHandleMenu = null;
     }

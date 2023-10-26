@@ -59,6 +59,7 @@ import androidx.lifecycle.Observer;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.systemui.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissViewUtils;
@@ -331,7 +332,7 @@ class MenuViewLayer extends FrameLayout implements
             mMenuViewAppearance.onImeVisibilityChanged(windowInsets.isVisible(ime()), imeTop);
 
             mMenuView.onEdgeChanged();
-            mMenuView.onPositionChanged();
+            mMenuView.onPositionChanged(/* animateMovement = */ true);
 
             mImeInsetsRect.set(imeInsetsRect);
         }
@@ -361,6 +362,10 @@ class MenuViewLayer extends FrameLayout implements
                     TooltipType.DOCK));
 
             mMenuAnimationController.startTuckedAnimationPreview();
+        }
+
+        if (Flags.floatingMenuImeDisplacementAnimation()) {
+            mMenuView.onArrivalAtPosition();
         }
     }
 

@@ -42,6 +42,10 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -52,8 +56,10 @@ import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -98,6 +104,10 @@ public class MenuViewLayerTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Mock
     private IAccessibilityFloatingMenu mFloatingMenu;
 
@@ -116,7 +126,8 @@ public class MenuViewLayerTest extends SysuiTestCase {
         final Rect mDisplayBounds = new Rect();
         mDisplayBounds.set(/* left= */ 0, /* top= */ 0, DISPLAY_WINDOW_WIDTH,
                 DISPLAY_WINDOW_HEIGHT);
-        mWindowMetrics = spy(new WindowMetrics(mDisplayBounds, fakeDisplayInsets()));
+        mWindowMetrics = spy(
+                new WindowMetrics(mDisplayBounds, fakeDisplayInsets(), /* density = */ 0.0f));
         doReturn(mWindowMetrics).when(mStubWindowManager).getCurrentWindowMetrics();
 
         mMenuViewLayer = new MenuViewLayer(mContext, mStubWindowManager, mStubAccessibilityManager,
@@ -221,7 +232,8 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
-    public void showingImeInsetsChange_overlapOnIme_menuShownAboveIme() {
+    @RequiresFlagsDisabled(Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION)
+    public void showingImeInsetsChange_overlapOnIme_menuShownAboveIme_old() {
         mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 100));
         final PointF beforePosition = mMenuView.getMenuPosition();
 
@@ -233,15 +245,49 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
-    public void hidingImeInsetsChange_overlapOnIme_menuBackToOriginalPosition() {
-        final float menuTop = IME_TOP + 200;
-        mMenuAnimationController.moveAndPersistPosition(new PointF(0, menuTop));
+    @RequiresFlagsEnabled(Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION)
+    public void showingImeInsetsChange_overlapOnIme_menuShownAboveIme() {
+        mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 100));
+        final PointF beforePosition = mMenuView.getMenuPosition();
+
         dispatchShowingImeInsets();
+        assertThat(isPositionAnimationRunning()).isTrue();
+        skipPositionAnimations();
+
+        final float menuBottom = mMenuView.getTranslationY() + mMenuView.getMenuHeight();
+
+        assertThat(mMenuView.getTranslationX()).isEqualTo(beforePosition.x);
+        assertThat(menuBottom).isLessThan(beforePosition.y);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION)
+    public void hidingImeInsetsChange_overlapOnIme_menuBackToOriginalPosition_old() {
+        mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 200));
+        final PointF beforePosition = mMenuView.getMenuPosition();
 
         dispatchHidingImeInsets();
 
-        assertThat(mMenuView.getTranslationX()).isEqualTo(0);
-        assertThat(mMenuView.getTranslationY()).isEqualTo(menuTop);
+        assertThat(mMenuView.getTranslationX()).isEqualTo(beforePosition.x);
+        assertThat(mMenuView.getTranslationY()).isEqualTo(beforePosition.y);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION)
+    public void hidingImeInsetsChange_overlapOnIme_menuBackToOriginalPosition() {
+        mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 200));
+        final PointF beforePosition = mMenuView.getMenuPosition();
+
+        dispatchShowingImeInsets();
+        assertThat(isPositionAnimationRunning()).isTrue();
+        skipPositionAnimations();
+
+        dispatchHidingImeInsets();
+        assertThat(isPositionAnimationRunning()).isTrue();
+        skipPositionAnimations();
+
+        assertThat(mMenuView.getTranslationX()).isEqualTo(beforePosition.x);
+        assertThat(mMenuView.getTranslationY()).isEqualTo(beforePosition.y);
     }
 
     private void setupEnabledAccessibilityServiceList() {
@@ -293,5 +339,22 @@ public class MenuViewLayerTest extends SysuiTestCase {
                 .setInsets(ime(),
                         Insets.of(/* left= */ 0, /* top= */ 0, /* right= */ 0, bottom))
                 .build();
+    }
+
+    private boolean isPositionAnimationRunning() {
+        return !mMenuAnimationController.mPositionAnimations.values().stream().filter(
+                        (animation) -> animation.isRunning()).findAny().isEmpty();
+    }
+
+    private void skipPositionAnimations() {
+        mMenuAnimationController.mPositionAnimations.values().stream().forEach(
+                (animation) -> {
+                    final SpringAnimation springAnimation = ((SpringAnimation) animation);
+                    // The doAnimationFrame function is used for skipping animation to the end.
+                    springAnimation.doAnimationFrame(500);
+                    springAnimation.skipToEnd();
+                    springAnimation.doAnimationFrame(500);
+                });
+
     }
 }

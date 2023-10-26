@@ -904,6 +904,7 @@ public class SettingsBackupTest {
                         Settings.Secure.EXTRA_AUTOMATIC_POWER_SAVE_MODE,
                         Settings.Secure.GAME_DASHBOARD_ALWAYS_ON,
                         Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST,
+                        Settings.Secure.HIDE_PRIVATESPACE_ENTRY_POINT,
                         Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING,
                         Settings.Secure.LOCATION_COARSE_ACCURACY_M,
                         Settings.Secure.LOCATION_SHOW_SYSTEM_OPS,

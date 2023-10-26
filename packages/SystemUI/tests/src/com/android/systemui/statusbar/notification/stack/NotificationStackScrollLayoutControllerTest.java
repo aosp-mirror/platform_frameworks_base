@@ -53,6 +53,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -84,14 +85,17 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -716,8 +720,11 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mSecureSettings,
                 mock(NotificationDismissibilityProvider.class),
                 mActivityStarter,
-                new ResourcesSplitShadeStateController()
-        );
+                new ResourcesSplitShadeStateController(),
+                mock(ConfigurationState.class),
+                mock(DozeParameters.class),
+                mock(ScreenOffAnimationController.class),
+                mock(ShelfNotificationIconViewStore.class));
     }
 
     static class LogMatcher implements ArgumentMatcher<LogMaker> {

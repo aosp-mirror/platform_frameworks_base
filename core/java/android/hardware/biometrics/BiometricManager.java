@@ -537,24 +537,6 @@ public class BiometricManager {
     }
 
     /**
-     * Listens for biometric prompt status, i.e., if it is being shown or idle.
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void registerBiometricPromptStatusListener(
-            IBiometricPromptStatusListener callback) {
-        if (mService != null) {
-            try {
-                mService.registerBiometricPromptStatusListener(callback);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Slog.w(TAG, "registerBiometricPromptOnKeyguardCallback(): Service not connected");
-        }
-    }
-
-    /**
      * Requests all {@link Authenticators.Types#BIOMETRIC_STRONG} sensors to have their
      * authenticatorId invalidated for the specified user. This happens when enrollments have been
      * added on devices with multiple biometric sensors.

@@ -35,4 +35,10 @@ internal abstract class DesktopModeWindowDecorationViewHolder(rootView: View) {
           }
         } ?: false
   }
+
+    /** Callback when the handle menu is opened. */
+    abstract fun onHandleMenuOpened()
+
+    /** Callback when the handle menu is closed. */
+    abstract fun onHandleMenuClosed()
 }

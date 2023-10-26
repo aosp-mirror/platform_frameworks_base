@@ -30,7 +30,6 @@ import com.android.systemui.common.shared.model.Position
 import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -78,7 +77,6 @@ constructor(
     private val powerInteractor: PowerInteractor,
     featureFlags: FeatureFlags,
     sceneContainerFlags: SceneContainerFlags,
-    deviceEntryRepository: DeviceEntryRepository,
     bouncerRepository: KeyguardBouncerRepository,
     configurationRepository: ConfigurationRepository,
     shadeRepository: ShadeRepository,
@@ -160,7 +158,7 @@ constructor(
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
 
     /** Whether the keyguard is unlocked or not. */
-    val isKeyguardUnlocked: Flow<Boolean> = deviceEntryRepository.isUnlocked
+    val isKeyguardUnlocked: Flow<Boolean> = repository.isKeyguardUnlocked
 
     /** Whether the keyguard is occluded (covered by an activity). */
     val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded

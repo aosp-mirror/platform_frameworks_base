@@ -68,7 +68,6 @@ class KeyguardInteractorTest : SysuiTestCase() {
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
             featureFlags = featureFlags,
             sceneContainerFlags = testUtils.sceneContainerFlags,
-            deviceEntryRepository = testUtils.deviceEntryRepository,
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
             shadeRepository = shadeRepository,

@@ -79,14 +79,14 @@ public final class ArchivedActivity {
      * @hide
      */
     public static Bitmap drawableToBitmap(Drawable drawable) {
-        return drawableToBitmap(drawable, /* maxIconSize= */ Integer.MAX_VALUE);
+        return drawableToBitmap(drawable, /* iconSize= */ 0);
     }
 
     /**
-     * Same as above, but.
+     * Same as above, but scale the resulting image to fit iconSize.
      * @hide
      */
-    public static Bitmap drawableToBitmap(Drawable drawable, int maxIconSize) {
+    public static Bitmap drawableToBitmap(Drawable drawable, int iconSize) {
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable) drawable).getBitmap();
 
@@ -106,8 +106,8 @@ public final class ArchivedActivity {
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
-        if (bitmap.getWidth() > maxIconSize || bitmap.getHeight() > maxIconSize) {
-            var scaledBitmap = Bitmap.createScaledBitmap(bitmap, maxIconSize, maxIconSize, true);
+        if (iconSize > 0 && bitmap.getWidth() > iconSize * 2 || bitmap.getHeight() > iconSize * 2) {
+            var scaledBitmap = Bitmap.createScaledBitmap(bitmap, iconSize, iconSize, true);
             if (scaledBitmap != bitmap) {
                 bitmap.recycle();
             }
@@ -118,7 +118,6 @@ public final class ArchivedActivity {
 
     /**
      * Compress bitmap to PNG format.
-     * The bitmap is going to be recycled.
      * @hide
      */
     public static byte[] bytesFromBitmap(Bitmap bitmap) {

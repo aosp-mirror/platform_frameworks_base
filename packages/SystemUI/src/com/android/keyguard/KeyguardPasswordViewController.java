@@ -65,15 +65,23 @@ public class KeyguardPasswordViewController
     private boolean mPaused;
 
     private final OnEditorActionListener mOnEditorActionListener = (v, actionId, event) -> {
-        // Check if this was the result of hitting the enter key
+        // Check if this was the result of hitting the IME done action
         final boolean isSoftImeEvent = event == null
                 && (actionId == EditorInfo.IME_NULL
                 || actionId == EditorInfo.IME_ACTION_DONE
                 || actionId == EditorInfo.IME_ACTION_NEXT);
-        final boolean isKeyboardEnterKey = event != null
-                && KeyEvent.isConfirmKey(event.getKeyCode())
-                && event.getAction() == KeyEvent.ACTION_DOWN;
-        if (isSoftImeEvent || isKeyboardEnterKey) {
+        if (isSoftImeEvent) {
+            verifyPasswordAndUnlock();
+            return true;
+        }
+        return false;
+    };
+
+    private final View.OnKeyListener mKeyListener = (v, keyCode, keyEvent) -> {
+        final boolean isKeyboardEnterKey = keyEvent != null
+                && KeyEvent.isConfirmKey(keyCode)
+                && keyEvent.getAction() == KeyEvent.ACTION_UP;
+        if (isKeyboardEnterKey) {
             verifyPasswordAndUnlock();
             return true;
         }
@@ -140,15 +148,16 @@ public class KeyguardPasswordViewController
                 | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
         mView.onDevicePostureChanged(mPostureController.getDevicePosture());
+
         mPostureController.addCallback(mPostureCallback);
 
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
         mPasswordEntry.setOnEditorActionListener(mOnEditorActionListener);
+        mPasswordEntry.setOnKeyListener(mKeyListener);
         mPasswordEntry.addTextChangedListener(mTextWatcher);
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(v -> mKeyguardSecurityCallback.userActivity());
-
         mSwitchImeButton.setOnClickListener(v -> {
             mKeyguardSecurityCallback.userActivity(); // Leave the screen on a bit longer
             // Do not show auxiliary subtypes in password lock screen.

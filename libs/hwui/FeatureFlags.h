@@ -33,6 +33,14 @@ inline bool fix_double_underline() {
 #endif  // __ANDROID__
 }
 
+inline bool deprecate_ui_fonts() {
+#ifdef __ANDROID__
+    return com_android_text_flags_deprecate_ui_fonts();
+#else
+    return true;
+#endif  // __ANDROID__
+}
+
 }  // namespace text_feature
 
 }  // namespace android

@@ -494,6 +494,10 @@ public final class ProcessList {
     @GuardedBy("mService")
     final ProcessMap<AppZygote> mAppZygotes = new ProcessMap<AppZygote>();
 
+    /** Manages the {@link android.app.ApplicationStartInfo} records. */
+    @GuardedBy("mAppStartInfoTracker")
+    final AppStartInfoTracker mAppStartInfoTracker = new AppStartInfoTracker();
+
     /**
      * The currently running SDK sandbox processes for a uid.
      */
@@ -956,12 +960,14 @@ public final class ProcessList {
                         mSystemServerSocketForZygote.getFileDescriptor(),
                         EVENT_INPUT, this::handleZygoteMessages);
             }
+            mAppStartInfoTracker.init(mService);
             mAppExitInfoTracker.init(mService);
             mImperceptibleKillRunner = new ImperceptibleKillRunner(sKillThread.getLooper());
         }
     }
 
     void onSystemReady() {
+        mAppStartInfoTracker.onSystemReady();
         mAppExitInfoTracker.onSystemReady();
     }
 

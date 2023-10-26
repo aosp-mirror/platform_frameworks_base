@@ -120,7 +120,6 @@ package android.content {
     method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
-    field public static final String REMOTE_AUTH_SERVICE = "remote_auth";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
