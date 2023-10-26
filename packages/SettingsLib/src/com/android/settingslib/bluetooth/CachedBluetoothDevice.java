@@ -410,8 +410,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         connectDevice();
     }
 
-    void setHearingAidInfo(HearingAidInfo hearingAidInfo) {
+    public void setHearingAidInfo(HearingAidInfo hearingAidInfo) {
         mHearingAidInfo = hearingAidInfo;
+    }
+
+    public HearingAidInfo getHearingAidInfo() {
+        return mHearingAidInfo;
     }
 
     /**
