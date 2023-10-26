@@ -25,6 +25,7 @@ import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -515,7 +516,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
 
         if (backgroundColorForTransition != 0) {
-            addBackgroundColorOnTDA(info, backgroundColorForTransition, startTransaction,
+            addBackgroundColor(info, backgroundColorForTransition, startTransaction,
                     finishTransaction);
         }
 
@@ -546,7 +547,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return true;
     }
 
-    private void addBackgroundColorOnTDA(@NonNull TransitionInfo info,
+    private void addBackgroundColor(@NonNull TransitionInfo info,
             @ColorInt int color, @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction) {
         final Color bgColor = Color.valueOf(color);
@@ -558,9 +559,19 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     .setName("animation-background")
                     .setCallsite("DefaultTransitionHandler")
                     .setColorLayer();
-
-            mRootTDAOrganizer.attachToDisplayArea(displayId, colorLayerBuilder);
             final SurfaceControl backgroundSurface = colorLayerBuilder.build();
+
+            // Attaching the background surface to the transition root could unexpectedly make it
+            // cover one of the split root tasks. To avoid this, put the background surface just
+            // above the display area when split is on.
+            final boolean isSplitTaskInvolved =
+                    info.getChanges().stream().anyMatch(c-> c.getTaskInfo() != null
+                            && c.getTaskInfo().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW);
+            if (isSplitTaskInvolved) {
+                mRootTDAOrganizer.attachToDisplayArea(displayId, colorLayerBuilder);
+            } else {
+                startTransaction.reparent(backgroundSurface, info.getRootLeash());
+            }
             startTransaction.setColor(backgroundSurface, colorArray)
                     .setLayer(backgroundSurface, -1)
                     .show(backgroundSurface);
