@@ -5914,6 +5914,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String TOUCHPAD_NATURAL_SCROLLING = "touchpad_natural_scrolling";
 
         /**
