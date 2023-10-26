@@ -123,7 +123,7 @@ object Flags {
     // TODO(b/301955929)
     @JvmField
     val NOTIF_LS_BACKGROUND_THREAD =
-            unreleasedFlag("notification_lockscreen_mgr_bg_thread")
+            unreleasedFlag("notification_lockscreen_mgr_bg_thread", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
