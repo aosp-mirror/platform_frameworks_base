@@ -81,6 +81,9 @@ public final class SatelliteManager {
             new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<NtnSignalStrengthCallback, INtnSignalStrengthCallback>
             sNtnSignalStrengthCallbackMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<SatelliteCapabilitiesCallback,
+            ISatelliteCapabilitiesCallback>
+            sSatelliteCapabilitiesCallbackMap = new ConcurrentHashMap<>();
 
     private final int mSubId;
 
@@ -2018,7 +2021,7 @@ public final class SatelliteManager {
      * {@link TelephonyManager#unregisterTelephonyCallback(TelephonyCallback)}..
      * </p>
      *
-     * @param callback The callback that was passed to
+     * @param callback The callback that was passed to.
      * {@link #registerForNtnSignalStrengthChanged(Executor, NtnSignalStrengthCallback)}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
@@ -2046,9 +2049,84 @@ public final class SatelliteManager {
             loge("unregisterForNtnSignalStrengthChanged() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
-
     }
 
+    /**
+     * Registers for satellite capabilities change event from the satellite service.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle the satellite capabilities changed event.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SatelliteResult public int registerForSatelliteCapabilitiesChanged(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteCapabilitiesCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ISatelliteCapabilitiesCallback internalCallback =
+                        new ISatelliteCapabilitiesCallback.Stub() {
+                            @Override
+                            public void onSatelliteCapabilitiesChanged(
+                                    SatelliteCapabilities capabilities) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatelliteCapabilitiesChanged(
+                                                capabilities)));
+                            }
+                        };
+                sSatelliteCapabilitiesCallbackMap.put(callback, internalCallback);
+                return telephony.registerForSatelliteCapabilitiesChanged(mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForSatelliteCapabilitiesChanged() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_RESULT_REQUEST_FAILED;
+    }
+
+    /**
+     * Unregisters for satellite capabilities change event from the satellite service.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback that was passed to.
+     * {@link #registerForSatelliteCapabilitiesChanged(Executor, SatelliteCapabilitiesCallback)}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void unregisterForSatelliteCapabilitiesChanged(
+            @NonNull SatelliteCapabilitiesCallback callback) {
+        Objects.requireNonNull(callback);
+        ISatelliteCapabilitiesCallback internalCallback =
+                sSatelliteCapabilitiesCallbackMap.remove(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (internalCallback != null) {
+                    telephony.unregisterForSatelliteCapabilitiesChanged(mSubId, internalCallback);
+                } else {
+                    loge("unregisterForSatelliteCapabilitiesChanged: No internal callback.");
+                }
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForSatelliteCapabilitiesChanged() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
 
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
