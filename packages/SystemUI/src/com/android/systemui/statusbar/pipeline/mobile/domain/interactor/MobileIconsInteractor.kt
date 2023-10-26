@@ -19,10 +19,13 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.content.Context
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.PROFILE_CLASS_PROVISIONING
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
@@ -121,6 +124,7 @@ constructor(
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
     private val context: Context,
+    private val featureFlagsClassic: FeatureFlagsClassic,
 ) : MobileIconsInteractor {
 
     // Weak reference lookup for created interactors
@@ -163,6 +167,20 @@ constructor(
         mobileConnectionsRepo.subscriptions
 
     /**
+     * Any filtering that we can do based purely on the info of each subscription. Currently this
+     * only applies the ProfileClass-based filter, but if we need other they can go here
+     */
+    private val subscriptionsBasedFilteredSubs =
+        unfilteredSubscriptions.map { subs -> applyProvisioningFilter(subs) }.distinctUntilChanged()
+
+    private fun applyProvisioningFilter(subs: List<SubscriptionModel>): List<SubscriptionModel> =
+        if (!featureFlagsClassic.isEnabled(FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS)) {
+            subs
+        } else {
+            subs.filter { it.profileClass != PROFILE_CLASS_PROVISIONING }
+        }
+
+    /**
      * Generally, SystemUI wants to show iconography for each subscription that is listed by
      * [SubscriptionManager]. However, in the case of opportunistic subscriptions, we want to only
      * show a single representation of the pair of subscriptions. The docs define opportunistic as:
@@ -177,48 +195,15 @@ constructor(
      */
     override val filteredSubscriptions: Flow<List<SubscriptionModel>> =
         combine(
-                unfilteredSubscriptions,
+                subscriptionsBasedFilteredSubs,
                 mobileConnectionsRepo.activeMobileDataSubscriptionId,
                 connectivityRepository.vcnSubId,
             ) { unfilteredSubs, activeId, vcnSubId ->
-                // Based on the old logic,
-                if (unfilteredSubs.size != 2) {
-                    return@combine unfilteredSubs
-                }
-
-                val info1 = unfilteredSubs[0]
-                val info2 = unfilteredSubs[1]
-
-                // Filtering only applies to subscriptions in the same group
-                if (info1.groupUuid == null || info1.groupUuid != info2.groupUuid) {
-                    return@combine unfilteredSubs
-                }
-
-                // If both subscriptions are primary, show both
-                if (!info1.isOpportunistic && !info2.isOpportunistic) {
-                    return@combine unfilteredSubs
-                }
-
-                // NOTE: at this point, we are now returning a single SubscriptionInfo
-
-                // If carrier required, always show the icon of the primary subscription.
-                // Otherwise, show whichever subscription is currently active for internet.
-                if (carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault) {
-                    // return the non-opportunistic info
-                    return@combine if (info1.isOpportunistic) listOf(info2) else listOf(info1)
-                } else {
-                    // It's possible for the subId of the VCN to disagree with the active subId in
-                    // cases where the system has tried to switch but found no connection. In these
-                    // scenarios, VCN will always have the subId that we want to use, so use that
-                    // value instead of the activeId reported by telephony
-                    val subIdToKeep = vcnSubId ?: activeId
-
-                    return@combine if (info1.subscriptionId == subIdToKeep) {
-                        listOf(info1)
-                    } else {
-                        listOf(info2)
-                    }
-                }
+                filterSubsBasedOnOpportunistic(
+                    unfilteredSubs,
+                    activeId,
+                    vcnSubId,
+                )
             }
             .distinctUntilChanged()
             .logDiffsForTable(
@@ -228,6 +213,51 @@ constructor(
                 initialValue = listOf(),
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
+
+    private fun filterSubsBasedOnOpportunistic(
+        subList: List<SubscriptionModel>,
+        activeId: Int?,
+        vcnSubId: Int?,
+    ): List<SubscriptionModel> {
+        // Based on the old logic,
+        if (subList.size != 2) {
+            return subList
+        }
+
+        val info1 = subList[0]
+        val info2 = subList[1]
+
+        // Filtering only applies to subscriptions in the same group
+        if (info1.groupUuid == null || info1.groupUuid != info2.groupUuid) {
+            return subList
+        }
+
+        // If both subscriptions are primary, show both
+        if (!info1.isOpportunistic && !info2.isOpportunistic) {
+            return subList
+        }
+
+        // NOTE: at this point, we are now returning a single SubscriptionInfo
+
+        // If carrier required, always show the icon of the primary subscription.
+        // Otherwise, show whichever subscription is currently active for internet.
+        if (carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault) {
+            // return the non-opportunistic info
+            return if (info1.isOpportunistic) listOf(info2) else listOf(info1)
+        } else {
+            // It's possible for the subId of the VCN to disagree with the active subId in
+            // cases where the system has tried to switch but found no connection. In these
+            // scenarios, VCN will always have the subId that we want to use, so use that
+            // value instead of the activeId reported by telephony
+            val subIdToKeep = vcnSubId ?: activeId
+
+            return if (info1.subscriptionId == subIdToKeep) {
+                listOf(info1)
+            } else {
+                listOf(info2)
+            }
+        }
+    }
 
     /**
      * Copied from the old pipeline. We maintain a 2s period of time where we will keep the

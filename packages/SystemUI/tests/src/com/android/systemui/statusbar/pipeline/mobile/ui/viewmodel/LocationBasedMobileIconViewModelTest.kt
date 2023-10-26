@@ -70,7 +70,11 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
 
     private val connectivityRepository = FakeConnectivityRepository()
-    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
+    private val flags =
+        FakeFeatureFlagsClassic().also {
+            it.set(Flags.NEW_NETWORK_SLICE_UI, false)
+            it.set(Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS, true)
+        }
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var constants: ConnectivityConstants
@@ -114,6 +118,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
                 FakeUserSetupRepository(),
                 testScope.backgroundScope,
                 context,
+                flags,
             )
 
         interactor =
