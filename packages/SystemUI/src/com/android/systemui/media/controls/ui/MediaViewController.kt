@@ -60,7 +60,7 @@ constructor(
     }
 
     companion object {
-        @JvmField val GUTS_ANIMATION_DURATION = 500L
+        @JvmField val GUTS_ANIMATION_DURATION = 234L
     }
 
     /** A listener when the current dimensions of the player change */
@@ -234,7 +234,8 @@ constructor(
             currentStartLocation,
             currentEndLocation,
             currentTransitionProgress,
-            applyImmediately = false
+            applyImmediately = false,
+            isGutsAnimation = true,
         )
     }
 
@@ -254,7 +255,8 @@ constructor(
             currentStartLocation,
             currentEndLocation,
             currentTransitionProgress,
-            applyImmediately = immediate
+            applyImmediately = immediate,
+            isGutsAnimation = true,
         )
     }
 
@@ -414,7 +416,10 @@ constructor(
      * it's not available, it will recreate one by measuring, which may be expensive.
      */
     @VisibleForTesting
-    fun obtainViewState(state: MediaHostState?): TransitionViewState? {
+    fun obtainViewState(
+        state: MediaHostState?,
+        isGutsAnimation: Boolean = false
+    ): TransitionViewState? {
         if (state == null || state.measurementInput == null) {
             return null
         }
@@ -423,7 +428,7 @@ constructor(
         val viewState = viewStates[cacheKey]
         if (viewState != null) {
             // we already have cached this measurement, let's continue
-            if (state.squishFraction <= 1f) {
+            if (state.squishFraction <= 1f && !isGutsAnimation) {
                 return squishViewState(viewState, state.squishFraction)
             }
             return viewState
@@ -455,13 +460,14 @@ constructor(
 
             // Given that we have a measurement and a view, let's get (guaranteed) viewstates
             // from the start and end state and interpolate them
-            val startViewState = obtainViewState(startState) as TransitionViewState
+            val startViewState = obtainViewState(startState, isGutsAnimation) as TransitionViewState
             val endState = state.copy().also { it.expansion = 1.0f }
-            val endViewState = obtainViewState(endState) as TransitionViewState
+            val endViewState = obtainViewState(endState, isGutsAnimation) as TransitionViewState
             result =
                 layoutController.getInterpolatedState(startViewState, endViewState, state.expansion)
         }
-        if (state.squishFraction <= 1f) {
+        // Skip the adjustments of squish view state if UMO changes due to guts animation.
+        if (state.squishFraction <= 1f && !isGutsAnimation) {
             return squishViewState(result, state.squishFraction)
         }
         return result
@@ -521,7 +527,8 @@ constructor(
         @MediaLocation startLocation: Int,
         @MediaLocation endLocation: Int,
         transitionProgress: Float,
-        applyImmediately: Boolean
+        applyImmediately: Boolean,
+        isGutsAnimation: Boolean = false,
     ) =
         traceSection("MediaViewController#setCurrentState") {
             currentEndLocation = endLocation
@@ -537,7 +544,7 @@ constructor(
             // Obtain the view state that we'd want to be at the end
             // The view might not be bound yet or has never been measured and in that case will be
             // reset once the state is fully available
-            var endViewState = obtainViewState(endHostState) ?: return
+            var endViewState = obtainViewState(endHostState, isGutsAnimation) ?: return
             endViewState = updateViewStateSize(endViewState, endLocation, tmpState2)!!
             layoutController.setMeasureState(endViewState)
 
@@ -548,7 +555,7 @@ constructor(
             }
 
             val result: TransitionViewState
-            var startViewState = obtainViewState(startHostState)
+            var startViewState = obtainViewState(startHostState, isGutsAnimation)
             startViewState = updateViewStateSize(startViewState, startLocation, tmpState3)
 
             if (!endHostState.visible) {
@@ -602,7 +609,8 @@ constructor(
                 applyImmediately,
                 shouldAnimate,
                 animationDuration,
-                animationDelay
+                animationDelay,
+                isGutsAnimation,
             )
         }
 
