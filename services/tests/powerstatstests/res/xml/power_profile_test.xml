@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<device name="Android">
+    <!-- This is the battery capacity in mAh -->
+    <item name="battery.capacity">3000</item>
+
+    <!-- Power consumption when CPU is suspended -->
+    <item name="cpu.suspend">5</item>
+    <!-- Additional power consumption when CPU is in a kernel idle loop -->
+    <item name="cpu.idle">1.11</item>
+    <!-- Additional power consumption by CPU excluding cluster and core when  running -->
+    <item name="cpu.active">2.55</item>
+
+    <!-- Additional power consumption of CPU policy0 itself when running on related cores -->
+    <item name="cpu.scaling_policy_power.policy0">2.11</item>
+    <!-- Additional power consumption of CPU policy4 itself when running on related cores -->
+    <item name="cpu.scaling_policy_power.policy4">2.22</item>
+
+    <!-- Additional power used by a CPU related to policy3 when running at different
+     speeds. -->
+    <array name="cpu.scaling_step_power.policy0">
+        <value>10</value> <!-- 300 MHz CPU speed -->
+        <value>20</value> <!-- 1000 MHz CPU speed -->
+        <value>30</value> <!-- 1900 MHz CPU speed -->
+    </array>
+    <!-- Additional power used by a CPU related to policy3 when running at different
+         speeds. -->
+    <array name="cpu.scaling_step_power.policy4">
+        <value>25</value> <!-- 300 MHz CPU speed -->
+        <value>35</value> <!-- 1000 MHz CPU speed -->
+        <value>50</value> <!-- 2500 MHz CPU speed -->
+        <value>60</value> <!-- 3000 MHz CPU speed -->
+    </array>
+
+    <!-- Power used by display unit in ambient display mode, including back lighting-->
+    <item name="ambient.on">0.5</item>
+    <!-- Additional power used when screen is turned on at minimum brightness -->
+    <item name="screen.on">100</item>
+    <!-- Additional power used when screen is at maximum brightness, compared to
+         screen at minimum brightness -->
+    <item name="screen.full">800</item>
+
+    <!-- Average power used by the camera flash module when on -->
+    <item name="camera.flashlight">500</item>
+    <!-- Average power use by the camera subsystem for a typical camera
+         application. Intended as a rough estimate for an application running a
+         preview and capturing approximately 10 full-resolution pictures per
+         minute. -->
+    <item name="camera.avg">600</item>
+
+    <!-- Additional power used by the audio hardware, probably due to DSP -->
+    <item name="audio">100.0</item>
+
+    <!-- Additional power used by the video hardware, probably due to DSP -->
+    <item name="video">150.0</item> <!-- ~50mA -->
+
+    <!-- Additional power used when GPS is acquiring a signal -->
+    <item name="gps.on">10</item>
+
+    <!-- Additional power used when cellular radio is transmitting/receiving -->
+    <item name="radio.active">60</item>
+    <!-- Additional power used when cellular radio is paging the tower -->
+    <item name="radio.scanning">3</item>
+    <!-- Additional power used when the cellular radio is on. Multi-value entry,
+         one per signal strength (no signal, weak, moderate, strong) -->
+    <array name="radio.on"> <!-- Strength 0 to BINS-1 -->
+        <value>6</value>       <!-- none -->
+        <value>5</value>       <!-- poor -->
+        <value>4</value>       <!-- moderate -->
+        <value>3</value>       <!-- good -->
+        <value>3</value>       <!-- great -->
+    </array>
+
+    <!-- Cellular modem related values. These constants are deprecated, but still supported and
+         need to be tested -->
+    <item name="modem.controller.sleep">123</item>
+    <item name="modem.controller.idle">456</item>
+    <item name="modem.controller.rx">789</item>
+    <array name="modem.controller.tx"> <!-- Strength 0 to 4 -->
+        <value>10</value>
+        <value>20</value>
+        <value>30</value>
+        <value>40</value>
+        <value>50</value>
+    </array>
+</device>

@@ -108,6 +108,9 @@ public class PowerStatsScheduler {
         long currentTimeMillis = mClock.currentTimeMillis();
         long currentMonotonicTime = mMonotonicClock.monotonicTime();
         long startTime = getLastSavedSpanEndMonotonicTime();
+        if (startTime < 0) {
+            startTime = mBatteryStats.getHistory().getStartTime();
+        }
         long endTimeMs = alignToWallClock(startTime + mAggregatedPowerStatsSpanDuration,
                 mAggregatedPowerStatsSpanDuration, currentMonotonicTime, currentTimeMillis);
         while (endTimeMs <= currentMonotonicTime) {
@@ -214,6 +217,7 @@ public class PowerStatsScheduler {
             return mLastSavedSpanEndMonotonicTime;
         }
 
+        mLastSavedSpanEndMonotonicTime = -1;
         for (PowerStatsSpan.Metadata metadata : mPowerStatsStore.getTableOfContents()) {
             if (metadata.getSections().contains(AggregatedPowerStatsSection.TYPE)) {
                 for (PowerStatsSpan.TimeFrame timeFrame : metadata.getTimeFrames()) {

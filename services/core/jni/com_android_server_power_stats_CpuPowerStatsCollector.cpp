@@ -34,9 +34,12 @@ namespace android {
 
 static constexpr uint64_t NSEC_PER_MSEC = 1000000;
 
-static int extractUidStats(JNIEnv *env, std::vector<std::vector<uint64_t>> &times,
-                           ScopedIntArrayRO &scopedScalingStepToPowerBracketMap,
-                           jlongArray tempForUidStats);
+static int flatten(JNIEnv *env, const std::vector<std::vector<uint64_t>> &times,
+                   jlongArray outArray);
+
+static int combineByBracket(JNIEnv *env, const std::vector<std::vector<uint64_t>> &times,
+                            ScopedIntArrayRO &scopedScalingStepToPowerBracketMap,
+                            jlongArray outBrackets);
 
 static bool initialized = false;
 static jclass class_KernelCpuStatsCallback;
@@ -62,25 +65,43 @@ static int init(JNIEnv *env) {
     return OK;
 }
 
+static jboolean nativeIsSupportedFeature(JNIEnv *env) {
+    if (!android::bpf::startTrackingUidTimes()) {
+        return false;
+    }
+    auto totalByScalingStep = android::bpf::getTotalCpuFreqTimes();
+    return totalByScalingStep.has_value();
+}
+
 static jlong nativeReadCpuStats(JNIEnv *env, [[maybe_unused]] jobject zis, jobject callback,
                                 jintArray scalingStepToPowerBracketMap,
-                                jlong lastUpdateTimestampNanos, jlongArray tempForUidStats) {
+                                jlong lastUpdateTimestampNanos, jlongArray cpuTimeByScalingStep,
+                                jlongArray tempForUidStats) {
+    ScopedIntArrayRO scopedScalingStepToPowerBracketMap(env, scalingStepToPowerBracketMap);
+
     if (!initialized) {
         if (init(env) == EXCEPTION) {
             return 0L;
         }
     }
 
+    auto totalByScalingStep = android::bpf::getTotalCpuFreqTimes();
+    if (!totalByScalingStep) {
+        jniThrowExceptionFmt(env, "java/lang/RuntimeException", "Unsupported kernel feature");
+        return EXCEPTION;
+    }
+
+    if (flatten(env, *totalByScalingStep, cpuTimeByScalingStep) == EXCEPTION) {
+        return 0L;
+    }
+
     uint64_t newLastUpdate = lastUpdateTimestampNanos;
     auto data = android::bpf::getUidsUpdatedCpuFreqTimes(&newLastUpdate);
     if (!data.has_value()) return lastUpdateTimestampNanos;
 
-    ScopedIntArrayRO scopedScalingStepToPowerBracketMap(env, scalingStepToPowerBracketMap);
-
     for (auto &[uid, times] : *data) {
-        int status =
-                extractUidStats(env, times, scopedScalingStepToPowerBracketMap, tempForUidStats);
-        if (status == EXCEPTION) {
+        if (combineByBracket(env, times, scopedScalingStepToPowerBracketMap, tempForUidStats) ==
+            EXCEPTION) {
             return 0L;
         }
         env->CallVoidMethod(callback, method_KernelCpuStatsCallback_processUidStats, (jint)uid,
@@ -89,13 +110,34 @@ static jlong nativeReadCpuStats(JNIEnv *env, [[maybe_unused]] jobject zis, jobje
     return newLastUpdate;
 }
 
-static int extractUidStats(JNIEnv *env, std::vector<std::vector<uint64_t>> &times,
-                           ScopedIntArrayRO &scopedScalingStepToPowerBracketMap,
-                           jlongArray tempForUidStats) {
-    ScopedLongArrayRW scopedTempForStats(env, tempForUidStats);
-    uint64_t *arrayForStats = reinterpret_cast<uint64_t *>(scopedTempForStats.get());
-    const uint8_t statsSize = scopedTempForStats.size();
-    memset(arrayForStats, 0, statsSize * sizeof(uint64_t));
+static int flatten(JNIEnv *env, const std::vector<std::vector<uint64_t>> &times,
+                   jlongArray outArray) {
+    ScopedLongArrayRW scopedOutArray(env, outArray);
+    const uint8_t scalingStepCount = scopedOutArray.size();
+    uint64_t *out = reinterpret_cast<uint64_t *>(scopedOutArray.get());
+    uint32_t scalingStep = 0;
+    for (const auto &subVec : times) {
+        for (uint32_t i = 0; i < subVec.size(); ++i) {
+            if (scalingStep >= scalingStepCount) {
+                jniThrowExceptionFmt(env, "java/lang/IndexOutOfBoundsException",
+                                     "Array is too short, size=%u, scalingStep=%u",
+                                     scalingStepCount, scalingStep);
+                return EXCEPTION;
+            }
+            out[scalingStep] = subVec[i] / NSEC_PER_MSEC;
+            scalingStep++;
+        }
+    }
+    return OK;
+}
+
+static int combineByBracket(JNIEnv *env, const std::vector<std::vector<uint64_t>> &times,
+                            ScopedIntArrayRO &scopedScalingStepToPowerBracketMap,
+                            jlongArray outBrackets) {
+    ScopedLongArrayRW scopedOutBrackets(env, outBrackets);
+    uint64_t *brackets = reinterpret_cast<uint64_t *>(scopedOutBrackets.get());
+    const uint8_t statsSize = scopedOutBrackets.size();
+    memset(brackets, 0, statsSize * sizeof(uint64_t));
     const uint8_t scalingStepCount = scopedScalingStepToPowerBracketMap.size();
 
     uint32_t scalingStep = 0;
@@ -108,14 +150,14 @@ static int extractUidStats(JNIEnv *env, std::vector<std::vector<uint64_t>> &time
                                      scalingStepCount, scalingStep);
                 return EXCEPTION;
             }
-            uint32_t bucket = scopedScalingStepToPowerBracketMap[scalingStep];
-            if (bucket >= statsSize) {
+            uint32_t bracket = scopedScalingStepToPowerBracketMap[scalingStep];
+            if (bracket >= statsSize) {
                 jniThrowExceptionFmt(env, "java/lang/IndexOutOfBoundsException",
-                                     "UidStats array is too short, length=%u, bucket[%u]=%u",
-                                     statsSize, scalingStep, bucket);
+                                     "Bracket array is too short, length=%u, bracket[%u]=%u",
+                                     statsSize, scalingStep, bracket);
                 return EXCEPTION;
             }
-            arrayForStats[bucket] += subVec[i] / NSEC_PER_MSEC;
+            brackets[bracket] += subVec[i] / NSEC_PER_MSEC;
             scalingStep++;
         }
     }
@@ -123,7 +165,8 @@ static int extractUidStats(JNIEnv *env, std::vector<std::vector<uint64_t>> &time
 }
 
 static const JNINativeMethod method_table[] = {
-        {"nativeReadCpuStats", "(L" JAVA_CLASS_KERNEL_CPU_STATS_CALLBACK ";[IJ[J)J",
+        {"nativeIsSupportedFeature", "()Z", (void *)nativeIsSupportedFeature},
+        {"nativeReadCpuStats", "(L" JAVA_CLASS_KERNEL_CPU_STATS_CALLBACK ";[IJ[J[J)J",
          (void *)nativeReadCpuStats},
 };
 

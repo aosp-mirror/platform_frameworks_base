@@ -44,7 +44,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
 
 /**
  * Reports power consumption values for various device activities. Reads values from an XML file.
@@ -295,7 +294,7 @@ public class PowerProfile {
 
     private static final long SUBSYSTEM_FIELDS_MASK = 0xFFFF_FFFF;
 
-    private static final int DEFAULT_CPU_POWER_BRACKET_NUMBER = 3;
+    public static final int POWER_BRACKETS_UNSPECIFIED = -1;
 
     /**
      * A map from Power Use Item to its power consumption.
@@ -361,7 +360,7 @@ public class PowerProfile {
         }
         initCpuClusters();
         initCpuScalingPolicies();
-        initCpuPowerBrackets(DEFAULT_CPU_POWER_BRACKET_NUMBER);
+        initCpuPowerBrackets();
         initDisplays();
         initModem();
     }
@@ -560,8 +559,7 @@ public class PowerProfile {
     /**
      * Parses or computes CPU power brackets: groups of states with similar power requirements.
      */
-    @VisibleForTesting
-    public void initCpuPowerBrackets(int defaultCpuPowerBracketNumber) {
+    private void initCpuPowerBrackets() {
         boolean anyBracketsSpecified = false;
         boolean allBracketsSpecified = true;
         for (int i = mCpuScalingPolicies.size() - 1; i >= 0; i--) {
@@ -580,79 +578,32 @@ public class PowerProfile {
                     "Power brackets should be specified for all scaling policies or none");
         }
 
+        if (!allBracketsSpecified) {
+            mCpuPowerBracketCount = POWER_BRACKETS_UNSPECIFIED;
+            return;
+        }
+
         mCpuPowerBracketCount = 0;
-        if (allBracketsSpecified) {
-            for (int i = mCpuScalingPolicies.size() - 1; i >= 0; i--) {
-                int policy = mCpuScalingPolicies.keyAt(i);
-                CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.valueAt(i);
-                final Double[] data = sPowerArrayMap.get(CPU_POWER_BRACKETS_PREFIX + policy);
-                if (data.length != cpuScalingPolicyPower.powerBrackets.length) {
-                    throw new RuntimeException(
-                            "Wrong number of items in " + CPU_POWER_BRACKETS_PREFIX + policy
-                                    + ", expected: "
-                                    + cpuScalingPolicyPower.powerBrackets.length);
-                }
-
-                for (int j = 0; j < data.length; j++) {
-                    final int bracket = (int) Math.round(data[j]);
-                    cpuScalingPolicyPower.powerBrackets[j] = bracket;
-                    if (bracket > mCpuPowerBracketCount) {
-                        mCpuPowerBracketCount = bracket;
-                    }
-                }
-            }
-            mCpuPowerBracketCount++;
-        } else {
-            double minPower = Double.MAX_VALUE;
-            double maxPower = Double.MIN_VALUE;
-            int stateCount = 0;
-            for (int i = mCpuScalingPolicies.size() - 1; i >= 0; i--) {
-                int policy = mCpuScalingPolicies.keyAt(i);
-                CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.valueAt(i);
-                final int steps = cpuScalingPolicyPower.stepPower.length;
-                for (int step = 0; step < steps; step++) {
-                    final double power = getAveragePowerForCpuScalingStep(policy, step);
-                    if (power < minPower) {
-                        minPower = power;
-                    }
-                    if (power > maxPower) {
-                        maxPower = power;
-                    }
-                }
-                stateCount += steps;
+        for (int i = mCpuScalingPolicies.size() - 1; i >= 0; i--) {
+            int policy = mCpuScalingPolicies.keyAt(i);
+            CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.valueAt(i);
+            final Double[] data = sPowerArrayMap.get(CPU_POWER_BRACKETS_PREFIX + policy);
+            if (data.length != cpuScalingPolicyPower.powerBrackets.length) {
+                throw new RuntimeException(
+                        "Wrong number of items in " + CPU_POWER_BRACKETS_PREFIX + policy
+                                + ", expected: "
+                                + cpuScalingPolicyPower.powerBrackets.length);
             }
 
-            if (stateCount <= defaultCpuPowerBracketNumber) {
-                mCpuPowerBracketCount = stateCount;
-                int bracket = 0;
-                for (int i = 0; i < mCpuScalingPolicies.size(); i++) {
-                    CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.valueAt(i);
-                    final int steps = cpuScalingPolicyPower.stepPower.length;
-                    for (int step = 0; step < steps; step++) {
-                        cpuScalingPolicyPower.powerBrackets[step] = bracket++;
-                    }
-                }
-            } else {
-                mCpuPowerBracketCount = defaultCpuPowerBracketNumber;
-                final double minLogPower = Math.log(minPower);
-                final double logBracket = (Math.log(maxPower) - minLogPower)
-                        / defaultCpuPowerBracketNumber;
-
-                for (int i = mCpuScalingPolicies.size() - 1; i >= 0; i--) {
-                    int policy = mCpuScalingPolicies.keyAt(i);
-                    CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.valueAt(i);
-                    final int steps = cpuScalingPolicyPower.stepPower.length;
-                    for (int step = 0; step < steps; step++) {
-                        final double power = getAveragePowerForCpuScalingStep(policy, step);
-                        int bracket = (int) ((Math.log(power) - minLogPower) / logBracket);
-                        if (bracket >= defaultCpuPowerBracketNumber) {
-                            bracket = defaultCpuPowerBracketNumber - 1;
-                        }
-                        cpuScalingPolicyPower.powerBrackets[step] = bracket;
-                    }
+            for (int j = 0; j < data.length; j++) {
+                final int bracket = (int) Math.round(data[j]);
+                cpuScalingPolicyPower.powerBrackets[j] = bracket;
+                if (bracket > mCpuPowerBracketCount) {
+                    mCpuPowerBracketCount = bracket;
                 }
             }
         }
+        mCpuPowerBracketCount++;
     }
 
     private static class CpuScalingPolicyPower {
@@ -771,41 +722,10 @@ public class PowerProfile {
 
     /**
      * Returns the number of CPU power brackets: groups of states with similar power requirements.
+     * If power brackets are not specified, returns {@link #POWER_BRACKETS_UNSPECIFIED}
      */
     public int getCpuPowerBracketCount() {
         return mCpuPowerBracketCount;
-    }
-
-    /**
-     * Description of a CPU power bracket: which cluster/frequency combinations are included.
-     */
-    public String getCpuPowerBracketDescription(CpuScalingPolicies cpuScalingPolicies,
-            int powerBracket) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < mCpuScalingPolicies.size(); i++) {
-            int policy = mCpuScalingPolicies.keyAt(i);
-            CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.valueAt(i);
-            int[] brackets = cpuScalingPolicyPower.powerBrackets;
-            int[] freqs = cpuScalingPolicies.getFrequencies(policy);
-            for (int step = 0; step < brackets.length; step++) {
-                if (brackets[step] == powerBracket) {
-                    if (sb.length() != 0) {
-                        sb.append(", ");
-                    }
-                    if (mCpuScalingPolicies.size() > 1) {
-                        sb.append(policy).append('/');
-                    }
-                    if (step < freqs.length) {
-                        sb.append(freqs[step] / 1000);
-                    }
-                    sb.append('(');
-                    sb.append(String.format(Locale.US, "%.1f",
-                            getAveragePowerForCpuScalingStep(policy, step)));
-                    sb.append(')');
-                }
-            }
-        }
-        return sb.toString();
     }
 
     /**

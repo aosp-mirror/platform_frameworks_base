@@ -19,7 +19,6 @@ package com.android.server.power.stats;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
-import android.os.BatteryConsumer;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.IndentingPrintWriter;
@@ -66,17 +65,7 @@ class AggregatedPowerStats {
                 aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs();
         mPowerComponentStats = new PowerComponentAggregatedPowerStats[configs.size()];
         for (int i = 0; i < configs.size(); i++) {
-            mPowerComponentStats[i] = createPowerComponentAggregatedPowerStats(configs.get(i));
-        }
-    }
-
-    private PowerComponentAggregatedPowerStats createPowerComponentAggregatedPowerStats(
-            AggregatedPowerStatsConfig.PowerComponent config) {
-        switch (config.getPowerComponentId()) {
-            case BatteryConsumer.POWER_COMPONENT_CPU:
-                return new CpuAggregatedPowerStats(config);
-            default:
-                return new PowerComponentAggregatedPowerStats(config);
+            mPowerComponentStats[i] = new PowerComponentAggregatedPowerStats(configs.get(i));
         }
     }
 

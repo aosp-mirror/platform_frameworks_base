@@ -29,6 +29,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Maintains multidimensional multi-state stats.  States could be something like on-battery (0,1),
@@ -52,12 +54,54 @@ public class MultiStateStats {
 
         public States(String name, boolean tracked, String... labels) {
             mName = name;
-            this.mTracked = tracked;
-            this.mLabels = labels;
+            mTracked = tracked;
+            mLabels = labels;
         }
 
         public boolean isTracked() {
             return mTracked;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public String[] getLabels() {
+            return mLabels;
+        }
+
+        /**
+         * Iterates over all combinations of tracked states and invokes <code>consumer</code>
+         * for each of them.
+         */
+        public static void forEachTrackedStateCombination(States[] states,
+                Consumer<int[]> consumer) {
+            forEachTrackedStateCombination(consumer, states, new int[states.length], 0);
+        }
+
+        /**
+         * Recursive function that does a depth-first traversal of the multi-dimensional
+         * state space. Each time the traversal reaches the end of the <code>states</code> array,
+         * <code>statesValues</code> contains a unique combination of values for all tracked states.
+         * For untracked states, the corresponding values are left as 0.  The end result is
+         * that the <code>consumer</code> is invoked for every unique combination of tracked state
+         * values.  For example, it may be a sequence of calls like screen-on/power-on,
+         * screen-on/power-off, screen-off/power-on, screen-off/power-off.
+         */
+        private static void forEachTrackedStateCombination(Consumer<int[]> consumer,
+                States[] states, int[] statesValues, int stateIndex) {
+            if (stateIndex < statesValues.length) {
+                if (!states[stateIndex].mTracked) {
+                    forEachTrackedStateCombination(consumer, states, statesValues, stateIndex + 1);
+                    return;
+                }
+                for (int i = 0; i < states[stateIndex].mLabels.length; i++) {
+                    statesValues[stateIndex] = i;
+                    forEachTrackedStateCombination(consumer, states, statesValues, stateIndex + 1);
+                }
+                return;
+            }
+            consumer.accept(statesValues);
         }
     }
 
@@ -276,6 +320,13 @@ public class MultiStateStats {
     }
 
     /**
+     * Updates the stats values for the provided combination of states.
+     */
+    public void setStats(int[] states, long[] values) {
+        mCounter.setValues(mFactory.getSerialState(states), values);
+    }
+
+    /**
      * Resets the counters.
      */
     public void reset() {
@@ -293,24 +344,27 @@ public class MultiStateStats {
      */
     public void writeXml(TypedXmlSerializer serializer) throws IOException {
         long[] tmpArray = new long[mCounter.getArrayLength()];
-        writeXmlAllStates(serializer, new int[mFactory.mStates.length], 0, tmpArray);
+
+        try {
+            States.forEachTrackedStateCombination(mFactory.mStates,
+                    states -> {
+                        try {
+                            writeXmlForStates(serializer, states, tmpArray);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
 
-    private void writeXmlAllStates(TypedXmlSerializer serializer, int[] states, int stateIndex,
-            long[] values) throws IOException {
-        if (stateIndex < states.length) {
-            if (!mFactory.mStates[stateIndex].mTracked) {
-                writeXmlAllStates(serializer, states, stateIndex + 1, values);
-                return;
-            }
-
-            for (int i = 0; i < mFactory.mStates[stateIndex].mLabels.length; i++) {
-                states[stateIndex] = i;
-                writeXmlAllStates(serializer, states, stateIndex + 1, values);
-            }
-            return;
-        }
-
+    private void writeXmlForStates(TypedXmlSerializer serializer, int[] states, long[] values)
+            throws IOException {
         mCounter.getCounts(values, mFactory.getSerialState(states));
         boolean nonZero = false;
         for (long value : values) {
@@ -391,48 +445,33 @@ public class MultiStateStats {
     /**
      * Prints the accumulated stats, one line of every combination of states that has data.
      */
-    public void dump(PrintWriter pw) {
-        long[] tmpArray = new long[mCounter.getArrayLength()];
-        dumpAllStates(pw, new int[mFactory.mStates.length], 0, tmpArray);
-    }
-
-    private void dumpAllStates(PrintWriter pw, int[] states, int stateIndex, long[] values) {
-        if (stateIndex < states.length) {
-            if (!mFactory.mStates[stateIndex].mTracked) {
-                dumpAllStates(pw, states, stateIndex + 1, values);
+    public void dump(PrintWriter pw, Function<long[], String> statsFormatter) {
+        long[] values = new long[mCounter.getArrayLength()];
+        States.forEachTrackedStateCombination(mFactory.mStates, states -> {
+            mCounter.getCounts(values, mFactory.getSerialState(states));
+            boolean nonZero = false;
+            for (long value : values) {
+                if (value != 0) {
+                    nonZero = true;
+                    break;
+                }
+            }
+            if (!nonZero) {
                 return;
             }
 
-            for (int i = 0; i < mFactory.mStates[stateIndex].mLabels.length; i++) {
-                states[stateIndex] = i;
-                dumpAllStates(pw, states, stateIndex + 1, values);
-            }
-            return;
-        }
-
-        mCounter.getCounts(values, mFactory.getSerialState(states));
-        boolean nonZero = false;
-        for (long value : values) {
-            if (value != 0) {
-                nonZero = true;
-                break;
-            }
-        }
-        if (!nonZero) {
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < states.length; i++) {
-            if (mFactory.mStates[i].mTracked) {
-                if (sb.length() != 0) {
-                    sb.append(" ");
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < states.length; i++) {
+                if (mFactory.mStates[i].mTracked) {
+                    if (sb.length() != 0) {
+                        sb.append(" ");
+                    }
+                    sb.append(mFactory.mStates[i].mLabels[states[i]]);
                 }
-                sb.append(mFactory.mStates[i].mLabels[states[i]]);
             }
-        }
-        sb.append(" ");
-        sb.append(Arrays.toString(values));
-        pw.println(sb);
+            sb.append(" ");
+            sb.append(statsFormatter.apply(values));
+            pw.println(sb);
+        });
     }
 }
