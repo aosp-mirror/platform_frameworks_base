@@ -125,6 +125,7 @@ import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
 import com.android.server.power.stats.CpuAggregatedPowerStatsProcessor;
 import com.android.server.power.stats.PowerStatsAggregator;
+import com.android.server.power.stats.PowerStatsExporter;
 import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
@@ -430,8 +431,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mPowerStatsScheduler = new PowerStatsScheduler(context, mPowerStatsAggregator,
                 aggregatedPowerStatsSpanDuration, powerStatsAggregationPeriod, mPowerStatsStore,
                 Clock.SYSTEM_CLOCK, mMonotonicClock, mHandler, mStats);
-        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerProfile,
-                mCpuScalingPolicies, mPowerStatsStore, Clock.SYSTEM_CLOCK);
+        PowerStatsExporter powerStatsExporter =
+                new PowerStatsExporter(mPowerStatsStore, mPowerStatsAggregator);
+        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context,
+                powerStatsExporter, mPowerProfile, mCpuScalingPolicies,
+                mPowerStatsStore, Clock.SYSTEM_CLOCK);
         mStats.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider, mPowerStatsStore);
         mDumpHelper = new BatteryStatsDumpHelperImpl(mBatteryUsageStatsProvider);
         mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map, mHandler);
@@ -473,9 +477,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void systemServicesReady() {
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(Flags.streamlinedBatteryStats());
+        mWorker.systemServicesReady();
         mStats.systemServicesReady(mContext);
         mCpuWakeupStats.systemServicesReady();
-        mWorker.systemServicesReady();
         final INetworkManagementService nms = INetworkManagementService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
         final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);

@@ -156,14 +156,14 @@ public class CpuPowerStatsCollectorTest {
         assertThat(descriptor.name).isEqualTo("cpu");
         assertThat(descriptor.statsArrayLength).isEqualTo(13);
         assertThat(descriptor.uidStatsArrayLength).isEqualTo(5);
-        CpuPowerStatsCollector.StatsArrayLayout layout =
-                new CpuPowerStatsCollector.StatsArrayLayout();
+        CpuPowerStatsCollector.CpuStatsArrayLayout layout =
+                new CpuPowerStatsCollector.CpuStatsArrayLayout();
         layout.fromExtras(descriptor.extras);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
         layout.setTimeByScalingStep(deviceStats, 2, 42);
         layout.setConsumedEnergy(deviceStats, 1, 43);
-        layout.setUptime(deviceStats, 44);
+        layout.setUsageDuration(deviceStats, 44);
         layout.setDevicePowerEstimate(deviceStats, 45);
 
         long[] uidStats = new long[descriptor.uidStatsArrayLength];
@@ -173,10 +173,10 @@ public class CpuPowerStatsCollectorTest {
         assertThat(layout.getCpuScalingStepCount()).isEqualTo(7);
         assertThat(layout.getTimeByScalingStep(deviceStats, 2)).isEqualTo(42);
 
-        assertThat(layout.getCpuClusterEnergyConsumerCount()).isEqualTo(2);
+        assertThat(layout.getEnergyConsumerCount()).isEqualTo(2);
         assertThat(layout.getConsumedEnergy(deviceStats, 1)).isEqualTo(43);
 
-        assertThat(layout.getUptime(deviceStats)).isEqualTo(44);
+        assertThat(layout.getUsageDuration(deviceStats)).isEqualTo(44);
 
         assertThat(layout.getDevicePowerEstimate(deviceStats)).isEqualTo(45);
 
@@ -195,8 +195,8 @@ public class CpuPowerStatsCollectorTest {
         mockEnergyConsumers();
 
         CpuPowerStatsCollector collector = createCollector(8, 0);
-        CpuPowerStatsCollector.StatsArrayLayout layout =
-                new CpuPowerStatsCollector.StatsArrayLayout();
+        CpuPowerStatsCollector.CpuStatsArrayLayout layout =
+                new CpuPowerStatsCollector.CpuStatsArrayLayout();
         layout.fromExtras(collector.getPowerStatsDescriptor().extras);
 
         mockKernelCpuStats(new long[]{1111, 2222, 3333},
@@ -375,8 +375,8 @@ public class CpuPowerStatsCollectorTest {
     }
 
     private static int[] getScalingStepToPowerBracketMap(CpuPowerStatsCollector collector) {
-        CpuPowerStatsCollector.StatsArrayLayout layout =
-                new CpuPowerStatsCollector.StatsArrayLayout();
+        CpuPowerStatsCollector.CpuStatsArrayLayout layout =
+                new CpuPowerStatsCollector.CpuStatsArrayLayout();
         layout.fromExtras(collector.getPowerStatsDescriptor().extras);
         return layout.getScalingStepToPowerBracketMap();
     }

@@ -44,6 +44,7 @@ class PowerComponentAggregatedPowerStats {
     private static final String XML_TAG_DEVICE_STATS = "device-stats";
     private static final String XML_TAG_UID_STATS = "uid-stats";
     private static final String XML_ATTR_UID = "uid";
+    private static final long UNKNOWN = -1;
 
     public final int powerComponentId;
     private final MultiStateStats.States[] mDeviceStateConfig;
@@ -51,17 +52,16 @@ class PowerComponentAggregatedPowerStats {
     @NonNull
     private final AggregatedPowerStatsConfig.PowerComponent mConfig;
     private final int[] mDeviceStates;
-    private final long[] mDeviceStateTimestamps;
 
     private MultiStateStats.Factory mStatsFactory;
     private MultiStateStats.Factory mUidStatsFactory;
     private PowerStats.Descriptor mPowerStatsDescriptor;
+    private long mPowerStatsTimestamp;
     private MultiStateStats mDeviceStats;
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
 
     private static class UidStats {
         public int[] states;
-        public long[] stateTimestampMs;
         public MultiStateStats stats;
     }
 
@@ -71,7 +71,7 @@ class PowerComponentAggregatedPowerStats {
         mDeviceStateConfig = config.getDeviceStateConfig();
         mUidStateConfig = config.getUidStateConfig();
         mDeviceStates = new int[mDeviceStateConfig.length];
-        mDeviceStateTimestamps = new long[mDeviceStateConfig.length];
+        mPowerStatsTimestamp = UNKNOWN;
     }
 
     @NonNull
@@ -85,8 +85,11 @@ class PowerComponentAggregatedPowerStats {
     }
 
     void setState(@AggregatedPowerStatsConfig.TrackedState int stateId, int state, long time) {
+        if (mDeviceStats == null) {
+            createDeviceStats();
+        }
+
         mDeviceStates[stateId] = state;
-        mDeviceStateTimestamps[stateId] = time;
 
         if (mDeviceStateConfig[stateId].isTracked()) {
             if (mDeviceStats != null) {
@@ -97,6 +100,11 @@ class PowerComponentAggregatedPowerStats {
         if (mUidStateConfig[stateId].isTracked()) {
             for (int i = mUidStats.size() - 1; i >= 0; i--) {
                 PowerComponentAggregatedPowerStats.UidStats uidStats = mUidStats.valueAt(i);
+                if (uidStats.stats == null) {
+                    createUidStats(uidStats);
+                }
+
+                uidStats.states[stateId] = state;
                 if (uidStats.stats != null) {
                     uidStats.stats.setState(stateId, state, time);
                 }
@@ -111,8 +119,11 @@ class PowerComponentAggregatedPowerStats {
         }
 
         UidStats uidStats = getUidStats(uid);
+        if (uidStats.stats == null) {
+            createUidStats(uidStats);
+        }
+
         uidStats.states[stateId] = state;
-        uidStats.stateTimestampMs[stateId] = time;
 
         if (uidStats.stats != null) {
             uidStats.stats.setState(stateId, state, time);
@@ -150,10 +161,11 @@ class PowerComponentAggregatedPowerStats {
             }
             uidStats.stats.increment(powerStats.uidStats.valueAt(i), timestampMs);
         }
+
+        mPowerStatsTimestamp = timestampMs;
     }
 
     void reset() {
-        mPowerStatsDescriptor = null;
         mStatsFactory = null;
         mUidStatsFactory = null;
         mDeviceStats = null;
@@ -168,7 +180,6 @@ class PowerComponentAggregatedPowerStats {
         if (uidStats == null) {
             uidStats = new UidStats();
             uidStats.states = new int[mUidStateConfig.length];
-            uidStats.stateTimestampMs = new long[mUidStateConfig.length];
             mUidStats.put(uid, uidStats);
         }
         return uidStats;
@@ -209,42 +220,38 @@ class PowerComponentAggregatedPowerStats {
         return false;
     }
 
-    private boolean createDeviceStats() {
+    private void createDeviceStats() {
         if (mStatsFactory == null) {
             if (mPowerStatsDescriptor == null) {
-                return false;
+                return;
             }
             mStatsFactory = new MultiStateStats.Factory(
                     mPowerStatsDescriptor.statsArrayLength, mDeviceStateConfig);
         }
 
         mDeviceStats = mStatsFactory.create();
-        for (int stateId = 0; stateId < mDeviceStateConfig.length; stateId++) {
-            mDeviceStats.setState(stateId, mDeviceStates[stateId],
-                    mDeviceStateTimestamps[stateId]);
+        if (mPowerStatsTimestamp != UNKNOWN) {
+            for (int stateId = 0; stateId < mDeviceStateConfig.length; stateId++) {
+                mDeviceStats.setState(stateId, mDeviceStates[stateId], mPowerStatsTimestamp);
+            }
         }
-        return true;
     }
 
-    private boolean createUidStats(UidStats uidStats) {
+    private void createUidStats(UidStats uidStats) {
         if (mUidStatsFactory == null) {
             if (mPowerStatsDescriptor == null) {
-                return false;
+                return;
             }
             mUidStatsFactory = new MultiStateStats.Factory(
                     mPowerStatsDescriptor.uidStatsArrayLength, mUidStateConfig);
         }
 
         uidStats.stats = mUidStatsFactory.create();
-        for (int stateId = 0; stateId < mDeviceStateConfig.length; stateId++) {
-            uidStats.stats.setState(stateId, mDeviceStates[stateId],
-                    mDeviceStateTimestamps[stateId]);
+        for (int stateId = 0; stateId < mUidStateConfig.length; stateId++) {
+            if (mPowerStatsTimestamp != UNKNOWN) {
+                uidStats.stats.setState(stateId, uidStats.states[stateId], mPowerStatsTimestamp);
+            }
         }
-        for (int stateId = mDeviceStateConfig.length; stateId < mUidStateConfig.length; stateId++) {
-            uidStats.stats.setState(stateId, uidStats.states[stateId],
-                    uidStats.stateTimestampMs[stateId]);
-        }
-        return true;
     }
 
     public void writeXml(TypedXmlSerializer serializer) throws IOException {

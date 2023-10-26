@@ -69,7 +69,7 @@ public class BatteryUsageStatsProviderTest {
         BatteryStatsImpl batteryStats = prepareBatteryStats();
 
         Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -97,7 +97,7 @@ public class BatteryUsageStatsProviderTest {
         BatteryStatsImpl batteryStats = prepareBatteryStats();
 
         Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -203,7 +203,7 @@ public class BatteryUsageStatsProviderTest {
         }
 
         Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -292,7 +292,7 @@ public class BatteryUsageStatsProviderTest {
         }
 
         Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -379,7 +379,7 @@ public class BatteryUsageStatsProviderTest {
                 mStatsRule.getHandler(), null);
         powerStatsStore.reset();
 
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), powerStatsStore,
                 mMockClock);
 
@@ -502,7 +502,7 @@ public class BatteryUsageStatsProviderTest {
         when(powerStatsStore.loadPowerStatsSpan(1, BatteryUsageStatsSection.TYPE))
                 .thenReturn(span1);
 
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), powerStatsStore,
                 mMockClock);
 

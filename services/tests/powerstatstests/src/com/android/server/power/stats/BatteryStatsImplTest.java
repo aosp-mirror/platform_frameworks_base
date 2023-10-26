@@ -106,6 +106,8 @@ public class BatteryStatsImplTest {
     private Handler mHandler;
     private PowerStatsStore mPowerStatsStore;
     private BatteryUsageStatsProvider mBatteryUsageStatsProvider;
+    @Mock
+    private PowerStatsExporter mPowerStatsExporter;
 
     @Before
     public void setUp() {
@@ -130,8 +132,9 @@ public class BatteryStatsImplTest {
         File systemDir = context.getCacheDir();
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler,
                 new AggregatedPowerStatsConfig());
-        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerProfile,
-                mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore, mMockClock);
+        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerStatsExporter,
+                mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore,
+                mMockClock);
     }
 
     @Test

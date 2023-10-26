@@ -75,6 +75,7 @@ public class PowerStatsScheduler {
     public void start(boolean enablePeriodicPowerStatsCollection) {
         mEnablePeriodicPowerStatsCollection = enablePeriodicPowerStatsCollection;
         if (mEnablePeriodicPowerStatsCollection) {
+            schedulePowerStatsAggregation();
             scheduleNextPowerStatsAggregation();
         }
     }

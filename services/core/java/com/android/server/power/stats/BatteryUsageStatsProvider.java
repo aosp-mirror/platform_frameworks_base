@@ -43,6 +43,8 @@ import java.util.List;
 public class BatteryUsageStatsProvider {
     private static final String TAG = "BatteryUsageStatsProv";
     private final Context mContext;
+    private boolean mPowerStatsExporterEnabled;
+    private final PowerStatsExporter mPowerStatsExporter;
     private final PowerStatsStore mPowerStatsStore;
     private final PowerProfile mPowerProfile;
     private final CpuScalingPolicies mCpuScalingPolicies;
@@ -50,9 +52,12 @@ public class BatteryUsageStatsProvider {
     private final Object mLock = new Object();
     private List<PowerCalculator> mPowerCalculators;
 
-    public BatteryUsageStatsProvider(Context context, PowerProfile powerProfile,
-            CpuScalingPolicies cpuScalingPolicies, PowerStatsStore powerStatsStore, Clock clock) {
+    public BatteryUsageStatsProvider(Context context,
+            PowerStatsExporter powerStatsExporter,
+            PowerProfile powerProfile, CpuScalingPolicies cpuScalingPolicies,
+            PowerStatsStore powerStatsStore, Clock clock) {
         mContext = context;
+        mPowerStatsExporter = powerStatsExporter;
         mPowerStatsStore = powerStatsStore;
         mPowerProfile = powerProfile;
         mCpuScalingPolicies = cpuScalingPolicies;
@@ -66,7 +71,10 @@ public class BatteryUsageStatsProvider {
 
                 // Power calculators are applied in the order of registration
                 mPowerCalculators.add(new BatteryChargeCalculator());
-                mPowerCalculators.add(new CpuPowerCalculator(mCpuScalingPolicies, mPowerProfile));
+                if (mPowerStatsExporterEnabled) {
+                    mPowerCalculators.add(
+                            new CpuPowerCalculator(mCpuScalingPolicies, mPowerProfile));
+                }
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
                 if (!BatteryStats.checkWifiOnly(mContext)) {
@@ -204,6 +212,11 @@ public class BatteryUsageStatsProvider {
                 }
             }
             powerCalculator.calculate(batteryUsageStatsBuilder, stats, realtimeUs, uptimeUs, query);
+        }
+
+        if (mPowerStatsExporterEnabled) {
+            mPowerStatsExporter.exportAggregatedPowerStats(batteryUsageStatsBuilder,
+                    stats.getMonotonicStartTime(), stats.getMonotonicEndTime());
         }
 
         if ((query.getFlags()
@@ -369,5 +382,10 @@ public class BatteryUsageStatsProvider {
             }
         }
         return builder.build();
+    }
+
+    public void setPowerStatsExporterEnabled(boolean enabled) {
+
+        mPowerStatsExporterEnabled = enabled;
     }
 }
