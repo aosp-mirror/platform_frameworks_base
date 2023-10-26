@@ -1098,19 +1098,6 @@
     <!-- Used to let users know that they have more than some amount of battery life remaining. ex: more than 1 day remaining [CHAR LIMIT = 40] -->
     <string name="power_remaining_only_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
 
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default">Phone may shut down soon</string>
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet">Tablet may shut down soon</string>
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device">Device may shut down soon</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="default">Phone may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet">Tablet may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="device">Device may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
-
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
