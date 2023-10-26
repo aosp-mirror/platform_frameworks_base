@@ -192,7 +192,6 @@ java_library_static {
         "com.android.sysprop.watchdog",
         "ImmutabilityAnnotation",
         "securebox",
-        "android.content.pm.flags-aconfig-java",
         "apache-commons-math",
         "backstage_power_flags_lib",
         "notification_flags_lib",
