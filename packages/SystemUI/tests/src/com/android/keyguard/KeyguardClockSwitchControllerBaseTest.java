@@ -21,6 +21,7 @@ import static android.view.View.INVISIBLE;
 import static com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.MIGRATE_KEYGUARD_STATUS_VIEW;
+import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
@@ -39,7 +40,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.log.LogBuffer;
@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
@@ -143,6 +144,7 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        setFlagDefault(mSetFlagsRule, NotificationIconContainerRefactor.FLAG_NAME);
         mFakeDateView.setTag(R.id.tag_smartspace_view, new Object());
         mFakeWeatherView.setTag(R.id.tag_smartspace_view, new Object());
         mFakeSmartspaceView.setTag(R.id.tag_smartspace_view, new Object());
@@ -173,7 +175,6 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mExecutor = new FakeExecutor(new FakeSystemClock());
         mFakeFeatureFlags = new FakeFeatureFlags();
-        mFakeFeatureFlags.setDefault(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR);
         mFakeFeatureFlags.set(FACE_AUTH_REFACTOR, false);
         mFakeFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mFakeFeatureFlags.set(MIGRATE_KEYGUARD_STATUS_VIEW, false);

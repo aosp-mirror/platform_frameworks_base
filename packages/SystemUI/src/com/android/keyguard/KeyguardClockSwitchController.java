@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -346,7 +347,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     int getNotificationIconAreaHeight() {
         if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
             return 0;
-        } else if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+        } else if (NotificationIconContainerRefactor.isEnabled()) {
             return mAodIconContainer != null ? mAodIconContainer.getHeight() : 0;
         } else {
             return mNotificationIconAreaController.getHeight();
@@ -565,7 +566,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             NotificationIconContainer nic = (NotificationIconContainer)
                     mView.findViewById(
                             com.android.systemui.res.R.id.left_aligned_notification_icon_container);
-            if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            if (NotificationIconContainerRefactor.isEnabled()) {
                 if (mAodIconsBindJob != null) {
                     mAodIconsBindJob.dispose();
                 }

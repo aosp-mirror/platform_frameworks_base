@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,7 +37,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeHeadsUpTracker;
@@ -47,6 +48,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.Clock;
@@ -90,7 +92,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
-        mFeatureFlags.setDefault(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR);
+        setFlagDefault(mSetFlagsRule, NotificationIconContainerRefactor.FLAG_NAME);
         mTestHelper = new NotificationTestHelper(
                 mContext,
                 mDependency,

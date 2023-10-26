@@ -19,11 +19,11 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.graphics.Rect
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.FrameLayout
 import androidx.collection.ArrayMap
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.android.app.animation.Interpolators
 import com.android.internal.policy.SystemBarUtils
 import com.android.internal.util.ContrastColorUtil
@@ -37,9 +37,12 @@ import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.IconViewStore
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconColors
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerViewModel.IconsViewData
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconColorLookup
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconColors
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -49,10 +52,10 @@ import com.android.systemui.util.children
 import com.android.systemui.util.kotlin.mapValuesNotNullTo
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.kotlin.stateFlow
+import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
-import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -61,13 +64,55 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-/** Binds a [NotificationIconContainer] to its [view model][NotificationIconContainerViewModel]. */
+/** Binds a view-model to a [NotificationIconContainer]. */
 object NotificationIconContainerViewBinder {
     @JvmStatic
     fun bind(
         view: NotificationIconContainer,
-        viewModel: NotificationIconContainerViewModel,
+        viewModel: NotificationIconContainerShelfViewModel,
+        configuration: ConfigurationState,
+        configurationController: ConfigurationController,
+        viewStore: ShelfNotificationIconViewStore,
+    ): DisposableHandle {
+        return view.repeatWhenAttached {
+            lifecycleScope.launch {
+                viewModel.icons.bindIcons(view, configuration, configurationController, viewStore)
+            }
+        }
+    }
+
+    @JvmStatic
+    fun bind(
+        view: NotificationIconContainer,
+        viewModel: NotificationIconContainerStatusBarViewModel,
+        configuration: ConfigurationState,
+        configurationController: ConfigurationController,
+        viewStore: StatusBarNotificationIconViewStore,
+    ): DisposableHandle {
+        val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
+        return view.repeatWhenAttached {
+            lifecycleScope.run {
+                launch {
+                    viewModel.icons.bindIcons(
+                        view,
+                        configuration,
+                        configurationController,
+                        viewStore
+                    )
+                }
+                launch { viewModel.iconColors.bindIconColors(view, contrastColorUtil) }
+                launch { viewModel.bindIsolatedIcon(view, viewStore) }
+                launch { viewModel.animationsEnabled.bindAnimationsEnabled(view) }
+            }
+        }
+    }
+
+    @JvmStatic
+    fun bind(
+        view: NotificationIconContainer,
+        viewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
         dozeParameters: DozeParameters,
@@ -77,58 +122,54 @@ object NotificationIconContainerViewBinder {
     ): DisposableHandle {
         val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
         return view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch { bindAnimationsEnabled(viewModel, view) }
-                launch { bindIsDozing(viewModel, view, dozeParameters) }
-                // TODO(b/278765923): this should live where AOD is bound, not inside of the NIC
-                //  view-binder
+            lifecycleScope.launch {
                 launch {
-                    bindVisibility(
-                        viewModel,
-                        view,
-                        configuration,
-                        featureFlags,
-                        screenOffAnimationController,
-                    )
-                }
-                launch { bindIconColors(viewModel, view, contrastColorUtil) }
-                launch {
-                    bindIconViewData(
-                        viewModel,
+                    viewModel.icons.bindIcons(
                         view,
                         configuration,
                         configurationController,
                         viewStore,
                     )
                 }
-                launch { bindIsolatedIcon(viewModel, view, viewStore) }
+                launch { viewModel.animationsEnabled.bindAnimationsEnabled(view) }
+                launch { viewModel.isDozing.bindIsDozing(view, dozeParameters) }
+                // TODO(b/278765923): this should live where AOD is bound, not inside of the NIC
+                //  view-binder
+                launch {
+                    viewModel.isVisible.bindIsVisible(
+                        view,
+                        configuration,
+                        featureFlags,
+                        screenOffAnimationController,
+                    )
+                }
+                launch { viewModel.iconColors.bindIconColors(view, contrastColorUtil) }
             }
         }
     }
 
-    private suspend fun bindAnimationsEnabled(
-        viewModel: NotificationIconContainerViewModel,
-        view: NotificationIconContainer
-    ) {
-        viewModel.animationsEnabled.collect(view::setAnimationsEnabled)
+    /** Binds to [NotificationIconContainer.setAnimationsEnabled] */
+    private suspend fun Flow<Boolean>.bindAnimationsEnabled(view: NotificationIconContainer) {
+        collect(view::setAnimationsEnabled)
     }
 
-    private suspend fun bindIconColors(
-        viewModel: NotificationIconContainerViewModel,
+    /**
+     * Binds to the [StatusBarIconView.setStaticDrawableColor] and [StatusBarIconView.setDecorColor]
+     * of the [children] of an [NotificationIconContainer].
+     */
+    private suspend fun Flow<NotificationIconColorLookup>.bindIconColors(
         view: NotificationIconContainer,
         contrastColorUtil: ContrastColorUtil,
     ) {
-        viewModel.iconColors
-            .mapNotNull { lookup -> lookup.iconColors(view.viewBounds) }
-            .collect { iconLookup -> applyTint(view, iconLookup, contrastColorUtil) }
+        mapNotNull { lookup -> lookup.iconColors(view.viewBounds) }
+            .collect { iconLookup -> view.applyTint(iconLookup, contrastColorUtil) }
     }
 
-    private suspend fun bindIsDozing(
-        viewModel: NotificationIconContainerViewModel,
+    private suspend fun Flow<AnimatedValue<Boolean>>.bindIsDozing(
         view: NotificationIconContainer,
         dozeParameters: DozeParameters,
     ) {
-        viewModel.isDozing.collect { isDozing ->
+        collect { isDozing ->
             if (isDozing.isAnimating) {
                 val animate = !dozeParameters.displayNeedsBlanking
                 view.setDozing(
@@ -147,19 +188,18 @@ object NotificationIconContainerViewBinder {
         }
     }
 
-    private suspend fun bindIsolatedIcon(
-        viewModel: NotificationIconContainerViewModel,
+    private suspend fun NotificationIconContainerStatusBarViewModel.bindIsolatedIcon(
         view: NotificationIconContainer,
         viewStore: IconViewStore,
     ) {
         coroutineScope {
             launch {
-                viewModel.isolatedIconLocation.collect { location ->
+                isolatedIconLocation.collect { location ->
                     view.setIsolatedIconLocation(location, true)
                 }
             }
             launch {
-                viewModel.isolatedIcon.collect { iconInfo ->
+                isolatedIcon.collect { iconInfo ->
                     val iconView = iconInfo.value?.let { viewStore.iconView(it.notifKey) }
                     if (iconInfo.isAnimating) {
                         view.showIconIsolatedAnimated(iconView, iconInfo::stopAnimating)
@@ -171,8 +211,8 @@ object NotificationIconContainerViewBinder {
         }
     }
 
-    private suspend fun bindIconViewData(
-        viewModel: NotificationIconContainerViewModel,
+    /** Binds [NotificationIconsViewData] to a [NotificationIconContainer]'s [children]. */
+    private suspend fun Flow<NotificationIconsViewData>.bindIcons(
         view: NotificationIconContainer,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
@@ -205,11 +245,11 @@ object NotificationIconContainerViewBinder {
             }
         }
 
-        var prevIcons = IconsViewData()
-        viewModel.iconsViewData.sample(layoutParams, ::Pair).collect {
-            (iconsData: IconsViewData, layoutParams: FrameLayout.LayoutParams),
+        var prevIcons = NotificationIconsViewData()
+        sample(layoutParams, ::Pair).collect {
+            (iconsData: NotificationIconsViewData, layoutParams: FrameLayout.LayoutParams),
             ->
-            val iconsDiff = IconsViewData.computeDifference(iconsData, prevIcons)
+            val iconsDiff = NotificationIconsViewData.computeDifference(iconsData, prevIcons)
             prevIcons = iconsData
 
             val replacingIcons =
@@ -255,30 +295,27 @@ object NotificationIconContainerViewBinder {
 
     // TODO(b/305739416): Once StatusBarIconView has its own Recommended Architecture stack, this
     //  can be moved there and cleaned up.
-    private fun applyTint(
-        view: NotificationIconContainer,
-        iconColors: IconColors,
+    private fun ViewGroup.applyTint(
+        iconColors: NotificationIconColors,
         contrastColorUtil: ContrastColorUtil,
     ) {
-        view.children
+        children
             .filterIsInstance<StatusBarIconView>()
             .filter { it.width != 0 }
-            .forEach { iv -> updateTintForIcon(iv, iconColors, contrastColorUtil) }
+            .forEach { iv -> iv.updateTintForIcon(iconColors, contrastColorUtil) }
     }
 
-    private fun updateTintForIcon(
-        v: StatusBarIconView,
-        iconColors: IconColors,
+    private fun StatusBarIconView.updateTintForIcon(
+        iconColors: NotificationIconColors,
         contrastColorUtil: ContrastColorUtil,
     ) {
-        val isPreL = java.lang.Boolean.TRUE == v.getTag(R.id.icon_is_pre_L)
-        val isColorized = !isPreL || NotificationUtils.isGrayscale(v, contrastColorUtil)
-        v.staticDrawableColor = iconColors.staticDrawableColor(v.viewBounds, isColorized)
-        v.setDecorColor(iconColors.tint)
+        val isPreL = java.lang.Boolean.TRUE == getTag(R.id.icon_is_pre_L)
+        val isColorized = !isPreL || NotificationUtils.isGrayscale(this, contrastColorUtil)
+        staticDrawableColor = iconColors.staticDrawableColor(viewBounds, isColorized)
+        setDecorColor(iconColors.tint)
     }
 
-    private suspend fun bindVisibility(
-        viewModel: NotificationIconContainerViewModel,
+    private suspend fun Flow<AnimatedValue<Boolean>>.bindIsVisible(
         view: NotificationIconContainer,
         configuration: ConfigurationState,
         featureFlags: FeatureFlagsClassic,
@@ -287,7 +324,7 @@ object NotificationIconContainerViewBinder {
         val iconAppearTranslation =
             configuration.getDimensionPixelSize(R.dimen.shelf_appear_translation).stateIn(this)
         val statusViewMigrated = featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)
-        viewModel.isVisible.collect { isVisible ->
+        collect { isVisible ->
             view.animate().cancel()
             val animatorListener =
                 object : AnimatorListenerAdapter() {
@@ -304,7 +341,7 @@ object NotificationIconContainerViewBinder {
                     view.visibility = if (isVisible.value) View.VISIBLE else View.INVISIBLE
                 }
                 featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION) -> {
-                    animateInIconTranslation(view, statusViewMigrated)
+                    view.animateInIconTranslation(statusViewMigrated)
                     if (isVisible.value) {
                         CrossFadeHelper.fadeIn(view, animatorListener)
                     } else {
@@ -313,15 +350,14 @@ object NotificationIconContainerViewBinder {
                 }
                 !isVisible.value -> {
                     // Let's make sure the icon are translated to 0, since we cancelled it above
-                    animateInIconTranslation(view, statusViewMigrated)
+                    view.animateInIconTranslation(statusViewMigrated)
                     CrossFadeHelper.fadeOut(view, animatorListener)
                 }
                 view.visibility != View.VISIBLE -> {
                     // No fading here, let's just appear the icons instead!
                     view.visibility = View.VISIBLE
                     view.alpha = 1f
-                    appearIcons(
-                        view,
+                    view.appearIcons(
                         animate = screenOffAnimationController.shouldAnimateAodIcons(),
                         iconAppearTranslation.value,
                         statusViewMigrated,
@@ -330,7 +366,7 @@ object NotificationIconContainerViewBinder {
                 }
                 else -> {
                     // Let's make sure the icons are translated to 0, since we cancelled it above
-                    animateInIconTranslation(view, statusViewMigrated)
+                    view.animateInIconTranslation(statusViewMigrated)
                     // We were fading out, let's fade in instead
                     CrossFadeHelper.fadeIn(view, animatorListener)
                 }
@@ -338,8 +374,7 @@ object NotificationIconContainerViewBinder {
         }
     }
 
-    private fun appearIcons(
-        view: View,
+    private fun View.appearIcons(
         animate: Boolean,
         iconAppearTranslation: Int,
         statusViewMigrated: Boolean,
@@ -347,11 +382,10 @@ object NotificationIconContainerViewBinder {
     ) {
         if (animate) {
             if (!statusViewMigrated) {
-                view.translationY = -iconAppearTranslation.toFloat()
+                translationY = -iconAppearTranslation.toFloat()
             }
-            view.alpha = 0f
-            view
-                .animate()
+            alpha = 0f
+            animate()
                 .alpha(1f)
                 .setInterpolator(Interpolators.LINEAR)
                 .setDuration(AOD_ICONS_APPEAR_DURATION)
@@ -359,40 +393,28 @@ object NotificationIconContainerViewBinder {
                 .setListener(animatorListener)
                 .start()
         } else {
-            view.alpha = 1.0f
+            alpha = 1.0f
             if (!statusViewMigrated) {
-                view.translationY = 0f
+                translationY = 0f
             }
         }
     }
 
-    private fun animateInIconTranslation(view: View, statusViewMigrated: Boolean) {
+    private fun View.animateInIconTranslation(statusViewMigrated: Boolean) {
         if (!statusViewMigrated) {
-            view.animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
+            animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
         }
     }
 
     private fun ViewPropertyAnimator.animateInIconTranslation(): ViewPropertyAnimator =
         setInterpolator(Interpolators.DECELERATE_QUINT).translationY(0f)
 
-    private const val AOD_ICONS_APPEAR_DURATION: Long = 200
-
-    private val View.viewBounds: Rect
-        get() {
-            val tmpArray = intArrayOf(0, 0)
-            getLocationOnScreen(tmpArray)
-            return Rect(
-                /* left = */ tmpArray[0],
-                /* top = */ tmpArray[1],
-                /* right = */ left + width,
-                /* bottom = */ top + height,
-            )
-        }
-
     /** External storage for [StatusBarIconView] instances. */
     fun interface IconViewStore {
         fun iconView(key: String): StatusBarIconView?
     }
+
+    private const val AOD_ICONS_APPEAR_DURATION: Long = 200
 }
 
 /** [IconViewStore] for the [com.android.systemui.statusbar.NotificationShelf] */
@@ -424,3 +446,15 @@ constructor(
     override fun iconView(key: String): StatusBarIconView? =
         notifCollection.getEntry(key)?.icons?.statusBarIcon
 }
+
+private val View.viewBounds: Rect
+    get() {
+        val tmpArray = intArrayOf(0, 0)
+        getLocationOnScreen(tmpArray)
+        return Rect(
+            /* left = */ tmpArray[0],
+            /* top = */ tmpArray[1],
+            /* right = */ left + width,
+            /* bottom = */ top + height,
+        )
+    }

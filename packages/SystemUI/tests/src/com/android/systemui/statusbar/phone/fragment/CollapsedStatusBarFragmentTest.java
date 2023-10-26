@@ -60,10 +60,8 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel;
-import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
@@ -720,8 +718,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mock(NotificationIconContainerStatusBarViewModel.class),
                 mock(ConfigurationState.class),
                 mock(ConfigurationController.class),
-                mock(DozeParameters.class),
-                mock(ScreenOffAnimationController.class),
                 mock(StatusBarNotificationIconViewStore.class),
                 mock(DemoModeController.class));
     }
