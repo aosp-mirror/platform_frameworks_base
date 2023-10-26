@@ -5085,5 +5085,23 @@ public final class DisplayManagerService extends SystemService {
         public SyncRoot getSyncRoot() {
             return mSyncRoot;
         }
+
+        /**
+         * Notification manager for display manager
+         */
+        @Override
+        @NonNull
+        public DisplayNotificationManager getDisplayNotificationManager() {
+            return mDisplayNotificationManager;
+        }
+
+        /**
+         * Handler to use for notification sending to avoid requiring POST_NOTIFICATION permission.
+         */
+        @Override
+        @NonNull
+        public Handler getHandler() {
+            return mHandler;
+        }
     }
 }

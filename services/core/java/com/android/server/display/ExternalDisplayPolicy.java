@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerGlobal.DisplayEvent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.RemoteException;
@@ -38,6 +39,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.display.utils.DebugUtils;
 
 /**
@@ -77,6 +79,12 @@ class ExternalDisplayPolicy {
 
         @NonNull
         DisplayManagerFlags getFlags();
+
+        @NonNull
+        DisplayNotificationManager getDisplayNotificationManager();
+
+        @NonNull
+        Handler getHandler();
     }
 
     @NonNull
@@ -87,6 +95,10 @@ class ExternalDisplayPolicy {
     private final SyncRoot mSyncRoot;
     @NonNull
     private final DisplayManagerFlags mFlags;
+    @NonNull
+    private final DisplayNotificationManager mDisplayNotificationManager;
+    @NonNull
+    private final Handler mHandler;
     @ThrottlingStatus
     private volatile int mStatus = THROTTLING_NONE;
 
@@ -95,6 +107,8 @@ class ExternalDisplayPolicy {
         mLogicalDisplayMapper = mInjector.getLogicalDisplayMapper();
         mSyncRoot = mInjector.getSyncRoot();
         mFlags = mInjector.getFlags();
+        mDisplayNotificationManager = mInjector.getDisplayNotificationManager();
+        mHandler = mInjector.getHandler();
     }
 
     /**
@@ -143,6 +157,7 @@ class ExternalDisplayPolicy {
         if (enabled && !isExternalDisplayAllowed()) {
             Slog.w(TAG, "setExternalDisplayEnabledLocked: External display can not be enabled"
                                 + " because it is currently not allowed.");
+            mHandler.post(mDisplayNotificationManager::onHighTemperatureExternalDisplayNotAllowed);
             return;
         }
 
@@ -182,6 +197,7 @@ class ExternalDisplayPolicy {
         if (!isExternalDisplayAllowed()) {
             Slog.w(TAG, "handleExternalDisplayConnectedLocked: External display can not be used"
                                 + " because it is currently not allowed.");
+            mDisplayNotificationManager.onHighTemperatureExternalDisplayNotAllowed();
             return;
         }
 
@@ -220,6 +236,11 @@ class ExternalDisplayPolicy {
                                     + " isEnabledLocked=false");
             }
             return;
+        }
+
+        if (!isExternalDisplayAllowed()) {
+            Slog.w(TAG, "External display is currently not allowed and is getting disabled.");
+            mDisplayNotificationManager.onHighTemperatureExternalDisplayNotAllowed();
         }
 
         mLogicalDisplayMapper.setDisplayEnabledLocked(logicalDisplay, /*enabled=*/ false);
