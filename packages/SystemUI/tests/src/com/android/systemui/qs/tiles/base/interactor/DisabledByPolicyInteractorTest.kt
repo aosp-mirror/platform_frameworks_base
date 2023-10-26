@@ -83,7 +83,7 @@ class DisabledByPolicyInteractorTest : SysuiTestCase() {
     @Test
     fun testDisabledWhenAdminWithNoRestrictions() =
         testScope.runTest {
-            val admin = EnforcedAdmin(TEST_COMPONENT_NAME, UserHandle(TEST_USER))
+            val admin = EnforcedAdmin(TEST_COMPONENT_NAME, TEST_USER)
             whenever(restrictedLockProxy.getEnforcedAdmin(anyInt(), anyString())).thenReturn(admin)
             whenever(restrictedLockProxy.hasBaseUserRestriction(anyInt(), anyString()))
                 .thenReturn(false)
@@ -129,11 +129,11 @@ class DisabledByPolicyInteractorTest : SysuiTestCase() {
     }
 
     private companion object {
-        const val TEST_USER = 1
+
         const val TEST_RESTRICTION = "test_restriction"
 
         val TEST_COMPONENT_NAME = ComponentName("test.pkg", "test.cls")
-
-        val ADMIN = EnforcedAdmin(TEST_COMPONENT_NAME, UserHandle(TEST_USER))
+        val TEST_USER = UserHandle(1)
+        val ADMIN = EnforcedAdmin(TEST_COMPONENT_NAME, TEST_USER)
     }
 }

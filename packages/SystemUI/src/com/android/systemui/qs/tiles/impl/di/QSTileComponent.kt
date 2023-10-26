@@ -24,7 +24,7 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 /**
  * Base QS tile component. It should be used with [QSTileScope] to create a custom tile scoped
  * component. Pass this component to
- * [com.android.systemui.qs.tiles.base.viewmodel.QSViewModelFactory.Component].
+ * [com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory.Component].
  */
 interface QSTileComponent<T> {
 

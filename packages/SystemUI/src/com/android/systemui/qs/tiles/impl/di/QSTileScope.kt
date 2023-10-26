@@ -21,7 +21,7 @@ import javax.inject.Scope
 /**
  * Scope annotation for QS tiles. This scope is created for each tile and is disposed when the tile
  * is no longer needed (ex. it's removed from QS). So, it lives along the instance of
- * [com.android.systemui.qs.tiles.base.viewmodel.BaseQSTileViewModel]. This doesn't align with tile
+ * [com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelImpl]. This doesn't align with tile
  * visibility. For example, the tile scope survives shade open/close.
  */
 @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) @Scope annotation class QSTileScope

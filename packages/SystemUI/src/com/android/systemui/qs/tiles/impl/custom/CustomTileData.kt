@@ -18,11 +18,12 @@ package com.android.systemui.qs.tiles.impl.custom
 
 import android.content.ComponentName
 import android.graphics.drawable.Icon
+import android.os.UserHandle
 import android.service.quicksettings.Tile
 import com.android.systemui.qs.tiles.impl.custom.di.bound.CustomTileBoundComponent
 
 data class CustomTileData(
-    val userId: Int,
+    val user: UserHandle,
     val componentName: ComponentName,
     val tile: Tile,
     val callingAppUid: Int,

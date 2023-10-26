@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.base.interactor
 
+import android.os.UserHandle
 import javax.annotation.CheckReturnValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,16 +39,16 @@ class FakeQSTileDataInteractor<T>(
     fun tryEmitAvailability(isAvailable: Boolean): Boolean = availabilityFlow.tryEmit(isAvailable)
     suspend fun emitAvailability(isAvailable: Boolean) = availabilityFlow.emit(isAvailable)
 
-    override fun tileData(userId: Int, triggers: Flow<DataUpdateTrigger>): Flow<T> {
-        mutableDataRequests.add(DataRequest(userId))
+    override fun tileData(user: UserHandle, triggers: Flow<DataUpdateTrigger>): Flow<T> {
+        mutableDataRequests.add(DataRequest(user))
         return triggers.flatMapLatest { dataFlow }
     }
 
-    override fun availability(userId: Int): Flow<Boolean> {
-        mutableAvailabilityRequests.add(AvailabilityRequest(userId))
+    override fun availability(user: UserHandle): Flow<Boolean> {
+        mutableAvailabilityRequests.add(AvailabilityRequest(user))
         return availabilityFlow
     }
 
-    data class DataRequest(val userId: Int)
-    data class AvailabilityRequest(val userId: Int)
+    data class DataRequest(val user: UserHandle)
+    data class AvailabilityRequest(val user: UserHandle)
 }

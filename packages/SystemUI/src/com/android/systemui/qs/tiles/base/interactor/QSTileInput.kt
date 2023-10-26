@@ -16,11 +16,12 @@
 
 package com.android.systemui.qs.tiles.base.interactor
 
+import android.os.UserHandle
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 
 /** @see QSTileUserActionInteractor.handleInput */
 data class QSTileInput<T>(
-    val userId: Int,
+    val user: UserHandle,
     val action: QSTileUserAction,
     val data: T,
 )

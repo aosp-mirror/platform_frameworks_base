@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.viewmodel
 
 import android.content.Context
+import android.os.UserHandle
 import android.util.Log
 import android.view.View
 import androidx.annotation.GuardedBy
@@ -134,7 +135,7 @@ constructor(
         qsTileViewModel.currentState?.supportedActions?.contains(action) == true
 
     override fun userSwitch(currentUser: Int) {
-        qsTileViewModel.onUserIdChanged(currentUser)
+        qsTileViewModel.onUserChanged(UserHandle.of(currentUser))
     }
 
     @Deprecated(
