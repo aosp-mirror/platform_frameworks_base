@@ -57,6 +57,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -212,7 +213,8 @@ public class BubbleStackView extends FrameLayout
     private ExpandedViewAnimationController mExpandedViewAnimationController;
 
     private View mScrim;
-    private boolean mScrimAnimating;
+    @Nullable
+    private ViewPropertyAnimator mScrimAnimation;
     private View mManageMenuScrim;
     private FrameLayout mExpandedViewContainer;
 
@@ -748,8 +750,8 @@ public class BubbleStackView extends FrameLayout
             float collapsed = -Math.min(dy, 0);
             mExpandedViewAnimationController.updateDrag((int) collapsed);
 
-            // Update scrim
-            if (!mScrimAnimating) {
+            // Update scrim if it's not animating already
+            if (mScrimAnimation == null) {
                 mScrim.setAlpha(getScrimAlphaForDrag(collapsed));
             }
         }
@@ -768,8 +770,8 @@ public class BubbleStackView extends FrameLayout
             } else {
                 mExpandedViewAnimationController.animateBackToExpanded();
 
-                // Update scrim
-                if (!mScrimAnimating) {
+                // Update scrim if it's not animating already
+                if (mScrimAnimation == null) {
                     showScrim(true, null /* runnable */);
                 }
             }
@@ -2237,26 +2239,27 @@ public class BubbleStackView extends FrameLayout
     private void showScrim(boolean show, Runnable after) {
         AnimatorListenerAdapter listener = new AnimatorListenerAdapter() {
             @Override
-            public void onAnimationStart(Animator animation) {
-                mScrimAnimating = true;
-            }
-
-            @Override
             public void onAnimationEnd(Animator animation) {
-                mScrimAnimating = false;
+                mScrimAnimation = null;
                 if (after != null) {
                     after.run();
                 }
             }
         };
+        if (mScrimAnimation != null) {
+            // Cancel scrim animation if it animates
+            mScrimAnimation.cancel();
+        }
         if (show) {
-            mScrim.animate()
+            mScrimAnimation = mScrim.animate();
+            mScrimAnimation
                     .setInterpolator(ALPHA_IN)
                     .alpha(BUBBLE_EXPANDED_SCRIM_ALPHA)
                     .setListener(listener)
                     .start();
         } else {
-            mScrim.animate()
+            mScrimAnimation = mScrim.animate();
+            mScrimAnimation
                     .alpha(0f)
                     .setInterpolator(ALPHA_OUT)
                     .setListener(listener)
