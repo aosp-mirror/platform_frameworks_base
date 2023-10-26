@@ -44,10 +44,10 @@ import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
@@ -76,7 +76,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
-import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -99,12 +99,13 @@ constructor(
     private val quickAffordancesCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
     displayManager: DisplayManager,
     private val windowManager: WindowManager,
+    private val configuration: ConfigurationState,
     private val clockController: ClockEventController,
     private val clockRegistry: ClockRegistry,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val lockscreenSmartspaceController: LockscreenSmartspaceController,
     private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
-    private val featureFlags: FeatureFlags,
+    private val featureFlags: FeatureFlagsClassic,
     private val falsingManager: FalsingManager,
     private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
@@ -113,9 +114,8 @@ constructor(
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
-    private val keyguardStateController: KeyguardStateController,
+    private val screenOffAnimationController: ScreenOffAnimationController,
     private val shadeInteractor: ShadeInteractor,
-    private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
 ) {
 
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
@@ -341,10 +341,11 @@ constructor(
             KeyguardRootViewBinder.bind(
                 keyguardRootView,
                 keyguardRootViewModel,
+                configuration,
                 featureFlags,
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
-                keyguardStateController,
+                screenOffAnimationController,
                 shadeInteractor,
                 null, // clock provider only needed for burn in
                 null, // jank monitor not required for preview mode

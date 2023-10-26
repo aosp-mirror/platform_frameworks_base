@@ -27,9 +27,10 @@ import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
+import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
@@ -46,7 +47,7 @@ import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import dagger.Lazy
 import javax.inject.Inject
@@ -63,14 +64,15 @@ constructor(
     private val keyguardRootViewModel: KeyguardRootViewModel,
     private val keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel,
     private val notificationShadeWindowView: NotificationShadeWindowView,
-    private val featureFlags: FeatureFlags,
+    private val featureFlags: FeatureFlagsClassic,
     private val indicationController: KeyguardIndicationController,
-    private val keyguardStateController: KeyguardStateController,
+    private val screenOffAnimationController: ScreenOffAnimationController,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
     private val keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener,
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
+    private val configuration: ConfigurationState,
     private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
     private val lockIconViewController: Lazy<LockIconViewController>,
@@ -143,10 +145,11 @@ constructor(
             KeyguardRootViewBinder.bind(
                 keyguardRootView,
                 keyguardRootViewModel,
+                configuration,
                 featureFlags,
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
-                keyguardStateController,
+                screenOffAnimationController,
                 shadeInteractor,
                 { keyguardStatusViewController!!.getClockController() },
                 interactionJankMonitor,

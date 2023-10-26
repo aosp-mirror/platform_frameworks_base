@@ -31,7 +31,6 @@ import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
-import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
@@ -39,7 +38,6 @@ import com.android.systemui.statusbar.notification.shared.NotificationIconContai
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
@@ -54,9 +52,7 @@ constructor(
     private val featureFlags: FeatureFlagsClassic,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
-    private val notificationPanelView: NotificationPanelView,
     private val notificationIconAreaController: NotificationIconAreaController,
-    private val screenOffAnimationController: ScreenOffAnimationController,
 ) : KeyguardSection() {
 
     private var nicBindingDisposable: DisposableHandle? = null
@@ -97,8 +93,6 @@ constructor(
                     configurationState,
                     configurationController,
                     dozeParameters,
-                    featureFlags,
-                    screenOffAnimationController,
                     nicAodIconViewStore,
                 )
         } else {

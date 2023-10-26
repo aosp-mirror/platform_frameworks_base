@@ -16,25 +16,31 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.annotation.DrawableRes
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import android.view.ViewGroup.OnHierarchyChangeListener
+import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
-import android.view.WindowInsets.Type
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.animation.Interpolators
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.keyguard.KeyguardClockSwitch.MISSING_CLOCK_ID
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
+import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.RefactorFlag
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
@@ -42,29 +48,38 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
+import com.android.systemui.util.ui.AnimatedValue
+import com.android.systemui.util.ui.isAnimating
+import com.android.systemui.util.ui.stopAnimating
+import com.android.systemui.util.ui.value
 import javax.inject.Provider
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Bind occludingAppDeviceEntryMessageViewModel to run whenever the keyguard view is attached. */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 object KeyguardRootViewBinder {
 
     @JvmStatic
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardRootViewModel,
-        featureFlags: FeatureFlags,
+        configuration: ConfigurationState,
+        featureFlags: FeatureFlagsClassic,
         occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
         chipbarCoordinator: ChipbarCoordinator,
-        keyguardStateController: KeyguardStateController,
+        screenOffAnimationController: ScreenOffAnimationController,
         shadeInteractor: ShadeInteractor,
         clockControllerProvider: Provider<ClockController>?,
         interactionJankMonitor: InteractionJankMonitor?,
@@ -145,6 +160,24 @@ object KeyguardRootViewBinder {
                                 } else {
                                     childViews[burnInLayerId]?.scaleX = scale
                                     childViews[burnInLayerId]?.scaleY = scale
+                                }
+                            }
+                        }
+
+                        if (NotificationIconContainerRefactor.isEnabled) {
+                            launch {
+                                val iconsAppearTranslationPx =
+                                    configuration
+                                        .getDimensionPixelSize(R.dimen.shelf_appear_translation)
+                                        .stateIn(this)
+                                viewModel.isNotifIconContainerVisible.collect { isVisible ->
+                                    childViews[aodNotificationIconContainerId]
+                                        ?.setAodNotifIconContainerIsVisible(
+                                            isVisible,
+                                            featureFlags,
+                                            iconsAppearTranslationPx.value,
+                                            screenOffAnimationController,
+                                        )
                                 }
                             }
                         }
@@ -312,5 +345,124 @@ object KeyguardRootViewBinder {
         }
     }
 
+    @JvmStatic
+    fun bindAodIconVisibility(
+        view: View,
+        isVisible: Flow<AnimatedValue<Boolean>>,
+        configuration: ConfigurationState,
+        featureFlags: FeatureFlagsClassic,
+        screenOffAnimationController: ScreenOffAnimationController,
+    ): DisposableHandle? {
+        RefactorFlag(featureFlags, Flags.MIGRATE_KEYGUARD_STATUS_VIEW).assertInLegacyMode()
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return null
+        return view.repeatWhenAttached {
+            lifecycleScope.launch {
+                val iconAppearTranslationPx =
+                    configuration
+                        .getDimensionPixelSize(R.dimen.shelf_appear_translation)
+                        .stateIn(this)
+                isVisible.collect { isVisible ->
+                    view.setAodNotifIconContainerIsVisible(
+                        isVisible,
+                        featureFlags,
+                        iconAppearTranslationPx.value,
+                        screenOffAnimationController,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun View.setAodNotifIconContainerIsVisible(
+        isVisible: AnimatedValue<Boolean>,
+        featureFlags: FeatureFlagsClassic,
+        iconsAppearTranslationPx: Int,
+        screenOffAnimationController: ScreenOffAnimationController,
+    ) {
+        val statusViewMigrated = featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)
+        animate().cancel()
+        val animatorListener =
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    isVisible.stopAnimating()
+                }
+            }
+        when {
+            !isVisible.isAnimating -> {
+                alpha = 1f
+                if (!statusViewMigrated) {
+                    translationY = 0f
+                }
+                visibility = if (isVisible.value) View.VISIBLE else View.INVISIBLE
+            }
+            featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION) -> {
+                animateInIconTranslation(statusViewMigrated)
+                if (isVisible.value) {
+                    CrossFadeHelper.fadeIn(this, animatorListener)
+                } else {
+                    CrossFadeHelper.fadeOut(this, animatorListener)
+                }
+            }
+            !isVisible.value -> {
+                // Let's make sure the icon are translated to 0, since we cancelled it above
+                animateInIconTranslation(statusViewMigrated)
+                CrossFadeHelper.fadeOut(this, animatorListener)
+            }
+            visibility != View.VISIBLE -> {
+                // No fading here, let's just appear the icons instead!
+                visibility = View.VISIBLE
+                alpha = 1f
+                appearIcons(
+                    animate = screenOffAnimationController.shouldAnimateAodIcons(),
+                    iconsAppearTranslationPx,
+                    statusViewMigrated,
+                    animatorListener,
+                )
+            }
+            else -> {
+                // Let's make sure the icons are translated to 0, since we cancelled it above
+                animateInIconTranslation(statusViewMigrated)
+                // We were fading out, let's fade in instead
+                CrossFadeHelper.fadeIn(this, animatorListener)
+            }
+        }
+    }
+
+    private fun View.appearIcons(
+        animate: Boolean,
+        iconAppearTranslation: Int,
+        statusViewMigrated: Boolean,
+        animatorListener: Animator.AnimatorListener,
+    ) {
+        if (animate) {
+            if (!statusViewMigrated) {
+                translationY = -iconAppearTranslation.toFloat()
+            }
+            alpha = 0f
+            animate()
+                .alpha(1f)
+                .setInterpolator(Interpolators.LINEAR)
+                .setDuration(AOD_ICONS_APPEAR_DURATION)
+                .apply { if (statusViewMigrated) animateInIconTranslation() }
+                .setListener(animatorListener)
+                .start()
+        } else {
+            alpha = 1.0f
+            if (!statusViewMigrated) {
+                translationY = 0f
+            }
+        }
+    }
+
+    private fun View.animateInIconTranslation(statusViewMigrated: Boolean) {
+        if (!statusViewMigrated) {
+            animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
+        }
+    }
+
+    private fun ViewPropertyAnimator.animateInIconTranslation(): ViewPropertyAnimator =
+        setInterpolator(Interpolators.DECELERATE_QUINT).translationY(0f)
+
     private const val ID = "occluding_app_device_entry_unlock_msg"
+    private const val AOD_ICONS_APPEAR_DURATION: Long = 200
 }
