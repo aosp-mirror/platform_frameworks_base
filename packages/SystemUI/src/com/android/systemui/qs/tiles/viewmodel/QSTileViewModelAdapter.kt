@@ -180,7 +180,7 @@ constructor(
     override fun destroy() {
         stateJob?.cancel()
         availabilityJob?.cancel()
-        qsTileViewModel.onLifecycle(QSTileLifecycle.DEAD)
+        qsTileViewModel.destroy()
     }
 
     override fun getState(): QSTile.State? =

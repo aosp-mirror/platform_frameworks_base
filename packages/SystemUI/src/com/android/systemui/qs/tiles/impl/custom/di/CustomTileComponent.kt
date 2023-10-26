@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.viewmodel
+package com.android.systemui.qs.tiles.impl.custom.di
 
-enum class QSTileLifecycle {
-    ALIVE,
-    DEAD,
+import com.android.systemui.qs.tiles.impl.di.QSTileComponent
+import com.android.systemui.qs.tiles.impl.di.QSTileScope
+import dagger.Subcomponent
+
+@QSTileScope
+@Subcomponent(modules = [QSTileConfigModule::class, CustomTileModule::class])
+interface CustomTileComponent : QSTileComponent<Any> {
+
+    @Subcomponent.Builder
+    interface Builder {
+
+        fun qsTileConfigModule(module: QSTileConfigModule): Builder
+
+        fun build(): CustomTileComponent
+    }
 }

@@ -17,9 +17,6 @@
 package com.android.systemui.qs.tiles.base.viewmodel
 
 import androidx.annotation.CallSuper
-import androidx.annotation.VisibleForTesting
-import com.android.internal.util.Preconditions
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
@@ -30,7 +27,6 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
-import com.android.systemui.qs.tiles.viewmodel.QSTileLifecycle
 import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
@@ -38,13 +34,11 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.throttle
 import com.android.systemui.util.time.SystemClock
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -66,19 +60,17 @@ import kotlinx.coroutines.flow.stateIn
 
 /**
  * Provides a hassle-free way to implement new tiles according to current System UI architecture
- * standards. THis ViewModel is cheap to instantiate and does nothing until it's moved to
- * [QSTileLifecycle.ALIVE] state.
+ * standards. This ViewModel is cheap to instantiate and does nothing until its [state] is listened.
  *
- * Inject [BaseQSTileViewModel.Factory] to create a new instance of this class.
+ * Don't use this constructor directly. Instead, inject [QSViewModelFactory] to create a new
+ * instance of this class.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class BaseQSTileViewModel<DATA_TYPE>
-@VisibleForTesting
-constructor(
-    override val config: QSTileConfig,
-    private val userActionInteractor: QSTileUserActionInteractor<DATA_TYPE>,
-    private val tileDataInteractor: QSTileDataInteractor<DATA_TYPE>,
-    private val mapper: QSTileDataToStateMapper<DATA_TYPE>,
+class BaseQSTileViewModel<DATA_TYPE>(
+    val tileConfig: () -> QSTileConfig,
+    private val userActionInteractor: () -> QSTileUserActionInteractor<DATA_TYPE>,
+    private val tileDataInteractor: () -> QSTileDataInteractor<DATA_TYPE>,
+    private val mapper: () -> QSTileDataToStateMapper<DATA_TYPE>,
     private val disabledByPolicyInteractor: DisabledByPolicyInteractor,
     userRepository: UserRepository,
     private val falsingManager: FalsingManager,
@@ -86,36 +78,8 @@ constructor(
     private val qsTileLogger: QSTileLogger,
     private val systemClock: SystemClock,
     private val backgroundDispatcher: CoroutineDispatcher,
-    private val tileScope: CoroutineScope,
+    private val tileScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) : QSTileViewModel {
-
-    @AssistedInject
-    constructor(
-        @Assisted config: QSTileConfig,
-        @Assisted userActionInteractor: QSTileUserActionInteractor<DATA_TYPE>,
-        @Assisted tileDataInteractor: QSTileDataInteractor<DATA_TYPE>,
-        @Assisted mapper: QSTileDataToStateMapper<DATA_TYPE>,
-        disabledByPolicyInteractor: DisabledByPolicyInteractor,
-        userRepository: UserRepository,
-        falsingManager: FalsingManager,
-        qsTileAnalytics: QSTileAnalytics,
-        qsTileLogger: QSTileLogger,
-        systemClock: SystemClock,
-        @Background backgroundDispatcher: CoroutineDispatcher,
-    ) : this(
-        config,
-        userActionInteractor,
-        tileDataInteractor,
-        mapper,
-        disabledByPolicyInteractor,
-        userRepository,
-        falsingManager,
-        qsTileAnalytics,
-        qsTileLogger,
-        systemClock,
-        backgroundDispatcher,
-        CoroutineScope(SupervisorJob())
-    )
 
     private val userIds: MutableStateFlow<Int> =
         MutableStateFlow(userRepository.getSelectedUserInfo().id)
@@ -126,12 +90,26 @@ constructor(
     private val spec
         get() = config.tileSpec
 
-    private lateinit var tileData: SharedFlow<DATA_TYPE>
+    private val tileData: SharedFlow<DATA_TYPE> = createTileDataFlow()
 
-    override lateinit var state: SharedFlow<QSTileState>
+    override val config
+        get() = tileConfig()
+    override val state: SharedFlow<QSTileState> =
+        tileData
+            .map { data ->
+                mapper().map(config, data).also { state ->
+                    qsTileLogger.logStateUpdate(spec, state, data)
+                }
+            }
+            .flowOn(backgroundDispatcher)
+            .shareIn(
+                tileScope,
+                SharingStarted.WhileSubscribed(),
+                replay = 1,
+            )
     override val isAvailable: StateFlow<Boolean> =
         userIds
-            .flatMapLatest { tileDataInteractor.availability(it) }
+            .flatMapLatest { tileDataInteractor().availability(it) }
             .flowOn(backgroundDispatcher)
             .stateIn(
                 tileScope,
@@ -139,24 +117,18 @@ constructor(
                 true,
             )
 
-    private var currentLifeState: QSTileLifecycle = QSTileLifecycle.DEAD
-
     @CallSuper
     override fun forceUpdate() {
-        Preconditions.checkState(currentLifeState == QSTileLifecycle.ALIVE)
         forceUpdates.tryEmit(Unit)
     }
 
     @CallSuper
     override fun onUserIdChanged(userId: Int) {
-        Preconditions.checkState(currentLifeState == QSTileLifecycle.ALIVE)
         userIds.tryEmit(userId)
     }
 
     @CallSuper
     override fun onActionPerformed(userAction: QSTileUserAction) {
-        Preconditions.checkState(currentLifeState == QSTileLifecycle.ALIVE)
-
         qsTileLogger.logUserAction(
             userAction,
             spec,
@@ -166,32 +138,8 @@ constructor(
         userInputs.tryEmit(userAction)
     }
 
-    @CallSuper
-    override fun onLifecycle(lifecycle: QSTileLifecycle) {
-        when (lifecycle) {
-            QSTileLifecycle.ALIVE -> {
-                Preconditions.checkState(currentLifeState == QSTileLifecycle.DEAD)
-                tileData = createTileDataFlow()
-                state =
-                    tileData
-                        .map { data ->
-                            mapper.map(config, data).also { state ->
-                                qsTileLogger.logStateUpdate(spec, state, data)
-                            }
-                        }
-                        .flowOn(backgroundDispatcher)
-                        .shareIn(
-                            tileScope,
-                            SharingStarted.WhileSubscribed(),
-                            replay = 1,
-                        )
-            }
-            QSTileLifecycle.DEAD -> {
-                Preconditions.checkState(currentLifeState == QSTileLifecycle.ALIVE)
-                tileScope.coroutineContext.cancelChildren()
-            }
-        }
-        currentLifeState = lifecycle
+    override fun destroy() {
+        tileScope.cancel()
     }
 
     private fun createTileDataFlow(): SharedFlow<DATA_TYPE> =
@@ -208,7 +156,7 @@ constructor(
                             emit(DataUpdateTrigger.InitialRequest)
                             qsTileLogger.logInitialRequest(spec)
                         }
-                tileDataInteractor
+                tileDataInteractor()
                     .tileData(userId, updateTriggers)
                     .cancellable()
                     .flowOn(backgroundDispatcher)
@@ -242,23 +190,25 @@ constructor(
 
                 DataUpdateTrigger.UserInput(QSTileInput(userId, action, data))
             }
-            .onEach { userActionInteractor.handleInput(it.input) }
+            .onEach { userActionInteractor().handleInput(it.input) }
             .flowOn(backgroundDispatcher)
     }
 
     private fun Flow<QSTileUserAction>.filterByPolicy(userId: Int): Flow<QSTileUserAction> =
-        when (config.policy) {
-            is QSTilePolicy.NoRestrictions -> this
-            is QSTilePolicy.Restricted ->
-                filter { action ->
-                    val result =
-                        disabledByPolicyInteractor.isDisabled(userId, config.policy.userRestriction)
-                    !disabledByPolicyInteractor.handlePolicyResult(result).also { isDisabled ->
-                        if (isDisabled) {
-                            qsTileLogger.logUserActionRejectedByPolicy(action, spec)
+        config.policy.let { policy ->
+            when (policy) {
+                is QSTilePolicy.NoRestrictions -> this@filterByPolicy
+                is QSTilePolicy.Restricted ->
+                    filter { action ->
+                        val result =
+                            disabledByPolicyInteractor.isDisabled(userId, policy.userRestriction)
+                        !disabledByPolicyInteractor.handlePolicyResult(result).also { isDisabled ->
+                            if (isDisabled) {
+                                qsTileLogger.logUserActionRejectedByPolicy(action, spec)
+                            }
                         }
                     }
-                }
+            }
         }
 
     private fun Flow<QSTileUserAction>.filterFalseActions(): Flow<QSTileUserAction> =
@@ -278,31 +228,5 @@ constructor(
 
     private companion object {
         const val CLICK_THROTTLE_DURATION = 200L
-    }
-
-    /**
-     * Factory interface for assisted inject. Dagger has bad time supporting generics in assisted
-     * injection factories now. That's why you need to create an interface implementing this one and
-     * annotate it with [dagger.assisted.AssistedFactory].
-     *
-     * ex: @AssistedFactory interface FooFactory : BaseQSTileViewModel.Factory<FooData>
-     */
-    interface Factory<T> {
-
-        /**
-         * @param config contains all the static information (like TileSpec) about the tile.
-         * @param userActionInteractor encapsulates user input processing logic. Use it to start
-         *   activities, show dialogs or otherwise update the tile state.
-         * @param tileDataInteractor provides [DATA_TYPE] and its availability.
-         * @param mapper maps [DATA_TYPE] to the [QSTileState] that is then displayed by the View
-         *   layer. It's called in [backgroundDispatcher], so it's safe to perform long running
-         *   operations there.
-         */
-        fun create(
-            config: QSTileConfig,
-            userActionInteractor: QSTileUserActionInteractor<T>,
-            tileDataInteractor: QSTileDataInteractor<T>,
-            mapper: QSTileDataToStateMapper<T>,
-        ): BaseQSTileViewModel<T>
     }
 }

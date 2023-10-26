@@ -19,7 +19,6 @@ package com.android.systemui.qs.tiles.di
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.qs.QSFactory
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.qs.tiles.viewmodel.QSTileLifecycle
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModelAdapter
 import javax.inject.Inject
@@ -38,7 +37,6 @@ constructor(
     override fun createTile(tileSpec: String): QSTile? =
         tileMap[tileSpec]?.let {
             val tile = it.get()
-            tile.onLifecycle(QSTileLifecycle.ALIVE)
             adapterFactory.create(tile)
         }
 }
