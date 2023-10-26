@@ -198,7 +198,8 @@ public final class MovePackageHelper {
         // If we're moving app data around, we need all the users unlocked
         if (moveCompleteApp) {
             for (int userId : installedUserIds) {
-                if (StorageManager.isFileEncrypted() && !StorageManager.isUserKeyUnlocked(userId)) {
+                if (StorageManager.isFileEncrypted()
+                        && !StorageManager.isCeStorageUnlocked(userId)) {
                     freezer.close();
                     throw new PackageManagerException(MOVE_FAILED_LOCKED_USER,
                             "User " + userId + " must be unlocked");
