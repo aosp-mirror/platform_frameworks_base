@@ -22,6 +22,7 @@ import static android.content.pm.ArchivedActivityInfo.bytesFromBitmap;
 import static android.content.pm.ArchivedActivityInfo.drawableToBitmap;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
+import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_UNARCHIVE;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
@@ -61,6 +62,7 @@ import android.os.Process;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ExceptionUtils;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -398,7 +400,45 @@ public class PackageArchiver {
                                     packageName)));
         }
 
-        mPm.mHandler.post(() -> unarchiveInternal(packageName, userHandle, installerPackage));
+        int draftSessionId;
+        try {
+            draftSessionId = createDraftSession(packageName, installerPackage, userId);
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof IOException) {
+                throw ExceptionUtils.wrap((IOException) e.getCause());
+            } else {
+                throw e;
+            }
+        }
+
+        mPm.mHandler.post(
+                () -> unarchiveInternal(packageName, userHandle, installerPackage, draftSessionId));
+    }
+
+    private int createDraftSession(String packageName, String installerPackage, int userId) {
+        PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+        sessionParams.setAppPackageName(packageName);
+        sessionParams.installFlags = INSTALL_UNARCHIVE_DRAFT;
+        int installerUid = mPm.snapshotComputer().getPackageUid(installerPackage, 0, userId);
+        // Handles case of repeated unarchival calls for the same package.
+        int existingSessionId = mPm.mInstallerService.getExistingDraftSessionId(installerUid,
+                sessionParams,
+                userId);
+        if (existingSessionId != PackageInstaller.SessionInfo.INVALID_ID) {
+            return existingSessionId;
+        }
+
+        int sessionId = Binder.withCleanCallingIdentity(
+                () -> mPm.mInstallerService.createSessionInternal(
+                        sessionParams,
+                        installerPackage, mContext.getAttributionTag(),
+                        installerUid,
+                        userId));
+        // TODO(b/297358628) Also cleanup sessions upon device restart.
+        mPm.mHandler.postDelayed(() -> mPm.mInstallerService.cleanupDraftIfUnclaimed(sessionId),
+                getUnarchiveForegroundTimeout());
+        return sessionId;
     }
 
     /**
@@ -461,7 +501,7 @@ public class PackageArchiver {
                 cloudDrawable.getIntrinsicWidth(),
                 cloudDrawable.getIntrinsicHeight());
         LayerDrawable layerDrawable =
-                new LayerDrawable(new Drawable[] {appIconDrawable, cloudDrawable});
+                new LayerDrawable(new Drawable[]{appIconDrawable, cloudDrawable});
         final int iconSize = mContext.getSystemService(
                 ActivityManager.class).getLauncherLargeIconSize();
         Bitmap appIconWithCloudOverlay = drawableToBitmap(layerDrawable, iconSize);
@@ -487,10 +527,11 @@ public class PackageArchiver {
                     android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND},
             conditional = true)
     private void unarchiveInternal(String packageName, UserHandle userHandle,
-            String installerPackage) {
+            String installerPackage, int unarchiveId) {
         int userId = userHandle.getIdentifier();
         Intent unarchiveIntent = new Intent(Intent.ACTION_UNARCHIVE_PACKAGE);
         unarchiveIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        unarchiveIntent.putExtra(PackageInstaller.EXTRA_UNARCHIVE_ID, unarchiveId);
         unarchiveIntent.putExtra(PackageInstaller.EXTRA_UNARCHIVE_PACKAGE_NAME, packageName);
         unarchiveIntent.putExtra(PackageInstaller.EXTRA_UNARCHIVE_ALL_USERS,
                 userId == UserHandle.USER_ALL);
