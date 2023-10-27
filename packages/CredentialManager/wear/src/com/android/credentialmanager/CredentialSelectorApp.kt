@@ -17,18 +17,7 @@
 package com.android.credentialmanager
 
 import android.app.Application
-import com.android.credentialmanager.di.inject
-import com.android.credentialmanager.repository.PasswordRepository
-import com.android.credentialmanager.repository.RequestRepository
+import dagger.hilt.android.HiltAndroidApp
 
-class CredentialSelectorApp : Application() {
-
-    lateinit var requestRepository: RequestRepository
-    lateinit var passwordRepository: PasswordRepository
-
-    override fun onCreate() {
-        super.onCreate()
-
-        inject()
-    }
-}
+@HiltAndroidApp(Application::class)
+class CredentialSelectorApp : Hilt_CredentialSelectorApp()

@@ -454,6 +454,9 @@
     <!-- The radius of the caption menu corners. -->
     <dimen name="desktop_mode_handle_menu_corner_radius">26dp</dimen>
 
+    <!-- The radius of the caption menu icon. -->
+    <dimen name="desktop_mode_caption_icon_radius">28dp</dimen>
+
     <!-- The radius of the caption menu shadow. -->
     <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>
 

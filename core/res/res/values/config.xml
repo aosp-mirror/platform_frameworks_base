@@ -1241,6 +1241,21 @@
    <!-- Activity name for the default target activity to be launched. [DO NOT TRANSLATE] -->
    <string name="config_primaryShortPressTargetActivity" translatable="false"></string>
 
+    <!-- Whether a single short press on POWER should be launched without multi-press delay.
+        When this value is set to true, POWER button's single short press behavior will execute
+        immediately upon key-up regardless of whether this press will be part of a multi-press
+        gesture in the future(therefore, not waiting for a multi-press detecting delay).
+
+       For Example, let's say a power button single press launches the app menu and power button
+       double press launches the camera. By configuring this variable to true, user will observe 2
+       things in order upon a double press:
+          1. App menu pops up immediately upon the first key up.
+          2. Camera starts as the double press behavior.
+
+        Note that this config has no effect on long press behavior.
+    -->
+    <bool name="config_shortPressEarlyOnPower">false</bool>
+
     <!-- Control the behavior of the search key.
             0 - Launch default search activity
             1 - Launch target activity defined by config_searchKeyTargetActivity

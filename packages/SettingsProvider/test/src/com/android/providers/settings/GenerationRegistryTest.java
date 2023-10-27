@@ -36,7 +36,7 @@ import java.io.IOException;
 public class GenerationRegistryTest {
     @Test
     public void testGenerationsWithRegularSetting() throws IOException {
-        final GenerationRegistry generationRegistry = new GenerationRegistry(new Object(), 2);
+        final GenerationRegistry generationRegistry = new GenerationRegistry(2);
         final int secureKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_SECURE, 0);
         final String testSecureSetting = "test_secure_setting";
         Bundle b = new Bundle();
@@ -93,7 +93,7 @@ public class GenerationRegistryTest {
 
     @Test
     public void testGenerationsWithConfigSetting() throws IOException {
-        final GenerationRegistry generationRegistry = new GenerationRegistry(new Object(), 1);
+        final GenerationRegistry generationRegistry = new GenerationRegistry(1);
         final String prefix = "test_namespace/";
         final int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
 
@@ -110,7 +110,7 @@ public class GenerationRegistryTest {
 
     @Test
     public void testMaxNumBackingStores() throws IOException {
-        final GenerationRegistry generationRegistry = new GenerationRegistry(new Object(), 2);
+        final GenerationRegistry generationRegistry = new GenerationRegistry(2);
         final String testSecureSetting = "test_secure_setting";
         Bundle b = new Bundle();
         for (int i = 0; i < generationRegistry.getMaxNumBackingStores(); i++) {
@@ -133,7 +133,7 @@ public class GenerationRegistryTest {
 
     @Test
     public void testMaxSizeBackingStore() throws IOException {
-        final GenerationRegistry generationRegistry = new GenerationRegistry(new Object(), 1);
+        final GenerationRegistry generationRegistry = new GenerationRegistry(1);
         final int secureKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_SECURE, 0);
         final String testSecureSetting = "test_secure_setting";
         Bundle b = new Bundle();
@@ -153,7 +153,7 @@ public class GenerationRegistryTest {
 
     @Test
     public void testUnsetSettings() throws IOException {
-        final GenerationRegistry generationRegistry = new GenerationRegistry(new Object(), 1);
+        final GenerationRegistry generationRegistry = new GenerationRegistry(1);
         final int secureKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_SECURE, 0);
         final String testSecureSetting = "test_secure_setting";
         Bundle b = new Bundle();
@@ -172,7 +172,7 @@ public class GenerationRegistryTest {
 
     @Test
     public void testGlobalSettings() throws IOException {
-        final GenerationRegistry generationRegistry = new GenerationRegistry(new Object(), 2);
+        final GenerationRegistry generationRegistry = new GenerationRegistry(2);
         final int globalKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_GLOBAL, 0);
         final String testGlobalSetting = "test_global_setting";
         final Bundle b = new Bundle();
@@ -190,11 +190,11 @@ public class GenerationRegistryTest {
 
     @Test
     public void testNumberOfBackingStores() {
-        GenerationRegistry generationRegistry = new GenerationRegistry(new Object(), 0);
+        GenerationRegistry generationRegistry = new GenerationRegistry(0);
         // Test that the capacity of the backing stores is always valid
         assertThat(generationRegistry.getMaxNumBackingStores()).isEqualTo(
                 GenerationRegistry.MIN_NUM_BACKING_STORE);
-        generationRegistry = new GenerationRegistry(new Object(), 100);
+        generationRegistry = new GenerationRegistry(100);
         // Test that the capacity of the backing stores is always valid
         assertThat(generationRegistry.getMaxNumBackingStores()).isEqualTo(
                 GenerationRegistry.MAX_NUM_BACKING_STORE);

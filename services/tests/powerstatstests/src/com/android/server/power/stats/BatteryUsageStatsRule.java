@@ -142,6 +142,22 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
+    /**
+     * Mocks the CPU bracket count
+     */
+    public BatteryUsageStatsRule setCpuPowerBracketCount(int count) {
+        when(mPowerProfile.getCpuPowerBracketCount()).thenReturn(count);
+        return this;
+    }
+
+    /**
+     * Mocks the CPU bracket for the given CPU scaling policy and step
+     */
+    public BatteryUsageStatsRule setCpuPowerBracket(int policy, int step, int bracket) {
+        when(mPowerProfile.getCpuPowerBracketForScalingStep(policy, step)).thenReturn(bracket);
+        return this;
+    }
+
     public BatteryUsageStatsRule setAveragePowerForOrdinal(String group, int ordinal,
             double value) {
         when(mPowerProfile.getAveragePowerForOrdinal(group, ordinal)).thenReturn(value);

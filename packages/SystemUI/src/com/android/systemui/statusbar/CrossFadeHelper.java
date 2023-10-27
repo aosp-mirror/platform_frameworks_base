@@ -48,6 +48,13 @@ public class CrossFadeHelper {
         fadeOut(view, duration, delay, (Runnable) null);
     }
 
+    /**
+     * Perform a fade-out animation, invoking {@code endRunnable} when the animation ends. It will
+     * not be invoked if the animation is cancelled.
+     *
+     * @deprecated Use {@link #fadeOut(View, long, int, Animator.AnimatorListener)} instead.
+     */
+    @Deprecated
     public static void fadeOut(final View view, long duration, int delay,
             @Nullable final Runnable endRunnable) {
         view.animate().cancel();
@@ -155,6 +162,13 @@ public class CrossFadeHelper {
         fadeIn(view, duration, delay, /* endRunnable= */ (Runnable) null);
     }
 
+    /**
+     * Perform a fade-in animation, invoking {@code endRunnable} when the animation ends. It will
+     * not be invoked if the animation is cancelled.
+     *
+     * @deprecated Use {@link #fadeIn(View, long, int, Animator.AnimatorListener)} instead.
+     */
+    @Deprecated
     public static void fadeIn(final View view, long duration, int delay,
             @Nullable Runnable endRunnable) {
         view.animate().cancel();

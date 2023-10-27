@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
@@ -71,7 +72,8 @@ class NotificationIconAreaControllerViewBinderWrapperImpl @Inject constructor() 
         val unsupported: Nothing
             get() =
                 error(
-                    "Code path not supported when NOTIFICATION_ICON_CONTAINER_REFACTOR is disabled"
+                    "Code path not supported when ${NotificationIconContainerRefactor.FLAG_NAME}" +
+                        " is disabled"
                 )
     }
 }

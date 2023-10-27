@@ -16,14 +16,19 @@
 
 package android.app.servertransaction;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.clearInvocations;
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.display.IDisplayManager;
+import android.os.Handler;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,8 +38,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.function.IntConsumer;
 
 /**
  * Tests for {@link ClientTransactionListenerController}.
@@ -47,30 +50,36 @@ import java.util.function.IntConsumer;
 @Presubmit
 public class ClientTransactionListenerControllerTest {
     @Mock
-    private IntConsumer mDisplayChangeListener;
+    private IDisplayManager mIDisplayManager;
+    @Mock
+    private DisplayManager.DisplayListener mListener;
 
+    private DisplayManagerGlobal mDisplayManager;
+    private Handler mHandler;
     private ClientTransactionListenerController mController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mController = spy(ClientTransactionListenerController.createInstanceForTesting());
+        mDisplayManager = new DisplayManagerGlobal(mIDisplayManager);
+        mHandler = getInstrumentation().getContext().getMainThreadHandler();
+        mController = spy(ClientTransactionListenerController.createInstanceForTesting(
+                mDisplayManager));
         doReturn(true).when(mController).isSyncWindowConfigUpdateFlagEnabled();
     }
 
     @Test
-    public void testRegisterDisplayChangeListener() {
-        mController.registerDisplayChangeListener(mDisplayChangeListener, Runnable::run);
+    public void testOnDisplayChanged() throws RemoteException {
+        // Mock IDisplayManager to return a display info to trigger display change.
+        final DisplayInfo newDisplayInfo = new DisplayInfo();
+        doReturn(newDisplayInfo).when(mIDisplayManager).getDisplayInfo(123);
+
+        mDisplayManager.registerDisplayListener(mListener, mHandler,
+                DisplayManager.EVENT_FLAG_DISPLAY_CHANGED, null /* packageName */);
 
         mController.onDisplayChanged(123);
+        mHandler.runWithScissors(() -> { }, 0);
 
-        verify(mDisplayChangeListener).accept(123);
-
-        clearInvocations(mDisplayChangeListener);
-        mController.unregisterDisplayChangeListener(mDisplayChangeListener);
-
-        mController.onDisplayChanged(321);
-
-        verify(mDisplayChangeListener, never()).accept(anyInt());
+        verify(mListener).onDisplayChanged(123);
     }
 }

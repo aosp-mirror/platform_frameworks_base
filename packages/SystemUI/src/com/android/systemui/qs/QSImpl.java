@@ -943,7 +943,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     @Override
     public void dump(PrintWriter pw, String[] args) {
         IndentingPrintWriter indentingPw = new IndentingPrintWriter(pw, /* singleIndent= */ "  ");
-        indentingPw.println("QSFragment:");
+        indentingPw.println("QSImpl:");
         indentingPw.increaseIndent();
         indentingPw.println("mQsBounds: " + mQsBounds);
         indentingPw.println("mQsExpanded: " + mQsExpanded);

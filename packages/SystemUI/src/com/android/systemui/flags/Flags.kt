@@ -87,11 +87,6 @@ object Flags {
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR = releasedFlag("notification_shelf_refactor")
 
-    // TODO(b/290787599): Tracking Bug
-    @JvmField
-    val NOTIFICATION_ICON_CONTAINER_REFACTOR =
-        unreleasedFlag("notification_icon_container_refactor")
-
     // TODO(b/288326013): Tracking Bug
     @JvmField
     val NOTIFICATION_ASYNC_HYBRID_VIEW_INFLATION =
@@ -123,7 +118,7 @@ object Flags {
     // TODO(b/301955929)
     @JvmField
     val NOTIF_LS_BACKGROUND_THREAD =
-            unreleasedFlag("notification_lockscreen_mgr_bg_thread")
+            unreleasedFlag("notification_lockscreen_mgr_bg_thread", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **

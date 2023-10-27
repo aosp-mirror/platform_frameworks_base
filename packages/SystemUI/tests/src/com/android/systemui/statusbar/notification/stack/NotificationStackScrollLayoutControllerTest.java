@@ -92,10 +92,8 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
-import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -722,8 +720,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mActivityStarter,
                 new ResourcesSplitShadeStateController(),
                 mock(ConfigurationState.class),
-                mock(DozeParameters.class),
-                mock(ScreenOffAnimationController.class),
                 mock(ShelfNotificationIconViewStore.class));
     }
 

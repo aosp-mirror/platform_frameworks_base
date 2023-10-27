@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles.base.interactor
 
+import android.os.UserHandle
+
 class FakeDisabledByPolicyInteractor : DisabledByPolicyInteractor {
 
     var handleResult: Boolean = false
@@ -23,7 +25,7 @@ class FakeDisabledByPolicyInteractor : DisabledByPolicyInteractor {
         DisabledByPolicyInteractor.PolicyResult.TileEnabled
 
     override suspend fun isDisabled(
-        userId: Int,
+        user: UserHandle,
         userRestriction: String?
     ): DisabledByPolicyInteractor.PolicyResult = policyResult
 

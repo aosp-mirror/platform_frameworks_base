@@ -21,11 +21,7 @@ import android.util.Log
 import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
-import com.android.credentialmanager.CredentialSelectorApp
 import com.android.credentialmanager.TAG
 import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.model.Password
@@ -33,12 +29,15 @@ import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.repository.PasswordRepository
 import com.android.credentialmanager.repository.RequestRepository
 import com.android.credentialmanager.ui.model.PasswordUiModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SinglePasswordScreenViewModel(
+@HiltViewModel
+class SinglePasswordScreenViewModel @Inject constructor(
     private val requestRepository: RequestRepository,
     private val passwordRepository: PasswordRepository,
 ) : ViewModel() {
@@ -103,23 +102,6 @@ class SinglePasswordScreenViewModel(
             )
 
             _uiState.value = SinglePasswordScreenUiState.Completed
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
-            ): T {
-                val application = checkNotNull(extras[APPLICATION_KEY])
-
-                return SinglePasswordScreenViewModel(
-                    requestRepository = (application as CredentialSelectorApp).requestRepository,
-                    passwordRepository = application.passwordRepository,
-                ) as T
-            }
         }
     }
 }

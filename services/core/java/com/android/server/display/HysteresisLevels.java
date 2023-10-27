@@ -18,6 +18,8 @@ package com.android.server.display;
 
 import android.util.Slog;
 
+import com.android.server.display.utils.DebugUtils;
+
 import java.io.PrintWriter;
 import java.util.Arrays;
 
@@ -27,7 +29,9 @@ import java.util.Arrays;
 public class HysteresisLevels {
     private static final String TAG = "HysteresisLevels";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.HysteresisLevels DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     private final float[] mBrighteningThresholdsPercentages;
     private final float[] mDarkeningThresholdsPercentages;

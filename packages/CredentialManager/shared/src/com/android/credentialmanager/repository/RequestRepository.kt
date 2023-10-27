@@ -16,17 +16,20 @@
 
 package com.android.credentialmanager.repository
 
-import android.app.Application
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
 import com.android.credentialmanager.TAG
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.parse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RequestRepository(
-    private val application: Application,
+@Singleton
+class RequestRepository @Inject constructor(
+        private val packageManager: PackageManager,
 ) {
 
     private val _requests = MutableStateFlow<Request?>(null)
@@ -34,7 +37,7 @@ class RequestRepository(
 
     suspend fun processRequest(intent: Intent, previousIntent: Intent? = null) {
         val request = intent.parse(
-            packageManager = application.packageManager,
+            packageManager = packageManager,
             previousIntent = previousIntent
         )
 

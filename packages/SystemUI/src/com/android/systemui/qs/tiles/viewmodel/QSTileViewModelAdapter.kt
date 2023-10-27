@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.viewmodel
 
 import android.content.Context
+import android.os.UserHandle
 import android.util.Log
 import android.view.View
 import androidx.annotation.GuardedBy
@@ -134,7 +135,7 @@ constructor(
         qsTileViewModel.currentState?.supportedActions?.contains(action) == true
 
     override fun userSwitch(currentUser: Int) {
-        qsTileViewModel.onUserIdChanged(currentUser)
+        qsTileViewModel.onUserChanged(UserHandle.of(currentUser))
     }
 
     @Deprecated(
@@ -180,7 +181,7 @@ constructor(
     override fun destroy() {
         stateJob?.cancel()
         availabilityJob?.cancel()
-        qsTileViewModel.onLifecycle(QSTileLifecycle.DEAD)
+        qsTileViewModel.destroy()
     }
 
     override fun getState(): QSTile.State? =
@@ -188,7 +189,13 @@ constructor(
 
     override fun getInstanceId(): InstanceId = qsTileViewModel.config.instanceId
     override fun getTileLabel(): CharSequence =
-        context.getString(qsTileViewModel.config.tileLabelRes)
+        with(qsTileViewModel.config.uiConfig) {
+            when (this) {
+                is QSTileUIConfig.Empty -> qsTileViewModel.currentState?.label ?: ""
+                is QSTileUIConfig.Resource -> context.getString(tileLabelRes)
+            }
+        }
+
     override fun getTileSpec(): String = qsTileViewModel.config.tileSpec.spec
 
     private companion object {

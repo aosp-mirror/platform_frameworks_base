@@ -603,6 +603,17 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Returns the monotonic clock time when the available battery history collection started.
+     */
+    public long getStartTime() {
+        if (!mHistoryFiles.isEmpty()) {
+            return mHistoryFiles.get(0).monotonicTimeMs;
+        } else {
+            return mHistoryBufferStartTime;
+        }
+    }
+
+    /**
      * Start iterating history files and history buffer.
      *
      * @param startTimeMs monotonic time (the HistoryItem.time field) to start iterating from,

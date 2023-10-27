@@ -38,8 +38,9 @@ import java.util.stream.Stream;
  * except where noted.
  */
 public abstract class PowerStatsCollector {
+    private static final int MILLIVOLTS_PER_VOLT = 1000;
     private final Handler mHandler;
-    private final Clock mClock;
+    protected final Clock mClock;
     private final long mThrottlePeriodMs;
     private final Runnable mCollectAndDeliverStats = this::collectAndDeliverStats;
     private boolean mEnabled;
@@ -100,6 +101,9 @@ public abstract class PowerStatsCollector {
     @SuppressWarnings("GuardedBy")  // Field is volatile
     private void collectAndDeliverStats() {
         PowerStats stats = collectStats();
+        if (stats == null) {
+            return;
+        }
         for (Consumer<PowerStats> consumer : mConsumerList) {
             consumer.accept(stats);
         }
@@ -179,5 +183,12 @@ public abstract class PowerStatsCollector {
         ConditionVariable done = new ConditionVariable();
         mHandler.post(done::open);
         done.block();
+    }
+
+    /** Calculate charge consumption (in microcoulombs) from a given energy and voltage */
+    protected long uJtoUc(long deltaEnergyUj, int avgVoltageMv) {
+        // To overflow, a 3.7V 10000mAh battery would need to completely drain 69244 times
+        // since the last snapshot. Round off to the nearest whole long.
+        return (deltaEnergyUj * MILLIVOLTS_PER_VOLT + (avgVoltageMv / 2)) / avgVoltageMv;
     }
 }

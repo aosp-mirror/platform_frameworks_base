@@ -217,8 +217,6 @@ public class NotificationStackScrollLayoutController {
     private final NotificationDismissibilityProvider mDismissibilityProvider;
     private final ActivityStarter mActivityStarter;
     private final ConfigurationState mConfigurationState;
-    private final DozeParameters mDozeParameters;
-    private final ScreenOffAnimationController mScreenOffAnimationController;
     private final ShelfNotificationIconViewStore mShelfIconViewStore;
 
     private View mLongPressedView;
@@ -683,8 +681,7 @@ public class NotificationStackScrollLayoutController {
             NotificationDismissibilityProvider dismissibilityProvider,
             ActivityStarter activityStarter,
             SplitShadeStateController splitShadeStateController,
-            ConfigurationState configurationState, DozeParameters dozeParameters,
-            ScreenOffAnimationController screenOffAnimationController,
+            ConfigurationState configurationState,
             ShelfNotificationIconViewStore shelfIconViewStore) {
         mView = view;
         mKeyguardTransitionRepo = keyguardTransitionRepo;
@@ -736,8 +733,6 @@ public class NotificationStackScrollLayoutController {
         mDismissibilityProvider = dismissibilityProvider;
         mActivityStarter = activityStarter;
         mConfigurationState = configurationState;
-        mDozeParameters = dozeParameters;
-        mScreenOffAnimationController = screenOffAnimationController;
         mShelfIconViewStore = shelfIconViewStore;
         mView.passSplitShadeStateController(splitShadeStateController);
         updateResources();
@@ -848,8 +843,8 @@ public class NotificationStackScrollLayoutController {
         mViewModel.ifPresent(
                 vm -> NotificationListViewBinder
                         .bind(mView, vm, mConfigurationState, mConfigurationController,
-                                mDozeParameters, mFalsingManager, mFeatureFlags,
-                                mNotifIconAreaController, mScreenOffAnimationController,
+                                mFalsingManager,
+                                mNotifIconAreaController,
                                 mShelfIconViewStore));
 
         collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),

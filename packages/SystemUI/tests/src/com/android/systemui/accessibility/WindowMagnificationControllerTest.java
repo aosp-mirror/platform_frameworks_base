@@ -1278,7 +1278,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
         final float magnificationScaleLarge = 2.5f;
         final int initSize = Math.min(bounds.width(), bounds.height()) / 3;
-        final int magnificationSize = (int) (initSize * magnificationScaleLarge);
+        final int magnificationSize = (int) (initSize * magnificationScaleLarge)
+                - (int) (initSize * magnificationScaleLarge) % 2;
 
         final int expectedWindowHeight = magnificationSize;
         final int expectedWindowWidth = magnificationSize;

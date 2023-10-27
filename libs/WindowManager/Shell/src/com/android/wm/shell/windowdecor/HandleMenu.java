@@ -29,9 +29,9 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PointF;
-import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -58,7 +58,7 @@ class HandleMenu {
     private WindowDecoration.AdditionalWindow mHandleMenuWindow;
     private final PointF mHandleMenuPosition = new PointF();
     private final boolean mShouldShowWindowingPill;
-    private final Drawable mAppIcon;
+    private final Bitmap mAppIconBitmap;
     private final CharSequence mAppName;
     private final View.OnClickListener mOnClickListener;
     private final View.OnTouchListener mOnTouchListener;
@@ -76,7 +76,7 @@ class HandleMenu {
 
     HandleMenu(WindowDecoration parentDecor, int layoutResId, int captionX, int captionY,
             View.OnClickListener onClickListener, View.OnTouchListener onTouchListener,
-            Drawable appIcon, CharSequence appName, boolean shouldShowWindowingPill,
+            Bitmap appIcon, CharSequence appName, boolean shouldShowWindowingPill,
             int captionHeight) {
         mParentDecor = parentDecor;
         mContext = mParentDecor.mDecorWindowContext;
@@ -86,7 +86,7 @@ class HandleMenu {
         mCaptionY = captionY;
         mOnClickListener = onClickListener;
         mOnTouchListener = onTouchListener;
-        mAppIcon = appIcon;
+        mAppIconBitmap = appIcon;
         mAppName = appName;
         mShouldShowWindowingPill = shouldShowWindowingPill;
         mCaptionHeight = captionHeight;
@@ -150,7 +150,7 @@ class HandleMenu {
         final ImageView appIcon = handleMenu.findViewById(R.id.application_icon);
         final TextView appName = handleMenu.findViewById(R.id.application_name);
         collapseBtn.setOnClickListener(mOnClickListener);
-        appIcon.setImageDrawable(mAppIcon);
+        appIcon.setImageBitmap(mAppIconBitmap);
         appName.setText(mAppName);
     }
 
@@ -335,7 +335,7 @@ class HandleMenu {
     static final class Builder {
         private final WindowDecoration mParent;
         private CharSequence mName;
-        private Drawable mAppIcon;
+        private Bitmap mAppIcon;
         private View.OnClickListener mOnClickListener;
         private View.OnTouchListener mOnTouchListener;
         private int mLayoutId;
@@ -354,7 +354,7 @@ class HandleMenu {
             return this;
         }
 
-        Builder setAppIcon(@Nullable Drawable appIcon) {
+        Builder setAppIcon(@Nullable Bitmap appIcon) {
             mAppIcon = appIcon;
             return this;
         }

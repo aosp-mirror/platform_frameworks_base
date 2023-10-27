@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -37,12 +39,11 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FakeFeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository;
 import com.android.systemui.statusbar.domain.interactor.SilentNotificationStatusIconsVisibilityInteractor;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -71,12 +72,9 @@ public class NotificationListenerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
-        featureFlags.setDefault(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR);
+        setFlagDefault(mSetFlagsRule, NotificationIconContainerRefactor.FLAG_NAME);
         mListener = new NotificationListener(
                 mContext,
-                featureFlags,
                 mNotificationManager,
                 new SilentNotificationStatusIconsVisibilityInteractor(
                         new NotificationListenerSettingsRepository()),

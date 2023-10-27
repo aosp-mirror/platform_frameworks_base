@@ -174,7 +174,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     public void destroy() {
-        super.destroy();
+        // Don't call super as this may be called before the view is dettached and calling super
+        // will remove the attach listener. We don't need to do that, because once this object is
+        // detached from the graph, it will be gc.
         mHost.removeCallback(mQSHostCallback);
 
         for (TileRecord record : mRecords) {

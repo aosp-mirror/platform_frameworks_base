@@ -38,7 +38,6 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -49,18 +48,18 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Assert;
 
-import dagger.Lazy;
-
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
@@ -178,7 +177,7 @@ public final class DozeServiceHost implements DozeHost {
 
     void fireNotificationPulse(NotificationEntry entry) {
         Runnable pulseSuppressedListener = () -> {
-            if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            if (NotificationIconContainerRefactor.isEnabled()) {
                 mHeadsUpManager.removeNotification(
                         entry.getKey(), /* releaseImmediately= */ true, /* animate= */ false);
             } else {

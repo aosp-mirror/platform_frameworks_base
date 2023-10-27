@@ -16,6 +16,7 @@
 package com.android.server.power.stats;
 
 import android.os.BatteryStats;
+import android.util.SparseArray;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
@@ -30,11 +31,17 @@ import java.util.function.Consumer;
 public class PowerStatsAggregator {
     private final AggregatedPowerStats mStats;
     private final BatteryStatsHistory mHistory;
+    private final SparseArray<AggregatedPowerStatsProcessor> mProcessors = new SparseArray<>();
 
     public PowerStatsAggregator(AggregatedPowerStatsConfig aggregatedPowerStatsConfig,
             BatteryStatsHistory history) {
         mStats = new AggregatedPowerStats(aggregatedPowerStatsConfig);
         mHistory = history;
+        for (AggregatedPowerStatsConfig.PowerComponent powerComponentsConfig :
+                aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs()) {
+            AggregatedPowerStatsProcessor processor = powerComponentsConfig.getProcessor();
+            mProcessors.put(powerComponentsConfig.getPowerComponentId(), processor);
+        }
     }
 
     /**
@@ -100,6 +107,7 @@ public class PowerStatsAggregator {
                     if (!mStats.isCompatible(item.powerStats)) {
                         if (lastTime > baseTime) {
                             mStats.setDuration(lastTime - baseTime);
+                            finish(mStats);
                             consumer.accept(mStats);
                         }
                         mStats.reset();
@@ -112,9 +120,20 @@ public class PowerStatsAggregator {
         }
         if (lastTime > baseTime) {
             mStats.setDuration(lastTime - baseTime);
+            finish(mStats);
             consumer.accept(mStats);
         }
 
         mStats.reset();     // to free up memory
+    }
+
+    private void finish(AggregatedPowerStats stats) {
+        for (int i = 0; i < mProcessors.size(); i++) {
+            PowerComponentAggregatedPowerStats component =
+                    stats.getPowerComponentStats(mProcessors.keyAt(i));
+            if (component != null) {
+                mProcessors.valueAt(i).finish(component);
+            }
+        }
     }
 }

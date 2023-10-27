@@ -34,10 +34,10 @@
 
         <ImageView
             android:id="@+id/application_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="14dp"
-            android:layout_marginEnd="14dp"
+            android:layout_width="@dimen/desktop_mode_caption_icon_radius"
+            android:layout_height="@dimen/desktop_mode_caption_icon_radius"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
             android:contentDescription="@string/app_icon_text"/>
 
         <TextView

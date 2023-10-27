@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
+import com.android.server.display.utils.DebugUtils;
 import com.android.server.display.utils.DeviceConfigParsingUtils;
 
 import java.io.PrintWriter;
@@ -58,8 +59,10 @@ import java.util.function.Function;
 @Deprecated
 class BrightnessThrottler {
     private static final String TAG = "BrightnessThrottler";
-    private static final boolean DEBUG = false;
 
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.BrightnessThrottler DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
     private static final int THROTTLING_INVALID = -1;
 
     private final Injector mInjector;
