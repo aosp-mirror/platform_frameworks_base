@@ -30,6 +30,18 @@ stubs_defaults {
         ":android-test-mock-sources",
         ":android-test-runner-sources",
     ],
+    flags: [
+        // These errors are suppressed in the doc stubs as it isn't easy to suppress them.
+        // They remain unsuppressed/active in the "main" stubs build (the jar stubs).
+        // These can be removed when either a) all the issues have been fixed or
+        // b) these reporting of these issues is gated behind api lint being enabled in metalava.
+        "--hide BroadcastBehavior",
+        "--hide DeprecationMismatch",
+        "--hide MissingPermission",
+        "--hide RequiresPermission",
+        "--hide SdkConstant",
+        "--hide Todo",
+    ],
     create_doc_stubs: true,
     write_sdk_values: true,
 }
