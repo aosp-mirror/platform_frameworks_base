@@ -2357,6 +2357,7 @@ package android.os {
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo createUser(@Nullable String, @NonNull String, int);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.content.pm.UserInfo> getAliveUsers();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.os.UserHandle getBootUser();
+    method @FlaggedApi("android.multiuser.support_communal_profile") @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getCommunalProfile();
     method public int getMainDisplayIdAssignedToUser();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.Set<java.lang.String> getPreInstallableSystemPackages(@NonNull String);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public String getUserType();

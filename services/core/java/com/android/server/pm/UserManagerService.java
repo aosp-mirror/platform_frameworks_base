@@ -2138,6 +2138,19 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isForegroundUserAdmin() {
+        // No permission requirements for this API.
+        synchronized (mUsersLock) {
+            final int currentUserId = getCurrentUserId();
+            if (currentUserId != UserHandle.USER_NULL) {
+                final UserInfo userInfo = getUserInfoLU(currentUserId);
+                return userInfo != null && userInfo.isAdmin();
+            }
+        }
+        return false;
+    }
+
+    @Override
     public @NonNull String getUserName() {
         final int callingUid = Binder.getCallingUid();
         if (!hasQueryOrCreateUsersPermission()
