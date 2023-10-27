@@ -486,8 +486,6 @@ class Task extends TaskFragment {
 
     private boolean mForceShowForAllUsers;
 
-    private boolean mForceTranslucent = false;
-
     // The display category name for this task.
     String mRequiredDisplayCategory;
 
@@ -4502,10 +4500,6 @@ class Task extends TaskFragment {
         return true;
     }
 
-    void setForceTranslucent(boolean set) {
-        mForceTranslucent = set;
-    }
-
     @Override
     public boolean isAlwaysOnTop() {
         return !isForceHidden() && super.isAlwaysOnTop();
@@ -4520,11 +4514,6 @@ class Task extends TaskFragment {
 
     boolean isForceHiddenForPinnedTask() {
         return (mForceHiddenFlags & FLAG_FORCE_HIDDEN_FOR_PINNED_TASK) != 0;
-    }
-
-    @Override
-    protected boolean isForceTranslucent() {
-        return mForceTranslucent;
     }
 
     @Override

@@ -374,6 +374,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @interface FlagForceHidden {}
     protected int mForceHiddenFlags = 0;
 
+    private boolean mForceTranslucent = false;
+
     final Point mLastSurfaceSize = new Point();
 
     private final Rect mTmpBounds = new Rect();
@@ -843,8 +845,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return true;
     }
 
-    protected boolean isForceTranslucent() {
-        return false;
+    boolean isForceTranslucent() {
+        return mForceTranslucent;
+    }
+
+    void setForceTranslucent(boolean set) {
+        mForceTranslucent = set;
     }
 
     boolean isLeafTaskFragment() {
