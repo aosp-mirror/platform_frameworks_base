@@ -6553,7 +6553,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean destroyInputConsumer(String name, int displayId) {
+    public boolean destroyInputConsumer(IBinder token, int displayId) {
         if (!mAtmService.isCallerRecents(Binder.getCallingUid())
                 && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
             throw new SecurityException("destroyInputConsumer requires INPUT_CONSUMER permission");
@@ -6562,7 +6562,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
-                return display.getInputMonitor().destroyInputConsumer(name);
+                return display.getInputMonitor().destroyInputConsumer(token);
             }
             return false;
         }

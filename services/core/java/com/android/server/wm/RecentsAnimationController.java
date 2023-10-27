@@ -1021,7 +1021,11 @@ public class RecentsAnimationController implements DeathRecipient {
         synchronized (mService.getWindowManagerLock()) {
             // Clear associated input consumers on runner death
             final InputMonitor inputMonitor = mDisplayContent.getInputMonitor();
-            inputMonitor.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+            final InputConsumerImpl consumer = inputMonitor.getInputConsumer(
+                    INPUT_CONSUMER_RECENTS_ANIMATION);
+            if (consumer != null) {
+                inputMonitor.destroyInputConsumer(consumer.mToken);
+            }
         }
     }
 
