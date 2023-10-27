@@ -25,6 +25,7 @@ import java.io.PrintWriter;
 
 public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCallback>
         implements BatteryController {
+    private boolean mIsAodPowerSave = false;
     private boolean mWirelessCharging;
 
     public FakeBatteryController(LeakCheck test) {
@@ -63,12 +64,16 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
 
     @Override
     public boolean isAodPowerSave() {
-        return false;
+        return mIsAodPowerSave;
     }
 
     @Override
     public boolean isWirelessCharging() {
         return mWirelessCharging;
+    }
+
+    public void setIsAodPowerSave(boolean isAodPowerSave) {
+        mIsAodPowerSave = isAodPowerSave;
     }
 
     public void setWirelessCharging(boolean wirelessCharging) {

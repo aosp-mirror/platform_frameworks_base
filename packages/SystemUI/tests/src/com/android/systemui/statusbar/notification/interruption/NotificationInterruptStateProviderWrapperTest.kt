@@ -2,7 +2,6 @@ package com.android.systemui.statusbar.notification.interruption
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE
@@ -19,7 +18,30 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class NotificationInterruptStateProviderWrapperTest : SysuiTestCase() {
+class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecisionProviderTestBase() {
+    override val provider: VisualInterruptionDecisionProvider
+        get() =
+            NotificationInterruptStateProviderWrapper(
+                NotificationInterruptStateProviderImpl(
+                        context.contentResolver,
+                        powerManager,
+                        ambientDisplayConfiguration,
+                        batteryController,
+                        statusBarStateController,
+                        keyguardStateController,
+                        headsUpManager,
+                        logger,
+                        mainHandler,
+                        flags,
+                        keyguardNotificationVisibilityProvider,
+                        uiEventLogger,
+                        userTracker,
+                        deviceProvisionedController
+                    )
+                    .also { it.mUseHeadsUp = true }
+            )
+
+    // Tests of internals of the wrapper:
 
     @Test
     fun decisionOfTrue() {
