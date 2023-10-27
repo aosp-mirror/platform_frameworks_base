@@ -37,6 +37,7 @@ import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
 import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.IDevicesForAttributesCallback;
+import android.media.ILoudnessCodecUpdatesDispatcher;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IPreferredMixerAttributesDispatcher;
@@ -51,6 +52,7 @@ import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
 import android.media.IStreamAliasingDispatcher;
 import android.media.IVolumeController;
+import android.media.LoudnessCodecFormat;
 import android.media.PlayerBase;
 import android.media.VolumeInfo;
 import android.media.VolumePolicy;
@@ -728,4 +730,20 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     boolean isBluetoothVariableLatencyEnabled();
+
+    void registerLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
+
+    void unregisterLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
+
+    oneway void startLoudnessCodecUpdates(in int piid);
+
+    oneway void stopLoudnessCodecUpdates(in int piid);
+
+    oneway void addLoudnesssCodecFormat(in int piid, in LoudnessCodecFormat format);
+
+    oneway void addLoudnesssCodecFormatList(in int piid, in List<LoudnessCodecFormat> format);
+
+    oneway void removeLoudnessCodecFormat(in int piid, in LoudnessCodecFormat format);
+
+    PersistableBundle getLoudnessParams(in int piid, in LoudnessCodecFormat format);
 }

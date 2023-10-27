@@ -118,6 +118,7 @@ import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
 import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.IDevicesForAttributesCallback;
+import android.media.ILoudnessCodecUpdatesDispatcher;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IPreferredMixerAttributesDispatcher;
@@ -132,6 +133,7 @@ import android.media.IStrategyNonDefaultDevicesDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IStreamAliasingDispatcher;
 import android.media.IVolumeController;
+import android.media.LoudnessCodecFormat;
 import android.media.MediaMetrics;
 import android.media.MediaRecorder.AudioSource;
 import android.media.PlayerBase;
@@ -4370,6 +4372,7 @@ public class AudioService extends IAudioService.Stub
         if (mMediaPlaybackActive.getAndSet(mediaActive) != mediaActive && mediaActive) {
             mSoundDoseHelper.scheduleMusicActiveCheck();
         }
+
         // Update playback active state for all apps in audio mode stack.
         // When the audio mode owner becomes active, replace any delayed MSG_UPDATE_AUDIO_MODE
         // and request an audio mode update immediately. Upon any other change, queue the message
@@ -10588,6 +10591,51 @@ public class AudioService extends IAudioService.Stub
         }
 
         return anonymizeAudioDeviceAttributesUnchecked(ada);
+    }
+
+    // ========================================================================================
+    // LoudnessCodecConfigurator
+
+    @Override
+    public void registerLoudnessCodecUpdatesDispatcher(ILoudnessCodecUpdatesDispatcher dispatcher) {
+        // TODO: implement
+    }
+
+    @Override
+    public void unregisterLoudnessCodecUpdatesDispatcher(
+            ILoudnessCodecUpdatesDispatcher dispatcher) {
+        // TODO: implement
+    }
+
+    @Override
+    public void startLoudnessCodecUpdates(int piid) {
+        // TODO: implement
+    }
+
+    @Override
+    public void stopLoudnessCodecUpdates(int piid) {
+        // TODO: implement
+    }
+
+    @Override
+    public void addLoudnesssCodecFormat(int piid, LoudnessCodecFormat format) {
+        // TODO: implement
+    }
+
+    @Override
+    public void addLoudnesssCodecFormatList(int piid, List<LoudnessCodecFormat> format) {
+        // TODO: implement
+    }
+
+    @Override
+    public void removeLoudnessCodecFormat(int piid, LoudnessCodecFormat format) {
+        // TODO: implement
+    }
+
+    @Override
+    public PersistableBundle getLoudnessParams(int piid, LoudnessCodecFormat format) {
+        // TODO: implement
+        return null;
     }
 
     //==========================================================================================
