@@ -4696,6 +4696,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             scheduleAnimation();
 
             mWmService.mH.post(() -> InputMethodManagerInternal.get().onImeParentChanged());
+        } else if (mImeControlTarget != null && mImeControlTarget == mImeLayeringTarget) {
+            // Even if the IME surface parent is not changed, the layer target belonging to the
+            // parent may have changes. Then attempt to reassign if the IME control target is
+            // possible to be the relative layer.
+            final SurfaceControl lastRelativeLayer = mImeWindowsContainer.getLastRelativeLayer();
+            if (lastRelativeLayer != mImeLayeringTarget.mSurfaceControl) {
+                assignRelativeLayerForIme(getSyncTransaction(), false /* forceUpdate */);
+                if (lastRelativeLayer != mImeWindowsContainer.getLastRelativeLayer()) {
+                    scheduleAnimation();
+                }
+            }
         }
     }
 
