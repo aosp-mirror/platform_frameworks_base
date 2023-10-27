@@ -35,3 +35,10 @@ flag {
     description: "Further framework support for communal profile, beyond the basics, for later releases."
     bug: "285426179"
 }
+
+flag {
+    name: "use_all_cpus_during_user_switch"
+    namespace: "multiuser"
+    description: "Allow using all cpu cores during a user switch."
+    bug: "308105403"
+}
