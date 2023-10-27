@@ -23,6 +23,8 @@ import android.credentials.CredentialOption
 import android.credentials.GetCandidateCredentialsException
 import android.credentials.GetCandidateCredentialsResponse
 import android.credentials.GetCredentialRequest
+import android.credentials.ui.GetCredentialProviderData
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
@@ -42,6 +44,9 @@ import android.view.autofill.AutofillId
 import org.json.JSONException
 import android.widget.inline.InlinePresentationSpec
 import androidx.autofill.inline.v1.InlineSuggestionUi
+import androidx.credentials.provider.CustomCredentialEntry
+import androidx.credentials.provider.PasswordCredentialEntry
+import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.GetFlowUtils
 import com.android.credentialmanager.getflow.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
@@ -110,6 +115,34 @@ class CredentialAutofillService : AutofillService() {
         )
     }
 
+    private fun getEntryToIconMap(
+            candidateProviderDataList: MutableList<GetCredentialProviderData>
+    ): Map<String, Icon> {
+        val entryIconMap: MutableMap<String, Icon> = mutableMapOf()
+        candidateProviderDataList.forEach { provider ->
+            provider.credentialEntries.forEach { entry ->
+                val credentialEntry = GetFlowUtils.parseCredentialEntryFromSlice(entry.slice)
+                when (credentialEntry) {
+                    is PasswordCredentialEntry -> {
+                        entryIconMap[entry.key + entry.subkey] = credentialEntry.icon
+                    }
+                    is PublicKeyCredentialEntry -> {
+                        entryIconMap[entry.key + entry.subkey] = credentialEntry.icon
+                    }
+                    is CustomCredentialEntry -> {
+                        entryIconMap[entry.key + entry.subkey] = credentialEntry.icon
+                    }
+                }
+            }
+        }
+        return entryIconMap
+    }
+
+    private fun getDefaultIcon(): Icon {
+        return Icon.createWithResource(
+                this, com.android.credentialmanager.R.drawable.ic_other_sign_in_24)
+    }
+
     private fun convertToFillResponse(
             getCredResponse: GetCandidateCredentialsResponse,
             filLRequest: FillRequest
@@ -120,6 +153,8 @@ class CredentialAutofillService : AutofillService() {
         if (providerList.isEmpty()) {
             return null
         }
+        val entryIconMap: Map<String, Icon> =
+                getEntryToIconMap(getCredResponse.candidateProviderDataList)
         var totalEntryCount = 0
         providerList.forEach { provider ->
             totalEntryCount += provider.credentialEntryList.size
@@ -174,6 +209,10 @@ class CredentialAutofillService : AutofillService() {
                     val sliceBuilder = InlineSuggestionUi
                             .newContentBuilder(pendingIntent)
                             .setTitle(credentialEntry.userName)
+                    val icon: Icon =
+                            entryIconMap[credentialEntry.entryKey + credentialEntry.entrySubkey]
+                                    ?: getDefaultIcon()
+                    sliceBuilder.setStartIcon(icon)
                     inlinePresentation = InlinePresentation(
                             sliceBuilder.build().slice, spec, /* pinned= */ false)
                 }
