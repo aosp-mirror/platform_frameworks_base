@@ -296,7 +296,6 @@ class ZygoteConnection {
                     } else {
                         // child; result is a Runnable.
                         zygoteServer.setForkChild();
-                        Zygote.setAppProcessName(parsedArgs, TAG);  // ??? Necessary?
                         return result;
                     }
                 }
