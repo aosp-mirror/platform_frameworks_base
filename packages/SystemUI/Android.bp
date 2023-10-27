@@ -60,7 +60,6 @@ systemui_compose_java_defaults {
             // except for SystemUI-core.
             // Copied from compose/features/Android.bp.
             static_libs: [
-                "CommunalLayoutLib",
                 "PlatformComposeCore",
                 "PlatformComposeSceneTransitionLayout",
 
