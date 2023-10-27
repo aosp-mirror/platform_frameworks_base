@@ -30,6 +30,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -60,7 +61,11 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
+    @Mock private lateinit var logger: BluetoothTileDialogLogger
+
     private val subtitleResId = R.string.quick_settings_bluetooth_tile_subtitle
+
+    private val fakeSystemClock = FakeSystemClock()
 
     private lateinit var icon: Pair<Drawable, String>
     private lateinit var bluetoothTileDialog: BluetoothTileDialog
@@ -73,7 +78,9 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                 ENABLED,
                 subtitleResId,
                 bluetoothTileDialogCallback,
+                fakeSystemClock,
                 uiEventLogger,
+                logger,
                 mContext
             )
         icon = Pair(drawable, DEVICE_NAME)
@@ -109,7 +116,9 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                 ENABLED,
                 subtitleResId,
                 bluetoothTileDialogCallback,
+                fakeSystemClock,
                 uiEventLogger,
+                logger,
                 mContext
             )
         bluetoothTileDialog.show()
@@ -138,7 +147,9 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                     ENABLED,
                     subtitleResId,
                     bluetoothTileDialogCallback,
+                    fakeSystemClock,
                     uiEventLogger,
+                    logger,
                     mContext
                 )
                 .Adapter(bluetoothTileDialogCallback)
@@ -162,7 +173,9 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                     ENABLED,
                     subtitleResId,
                     bluetoothTileDialogCallback,
+                    fakeSystemClock,
                     uiEventLogger,
+                    logger,
                     mContext
                 )
                 .Adapter(bluetoothTileDialogCallback)
@@ -182,7 +195,9 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                 ENABLED,
                 subtitleResId,
                 bluetoothTileDialogCallback,
+                fakeSystemClock,
                 uiEventLogger,
+                logger,
                 mContext
             )
         bluetoothTileDialog.show()

@@ -77,6 +77,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
+    @Mock private lateinit var logger: BluetoothTileDialogLogger
+
     private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var dispatcher: CoroutineDispatcher
     private lateinit var testScope: TestScope
@@ -92,7 +94,9 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                 bluetoothStateInteractor,
                 dialogLaunchAnimator,
                 activityStarter,
+                fakeSystemClock,
                 uiEventLogger,
+                logger,
                 testScope.backgroundScope,
                 dispatcher,
             )

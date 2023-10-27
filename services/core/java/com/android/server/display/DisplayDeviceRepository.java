@@ -24,6 +24,7 @@ import android.view.DisplayAddress;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.display.DisplayManagerService.SyncRoot;
+import com.android.server.display.utils.DebugUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,10 @@ import java.util.function.Consumer;
  */
 class DisplayDeviceRepository implements DisplayAdapter.Listener {
     private static final String TAG = "DisplayDeviceRepository";
-    private static final Boolean DEBUG = false;
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayDeviceRepository DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     public static final int DISPLAY_DEVICE_EVENT_ADDED = 1;
     public static final int DISPLAY_DEVICE_EVENT_REMOVED = 3;

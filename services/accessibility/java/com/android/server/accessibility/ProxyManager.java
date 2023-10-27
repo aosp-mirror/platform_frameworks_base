@@ -101,6 +101,8 @@ public class ProxyManager {
     private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener
             mAppsOnVirtualDeviceListener;
 
+    private VirtualDeviceManager.VirtualDeviceListener mVirtualDeviceListener;
+
     /**
      * Callbacks into AccessibilityManagerService.
      */
@@ -189,6 +191,9 @@ public class ProxyManager {
                     }
                 }
             }
+            if (mProxyA11yServiceConnections.size() == 1) {
+                registerVirtualDeviceListener();
+            }
         }
 
         // If the client dies, make sure to remove the connection.
@@ -208,6 +213,31 @@ public class ProxyManager {
             }
         });
         connection.initializeServiceInterface(client);
+    }
+
+    private void registerVirtualDeviceListener() {
+        VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
+        if (vdm == null || !android.companion.virtual.flags.Flags.vdmPublicApis()) {
+            return;
+        }
+        if (mVirtualDeviceListener == null) {
+            mVirtualDeviceListener = new VirtualDeviceManager.VirtualDeviceListener() {
+                @Override
+                public void onVirtualDeviceClosed(int deviceId) {
+                    clearConnections(deviceId);
+                }
+            };
+        }
+
+        vdm.registerVirtualDeviceListener(mContext.getMainExecutor(), mVirtualDeviceListener);
+    }
+
+    private void unregisterVirtualDeviceListener() {
+        VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
+        if (vdm == null || !android.companion.virtual.flags.Flags.vdmPublicApis()) {
+            return;
+        }
+        vdm.unregisterVirtualDeviceListener(mVirtualDeviceListener);
     }
 
     /**
@@ -258,6 +288,9 @@ public class ProxyManager {
                 deviceId = mProxyA11yServiceConnections.get(displayId).getDeviceId();
                 mProxyA11yServiceConnections.remove(displayId);
                 removedFromConnections = true;
+                if (mProxyA11yServiceConnections.size() == 0) {
+                    unregisterVirtualDeviceListener();
+                }
             }
         }
 

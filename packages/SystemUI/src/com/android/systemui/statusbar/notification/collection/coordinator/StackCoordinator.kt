@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
@@ -25,6 +23,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.util.traceSection
@@ -38,7 +37,6 @@ import javax.inject.Inject
 class StackCoordinator
 @Inject
 internal constructor(
-    private val featureFlags: FeatureFlagsClassic,
     private val groupExpansionManagerImpl: GroupExpansionManagerImpl,
     private val notificationIconAreaController: NotificationIconAreaController,
     private val renderListInteractor: RenderNotificationListInteractor,
@@ -52,7 +50,7 @@ internal constructor(
     fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
         traceSection("StackCoordinator.onAfterRenderList") {
             controller.setNotifStats(calculateNotifStats(entries))
-            if (featureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+            if (NotificationIconContainerRefactor.isEnabled) {
                 renderListInteractor.setRenderedList(entries)
             } else {
                 notificationIconAreaController.updateNotificationIcons(entries)

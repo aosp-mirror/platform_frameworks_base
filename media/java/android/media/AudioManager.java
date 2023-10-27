@@ -20,6 +20,8 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 
+import static com.android.media.audio.flags.Flags.autoPublicVolumeApiHardening;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -1060,8 +1062,17 @@ public class AudioManager {
      * @see #isVolumeFixed()
      */
     public void adjustVolume(int direction, @PublicVolumeFlags int flags) {
-        MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
-        helper.sendAdjustVolumeBy(USE_DEFAULT_STREAM_TYPE, direction, flags);
+        if (autoPublicVolumeApiHardening()) {
+            final IAudioService service = getService();
+            try {
+                service.adjustVolume(direction, flags);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
+            helper.sendAdjustVolumeBy(USE_DEFAULT_STREAM_TYPE, direction, flags);
+        }
     }
 
     /**
@@ -1090,8 +1101,17 @@ public class AudioManager {
      */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType,
             @PublicVolumeFlags int flags) {
-        MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
-        helper.sendAdjustVolumeBy(suggestedStreamType, direction, flags);
+        if (autoPublicVolumeApiHardening()) {
+            final IAudioService service = getService();
+            try {
+                service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
+            helper.sendAdjustVolumeBy(suggestedStreamType, direction, flags);
+        }
     }
 
     /** @hide */

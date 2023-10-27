@@ -36,18 +36,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
-import androidx.preference.SwitchPreference;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
- * Version of SwitchPreference that can be disabled by a device admin
+ * Version of SwitchPreferenceCompat that can be disabled by a device admin
  * using a user restriction.
  */
-public class RestrictedSwitchPreference extends SwitchPreference {
+public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
     RestrictedPreferenceHelper mHelper;
     AppOpsManager mAppOpsManager;
     boolean mUseAdditionalSummary = false;
@@ -93,8 +92,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     }
 
     public RestrictedSwitchPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.switchPreferenceStyle,
-                android.R.attr.switchPreferenceStyle));
+        this(context, attrs, androidx.preference.R.attr.switchPreferenceCompatStyle);
     }
 
     public RestrictedSwitchPreference(Context context) {
@@ -113,7 +111,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        final View switchView = holder.findViewById(android.R.id.switch_widget);
+        final View switchView = holder.findViewById(androidx.preference.R.id.switchWidget);
         if (switchView != null) {
             final View rootView = switchView.getRootView();
             rootView.setFilterTouchesWhenObscured(true);

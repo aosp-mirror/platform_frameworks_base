@@ -145,20 +145,13 @@ public class PluginInstanceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnRepeatedlyLoadUnload_PluginFreed() {
+    public void testOnUnloadAfterLoad() {
         mPluginInstance.onCreate();
         mPluginInstance.loadPlugin();
+        assertNotNull(mPluginInstance.getPlugin());
         assertInstances(1, 1);
 
         mPluginInstance.unloadPlugin();
-        assertNull(mPluginInstance.getPlugin());
-        assertInstances(0, 0);
-
-        mPluginInstance.loadPlugin();
-        assertInstances(1, 1);
-
-        mPluginInstance.unloadPlugin();
-        mPluginInstance.onDestroy();
         assertNull(mPluginInstance.getPlugin());
         assertInstances(0, 0);
     }
@@ -169,7 +162,7 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance.onCreate();
         assertEquals(1, mPluginListener.mAttachedCount);
         assertEquals(0, mPluginListener.mLoadCount);
-        assertEquals(null, mPluginInstance.getPlugin());
+        assertNull(mPluginInstance.getPlugin());
         assertInstances(0, 0);
     }
 

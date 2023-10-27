@@ -180,7 +180,7 @@ public class MultiStateStatsTest {
 
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw, true);
-        multiStateStats.dump(pw);
+        multiStateStats.dump(pw, Arrays::toString);
         assertThat(sw.toString()).isEqualTo(
                 "plugged-in fg [25, 50]\n"
                 + "on-battery fg [25, 50]\n"

@@ -35,8 +35,8 @@
 
         <ImageView
             android:id="@+id/application_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/desktop_mode_caption_icon_radius"
+            android:layout_height="@dimen/desktop_mode_caption_icon_radius"
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/app_icon_text" />
 

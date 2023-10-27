@@ -16,13 +16,16 @@
 package com.android.server.power.stats;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.BatteryConsumer;
 
 import com.android.internal.os.MultiStateStats;
+import com.android.internal.os.PowerStats;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -73,6 +76,7 @@ public class AggregatedPowerStatsConfig {
         private final int mPowerComponentId;
         private @TrackedState int[] mTrackedDeviceStates;
         private @TrackedState int[] mTrackedUidStates;
+        private AggregatedPowerStatsProcessor mProcessor = NO_OP_PROCESSOR;
 
         PowerComponent(int powerComponentId) {
             this.mPowerComponentId = powerComponentId;
@@ -91,6 +95,16 @@ public class AggregatedPowerStatsConfig {
          */
         public PowerComponent trackUidStates(@TrackedState int... states) {
             mTrackedUidStates = states;
+            return this;
+        }
+
+        /**
+         * Takes an object that should be invoked for every aggregated stats span
+         * before giving the aggregates stats to consumers. The processor can complete the
+         * aggregation process, for example by computing estimated power usage.
+         */
+        public PowerComponent setProcessor(@NonNull AggregatedPowerStatsProcessor processor) {
+            mProcessor = processor;
             return this;
         }
 
@@ -123,6 +137,11 @@ public class AggregatedPowerStatsConfig {
             };
         }
 
+        @NonNull
+        public AggregatedPowerStatsProcessor getProcessor() {
+            return mProcessor;
+        }
+
         private boolean isTracked(int[] trackedStates, int state) {
             if (trackedStates == null) {
                 return false;
@@ -153,4 +172,21 @@ public class AggregatedPowerStatsConfig {
     public List<PowerComponent> getPowerComponentsAggregatedStatsConfigs() {
         return mPowerComponents;
     }
+
+    private static final AggregatedPowerStatsProcessor NO_OP_PROCESSOR =
+            new AggregatedPowerStatsProcessor() {
+                @Override
+                public void finish(PowerComponentAggregatedPowerStats stats) {
+                }
+
+                @Override
+                public String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
+                    return Arrays.toString(stats);
+                }
+
+                @Override
+                public String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
+                    return Arrays.toString(stats);
+                }
+            };
 }

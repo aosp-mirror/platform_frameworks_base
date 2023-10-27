@@ -41,6 +41,7 @@ import android.view.SurfaceControl;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -65,7 +66,9 @@ import java.util.Objects;
 final class WifiDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "WifiDisplayAdapter";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.WifiDisplayAdapter DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     private static final int MSG_SEND_STATUS_CHANGE_BROADCAST = 1;
 

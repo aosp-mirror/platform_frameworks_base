@@ -148,12 +148,13 @@ constructor(
      *
      * TODO(b/300258424) remove all but the first sentence of this comment
      */
-    val isAnyExpanded: Flow<Boolean> =
+    val isAnyExpanded: StateFlow<Boolean> =
         if (sceneContainerFlags.isEnabled()) {
-            anyExpansion.map { it > 0f }.distinctUntilChanged()
-        } else {
-            repository.legacyExpandedOrAwaitingInputTransfer
-        }
+                anyExpansion.map { it > 0f }.distinctUntilChanged()
+            } else {
+                repository.legacyExpandedOrAwaitingInputTransfer
+            }
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     /**
      * Whether the user is expanding or collapsing the shade with user input. This will be true even
@@ -184,7 +185,7 @@ constructor(
      * but a transition they initiated is still animating.
      */
     val isUserInteracting: Flow<Boolean> =
-        combine(isUserInteractingWithShade, isUserInteractingWithShade) { shade, qs -> shade || qs }
+        combine(isUserInteractingWithShade, isUserInteractingWithQs) { shade, qs -> shade || qs }
             .distinctUntilChanged()
 
     /** Are touches allowed on the notification panel? */

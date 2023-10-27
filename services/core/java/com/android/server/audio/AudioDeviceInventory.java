@@ -924,9 +924,6 @@ public class AudioDeviceInventory {
             @NonNull List<AudioDeviceAttributes> devices) {
         int status = AudioSystem.ERROR;
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
-                    "setPreferredDevicesForStrategy, strategy: " + strategy
-                            + " devices: " + devices)).printLog(TAG));
             status = setDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices, false /* internal */);
         }
@@ -952,10 +949,6 @@ public class AudioDeviceInventory {
         int status = AudioSystem.ERROR;
 
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
-                            "removePreferredDevicesForStrategy, strategy: "
-                            + strategy)).printLog(TAG));
-
             status = clearDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_PREFERRED, false /*internal */);
         }
@@ -974,10 +967,6 @@ public class AudioDeviceInventory {
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
             List<AudioDeviceAttributes> devices = new ArrayList<>();
             devices.add(device);
-
-            AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
-                            "setDeviceAsNonDefaultForStrategyAndSave, strategy: " + strategy
-                            + " device: " + device)).printLog(TAG));
             status = addDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices, false /* internal */);
         }
@@ -995,11 +984,6 @@ public class AudioDeviceInventory {
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
             List<AudioDeviceAttributes> devices = new ArrayList<>();
             devices.add(device);
-
-            AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
-                            "removeDeviceAsNonDefaultForStrategyAndSave, strategy: "
-                            + strategy + " devices: " + device)).printLog(TAG));
-
             status = removeDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices, false /* internal */);
         }

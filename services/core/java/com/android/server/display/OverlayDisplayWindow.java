@@ -35,6 +35,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.android.internal.util.DumpUtils;
+import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
 
@@ -47,8 +48,10 @@ import java.io.PrintWriter;
  */
 final class OverlayDisplayWindow implements DumpUtils.Dump {
     private static final String TAG = "OverlayDisplayWindow";
-    private static final boolean DEBUG = false;
 
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.OverlayDisplayWindow DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
     private final float INITIAL_SCALE = 0.5f;
     private final float MIN_SCALE = 0.3f;
     private final float MAX_SCALE = 1.0f;

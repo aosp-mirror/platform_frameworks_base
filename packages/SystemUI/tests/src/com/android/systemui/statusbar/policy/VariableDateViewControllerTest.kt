@@ -23,26 +23,27 @@ import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.Date
 
 @RunWith(AndroidTestingRunner::class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class VariableDateViewControllerTest : SysuiTestCase() {
 
@@ -57,12 +58,15 @@ class VariableDateViewControllerTest : SysuiTestCase() {
     private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock
     private lateinit var view: VariableDateView
+    @Mock
+    private lateinit var shadeInteractor: ShadeInteractor
     @Captor
     private lateinit var onMeasureListenerCaptor: ArgumentCaptor<VariableDateView.OnMeasureListener>
 
+    private val qsExpansion = MutableStateFlow(0F)
+
     private var lastText: String? = null
 
-    private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
     private lateinit var systemClock: FakeSystemClock
     private lateinit var testableLooper: TestableLooper
     private lateinit var testableHandler: Handler
@@ -80,7 +84,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
         systemClock = FakeSystemClock()
         systemClock.setCurrentTimeMillis(TIME_STAMP)
 
-        shadeExpansionStateManager = ShadeExpansionStateManager()
+        `when`(shadeInteractor.qsExpansion).thenReturn(qsExpansion)
 
         `when`(view.longerPattern).thenReturn(LONG_PATTERN)
         `when`(view.shorterPattern).thenReturn(SHORT_PATTERN)
@@ -91,6 +95,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
             Unit
         }
         `when`(view.isAttachedToWindow).thenReturn(true)
+        `when`(view.viewTreeObserver).thenReturn(mock())
 
         val date = Date(TIME_STAMP)
         longText = getTextForFormat(date, getFormatFromPattern(LONG_PATTERN))
@@ -103,12 +108,12 @@ class VariableDateViewControllerTest : SysuiTestCase() {
         }
 
         controller = VariableDateViewController(
-                systemClock,
-                broadcastDispatcher,
-                shadeExpansionStateManager,
-                mock(),
-                testableHandler,
-                view
+            systemClock,
+            broadcastDispatcher,
+            shadeInteractor,
+            mock(),
+            testableHandler,
+            view
         )
 
         controller.init()
@@ -180,7 +185,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testQsExpansionTrue_ignoreAtMostMeasureRequests() {
-        shadeExpansionStateManager.onQsExpansionFractionChanged(0f)
+        qsExpansion.value = 0f
 
         onMeasureListenerCaptor.value.onMeasureAction(
                 getTextLength(shortText).toInt(),
@@ -195,7 +200,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testQsExpansionFalse_acceptAtMostMeasureRequests() {
-        shadeExpansionStateManager.onQsExpansionFractionChanged(1f)
+        qsExpansion.value = 1f
 
         onMeasureListenerCaptor.value.onMeasureAction(
                 getTextLength(shortText).toInt(),

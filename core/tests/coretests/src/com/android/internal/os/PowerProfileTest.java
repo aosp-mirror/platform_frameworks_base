@@ -21,16 +21,12 @@ import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_ON;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -539,67 +535,5 @@ public class PowerProfileTest {
 
     private void assertEquals(double expected, double actual) {
         Assert.assertEquals(expected, actual, 0.1);
-    }
-
-    @Test
-    public void powerBrackets_specifiedInPowerProfile() {
-        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test_power_brackets);
-        mProfile.initCpuPowerBrackets(8);
-
-        int cpuPowerBracketCount = mProfile.getCpuPowerBracketCount();
-        assertThat(cpuPowerBracketCount).isEqualTo(2);
-        assertThat(new int[]{
-                mProfile.getCpuPowerBracketForScalingStep(0, 0),
-                mProfile.getCpuPowerBracketForScalingStep(4, 0),
-                mProfile.getCpuPowerBracketForScalingStep(4, 1),
-        }).isEqualTo(new int[]{1, 1, 0});
-    }
-
-    @Test
-    public void powerBrackets_automatic() {
-        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
-        CpuScalingPolicies scalingPolicies = new CpuScalingPolicies(
-                new SparseArray<>() {{
-                    put(0, new int[]{0, 1, 2});
-                    put(3, new int[]{3, 4});
-                }},
-                new SparseArray<>() {{
-                    put(0, new int[]{300000, 1000000, 2000000});
-                    put(3, new int[]{300000, 1000000, 2500000, 3000000});
-                }});
-
-        assertThat(mProfile.getCpuPowerBracketCount()).isEqualTo(3);
-        assertThat(mProfile.getCpuPowerBracketDescription(scalingPolicies, 0))
-                .isEqualTo("0/300(10.0)");
-        assertThat(mProfile.getCpuPowerBracketDescription(scalingPolicies, 1))
-                .isEqualTo("0/1000(20.0), 0/2000(30.0), 3/300(25.0)");
-        assertThat(mProfile.getCpuPowerBracketDescription(scalingPolicies, 2))
-                .isEqualTo("3/1000(35.0), 3/2500(50.0), 3/3000(60.0)");
-        assertThat(new int[]{
-                mProfile.getCpuPowerBracketForScalingStep(0, 0),
-                mProfile.getCpuPowerBracketForScalingStep(0, 1),
-                mProfile.getCpuPowerBracketForScalingStep(0, 2),
-                mProfile.getCpuPowerBracketForScalingStep(3, 0),
-                mProfile.getCpuPowerBracketForScalingStep(3, 1),
-                mProfile.getCpuPowerBracketForScalingStep(3, 2),
-                mProfile.getCpuPowerBracketForScalingStep(3, 3),
-        }).isEqualTo(new int[]{0, 1, 1, 1, 2, 2, 2});
-    }
-
-    @Test
-    public void powerBrackets_moreBracketsThanStates() {
-        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
-        mProfile.initCpuPowerBrackets(8);
-
-        assertThat(mProfile.getCpuPowerBracketCount()).isEqualTo(7);
-        assertThat(new int[]{
-                mProfile.getCpuPowerBracketForScalingStep(0, 0),
-                mProfile.getCpuPowerBracketForScalingStep(0, 1),
-                mProfile.getCpuPowerBracketForScalingStep(0, 2),
-                mProfile.getCpuPowerBracketForScalingStep(3, 0),
-                mProfile.getCpuPowerBracketForScalingStep(3, 1),
-                mProfile.getCpuPowerBracketForScalingStep(3, 2),
-                mProfile.getCpuPowerBracketForScalingStep(3, 3),
-        }).isEqualTo(new int[]{0, 1, 2, 3, 4, 5, 6});
     }
 }

@@ -16,22 +16,21 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
+import android.os.UserHandle
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.FakeDisabledByPolicyInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
-import com.android.systemui.qs.tiles.base.viewmodel.BaseQSTileViewModel
+import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelImpl
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -77,9 +76,6 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
         testScope.runTest {
             assertThat(fakeQSTileDataInteractor.dataRequests).isEmpty()
 
-            underTest.onLifecycle(QSTileLifecycle.ALIVE)
-            underTest.onUserIdChanged(1)
-
             assertThat(fakeQSTileDataInteractor.dataRequests).isEmpty()
 
             underTest.state.launchIn(backgroundScope)
@@ -87,20 +83,22 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
 
             assertThat(fakeQSTileDataInteractor.dataRequests).isNotEmpty()
             assertThat(fakeQSTileDataInteractor.dataRequests.first())
-                .isEqualTo(FakeQSTileDataInteractor.DataRequest(1))
+                .isEqualTo(FakeQSTileDataInteractor.DataRequest(UserHandle.of(0)))
         }
 
     private fun createViewModel(
         scope: TestScope,
         config: QSTileConfig = TEST_QS_TILE_CONFIG,
     ): QSTileViewModel =
-        BaseQSTileViewModel(
+        QSTileViewModelImpl(
             config,
-            fakeQSTileUserActionInteractor,
-            fakeQSTileDataInteractor,
-            object : QSTileDataToStateMapper<Any> {
-                override fun map(config: QSTileConfig, data: Any): QSTileState =
-                    QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {}
+            { fakeQSTileUserActionInteractor },
+            { fakeQSTileDataInteractor },
+            {
+                object : QSTileDataToStateMapper<Any> {
+                    override fun map(config: QSTileConfig, data: Any): QSTileState =
+                        QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {}
+                }
             },
             fakeDisabledByPolicyInteractor,
             fakeUserRepository,
@@ -114,12 +112,6 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
 
     private companion object {
 
-        val TEST_QS_TILE_CONFIG =
-            QSTileConfig(
-                TileSpec.create("default"),
-                Icon.Resource(0, null),
-                0,
-                InstanceId.fakeInstanceId(0),
-            )
+        val TEST_QS_TILE_CONFIG = QSTileConfigTestBuilder.build {}
     }
 }

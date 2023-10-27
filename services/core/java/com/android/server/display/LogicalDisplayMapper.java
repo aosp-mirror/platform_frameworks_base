@@ -43,6 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
+import com.android.server.display.utils.DebugUtils;
 import com.android.server.utils.FoldSettingProvider;
 
 import java.io.PrintWriter;
@@ -63,7 +64,9 @@ import java.util.function.Consumer;
 class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private static final String TAG = "LogicalDisplayMapper";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.LogicalDisplayMapper DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     public static final int LOGICAL_DISPLAY_EVENT_ADDED = 1;
     public static final int LOGICAL_DISPLAY_EVENT_CHANGED = 2;

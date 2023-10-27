@@ -15,9 +15,8 @@
  */
 package com.android.systemui.statusbar.phone
 
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconAreaControllerViewBinderWrapperImpl
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
@@ -26,11 +25,10 @@ import javax.inject.Provider
 object NotificationIconAreaControllerModule {
     @Provides
     fun provideNotificationIconAreaControllerImpl(
-        featureFlags: FeatureFlags,
         legacyProvider: Provider<LegacyNotificationIconAreaControllerImpl>,
         newProvider: Provider<NotificationIconAreaControllerViewBinderWrapperImpl>,
     ): NotificationIconAreaController =
-        if (featureFlags.isEnabled(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR)) {
+        if (NotificationIconContainerRefactor.isEnabled) {
             newProvider.get()
         } else {
             legacyProvider.get()

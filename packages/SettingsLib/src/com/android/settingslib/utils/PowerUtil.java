@@ -44,45 +44,6 @@ public class PowerUtil {
     private static final long ONE_MIN_MILLIS = TimeUnit.MINUTES.toMillis(1);
 
     /**
-     * This method produces the text used in various places throughout the system to describe the
-     * remaining battery life of the phone in a consistent manner.
-     *
-     * @param context
-     * @param drainTimeMs The estimated time remaining before the phone dies in milliseconds.
-     * @param percentageString An optional percentage of battery remaining string.
-     * @param basedOnUsage Whether this estimate is based on usage or simple extrapolation.
-     * @return a properly formatted and localized string describing how much time remains
-     * before the battery runs out.
-     */
-    public static String getBatteryRemainingStringFormatted(Context context, long drainTimeMs,
-            @Nullable String percentageString, boolean basedOnUsage) {
-        if (drainTimeMs > 0) {
-            if (drainTimeMs <= SEVEN_MINUTES_MILLIS) {
-                // show a imminent shutdown warning if less than 7 minutes remain
-                return getShutdownImminentString(context, percentageString);
-            } else if (drainTimeMs <= FIFTEEN_MINUTES_MILLIS) {
-                // show a less than 15 min remaining warning if appropriate
-                CharSequence timeString = StringUtil.formatElapsedTime(context,
-                        FIFTEEN_MINUTES_MILLIS,
-                        false /* withSeconds */, false /* collapseTimeUnit */);
-                return getUnderFifteenString(context, timeString, percentageString);
-            } else if (drainTimeMs >= TWO_DAYS_MILLIS) {
-                // just say more than two day if over 48 hours
-                return getMoreThanTwoDaysString(context, percentageString);
-            } else if (drainTimeMs >= ONE_DAY_MILLIS) {
-                // show remaining days & hours if more than a day
-                return getMoreThanOneDayString(context, drainTimeMs,
-                        percentageString, basedOnUsage);
-            } else {
-                // show the time of day we think you'll run out
-                return getRegularTimeRemainingString(context, drainTimeMs,
-                        percentageString, basedOnUsage);
-            }
-        }
-        return null;
-    }
-
-    /**
      * Method to produce a shortened string describing the remaining battery. Suitable for Quick
      * Settings and other areas where space is constrained.
      *
@@ -126,14 +87,6 @@ public class PowerUtil {
             return getMoreThanOneDayShortString(context, drainTimeMs,
                 R.string.power_remaining_only_more_than_subtext);
         }
-    }
-
-    private static String getShutdownImminentString(Context context, String percentageString) {
-        return TextUtils.isEmpty(percentageString)
-                ? context.getString(R.string.power_remaining_duration_only_shutdown_imminent)
-                : context.getString(
-                        R.string.power_remaining_duration_shutdown_imminent,
-                        percentageString);
     }
 
     private static String getUnderFifteenString(Context context, CharSequence timeString,

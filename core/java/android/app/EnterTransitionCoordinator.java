@@ -706,8 +706,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private boolean allowOverlappingTransitions() {
-        return mIsReturning ? getWindow().getAllowReturnTransitionOverlap()
-                : getWindow().getAllowEnterTransitionOverlap();
+        final Window window = getWindow();
+        if (window == null) {
+            return false;
+        }
+        return mIsReturning ? window.getAllowReturnTransitionOverlap()
+                : window.getAllowEnterTransitionOverlap();
     }
 
     private void startRejectedAnimations(final ArrayList<View> rejectedSnapshots) {

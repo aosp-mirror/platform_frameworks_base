@@ -64,7 +64,6 @@ import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManagerInternal;
-import android.companion.virtual.VirtualDeviceManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -1071,18 +1070,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mContext.registerReceiverAsUser(receiver, UserHandle.ALL, filter, null, mMainHandler,
                 Context.RECEIVER_EXPORTED);
 
-        if (android.companion.virtual.flags.Flags.vdmPublicApis()) {
-            VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
-            if (vdm != null) {
-                vdm.registerVirtualDeviceListener(mContext.getMainExecutor(),
-                        new VirtualDeviceManager.VirtualDeviceListener() {
-                            @Override
-                            public void onVirtualDeviceClosed(int deviceId) {
-                                mProxyManager.clearConnections(deviceId);
-                            }
-                        });
-            }
-        } else {
+        if (!android.companion.virtual.flags.Flags.vdmPublicApis()) {
             final BroadcastReceiver virtualDeviceReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {

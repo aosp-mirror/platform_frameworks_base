@@ -175,6 +175,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     }
 
     @Override
+    public void removeSuppressor(NotificationInterruptSuppressor suppressor) {
+        mSuppressors.remove(suppressor);
+    }
+
+    @Override
     public boolean shouldBubbleUp(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
 
@@ -505,7 +510,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
         if (entry.getRanking().getLockscreenVisibilityOverride()
                 == Notification.VISIBILITY_PRIVATE) {
-            if (log) mLogger.logNoPulsingNotificationHidden(entry);
+            if (log) mLogger.logNoPulsingNotificationHiddenOverride(entry);
             return false;
         }
 
@@ -536,7 +541,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
-            if (log) mLogger.keyguardHideNotification(entry);
+            if (log) mLogger.logNoAlertingNotificationHidden(entry);
             return false;
         }
 

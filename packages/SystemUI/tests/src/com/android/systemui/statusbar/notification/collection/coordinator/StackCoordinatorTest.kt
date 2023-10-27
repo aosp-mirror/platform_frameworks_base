@@ -19,8 +19,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags
+import com.android.systemui.flags.setFlagValue
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -30,6 +29,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
@@ -39,6 +39,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations.initMocks
@@ -59,15 +60,18 @@ class StackCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var stackController: NotifStackController
     @Mock private lateinit var section: NotifSection
 
-    val featureFlags =
-        FakeFeatureFlagsClassic().apply { setDefault(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR) }
-
     @Before
     fun setUp() {
         initMocks(this)
+        setUp(NotificationIconContainerRefactor.FLAG_NAME to null)
+        entry = NotificationEntryBuilder().setSection(section).build()
+    }
+
+    private fun setUp(vararg flags: Pair<String, Boolean?>) {
+        flags.forEach { (name, value) -> mSetFlagsRule.setFlagValue(name, value) }
+        reset(pipeline)
         coordinator =
             StackCoordinator(
-                featureFlags,
                 groupExpansionManagerImpl,
                 notificationIconAreaController,
                 renderListInteractor,
@@ -76,19 +80,18 @@ class StackCoordinatorTest : SysuiTestCase() {
         afterRenderListListener = withArgCaptor {
             verify(pipeline).addOnAfterRenderListListener(capture())
         }
-        entry = NotificationEntryBuilder().setSection(section).build()
     }
 
     @Test
     fun testUpdateNotificationIcons() {
-        featureFlags.set(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR, false)
+        setUp(NotificationIconContainerRefactor.FLAG_NAME to false)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(notificationIconAreaController).updateNotificationIcons(eq(listOf(entry)))
     }
 
     @Test
     fun testSetRenderedListOnInteractor() {
-        featureFlags.set(Flags.NOTIFICATION_ICON_CONTAINER_REFACTOR, true)
+        setUp(NotificationIconContainerRefactor.FLAG_NAME to true)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(renderListInteractor).setRenderedList(eq(listOf(entry)))
     }

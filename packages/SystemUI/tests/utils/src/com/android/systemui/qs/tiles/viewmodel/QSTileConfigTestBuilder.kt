@@ -16,10 +16,7 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
-import androidx.annotation.StringRes
 import com.android.internal.logging.InstanceId
-import com.android.systemui.common.shared.model.ContentDescription
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.qs.pipeline.shared.TileSpec
 
 object QSTileConfigTestBuilder {
@@ -29,8 +26,7 @@ object QSTileConfigTestBuilder {
 
     class BuildingScope {
         var tileSpec: TileSpec = TileSpec.create("test_spec")
-        var tileIcon: Icon = Icon.Resource(0, ContentDescription.Resource(0))
-        @StringRes var tileLabel: Int = 0
+        var uiConfig: QSTileUIConfig = QSTileUIConfig.Empty
         var instanceId: InstanceId = InstanceId.fakeInstanceId(0)
         var metricsSpec: String = tileSpec.spec
         var policy: QSTilePolicy = QSTilePolicy.NoRestrictions
@@ -38,8 +34,7 @@ object QSTileConfigTestBuilder {
         fun build() =
             QSTileConfig(
                 tileSpec,
-                tileIcon,
-                tileLabel,
+                uiConfig,
                 instanceId,
                 metricsSpec,
                 policy,

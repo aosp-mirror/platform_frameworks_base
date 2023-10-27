@@ -27,10 +27,9 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Enforces daily limits on the egress of {@link HotwordTrainingData} from the hotword detection
@@ -111,9 +110,9 @@ public class HotwordTrainingDataLimitEnforcer {
     }
 
     private boolean incrementTrainingDataEgressCountLocked() {
-        SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        dt.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String currentDate = dt.format(new Date());
+        LocalDate utcDate = LocalDate.now(ZoneOffset.UTC);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String currentDate = utcDate.format(formatter);
 
         String storedDate = mSharedPreferences.getString(TRAINING_DATA_EGRESS_DATE, "");
         int storedCount = mSharedPreferences.getInt(TRAINING_DATA_EGRESS_COUNT, 0);

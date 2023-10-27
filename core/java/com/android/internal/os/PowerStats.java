@@ -55,12 +55,12 @@ public final class PowerStats {
     private static final int STATS_ARRAY_LENGTH_SHIFT =
             Integer.numberOfTrailingZeros(STATS_ARRAY_LENGTH_MASK);
     public static final int MAX_STATS_ARRAY_LENGTH =
-            2 ^ Integer.bitCount(STATS_ARRAY_LENGTH_MASK) - 1;
+            (1 << Integer.bitCount(STATS_ARRAY_LENGTH_MASK)) - 1;
     private static final int UID_STATS_ARRAY_LENGTH_MASK = 0x00FF0000;
     private static final int UID_STATS_ARRAY_LENGTH_SHIFT =
             Integer.numberOfTrailingZeros(UID_STATS_ARRAY_LENGTH_MASK);
     public static final int MAX_UID_STATS_ARRAY_LENGTH =
-            (2 ^ Integer.bitCount(UID_STATS_ARRAY_LENGTH_MASK)) - 1;
+            (1 << Integer.bitCount(UID_STATS_ARRAY_LENGTH_MASK)) - 1;
 
     /**
      * Descriptor of the stats collected for a given power component (e.g. CPU, WiFi etc).

@@ -36,6 +36,7 @@ import android.graphics.drawable.Drawable
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 
 enum class DeviceItemType {
+    ACTIVE_MEDIA_BLUETOOTH_DEVICE,
     AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
     CONNECTED_BLUETOOTH_DEVICE,
     SAVED_BLUETOOTH_DEVICE,

@@ -1097,23 +1097,22 @@ class ActivityStarter {
                         "shouldAbortBackgroundActivityStart");
                 BackgroundActivityStartController balController =
                         mSupervisor.getBackgroundActivityLaunchController();
-                balCode =
+                BackgroundActivityStartController.BalVerdict balVerdict =
                         balController.checkBackgroundActivityStart(
-                                callingUid,
-                                callingPid,
-                                callingPackage,
-                                realCallingUid,
-                                realCallingPid,
-                                callerApp,
-                                request.originatingPendingIntent,
-                                request.backgroundStartPrivileges,
-                                intent,
-                                checkedOptions);
-                if (balCode != BAL_ALLOW_DEFAULT) {
-                    request.logMessage.append(" (").append(
-                                    BackgroundActivityStartController.balCodeToString(balCode))
-                            .append(")");
-                }
+                            callingUid,
+                            callingPid,
+                            callingPackage,
+                            realCallingUid,
+                            realCallingPid,
+                            callerApp,
+                            request.originatingPendingIntent,
+                            request.backgroundStartPrivileges,
+                            intent,
+                            checkedOptions);
+                balCode = balVerdict.getCode();
+                request.logMessage.append(" (").append(
+                                BackgroundActivityStartController.balCodeToString(balCode))
+                        .append(")");
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             }
