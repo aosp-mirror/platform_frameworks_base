@@ -2015,7 +2015,7 @@ public final class ProcessList {
             // the package was initially frozen through KILL_APPLICATION_MSG, so
             // it doesn't hurt to use it again.)
             mService.forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
-                    false, false, true, false, false, app.userId, "start failure");
+                    false, false, true, false, false, false, app.userId, "start failure");
             return false;
         }
     }
@@ -2086,7 +2086,7 @@ public final class ProcessList {
                         + app.processName, e);
                 app.setPendingStart(false);
                 mService.forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
-                        false, false, true, false, false, app.userId, "start failure");
+                        false, false, true, false, false, false, app.userId, "start failure");
             }
             return app.getPid() > 0;
         }
@@ -2119,7 +2119,7 @@ public final class ProcessList {
                     app.setPendingStart(false);
                     mService.forceStopPackageLocked(app.info.packageName,
                             UserHandle.getAppId(app.uid),
-                            false, false, true, false, false, app.userId, "start failure");
+                            false, false, true, false, false, false, app.userId, "start failure");
                 }
             }
         };

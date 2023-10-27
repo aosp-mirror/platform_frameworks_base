@@ -1885,7 +1885,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     int exitInfoReason = (int) args.arg3;
                     args.recycle();
                     forceStopPackageLocked(pkg, appId, false, false, true, false,
-                            false, userId, reason, exitInfoReason);
+                            false, false, userId, reason, exitInfoReason);
                 }
             } break;
 
@@ -3910,7 +3910,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 + packageName + ": " + e);
                     }
                     if (mUserController.isUserRunning(user, userRunningFlags)) {
-                        forceStopPackageLocked(packageName, pkgUid,
+                        forceStopPackageLocked(packageName, UserHandle.getAppId(pkgUid),
+                                false /* callerWillRestart */, false /* purgeCache */,
+                                true /* doIt */, false /* evenPersistent */,
+                                false /* uninstalling */, true /* packageStateStopped */, user,
                                 reason == null ? ("from pid " + callingPid) : reason);
                         finishForceStopPackageLocked(packageName, pkgUid);
                     }
@@ -4159,7 +4162,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     private void forceStopPackageLocked(final String packageName, int uid, String reason) {
         forceStopPackageLocked(packageName, UserHandle.getAppId(uid), false,
-                false, true, false, false, UserHandle.getUserId(uid), reason);
+                false, true, false, false, false, UserHandle.getUserId(uid), reason);
     }
 
     @GuardedBy("this")
@@ -4345,20 +4348,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean forceStopPackageLocked(String packageName, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
-            boolean evenPersistent, boolean uninstalling, int userId, String reasonString) {
-
+            boolean evenPersistent, boolean uninstalling, boolean packageStateStopped,
+            int userId, String reasonString) {
         int reason = packageName == null ? ApplicationExitInfo.REASON_USER_STOPPED
                 : ApplicationExitInfo.REASON_USER_REQUESTED;
         return forceStopPackageLocked(packageName, appId, callerWillRestart, purgeCache, doit,
-                evenPersistent, uninstalling, userId, reasonString, reason);
+                evenPersistent, uninstalling, packageStateStopped, userId, reasonString, reason);
 
     }
 
     @GuardedBy("this")
     final boolean forceStopPackageLocked(String packageName, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
-            boolean evenPersistent, boolean uninstalling, int userId, String reasonString,
-            int reason) {
+            boolean evenPersistent, boolean uninstalling, boolean packageStateStopped,
+            int userId, String reasonString, int reason) {
         int i;
 
         if (userId == UserHandle.USER_ALL && packageName == null) {
@@ -4439,7 +4442,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (packageName == null || uninstalling) {
+        if (packageName == null || uninstalling || packageStateStopped) {
             didSomething |= mPendingIntentController.removePendingIntentsForPackage(
                     packageName, userId, appId, doit);
         }
@@ -5144,7 +5147,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     for (String pkg : pkgs) {
                         synchronized (ActivityManagerService.this) {
                             if (forceStopPackageLocked(pkg, -1, false, false, false, false, false,
-                                    0, "query restart")) {
+                                    false, 0, "query restart")) {
                                 setResultCode(Activity.RESULT_OK);
                                 return;
                             }
@@ -7329,7 +7332,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mDebugTransient = !persistent;
                 if (packageName != null) {
                     forceStopPackageLocked(packageName, -1, false, false, true, true,
-                            false, UserHandle.USER_ALL, "set debug app");
+                            false, false, UserHandle.USER_ALL, "set debug app");
                 }
             }
         } finally {
@@ -14905,7 +14908,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (list != null && list.length > 0) {
                                 for (int i = 0; i < list.length; i++) {
                                     forceStopPackageLocked(list[i], -1, false, true, true,
-                                            false, false, userId, "storage unmount");
+                                            false, false, false, userId, "storage unmount");
                                 }
                                 mAtmInternal.cleanupRecentTasksForUser(UserHandle.USER_ALL);
                                 sendPackageBroadcastLocked(
@@ -14932,8 +14935,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     if (killProcess) {
                                         forceStopPackageLocked(ssp, UserHandle.getAppId(
                                                 intent.getIntExtra(Intent.EXTRA_UID, -1)),
-                                                false, true, true, false, fullUninstall, userId,
-                                                "pkg removed");
+                                                false, true, true, false, fullUninstall, false,
+                                                userId, "pkg removed");
                                         getPackageManagerInternal()
                                                 .onPackageProcessKilledForUninstall(ssp);
                                     } else {
@@ -15851,7 +15854,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else {
                     // Instrumentation can kill and relaunch even persistent processes
                     forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false,
-                            userId, "start instr");
+                            false, userId, "start instr");
                     // Inform usage stats to make the target package active
                     if (mUsageStatsService != null) {
                         mUsageStatsService.reportEvent(ii.targetPackage, userId,
@@ -15980,6 +15983,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         /* doIt= */ true,
                         /* evenPersistent= */ true,
                         /* uninstalling= */ false,
+                        /* packageStateStopped= */ false,
                         userId,
                         "start instr");
 
@@ -16150,8 +16154,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else if (!instr.mNoRestart) {
                 forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false,
-                        app.userId,
-                        "finished inst");
+                        false, app.userId, "finished inst");
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
