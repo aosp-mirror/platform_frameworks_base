@@ -506,6 +506,9 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(userId, "cannot get shouldHideFromSuggestions")) {
                 return false;
             }
+            if (Flags.archiving() && packageName != null && isPackageArchived(packageName, user)) {
+                return true;
+            }
             if (mPackageManagerInternal.filterAppAccess(
                     packageName, Binder.getCallingUid(), userId)) {
                 return false;
@@ -758,6 +761,10 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
+        private boolean isPackageArchived(@NonNull String packageName, UserHandle user) {
+            return !getApplicationInfoForArchivedApp(packageName, user).isEmpty();
+        }
+
         @NonNull
         private List<LauncherActivityInfoInternal> generateLauncherActivitiesForArchivedApp(
                 @Nullable String packageName, UserHandle user) {
@@ -969,11 +976,17 @@ public class LauncherAppsService extends SystemService {
             final int callingUid = injectBinderCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                final PackageInfo info = mPackageManagerInternal.getPackageInfo(packageName,
+                long callingFlag =
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        callingUid, user.getIdentifier());
-                return info != null && info.applicationInfo.enabled;
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+                if (Flags.archiving()) {
+                    callingFlag |= PackageManager.MATCH_ARCHIVED_PACKAGES;
+                }
+                final PackageInfo info =
+                        mPackageManagerInternal.getPackageInfo(
+                                packageName, callingFlag, callingUid, user.getIdentifier());
+                return info != null
+                        && (info.applicationInfo.enabled || info.applicationInfo.isArchived);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1439,7 +1452,18 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(user.getIdentifier(), "Cannot check component")) {
                 return false;
             }
-
+            if (Flags.archiving() && component != null && component.getPackageName() != null) {
+                List<LauncherActivityInfoInternal> archiveActivities =
+                        generateLauncherActivitiesForArchivedApp(component.getPackageName(), user);
+                if (!archiveActivities.isEmpty()) {
+                    for (int i = 0; i < archiveActivities.size(); i++) {
+                        if (archiveActivities.get(i).getComponentName().equals(component)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
             final int callingUid = injectBinderCallingUid();
             final int state = mPackageManagerInternal.getComponentEnabledSetting(component,
                     callingUid, user.getIdentifier());
