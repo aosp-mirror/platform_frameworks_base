@@ -74,6 +74,7 @@ import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
@@ -132,8 +133,10 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock private UserTracker mUserTracker;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
+    private final Executor mMainExecutor = MoreExecutors.directExecutor();
     private final Executor mBackgroundExecutor = MoreExecutors.directExecutor();
     private SceneTestUtils mUtils = new SceneTestUtils(this);
     private TestScope mTestScope = mUtils.getTestScope();
@@ -248,6 +251,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mConfigurationController,
                 mKeyguardViewMediator,
                 mKeyguardBypassController,
+                mMainExecutor,
                 mBackgroundExecutor,
                 mColorExtractor,
                 mDumpManager,
@@ -256,7 +260,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mAuthController,
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
-                () -> mSelectedUserInteractor) {
+                () -> mSelectedUserInteractor,
+                mUserTracker) {
                     @Override
                     protected boolean isDebuggable() {
                         return false;
