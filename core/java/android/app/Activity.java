@@ -9072,6 +9072,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @UnsupportedAppUsage
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_NFC_MAINLINE)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final boolean isResumed() {
         return mResumed;
