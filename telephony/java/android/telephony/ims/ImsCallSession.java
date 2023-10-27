@@ -29,6 +29,7 @@ import android.util.Log;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.ArrayList;
@@ -545,6 +546,11 @@ public class ImsCallSession {
             try {
                 iSession.setListener(mIImsCallSessionListenerProxy);
             } catch (RemoteException e) {
+                if (Flags.ignoreAlreadyTerminatedIncomingCallBeforeRegisteringListener()) {
+                    // Registering listener failed, so other operations are not allowed.
+                    Log.e(TAG, "ImsCallSession : " + e);
+                    mClosed = true;
+                }
             }
         } else {
             mClosed = true;
