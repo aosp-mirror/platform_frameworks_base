@@ -47,8 +47,7 @@ fun SinglePasswordScreen(
     columnState: ScalingLazyColumnState,
     onCloseApp: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SinglePasswordScreenViewModel =
-        viewModel(factory = SinglePasswordScreenViewModel.Factory),
+    viewModel: SinglePasswordScreenViewModel = viewModel(),
 ) {
     viewModel.initialize()
 
