@@ -26,6 +26,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
@@ -736,7 +737,7 @@ public class KeyguardManager {
      * @see #isKeyguardLocked()
      */
     public boolean isDeviceLocked() {
-        return isDeviceLocked(mContext.getUserId());
+        return isDeviceLocked(mContext.getUserId(), mContext.getDeviceId());
     }
 
     /**
@@ -746,8 +747,17 @@ public class KeyguardManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean isDeviceLocked(int userId) {
+        return isDeviceLocked(userId, mContext.getDeviceId());
+    }
+
+    /**
+     * Per-user per-device version of {@link #isDeviceLocked()}.
+     *
+     * @hide
+     */
+    public boolean isDeviceLocked(@UserIdInt int userId, int deviceId) {
         try {
-            return mTrustManager.isDeviceLocked(userId, mContext.getAssociatedDisplayId());
+            return mTrustManager.isDeviceLocked(userId, deviceId);
         } catch (RemoteException e) {
             return false;
         }
@@ -769,7 +779,7 @@ public class KeyguardManager {
      * @see #isKeyguardSecure()
      */
     public boolean isDeviceSecure() {
-        return isDeviceSecure(mContext.getUserId());
+        return isDeviceSecure(mContext.getUserId(), mContext.getDeviceId());
     }
 
     /**
@@ -779,8 +789,17 @@ public class KeyguardManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isDeviceSecure(int userId) {
+        return isDeviceSecure(userId, mContext.getDeviceId());
+    }
+
+    /**
+     * Per-user per-device version of {@link #isDeviceSecure()}.
+     *
+     * @hide
+     */
+    public boolean isDeviceSecure(@UserIdInt int userId, int deviceId) {
         try {
-            return mTrustManager.isDeviceSecure(userId, mContext.getAssociatedDisplayId());
+            return mTrustManager.isDeviceSecure(userId, deviceId);
         } catch (RemoteException e) {
             return false;
         }
