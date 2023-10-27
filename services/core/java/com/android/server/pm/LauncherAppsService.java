@@ -540,7 +540,7 @@ public class LauncherAppsService extends SystemService {
                     == 0) {
                 return launcherActivities;
             }
-            if (launcherActivities == null || launcherActivities.getList().isEmpty()) {
+            if (launcherActivities == null) {
                 // Cannot access profile, so we don't even return any hidden apps.
                 return null;
             }
