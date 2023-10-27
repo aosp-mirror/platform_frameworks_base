@@ -2787,7 +2787,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         .FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP;
             }
             if (Flags.enableMagnificationMultipleFingerMultipleTapGesture()) {
-                if (userState.isMagnificationSingleFingerTripleTapEnabledLocked()) {
+                if (userState.isMagnificationTwoFingerTripleTapEnabledLocked()) {
                     flags |= AccessibilityInputFilter
                             .FLAG_FEATURE_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP;
                 }
