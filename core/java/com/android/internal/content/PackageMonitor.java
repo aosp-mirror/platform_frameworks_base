@@ -401,6 +401,12 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                     mChangeType = PACKAGE_UPDATING;
                     onPackageUpdateStarted(pkg, uid);
+                    if (intent.getBooleanExtra(Intent.EXTRA_ARCHIVAL, false)) {
+                        // In case it is a removal event due to archiving, we trigger package
+                        // update event to refresh details like icons, title etc. corresponding to
+                        // the archived app.
+                        onPackageModified(pkg);
+                    }
                 } else {
                     mChangeType = PACKAGE_PERMANENT_CHANGE;
                     // We only consider something to have changed if this is

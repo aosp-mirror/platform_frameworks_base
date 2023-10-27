@@ -182,6 +182,10 @@ public class PackageArchiverTest {
                 any(LauncherActivityInfo.class), eq(mUserId), anyInt(), anyInt());
         doReturn(mIcon).when(mArchiveManager).decodeIcon(
                 any(ArchiveState.ArchiveActivityInfo.class));
+        Resources mockResources = mock(Resources.class);
+        doReturn(mockResources)
+                .when(mContext)
+                .getResources();
     }
 
     @Test
