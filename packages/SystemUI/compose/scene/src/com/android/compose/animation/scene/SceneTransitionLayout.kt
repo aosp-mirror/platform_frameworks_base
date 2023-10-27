@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
@@ -191,9 +192,9 @@ data class Swipe(
     }
 }
 
-enum class SwipeDirection {
-    Up,
-    Down,
-    Left,
-    Right,
+enum class SwipeDirection(val orientation: Orientation) {
+    Up(Orientation.Vertical),
+    Down(Orientation.Vertical),
+    Left(Orientation.Horizontal),
+    Right(Orientation.Horizontal),
 }
