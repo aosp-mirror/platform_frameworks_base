@@ -18,6 +18,7 @@ package com.android.server.media.projection;
 
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CANCELLED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
@@ -450,6 +451,63 @@ public class MediaProjectionMetricsLoggerTest {
         mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
+    }
+
+    @Test
+    public void logProjectionPermissionRequestCancelled_logsStateChangedAtomId() {
+        mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
+
+        verifyStateChangedAtomIdLogged();
+    }
+
+    @Test
+    public void logProjectionPermissionRequestCancelled_logsExistingSessionId() {
+        int existingSessionId = 456;
+        when(mSessionIdGenerator.getCurrentSessionId()).thenReturn(existingSessionId);
+
+        mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
+
+        verifySessionIdLogged(existingSessionId);
+    }
+
+    @Test
+    public void logProjectionPermissionRequestCancelled_logsStateCancelled() {
+        mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
+
+        verifyStateLogged(MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CANCELLED);
+    }
+
+    @Test
+    public void logProjectionPermissionRequestCancelled_logsPreviousState() {
+        mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN);
+
+        mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
+        verifyPreviousStateLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
+    }
+
+    @Test
+    public void logProjectionPermissionRequestCancelled_logsHostUid() {
+        mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
+
+        verifyHostUidLogged(TEST_HOST_UID);
+    }
+
+    @Test
+    public void logProjectionPermissionRequestCancelled_logsUnknownTargetUid() {
+        mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
+
+        verifyTargetUidLogged(-2);
+    }
+
+    @Test
+    public void logProjectionPermissionRequestCancelled_logsUnknownCreationSource() {
+        mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
+
+        verifyCreationSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
     }
 
     private void verifyStateChangedAtomIdLogged() {

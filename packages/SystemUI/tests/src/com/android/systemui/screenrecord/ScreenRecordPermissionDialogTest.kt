@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
 import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
 import com.android.systemui.mediaprojection.permission.SINGLE_APP
@@ -41,7 +42,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -57,6 +57,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
     @Mock private lateinit var userContextProvider: UserContextProvider
     @Mock private lateinit var flags: FeatureFlags
     @Mock private lateinit var onStartRecordingClicked: Runnable
+    @Mock private lateinit var mediaProjectionMetricsLogger: MediaProjectionMetricsLogger
 
     private lateinit var dialog: ScreenRecordPermissionDialog
 
@@ -72,7 +73,8 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
                 controller,
                 starter,
                 userContextProvider,
-                onStartRecordingClicked
+                onStartRecordingClicked,
+                mediaProjectionMetricsLogger,
             )
         dialog.onCreate(null)
         whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
@@ -147,6 +149,28 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
         clickOnCancel()
 
         assertThat(dialog.isShowing).isFalse()
+    }
+
+    @Test
+    fun showDialog_cancelClickedMultipleTimes_projectionRequestCancelledIsLoggedOnce() {
+        dialog.show()
+
+        clickOnCancel()
+        clickOnCancel()
+
+        verify(mediaProjectionMetricsLogger).notifyProjectionRequestCancelled(TEST_HOST_UID)
+    }
+
+    @Test
+    fun dismissDialog_dismissCalledMultipleTimes_projectionRequestCancelledIsLoggedOnce() {
+        dialog.show()
+
+        TestableLooper.get(this).runWithLooper {
+            dialog.dismiss()
+            dialog.dismiss()
+        }
+
+        verify(mediaProjectionMetricsLogger).notifyProjectionRequestCancelled(TEST_HOST_UID)
     }
 
     private fun clickOnCancel() {

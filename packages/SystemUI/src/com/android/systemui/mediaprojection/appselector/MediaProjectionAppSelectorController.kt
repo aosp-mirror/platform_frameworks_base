@@ -18,7 +18,6 @@ package com.android.systemui.mediaprojection.appselector
 
 import android.content.ComponentName
 import android.os.UserHandle
-import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED as STATE_APP_SELECTOR_DISPLAYED
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
@@ -74,6 +73,10 @@ constructor(
 
     fun destroy() {
         scope.cancel()
+    }
+
+    fun onSelectorDismissed() {
+        logger.notifyProjectionRequestCancelled(hostUid)
     }
 
     private suspend fun refreshForegroundTaskThumbnails(tasks: List<RecentTask>) {

@@ -16,7 +16,6 @@
 package com.android.systemui.mediaprojection
 
 import android.media.projection.IMediaProjectionManager
-import android.os.Process
 import android.os.RemoteException
 import android.util.Log
 import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_APP as METRICS_CREATION_SOURCE_APP
@@ -66,6 +65,19 @@ constructor(private val service: IMediaProjectionManager) {
     }
 
     /**
+     * Request to log that the permission request was cancelled.
+     *
+     * @param hostUid The UID of the package that initiates MediaProjection.
+     */
+    fun notifyProjectionRequestCancelled(hostUid: Int) {
+        try {
+            service.notifyPermissionRequestCancelled(hostUid)
+        } catch (e: RemoteException) {
+            Log.e(TAG, "Error notifying server of projection cancelled", e)
+        }
+    }
+
+    /**
      * Request to log that the app selector was displayed.
      *
      * @param hostUid The UID of the package that initiates MediaProjection.
@@ -75,47 +87,6 @@ constructor(private val service: IMediaProjectionManager) {
             service.notifyAppSelectorDisplayed(hostUid)
         } catch (e: RemoteException) {
             Log.e(TAG, "Error notifying server of app selector displayed", e)
-        }
-    }
-
-    /**
-     * Request to log that the permission request moved to the given state.
-     *
-     * Should not be used for the initialization state, since that should use {@link
-     * MediaProjectionMetricsLogger#notifyProjectionInitiated(Int)} and pass the
-     * sessionCreationSource.
-     */
-    fun notifyPermissionProgress(state: Int) {
-        // TODO validate state is valid
-        notifyToServer(state, SessionCreationSource.UNKNOWN)
-    }
-
-    /**
-     * Notifies system server that we are handling a particular state during the consent flow.
-     *
-     * Only used for emitting atoms.
-     *
-     * @param state The state that SystemUI is handling during the consent flow. Must be a valid
-     *   state defined in the MediaProjectionState enum.
-     * @param sessionCreationSource Only set if the state is MEDIA_PROJECTION_STATE_INITIATED.
-     *   Indicates the entry point for requesting the permission. Must be a valid state defined in
-     *   the SessionCreationSource enum.
-     */
-    private fun notifyToServer(state: Int, sessionCreationSource: SessionCreationSource) {
-        Log.v(TAG, "FOO notifyToServer of state $state and source $sessionCreationSource")
-        try {
-            service.notifyPermissionRequestStateChange(
-                Process.myUid(),
-                state,
-                sessionCreationSource.toMetricsConstant()
-            )
-        } catch (e: RemoteException) {
-            Log.e(
-                TAG,
-                "Error notifying server of permission flow state $state from source " +
-                    "$sessionCreationSource",
-                e
-            )
         }
     }
 

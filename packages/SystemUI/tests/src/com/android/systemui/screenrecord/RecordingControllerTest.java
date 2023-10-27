@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenrecord;
 
+import static android.os.Process.myUid;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
@@ -31,8 +33,8 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Looper;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -60,6 +62,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 /**
  * Tests for exception handling and  bitmap configuration in adding smart actions to Screenshot
  * Notification.
@@ -117,10 +120,6 @@ public class RecordingControllerTest extends SysuiTestCase {
     // starting, and notifies listeners.
     @Test
     public void testCancelCountdown() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         mController.startCountdown(100, 10, null, null);
 
         assertTrue(mController.isStarting());
@@ -137,10 +136,6 @@ public class RecordingControllerTest extends SysuiTestCase {
     // Test that when recording is started, the start intent is sent and listeners are notified.
     @Test
     public void testStartRecording() throws PendingIntent.CanceledException {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         PendingIntent startIntent = Mockito.mock(PendingIntent.class);
         mController.startCountdown(0, 0, startIntent, null);
 
@@ -151,10 +146,6 @@ public class RecordingControllerTest extends SysuiTestCase {
     // Test that when recording is stopped, the stop intent is sent and listeners are notified.
     @Test
     public void testStopRecording() throws PendingIntent.CanceledException {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         PendingIntent startIntent = Mockito.mock(PendingIntent.class);
         PendingIntent stopIntent = Mockito.mock(PendingIntent.class);
 
@@ -182,10 +173,6 @@ public class RecordingControllerTest extends SysuiTestCase {
     // Test that broadcast will update state
     @Test
     public void testUpdateStateBroadcast() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         // When a recording has started
         PendingIntent startIntent = Mockito.mock(PendingIntent.class);
         mController.startCountdown(0, 0, startIntent, null);
@@ -211,10 +198,6 @@ public class RecordingControllerTest extends SysuiTestCase {
     // Test that switching users will stop an ongoing recording
     @Test
     public void testUserChange() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         // If we are recording
         PendingIntent startIntent = Mockito.mock(PendingIntent.class);
         PendingIntent stopIntent = Mockito.mock(PendingIntent.class);
@@ -231,10 +214,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     @Test
     public void testPoliciesFlagDisabled_screenCapturingNotAllowed_returnsNullDevicePolicyDialog() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, false);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(true);
@@ -247,10 +226,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     @Test
     public void testPartialScreenSharingDisabled_returnsLegacyDialog() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, false);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, false);
 
@@ -262,10 +237,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     @Test
     public void testPoliciesFlagEnabled_screenCapturingNotAllowed_returnsDevicePolicyDialog() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(true);
@@ -278,10 +249,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     @Test
     public void testPoliciesFlagEnabled_screenCapturingAllowed_returnsNullDevicePolicyDialog() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(false);
@@ -294,9 +261,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     @Test
     public void testPoliciesFlagEnabled_screenCapturingAllowed_logsProjectionInitiated() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(false);
@@ -306,7 +270,7 @@ public class RecordingControllerTest extends SysuiTestCase {
 
         verify(mMediaProjectionMetricsLogger)
                 .notifyProjectionInitiated(
-                        TEST_USER_ID,
+                        /* hostUid= */ myUid(),
                         SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
     }
 }

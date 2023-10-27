@@ -163,8 +163,7 @@ public class RecordingController
         }
 
         mMediaProjectionMetricsLogger.notifyProjectionInitiated(
-                mUserContextProvider.getUserContext().getUserId(),
-                SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
+                getHostUid(), SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
 
         return flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
                 ? new ScreenRecordPermissionDialog(
@@ -174,7 +173,8 @@ public class RecordingController
                         /* controller= */ this,
                         activityStarter,
                         mUserContextProvider,
-                        onStartRecordingClicked)
+                        onStartRecordingClicked,
+                        mMediaProjectionMetricsLogger)
                 : new ScreenRecordDialog(
                         context,
                         /* controller= */ this,
