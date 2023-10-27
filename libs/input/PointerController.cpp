@@ -74,6 +74,10 @@ std::shared_ptr<PointerController> PointerController::create(
             controller = std::shared_ptr<PointerController>(
                     new MousePointerController(policy, looper, spriteController, enabled));
             break;
+        case ControllerType::TOUCH:
+            controller = std::shared_ptr<PointerController>(
+                    new TouchPointerController(policy, looper, spriteController, enabled));
+            break;
         case ControllerType::LEGACY:
         default:
             controller = std::shared_ptr<PointerController>(
@@ -395,6 +399,15 @@ MousePointerController::MousePointerController(const sp<PointerControllerPolicyI
                                                SpriteController& spriteController, bool enabled)
       : PointerController(policy, looper, spriteController, enabled) {
     PointerController::setPresentation(Presentation::POINTER);
+}
+
+// --- TouchPointerController ---
+
+TouchPointerController::TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                               const sp<Looper>& looper,
+                                               SpriteController& spriteController, bool enabled)
+      : PointerController(policy, looper, spriteController, enabled) {
+    PointerController::setPresentation(Presentation::SPOT);
 }
 
 } // namespace android

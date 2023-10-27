@@ -68,7 +68,7 @@ public:
 
     void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
-    void setInactivityTimeout(InactivityTimeout inactivityTimeout);
+    virtual void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
     void reloadPointerResources();
     void onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports);
@@ -152,6 +152,50 @@ public:
     void clearSpots() override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
+};
+
+class TouchPointerController : public PointerController {
+public:
+    /** A version of PointerController that controls touch spots. */
+    TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                           const sp<Looper>& looper, SpriteController& spriteController,
+                           bool enabled);
+
+    std::optional<FloatRect> getBounds() const override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void move(float, float) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setPosition(float, float) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    FloatPoint getPosition() const override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    int32_t getDisplayId() const override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void fade(Transition) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void unfade(Transition) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setDisplayViewport(const DisplayViewport&) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setPresentation(Presentation) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void updatePointerIcon(PointerIconStyle) {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setCustomPointerIcon(const SpriteIcon&) {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    // fade() should not be called by inactivity timeout. Do nothing.
+    void setInactivityTimeout(InactivityTimeout) override {}
 };
 
 } // namespace android
