@@ -146,13 +146,13 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 });
             }
         };
+        // If the remote is actually in the same process, then make a copy of parameters since
+        // remote impls assume that they have to clean-up native references.
+        final SurfaceControl.Transaction remoteStartT =
+                copyIfLocal(startTransaction, remote.getRemoteTransition());
+        final TransitionInfo remoteInfo =
+                remoteStartT == startTransaction ? info : info.localRemoteCopy();
         try {
-            // If the remote is actually in the same process, then make a copy of parameters since
-            // remote impls assume that they have to clean-up native references.
-            final SurfaceControl.Transaction remoteStartT =
-                    copyIfLocal(startTransaction, remote.getRemoteTransition());
-            final TransitionInfo remoteInfo =
-                    remoteStartT == startTransaction ? info : info.localRemoteCopy();
             handleDeath(remote.asBinder(), finishCallback);
             remote.getRemoteTransition().startAnimation(transition, remoteInfo, remoteStartT, cb);
             // assume that remote will apply the start transaction.
@@ -160,6 +160,10 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             Transitions.setRunningRemoteTransitionDelegate(remote.getAppThread());
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
+            if (remoteStartT != startTransaction) {
+                remoteStartT.close();
+            }
+            startTransaction.apply();
             unhandleDeath(remote.asBinder(), finishCallback);
             mRequestedRemotes.remove(transition);
             mMainExecutor.execute(() -> finishCallback.onTransitionFinished(null /* wct */));
