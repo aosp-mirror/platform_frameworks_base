@@ -1749,6 +1749,11 @@ FloatPoint NativeInputManager::getMouseCursorPosition() {
 }
 
 void NativeInputManager::setStylusPointerIconEnabled(bool enabled) {
+    if (ENABLE_POINTER_CHOREOGRAPHER) {
+        mInputManager->getChoreographer().setStylusPointerIconEnabled(enabled);
+        return;
+    }
+
     { // acquire lock
         std::scoped_lock _l(mLock);
 

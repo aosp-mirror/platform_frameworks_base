@@ -198,6 +198,24 @@ public:
     void setInactivityTimeout(InactivityTimeout) override {}
 };
 
+class StylusPointerController : public PointerController {
+public:
+    /** A version of PointerController that controls one stylus pointer. */
+    StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                            const sp<Looper>& looper, SpriteController& spriteController,
+                            bool enabled);
+
+    void setPresentation(Presentation) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, int32_t) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void clearSpots() override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+};
+
 } // namespace android
 
 #endif // _UI_POINTER_CONTROLLER_H

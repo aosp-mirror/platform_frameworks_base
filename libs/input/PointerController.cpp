@@ -78,6 +78,10 @@ std::shared_ptr<PointerController> PointerController::create(
             controller = std::shared_ptr<PointerController>(
                     new TouchPointerController(policy, looper, spriteController, enabled));
             break;
+        case ControllerType::STYLUS:
+            controller = std::shared_ptr<PointerController>(
+                    new StylusPointerController(policy, looper, spriteController, enabled));
+            break;
         case ControllerType::LEGACY:
         default:
             controller = std::shared_ptr<PointerController>(
@@ -408,6 +412,15 @@ TouchPointerController::TouchPointerController(const sp<PointerControllerPolicyI
                                                SpriteController& spriteController, bool enabled)
       : PointerController(policy, looper, spriteController, enabled) {
     PointerController::setPresentation(Presentation::SPOT);
+}
+
+// --- StylusPointerController ---
+
+StylusPointerController::StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                                 const sp<Looper>& looper,
+                                                 SpriteController& spriteController, bool enabled)
+      : PointerController(policy, looper, spriteController, enabled) {
+    PointerController::setPresentation(Presentation::STYLUS_HOVER);
 }
 
 } // namespace android
