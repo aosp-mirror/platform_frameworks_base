@@ -40,6 +40,9 @@ public class ContentProtectionConsentManager {
 
     private static final String KEY_PACKAGE_VERIFIER_USER_CONSENT = "package_verifier_user_consent";
 
+    private static final String KEY_CONTENT_PROTECTION_USER_CONSENT =
+            "content_protection_user_consent";
+
     @NonNull private final ContentResolver mContentResolver;
 
     @NonNull private final DevicePolicyManagerInternal mDevicePolicyManagerInternal;
@@ -49,6 +52,8 @@ public class ContentProtectionConsentManager {
     public final ContentObserver mContentObserver;
 
     private volatile boolean mCachedPackageVerifierConsent;
+
+    private volatile boolean mCachedContentProtectionConsent;
 
     public ContentProtectionConsentManager(
             @NonNull Handler handler,
@@ -63,14 +68,18 @@ public class ContentProtectionConsentManager {
                 /* notifyForDescendants= */ false,
                 mContentObserver,
                 UserHandle.USER_ALL);
+
         mCachedPackageVerifierConsent = isPackageVerifierConsentGranted();
+        mCachedContentProtectionConsent = isContentProtectionConsentGranted();
     }
 
     /**
      * Returns true if all the consents are granted
      */
     public boolean isConsentGranted(@UserIdInt int userId) {
-        return mCachedPackageVerifierConsent && !isUserOrganizationManaged(userId);
+        return mCachedPackageVerifierConsent
+                && mCachedContentProtectionConsent
+                && !isUserOrganizationManaged(userId);
     }
 
     private boolean isPackageVerifierConsentGranted() {
@@ -78,6 +87,13 @@ public class ContentProtectionConsentManager {
         return Settings.Global.getInt(
                         mContentResolver, KEY_PACKAGE_VERIFIER_USER_CONSENT, /* def= */ 0)
                 >= 1;
+    }
+
+    private boolean isContentProtectionConsentGranted() {
+        // Not always cached internally
+        return Settings.Global.getInt(
+                        mContentResolver, KEY_CONTENT_PROTECTION_USER_CONSENT, /* def= */ 0)
+                >= 0;
     }
 
     private boolean isUserOrganizationManaged(@UserIdInt int userId) {
@@ -100,6 +116,9 @@ public class ContentProtectionConsentManager {
             switch (property) {
                 case KEY_PACKAGE_VERIFIER_USER_CONSENT:
                     mCachedPackageVerifierConsent = isPackageVerifierConsentGranted();
+                    return;
+                case KEY_CONTENT_PROTECTION_USER_CONSENT:
+                    mCachedContentProtectionConsent = isContentProtectionConsentGranted();
                     return;
                 default:
                     Slog.w(TAG, "Ignoring unexpected property: " + property);

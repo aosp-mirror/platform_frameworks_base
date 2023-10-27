@@ -55,8 +55,14 @@ public class ContentProtectionConsentManagerTest {
 
     private static final String KEY_PACKAGE_VERIFIER_USER_CONSENT = "package_verifier_user_consent";
 
+    private static final String KEY_CONTENT_PROTECTION_USER_CONSENT =
+            "content_protection_user_consent";
+
     private static final Uri URI_PACKAGE_VERIFIER_USER_CONSENT =
             Settings.Global.getUriFor(KEY_PACKAGE_VERIFIER_USER_CONSENT);
+
+    private static final Uri URI_CONTENT_PROTECTION_USER_CONSENT =
+            Settings.Global.getUriFor(KEY_CONTENT_PROTECTION_USER_CONSENT);
 
     private static final int VALUE_TRUE = 1;
 
@@ -96,7 +102,18 @@ public class ContentProtectionConsentManagerTest {
     @Test
     public void isConsentGranted_packageVerifierNotGranted() {
         ContentProtectionConsentManager manager =
-                createContentProtectionConsentManager(VALUE_FALSE);
+                createContentProtectionConsentManager(VALUE_FALSE, VALUE_TRUE);
+
+        boolean actual = manager.isConsentGranted(TEST_USER_ID);
+
+        assertThat(actual).isFalse();
+        verifyZeroInteractions(mMockDevicePolicyManagerInternal);
+    }
+
+    @Test
+    public void isConsentGranted_contentProtectionNotGranted() {
+        ContentProtectionConsentManager manager =
+                createContentProtectionConsentManager(VALUE_TRUE, VALUE_FALSE);
 
         boolean actual = manager.isConsentGranted(TEST_USER_ID);
 
@@ -106,7 +123,8 @@ public class ContentProtectionConsentManagerTest {
 
     @Test
     public void isConsentGranted_packageVerifierGranted_userNotManaged() {
-        ContentProtectionConsentManager manager = createContentProtectionConsentManager(VALUE_TRUE);
+        ContentProtectionConsentManager manager =
+                createContentProtectionConsentManager(VALUE_TRUE, VALUE_TRUE);
 
         boolean actual = manager.isConsentGranted(TEST_USER_ID);
 
@@ -118,7 +136,8 @@ public class ContentProtectionConsentManagerTest {
     public void isConsentGranted_packageVerifierGranted_userManaged() {
         when(mMockDevicePolicyManagerInternal.isUserOrganizationManaged(TEST_USER_ID))
                 .thenReturn(true);
-        ContentProtectionConsentManager manager = createContentProtectionConsentManager(VALUE_TRUE);
+        ContentProtectionConsentManager manager =
+                createContentProtectionConsentManager(VALUE_TRUE, VALUE_TRUE);
 
         boolean actual = manager.isConsentGranted(TEST_USER_ID);
 
@@ -128,7 +147,7 @@ public class ContentProtectionConsentManagerTest {
     @Test
     public void isConsentGranted_packageVerifierDefault() {
         ContentProtectionConsentManager manager =
-                createContentProtectionConsentManager(VALUE_DEFAULT);
+                createContentProtectionConsentManager(VALUE_DEFAULT, VALUE_TRUE);
 
         boolean actual = manager.isConsentGranted(TEST_USER_ID);
 
@@ -137,20 +156,57 @@ public class ContentProtectionConsentManagerTest {
     }
 
     @Test
-    public void contentObserver() throws Exception {
-        ContentProtectionConsentManager manager = createContentProtectionConsentManager(VALUE_TRUE);
+    public void isConsentGranted_contentProtectionDefault() {
+        ContentProtectionConsentManager manager =
+                createContentProtectionConsentManager(VALUE_TRUE, VALUE_DEFAULT);
+
+        boolean actual = manager.isConsentGranted(TEST_USER_ID);
+
+        assertThat(actual).isTrue();
+        verify(mMockDevicePolicyManagerInternal).isUserOrganizationManaged(TEST_USER_ID);
+    }
+
+    @Test
+    public void contentObserver_packageVerifier() {
+        ContentProtectionConsentManager manager =
+                createContentProtectionConsentManager(VALUE_TRUE, VALUE_DEFAULT);
         boolean firstActual = manager.isConsentGranted(TEST_USER_ID);
 
-        Settings.Global.putInt(
-                mTestableContentResolver, KEY_PACKAGE_VERIFIER_USER_CONSENT, VALUE_FALSE);
-        // Observer has to be called manually, mTestableContentResolver is not propagating
-        manager.mContentObserver.onChange(
-                /* selfChange= */ false, URI_PACKAGE_VERIFIER_USER_CONSENT, TEST_USER_ID);
+        notifyContentObserver(
+                manager,
+                URI_PACKAGE_VERIFIER_USER_CONSENT,
+                KEY_PACKAGE_VERIFIER_USER_CONSENT,
+                VALUE_FALSE);
         boolean secondActual = manager.isConsentGranted(TEST_USER_ID);
 
         assertThat(firstActual).isTrue();
         assertThat(secondActual).isFalse();
         verify(mMockDevicePolicyManagerInternal).isUserOrganizationManaged(TEST_USER_ID);
+    }
+
+    @Test
+    public void contentObserver_contentProtection() {
+        ContentProtectionConsentManager manager =
+                createContentProtectionConsentManager(VALUE_TRUE, VALUE_DEFAULT);
+        boolean firstActual = manager.isConsentGranted(TEST_USER_ID);
+
+        notifyContentObserver(
+                manager,
+                URI_CONTENT_PROTECTION_USER_CONSENT,
+                KEY_CONTENT_PROTECTION_USER_CONSENT,
+                VALUE_FALSE);
+        boolean secondActual = manager.isConsentGranted(TEST_USER_ID);
+
+        assertThat(firstActual).isTrue();
+        assertThat(secondActual).isFalse();
+        verify(mMockDevicePolicyManagerInternal).isUserOrganizationManaged(TEST_USER_ID);
+    }
+
+    private void notifyContentObserver(
+            ContentProtectionConsentManager manager, Uri uri, String key, int value) {
+        Settings.Global.putInt(mTestableContentResolver, key, value);
+        // Observer has to be called manually, mTestableContentResolver is not propagating
+        manager.mContentObserver.onChange(/* selfChange= */ false, uri, TEST_USER_ID);
     }
 
     private ContentProtectionConsentManager createContentProtectionConsentManager(
@@ -162,11 +218,15 @@ public class ContentProtectionConsentManagerTest {
     }
 
     private ContentProtectionConsentManager createContentProtectionConsentManager(
-            int valuePackageVerifierUserConsent) {
+            int valuePackageVerifierUserConsent, int valueContentProtectionUserConsent) {
         Settings.Global.putInt(
                 mTestableContentResolver,
                 KEY_PACKAGE_VERIFIER_USER_CONSENT,
                 valuePackageVerifierUserConsent);
+        Settings.Global.putInt(
+                mTestableContentResolver,
+                KEY_CONTENT_PROTECTION_USER_CONSENT,
+                valueContentProtectionUserConsent);
         return createContentProtectionConsentManager(mTestableContentResolver);
     }
 }
