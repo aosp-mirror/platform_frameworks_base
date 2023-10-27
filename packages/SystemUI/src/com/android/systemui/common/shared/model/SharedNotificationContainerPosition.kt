@@ -20,4 +20,7 @@ package com.android.systemui.common.shared.model
 data class SharedNotificationContainerPosition(
     val top: Float = 0f,
     val bottom: Float = 0f,
+
+    /** Whether any modifications to top/bottom are smoothly animated */
+    val animate: Boolean = false,
 )
