@@ -15934,7 +15934,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             sdkSandboxInfo =
                     sandboxManagerLocal.getSdkSandboxApplicationInfoForInstrumentation(
-                            sdkSandboxClientAppInfo, isSdkInSandbox);
+                            sdkSandboxClientAppInfo, userId, isSdkInSandbox);
         } catch (NameNotFoundException e) {
             reportStartInstrumentationFailureLocked(
                     watcher, className, "Can't find SdkSandbox package");
