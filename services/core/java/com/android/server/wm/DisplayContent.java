@@ -1162,7 +1162,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mUnknownAppVisibilityController = new UnknownAppVisibilityController(mWmService, this);
         mDisplaySwitchTransitionLauncher = new PhysicalDisplaySwitchTransitionLauncher(this,
                 mTransitionController);
-        mRemoteDisplayChangeController = new RemoteDisplayChangeController(mWmService, mDisplayId);
+        mRemoteDisplayChangeController = new RemoteDisplayChangeController(this);
 
         final InputChannel inputChannel = mWmService.mInputManager.monitorInput(
                 "PointerEventDispatcher" + mDisplayId, mDisplayId);
