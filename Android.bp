@@ -695,7 +695,6 @@ stubs_defaults {
         "--hide CallbackInterface",
         "--hide DeprecationMismatch",
         "--hide HiddenSuperclass",
-        "--hide HiddenTypeParameter",
         "--hide MissingPermission",
         "--hide RequiresPermission",
         "--hide SdkConstant",
