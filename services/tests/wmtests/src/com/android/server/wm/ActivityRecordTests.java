@@ -125,6 +125,7 @@ import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
+import android.app.servertransaction.WindowStateResizeItem;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -3341,6 +3342,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Simulate switching to app2 to make it visible to be IME targets.
         spyOn(app2);
         spyOn(app2.mClient);
+        spyOn(app2.getProcess());
         ArgumentCaptor<InsetsState> insetsStateCaptor = ArgumentCaptor.forClass(InsetsState.class);
         doReturn(true).when(app2).isReadyToDispatchInsetsState();
         mDisplayContent.setImeLayeringTarget(app2);
@@ -3351,9 +3353,15 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Verify after unfreezing app2's IME insets state, we won't dispatch visible IME insets
         // to client if the app didn't request IME visible.
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
-        verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
-                insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
-                anyBoolean());
+
+        if (mWm.mFlags.mWindowStateResizeItemFlag) {
+            verify(app2.getProcess()).scheduleClientTransactionItem(
+                    isA(WindowStateResizeItem.class));
+        } else {
+            verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
+                    insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
+                    anyBoolean());
+        }
         assertFalse(app2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
     }
 
