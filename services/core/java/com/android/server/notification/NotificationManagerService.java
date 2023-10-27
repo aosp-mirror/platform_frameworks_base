@@ -7031,9 +7031,8 @@ public class NotificationManagerService extends SystemService {
             channelId = (new Notification.TvExtender(notification)).getChannelId();
         }
         String shortcutId = n.getShortcutId();
-        final NotificationChannel channel = mPreferencesHelper.getConversationNotificationChannel(
-                pkg, notificationUid, channelId, shortcutId,
-                true /* parent ok */, false /* includeDeleted */);
+        final NotificationChannel channel = getNotificationChannelRestoreDeleted(pkg,
+                callingUid, notificationUid, channelId, shortcutId);
         if (channel == null) {
             final String noChannelStr = "No Channel found for "
                     + "pkg=" + pkg
@@ -7149,6 +7148,35 @@ public class NotificationManagerService extends SystemService {
         }
         mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground, tracker));
         return true;
+    }
+
+    /**
+     * Returns a channel, if exists, and restores deleted conversation channels.
+     */
+    @Nullable
+    private NotificationChannel getNotificationChannelRestoreDeleted(String pkg,
+            int callingUid, int notificationUid, String channelId, String conversationId) {
+        // Restore a deleted conversation channel, if exists. Otherwise use the parent channel.
+        NotificationChannel channel = mPreferencesHelper.getConversationNotificationChannel(
+                pkg, notificationUid, channelId, conversationId,
+                true /* parent ok */, !TextUtils.isEmpty(conversationId) /* includeDeleted */);
+        // Restore deleted conversation channel
+        if (channel != null && channel.isDeleted()) {
+            if (Objects.equals(conversationId, channel.getConversationId())) {
+                boolean needsPolicyFileChange = mPreferencesHelper.createNotificationChannel(
+                        pkg, notificationUid, channel, true /* fromTargetApp */,
+                        mConditionProviders.isPackageOrComponentAllowed(pkg,
+                        UserHandle.getUserId(notificationUid)), callingUid, true);
+                // Update policy file if the conversation channel was restored
+                if (needsPolicyFileChange) {
+                    handleSavePolicyFile();
+                }
+            } else {
+                // Do not restore parent channel
+                channel = null;
+            }
+        }
+        return channel;
     }
 
     private void onConversationRemovedInternal(String pkg, int uid, Set<String> shortcuts) {
