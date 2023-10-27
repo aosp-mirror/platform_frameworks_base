@@ -1041,11 +1041,15 @@ public final class PinnerService extends SystemService {
             if (fileAsZip != null) {
                 pinRangeStream = maybeOpenPinMetaInZip(fileAsZip, fileToPin);
             }
-
-            PinRangeSource pinRangeSource = (pinRangeStream != null)
-                ? new PinRangeSourceStream(pinRangeStream)
-                : new PinRangeSourceStatic(0, Integer.MAX_VALUE /* will be clipped */);
-            return pinFileRanges(fileToPin, maxBytesToPin, pinRangeSource);
+            boolean use_pinlist = (pinRangeStream != null);
+            PinRangeSource pinRangeSource = use_pinlist
+                    ? new PinRangeSourceStream(pinRangeStream)
+                    : new PinRangeSourceStatic(0, Integer.MAX_VALUE /* will be clipped */);
+            PinnedFile pinnedFile = pinFileRanges(fileToPin, maxBytesToPin, pinRangeSource);
+            if (pinnedFile != null) {
+                pinnedFile.used_pinlist = use_pinlist;
+            }
+            return pinnedFile;
         } finally {
             safeClose(pinRangeStream);
             safeClose(fileAsZip);  // Also closes any streams we've opened
@@ -1344,7 +1348,7 @@ public final class PinnerService extends SystemService {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             HashSet<PinnedFile> shownPins = new HashSet<>();
             HashSet<String> groups = new HashSet<>();
-
+            final int bytesPerMB = 1024 * 1024;
             synchronized (PinnerService.this) {
                 long totalSize = 0;
                 for (int key : mPinnedApps.keySet()) {
@@ -1354,7 +1358,9 @@ public final class PinnerService extends SystemService {
                     pw.print(" active="); pw.print(app.active);
                     pw.println();
                     for (PinnedFile pf : mPinnedApps.get(key).mFiles) {
-                        pw.print("  "); pw.format("%s %s\n", pf.fileName, pf.bytesPinned);
+                        pw.print("  ");
+                        pw.format("%s pinned:%d bytes (%d MB) pinlist:%b\n", pf.fileName,
+                                pf.bytesPinned, pf.bytesPinned / bytesPerMB, pf.used_pinlist);
                         totalSize += pf.bytesPinned;
                         shownPins.add(pf);
                     }
@@ -1377,15 +1383,18 @@ public final class PinnerService extends SystemService {
                             // Already showed in the dump and accounted for, skip.
                             continue;
                         }
-                        pw.format(" %s %s\n", pinnedFile.fileName, pinnedFile.bytesPinned);
+                        pw.format("  %s pinned:%d bytes (%d MB) pinlist:%b\n", pinnedFile.fileName,
+                                pinnedFile.bytesPinned, pinnedFile.bytesPinned / bytesPerMB,
+                                pinnedFile.used_pinlist);
                         totalSize += pinnedFile.bytesPinned;
                     }
                 }
                 pw.println();
                 if (mPinAnonAddress != 0) {
                     pw.format("Pinned anon region: %s\n", mCurrentlyPinnedAnonSize);
+                    totalSize += mCurrentlyPinnedAnonSize;
                 }
-                pw.format("Total size: %s\n", totalSize);
+                pw.format("Total pinned: %s bytes (%s MB)\n", totalSize, totalSize / bytesPerMB);
                 pw.println();
                 if (!mPendingRepin.isEmpty()) {
                     pw.print("Pending repin: ");
@@ -1439,6 +1448,9 @@ public final class PinnerService extends SystemService {
         final int mapSize;
         final String fileName;
         final int bytesPinned;
+
+        // Whether this file was pinned using a pinlist
+        boolean used_pinlist;
 
         // User defined group name for pinner accounting
         String groupName = "";
