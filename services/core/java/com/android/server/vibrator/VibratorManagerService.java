@@ -53,6 +53,7 @@ import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.os.vibrator.VibratorInfoFactory;
@@ -87,10 +88,13 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+
 /** System implementation of {@link IVibratorManagerService}. */
 public class VibratorManagerService extends IVibratorManagerService.Stub {
     private static final String TAG = "VibratorManagerService";
     private static final String EXTERNAL_VIBRATOR_SERVICE = "external_vibrator_service";
+    private static final String VIBRATOR_CONTROL_SERVICE =
+            "android.frameworks.vibrator.IVibratorControlService/default";
     private static final boolean DEBUG = false;
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
             new VibrationAttributes.Builder().build();
@@ -269,6 +273,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         context.registerReceiver(mIntentReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
+        if (Flags.adaptiveHapticsEnabled()) {
+            injector.addService(VIBRATOR_CONTROL_SERVICE,
+                    new VibratorControlService(new VibratorControllerHolder(), mLock));
+        }
     }
 
     /** Finish initialization at boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}. */
