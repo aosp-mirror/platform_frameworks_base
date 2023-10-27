@@ -691,7 +691,6 @@ stubs_defaults {
         "--hide RequiresPermission",
         "--hide SdkConstant",
         "--hide Todo",
-        "--hide UnavailableSymbol",
         "--hide-package android.audio.policy.configuration.V7_0",
         "--hide-package com.android.server",
         "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
