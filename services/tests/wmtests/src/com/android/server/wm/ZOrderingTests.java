@@ -448,7 +448,6 @@ public class ZOrderingTests extends WindowTestsBase {
         mDisplayContent.updateImeParent();
 
         // Ime should on top of the popup IME layering target window.
-        mDisplayContent.assignChildLayers(mTransaction);
         assertWindowHigher(mImeWindow, popupImeTargetWin);
     }
 
