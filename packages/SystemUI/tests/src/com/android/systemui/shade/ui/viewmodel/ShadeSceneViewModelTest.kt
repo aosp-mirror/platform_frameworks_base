@@ -19,7 +19,7 @@ package com.android.systemui.shade.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -124,7 +124,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            utils.deviceEntryRepository.setLockscreenEnabled(true)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
             sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
@@ -136,7 +136,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            utils.deviceEntryRepository.setLockscreenEnabled(true)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
             sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")

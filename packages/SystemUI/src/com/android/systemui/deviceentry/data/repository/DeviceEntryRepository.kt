@@ -39,10 +39,11 @@ interface DeviceEntryRepository {
     val isUnlocked: StateFlow<Boolean>
 
     /**
-     * Whether the lockscreen should be shown when the authentication method is not secure (e.g.
-     * `None` or `Swipe`).
+     * Whether the lockscreen is enabled for the current user. This is `true` whenever the user has
+     * chosen any secure authentication method and even if they set the lockscreen to be dismissed
+     * when the user swipes on it.
      */
-    suspend fun isInsecureLockscreenEnabled(): Boolean
+    suspend fun isLockscreenEnabled(): Boolean
 
     /** Report successful authentication for device entry. */
     fun reportSuccessfulAuthentication()
@@ -117,7 +118,7 @@ constructor(
 
     override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
 
-    override suspend fun isInsecureLockscreenEnabled(): Boolean {
+    override suspend fun isLockscreenEnabled(): Boolean {
         return withContext(backgroundDispatcher) {
             val selectedUserId = userRepository.getSelectedUserInfo().id
             !lockPatternUtils.isLockScreenDisabled(selectedUserId)

@@ -19,16 +19,14 @@ package com.android.systemui.bouncer.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.ceil
 import kotlin.time.Duration.Companion.milliseconds
@@ -43,17 +41,14 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class
-BouncerInteractorTest : SysuiTestCase() {
+class BouncerInteractorTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val authenticationInteractor = utils.authenticationInteractor()
-    private val sceneInteractor = utils.sceneInteractor()
     private val underTest =
         utils.bouncerInteractor(
             authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
         )
 
     @Before
@@ -69,7 +64,6 @@ BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun pinAuthMethod() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(underTest.message)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
@@ -124,7 +118,6 @@ BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun pinAuthMethod_tryAutoConfirm_withoutAutoConfirmPin() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(underTest.message)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
@@ -174,7 +167,6 @@ BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun patternAuthMethod() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(underTest.message)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern
@@ -223,7 +215,6 @@ BouncerInteractorTest : SysuiTestCase() {
             val isThrottled by collectLastValue(underTest.isThrottled)
             val throttling by collectLastValue(underTest.throttling)
             val message by collectLastValue(underTest.message)
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
@@ -289,31 +280,15 @@ BouncerInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun hide_whenOnBouncerScene_hidesBouncerAndGoesToLockscreenScene() =
+    fun imeHiddenEvent_isTriggered() =
         testScope.runTest {
-            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "")
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            val bouncerSceneKey = currentScene?.key
-            assertThat(bouncerSceneKey).isEqualTo(SceneKey.Bouncer)
+            val imeHiddenEvent by collectLastValue(underTest.onImeHidden)
+            runCurrent()
 
             underTest.onImeHidden()
+            runCurrent()
 
-            assertThat(currentScene?.key).isEqualTo(SceneKey.Lockscreen)
-        }
-
-    @Test
-    fun hide_whenNotOnBouncerScene_doesNothing() =
-        testScope.runTest {
-            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "")
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            val notBouncerSceneKey = currentScene?.key
-            assertThat(notBouncerSceneKey).isNotEqualTo(SceneKey.Bouncer)
-
-            underTest.onImeHidden()
-
-            assertThat(currentScene?.key).isEqualTo(notBouncerSceneKey)
+            assertThat(imeHiddenEvent).isNotNull()
         }
 
     private fun assertTryAgainMessage(

@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 @SysUISingleton
 class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
 
-    private var isInsecureLockscreenEnabled = true
+    private var isLockscreenEnabled = true
 
     private val _isBypassEnabled = MutableStateFlow(false)
     override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled
@@ -35,8 +35,8 @@ class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
     private val _isUnlocked = MutableStateFlow(false)
     override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
 
-    override suspend fun isInsecureLockscreenEnabled(): Boolean {
-        return isInsecureLockscreenEnabled
+    override suspend fun isLockscreenEnabled(): Boolean {
+        return isLockscreenEnabled
     }
 
     override fun reportSuccessfulAuthentication() {
@@ -47,8 +47,8 @@ class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
         _isUnlocked.value = isUnlocked
     }
 
-    fun setInsecureLockscreenEnabled(isLockscreenEnabled: Boolean) {
-        this.isInsecureLockscreenEnabled = isLockscreenEnabled
+    fun setLockscreenEnabled(isLockscreenEnabled: Boolean) {
+        this.isLockscreenEnabled = isLockscreenEnabled
     }
 
     fun setBypassEnabled(isBypassEnabled: Boolean) {

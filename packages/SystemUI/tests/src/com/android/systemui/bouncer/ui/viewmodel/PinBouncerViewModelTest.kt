@@ -19,9 +19,8 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainAuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
@@ -51,7 +50,6 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     private val bouncerInteractor =
         utils.bouncerInteractor(
             authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
         )
     private val bouncerViewModel =
         utils.bouncerViewModel(
@@ -90,8 +88,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             assertThat(message?.text).ignoringCase().isEqualTo(ENTER_YOUR_PIN)
             assertThat(pin).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-            assertThat(underTest.authenticationMethod)
-                .isEqualTo(DomainAuthenticationMethodModel.Pin)
+            assertThat(underTest.authenticationMethod).isEqualTo(AuthenticationMethodModel.Pin)
         }
 
     @Test

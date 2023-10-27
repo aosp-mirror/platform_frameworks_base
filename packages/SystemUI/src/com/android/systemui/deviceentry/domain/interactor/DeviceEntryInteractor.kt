@@ -17,7 +17,7 @@
 package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -95,28 +96,33 @@ constructor(
             .map { it == SceneKey.Gone }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Eagerly,
                 initialValue = false,
             )
 
     // Authenticated by a TrustAgent like trusted device, location, etc or by face auth.
     private val passivelyAuthenticated =
         merge(
-            trustRepository.isCurrentUserTrusted,
-            deviceEntryFaceAuthRepository.isAuthenticated,
-        )
+                trustRepository.isCurrentUserTrusted,
+                deviceEntryFaceAuthRepository.isAuthenticated,
+            )
+            .onStart { emit(false) }
 
     /**
      * Whether it's currently possible to swipe up to enter the device without requiring
-     * authentication. This returns `false` whenever the lockscreen has been dismissed.
+     * authentication or when the device is already authenticated using a passive authentication
+     * mechanism like face or trust manager. This returns `false` whenever the lockscreen has been
+     * dismissed.
      *
      * Note: `true` doesn't mean the lockscreen is visible. It may be occluded or covered by other
      * UI.
      */
     val canSwipeToEnter =
         combine(
+                // This is true when the user has chosen to show the lockscreen but has not made it
+                // secure.
                 authenticationInteractor.authenticationMethod.map {
-                    it == AuthenticationMethodModel.Swipe
+                    it == AuthenticationMethodModel.None && repository.isLockscreenEnabled()
                 },
                 passivelyAuthenticated,
                 isDeviceEntered
@@ -125,7 +131,7 @@ constructor(
             }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Eagerly,
                 initialValue = false,
             )
 
@@ -164,10 +170,10 @@ constructor(
     }
 
     /**
-     * Whether lock screen bypass is enabled. When enabled, the lock screen will be automatically
+     * Whether lockscreen bypass is enabled. When enabled, the lockscreen will be automatically
      * dismissed once the authentication challenge is completed. For example, completing a biometric
      * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
-     * lock screen.
+     * lockscreen.
      */
     val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
 

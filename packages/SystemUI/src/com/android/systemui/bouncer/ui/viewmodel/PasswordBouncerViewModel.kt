@@ -16,7 +16,7 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.res.R
 import kotlinx.coroutines.CoroutineScope

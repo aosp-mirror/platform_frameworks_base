@@ -19,8 +19,8 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
@@ -37,17 +37,16 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val authenticationInteractor = utils.authenticationInteractor()
     private val sceneInteractor = utils.sceneInteractor()
+    private val bouncerInteractor =
+        utils.bouncerInteractor(
+            authenticationInteractor = utils.authenticationInteractor(),
+        )
     private val underTest =
         PinBouncerViewModel(
             applicationContext = context,
             viewModelScope = testScope.backgroundScope,
-            interactor =
-                utils.bouncerInteractor(
-                    authenticationInteractor = authenticationInteractor,
-                    sceneInteractor = sceneInteractor,
-                ),
+            interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true),
         )
 
@@ -79,18 +78,14 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onImeVisibilityChanged() =
         testScope.runTest {
-            val desiredScene by collectLastValue(sceneInteractor.desiredScene)
             sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "")
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "")
-            assertThat(desiredScene?.key).isEqualTo(SceneKey.Bouncer)
-
-            underTest.onImeVisibilityChanged(false)
-            assertThat(desiredScene?.key).isEqualTo(SceneKey.Bouncer)
+            val onImeHidden by collectLastValue(bouncerInteractor.onImeHidden)
 
             underTest.onImeVisibilityChanged(true)
-            assertThat(desiredScene?.key).isEqualTo(SceneKey.Bouncer)
+            assertThat(onImeHidden).isNull()
 
             underTest.onImeVisibilityChanged(false)
-            assertThat(desiredScene?.key).isEqualTo(SceneKey.Lockscreen)
+            assertThat(onImeHidden).isNotNull()
         }
 }

@@ -19,7 +19,7 @@ package com.android.systemui.bouncer.domain.interactor
 import android.content.Context
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.classifier.FalsingClassifier
@@ -27,15 +27,14 @@ import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -51,7 +50,6 @@ constructor(
     @Application private val applicationContext: Context,
     private val repository: BouncerRepository,
     private val authenticationInteractor: AuthenticationInteractor,
-    private val sceneInteractor: SceneInteractor,
     flags: SceneContainerFlags,
     private val falsingInteractor: FalsingInteractor,
 ) {
@@ -97,6 +95,10 @@ constructor(
     /** Whether the user switcher should be displayed within the bouncer UI on large screens. */
     val isUserSwitcherVisible: Boolean
         get() = repository.isUserSwitcherVisible
+
+    private val _onImeHidden = MutableSharedFlow<Unit>()
+    /** Provide the onImeHidden events from the bouncer */
+    val onImeHidden: SharedFlow<Unit> = _onImeHidden
 
     init {
         if (flags.isEnabled()) {
@@ -208,16 +210,8 @@ constructor(
     }
 
     /** Notifies the interactor that the input method editor has been hidden. */
-    fun onImeHidden() {
-        // If the bouncer is showing, hide it and return to the lockscreen scene.
-        if (sceneInteractor.desiredScene.value.key != SceneKey.Bouncer) {
-            return
-        }
-
-        sceneInteractor.changeScene(
-            scene = SceneModel(SceneKey.Lockscreen),
-            loggingReason = "IME hidden",
-        )
+    suspend fun onImeHidden() {
+        _onImeHidden.emit(Unit)
     }
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {
