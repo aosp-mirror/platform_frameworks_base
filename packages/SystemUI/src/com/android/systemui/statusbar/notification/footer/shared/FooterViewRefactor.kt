@@ -17,12 +17,18 @@
 package com.android.systemui.statusbar.notification.footer.shared
 
 import com.android.systemui.Flags
+import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the FooterView refactor flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object FooterViewRefactor {
+    /** The aconfig flag name */
     const val FLAG_NAME = Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR
+
+    /** A token used for dependency declaration */
+    val token: FlagToken
+        get() = FlagToken(FLAG_NAME, isEnabled)
 
     /** Is the refactor enabled */
     @JvmStatic
