@@ -105,24 +105,23 @@ class BackgroundLaunchProcessController {
         // Allow if the proc is instrumenting with background activity starts privs.
         if (hasBackgroundActivityStartPrivileges) {
             return new BalVerdict(BAL_ALLOW_PERMISSION, /*background*/ true,
-                    "Activity start allowed: process instrumenting with background "
-                            + "activity starts privileges");
+                    "process instrumenting with background activity starts privileges");
         }
         // Allow if the flag was explicitly set.
         if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {
             return new BalVerdict(BAL_ALLOW_PERMISSION, /*background*/ true,
-                    "Activity start allowed: process allowed by token");
+                    "process allowed by token");
         }
         // Allow if the caller is bound by a UID that's currently foreground.
         if (isBoundByForegroundUid()) {
             return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW, /*background*/ false,
-                    "Activity start allowed: process bound by foreground uid");
+                    "process bound by foreground uid");
         }
         // Allow if the caller has an activity in any foreground task.
         if (hasActivityInVisibleTask
                 && (appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY)) {
             return new BalVerdict(BAL_ALLOW_FOREGROUND, /*background*/ false,
-                    "Activity start allowed: process has activity in foreground task");
+                    "process has activity in foreground task");
         }
 
         // If app switching is not allowed, we ignore all the start activity grace period
@@ -138,8 +137,7 @@ class BackgroundLaunchProcessController {
                 if (lastActivityLaunchTime > lastStopAppSwitchesTime
                         || lastActivityFinishTime > lastStopAppSwitchesTime) {
                     return new BalVerdict(BAL_ALLOW_GRACE_PERIOD, /*background*/ true,
-                            "Activity start allowed: within "
-                                    + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+                            "within " + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
                 }
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "[Process(" + pid + ")] Activity start within "
