@@ -1204,12 +1204,15 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /**
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
      * Enabling this change will allow the following min aspect ratio treatments to be applied:
-     * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
-     * OVERRIDE_MIN_ASPECT_RATIO_LARGE
+     * <ul>
+     *  <li>OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
+     *  <li>OVERRIDE_MIN_ASPECT_RATIO_LARGE
+     * </ul>
      *
      * If OVERRIDE_MIN_ASPECT_RATIO is applied, the min aspect ratio given in the app's manifest
      * will be overridden to the largest enabled aspect ratio treatment unless the app's manifest
-     * value is higher.
+     * value is higher. By default, this will only apply to activities with fixed portrait
+     * orientation if OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY is not explicitly disabled.
      * @hide
      */
     @ChangeId
