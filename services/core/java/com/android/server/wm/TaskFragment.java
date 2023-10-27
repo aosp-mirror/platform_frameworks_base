@@ -1049,6 +1049,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return getActivity(ActivityRecord::canBeTopRunning);
     }
 
+    /**
+     * Reports non-finishing activity count including this TaskFragment's child embedded
+     * TaskFragments' children activities.
+     */
     int getNonFinishingActivityCount() {
         final int[] runningActivityCount = new int[1];
         forAllActivities(a -> {
@@ -1057,6 +1061,20 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
         });
         return runningActivityCount[0];
+    }
+
+    /**
+     * Returns {@code true} if there's any non-finishing direct children activity, which is not
+     * embedded in TaskFragments
+     */
+    boolean hasNonFinishingDirectActivity() {
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityRecord activity = getChildAt(i).asActivityRecord();
+            if (activity != null && !activity.finishing) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isTopActivityFocusable() {
