@@ -41,6 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="3dp"
             android:scaleType="centerInside"
             android:src="@drawable/stat_sys_connected_display"
             android:tint="@android:color/black" />
