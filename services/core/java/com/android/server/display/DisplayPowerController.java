@@ -1973,6 +1973,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         || !isDisplayContentVisible || brightnessIsTemporary;
                 if (!skipAnimation && BrightnessSynchronizer.floatEquals(
                         sdrAnimateValue, currentSdrBrightness)) {
+                    // SDR brightness is unchanged, so animate quickly as this is only impacting
+                    // a likely minority amount of display content
+                    // ie, the highlights of an HDR video or UltraHDR image
+                    slowChange = false;
+
                     // Going from HDR to no HDR; visually this should be a "no-op" anyway
                     // as the remaining SDR content's brightness should be holding steady
                     // due to the sdr brightness not shifting
