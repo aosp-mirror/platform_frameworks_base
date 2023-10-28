@@ -28,3 +28,10 @@ flag {
     description: "Framework support for communal profile."
     bug: "285426179"
 }
+
+flag {
+    name: "support_communal_profile_nextgen"
+    namespace: "multiuser"
+    description: "Further framework support for communal profile, beyond the basics, for later releases."
+    bug: "285426179"
+}

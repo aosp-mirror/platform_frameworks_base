@@ -2786,6 +2786,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 flags |= AccessibilityInputFilter
                         .FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP;
             }
+            if (Flags.enableMagnificationMultipleFingerMultipleTapGesture()) {
+                if (userState.isMagnificationSingleFingerTripleTapEnabledLocked()) {
+                    flags |= AccessibilityInputFilter
+                            .FLAG_FEATURE_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP;
+                }
+            }
             if (userState.isShortcutMagnificationEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
             }
@@ -3150,6 +3156,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return false;
     }
 
+    private boolean readMagnificationTwoFingerTripleTapSettingsLocked(
+            AccessibilityUserState userState) {
+        final boolean magnificationTwoFingerTripleTapEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED,
+                0, userState.mUserId) == 1;
+        if ((magnificationTwoFingerTripleTapEnabled
+                != userState.isMagnificationTwoFingerTripleTapEnabledLocked())) {
+            userState.setMagnificationTwoFingerTripleTapEnabledLocked(
+                    magnificationTwoFingerTripleTapEnabled);
+            return true;
+        }
+        return false;
+    }
+
     private boolean readAutoclickEnabledSettingLocked(AccessibilityUserState userState) {
         final boolean autoclickEnabled = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
@@ -3385,6 +3406,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // displays in one display. It's not a real display and there's no input events for it.
         final ArrayList<Display> displays = getValidDisplayList();
         if (userState.isMagnificationSingleFingerTripleTapEnabledLocked()
+                || userState.isMagnificationTwoFingerTripleTapEnabledLocked()
                 || userState.isShortcutMagnificationEnabledLocked()) {
             for (int i = 0; i < displays.size(); i++) {
                 final Display display = displays.get(i);
@@ -4920,6 +4942,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mMagnificationmSingleFingerTripleTapEnabledUri = Settings.Secure
                 .getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED);
 
+        private final Uri mMagnificationTwoFingerTripleTapEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED);
+
         private final Uri mAutoclickEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED);
 
@@ -4977,6 +5002,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mMagnificationmSingleFingerTripleTapEnabledUri,
                     false, this, UserHandle.USER_ALL);
+            if (Flags.enableMagnificationMultipleFingerMultipleTapGesture()) {
+                contentResolver.registerContentObserver(mMagnificationTwoFingerTripleTapEnabledUri,
+                        false, this, UserHandle.USER_ALL);
+            }
             contentResolver.registerContentObserver(mAutoclickEnabledUri,
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mEnabledAccessibilityServicesUri,
@@ -5025,6 +5054,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 } else if (mMagnificationmSingleFingerTripleTapEnabledUri.equals(uri)) {
                     if (readMagnificationEnabledSettingsLocked(userState)) {
+                        onUserStateChangedLocked(userState);
+                    }
+                } else if (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
+                        && mMagnificationTwoFingerTripleTapEnabledUri.equals(uri)) {
+                    if (readMagnificationTwoFingerTripleTapSettingsLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mAutoclickEnabledUri.equals(uri)) {

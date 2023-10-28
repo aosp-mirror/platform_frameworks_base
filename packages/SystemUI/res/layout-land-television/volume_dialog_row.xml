@@ -79,7 +79,4 @@
             android:tint="@color/accent_tint_color_selector"
             android:soundEffectsEnabled="false" />
     </LinearLayout>
-
-    <include layout="@layout/volume_dnd_icon"/>
-
 </FrameLayout>

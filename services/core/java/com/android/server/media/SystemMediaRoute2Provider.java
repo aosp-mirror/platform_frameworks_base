@@ -40,6 +40,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.media.flags.Flags;
 
 import java.util.List;
 import java.util.Objects;
@@ -358,21 +359,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
             RoutingSessionInfo newSessionInfo = builder.setProviderId(mUniqueId).build();
 
-            if (mPendingSessionCreationRequest != null) {
-                SessionCreationRequest sessionCreationRequest;
-                synchronized (mRequestLock) {
-                    sessionCreationRequest = mPendingSessionCreationRequest;
-                    mPendingSessionCreationRequest = null;
-                }
-                if (sessionCreationRequest != null) {
-                    if (TextUtils.equals(mSelectedRouteId, sessionCreationRequest.mRouteId)) {
-                        mCallback.onSessionCreated(this,
-                                sessionCreationRequest.mRequestId, newSessionInfo);
-                    } else {
-                        mCallback.onRequestFailed(this, sessionCreationRequest.mRequestId,
-                                MediaRoute2ProviderService.REASON_UNKNOWN_ERROR);
-                    }
-                }
+            synchronized (mRequestLock) {
+                reportPendingSessionRequestResultLockedIfNeeded(newSessionInfo);
             }
 
             if (Objects.equals(oldSessionInfo, newSessionInfo)) {
@@ -393,6 +381,59 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 return true;
             }
         }
+    }
+
+    @GuardedBy("mRequestLock")
+    private void reportPendingSessionRequestResultLockedIfNeeded(
+            RoutingSessionInfo newSessionInfo) {
+        if (mPendingSessionCreationRequest == null) {
+            // No pending request, nothing to report.
+            return;
+        }
+
+        long pendingRequestId = mPendingSessionCreationRequest.mRequestId;
+        if (TextUtils.equals(mSelectedRouteId, mPendingSessionCreationRequest.mRouteId)) {
+            if (DEBUG) {
+                Slog.w(
+                        TAG,
+                        "Session creation success to route "
+                                + mPendingSessionCreationRequest.mRouteId);
+            }
+            mPendingSessionCreationRequest = null;
+            mCallback.onSessionCreated(this, pendingRequestId, newSessionInfo);
+        } else {
+            boolean isRequestedRouteConnectedBtRoute = isRequestedRouteConnectedBtRoute();
+            if (!Flags.enableWaitingStateForSystemSessionCreationRequest()
+                    || !isRequestedRouteConnectedBtRoute) {
+                if (DEBUG) {
+                    Slog.w(
+                            TAG,
+                            "Session creation failed to route "
+                                    + mPendingSessionCreationRequest.mRouteId);
+                }
+                mPendingSessionCreationRequest = null;
+                mCallback.onRequestFailed(
+                        this, pendingRequestId, MediaRoute2ProviderService.REASON_UNKNOWN_ERROR);
+            } else if (DEBUG) {
+                Slog.w(
+                        TAG,
+                        "Session creation waiting state to route "
+                                + mPendingSessionCreationRequest.mRouteId);
+            }
+        }
+    }
+
+    @GuardedBy("mRequestLock")
+    private boolean isRequestedRouteConnectedBtRoute() {
+        // Using AllRoutes instead of TransferableRoutes as BT Stack sends an intermediate update
+        // where two BT routes are active so the transferable routes list is empty.
+        // See b/307723189 for context
+        for (MediaRoute2Info btRoute : mBluetoothRouteController.getAllBluetoothRoutes()) {
+            if (TextUtils.equals(btRoute.getId(), mPendingSessionCreationRequest.mRouteId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void publishProviderState() {

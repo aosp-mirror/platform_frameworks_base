@@ -210,6 +210,10 @@ class MediaProjectionAppSelectorActivity(
                 reviewGrantedConsentRequired,
                 /* projection= */ null
             )
+            if (isFinishing) {
+                // Only log dismissed when actually finishing, and not when changing configuration.
+                controller.onSelectorDismissed()
+            }
         }
         activityLauncher.destroy()
         controller.destroy()

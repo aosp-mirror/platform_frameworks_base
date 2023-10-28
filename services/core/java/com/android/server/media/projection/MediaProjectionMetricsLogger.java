@@ -118,6 +118,23 @@ public class MediaProjectionMetricsLogger {
     }
 
     /**
+     * Logs that requesting permission for media projection was cancelled by the user.
+     *
+     * @param hostUid UID of the package that initiates MediaProjection.
+     */
+    public void logProjectionPermissionRequestCancelled(int hostUid) {
+        write(
+                mSessionIdGenerator.getCurrentSessionId(),
+                FrameworkStatsLog
+                        .MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CANCELLED,
+                hostUid,
+                TARGET_UID_UNKNOWN,
+                TIME_SINCE_LAST_ACTIVE_UNKNOWN,
+                FrameworkStatsLog
+                        .MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    /**
      * Logs that the app selector dialog is shown for the user.
      *
      * @param hostUid UID of the package that initiates MediaProjection.
@@ -172,23 +189,6 @@ public class MediaProjectionMetricsLogger {
         if (wasCaptureInProgress) {
             mTimestampStore.registerActiveSessionEnded();
         }
-    }
-
-    public void notifyProjectionStateChange(int hostUid, int state, int sessionCreationSource) {
-        write(hostUid, state, sessionCreationSource);
-    }
-
-    private void write(int hostUid, int state, int sessionCreationSource) {
-        mFrameworkStatsLogWrapper.write(
-                /* code */ FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED,
-                /* session_id */ 123,
-                /* state */ state,
-                /* previous_state */ FrameworkStatsLog
-                        .MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN,
-                /* host_uid */ hostUid,
-                /* target_uid */ -1,
-                /* time_since_last_active */ 0,
-                /* creation_source */ sessionCreationSource);
     }
 
     private void write(

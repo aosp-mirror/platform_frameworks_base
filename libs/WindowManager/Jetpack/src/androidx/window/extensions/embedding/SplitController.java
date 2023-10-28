@@ -1763,6 +1763,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
 
+        if (container.isFinished()) {
+            return;
+        }
+
+        if (container.isOverlay()) {
+            updateOverlayContainer(wct, container);
+            return;
+        }
+
         if (launchPlaceholderIfNecessary(wct, container)) {
             // Placeholder was launched, the positions will be updated when the activity is added
             // to the secondary container.
@@ -1781,6 +1790,25 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         updateSplitContainerIfNeeded(splitContainer, wct, null /* splitAttributes */);
+    }
+
+
+    @VisibleForTesting
+    // Suppress GuardedBy warning because lint ask to mark this method as
+    // @GuardedBy(mPresenter.mController.mLock), which is mLock itself
+    @SuppressWarnings("GuardedBy")
+    @GuardedBy("mLock")
+    void updateOverlayContainer(@NonNull WindowContainerTransaction wct,
+                                @NonNull TaskFragmentContainer container) {
+        final TaskContainer taskContainer = container.getTaskContainer();
+        // Dismiss the overlay container if it's the only container in the task and there's no
+        // direct activity in the parent task.
+        if (taskContainer.getTaskFragmentContainers().size() == 1
+                && !taskContainer.hasDirectActivity()) {
+            container.finish(false /* shouldFinishDependent */, mPresenter, wct, this);
+        }
+
+        // TODO(b/295805054): Add the logic to update overlay container
     }
 
     /**

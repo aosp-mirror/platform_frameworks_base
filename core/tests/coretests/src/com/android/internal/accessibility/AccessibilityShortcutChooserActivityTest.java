@@ -33,6 +33,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.endsWith;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -119,6 +120,11 @@ public class AccessibilityShortcutChooserActivityTest {
 
     @Before
     public void setUp() throws Exception {
+        final PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        assumeFalse("AccessibilityShortcutChooserActivity not supported on watch",
+                pm.hasSystemFeature(PackageManager.FEATURE_WATCH));
+
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         mDevice.wakeUp();
         when(mAccessibilityServiceInfo.getResolveInfo()).thenReturn(mResolveInfo);
@@ -138,7 +144,9 @@ public class AccessibilityShortcutChooserActivityTest {
 
     @After
     public void cleanUp() {
-        mScenario.close();
+        if (mScenario != null) {
+            mScenario.close();
+        }
     }
 
     @Test

@@ -1,0 +1,76 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.systemui.statusbar.notification.interruption
+
+import com.android.internal.logging.UiEventLogger.UiEventEnum
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+
+/**
+ * A reason why visual interruptions might be suppressed.
+ *
+ * @see VisualInterruptionCondition
+ * @see VisualInterruptionFilter
+ */
+enum class VisualInterruptionType {
+    /* HUN when awake */
+    PEEK,
+
+    /* HUN when dozing */
+    PULSE,
+
+    /* Bubble */
+    BUBBLE
+}
+
+/**
+ * A reason why visual interruptions might be suppressed.
+ *
+ * @see VisualInterruptionCondition
+ * @see VisualInterruptionFilter
+ */
+sealed interface VisualInterruptionSuppressor {
+    /** The type(s) of interruption that this suppresses. */
+    val types: Set<VisualInterruptionType>
+
+    /** A human-readable string to be logged to explain why this suppressed an interruption. */
+    val reason: String
+
+    /** An optional UiEvent ID to be recorded when this suppresses an interruption. */
+    val uiEventId: UiEventEnum?
+}
+
+/** A reason why visual interruptions might be suppressed regardless of the notification. */
+abstract class VisualInterruptionCondition(
+    override val types: Set<VisualInterruptionType>,
+    override val reason: String,
+    override val uiEventId: UiEventEnum? = null
+) : VisualInterruptionSuppressor {
+    /** @return true if these interruptions should be suppressed right now. */
+    abstract fun shouldSuppress(): Boolean
+}
+
+/** A reason why visual interruptions might be suppressed based on the notification. */
+abstract class VisualInterruptionFilter(
+    override val types: Set<VisualInterruptionType>,
+    override val reason: String,
+    override val uiEventId: UiEventEnum? = null
+) : VisualInterruptionSuppressor {
+    /**
+     * @param entry the notification to consider suppressing
+     * @return true if these interruptions should be suppressed for this notification right now
+     */
+    abstract fun shouldSuppress(entry: NotificationEntry): Boolean
+}

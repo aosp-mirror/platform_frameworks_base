@@ -1568,6 +1568,7 @@ public class TaskTests extends WindowTestsBase {
 
         final TaskFragment fragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
         final ActivityRecord embeddedActivity = fragment.getTopMostActivity();
+        doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
         task.moveActivityToFront(activity);
         assertEquals("Activity must be moved to front", activity, task.getTopMostActivity());
 

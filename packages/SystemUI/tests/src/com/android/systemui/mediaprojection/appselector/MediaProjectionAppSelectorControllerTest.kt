@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED as STATE_APP_SELECTOR_DISPLAYED
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
@@ -214,7 +213,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     @Test
     fun init_firstStart_logsAppSelectorDisplayed() {
         val hostUid = 123456789
-        val controller = createController(isFirstStart = true,  hostUid)
+        val controller = createController(isFirstStart = true, hostUid)
 
         controller.init()
 
@@ -229,6 +228,15 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
         controller.init()
 
         verify(logger, never()).notifyAppSelectorDisplayed(hostUid)
+    }
+
+    @Test
+    fun onSelectorDismissed_logsProjectionRequestCancelled() {
+        val hostUid = 123
+
+        createController(hostUid = hostUid).onSelectorDismissed()
+
+        verify(logger).notifyProjectionRequestCancelled(hostUid)
     }
 
     private fun givenCaptureAllowed(isAllow: Boolean) {

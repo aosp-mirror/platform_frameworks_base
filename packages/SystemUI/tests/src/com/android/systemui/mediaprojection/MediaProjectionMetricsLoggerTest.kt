@@ -74,6 +74,15 @@ class MediaProjectionMetricsLoggerTest : SysuiTestCase() {
     }
 
     @Test
+    fun notifyProjectionCancelled_forwardsToServiceWithMetricsValue() {
+        val hostUid = 123
+
+        logger.notifyProjectionRequestCancelled(hostUid)
+
+        verify(service).notifyPermissionRequestCancelled(hostUid)
+    }
+
+    @Test
     fun notifyAppSelectorDisplayed_forwardsToService() {
         val hostUid = 654
 

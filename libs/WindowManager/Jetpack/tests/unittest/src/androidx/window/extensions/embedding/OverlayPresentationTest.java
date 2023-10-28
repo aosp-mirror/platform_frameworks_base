@@ -58,6 +58,7 @@ import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
@@ -411,6 +412,33 @@ public class OverlayPresentationTest {
                 .that(taskContainer.getTopNonFinishingTaskFragmentContainer(
                         false /* includePin */, true /* includeOverlay */))
                 .isEqualTo(overlayContainer);
+    }
+
+    @Test
+    public void testUpdateContainer_dontInvokeUpdateOverlayForNonOverlayContainer() {
+        TaskFragmentContainer taskFragmentContainer = createMockTaskFragmentContainer(mActivity);
+
+        mSplitController.updateContainer(mTransaction, taskFragmentContainer);
+        verify(mSplitController, never()).updateOverlayContainer(any(), any());
+    }
+
+    @Test
+    public void testUpdateOverlayContainer_dismissOverlayIfNeeded() {
+        TaskFragmentContainer overlayContainer = createTestOverlayContainer(TASK_ID, "test");
+
+        mSplitController.updateOverlayContainer(mTransaction, overlayContainer);
+
+        final TaskContainer taskContainer = overlayContainer.getTaskContainer();
+        assertThat(taskContainer.getTaskFragmentContainers()).containsExactly(overlayContainer);
+
+        taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(Configuration.EMPTY,
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */));
+
+        mSplitController.updateOverlayContainer(mTransaction, overlayContainer);
+
+        assertWithMessage("The overlay must be dismissed since there's no activity"
+                + " in the task and other taskFragment.")
+                .that(taskContainer.getTaskFragmentContainers()).isEmpty();
     }
 
     /**
