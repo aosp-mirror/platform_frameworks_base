@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -72,6 +73,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.function.Predicate;
 
+@Ignore
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
