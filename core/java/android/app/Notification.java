@@ -374,7 +374,7 @@ public class Notification implements Parcelable
      * that you take care of task management as described in the
      * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
      * Stack</a> document.  In particular, make sure to read the
-     * <a href="{@docRoot}/training/notify-user/navigation">Start
+     * <a href="{@docRoot}training/notify-user/navigation">Start
      * an Activity from a Notification</a> page for the correct ways to launch an application from a
      * notification.
      */
