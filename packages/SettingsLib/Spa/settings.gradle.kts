@@ -26,7 +26,14 @@ dependencyResolutionManagement {
     rulesMode.set(RulesMode.FAIL_ON_PROJECT_RULES)
 
     repositories {
-        google()
+        google {
+            content {
+                includeGroupAndSubgroups("com.google")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("android")
+                includeGroupAndSubgroups("androidx")
+            }
+        }
         mavenCentral()
         maven {
             url = uri("https://jitpack.io")
