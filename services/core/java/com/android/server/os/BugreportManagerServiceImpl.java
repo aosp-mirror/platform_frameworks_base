@@ -16,6 +16,8 @@
 
 package com.android.server.os;
 
+import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
+
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -52,8 +54,10 @@ import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.Set;
 
 /**
  * Implementation of the service that provides a privileged API to capture and consume bugreports.
@@ -101,10 +105,12 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         private final ArrayMap<Pair<Integer, String>, ArraySet<String>> mBugreportFiles =
                 new ArrayMap<>();
 
+        @GuardedBy("mLock")
+        private final Set<String> mBugreportFilesToPersist = new HashSet<>();
+
         /**
          * Checks that a given file was generated on behalf of the given caller. If the file was
-         * generated on behalf of the caller, it is removed from the bugreport mapping so that it
-         * may not be retrieved again. If the file was not generated on behalf of the caller, an
+         * not generated on behalf of the caller, an
          * {@link IllegalArgumentException} is thrown.
          *
          * @param callingInfo a (uid, package name) pair identifying the caller
@@ -114,35 +120,76 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
          * @throws IllegalArgumentException if {@code bugreportFile} is not associated with
          *                                  {@code callingInfo}.
          */
+        @RequiresPermission(value = android.Manifest.permission.INTERACT_ACROSS_USERS,
+                conditional = true)
         void ensureCallerPreviouslyGeneratedFile(
-                Pair<Integer, String> callingInfo, String bugreportFile) {
+                Context context, Pair<Integer, String> callingInfo, int userId,
+                String bugreportFile) {
             synchronized (mLock) {
-                ArraySet<String> bugreportFilesForCaller = mBugreportFiles.get(callingInfo);
-                if (bugreportFilesForCaller != null
-                        && bugreportFilesForCaller.contains(bugreportFile)) {
-                    bugreportFilesForCaller.remove(bugreportFile);
-                    if (bugreportFilesForCaller.isEmpty()) {
-                        mBugreportFiles.remove(callingInfo);
+                if (onboardingBugreportV2Enabled()) {
+                    final int uidForUser = Binder.withCleanCallingIdentity(() -> {
+                        try {
+                            return context.getPackageManager()
+                                    .getPackageUidAsUser(callingInfo.second, userId);
+                        } catch (PackageManager.NameNotFoundException exception) {
+                            throwInvalidBugreportFileForCallerException(
+                                    bugreportFile, callingInfo.second);
+                            return -1;
+                        }
+                    });
+                    if (uidForUser != callingInfo.first && context.checkCallingOrSelfPermission(
+                            Manifest.permission.INTERACT_ACROSS_USERS)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        throw new SecurityException(
+                                callingInfo.second + " does not hold the "
+                                        + "INTERACT_ACROSS_USERS permission to access "
+                                        + "cross-user bugreports.");
+                    }
+                    ArraySet<String> bugreportFilesForUid = mBugreportFiles.get(
+                            new Pair<>(uidForUser, callingInfo.second));
+                    if (bugreportFilesForUid == null
+                            || !bugreportFilesForUid.contains(bugreportFile)) {
+                        throwInvalidBugreportFileForCallerException(
+                                bugreportFile, callingInfo.second);
                     }
                 } else {
-                    throw new IllegalArgumentException(
-                            "File " + bugreportFile + " was not generated"
-                                    + " on behalf of calling package " + callingInfo.second);
+                    ArraySet<String> bugreportFilesForCaller = mBugreportFiles.get(callingInfo);
+                    if (bugreportFilesForCaller != null
+                            && bugreportFilesForCaller.contains(bugreportFile)) {
+                        bugreportFilesForCaller.remove(bugreportFile);
+                        if (bugreportFilesForCaller.isEmpty()) {
+                            mBugreportFiles.remove(callingInfo);
+                        }
+                    } else {
+                        throwInvalidBugreportFileForCallerException(
+                                bugreportFile, callingInfo.second);
+
+                    }
                 }
             }
+        }
+
+        private static void throwInvalidBugreportFileForCallerException(
+                String bugreportFile, String packageName) {
+            throw new IllegalArgumentException("File " + bugreportFile + " was not generated on"
+                    + " behalf of calling package " + packageName);
         }
 
         /**
          * Associates a bugreport file with a caller, which is identified as a
          * (uid, package name) pair.
          */
-        void addBugreportFileForCaller(Pair<Integer, String> caller, String bugreportFile) {
+        void addBugreportFileForCaller(
+                Pair<Integer, String> caller, String bugreportFile, boolean keepOnRetrieval) {
             synchronized (mLock) {
                 if (!mBugreportFiles.containsKey(caller)) {
                     mBugreportFiles.put(caller, new ArraySet<>());
                 }
                 ArraySet<String> bugreportFilesForCaller = mBugreportFiles.get(caller);
                 bugreportFilesForCaller.add(bugreportFile);
+                if ((onboardingBugreportV2Enabled()) && keepOnRetrieval) {
+                    mBugreportFilesToPersist.add(bugreportFile);
+                }
             }
         }
     }
@@ -246,16 +293,17 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     }
 
     @Override
-    @RequiresPermission(Manifest.permission.DUMP)
-    public void retrieveBugreport(int callingUidUnused, String callingPackage,
-            FileDescriptor bugreportFd, String bugreportFile, IDumpstateListener listener) {
+    @RequiresPermission(value = Manifest.permission.DUMP, conditional = true)
+    public void retrieveBugreport(int callingUidUnused, String callingPackage, int userId,
+            FileDescriptor bugreportFd, String bugreportFile,
+            boolean keepBugreportOnRetrievalUnused, IDumpstateListener listener) {
         int callingUid = Binder.getCallingUid();
         enforcePermission(callingPackage, callingUid, false);
 
         Slogf.i(TAG, "Retrieving bugreport for %s / %d", callingPackage, callingUid);
         try {
             mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
-                    new Pair<>(callingUid, callingPackage), bugreportFile);
+                    mContext, new Pair<>(callingUid, callingPackage), userId, bugreportFile);
         } catch (IllegalArgumentException e) {
             Slog.e(TAG, e.getMessage());
             reportError(listener, IDumpstateListener.BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE);
@@ -281,10 +329,17 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             // Wrap the listener so we can intercept binder events directly.
             DumpstateListener myListener = new DumpstateListener(listener, ds,
                     new Pair<>(callingUid, callingPackage), /* reportFinishedFile= */ true);
+
+            boolean keepBugreportOnRetrieval = false;
+            if (onboardingBugreportV2Enabled()) {
+                keepBugreportOnRetrieval = mBugreportFileManager.mBugreportFilesToPersist.contains(
+                        bugreportFile);
+            }
+
             setCurrentDumpstateListenerLocked(myListener);
             try {
-                ds.retrieveBugreport(callingUid, callingPackage, bugreportFd,
-                        bugreportFile, myListener);
+                ds.retrieveBugreport(callingUid, callingPackage, userId, bugreportFd,
+                        bugreportFile, keepBugreportOnRetrieval, myListener);
             } catch (RemoteException e) {
                 Slog.e(TAG, "RemoteException in retrieveBugreport", e);
             }
@@ -317,7 +372,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private void validateBugreportFlags(int flags) {
         flags = clearBugreportFlag(flags,
                 BugreportParams.BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA
-                        | BugreportParams.BUGREPORT_FLAG_DEFER_CONSENT);
+                        | BugreportParams.BUGREPORT_FLAG_DEFER_CONSENT
+                        | BugreportParams.BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL);
         if (flags != 0) {
             Slog.w(TAG, "Unknown bugreport flags: " + flags);
             throw new IllegalArgumentException("Unknown bugreport flags: " + flags);
@@ -482,6 +538,9 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         boolean reportFinishedFile =
                 (bugreportFlags & BugreportParams.BUGREPORT_FLAG_DEFER_CONSENT) != 0;
 
+        boolean keepBugreportOnRetrieval =
+                (bugreportFlags & BugreportParams.BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL) != 0;
+
         IDumpstate ds = startAndGetDumpstateBinderServiceLocked();
         if (ds == null) {
             Slog.w(TAG, "Unable to get bugreport service");
@@ -490,7 +549,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
 
         DumpstateListener myListener = new DumpstateListener(listener, ds,
-                new Pair<>(callingUid, callingPackage), reportFinishedFile);
+                new Pair<>(callingUid, callingPackage), reportFinishedFile,
+                keepBugreportOnRetrieval);
         setCurrentDumpstateListenerLocked(myListener);
         try {
             ds.startBugreport(callingUid, callingPackage, bugreportFd, screenshotFd, bugreportMode,
@@ -646,9 +706,16 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         private final boolean mReportFinishedFile;
         private int mProgress; // used for debugging purposes only
         private boolean mDone;
+        private boolean mKeepBugreportOnRetrieval;
 
         DumpstateListener(IDumpstateListener listener, IDumpstate ds,
                 Pair<Integer, String> caller, boolean reportFinishedFile) {
+            this(listener, ds, caller, reportFinishedFile, /* keepBugreportOnRetrieval= */ false);
+        }
+
+        DumpstateListener(IDumpstateListener listener, IDumpstate ds,
+                Pair<Integer, String> caller, boolean reportFinishedFile,
+                boolean keepBugreportOnRetrieval) {
             if (DEBUG) {
                 Slogf.d(TAG, "Starting DumpstateListener(id=%d) for caller %s", mId, caller);
             }
@@ -656,6 +723,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             mDs = ds;
             mCaller = caller;
             mReportFinishedFile = reportFinishedFile;
+            mKeepBugreportOnRetrieval = keepBugreportOnRetrieval;
             try {
                 mDs.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -690,7 +758,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 reportFinishedLocked("File: " + bugreportFile);
             }
             if (mReportFinishedFile) {
-                mBugreportFileManager.addBugreportFileForCaller(mCaller, bugreportFile);
+                mBugreportFileManager.addBugreportFileForCaller(
+                        mCaller, bugreportFile, mKeepBugreportOnRetrieval);
             } else if (DEBUG) {
                 Slog.d(TAG, "Not reporting finished file");
             }

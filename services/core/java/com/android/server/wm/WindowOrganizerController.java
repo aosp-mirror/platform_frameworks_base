@@ -37,6 +37,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_SET_RELATIVE_BOUNDS;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_UNKNOWN;
 import static android.window.WindowContainerTransaction.Change.CHANGE_FOCUSABLE;
+import static android.window.WindowContainerTransaction.Change.CHANGE_FORCE_TRANSLUCENT;
 import static android.window.WindowContainerTransaction.Change.CHANGE_HIDDEN;
 import static android.window.WindowContainerTransaction.Change.CHANGE_RELATIVE_BOUNDS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER;
@@ -768,8 +769,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
 
-        if ((c.getChangeMask()
-                & WindowContainerTransaction.Change.CHANGE_FORCE_TRANSLUCENT) != 0) {
+        if ((c.getChangeMask() & CHANGE_FORCE_TRANSLUCENT) != 0) {
             tr.setForceTranslucent(c.getForceTranslucent());
             effects = TRANSACT_EFFECTS_LIFECYCLE;
         }
@@ -877,6 +877,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
             }
         }
+        if ((c.getChangeMask() & CHANGE_FORCE_TRANSLUCENT) != 0) {
+            taskFragment.setForceTranslucent(c.getForceTranslucent());
+            effects = TRANSACT_EFFECTS_LIFECYCLE;
+        }
+
         effects |= applyChanges(taskFragment, c);
 
         if (taskFragment.shouldStartChangeTransition(mTmpBounds0, mTmpBounds1)) {
@@ -2022,9 +2027,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         if (mTaskFragmentOrganizerController.isSystemOrganizer(organizer.asBinder())) {
             // System organizer is allowed to update the hidden and focusable state.
-            // We unset the CHANGE_HIDDEN and CHANGE_FOCUSABLE bits because they are checked here.
+            // We unset the CHANGE_HIDDEN, CHANGE_FOCUSABLE, and CHANGE_FORCE_TRANSLUCENT bits
+            // because they are checked here.
             changeMaskToBeChecked &= ~CHANGE_HIDDEN;
             changeMaskToBeChecked &= ~CHANGE_FOCUSABLE;
+            changeMaskToBeChecked &= ~CHANGE_FORCE_TRANSLUCENT;
         }
 
         // setRelativeBounds is allowed.

@@ -70,12 +70,6 @@
                     android:tint="?android:attr/textColorPrimary"
                     android:layout_gravity="center"
                     android:soundEffectsEnabled="false" />
-
-                <include layout="@layout/volume_dnd_icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/volume_dialog_stream_padding"
-                    android:layout_marginTop="6dp"/>
             </FrameLayout>
 
             <LinearLayout

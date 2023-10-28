@@ -145,6 +145,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     /** Flag for intercepting generic motion events. */
     static final int FLAG_FEATURE_INTERCEPT_GENERIC_MOTION_EVENTS = 0x00000800;
 
+    /**
+     * Flag for enabling the two-finger triple-tap magnification feature.
+     *
+     * @see #setUserAndEnabledFeatures(int, int)
+     */
+    static final int FLAG_FEATURE_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP = 0x00001000;
+
     static final int FEATURES_AFFECTING_MOTION_EVENTS =
             FLAG_FEATURE_INJECT_MOTION_EVENTS
                     | FLAG_FEATURE_AUTOCLICK

@@ -1461,8 +1461,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mDragView.setColorFilter(filter);
     }
 
-    @VisibleForTesting
-    void setBounceEffectDuration(int duration) {
+    private void setBounceEffectDuration(int duration) {
         mBounceEffectDuration = duration;
     }
 

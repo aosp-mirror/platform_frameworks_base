@@ -110,6 +110,7 @@ class AccessibilityUserState {
     private boolean mIsAudioDescriptionByDefaultRequested;
     private boolean mIsAutoclickEnabled;
     private boolean mIsMagnificationSingleFingerTripleTapEnabled;
+    private boolean mMagnificationTwoFingerTripleTapEnabled;
     private boolean mIsFilterKeyEventsEnabled;
     private boolean mIsPerformGesturesEnabled;
     private boolean mAccessibilityFocusOnlyInActiveWindow;
@@ -212,6 +213,7 @@ class AccessibilityUserState {
         mRequestTwoFingerPassthrough = false;
         mSendMotionEventsEnabled = false;
         mIsMagnificationSingleFingerTripleTapEnabled = false;
+        mMagnificationTwoFingerTripleTapEnabled = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
@@ -631,6 +633,14 @@ class AccessibilityUserState {
 
     public void setMagnificationSingleFingerTripleTapEnabledLocked(boolean enabled) {
         mIsMagnificationSingleFingerTripleTapEnabled = enabled;
+    }
+
+    public boolean isMagnificationTwoFingerTripleTapEnabledLocked() {
+        return mMagnificationTwoFingerTripleTapEnabled;
+    }
+
+    public void setMagnificationTwoFingerTripleTapEnabledLocked(boolean enabled) {
+        mMagnificationTwoFingerTripleTapEnabled = enabled;
     }
 
     public boolean isFilterKeyEventsEnabledLocked() {

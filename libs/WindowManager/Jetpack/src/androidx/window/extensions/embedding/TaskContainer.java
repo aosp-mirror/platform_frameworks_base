@@ -75,6 +75,8 @@ class TaskContainer {
 
     private boolean mIsVisible;
 
+    private boolean mHasDirectActivity;
+
     /**
      * TaskFragments that the organizer has requested to be closed. They should be removed when
      * the organizer receives
@@ -102,8 +104,9 @@ class TaskContainer {
         mConfiguration = taskProperties.getConfiguration();
         mDisplayId = taskProperties.getDisplayId();
         // Note that it is always called when there's a new Activity is started, which implies
-        // the host task is visible.
+        // the host task is visible and has an activity in the task.
         mIsVisible = true;
+        mHasDirectActivity = true;
     }
 
     int getTaskId() {
@@ -118,6 +121,10 @@ class TaskContainer {
         return mIsVisible;
     }
 
+    boolean hasDirectActivity() {
+        return mHasDirectActivity;
+    }
+
     @NonNull
     TaskProperties getTaskProperties() {
         return new TaskProperties(mDisplayId, mConfiguration);
@@ -127,6 +134,7 @@ class TaskContainer {
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.getDisplayId();
         mIsVisible = info.isVisible();
+        mHasDirectActivity = info.hasDirectActivity();
     }
 
     /**

@@ -2706,6 +2706,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mLastLayer;
     }
 
+    SurfaceControl getLastRelativeLayer() {
+        return mLastRelativeToLayer;
+    }
+
     protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
         if (mSurfaceFreezer.hasLeash()) {
             // When the freezer has created animation leash parent for the window, set the layer

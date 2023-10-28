@@ -674,6 +674,17 @@ public class MediaProjectionManagerServiceTest {
     }
 
     @Test
+    public void notifyPermissionRequestCancelled_forwardsToLogger() {
+        int hostUid = 123;
+        mService =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+
+        mService.notifyPermissionRequestCancelled(hostUid);
+
+        verify(mMediaProjectionMetricsLogger).logProjectionPermissionRequestCancelled(hostUid);
+    }
+
+    @Test
     public void notifyAppSelectorDisplayed_forwardsToLogger() {
         int hostUid = 456;
         mService =

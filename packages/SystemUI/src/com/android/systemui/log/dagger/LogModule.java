@@ -91,7 +91,7 @@ public class LogModule {
     @SysUISingleton
     @NotifInflationLog
     public static LogBuffer provideNotifInflationLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifInflationLog", 100);
+        return factory.create("NotifInflationLog", 250);
     }
 
     /** Provides a logging buffer for notification interruption calculations. */

@@ -35,17 +35,21 @@ public class TaskFragmentParentInfo implements Parcelable {
 
     private final boolean mVisible;
 
+    private final boolean mHasDirectActivity;
+
     public TaskFragmentParentInfo(@NonNull Configuration configuration, int displayId,
-            boolean visible) {
+            boolean visible, boolean hasDirectActivity) {
         mConfiguration.setTo(configuration);
         mDisplayId = displayId;
         mVisible = visible;
+        mHasDirectActivity = hasDirectActivity;
     }
 
     public TaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.mDisplayId;
         mVisible = info.mVisible;
+        mHasDirectActivity = info.mHasDirectActivity;
     }
 
     /** The {@link Configuration} of the parent Task */
@@ -68,6 +72,14 @@ public class TaskFragmentParentInfo implements Parcelable {
     }
 
     /**
+     * Whether the parent Task has any direct child activity, which is not embedded in any
+     * TaskFragment, or not
+     */
+    public boolean hasDirectActivity() {
+        return mHasDirectActivity;
+    }
+
+    /**
      * Returns {@code true} if the parameters which are important for task fragment
      * organizers are equal between this {@link TaskFragmentParentInfo} and {@code that}.
      * Note that this method is usually called with
@@ -80,7 +92,7 @@ public class TaskFragmentParentInfo implements Parcelable {
             return false;
         }
         return getWindowingMode() == that.getWindowingMode() && mDisplayId == that.mDisplayId
-                && mVisible == that.mVisible;
+                && mVisible == that.mVisible && mHasDirectActivity == that.mHasDirectActivity;
     }
 
     @WindowConfiguration.WindowingMode
@@ -94,6 +106,7 @@ public class TaskFragmentParentInfo implements Parcelable {
                 + "config=" + mConfiguration
                 + ", displayId=" + mDisplayId
                 + ", visible=" + mVisible
+                + ", hasDirectActivity=" + mHasDirectActivity
                 + "}";
     }
 
@@ -114,7 +127,8 @@ public class TaskFragmentParentInfo implements Parcelable {
         final TaskFragmentParentInfo that = (TaskFragmentParentInfo) obj;
         return mConfiguration.equals(that.mConfiguration)
                 && mDisplayId == that.mDisplayId
-                && mVisible == that.mVisible;
+                && mVisible == that.mVisible
+                && mHasDirectActivity == that.mHasDirectActivity;
     }
 
     @Override
@@ -122,6 +136,7 @@ public class TaskFragmentParentInfo implements Parcelable {
         int result = mConfiguration.hashCode();
         result = 31 * result + mDisplayId;
         result = 31 * result + (mVisible ? 1 : 0);
+        result = 31 * result + (mHasDirectActivity ? 1 : 0);
         return result;
     }
 
@@ -130,12 +145,14 @@ public class TaskFragmentParentInfo implements Parcelable {
         mConfiguration.writeToParcel(dest, flags);
         dest.writeInt(mDisplayId);
         dest.writeBoolean(mVisible);
+        dest.writeBoolean(mHasDirectActivity);
     }
 
     private TaskFragmentParentInfo(Parcel in) {
         mConfiguration.readFromParcel(in);
         mDisplayId = in.readInt();
         mVisible = in.readBoolean();
+        mHasDirectActivity = in.readBoolean();
     }
 
     public static final Creator<TaskFragmentParentInfo> CREATOR =

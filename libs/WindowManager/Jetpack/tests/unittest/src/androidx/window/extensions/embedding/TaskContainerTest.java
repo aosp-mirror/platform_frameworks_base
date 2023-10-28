@@ -79,14 +79,14 @@ public class TaskContainerTest {
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */));
 
         assertEquals(WINDOWING_MODE_MULTI_WINDOW,
                 taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */));
 
         assertEquals(WINDOWING_MODE_FREEFORM,
                 taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
@@ -106,13 +106,13 @@ public class TaskContainerTest {
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */));
 
         assertFalse(taskContainer.isInPictureInPicture());
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */));
 
         assertTrue(taskContainer.isInPictureInPicture());
     }

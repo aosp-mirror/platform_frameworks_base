@@ -94,27 +94,31 @@ public class BugreportManagerServiceImplTest {
     public void testBugreportFileManagerFileExists() {
         Pair<Integer, String> callingInfo = new Pair<>(mCallingUid, mCallingPackage);
         mBugreportFileManager.addBugreportFileForCaller(
-                callingInfo, mBugreportFile);
+                callingInfo, mBugreportFile, /* keepOnRetrieval= */ false);
 
         assertThrows(IllegalArgumentException.class, () ->
                 mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
-                        callingInfo, "unknown-file.zip"));
+                        mContext, callingInfo, Process.myUserHandle().getIdentifier(),
+                        "unknown-file.zip"));
 
         // No exception should be thrown.
-        mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(callingInfo, mBugreportFile);
+        mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
+                mContext, callingInfo, mContext.getUserId(), mBugreportFile);
     }
 
     @Test
     public void testBugreportFileManagerMultipleFiles() {
         Pair<Integer, String> callingInfo = new Pair<>(mCallingUid, mCallingPackage);
         mBugreportFileManager.addBugreportFileForCaller(
-                callingInfo, mBugreportFile);
+                callingInfo, mBugreportFile, /* keepOnRetrieval= */ false);
         mBugreportFileManager.addBugreportFileForCaller(
-                callingInfo, mBugreportFile2);
+                callingInfo, mBugreportFile2, /* keepOnRetrieval= */ false);
 
         // No exception should be thrown.
-        mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(callingInfo, mBugreportFile);
-        mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(callingInfo, mBugreportFile2);
+        mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
+                mContext, callingInfo, mContext.getUserId(), mBugreportFile);
+        mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
+                mContext, callingInfo, mContext.getUserId(), mBugreportFile2);
     }
 
     @Test
@@ -122,7 +126,8 @@ public class BugreportManagerServiceImplTest {
         Pair<Integer, String> callingInfo = new Pair<>(mCallingUid, mCallingPackage);
         assertThrows(IllegalArgumentException.class,
                 () -> mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
-                        callingInfo, "test-file.zip"));
+                        mContext, callingInfo, Process.myUserHandle().getIdentifier(),
+                        "test-file.zip"));
     }
 
     @Test
@@ -130,7 +135,8 @@ public class BugreportManagerServiceImplTest {
         CountDownLatch latch = new CountDownLatch(1);
         Listener listener = new Listener(latch);
         mService.retrieveBugreport(Binder.getCallingUid(), mContext.getPackageName(),
-                new FileDescriptor(), mBugreportFile, listener);
+                mContext.getUserId(), new FileDescriptor(), mBugreportFile,
+                /* keepOnRetrieval= */ false, listener);
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(listener.getErrorCode()).isEqualTo(
                 BugreportCallback.BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE);

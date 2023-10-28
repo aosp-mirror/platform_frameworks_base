@@ -33,6 +33,7 @@ import android.widget.Spinner
 import android.widget.Switch
 import androidx.annotation.LayoutRes
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
 import com.android.systemui.mediaprojection.permission.BaseScreenSharePermissionDialog
 import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
@@ -50,12 +51,15 @@ class ScreenRecordPermissionDialog(
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
     private val userContextProvider: UserContextProvider,
-    private val onStartRecordingClicked: Runnable?
+    private val onStartRecordingClicked: Runnable?,
+    mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
 ) :
     BaseScreenSharePermissionDialog(
         context,
         createOptionList(),
         appName = null,
+        hostUid = hostUid,
+        mediaProjectionMetricsLogger,
         R.drawable.ic_screenrecord,
         R.color.screenrecord_icon_color
     ) {

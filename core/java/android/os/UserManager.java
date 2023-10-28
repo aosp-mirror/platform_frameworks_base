@@ -2774,6 +2774,8 @@ public class UserManager {
      * Returns the designated "communal profile" of the device, or {@code null} if there is none.
      * @hide
      */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    @TestApi
     @RequiresPermission(anyOf = {
             Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS,
@@ -2791,16 +2793,33 @@ public class UserManager {
     }
 
     /**
+     * Checks if the context user is running in a communal profile.
+     *
+     * A communal profile is a {@link #isProfile() profile}, but instead of being associated with a
+     * particular parent user, it is communal to the device.
+     *
+     * @return whether the context user is a communal profile.
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.QUERY_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public boolean isCommunalProfile() {
+        return isCommunalProfile(mUserId);
+    }
+
+    /**
      * Returns {@code true} if the given user is the designated "communal profile" of the device.
      * @hide
      */
     @RequiresPermission(anyOf = {
-            Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS,
-            Manifest.permission.QUERY_USERS})
-    public boolean isCommunalProfile(@UserIdInt int userId) {
-        final UserInfo user = getUserInfo(userId);
-        return user != null && user.isCommunalProfile();
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    private boolean isCommunalProfile(@UserIdInt int userId) {
+        return isUserTypeCommunalProfile(getProfileType(userId));
     }
 
     /**
@@ -2837,6 +2856,23 @@ public class UserManager {
     public boolean isUserAdmin(@UserIdInt int userId) {
         UserInfo user = getUserInfo(userId);
         return user != null && user.isAdmin();
+    }
+
+    /**
+     * Used to check if the user currently running in the <b>foreground</b> is an
+     * {@link #isAdminUser() admin} user.
+     *
+     * @return whether the foreground user is an admin user.
+     * @see #isAdminUser()
+     * @see #isUserForeground()
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE_NEXTGEN)
+    public boolean isForegroundUserAdmin() {
+        try {
+            return mService.isForegroundUserAdmin();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2997,7 +3033,7 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling context user can have a restricted profile.
+     * Checks if the context user can have a restricted profile.
      * @return whether the context user can have a restricted profile.
      * @hide
      */
@@ -3101,11 +3137,11 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling context user is running in a profile. A profile is a user that
+     * Checks if the context user is running in a profile. A profile is a user that
      * typically has its own separate data but shares its UI with some parent user. For example, a
      * {@link #isManagedProfile() managed profile} is a type of profile.
      *
-     * @return whether the caller is in a profile.
+     * @return whether the context user is in a profile.
      */
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
@@ -5247,7 +5283,7 @@ public class UserManager {
 
     /**
      * Returns the parent of the profile which this method is called from
-     * or null if called from a user that is not a profile.
+     * or null if it has no parent (e.g. if it is not a profile).
      *
      * @hide
      */
@@ -5269,7 +5305,7 @@ public class UserManager {
      *
      * @param user the handle of the user profile
      *
-     * @return the parent of the user or {@code null} if the user is not profile
+     * @return the parent of the user or {@code null} if the user has no parent
      *
      * @hide
      */

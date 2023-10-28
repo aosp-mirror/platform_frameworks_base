@@ -32,6 +32,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
@@ -40,15 +41,30 @@ open class BaseScreenSharePermissionDialog(
     context: Context,
     private val screenShareOptions: List<ScreenShareOption>,
     private val appName: String?,
+    private val hostUid: Int,
+    private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     @DrawableRes private val dialogIconDrawable: Int? = null,
-    @ColorRes private val dialogIconTint: Int? = null
+    @ColorRes private val dialogIconTint: Int? = null,
 ) : SystemUIDialog(context), AdapterView.OnItemSelectedListener {
     private lateinit var dialogTitle: TextView
     private lateinit var startButton: TextView
     private lateinit var cancelButton: TextView
     private lateinit var warning: TextView
     private lateinit var screenShareModeSpinner: Spinner
+    private var hasCancelBeenLogged: Boolean = false
     var selectedScreenShareOption: ScreenShareOption = screenShareOptions.first()
+
+    override fun dismiss() {
+        super.dismiss()
+
+        // Dismiss can be called multiple times and we only want to log once.
+        if (hasCancelBeenLogged) {
+            return
+        }
+
+        mediaProjectionMetricsLogger.notifyProjectionRequestCancelled(hostUid)
+        hasCancelBeenLogged = true
+    }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
