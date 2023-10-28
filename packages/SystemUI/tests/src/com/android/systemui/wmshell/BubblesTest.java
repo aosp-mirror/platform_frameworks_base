@@ -18,6 +18,8 @@ package com.android.systemui.wmshell;
 
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
+import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
+import static android.provider.Settings.Global.HEADS_UP_ON;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
@@ -157,6 +159,8 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
@@ -507,8 +511,11 @@ public class BubblesTest extends SysuiTestCase {
         when(mUserManager.getProfiles(ActivityManager.getCurrentUser())).thenReturn(
                 Collections.singletonList(mock(UserInfo.class)));
 
+        final FakeGlobalSettings fakeGlobalSettings = new FakeGlobalSettings();
+        fakeGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
+
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
-                new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
+                new TestableNotificationInterruptStateProviderImpl(
                         mock(PowerManager.class),
                         mock(AmbientDisplayConfiguration.class),
                         mock(StatusBarStateController.class),
@@ -521,7 +528,9 @@ public class BubblesTest extends SysuiTestCase {
                         mock(KeyguardNotificationVisibilityProvider.class),
                         mock(UiEventLogger.class),
                         mock(UserTracker.class),
-                        mock(DeviceProvisionedController.class)
+                        mock(DeviceProvisionedController.class),
+                        mock(SystemClock.class),
+                        fakeGlobalSettings
                 );
 
         mShellTaskOrganizer = new ShellTaskOrganizer(mock(ShellInit.class),
