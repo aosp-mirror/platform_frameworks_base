@@ -72,10 +72,10 @@ public class EmptyShadeView extends StackScrollerDecorView {
         return findViewById(R.id.no_notifications_footer);
     }
 
-    public void setTextColor(@ColorInt int color) {
-        mEmptyText.setTextColor(color);
-        mEmptyFooterText.setTextColor(color);
-        mEmptyFooterText.setCompoundDrawableTintList(ColorStateList.valueOf(color));
+    public void setTextColors(@ColorInt int onSurface, @ColorInt int onSurfaceVariant) {
+        mEmptyText.setTextColor(onSurfaceVariant);
+        mEmptyFooterText.setTextColor(onSurface);
+        mEmptyFooterText.setCompoundDrawableTintList(ColorStateList.valueOf(onSurface));
     }
 
     public void setText(@StringRes int text) {

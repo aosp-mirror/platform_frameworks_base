@@ -16,6 +16,7 @@
 
 <com.android.systemui.statusbar.notification.row.ChannelRow
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/half_shelf_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -59,7 +60,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:fontFamily="@*android:string/config_headlineFontFamily"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?androidprv:attr/materialColorOnSurface"
                 android:textSize="16sp"
             />
 
@@ -74,7 +75,7 @@
                 android:maxLines="1"
                 android:layout_below="@id/channel_name"
                 android:fontFamily="@*android:string/config_bodyFontFamily"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
                 android:textSize="14sp"
             />
         </RelativeLayout>
