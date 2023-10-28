@@ -35,28 +35,28 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecisionProviderTestBase() {
-    override val provider: VisualInterruptionDecisionProvider
-        get() =
-            NotificationInterruptStateProviderWrapper(
-                NotificationInterruptStateProviderImpl(
-                        powerManager,
-                        ambientDisplayConfiguration,
-                        batteryController,
-                        statusBarStateController,
-                        keyguardStateController,
-                        headsUpManager,
-                        logger,
-                        mainHandler,
-                        flags,
-                        keyguardNotificationVisibilityProvider,
-                        uiEventLogger,
-                        userTracker,
-                        deviceProvisionedController,
-                        systemClock,
-                        globalSettings,
-                    )
-                    .also { it.mUseHeadsUp = true }
-            )
+    override val provider by lazy {
+        NotificationInterruptStateProviderWrapper(
+            NotificationInterruptStateProviderImpl(
+                    powerManager,
+                    ambientDisplayConfiguration,
+                    batteryController,
+                    statusBarStateController,
+                    keyguardStateController,
+                    headsUpManager,
+                    logger,
+                    mainHandler,
+                    flags,
+                    keyguardNotificationVisibilityProvider,
+                    uiEventLogger,
+                    userTracker,
+                    deviceProvisionedController,
+                    systemClock,
+                    globalSettings,
+                )
+                .also { it.mUseHeadsUp = true }
+        )
+    }
 
     // Tests of internals of the wrapper:
 
