@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -702,6 +703,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     // Schedules future expiration as appropriate.
     @WorkerThread
     private void runExpiration() {
+        if (Flags.rollbackLifetime()) {
+            runExpirationCustomRollbackLifetime();
+        } else {
+            runExpirationDefaultRollbackLifetime();
+        }
+    }
+
+    @WorkerThread
+    private void runExpirationDefaultRollbackLifetime() {
         getHandler().removeCallbacks(mRunExpiration);
         assertInWorkerThread();
         Instant now = Instant.now();
@@ -726,6 +736,44 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             long delay = now.until(
                     oldest.plusMillis(mRollbackLifetimeDurationInMillis), ChronoUnit.MILLIS);
             getHandler().postDelayed(mRunExpiration, delay);
+        }
+    }
+
+    @WorkerThread
+    private void runExpirationCustomRollbackLifetime() {
+        getHandler().removeCallbacks(mRunExpiration);
+        assertInWorkerThread();
+        Instant now = Instant.now();
+        long minDelay = 0;
+        Iterator<Rollback> iter = mRollbacks.iterator();
+        while (iter.hasNext()) {
+            Rollback rollback = iter.next();
+            if (!rollback.isAvailable() && !rollback.isCommitted()) {
+                continue;
+            }
+            long rollbackLifetimeMillis = rollback.getRollbackLifetimeMillis();
+            if (rollbackLifetimeMillis <= 0) {
+                rollbackLifetimeMillis = mRollbackLifetimeDurationInMillis;
+            }
+
+            Instant rollbackExpiryTimestamp = rollback.getTimestamp()
+                    .plusMillis(rollbackLifetimeMillis);
+            if (!now.isBefore(rollbackExpiryTimestamp)) {
+                Slog.i(TAG, "runExpiration id=" + rollback.info.getRollbackId());
+                iter.remove();
+                deleteRollback(rollback, "Expired by timeout");
+                continue;
+            }
+
+            long delay = now.until(
+                    rollbackExpiryTimestamp, ChronoUnit.MILLIS);
+            if (minDelay == 0 || delay < minDelay) {
+                minDelay = delay;
+            }
+        }
+
+        if (minDelay != 0) {
+            getHandler().postDelayed(mRunExpiration, minDelay);
         }
     }
 
@@ -1277,6 +1325,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         }
 
         final Rollback rollback;
+
         if (parentSession.isStaged()) {
             rollback = mRollbackStore.createStagedRollback(rollbackId, parentSessionId, userId,
                     installerPackageName, packageSessionIds, getExtensionVersions());
@@ -1284,6 +1333,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             rollback = mRollbackStore.createNonStagedRollback(rollbackId, parentSessionId, userId,
                     installerPackageName, packageSessionIds, getExtensionVersions());
         }
+
+        if (Flags.rollbackLifetime()) {
+            rollback.setRollbackLifetimeMillis(parentSession.rollbackLifetimeMillis);
+        }
+
 
         mRollbacks.add(rollback);
         return rollback;

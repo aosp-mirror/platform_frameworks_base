@@ -597,34 +597,34 @@
     <style name="TextAppearance.NotificationImportanceChannel">
         <item name="android:textSize">@dimen/notification_importance_channel_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
-        <item name="android:textColor">@color/notification_guts_header_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textSize">@dimen/notification_importance_channel_text</item>
     </style>
 
     <style name="TextAppearance.NotificationImportanceChannelGroup">
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">@color/notification_guts_header_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
     </style>
 
     <style name="TextAppearance.NotificationImportanceApp">
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">@color/notification_guts_sub_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
     </style>
 
     <style name="TextAppearance.NotificationImportanceHeader">
         <item name="android:textSize">@dimen/notification_importance_header_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">@color/notification_guts_header_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.NotificationImportanceDetail">
         <item name="android:textSize">@dimen/notification_importance_description_text</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">@color/notification_guts_sub_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -636,9 +636,27 @@
     </style>
 
     <style
+        name="TextAppearance.NotificationSectionHeaderLabel"
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style
         name="TextAppearance.NotificationSectionHeaderButton"
         parent="@android:style/Widget.DeviceDefault.Button.Borderless">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style
+        name="TextAppearance.NotificationFooterButton"
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
         <item name="android:minWidth">0dp</item>

@@ -15,7 +15,7 @@
  */
 package com.android.systemui;
 
-import static com.android.systemui.Flags.FLAG_EXAMPLE_FLAG;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -65,7 +65,7 @@ public abstract class SysuiTestCase {
             new AndroidXAnimatorIsolationRule();
 
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     @Rule
     public SysuiTestableContext mContext = new SysuiTestableContext(
@@ -88,9 +88,6 @@ public abstract class SysuiTestCase {
         if (isRobolectricTest()) {
             mContext = mContext.createDefaultDisplayContext();
         }
-        // Set the value of a single gantry flag inside the com.android.systemui package to
-        // ensure all flags in that package are faked (and thus require a value to be set).
-        mSetFlagsRule.disableFlags(FLAG_EXAMPLE_FLAG);
         mSysuiDependency = new SysuiTestDependency(mContext, shouldFailOnLeakedReceiver());
         mDependency = mSysuiDependency.install();
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();

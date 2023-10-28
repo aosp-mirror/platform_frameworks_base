@@ -121,7 +121,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void updateColors() {
         mNormalColor = Utils.getColorAttrDefaultColor(mContext,
-                com.android.internal.R.attr.colorSurface);
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh);
         mTintedRippleColor = mContext.getColor(
                 R.color.notification_ripple_tinted_color);
         mNormalRippleColor = mContext.getColor(
