@@ -44,10 +44,9 @@
         android:paddingTop="10dp"
         android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintWidth_percent="0.7"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/bluetooth_device_icon"
-        app:layout_constraintEnd_toStartOf="@+id/gear_icon"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintBottom_toTopOf="@+id/bluetooth_device_summary"
         android:gravity="center_vertical"
         android:textSize="14sp" />
@@ -60,34 +59,35 @@
         android:paddingBottom="10dp"
         android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintWidth_percent="0.7"
         app:layout_constraintTop_toBottomOf="@+id/bluetooth_device_name"
         app:layout_constraintStart_toEndOf="@+id/bluetooth_device_icon"
-        app:layout_constraintEnd_toStartOf="@+id/gear_icon"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintBottom_toBottomOf="parent"
         android:gravity="center_vertical" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline"
+        app:layout_constraintGuide_percent="0.8"
+        android:orientation="vertical"/>
 
     <View
         android:id="@+id/gear_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/accessibility_bluetooth_device_settings_gear"
-        app:layout_constraintStart_toEndOf="@+id/bluetooth_device_name"
-        app:layout_constraintEnd_toEndOf="@+id/gear_icon_image"
+        app:layout_constraintStart_toEndOf="@+id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <ImageView
         android:id="@+id/gear_icon_image"
-        android:src="@drawable/ic_settings_24dp"
-        android:contentDescription="@string/accessibility_bluetooth_device_settings_gear"
         android:layout_width="0dp"
         android:layout_height="24dp"
-        app:layout_constraintStart_toEndOf="@+id/bluetooth_device_name"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/ic_settings_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintWidth_percent="0.3"
-        android:gravity="center_vertical"
-        android:paddingStart="10dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

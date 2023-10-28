@@ -466,7 +466,7 @@
     <string name="accessibility_bluetooth_device_icon">Bluetooth device icon</string>
 
     <!-- Content description of the bluetooth device settings gear icon. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_bluetooth_device_settings_gear">Bluetooth device settings gear</string>
+    <string name="accessibility_bluetooth_device_settings_gear">Click to configure device detail</string>
 
     <!-- Content description of the battery when battery state is unknown for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_unknown">Battery percentage unknown.</string>

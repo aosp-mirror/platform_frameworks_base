@@ -78,7 +78,10 @@ constructor(
         super.onCreate(savedInstanceState)
         uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_TILE_DIALOG_SHOWN)
 
-        setContentView(LayoutInflater.from(context).inflate(R.layout.bluetooth_tile_dialog, null))
+        LayoutInflater.from(context).inflate(R.layout.bluetooth_tile_dialog, null).apply {
+            accessibilityPaneTitle = context.getText(R.string.accessibility_desc_quick_settings)
+            setContentView(this)
+        }
 
         toggleView = requireViewById(R.id.bluetooth_toggle)
         subtitleTextView = requireViewById(R.id.bluetooth_tile_dialog_subtitle) as TextView
@@ -114,14 +117,22 @@ constructor(
     }
 
     internal fun onBluetoothStateUpdated(isEnabled: Boolean, subtitleResId: Int) {
-        toggleView.isChecked = isEnabled
+        toggleView.apply {
+            isChecked = isEnabled
+            setEnabled(true)
+            alpha = ENABLED_ALPHA
+        }
         subtitleTextView.text = context.getString(subtitleResId)
     }
 
     private fun setupToggle() {
         toggleView.isChecked = bluetoothToggleInitialValue
-        toggleView.setOnCheckedChangeListener { _, isChecked ->
+        toggleView.setOnCheckedChangeListener { view, isChecked ->
             mutableBluetoothStateToggle.value = isChecked
+            view.apply {
+                isEnabled = false
+                alpha = DISABLED_ALPHA
+            }
             logger.logBluetoothState(BluetoothStateStage.USER_TOGGLED, isChecked.toString())
             uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_TOGGLE_CLICKED)
         }
@@ -225,5 +236,7 @@ constructor(
         const val ACTION_PREVIOUSLY_CONNECTED_DEVICE =
             "com.android.settings.PREVIOUSLY_CONNECTED_DEVICE"
         const val ACTION_PAIR_NEW_DEVICE = "android.settings.BLUETOOTH_PAIRING_SETTINGS"
+        const val DISABLED_ALPHA = 0.3f
+        const val ENABLED_ALPHA = 1f
     }
 }
