@@ -579,7 +579,7 @@ class MediaDataManager(
         // Song name
         var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
         if (song.isNullOrBlank()) {
-            song = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
+            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
         }
         if (song.isNullOrBlank()) {
             song = HybridGroupManager.resolveTitle(notif)
