@@ -17,7 +17,8 @@
 
 <com.android.systemui.statusbar.AlphaOptimizedView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/notification_more_divider"
     android:layout_width="match_parent"
     android:layout_height="@dimen/notification_divider_height"
-    android:background="@color/notification_divider_color" />
+    android:background="?androidprv:attr/materialColorOnSurfaceVariant" />

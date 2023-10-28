@@ -14,8 +14,9 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <item android:state_selected="true"
-          android:color="?android:attr/colorAccent" />
+          android:color="?androidprv:attr/materialColorOnSurfaceVariant" />
     <item android:color="@color/notification_guts_priority_button_content_color" />
 </selector>

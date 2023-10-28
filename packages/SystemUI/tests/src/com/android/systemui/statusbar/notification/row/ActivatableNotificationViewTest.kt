@@ -61,8 +61,9 @@ class ActivatableNotificationViewTest : SysuiTestCase() {
                 else -> null
             } as T?
         }
-        mNormalColor =
-            Utils.getColorAttrDefaultColor(mContext, com.android.internal.R.attr.colorSurface)
+
+        mNormalColor = Utils.getColorAttrDefaultColor(mContext,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh)
     }
 
     @Test
