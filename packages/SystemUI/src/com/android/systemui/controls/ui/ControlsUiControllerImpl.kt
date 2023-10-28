@@ -77,7 +77,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.indentIfPossible
+import com.android.systemui.util.withIncreasedIndent
 import com.android.wm.shell.taskview.TaskViewFactory
 import dagger.Lazy
 import java.io.PrintWriter
@@ -822,9 +822,9 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun findSelectionItem(si: SelectedItem, items: List<SelectionItem>): SelectionItem? =
         items.firstOrNull { it.matches(si) }
 
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("ControlsUiControllerImpl:")
-        pw.asIndenting().indentIfPossible {
+    override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {
+        println("ControlsUiControllerImpl:")
+        withIncreasedIndent {
             println("hidden: $hidden")
             println("selectedItem: $selectedItem")
             println("lastSelections: $lastSelections")
