@@ -8638,8 +8638,8 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp = mService.noteProxyOperation(op, attributionSource.asState(),
-                    collectionMode == COLLECT_ASYNC, message,
+            SyncNotedAppOp syncOp = mService.noteProxyOperationWithState(op,
+                    attributionSource.asState(), collectionMode == COLLECT_ASYNC, message,
                     shouldCollectMessage, skipProxyOperation);
 
             if (syncOp.getOpMode() == MODE_ALLOWED) {
@@ -9110,7 +9110,7 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp = mService.startProxyOperation(clientId, op,
+            SyncNotedAppOp syncOp = mService.startProxyOperationWithState(clientId, op,
                     attributionSource.asState(), false, collectionMode == COLLECT_ASYNC, message,
                     shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
                     proxiedAttributionFlags, attributionChainId);
@@ -9229,8 +9229,8 @@ public class AppOpsManager {
     public void finishProxyOp(@NonNull IBinder clientId, @NonNull String op,
             @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
         try {
-            mService.finishProxyOperation(clientId, strOpToOp(op), attributionSource.asState(),
-                    skipProxyOperation);
+            mService.finishProxyOperationWithState(
+                    clientId, strOpToOp(op), attributionSource.asState(), skipProxyOperation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
