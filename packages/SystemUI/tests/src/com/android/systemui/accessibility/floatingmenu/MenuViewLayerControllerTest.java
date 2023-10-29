@@ -19,8 +19,6 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.systemBars;
 
-import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
@@ -75,7 +73,6 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        setFlagDefaults(mSetFlagsRule);
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
         doAnswer(invocation -> wm.getMaximumWindowMetrics()).when(
                 mWindowManager).getMaximumWindowMetrics();

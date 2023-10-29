@@ -63,11 +63,11 @@ class StackCoordinatorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         initMocks(this)
-        setUp(NotificationIconContainerRefactor.FLAG_NAME to null)
         entry = NotificationEntryBuilder().setSection(section).build()
+        setUpWithFlags()
     }
 
-    private fun setUp(vararg flags: Pair<String, Boolean?>) {
+    private fun setUpWithFlags(vararg flags: Pair<String, Boolean>) {
         flags.forEach { (name, value) -> mSetFlagsRule.setFlagValue(name, value) }
         reset(pipeline)
         coordinator =
@@ -84,14 +84,14 @@ class StackCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testUpdateNotificationIcons() {
-        setUp(NotificationIconContainerRefactor.FLAG_NAME to false)
+        setUpWithFlags(NotificationIconContainerRefactor.FLAG_NAME to false)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(notificationIconAreaController).updateNotificationIcons(eq(listOf(entry)))
     }
 
     @Test
     fun testSetRenderedListOnInteractor() {
-        setUp(NotificationIconContainerRefactor.FLAG_NAME to true)
+        setUpWithFlags(NotificationIconContainerRefactor.FLAG_NAME to true)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(renderListInteractor).setRenderedList(eq(listOf(entry)))
     }
