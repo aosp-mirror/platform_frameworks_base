@@ -17,3 +17,10 @@ flag {
     bug: "294546335"
 }
 
+
+flag {
+    namespace: "input_native"
+    name: "pointer_coords_is_resampled_api"
+    description: "Makes MotionEvent.PointerCoords#isResampled() a public API"
+    bug: "298197511"
+}
