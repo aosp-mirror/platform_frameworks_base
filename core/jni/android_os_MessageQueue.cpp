@@ -225,7 +225,7 @@ static void android_os_MessageQueue_nativePollOnce(JNIEnv* env, jobject obj,
     nativeMessageQueue->pollOnce(env, obj, timeoutMillis);
 }
 
-static void android_os_MessageQueue_nativeWake(JNIEnv* env, jclass clazz, jlong ptr) {
+static void android_os_MessageQueue_nativeWake(jlong ptr) {
     NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
     nativeMessageQueue->wake();
 }
