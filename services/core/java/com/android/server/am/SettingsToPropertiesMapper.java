@@ -121,6 +121,7 @@ public class SettingsToPropertiesMapper {
         "accessibility",
         "android_core_networking",
         "angle",
+        "app_widgets",
         "arc_next",
         "bluetooth",
         "build",
