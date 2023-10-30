@@ -259,8 +259,10 @@ public class ActivityTileTest {
     }
 
     @Test
-    public void isSearchable_noMetadata_isTrue() {
-        final Tile tile = new ActivityTile(null, "category");
+    public void isSearchable_nullMetadata_isTrue() {
+        mActivityInfo.metaData = null;
+
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
 
         assertThat(tile.isSearchable()).isTrue();
     }
