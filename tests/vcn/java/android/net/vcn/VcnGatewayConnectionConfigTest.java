@@ -117,6 +117,16 @@ public class VcnGatewayConnectionConfigTest {
         return buildTestConfig(UNDERLYING_NETWORK_TEMPLATES);
     }
 
+    // Public for use in VcnGatewayConnectionTest
+    public static VcnGatewayConnectionConfig.Builder newTestBuilderMinimal() {
+        final VcnGatewayConnectionConfig.Builder builder = newBuilder();
+        for (int caps : EXPOSED_CAPS) {
+            builder.addExposedCapability(caps);
+        }
+
+        return builder;
+    }
+
     private static VcnGatewayConnectionConfig.Builder newBuilder() {
         // Append a unique identifier to the name prefix to guarantee that all created
         // VcnGatewayConnectionConfigs have a unique name (required by VcnConfig).

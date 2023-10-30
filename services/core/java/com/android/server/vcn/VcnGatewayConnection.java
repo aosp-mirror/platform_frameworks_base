@@ -1222,6 +1222,14 @@ public class VcnGatewayConnection extends StateMachine {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     void setSafeModeAlarm() {
+        final boolean isFlagSafeModeConfigEnabled = mVcnContext.getFeatureFlags().safeModeConfig();
+        logVdbg("isFlagSafeModeConfigEnabled " + isFlagSafeModeConfigEnabled);
+
+        if (isFlagSafeModeConfigEnabled && !mConnectionConfig.isSafeModeEnabled()) {
+            logVdbg("setSafeModeAlarm: safe mode disabled");
+            return;
+        }
+
         logVdbg("Setting safe mode alarm; mCurrentToken: " + mCurrentToken);
 
         // Only schedule a NEW alarm if none is already set.

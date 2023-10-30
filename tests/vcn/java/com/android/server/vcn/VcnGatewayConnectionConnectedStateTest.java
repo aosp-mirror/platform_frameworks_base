@@ -75,6 +75,9 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionCallback;
+import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
+import com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 import com.android.server.vcn.util.MtuUtils;
 
@@ -649,6 +652,74 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         mTestLooper.dispatchAll();
 
         verifySafeModeStateAndCallbackFired(2 /* invocationCount */, true /* isInSafeMode */);
+    }
+
+    private void verifySetSafeModeAlarm(
+            boolean safeModeEnabledByCaller,
+            boolean safeModeConfigFlagEnabled,
+            boolean expectingSafeModeEnabled)
+            throws Exception {
+        final VcnGatewayConnectionConfig config =
+                VcnGatewayConnectionConfigTest.newTestBuilderMinimal()
+                        .enableSafeMode(safeModeEnabledByCaller)
+                        .build();
+        final VcnGatewayConnection.Dependencies deps =
+                mock(VcnGatewayConnection.Dependencies.class);
+        setUpWakeupMessage(
+                mSafeModeTimeoutAlarm, VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM, deps);
+        doReturn(safeModeConfigFlagEnabled).when(mFeatureFlags).safeModeConfig();
+
+        final VcnGatewayConnection connection =
+                new VcnGatewayConnection(
+                        mVcnContext,
+                        TEST_SUB_GRP,
+                        TEST_SUBSCRIPTION_SNAPSHOT,
+                        config,
+                        mGatewayStatusCallback,
+                        true /* isMobileDataEnabled */,
+                        deps);
+
+        connection.setSafeModeAlarm();
+
+        final int expectedCallCnt = expectingSafeModeEnabled ? 1 : 0;
+        verify(deps, times(expectedCallCnt))
+                .newWakeupMessage(
+                        eq(mVcnContext),
+                        any(),
+                        eq(VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM),
+                        any());
+    }
+
+    @Test
+    public void testSafeModeEnabled_configFlagEnabled() throws Exception {
+        verifySetSafeModeAlarm(
+                true /* safeModeEnabledByCaller */,
+                true /* safeModeConfigFlagEnabled */,
+                true /* expectingSafeModeEnabled */);
+    }
+
+    @Test
+    public void testSafeModeEnabled_configFlagDisabled() throws Exception {
+        verifySetSafeModeAlarm(
+                true /* safeModeEnabledByCaller */,
+                false /* safeModeConfigFlagEnabled */,
+                true /* expectingSafeModeEnabled */);
+    }
+
+    @Test
+    public void testSafeModeDisabled_configFlagEnabled() throws Exception {
+        verifySetSafeModeAlarm(
+                false /* safeModeEnabledByCaller */,
+                true /* safeModeConfigFlagEnabled */,
+                false /* expectingSafeModeEnabled */);
+    }
+
+    @Test
+    public void testSafeModeDisabled_configFlagDisabled() throws Exception {
+        verifySetSafeModeAlarm(
+                false /* safeModeEnabledByCaller */,
+                false /* safeModeConfigFlagEnabled */,
+                true /* expectingSafeModeEnabled */);
     }
 
     private Consumer<VcnNetworkAgent> setupNetworkAndGetUnwantedCallback() {
