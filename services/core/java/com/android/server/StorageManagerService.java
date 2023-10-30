@@ -3623,7 +3623,26 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public void close() throws Exception {
             if (mMounted) {
-                mVold.unmountAppFuse(uid, mountId);
+                BackgroundThread.getHandler().post(() -> {
+                    try {
+                        // We need to run the unmount on a separate thread to
+                        // prevent a possible deadlock, where:
+                        // 1. AppFuseThread (this thread) tries to call into vold
+                        // 2. the vold lock is held by another thread, which called:
+                        //    mVold.openAppFuseFile()
+                        //    as part of that call, vold calls open() on the
+                        //    underlying file, which is a call that needs to be
+                        //    handled by the AppFuseThread, which is stuck waiting
+                        //    for the vold lock (see 1.)
+                        // It is safe to do the unmount asynchronously, because the mount
+                        // path we use is never reused during the current boot cycle;
+                        // see mNextAppFuseName. Also,we have anyway stopped serving
+                        // requests at this point.
+                        mVold.unmountAppFuse(uid, mountId);
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                });
                 mMounted = false;
             }
         }
