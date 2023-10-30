@@ -125,6 +125,7 @@ public class SettingsToPropertiesMapper {
         "arc_next",
         "bluetooth",
         "build",
+        "biometrics",
         "biometrics_framework",
         "biometrics_integration",
         "camera_platform",
