@@ -26,7 +26,7 @@ plugins {
 }
 
 allprojects {
-    extra["jetpackComposeVersion"] = "1.6.0-alpha07"
+    extra["jetpackComposeVersion"] = "1.6.0-alpha08"
 }
 
 subprojects {

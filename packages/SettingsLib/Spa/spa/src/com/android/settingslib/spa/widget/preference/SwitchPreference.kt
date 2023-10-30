@@ -32,7 +32,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import com.android.settingslib.spa.framework.compose.stateOf
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.EntryHighlight
@@ -96,10 +95,10 @@ fun SwitchPreference(model: SwitchPreferenceModel) {
     EntryHighlight {
         InternalSwitchPreference(
             title = model.title,
-            summary = model.summary,
+            summary = { model.summary.value },
             icon = model.icon,
-            checked = model.checked,
-            changeable = model.changeable,
+            checked = model.checked.value,
+            changeable = model.changeable.value,
             onCheckedChange = model.onCheckedChange,
         )
     }
@@ -108,25 +107,25 @@ fun SwitchPreference(model: SwitchPreferenceModel) {
 @Composable
 internal fun InternalSwitchPreference(
     title: String,
-    summary: State<String> = "".toState(),
+    summary: () -> String = { "" },
     icon: @Composable (() -> Unit)? = null,
-    checked: State<Boolean?>,
-    changeable: State<Boolean> = true.toState(),
+    checked: Boolean?,
+    changeable: Boolean = true,
     paddingStart: Dp = SettingsDimension.itemPaddingStart,
     paddingEnd: Dp = SettingsDimension.itemPaddingEnd,
     paddingVertical: Dp = SettingsDimension.itemPaddingVertical,
     onCheckedChange: ((newChecked: Boolean) -> Unit)?,
 ) {
-    val checkedValue = checked.value
     val indication = LocalIndication.current
     val onChangeWithLog = wrapOnSwitchWithLog(onCheckedChange)
-    val modifier = remember(checkedValue, changeable.value) {
-        if (checkedValue != null && onChangeWithLog != null) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val modifier = remember(checked, changeable) {
+        if (checked != null && onChangeWithLog != null) {
             Modifier.toggleable(
-                value = checkedValue,
-                interactionSource = MutableInteractionSource(),
+                value = checked,
+                interactionSource = interactionSource,
                 indication = indication,
-                enabled = changeable.value,
+                enabled = changeable,
                 role = Role.Switch,
                 onValueChange = onChangeWithLog,
             )
@@ -136,7 +135,7 @@ internal fun InternalSwitchPreference(
         title = title,
         summary = summary,
         modifier = modifier,
-        enabled = changeable,
+        enabled = { changeable },
         paddingStart = paddingStart,
         paddingEnd = paddingEnd,
         paddingVertical = paddingVertical,
@@ -145,10 +144,11 @@ internal fun InternalSwitchPreference(
         Spacer(Modifier.width(SettingsDimension.itemPaddingEnd))
         SettingsSwitch(
             checked = checked,
-            changeable = changeable,
+            changeable = { changeable },
             // The onCheckedChange is handled on the whole SwitchPreference.
             // DO NOT set it on SettingsSwitch.
             onCheckedChange = null,
+            interactionSource = interactionSource,
         )
     }
 }
@@ -160,19 +160,19 @@ private fun SwitchPreferencePreview() {
         Column {
             InternalSwitchPreference(
                 title = "Use Dark theme",
-                checked = true.toState(),
+                checked = true,
                 onCheckedChange = {},
             )
             InternalSwitchPreference(
                 title = "Use Dark theme",
-                summary = "Summary".toState(),
-                checked = false.toState(),
+                summary = { "Summary" },
+                checked = false,
                 onCheckedChange = {},
             )
             InternalSwitchPreference(
                 title = "Use Dark theme",
-                summary = "Summary".toState(),
-                checked = true.toState(),
+                summary = { "Summary" },
+                checked = true,
                 onCheckedChange = {},
                 icon = @Composable {
                     SettingsIcon(imageVector = Icons.Outlined.AirplanemodeActive)
