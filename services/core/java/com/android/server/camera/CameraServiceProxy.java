@@ -243,6 +243,7 @@ public class CameraServiceProxy extends SystemService
         public String mUserTag;
         public int mVideoStabilizationMode;
         public boolean mUsedUltraWide;
+        public boolean mUsedZoomOverride;
         public final long mLogId;
         public final int mSessionIndex;
 
@@ -271,7 +272,7 @@ public class CameraServiceProxy extends SystemService
                 long resultErrorCount, boolean deviceError,
                 List<CameraStreamStats>  streamStats, String userTag,
                 int videoStabilizationMode, boolean usedUltraWide,
-                CameraExtensionSessionStats extStats) {
+                boolean usedZoomOverride, CameraExtensionSessionStats extStats) {
             if (mCompleted) {
                 return;
             }
@@ -285,6 +286,7 @@ public class CameraServiceProxy extends SystemService
             mUserTag = userTag;
             mVideoStabilizationMode = videoStabilizationMode;
             mUsedUltraWide = usedUltraWide;
+            mUsedZoomOverride = usedZoomOverride;
             mExtSessionStats = extStats;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
@@ -877,6 +879,9 @@ public class CameraServiceProxy extends SystemService
                 String ultrawideDebug = Flags.logUltrawideUsage()
                         ? ", wideAngleUsage " + e.mUsedUltraWide
                         : "";
+                String zoomOverrideDebug = Flags.logZoomOverrideUsage()
+                        ? ", zoomOverrideUsage " + e.mUsedZoomOverride
+                        : "";
 
                 Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + e.mAction
                         + " clientName " + e.mClientName
@@ -895,6 +900,7 @@ public class CameraServiceProxy extends SystemService
                         + ", userTag is " + e.mUserTag
                         + ", videoStabilizationMode " + e.mVideoStabilizationMode
                         + ultrawideDebug
+                        + zoomOverrideDebug
                         + ", logId " + e.mLogId
                         + ", sessionIndex " + e.mSessionIndex
                         + ", mExtSessionStats {type " + extensionType
@@ -960,7 +966,8 @@ public class CameraServiceProxy extends SystemService
                     MessageNano.toByteArray(streamProtos[4]),
                     e.mUserTag, e.mVideoStabilizationMode,
                     e.mLogId, e.mSessionIndex,
-                    extensionType, extensionIsAdvanced, e.mUsedUltraWide);
+                    extensionType, extensionIsAdvanced, e.mUsedUltraWide,
+                    e.mUsedZoomOverride);
         }
     }
 
@@ -1158,6 +1165,8 @@ public class CameraServiceProxy extends SystemService
         String userTag = cameraState.getUserTag();
         int videoStabilizationMode = cameraState.getVideoStabilizationMode();
         boolean usedUltraWide = Flags.logUltrawideUsage() ? cameraState.getUsedUltraWide() : false;
+        boolean usedZoomOverride =
+                Flags.logZoomOverrideUsage() ? cameraState.getUsedZoomOverride() : false;
         long logId = cameraState.getLogId();
         int sessionIdx = cameraState.getSessionIndex();
         CameraExtensionSessionStats extSessionStats = cameraState.getExtensionSessionStats();
@@ -1216,7 +1225,7 @@ public class CameraServiceProxy extends SystemService
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
                                 /*resultErrorCount*/0, /*deviceError*/false, streamStats,
                                 /*userTag*/"", /*videoStabilizationMode*/-1, /*usedUltraWide*/false,
-                                new CameraExtensionSessionStats());
+                                /*usedZoomOverride*/false, new CameraExtensionSessionStats());
                         mCameraUsageHistory.add(oldEvent);
                     }
                     break;
@@ -1227,7 +1236,8 @@ public class CameraServiceProxy extends SystemService
 
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
                                 resultErrorCount, deviceError, streamStats, userTag,
-                                videoStabilizationMode, usedUltraWide, extSessionStats);
+                                videoStabilizationMode, usedUltraWide, usedZoomOverride,
+                                extSessionStats);
                         mCameraUsageHistory.add(doneEvent);
                         // Do not double count device error
                         deviceError = false;
