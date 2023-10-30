@@ -990,7 +990,6 @@ public class SettingsProvider extends ContentProvider {
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_ADDED);
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
-        userFilter.addAction(Intent.ACTION_USER_STOPPED);
 
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override
@@ -1013,11 +1012,6 @@ public class SettingsProvider extends ContentProvider {
                     case Intent.ACTION_USER_REMOVED -> {
                         synchronized (mLock) {
                             mSettingsRegistry.removeUserStateLocked(userId, true);
-                        }
-                    }
-                    case Intent.ACTION_USER_STOPPED -> {
-                        synchronized (mLock) {
-                            mSettingsRegistry.removeUserStateLocked(userId, false);
                         }
                     }
                 }
