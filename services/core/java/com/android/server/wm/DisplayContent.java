@@ -160,6 +160,7 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
+import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -245,6 +246,7 @@ import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
 import android.window.ScreenCapture;
 import android.window.ScreenCapture.SynchronousScreenCaptureListener;
+import android.window.SystemPerformanceHinter;
 import android.window.TransitionRequestInfo;
 
 import com.android.internal.R;
@@ -572,6 +574,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final SurfaceSession mSession = new SurfaceSession();
 
     /**
+     * A perf hint session which will boost the refresh rate for the display and change sf duration
+     * to handle larger workloads.
+     */
+    private SystemPerformanceHinter.HighPerfSession mTransitionPrefSession;
+
+    /** A perf hint session which will boost the refresh rate. */
+    private SystemPerformanceHinter.HighPerfSession mHighFrameRateSession;
+
+    /**
      * Window that is currently interacting with the user. This window is responsible for receiving
      * key events and pointer events from the user.
      */
@@ -760,6 +771,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * well and thus won't change the top resumed / focused record
      */
     boolean mDontMoveToTop;
+
+    /** Whether this display contains a WindowContainer with running SurfaceAnimator. */
+    boolean mLastContainsRunningSurfaceAnimator;
 
     /** Used for windows that want to keep the screen awake. */
     private PowerManager.WakeLock mHoldScreenWakeLock;
@@ -3445,6 +3459,42 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         dockFrame.inset(state.calculateInsets(dockFrame, systemBars() | displayCutout(),
                 false /* ignoreVisibility */));
         return dockFrame.bottom - imeFrame.top;
+    }
+
+    void enableHighPerfTransition(boolean enable) {
+        if (!explicitRefreshRateHints()) {
+            if (enable) {
+                getPendingTransaction().setEarlyWakeupStart();
+            } else {
+                getPendingTransaction().setEarlyWakeupEnd();
+            }
+            return;
+        }
+        if (enable) {
+            if (mTransitionPrefSession == null) {
+                mTransitionPrefSession = mWmService.mSystemPerformanceHinter.createSession(
+                        SystemPerformanceHinter.HINT_SF, mDisplayId, "Transition");
+            }
+            mTransitionPrefSession.start();
+        } else if (mTransitionPrefSession != null) {
+            mTransitionPrefSession.close();
+        }
+    }
+
+    void enableHighFrameRate(boolean enable) {
+        if (!explicitRefreshRateHints()) {
+            // Done by RefreshRatePolicy.
+            return;
+        }
+        if (enable) {
+            if (mHighFrameRateSession == null) {
+                mHighFrameRateSession = mWmService.mSystemPerformanceHinter.createSession(
+                        SystemPerformanceHinter.HINT_SF_FRAME_RATE, mDisplayId, "WindowAnimation");
+            }
+            mHighFrameRateSession.start();
+        } else if (mHighFrameRateSession != null) {
+            mHighFrameRateSession.close();
+        }
     }
 
     void rotateBounds(@Rotation int oldRotation, @Rotation int newRotation, Rect inOutBounds) {
