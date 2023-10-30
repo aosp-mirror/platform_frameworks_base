@@ -117,11 +117,6 @@ constructor(
 
     @WorkerThread
     override fun updateIcon(drawableConsumer: NotificationDrawableConsumer, icon: Icon?): Runnable {
-        if (this.drawableConsumer != null && this.drawableConsumer != drawableConsumer) {
-            Log.wtf(TAG, "A consumer is already set for this iconManager.")
-            return Runnable {}
-        }
-
         this.drawableConsumer = drawableConsumer
         this.lastLoadingJob?.cancel()
 
