@@ -30,6 +30,8 @@ import java.lang.annotation.Target;
  *
  * TODO: Javadoc
  * TODO: Create "whole-class-throw"?
+ *
+ * @hide
  */
 @Target({TYPE, FIELD, METHOD, CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)

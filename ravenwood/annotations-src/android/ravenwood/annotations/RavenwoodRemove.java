@@ -29,6 +29,8 @@ import java.lang.annotation.Target;
  * QUESTIONS ABOUT IT.
  *
  * TODO: Javadoc
+ *
+ * @hide
  */
 @Target({TYPE, FIELD, METHOD, CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)
