@@ -24,8 +24,7 @@ import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.privacy.PrivacyChipBuilder
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.privacy.PrivacyItemController
@@ -49,7 +48,6 @@ constructor(
     private val batteryController: BatteryController,
     private val privacyController: PrivacyItemController,
     private val context: Context,
-    private val featureFlags: FeatureFlags,
     @Application private val appScope: CoroutineScope,
     connectedDisplayInteractor: ConnectedDisplayInteractor
 ) {
@@ -76,9 +74,7 @@ constructor(
     }
 
     fun notifyPluggedIn(@IntRange(from = 0, to = 100) batteryLevel: Int) {
-        if (featureFlags.isEnabled(Flags.PLUG_IN_STATUS_BAR_CHIP)) {
-            scheduler.onStatusEvent(BatteryEvent(batteryLevel))
-        }
+        scheduler.onStatusEvent(BatteryEvent(batteryLevel))
     }
 
     fun notifyPrivacyItemsEmpty() {

@@ -17,19 +17,11 @@
 package com.android.systemui.statusbar.events
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.statusbar.window.StatusBarWindowController
-import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.time.SystemClock
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineScope
 
 @Module
 interface StatusBarEventsModule {
@@ -42,41 +34,11 @@ interface StatusBarEventsModule {
         fun provideSystemStatusAnimationSchedulerLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("SystemStatusAnimationSchedulerLog", 60)
         }
-
-        @Provides
-        @SysUISingleton
-        fun provideSystemStatusAnimationScheduler(
-                featureFlags: FeatureFlags,
-                coordinator: SystemEventCoordinator,
-                chipAnimationController: SystemEventChipAnimationController,
-                statusBarWindowController: StatusBarWindowController,
-                dumpManager: DumpManager,
-                systemClock: SystemClock,
-                @Application coroutineScope: CoroutineScope,
-                @Main executor: DelayableExecutor,
-                logger: SystemStatusAnimationSchedulerLogger
-        ): SystemStatusAnimationScheduler {
-            return if (featureFlags.isEnabled(Flags.PLUG_IN_STATUS_BAR_CHIP)) {
-                SystemStatusAnimationSchedulerImpl(
-                        coordinator,
-                        chipAnimationController,
-                        statusBarWindowController,
-                        dumpManager,
-                        systemClock,
-                        coroutineScope,
-                        logger
-                )
-            } else {
-                SystemStatusAnimationSchedulerLegacyImpl(
-                        coordinator,
-                        chipAnimationController,
-                        statusBarWindowController,
-                        dumpManager,
-                        systemClock,
-                        executor
-                )
-            }
-        }
     }
-}
 
+    @Binds
+    @SysUISingleton
+    fun bindSystemStatusAnimationScheduler(
+        systemStatusAnimationSchedulerImpl: SystemStatusAnimationSchedulerImpl
+    ): SystemStatusAnimationScheduler
+}
