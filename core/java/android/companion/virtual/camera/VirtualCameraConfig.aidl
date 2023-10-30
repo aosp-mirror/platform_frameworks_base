@@ -13,18 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.companion.virtual.camera;
 
-/***
- * Counterpart of {@link android.hardware.camera2.CameraCaptureSession} for producing
- * images from a {@link VirtualCamera}.
- * @hide
- */
-// TODO: b/289881985 - This is just a POC implementation for now, this will be extended
-// to a full featured Camera Session
-public interface VirtualCameraSession {
-
-    /** Close the session and release its resources. */
-    default void close() {}
-}
+/** @hide */
+parcelable VirtualCameraConfig;

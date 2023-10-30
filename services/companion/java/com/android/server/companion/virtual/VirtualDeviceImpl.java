@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
-import android.companion.virtual.camera.IVirtualCamera;
+import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorEvent;
@@ -277,7 +277,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 runningAppsChangedCallback,
                 params,
                 DisplayManagerGlobal.getInstance(),
-                Flags.virtualCamera() ? new VirtualCameraController(context) : null);
+                Flags.virtualCamera() ? new VirtualCameraController() : null);
     }
 
     @VisibleForTesting
@@ -950,13 +950,28 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void registerVirtualCamera(@NonNull IVirtualCamera camera) {
+    public void registerVirtualCamera(@NonNull VirtualCameraConfig cameraConfig)
+            throws RemoteException {
         super.registerVirtualCamera_enforcePermission();
+        Objects.requireNonNull(cameraConfig);
         if (mVirtualCameraController == null) {
-            return;
+            throw new UnsupportedOperationException("Virtual camera controller is not available");
         }
-        mVirtualCameraController.registerCamera(Objects.requireNonNull(camera));
+        mVirtualCameraController.registerCamera(Objects.requireNonNull(cameraConfig));
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void unregisterVirtualCamera(@NonNull VirtualCameraConfig cameraConfig)
+            throws RemoteException {
+        super.unregisterVirtualCamera_enforcePermission();
+        Objects.requireNonNull(cameraConfig);
+        if (mVirtualCameraController == null) {
+            throw new UnsupportedOperationException("Virtual camera controller is not available");
+        }
+        mVirtualCameraController.unregisterCamera(Objects.requireNonNull(cameraConfig));
     }
 
     @Override

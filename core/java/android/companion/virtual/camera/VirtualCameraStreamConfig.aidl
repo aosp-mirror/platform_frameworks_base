@@ -16,11 +16,7 @@
 package android.companion.virtual.camera;
 
 /**
- * A stream configuration supported by a virtual camera
+ * The configuration of a single virtual camera stream.
  * @hide
  */
-parcelable VirtualCameraStreamConfig {
-    int width;
-    int height;
-    int format;
-}
+parcelable VirtualCameraStreamConfig;

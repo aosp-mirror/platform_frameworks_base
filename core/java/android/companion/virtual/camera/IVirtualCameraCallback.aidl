@@ -13,41 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.companion.virtual.camera;
 
-import android.annotation.FlaggedApi;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.SystemApi;
-import android.companion.virtual.flags.Flags;
+import android.companion.virtual.camera.VirtualCameraStreamConfig;
+import android.companion.virtual.camera.VirtualCameraMetadata;
 import android.view.Surface;
 
-import java.util.concurrent.Executor;
-
 /**
- * Interface to be provided when creating a new {@link VirtualCamera} in order to receive callbacks
- * from the framework and the camera system.
+ * Interface for the virtual camera service and system server to talk back to the virtual camera owner.
  *
- * @see VirtualCameraConfig.Builder#setVirtualCameraCallback(Executor, VirtualCameraCallback)
  * @hide
  */
-@SystemApi
-@FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
-public interface VirtualCameraCallback {
+interface IVirtualCameraCallback {
 
     /**
      * Called when one of the requested stream has been configured by the virtual camera service and
      * is ready to receive data onto its {@link Surface}
      *
-     * @param streamId The id of the configured stream
-     * @param surface The surface to write data into for this stream
+     * @param streamId     The id of the configured stream
+     * @param surface      The surface to write data into for this stream
      * @param streamConfig The image data configuration for this stream
      */
-    void onStreamConfigured(
+    oneway void onStreamConfigured(
             int streamId,
-            @NonNull Surface surface,
-            @NonNull VirtualCameraStreamConfig streamConfig);
+            in Surface surface,
+            in VirtualCameraStreamConfig streamConfig);
 
     /**
      * The client application is requesting a camera frame for the given streamId with the provided
@@ -63,19 +53,18 @@ public interface VirtualCameraCallback {
      * @param frameId The frameId that is being requested. Each request will have a different
      *     frameId, that will be increasing for each call with a particular streamId.
      * @param metadata The metadata requested for the frame. The virtual camera should do its best
-     *     to honor the requested metadata but the consumer won't be informed about the metadata set
-     *     for a particular frame. If null, the requested frame can be anything the producer sends.
+     *     to honor the requested metadata.
      */
-    void onProcessCaptureRequest(
-            int streamId, long frameId, @Nullable VirtualCameraMetadata metadata);
+    oneway void onProcessCaptureRequest(
+            int streamId, long frameId, in VirtualCameraMetadata metadata);
 
     /**
      * The stream previously configured when {@link #onStreamConfigured(int, Surface,
      * VirtualCameraStreamConfig)} was called is now being closed and associated resources can be
-     * freed. The Surface corresponding to that streamId was disposed on the client side and should
-     * not be used anymore by the virtual camera owner
+     * freed. The Surface was disposed on the client side and should not be used anymore by the virtual camera owner
      *
      * @param streamId The id of the stream that was closed.
      */
-    void onStreamClosed(int streamId);
+    oneway void onStreamClosed(int streamId);
+
 }
