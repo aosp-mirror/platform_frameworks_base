@@ -36,6 +36,7 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
 import static android.system.OsConstants.*;
 
+import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxAudit;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
@@ -183,6 +184,7 @@ public final class ProcessList {
     static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
 
+    private static final String APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS = ":isSdkSandboxAudit";
     private static final String APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = ":isSdkSandboxNext";
 
     // OOM adjustments for processes in various states:
@@ -549,6 +551,10 @@ public final class ProcessList {
 
     ActivityManagerGlobalLock mProcLock;
 
+    private static final String PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS =
+            "apply_sdk_sandbox_audit_restrictions";
+    private static final boolean DEFAULT_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS = false;
+
     private static final String PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS =
             "apply_sdk_sandbox_next_restrictions";
     private static final boolean DEFAULT_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = false;
@@ -573,6 +579,13 @@ public final class ProcessList {
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
+        private boolean mSdkSandboxApplyRestrictionsAudit =
+                DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ADSERVICES,
+                PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS,
+                DEFAULT_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS);
+
+        @GuardedBy("mLock")
         private boolean mSdkSandboxApplyRestrictionsNext =
                 DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ADSERVICES,
@@ -593,6 +606,12 @@ public final class ProcessList {
             DeviceConfig.removeOnPropertiesChangedListener(this);
         }
 
+        boolean applySdkSandboxRestrictionsAudit() {
+            synchronized (mLock) {
+                return mSdkSandboxApplyRestrictionsAudit;
+            }
+        }
+
         boolean applySdkSandboxRestrictionsNext() {
             synchronized (mLock) {
                 return mSdkSandboxApplyRestrictionsNext;
@@ -608,6 +627,12 @@ public final class ProcessList {
                     }
 
                     switch (name) {
+                        case PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS:
+                            mSdkSandboxApplyRestrictionsAudit =
+                                properties.getBoolean(
+                                    PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS,
+                                    DEFAULT_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS);
+                            break;
                         case PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS:
                             mSdkSandboxApplyRestrictionsNext =
                                 properties.getBoolean(
@@ -2025,10 +2050,14 @@ public final class ProcessList {
     String updateSeInfo(ProcessRecord app) {
         String extraInfo = "";
         // By the time the first the SDK sandbox process is started, device config service
-        // should be available.
-        if (app.isSdkSandbox
-                && getProcessListSettingsListener().applySdkSandboxRestrictionsNext()) {
-            extraInfo = APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS;
+        // should be available. If both Next and Audit are enabled, Next takes precedence.
+        if (app.isSdkSandbox) {
+            if (getProcessListSettingsListener().applySdkSandboxRestrictionsNext()) {
+                extraInfo = APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS;
+            } else if (selinuxSdkSandboxAudit()
+                    && getProcessListSettingsListener().applySdkSandboxRestrictionsAudit()) {
+                extraInfo = APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS;
+            }
         }
 
         return app.info.seInfo
