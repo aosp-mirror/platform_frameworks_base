@@ -2512,6 +2512,28 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     }
   }
 
+  // Parse the feature flag values. An argument that starts with '@' points to a file to read flag
+  // values from.
+  std::vector<std::string> all_feature_flags_args;
+  for (const std::string& arg : feature_flags_args_) {
+    if (util::StartsWith(arg, "@")) {
+      const std::string path = arg.substr(1, arg.size() - 1);
+      std::string error;
+      if (!file::AppendArgsFromFile(path, &all_feature_flags_args, &error)) {
+        context.GetDiagnostics()->Error(android::DiagMessage(path) << error);
+        return 1;
+      }
+    } else {
+      all_feature_flags_args.push_back(arg);
+    }
+  }
+
+  for (const std::string& arg : all_feature_flags_args) {
+    if (ParseFeatureFlagsParameter(arg, context.GetDiagnostics(), &options_.feature_flag_values)) {
+      return 1;
+    }
+  }
+
   if (context.GetPackageType() != PackageType::kStaticLib && stable_id_file_path_) {
     if (!LoadStableIdMap(context.GetDiagnostics(), stable_id_file_path_.value(),
         &options_.stable_id_map)) {
