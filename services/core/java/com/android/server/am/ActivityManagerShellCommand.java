@@ -3751,6 +3751,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
+        public void onProcessStarted(int pid, int processUid, int packageUid, String packageName,
+                String processName) {
+        }
+
+        @Override
         public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {
         }
 
