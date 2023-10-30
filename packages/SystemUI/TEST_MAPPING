@@ -134,12 +134,46 @@
           "exclude-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
+    },
+    {
+      "name": "SystemUIGoogleKeyguardScreenshotTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        }
+      ]
     }
   ],
   // v2/sysui/suite/test-mapping-sysui-screenshot-test-staged
   "sysui-screenshot-test-staged": [
     {
       "name": "SystemUIGoogleScreenshotTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.FlakyTest"
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Postsubmit"
+        }
+      ]
+    },
+    {
+      "name": "SystemUIGoogleKeyguardScreenshotTests",
       "options": [
         {
           "exclude-annotation": "org.junit.Ignore"
