@@ -494,7 +494,6 @@ public final class VcnGatewayConnectionConfig {
      * Check whether safe mode is enabled
      *
      * @see Builder#enableSafeMode(boolean)
-     * @hide
      */
     @FlaggedApi(FLAG_SAFE_MODE_CONFIG)
     public boolean isSafeModeEnabled() {
@@ -824,7 +823,6 @@ public final class VcnGatewayConnectionConfig {
          * networks.
          *
          * @param enabled whether safe mode should be enabled. Defaults to {@code true}
-         * @hide
          */
         @FlaggedApi(FLAG_SAFE_MODE_CONFIG)
         @NonNull
