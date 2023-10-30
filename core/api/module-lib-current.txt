@@ -14,7 +14,7 @@ package android.app {
 
   @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
-    method public final boolean isResumed();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public final boolean isResumed();
   }
 
   public class ActivityManager {
