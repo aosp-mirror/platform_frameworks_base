@@ -16,6 +16,9 @@
 
 package android.content.pm;
 
+import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -390,6 +393,7 @@ public class UserInfo implements Parcelable {
         return UserManager.isUserTypeCommunalProfile(userType);
     }
 
+    @FlaggedApi(FLAG_ALLOW_PRIVATE_PROFILE)
     public boolean isPrivateProfile() {
         return UserManager.isUserTypePrivateProfile(userType);
     }
