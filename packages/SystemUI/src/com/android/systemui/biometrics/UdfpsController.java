@@ -26,7 +26,6 @@ import static android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROL
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -45,7 +44,6 @@ import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -725,23 +723,14 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @VisibleForTesting
     public void playStartHaptic() {
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
-            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-                if (mOverlay != null && mOverlay.getOverlayView() != null) {
-                    mVibrator.performHapticFeedback(
-                            mOverlay.getOverlayView(),
-                            HapticFeedbackConstants.CONTEXT_CLICK
-                    );
-                } else {
-                    Log.e(TAG, "No haptics played. Could not obtain overlay view to perform"
-                            + "vibration. Either the controller overlay is null or has no view");
-                }
+            if (mOverlay != null && mOverlay.getOverlayView() != null) {
+                mVibrator.performHapticFeedback(
+                        mOverlay.getOverlayView(),
+                        HapticFeedbackConstants.CONTEXT_CLICK
+                );
             } else {
-                mVibrator.vibrate(
-                        Process.myUid(),
-                        mContext.getOpPackageName(),
-                        EFFECT_CLICK,
-                        "udfps-onStart-click",
-                        UDFPS_VIBRATION_ATTRIBUTES);
+                Log.e(TAG, "No haptics played. Could not obtain overlay view to perform"
+                        + "vibration. Either the controller overlay is null or has no view");
             }
         }
     }
@@ -835,23 +824,14 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             mKeyguardViewManager.showPrimaryBouncer(true);
 
             // play the same haptic as the LockIconViewController longpress
-            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-                if (mOverlay != null && mOverlay.getOverlayView() != null) {
-                    mVibrator.performHapticFeedback(
-                            mOverlay.getOverlayView(),
-                            UdfpsController.LONG_PRESS
-                    );
-                } else {
-                    Log.e(TAG, "No haptics played. Could not obtain overlay view to perform"
-                            + "vibration. Either the controller overlay is null or has no view");
-                }
+            if (mOverlay != null && mOverlay.getOverlayView() != null) {
+                mVibrator.performHapticFeedback(
+                        mOverlay.getOverlayView(),
+                        UdfpsController.LONG_PRESS
+                );
             } else {
-                mVibrator.vibrate(
-                        Process.myUid(),
-                        mContext.getOpPackageName(),
-                        UdfpsController.EFFECT_CLICK,
-                        "aod-lock-icon-longpress",
-                        LOCK_ICON_VIBRATION_ATTRIBUTES);
+                Log.e(TAG, "No haptics played. Could not obtain overlay view to perform"
+                        + "vibration. Either the controller overlay is null or has no view");
             }
             return;
         }

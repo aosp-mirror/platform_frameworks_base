@@ -23,9 +23,7 @@ import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -34,7 +32,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -59,7 +56,6 @@ import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.VibrationAttributes;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.Pair;
 import android.view.HapticFeedbackConstants;
@@ -1047,35 +1043,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mHoverListenerCaptor.getValue().onHover(mUdfpsView, enterEvent);
         enterEvent.recycle();
 
-        // THEN tick haptic is played
-        verify(mVibrator).vibrate(
-                anyInt(),
-                anyString(),
-                any(),
-                eq("udfps-onStart-click"),
-                eq(UdfpsController.UDFPS_VIBRATION_ATTRIBUTES));
-
-        // THEN make sure vibration attributes has so that it always will play the haptic,
-        // even in battery saver mode
-        assertEquals(VibrationAttributes.USAGE_COMMUNICATION_REQUEST,
-                UdfpsController.UDFPS_VIBRATION_ATTRIBUTES.getUsage());
-    }
-
-    @Test
-    public void playHapticOnTouchUdfpsArea_a11yTouchExplorationEnabled_oneWayHapticsEnabled()
-            throws RemoteException {
-        when(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(true);
-
-        final Pair<TouchProcessorResult, TouchProcessorResult> touchProcessorResult =
-                givenFingerEvent(InteractionEvent.DOWN, InteractionEvent.UP, true);
-
-        // WHEN ACTION_HOVER is received
-        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
-                touchProcessorResult.first);
-        MotionEvent enterEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_HOVER_ENTER, 0, 0, 0);
-        mHoverListenerCaptor.getValue().onHover(mUdfpsView, enterEvent);
-        enterEvent.recycle();
-
         // THEN context click haptic is played
         verify(mVibrator).performHapticFeedback(
                 any(),
@@ -1085,31 +1052,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Test
     public void noHapticOnTouchUdfpsArea_a11yTouchExplorationDisabled() throws RemoteException {
-        final Pair<TouchProcessorResult, TouchProcessorResult> touchProcessorResult =
-                givenFingerEvent(InteractionEvent.DOWN, InteractionEvent.UP, false);
-
-        // WHEN ACTION_DOWN is received
-        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
-                touchProcessorResult.first);
-        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
-        mBiometricExecutor.runAllReady();
-        downEvent.recycle();
-
-        // THEN NO haptic played
-        verify(mVibrator, never()).vibrate(
-                anyInt(),
-                anyString(),
-                any(),
-                anyString(),
-                any());
-    }
-
-    @Test
-    public void noHapticOnTouchUdfpsArea_a11yTouchExplorationDisabled__oneWayHapticsEnabled()
-            throws RemoteException {
-        when(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(true);
-
         final Pair<TouchProcessorResult, TouchProcessorResult> touchProcessorResult =
                 givenFingerEvent(InteractionEvent.DOWN, InteractionEvent.UP, false);
 
@@ -1347,32 +1289,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void playHaptic_onAodInterrupt_oneWayHapticsDisabled_onAcquiredBad_usesVibrate()
+    public void playHaptic_onAodInterrupt_onAcquiredBad_performHapticFeedback()
             throws RemoteException {
-        // GIVEN UDFPS overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
-        mFgExecutor.runAllReady();
-
-        // GIVEN there's been an AoD interrupt
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(false);
-        mScreenObserver.onScreenTurnedOn();
-        mUdfpsController.onAodInterrupt(0, 0, 0, 0);
-
-        // THEN vibrate is used
-        verify(mVibrator).vibrate(
-                anyInt(),
-                anyString(),
-                eq(UdfpsController.EFFECT_CLICK),
-                eq("aod-lock-icon-longpress"),
-                eq(UdfpsController.LOCK_ICON_VIBRATION_ATTRIBUTES)
-        );
-    }
-
-    @Test
-    public void playHaptic_onAodInterrupt_oneWayHapticsEnabled_onAcquiredBad_performHapticFeedback()
-            throws RemoteException {
-        when(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(true);
         // GIVEN UDFPS overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
