@@ -48,6 +48,14 @@ class SwipeToSceneTest {
         /** The middle of the layout, in pixels. */
         private val Density.middle: Offset
             get() = Offset((LayoutWidth / 2).toPx(), (LayoutHeight / 2).toPx())
+
+        /** The middle-top of the layout, in pixels. */
+        private val Density.middleTop: Offset
+            get() = Offset((LayoutWidth / 2).toPx(), 0f)
+
+        /** The middle-left of the layout, in pixels. */
+        private val Density.middleLeft: Offset
+            get() = Offset(0f, (LayoutHeight / 2).toPx())
     }
 
     private var currentScene by mutableStateOf(TestScenes.SceneA)
@@ -87,6 +95,8 @@ class SwipeToSceneTest {
                     mapOf(
                         Swipe.Down to TestScenes.SceneA,
                         Swipe(SwipeDirection.Down, pointerCount = 2) to TestScenes.SceneB,
+                        Swipe(SwipeDirection.Right, fromEdge = Edge.Left) to TestScenes.SceneB,
+                        Swipe(SwipeDirection.Down, fromEdge = Edge.Top) to TestScenes.SceneB,
                     ),
             ) {
                 Box(Modifier.fillMaxSize())
@@ -281,6 +291,63 @@ class SwipeToSceneTest {
         // Release the fingers and wait for the animation to end. We are back to C because we only
         // swiped 10dp.
         rule.onRoot().performTouchInput { repeat(2) { i -> up(pointerId = i) } }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
+        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)
+    }
+
+    @Test
+    fun defaultEdgeSwipe() {
+        // Start at scene C.
+        currentScene = TestScenes.SceneC
+
+        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
+        // detected as a drag event.
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            TestContent()
+        }
+
+        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
+        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)
+
+        // Swipe down from the top edge.
+        rule.onRoot().performTouchInput {
+            down(middleTop)
+            moveBy(Offset(0f, touchSlop + 10.dp.toPx()), delayMillis = 1_000)
+        }
+
+        // We are transitioning to B (and not A) because we started from the top edge.
+        var transition = layoutState.transitionState
+        assertThat(transition).isInstanceOf(TransitionState.Transition::class.java)
+        assertThat((transition as TransitionState.Transition).fromScene)
+            .isEqualTo(TestScenes.SceneC)
+        assertThat(transition.toScene).isEqualTo(TestScenes.SceneB)
+
+        // Release the fingers and wait for the animation to end. We are back to C because we only
+        // swiped 10dp.
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
+        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)
+
+        // Swipe right from the left edge.
+        rule.onRoot().performTouchInput {
+            down(middleLeft)
+            moveBy(Offset(touchSlop + 10.dp.toPx(), 0f), delayMillis = 1_000)
+        }
+
+        // We are transitioning to B (and not A) because we started from the left edge.
+        transition = layoutState.transitionState
+        assertThat(transition).isInstanceOf(TransitionState.Transition::class.java)
+        assertThat((transition as TransitionState.Transition).fromScene)
+            .isEqualTo(TestScenes.SceneC)
+        assertThat(transition.toScene).isEqualTo(TestScenes.SceneB)
+
+        // Release the fingers and wait for the animation to end. We are back to C because we only
+        // swiped 10dp.
+        rule.onRoot().performTouchInput { up() }
         rule.waitForIdle()
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
         assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)

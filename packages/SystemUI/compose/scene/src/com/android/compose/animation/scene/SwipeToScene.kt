@@ -35,6 +35,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
@@ -157,7 +158,7 @@ class SceneGestureHandler(
 
     internal var gestureWithPriority: Any? = null
 
-    internal fun onDragStarted(pointersDown: Int) {
+    internal fun onDragStarted(pointersDown: Int, startedPosition: Offset?) {
         if (isDrivingTransition) {
             // This [transition] was already driving the animation: simply take over it.
             // Stop animating and start from where the current offset.
@@ -197,6 +198,16 @@ class SceneGestureHandler(
                 Orientation.Vertical -> layoutImpl.size.height
             }.toFloat()
 
+        val fromEdge =
+            startedPosition?.let { position ->
+                layoutImpl.edgeDetector.edge(
+                    layoutImpl.size,
+                    position.round(),
+                    layoutImpl.density,
+                    orientation,
+                )
+            }
+
         swipeTransition.actionUpOrLeft =
             Swipe(
                 direction =
@@ -205,6 +216,7 @@ class SceneGestureHandler(
                         Orientation.Vertical -> SwipeDirection.Up
                     },
                 pointerCount = pointersDown,
+                fromEdge = fromEdge,
             )
 
         swipeTransition.actionDownOrRight =
@@ -215,7 +227,18 @@ class SceneGestureHandler(
                         Orientation.Vertical -> SwipeDirection.Down
                     },
                 pointerCount = pointersDown,
+                fromEdge = fromEdge,
             )
+
+        if (fromEdge == null) {
+            swipeTransition.actionUpOrLeftNoEdge = null
+            swipeTransition.actionDownOrRightNoEdge = null
+        } else {
+            swipeTransition.actionUpOrLeftNoEdge =
+                (swipeTransition.actionUpOrLeft as Swipe).copy(fromEdge = null)
+            swipeTransition.actionDownOrRightNoEdge =
+                (swipeTransition.actionDownOrRight as Swipe).copy(fromEdge = null)
+        }
 
         if (swipeTransition.absoluteDistance > 0f) {
             transitionState = swipeTransition
@@ -264,15 +287,11 @@ class SceneGestureHandler(
         // to the next screen or go back to the previous one.
         val offset = swipeTransition.dragOffset
         val absoluteDistance = swipeTransition.absoluteDistance
-        if (
-            offset <= -absoluteDistance &&
-                fromScene.userActions[swipeTransition.actionUpOrLeft] == toScene.key
-        ) {
+        if (offset <= -absoluteDistance && swipeTransition.upOrLeft(fromScene) == toScene.key) {
             swipeTransition.dragOffset += absoluteDistance
             swipeTransition._fromScene = toScene
         } else if (
-            offset >= absoluteDistance &&
-                fromScene.userActions[swipeTransition.actionDownOrRight] == toScene.key
+            offset >= absoluteDistance && swipeTransition.downOrRight(fromScene) == toScene.key
         ) {
             swipeTransition.dragOffset -= absoluteDistance
             swipeTransition._fromScene = toScene
@@ -294,8 +313,8 @@ class SceneGestureHandler(
                 Orientation.Vertical -> layoutImpl.size.height
             }.toFloat()
 
-        val upOrLeft = userActions[swipeTransition.actionUpOrLeft]
-        val downOrRight = userActions[swipeTransition.actionDownOrRight]
+        val upOrLeft = swipeTransition.upOrLeft(this)
+        val downOrRight = swipeTransition.downOrRight(this)
 
         // Compute the target scene depending on the current offset.
         return when {
@@ -542,6 +561,18 @@ class SceneGestureHandler(
         /** The [UserAction]s associated to this swipe. */
         var actionUpOrLeft: UserAction = Back
         var actionDownOrRight: UserAction = Back
+        var actionUpOrLeftNoEdge: UserAction? = null
+        var actionDownOrRightNoEdge: UserAction? = null
+
+        fun upOrLeft(scene: Scene): SceneKey? {
+            return scene.userActions[actionUpOrLeft]
+                ?: actionUpOrLeftNoEdge?.let { scene.userActions[it] }
+        }
+
+        fun downOrRight(scene: Scene): SceneKey? {
+            return scene.userActions[actionDownOrRight]
+                ?: actionDownOrRightNoEdge?.let { scene.userActions[it] }
+        }
     }
 
     companion object {
@@ -554,7 +585,7 @@ private class SceneDraggableHandler(
 ) : DraggableHandler {
     override fun onDragStarted(startedPosition: Offset, pointersDown: Int) {
         gestureHandler.gestureWithPriority = this
-        gestureHandler.onDragStarted(pointersDown)
+        gestureHandler.onDragStarted(pointersDown, startedPosition)
     }
 
     override fun onDelta(pixels: Float) {
@@ -671,7 +702,7 @@ class SceneNestedScrollHandler(
             onStart = {
                 gestureHandler.gestureWithPriority = this
                 priorityScene = nextScene
-                gestureHandler.onDragStarted(pointersDown = 1)
+                gestureHandler.onDragStarted(pointersDown = 1, startedPosition = null)
             },
             onScroll = { offsetAvailable ->
                 if (gestureHandler.gestureWithPriority != this) {
