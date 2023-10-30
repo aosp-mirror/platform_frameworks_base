@@ -61,7 +61,6 @@ constructor(
                 Flags.MIGRATE_LOCK_ICON,
                 Flags.MIGRATE_NSSL,
                 Flags.MIGRATE_KEYGUARD_STATUS_VIEW,
-                Flags.NOTIFICATION_SHELF_REFACTOR,
                 Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW,
             )
     }

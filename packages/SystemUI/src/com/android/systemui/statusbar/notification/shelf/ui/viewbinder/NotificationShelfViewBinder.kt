@@ -16,63 +16,21 @@
 
 package com.android.systemui.statusbar.notification.shelf.ui.viewbinder
 
-import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.ConfigurationState
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
 import com.android.systemui.statusbar.NotificationShelf
-import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.ActivatableNotificationViewBinder
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
-import com.android.systemui.statusbar.notification.stack.AmbientState
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.policy.ConfigurationController
-import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
-
-/**
- * Controller class for [NotificationShelf]. This implementation serves as a temporary wrapper
- * around a [NotificationShelfViewBinder], so that external code can continue to depend on the
- * [NotificationShelfController] interface. Once the [LegacyNotificationShelfControllerImpl] is
- * removed, this class can go away and the ViewBinder can be used directly.
- */
-@SysUISingleton
-class NotificationShelfViewBinderWrapperControllerImpl @Inject constructor() :
-    NotificationShelfController {
-
-    override val view: NotificationShelf
-        get() = unsupported
-
-    override val intrinsicHeight: Int
-        get() = unsupported
-
-    override val shelfIcons: NotificationIconContainer
-        get() = unsupported
-
-    override fun canModifyColorOfNotifications(): Boolean = unsupported
-
-    override fun bind(
-        ambientState: AmbientState,
-        notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
-    ) = unsupported
-
-    override fun setOnClickListener(listener: View.OnClickListener) = unsupported
-
-    companion object {
-        val unsupported: Nothing
-            get() = error("Code path not supported when NOTIFICATION_SHELF_REFACTOR is disabled")
-    }
-}
 
 /** Binds a [NotificationShelf] to its [view model][NotificationShelfViewModel]. */
 object NotificationShelfViewBinder {

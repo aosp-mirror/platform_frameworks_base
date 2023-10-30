@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
-
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -65,7 +64,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -84,7 +82,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -119,12 +116,10 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
-import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -140,7 +135,6 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -168,12 +162,10 @@ public class NotificationStackScrollLayoutController {
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
     private final MetricsLogger mMetricsLogger;
-    private final Optional<NotificationListViewModel> mViewModel;
 
     private final DumpManager mDumpManager;
     private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
-    private final Resources mResources;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     private final ScrimController mScrimController;
     private final NotifPipeline mNotifPipeline;
@@ -194,10 +186,8 @@ public class NotificationStackScrollLayoutController {
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final StackStateLogger mStackStateLogger;
     private final NotificationStackScrollLogger mLogger;
-    private final NotificationIconAreaController mNotifIconAreaController;
 
     private final GroupExpansionManager mGroupExpansionManager;
-    private final NotifPipelineFlags mNotifPipelineFlags;
     private final SeenNotificationsInteractor mSeenNotificationsInteractor;
     private final KeyguardTransitionRepository mKeyguardTransitionRepo;
 
@@ -211,13 +201,10 @@ public class NotificationStackScrollLayoutController {
     private boolean mIsInTransitionToAod = false;
 
     private final FeatureFlagsClassic mFeatureFlags;
-    private final RefactorFlag mShelfRefactor;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
     private final ActivityStarter mActivityStarter;
-    private final ConfigurationState mConfigurationState;
-    private final ShelfNotificationIconViewStore mShelfIconViewStore;
 
     private View mLongPressedView;
 
@@ -315,6 +302,8 @@ public class NotificationStackScrollLayoutController {
     };
 
     private NotifStats mNotifStats = NotifStats.getEmpty();
+
+    private final NotificationListViewBinder mViewBinder;
 
     private void updateResources() {
         mNotificationStackSizeCalculator.updateResources();
@@ -651,40 +640,36 @@ public class NotificationStackScrollLayoutController {
             KeyguardTransitionRepository keyguardTransitionRepo,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager lockscreenUserManager,
-            Optional<NotificationListViewModel> nsslViewModel,
             MetricsLogger metricsLogger,
             DumpManager dumpManager,
             FalsingCollector falsingCollector,
             FalsingManager falsingManager,
-            @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
             ScrimController scrimController,
             GroupExpansionManager groupManager,
             @SilentHeader SectionHeaderController silentHeaderController,
             NotifPipeline notifPipeline,
-            NotifPipelineFlags notifPipelineFlags,
             NotifCollection notifCollection,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             UiEventLogger uiEventLogger,
             NotificationRemoteInputManager remoteInputManager,
             VisibilityLocationProviderDelegator visibilityLocationProviderDelegator,
             SeenNotificationsInteractor seenNotificationsInteractor,
+            NotificationListViewBinder viewBinder,
             ShadeController shadeController,
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
             NotificationStackScrollLogger logger,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
-            NotificationIconAreaController notifIconAreaController,
             FeatureFlagsClassic featureFlags,
             NotificationTargetsHelper notificationTargetsHelper,
             SecureSettings secureSettings,
             NotificationDismissibilityProvider dismissibilityProvider,
             ActivityStarter activityStarter,
-            SplitShadeStateController splitShadeStateController,
-            ConfigurationState configurationState,
-            ShelfNotificationIconViewStore shelfIconViewStore) {
+            SplitShadeStateController splitShadeStateController) {
         mView = view;
         mKeyguardTransitionRepo = keyguardTransitionRepo;
+        mViewBinder = viewBinder;
         mStackStateLogger = stackLogger;
         mLogger = logger;
         mAllowLongPress = allowLongPress;
@@ -704,13 +689,11 @@ public class NotificationStackScrollLayoutController {
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;
-        mViewModel = nsslViewModel;
         mMetricsLogger = metricsLogger;
         mDumpManager = dumpManager;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
-        mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mScrimController = scrimController;
         mJankMonitor = jankMonitor;
@@ -718,22 +701,17 @@ public class NotificationStackScrollLayoutController {
         mGroupExpansionManager = groupManager;
         mSilentHeaderController = silentHeaderController;
         mNotifPipeline = notifPipeline;
-        mNotifPipelineFlags = notifPipelineFlags;
         mNotifCollection = notifCollection;
         mUiEventLogger = uiEventLogger;
         mRemoteInputManager = remoteInputManager;
         mVisibilityLocationProviderDelegator = visibilityLocationProviderDelegator;
         mSeenNotificationsInteractor = seenNotificationsInteractor;
         mShadeController = shadeController;
-        mNotifIconAreaController = notifIconAreaController;
         mFeatureFlags = featureFlags;
-        mShelfRefactor = new RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;
         mActivityStarter = activityStarter;
-        mConfigurationState = configurationState;
-        mShelfIconViewStore = shelfIconViewStore;
         mView.passSplitShadeStateController(splitShadeStateController);
         updateResources();
         setUpView();
@@ -840,12 +818,7 @@ public class NotificationStackScrollLayoutController {
         mGroupExpansionManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
 
-        mViewModel.ifPresent(
-                vm -> NotificationListViewBinder
-                        .bind(mView, vm, mConfigurationState, mConfigurationController,
-                                mFalsingManager,
-                                mNotifIconAreaController,
-                                mShelfIconViewStore));
+        mViewBinder.bind(mView);
 
         collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),
                 this::onKeyguardTransitionChanged);
@@ -1443,11 +1416,6 @@ public class NotificationStackScrollLayoutController {
         mView.runAfterAnimationFinished(r);
     }
 
-    public void setShelfController(NotificationShelfController notificationShelfController) {
-        mShelfRefactor.assertInLegacyMode();
-        mView.setShelfController(notificationShelfController);
-    }
-
     public ExpandableView getFirstChildNotGone() {
         return mView.getFirstChildNotGone();
     }
@@ -1647,24 +1615,11 @@ public class NotificationStackScrollLayoutController {
         return mNotificationTargetsHelper;
     }
 
-    /**
-     * Set the remove notification listener
-     * @param listener callback for notification removed
-     */
-    public void setOnNotificationRemovedListener(
-            NotificationStackScrollLayout.OnNotificationRemovedListener listener) {
-        mView.setOnNotificationRemovedListener(listener);
-    }
-
     public void setShelf(NotificationShelf shelf) {
-        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
         mView.setShelf(shelf);
     }
 
     public int getShelfHeight() {
-        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) {
-            return 0;
-        }
         ExpandableView shelf = mView.getShelf();
         return shelf == null ? 0 : shelf.getIntrinsicHeight();
     }
