@@ -22,6 +22,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
 import com.android.systemui.res.R
@@ -75,6 +77,11 @@ class InternetTileViewModelTest : SysuiTestCase() {
     private val mobileConnectionRepository =
         FakeMobileConnectionRepository(SUB_1_ID, tableLogBuffer)
 
+    private val flags =
+        FakeFeatureFlagsClassic().also {
+            it.set(Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS, true)
+        }
+
     private val internet = context.getString(R.string.quick_settings_internet_label)
 
     @Before
@@ -101,6 +108,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
                 userSetupRepo,
                 testScope.backgroundScope,
                 context,
+                flags,
             )
 
         underTest =
