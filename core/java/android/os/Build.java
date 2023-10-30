@@ -17,6 +17,7 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -1227,6 +1228,7 @@ public class Build {
         /**
          * Vanilla Ice Cream.
          */
+        @FlaggedApi(Flags.FLAG_ANDROID_OS_BUILD_VANILLA_ICE_CREAM)
         public static final int VANILLA_ICE_CREAM = CUR_DEVELOPMENT;
     }
 
