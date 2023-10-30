@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.Notification.VISIBILITY_PRIVATE
+import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.database.ContentObserver
 import android.hardware.display.AmbientDisplayConfiguration
@@ -158,4 +160,23 @@ class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
             // Otherwise, check if the HUN's "when" is too old.
             else -> whenAge(entry) >= MAX_HUN_WHEN_AGE_MS
         }
+}
+
+class PulseEffectSuppressor() :
+    VisualInterruptionFilter(types = setOf(PULSE), reason = "ambient effect suppressed") {
+    override fun shouldSuppress(entry: NotificationEntry) = entry.shouldSuppressAmbient()
+}
+
+class PulseLockscreenVisibilityPrivateSuppressor() :
+    VisualInterruptionFilter(
+        types = setOf(PULSE),
+        reason = "notification hidden on lock screen by override"
+    ) {
+    override fun shouldSuppress(entry: NotificationEntry) =
+        entry.ranking.lockscreenVisibilityOverride == VISIBILITY_PRIVATE
+}
+
+class PulseLowImportanceSuppressor() :
+    VisualInterruptionFilter(types = setOf(PULSE), reason = "importance less than DEFAULT") {
+    override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_DEFAULT
 }

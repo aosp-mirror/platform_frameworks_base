@@ -20,9 +20,12 @@ import android.app.ActivityManager
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
 import android.app.Notification.FLAG_BUBBLE
+import android.app.Notification.VISIBILITY_PRIVATE
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
+import android.app.NotificationManager.IMPORTANCE_LOW
+import android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT
 import android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK
 import android.app.NotificationManager.VISIBILITY_NO_OVERRIDE
 import android.app.PendingIntent
@@ -280,6 +283,26 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     fun testShouldNotPulse_batterySaver() {
         ensurePulseState { isAodPowerSave = true }
         assertShouldNotHeadsUp(buildPulseEntry())
+    }
+
+    @Test
+    fun testShouldNotPulse_effectSuppressed() {
+        ensurePulseState()
+        assertShouldNotHeadsUp(
+            buildPulseEntry { suppressedVisualEffects = SUPPRESSED_EFFECT_AMBIENT }
+        )
+    }
+
+    @Test
+    fun testShouldNotPulse_visibilityOverridePrivate() {
+        ensurePulseState()
+        assertShouldNotHeadsUp(buildPulseEntry { visibilityOverride = VISIBILITY_PRIVATE })
+    }
+
+    @Test
+    fun testShouldNotPulse_importanceLow() {
+        ensurePulseState()
+        assertShouldNotHeadsUp(buildPulseEntry { importance = IMPORTANCE_LOW })
     }
 
     @Test
