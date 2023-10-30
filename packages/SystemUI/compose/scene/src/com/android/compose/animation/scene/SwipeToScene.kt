@@ -307,12 +307,6 @@ class SceneGestureHandler(
     )
 
     private fun Scene.findTargetSceneAndDistance(directionOffset: Float): TargetScene {
-        val maxDistance =
-            when (orientation) {
-                Orientation.Horizontal -> layoutImpl.size.width
-                Orientation.Vertical -> layoutImpl.size.height
-            }.toFloat()
-
         val upOrLeft = swipeTransition.upOrLeft(this)
         val downOrRight = swipeTransition.downOrRight(this)
 
@@ -321,13 +315,13 @@ class SceneGestureHandler(
             directionOffset < 0f && upOrLeft != null -> {
                 TargetScene(
                     sceneKey = upOrLeft,
-                    distance = -maxDistance,
+                    distance = -swipeTransition.absoluteDistance,
                 )
             }
             directionOffset > 0f && downOrRight != null -> {
                 TargetScene(
                     sceneKey = downOrRight,
-                    distance = maxDistance,
+                    distance = swipeTransition.absoluteDistance,
                 )
             }
             else -> {
