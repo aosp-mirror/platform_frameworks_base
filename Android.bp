@@ -321,7 +321,6 @@ java_defaults {
             ":installd_aidl",
             ":libaudioclient_aidl",
             ":libbinder_aidl",
-            ":libbluetooth-binder-aidl",
             ":libcamera_client_aidl",
             ":libcamera_client_framework_aidl",
             ":libupdate_engine_aidl",
@@ -370,17 +369,12 @@ java_defaults {
         // TODO(b/120066492): remove default_television.xml when the build system
         // propagates "required" properly.
         "default_television.xml",
-        "framework-platform-compat-config",
         // TODO(b/120066492): remove gps_debug and protolog.conf.json when the build
         // system propagates "required" properly.
         "gps_debug.conf",
-        "icu4j-platform-compat-config",
         "protolog.conf.json.gz",
-        "services-platform-compat-config",
-        "TeleService-platform-compat-config",
-        "documents-ui-compat-config",
-        "calendar-provider-compat-config",
-        "contacts-provider-platform-compat-config",
+        // any install dependencies should go into framework-minus-apex-install-dependencies
+        // rather than here to avoid bloating incremental build time
     ],
     libs: [
         "androidx.annotation_annotation",
@@ -415,21 +409,18 @@ java_defaults {
     ],
 }
 
-java_library {
-    name: "framework-minus-apex",
+// Separated so framework-minus-apex-defaults can be used without the libs dependency
+java_defaults {
+    name: "framework-minus-apex-with-libs-defaults",
     defaults: ["framework-minus-apex-defaults"],
-    installable: true,
-    // For backwards compatibility.
-    stem: "framework",
-    apex_available: ["//apex_available:platform"],
-    visibility: [
-        "//frameworks/base",
-        // TODO(b/147128803) remove the below lines
-        "//frameworks/base/apex/blobstore/framework",
-        "//frameworks/base/apex/jobscheduler/framework",
-        "//frameworks/base/packages/Tethering/tests/unit",
-        "//packages/modules/Connectivity/Tethering/tests/unit",
+    libs: [
+        "framework-virtualization.stubs.module_lib",
+        "framework-location.impl",
     ],
+}
+
+java_defaults {
+    name: "framework-non-updatable-lint-defaults",
     lint: {
         extra_check_modules: ["AndroidFrameworkLintChecker"],
         disabled_checks: ["ApiMightLeakAppVisibility"],
@@ -443,6 +434,43 @@ java_library {
             "UseOfCallerAwareMethodsWithClearedIdentity",
         ],
     },
+}
+
+// we are unfortunately building the turbine jar twice, but more efficient and less complex
+// than generating a similar set of stubs with metalava
+java_library {
+    name: "framework-minus-apex-headers",
+    defaults: ["framework-minus-apex-defaults"],
+    installable: false,
+    // For backwards compatibility.
+    stem: "framework",
+    apex_available: ["//apex_available:platform"],
+    visibility: [
+        "//frameworks/base/location",
+    ],
+    compile_dex: false,
+    headers_only: true,
+}
+
+java_library {
+    name: "framework-minus-apex",
+    defaults: [
+        "framework-minus-apex-with-libs-defaults",
+        "framework-non-updatable-lint-defaults",
+    ],
+    installable: true,
+    // For backwards compatibility.
+    stem: "framework",
+    apex_available: ["//apex_available:platform"],
+    visibility: [
+        "//frameworks/base",
+        "//frameworks/base/location",
+        // TODO(b/147128803) remove the below lines
+        "//frameworks/base/apex/blobstore/framework",
+        "//frameworks/base/apex/jobscheduler/framework",
+        "//frameworks/base/packages/Tethering/tests/unit",
+        "//packages/modules/Connectivity/Tethering/tests/unit",
+    ],
     errorprone: {
         javacflags: [
             "-Xep:AndroidFrameworkCompatChange:ERROR",
@@ -453,7 +481,7 @@ java_library {
 
 java_library {
     name: "framework-minus-apex-intdefs",
-    defaults: ["framework-minus-apex-defaults"],
+    defaults: ["framework-minus-apex-with-libs-defaults"],
     plugins: ["intdef-annotation-processor"],
 
     // Errorprone and android lint will already run on framework-minus-apex, don't rerun them on
@@ -481,11 +509,26 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "app-compat-annotations",
+        "framework-location.impl",
         "framework-minus-apex",
         "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
+}
+
+java_library {
+    name: "framework-minus-apex-install-dependencies",
+    required: [
+        "framework-minus-apex",
+        "framework-platform-compat-config",
+        "services-platform-compat-config",
+        "icu4j-platform-compat-config",
+        "TeleService-platform-compat-config",
+        "documents-ui-compat-config",
+        "calendar-provider-compat-config",
+        "contacts-provider-platform-compat-config",
+    ],
 }
 
 platform_compat_config {
@@ -560,29 +603,6 @@ java_library {
     ],
 }
 
-// TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
-metalava_framework_docs_args = "" +
-    "--api-lint-ignore-prefix android.icu. " +
-    "--api-lint-ignore-prefix java. " +
-    "--api-lint-ignore-prefix junit. " +
-    "--api-lint-ignore-prefix org. " +
-    "--error NoSettingsProvider " +
-    "--error UnhiddenSystemApi " +
-    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
-    "--hide BroadcastBehavior " +
-    "--hide CallbackInterface " +
-    "--hide DeprecationMismatch " +
-    "--hide HiddenSuperclass " +
-    "--hide HiddenTypeParameter " +
-    "--hide MissingPermission " +
-    "--hide-package android.audio.policy.configuration.V7_0 " +
-    "--hide-package com.android.server " +
-    "--hide RequiresPermission " +
-    "--hide SdkConstant " +
-    "--hide Todo " +
-    "--hide UnavailableSymbol " +
-    "--manifest $(location :frameworks-base-core-AndroidManifest.xml) "
-
 packages_to_document = [
     "android",
     "dalvik",
@@ -653,6 +673,27 @@ stubs_defaults {
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
     ],
+    flags: [
+        "--api-lint-ignore-prefix android.icu.",
+        "--api-lint-ignore-prefix java.",
+        "--api-lint-ignore-prefix junit.",
+        "--api-lint-ignore-prefix org.",
+        "--error NoSettingsProvider",
+        "--error UnhiddenSystemApi",
+        "--error UnflaggedApi",
+        "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*",
+        "--hide BroadcastBehavior",
+        "--hide CallbackInterface",
+        "--hide DeprecationMismatch",
+        "--hide HiddenSuperclass",
+        "--hide MissingPermission",
+        "--hide RequiresPermission",
+        "--hide SdkConstant",
+        "--hide Todo",
+        "--hide-package android.audio.policy.configuration.V7_0",
+        "--hide-package com.android.server",
+        "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
+    ],
     filter_packages: packages_to_document,
     high_mem: true, // Lots of sources => high memory use, see b/170701554
     installable: false,
@@ -687,6 +728,97 @@ stubs_defaults {
         // NOTE: The below can be removed once the prebuilt stub contains IKE.
         "sdk_system_current_android.net.ipsec.ike",
     ],
+}
+
+// Defaults for the java_sdk_libraries of unbundled jars from framework.
+// java_sdk_libraries using these defaults should also add themselves to the
+// non_updatable_modules list in frameworks/base/api/api.go
+java_defaults {
+    name: "framework-non-updatable-unbundled-defaults",
+    defaults: ["framework-non-updatable-lint-defaults"],
+
+    sdk_version: "core_platform",
+
+    // Api scope settings
+    public: {
+        enabled: true,
+        sdk_version: "module_current",
+        libs: ["android_module_lib_stubs_current"],
+    },
+    system: {
+        enabled: true,
+        sdk_version: "module_current",
+        libs: ["android_module_lib_stubs_current"],
+    },
+    module_lib: {
+        enabled: true,
+        sdk_version: "module_current",
+        libs: ["android_module_lib_stubs_current"],
+    },
+    test: {
+        enabled: true,
+        sdk_version: "test_frameworks_core_current",
+        libs: ["android_test_frameworks_core_stubs_current"],
+    },
+
+    stub_only_libs: [
+        "framework-protos",
+    ],
+    impl_only_libs: [
+        "framework-minus-apex-headers", // full access to framework-minus-apex including hidden API
+        "framework-annotations-lib",
+    ],
+    visibility: ["//visibility:public"],
+    stubs_library_visibility: ["//visibility:public"],
+    stubs_source_visibility: ["//visibility:private"],
+    impl_library_visibility: [
+        ":__pkg__",
+        "//frameworks/base",
+        "//frameworks/base/api", // For framework-all
+    ],
+    defaults_visibility: [
+        "//frameworks/base/location",
+    ],
+    plugins: [
+        "error_prone_android_framework",
+    ],
+    errorprone: {
+        javacflags: [
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            "-Xep:AndroidFrameworkUid:ERROR",
+        ],
+    },
+
+    // Include manual annotations in API txt files
+    merge_annotations_dirs: ["metalava-manual"],
+
+    // Use the source of annotations that affect metalava doc generation, since
+    // the relevant generation instructions are themselves in javadoc, which is
+    // not present in class files.
+    api_srcs: [":framework-metalava-annotations"],
+
+    // Framework modules are not generally shared libraries, i.e. they are not
+    // intended, and must not be allowed, to be used in a <uses-library> manifest
+    // entry.
+    shared_library: false,
+
+    // Prevent dependencies that do not specify an sdk_version from accessing the
+    // implementation library by default and force them to use stubs instead.
+    default_to_stubs: true,
+
+    // Subdirectory for the artifacts that are copied to the dist directory
+    dist_group: "android",
+
+    droiddoc_options: [
+        "--error UnhiddenSystemApi " +
+            "--hide CallbackInterface " +
+            "--hide HiddenTypedefConstant " +
+            "--hide RequiresPermission " +
+            "--enhance-documentation " +
+            "--hide-package com.android.server ",
+    ],
+
+    annotations_enabled: true,
 }
 
 build = [

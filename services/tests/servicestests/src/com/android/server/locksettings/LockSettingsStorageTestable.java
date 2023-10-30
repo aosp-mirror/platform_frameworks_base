@@ -84,6 +84,11 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     }
 
     @Override
+    File getRepairModePersistentDataFile() {
+        return remapToStorageDir(super.getRepairModePersistentDataFile());
+    }
+
+    @Override
     PersistentDataBlockManagerInternal getPersistentDataBlockManager() {
         return mPersistentDataBlockManager;
     }

@@ -16,16 +16,21 @@
 
 package android.nfc.cardemulation;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.nfc.Constants;
+import android.nfc.Flags;
 import android.nfc.INfcCardEmulation;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
@@ -274,7 +279,7 @@ public final class CardEmulation {
             try {
                 preferForeground = Settings.Secure.getInt(
                         contextAsUser.getContentResolver(),
-                        Settings.Secure.NFC_PAYMENT_FOREGROUND) != 0;
+                        Constants.SETTINGS_SECURE_NFC_PAYMENT_FOREGROUND) != 0;
             } catch (SettingNotFoundException e) {
             }
             return preferForeground;
@@ -876,9 +881,16 @@ public final class CardEmulation {
     }
 
     /**
+     * Retrieves list of services registered of the provided category for the provided user.
+     *
+     * @param category Category string, one of {@link #CATEGORY_PAYMENT} or {@link #CATEGORY_OTHER}
+     * @param userId the user handle of the user whose information is being requested.
      * @hide
      */
-    public List<ApduServiceInfo> getServices(String category, int userId) {
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public List<ApduServiceInfo> getServices(@NonNull String category, @UserIdInt int userId) {
         try {
             return sService.getServices(userId, category);
         } catch (RemoteException e) {

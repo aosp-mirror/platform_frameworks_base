@@ -439,8 +439,10 @@ key usage 0x0c007C KEYBOARD_BACKLIGHT_TOGGLE
 key usage 0x0c0173 MEDIA_AUDIO_TRACK
 key usage 0x0c019C PROFILE_SWITCH
 key usage 0x0c01A2 ALL_APPS
-key usage 0x0d0044 STYLUS_BUTTON_PRIMARY
-key usage 0x0d005a STYLUS_BUTTON_SECONDARY
+# TODO(b/297094448): Add stylus button mappings as a fallback when we have a way to determine
+#   if a device can actually report it.
+# key usage 0x0d0044 STYLUS_BUTTON_PRIMARY
+# key usage 0x0d005a STYLUS_BUTTON_SECONDARY
 
 # Joystick and game controller axes.
 # Axes that are not mapped will be assigned generic axis numbers by the input subsystem.

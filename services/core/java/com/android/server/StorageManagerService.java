@@ -377,15 +377,14 @@ class StorageManagerService extends IStorageManager.Stub
     private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_STORAGE);
 
     /**
-     * mLocalUnlockedUsers affects the return value of isUserUnlocked.  If
-     * any value in the array changes, then the binder cache for
-     * isUserUnlocked must be invalidated.  When adding mutating methods to
-     * WatchedLockedUsers, be sure to invalidate the cache in the new
-     * methods.
+     * mCeUnlockedUsers affects the return value of {@link UserManager#isUserUnlocked}.  If any
+     * value in the array changes, then the binder cache for {@link UserManager#isUserUnlocked} must
+     * be invalidated.  When adding mutating methods to this class, be sure to invalidate the cache
+     * in the new methods.
      */
-    private static class WatchedLockedUsers {
+    private static class WatchedUnlockedUsers {
         private int[] users = EmptyArray.INT;
-        public WatchedLockedUsers() {
+        public WatchedUnlockedUsers() {
             invalidateIsUserUnlockedCache();
         }
         public void append(int userId) {
@@ -417,10 +416,14 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    /** Set of users that we know are unlocked. */
+    /** Set of users whose CE storage is unlocked. */
     @GuardedBy("mLock")
-    private WatchedLockedUsers mLocalUnlockedUsers = new WatchedLockedUsers();
-    /** Set of users that system knows are unlocked. */
+    private WatchedUnlockedUsers mCeUnlockedUsers = new WatchedUnlockedUsers();
+
+    /**
+     * Set of users that are in the RUNNING_UNLOCKED state.  This differs from {@link
+     * mCeUnlockedUsers} in that a user can be stopped but still have its CE storage unlocked.
+     */
     @GuardedBy("mLock")
     private int[] mSystemUnlockedUsers = EmptyArray.INT;
 
@@ -1135,11 +1138,10 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    // If vold knows that some users have their storage unlocked already (which
-    // can happen after a "userspace reboot"), then add those users to
-    // mLocalUnlockedUsers.  Do this right away and don't wait until
-    // PHASE_BOOT_COMPLETED, since the system may unlock users before then.
-    private void restoreLocalUnlockedUsers() {
+    // If vold knows that some users have their CE storage unlocked already (which can happen after
+    // a "userspace reboot"), then add those users to mCeUnlockedUsers.  Do this right away and
+    // don't wait until PHASE_BOOT_COMPLETED, since the system may unlock users before then.
+    private void restoreCeUnlockedUsers() {
         final int[] userIds;
         try {
             userIds = mVold.getUnlockedUsers();
@@ -1155,7 +1157,7 @@ class StorageManagerService extends IStorageManager.Stub
                 // reconnecting to vold after it crashed and was restarted, in
                 // which case things will be the other way around --- we'll know
                 // about the unlocked users but vold won't.
-                mLocalUnlockedUsers.appendAll(userIds);
+                mCeUnlockedUsers.appendAll(userIds);
             }
         }
     }
@@ -2062,7 +2064,7 @@ class StorageManagerService extends IStorageManager.Stub
                 connectVold();
             }, DateUtils.SECOND_IN_MILLIS);
         } else {
-            restoreLocalUnlockedUsers();
+            restoreCeUnlockedUsers();
             onDaemonConnected();
         }
     }
@@ -2982,7 +2984,7 @@ class StorageManagerService extends IStorageManager.Stub
             // We need all the users unlocked to move their primary storage
             users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
-                if (StorageManager.isFileEncrypted() && !isUserKeyUnlocked(user.id)) {
+                if (StorageManager.isFileEncrypted() && !isCeStorageUnlocked(user.id)) {
                     Slog.w(TAG, "Failing move due to locked user " + user.id);
                     onMoveStatusLocked(PackageManager.MOVE_FAILED_LOCKED_USER);
                     return;
@@ -3206,15 +3208,15 @@ class StorageManagerService extends IStorageManager.Stub
 
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
+    public void createUserStorageKeys(int userId, int serialNumber, boolean ephemeral) {
 
-        super.createUserKey_enforcePermission();
+        super.createUserStorageKeys_enforcePermission();
 
         try {
-            mVold.createUserKey(userId, serialNumber, ephemeral);
-            // New keys are always unlocked.
+            mVold.createUserStorageKeys(userId, serialNumber, ephemeral);
+            // Since the user's CE key was just created, the user's CE storage is now unlocked.
             synchronized (mLock) {
-                mLocalUnlockedUsers.append(userId);
+                mCeUnlockedUsers.append(userId);
             }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
@@ -3223,15 +3225,15 @@ class StorageManagerService extends IStorageManager.Stub
 
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void destroyUserKey(int userId) {
+    public void destroyUserStorageKeys(int userId) {
 
-        super.destroyUserKey_enforcePermission();
+        super.destroyUserStorageKeys_enforcePermission();
 
         try {
-            mVold.destroyUserKey(userId);
-            // Destroying a key also locks it.
+            mVold.destroyUserStorageKeys(userId);
+            // Since the user's CE key was just destroyed, the user's CE storage is now locked.
             synchronized (mLock) {
-                mLocalUnlockedUsers.remove(userId);
+                mCeUnlockedUsers.remove(userId);
             }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
@@ -3241,60 +3243,60 @@ class StorageManagerService extends IStorageManager.Stub
     /* Only for use by LockSettingsService */
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void setUserKeyProtection(@UserIdInt int userId, byte[] secret) throws RemoteException {
-        super.setUserKeyProtection_enforcePermission();
+    public void setCeStorageProtection(@UserIdInt int userId, byte[] secret)
+            throws RemoteException {
+        super.setCeStorageProtection_enforcePermission();
 
-        mVold.setUserKeyProtection(userId, HexDump.toHexString(secret));
+        mVold.setCeStorageProtection(userId, HexDump.toHexString(secret));
     }
 
     /* Only for use by LockSettingsService */
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void unlockUserKey(@UserIdInt int userId, int serialNumber, byte[] secret)
-        throws RemoteException {
-        super.unlockUserKey_enforcePermission();
+    public void unlockCeStorage(@UserIdInt int userId, int serialNumber, byte[] secret)
+            throws RemoteException {
+        super.unlockCeStorage_enforcePermission();
 
         if (StorageManager.isFileEncrypted()) {
-            mVold.unlockUserKey(userId, serialNumber, HexDump.toHexString(secret));
+            mVold.unlockCeStorage(userId, serialNumber, HexDump.toHexString(secret));
         }
         synchronized (mLock) {
-            mLocalUnlockedUsers.append(userId);
+            mCeUnlockedUsers.append(userId);
         }
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void lockUserKey(int userId) {
-        //  Do not lock user 0 data for headless system user
-        super.lockUserKey_enforcePermission();
+    public void lockCeStorage(int userId) {
+        super.lockCeStorage_enforcePermission();
 
+        // Never lock the CE storage of a headless system user.
         if (userId == UserHandle.USER_SYSTEM
                 && UserManager.isHeadlessSystemUserMode()) {
             throw new IllegalArgumentException("Headless system user data cannot be locked..");
         }
 
-
-        if (!isUserKeyUnlocked(userId)) {
+        if (!isCeStorageUnlocked(userId)) {
             Slog.d(TAG, "User " + userId + "'s CE storage is already locked");
             return;
         }
 
         try {
-            mVold.lockUserKey(userId);
+            mVold.lockCeStorage(userId);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
             return;
         }
 
         synchronized (mLock) {
-            mLocalUnlockedUsers.remove(userId);
+            mCeUnlockedUsers.remove(userId);
         }
     }
 
     @Override
-    public boolean isUserKeyUnlocked(int userId) {
+    public boolean isCeStorageUnlocked(int userId) {
         synchronized (mLock) {
-            return mLocalUnlockedUsers.contains(userId);
+            return mCeUnlockedUsers.contains(userId);
         }
     }
 
@@ -3679,8 +3681,8 @@ class StorageManagerService extends IStorageManager.Stub
         final int userId = UserHandle.getUserId(callingUid);
         final String propertyName = "sys.user." + userId + ".ce_available";
 
-        // Ignore requests to create directories while storage is locked
-        if (!isUserKeyUnlocked(userId)) {
+        // Ignore requests to create directories while CE storage is locked
+        if (!isCeStorageUnlocked(userId)) {
             throw new IllegalStateException("Failed to prepare " + appPath);
         }
 
@@ -3806,15 +3808,15 @@ class StorageManagerService extends IStorageManager.Stub
         final boolean systemUserUnlocked = isSystemUnlocked(UserHandle.USER_SYSTEM);
 
         final boolean userIsDemo;
-        final boolean userKeyUnlocked;
         final boolean storagePermission;
+        final boolean ceStorageUnlocked;
         final long token = Binder.clearCallingIdentity();
         try {
             userIsDemo = LocalServices.getService(UserManagerInternal.class)
                     .getUserInfo(userId).isDemo();
             storagePermission = mStorageManagerInternal.hasExternalStorage(callingUid,
                     callingPackage);
-            userKeyUnlocked = isUserKeyUnlocked(userId);
+            ceStorageUnlocked = isCeStorageUnlocked(userId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -3874,7 +3876,7 @@ class StorageManagerService extends IStorageManager.Stub
                 } else if (!systemUserUnlocked) {
                     reportUnmounted = true;
                     Slog.w(TAG, "Reporting " + volId + " unmounted due to system locked");
-                } else if ((vol.getType() == VolumeInfo.TYPE_EMULATED) && !userKeyUnlocked) {
+                } else if ((vol.getType() == VolumeInfo.TYPE_EMULATED) && !ceStorageUnlocked) {
                     reportUnmounted = true;
                     Slog.w(TAG, "Reporting " + volId + "unmounted due to " + userId + " locked");
                 } else if (!storagePermission && !realState) {
@@ -4678,7 +4680,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             pw.println();
-            pw.println("Local unlocked users: " + mLocalUnlockedUsers);
+            pw.println("CE unlocked users: " + mCeUnlockedUsers);
             pw.println("System unlocked users: " + Arrays.toString(mSystemUnlockedUsers));
         }
 

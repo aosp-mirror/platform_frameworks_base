@@ -868,6 +868,11 @@ public final class Zygote {
                                  args.mPkgDataInfoList, args.mAllowlistedDataInfoList,
                                  args.mBindMountAppDataDirs, args.mBindMountAppStorageDirs);
 
+            // While `specializeAppProcess` sets the thread name on the process's main thread, this
+            // is distinct from the app process name which appears in stack traces, as the latter is
+            // sourced from the argument buffer of the Process class. Set the app process name here.
+            Zygote.setAppProcessName(args, TAG);
+
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
             return ZygoteInit.zygoteInit(args.mTargetSdkVersion,

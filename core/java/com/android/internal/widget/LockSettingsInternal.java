@@ -60,17 +60,6 @@ public abstract class LockSettingsInternal {
     public abstract void onThirdPartyAppsStarted();
 
     /**
-     * Unlocks the credential-encrypted storage for the given user if the user is not secured, i.e.
-     * doesn't have an LSKF.
-     * <p>
-     * This doesn't throw an exception on failure; whether the storage has been unlocked can be
-     * determined by {@link StorageManager#isUserKeyUnlocked()}.
-     *
-     * @param userId the ID of the user whose storage to unlock
-     */
-    public abstract void unlockUserKeyIfUnsecured(@UserIdInt int userId);
-
-    /**
      * Creates the locksettings state for a new user.
      * <p>
      * This includes creating a synthetic password and protecting it with an empty LSKF.
