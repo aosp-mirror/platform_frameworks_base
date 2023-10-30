@@ -378,6 +378,8 @@ public final class NfcAdapter {
      * <p>An external NFC field detected when device locked and SecureNfc enabled.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC =
             "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
 
@@ -944,7 +946,8 @@ public final class NfcAdapter {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public int getAdapterState() {
         try {
             return sService.getState();
