@@ -3241,6 +3241,48 @@ public class PowerManagerServiceTest {
         }
     }
 
+    @Test
+    public void testHalAutoSuspendMode_enabledByConfiguration() {
+        AtomicReference<DisplayManagerInternal.DisplayPowerCallbacks> callback =
+                new AtomicReference<>();
+        doAnswer((Answer<Void>) invocation -> {
+            callback.set(invocation.getArgument(0));
+            return null;
+        }).when(mDisplayManagerInternalMock).initPowerManagement(any(), any(), any());
+        when(mResourcesSpy.getBoolean(
+                com.android.internal.R.bool.config_powerDecoupleAutoSuspendModeFromDisplay))
+                .thenReturn(false);
+        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_useAutoSuspend))
+                .thenReturn(true);
+
+        createService();
+        startSystem();
+        callback.get().onDisplayStateChange(/* allInactive= */ true, /* allOff= */ true);
+
+        verify(mNativeWrapperMock).nativeSetAutoSuspend(true);
+    }
+
+    @Test
+    public void testHalAutoSuspendMode_disabledByConfiguration() {
+        AtomicReference<DisplayManagerInternal.DisplayPowerCallbacks> callback =
+                new AtomicReference<>();
+        doAnswer((Answer<Void>) invocation -> {
+            callback.set(invocation.getArgument(0));
+            return null;
+        }).when(mDisplayManagerInternalMock).initPowerManagement(any(), any(), any());
+        when(mResourcesSpy.getBoolean(
+                com.android.internal.R.bool.config_powerDecoupleAutoSuspendModeFromDisplay))
+                .thenReturn(false);
+        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_useAutoSuspend))
+                .thenReturn(false);
+
+        createService();
+        startSystem();
+        callback.get().onDisplayStateChange(/* allInactive= */ true, /* allOff= */ true);
+
+        verify(mNativeWrapperMock, never()).nativeSetAutoSuspend(true);
+    }
+
     private void setCachedUidProcState(int uid) {
         mService.updateUidProcStateInternal(uid, PROCESS_STATE_TOP_SLEEPING);
     }
