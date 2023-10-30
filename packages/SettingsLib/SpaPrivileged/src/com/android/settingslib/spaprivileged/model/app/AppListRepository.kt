@@ -67,6 +67,9 @@ object AppListRepositoryUtil {
         AppListRepositoryImpl(context).getSystemPackageNamesBlocking(userId)
 }
 
+/**
+ * This constructor is visible for tests only in order to override `featureFlags`.
+ */
 class AppListRepositoryImpl(
     private val context: Context,
     private val featureFlags: FeatureFlags
