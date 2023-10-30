@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
+import static android.content.pm.Flags.sdkLibIndependence;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
@@ -187,7 +188,9 @@ final class DeletePackageHelper {
                         List<VersionedPackage> libClientPackages =
                                 computer.getPackagesUsingSharedLibrary(libraryInfo,
                                         MATCH_KNOWN_PACKAGES, Process.SYSTEM_UID, currUserId);
-                        if (!ArrayUtils.isEmpty(libClientPackages)) {
+                        boolean allowSdkLibIndependence =
+                                (pkg.getSdkLibraryName() != null) && sdkLibIndependence();
+                        if (!ArrayUtils.isEmpty(libClientPackages) && !allowSdkLibIndependence) {
                             Slog.w(TAG, "Not removing package " + pkg.getManifestPackageName()
                                     + " hosting lib " + libraryInfo.getName() + " version "
                                     + libraryInfo.getLongVersion() + " used by " + libClientPackages
