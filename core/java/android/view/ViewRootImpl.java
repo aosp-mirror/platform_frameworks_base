@@ -3963,9 +3963,15 @@ public final class ViewRootImpl implements ViewParent,
             // on a different thread. However, when the current process is system, the finishDraw in
             // system server will be run on the current thread, which could result in a deadlock.
             if (mWindowSession instanceof Binder) {
-                reportDrawFinished(t, seqId);
+                // The transaction should be copied to a local reference when posting onto a new
+                // thread because up until now the SSG is holding a lock on the transaction. Once
+                // the call jumps onto a new thread, the lock is no longer held and the transaction
+                // send back may be modified or used again.
+                Transaction transactionCopy = new Transaction();
+                transactionCopy.merge(t);
+                mHandler.postAtFrontOfQueue(() -> reportDrawFinished(transactionCopy, seqId));
             } else {
-                mHandler.postAtFrontOfQueue(() -> reportDrawFinished(t, seqId));
+                reportDrawFinished(t, seqId);
             }
         });
         if (DEBUG_BLAST) {
