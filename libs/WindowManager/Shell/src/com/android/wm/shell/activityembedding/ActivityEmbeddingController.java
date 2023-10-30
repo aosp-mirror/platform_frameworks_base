@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.activityembedding;
 
+import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
@@ -110,12 +111,18 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
         }
 
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
-        if (options != null
-                // Scene-transition will be handled by app side.
-                && (options.getType() == ANIM_SCENE_TRANSITION
-                // Use default transition handler to animate override animation.
-                || isSupportedOverrideAnimation(options))) {
-            return false;
+        if (options != null) {
+            // Scene-transition should be handled by app side.
+            if (options.getType() == ANIM_SCENE_TRANSITION) {
+                return false;
+            }
+            // The case of ActivityOptions#makeCustomAnimation, Activity#overridePendingTransition,
+            // and Activity#overrideActivityTransition are supported.
+            if (options.getType() == ANIM_CUSTOM) {
+                return true;
+            }
+            // Use default transition handler to animate other override animation.
+            return !isSupportedOverrideAnimation(options);
         }
 
         return true;
