@@ -26,7 +26,6 @@ import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.NEW_AOD_TRANSITION;
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.annotation.SuppressLint;
@@ -38,7 +37,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricSourceType;
-import android.os.Process;
 import android.os.VibrationAttributes;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -806,33 +804,15 @@ public class LockIconViewController implements Dumpable {
 
     @VisibleForTesting
     void vibrateOnTouchExploration() {
-        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            mVibrator.performHapticFeedback(
-                    mView,
-                    HapticFeedbackConstants.CONTEXT_CLICK
-            );
-        } else {
-            mVibrator.vibrate(
-                    Process.myUid(),
-                    mContext.getOpPackageName(),
-                    UdfpsController.EFFECT_CLICK,
-                    "lock-icon-down",
-                    TOUCH_VIBRATION_ATTRIBUTES);
-        }
+        mVibrator.performHapticFeedback(
+                mView,
+                HapticFeedbackConstants.CONTEXT_CLICK
+        );
     }
 
     @VisibleForTesting
     void vibrateOnLongPress() {
-        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            mVibrator.performHapticFeedback(mView, UdfpsController.LONG_PRESS);
-        } else {
-            mVibrator.vibrate(
-                    Process.myUid(),
-                    mContext.getOpPackageName(),
-                    UdfpsController.EFFECT_CLICK,
-                    "lock-screen-lock-icon-longpress",
-                    TOUCH_VIBRATION_ATTRIBUTES);
-        }
+        mVibrator.performHapticFeedback(mView, UdfpsController.LONG_PRESS);
     }
 
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
