@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB aktivieren"</string>
     <string name="learn_more" msgid="4690632085667273811">"Weitere Informationen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"„Extend Unlock“ deaktiviert"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"„Erweitertes Entsperren“ deaktiviert"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"Bild gesendet"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Screenshot wird gespeichert..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Screenshot wird in Arbeitsprofil gespeichert…"</string>
