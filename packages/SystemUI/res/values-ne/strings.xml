@@ -76,8 +76,7 @@
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"कार्य प्रोफाइलमा स्क्रिनसट सेभ गरिँदै छ…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"स्क्रिनसट सेभ गरियो"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"स्क्रिनसट सुरक्षित गर्न सकिएन"</string>
-    <!-- no translation found for screenshot_failed_external_display_indication (6555673132061101936) -->
-    <skip />
+    <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"बाह्य डिस्प्ले"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"डिभाइस अनलक गरेपछि मात्र स्क्रिनसट सुरक्षित गर्न सकिन्छ"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रिनसट फेरि लिएर हेर्नुहोस्"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"स्क्रिनसट सुरक्षित गर्न सकिएन"</string>
@@ -197,7 +196,8 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"फेस अनलक उपलब्ध छैन"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लुटुथ जडान भयो।"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ब्लुटुथ डिभाइस जनाउने आइकन"</string>
-    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"ब्लुटुथ डिभाइसका सेटिङ गियर जनाउने आइकन"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ब्याट्रीमा कति प्रतिशत चार्ज छ भन्ने कुराको जानाकरी छैन।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> मा जडित।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> मा कनेक्ट गरियो।"</string>
@@ -250,7 +250,8 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"बाधा नपुऱ्याउनुहोस्"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ब्लुटुथ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"जोडी उपकरणहरू उपलब्ध छैन"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"कनेक्ट गर्न कुनै डिभाइसमा ट्याप गर्नुहोस्"</string>
+    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
+    <skip />
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"नयाँ डिभाइस कनेक्ट गर्नुहोस्"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"सबै डिभाइसहरू हेर्नुहोस्"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्लुटुथ प्रयोग गर्नुहोस्"</string>
@@ -282,8 +283,7 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"प्रसारण गर्दै"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"बेनाम उपकरण"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कुनै उपकरणहरू उपलब्ध छैन"</string>
-    <!-- no translation found for quick_settings_cast_no_network (3863016850468559522) -->
-    <skip />
+    <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"Wi-Fi वा इन्टरनेट कनेक्सन छैन"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"उज्यालपन"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्भर्सन"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"कलर करेक्सन"</string>
@@ -821,7 +821,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi अफ छ"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ निष्क्रिय छ"</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ अफ छ"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Do Not Disturb अन छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
@@ -1132,7 +1132,6 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"क्यामेरा अफ छ"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"माइक अफ छ"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"क्यामेरा र माइक अफ छन्"</string>
-    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"सहायकले सुनिरहेको छ"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# वटा सूचना}other{# वटा सूचनाहरू}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"नोट लेख्ने कार्य"</string>
@@ -1183,12 +1182,14 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"क्यामेरा र माइक्रोफोन ब्लक गरिएको छ"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"माइक्रोफोन ब्लक गरिएको छ"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"प्राथमिकता मोड अन छ"</string>
-    <string name="assistant_attention_content_description" msgid="6830215897604642875">"सहायकले सुनिरहेको छ"</string>
+    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
+    <skip />
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"सेटिङमा गई नोट बनाउने डिफल्ट एप तोक्नुहोस्"</string>
     <string name="install_app" msgid="5066668100199613936">"एप इन्स्टल गर्नुहोस्"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"बाह्य डिस्प्लेमा मिरर गर्ने हो?"</string>
     <string name="mirror_display" msgid="2515262008898122928">"डिस्प्ले मिरर गर्नुहोस्"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"खारेज गर्नुहोस्"</string>
+    <string name="connected_display_icon_desc" msgid="6373560639989971997">"डिस्प्ले कनेक्ट गरिएको छ"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"माइक्रोफोन तथा क्यामेरा"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"एपको हालसालैको प्रयोग"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"हालसालै एक्सेस गर्ने एप हेर्नुहोस्"</string>
