@@ -16,6 +16,7 @@
 
 package com.android.server.job.controllers;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
@@ -24,6 +25,8 @@ import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.controllers.FlexibilityController.NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
+import static com.android.server.job.controllers.FlexibilityController.SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
@@ -124,11 +127,12 @@ public final class JobStatus {
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
     static final int CONSTRAINT_PREFETCH = 1 << 23;
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
-    static final int CONSTRAINT_FLEXIBLE = 1 << 21;
+    static final int CONSTRAINT_FLEXIBLE = 1 << 21; // Implicit constraint
 
     private static final int IMPLICIT_CONSTRAINTS = 0
             | CONSTRAINT_BACKGROUND_NOT_RESTRICTED
             | CONSTRAINT_DEVICE_NOT_DOZING
+            | CONSTRAINT_FLEXIBLE
             | CONSTRAINT_TARE_WEALTH
             | CONSTRAINT_WITHIN_QUOTA;
 
@@ -318,7 +322,6 @@ public final class JobStatus {
 
     // Constraints.
     final int requiredConstraints;
-    private final int mPreferredConstraints;
     private final int mRequiredConstraintsOfInterest;
     int satisfiedConstraints = 0;
     private int mSatisfiedConstraintsOfInterest = 0;
@@ -664,26 +667,24 @@ public final class JobStatus {
         }
         mHasExemptedMediaUrisOnly = exemptedMediaUrisOnly;
 
-        mPreferredConstraints = job.getPreferredConstraintFlags();
+        mPreferUnmetered = job.getRequiredNetwork() != null
+                && !job.getRequiredNetwork().hasCapability(NET_CAPABILITY_NOT_METERED);
 
-        // Exposing a preferredNetworkRequest API requires that we make sure that the preferred
-        // NetworkRequest is a subset of the required NetworkRequest. We currently don't have the
-        // code to ensure that, so disable this part for now.
-        // TODO(236261941): look into enabling flexible network constraint requests
-        mPreferUnmetered = false;
-                // && job.getRequiredNetwork() != null
-                // && !job.getRequiredNetwork().hasCapability(NET_CAPABILITY_NOT_METERED);
-
+        final boolean lacksSomeFlexibleConstraints =
+                ((~requiredConstraints) & SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS) != 0
+                        || mPreferUnmetered;
         final boolean satisfiesMinWindowException =
                 (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis)
                 >= MIN_WINDOW_FOR_FLEXIBILITY_MS;
 
         // The first time a job is rescheduled it will not be subject to flexible constraints.
         // Otherwise, every consecutive reschedule increases a jobs' flexibility deadline.
-        if (mPreferredConstraints != 0 && !isRequestedExpeditedJob() && !job.isUserInitiated()
+        if (!isRequestedExpeditedJob() && !job.isUserInitiated()
                 && satisfiesMinWindowException
-                && (numFailures + numSystemStops) != 1) {
-            mNumRequiredFlexibleConstraints = Integer.bitCount(mPreferredConstraints);
+                && (numFailures + numSystemStops) != 1
+                && lacksSomeFlexibleConstraints) {
+            mNumRequiredFlexibleConstraints =
+                    NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mPreferUnmetered ? 1 : 0);
             requiredConstraints |= CONSTRAINT_FLEXIBLE;
         } else {
             mNumRequiredFlexibleConstraints = 0;
@@ -1382,10 +1383,6 @@ public final class JobStatus {
 
     public void removeInternalFlags(int flags) {
         mInternalFlags = mInternalFlags & ~flags;
-    }
-
-    int getPreferredConstraintFlags() {
-        return mPreferredConstraints;
     }
 
     public int getSatisfiedConstraintFlags() {
@@ -2768,9 +2765,6 @@ public final class JobStatus {
 
         pw.print("Required constraints:");
         dumpConstraints(pw, requiredConstraints);
-        pw.println();
-        pw.print("Preferred constraints:");
-        dumpConstraints(pw, mPreferredConstraints);
         pw.println();
         pw.print("Dynamic constraints:");
         dumpConstraints(pw, mDynamicConstraints);
