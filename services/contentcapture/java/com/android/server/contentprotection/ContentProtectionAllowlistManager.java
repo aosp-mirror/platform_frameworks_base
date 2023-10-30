@@ -16,8 +16,22 @@
 
 package com.android.server.contentprotection;
 
+import static android.view.contentprotection.flags.Flags.blocklistUpdateEnabled;
+
 import android.annotation.NonNull;
-import android.util.Slog;
+import android.annotation.Nullable;
+import android.os.Handler;
+import android.os.UserHandle;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.PackageMonitor;
+import com.android.server.contentcapture.ContentCaptureManagerService;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Manages whether the content protection is enabled for an app using a allowlist.
@@ -28,11 +42,124 @@ public class ContentProtectionAllowlistManager {
 
     private static final String TAG = "ContentProtectionAllowlistManager";
 
-    public ContentProtectionAllowlistManager() {}
+    @NonNull private final ContentCaptureManagerService mContentCaptureManagerService;
+
+    @NonNull private final Handler mHandler;
+
+    private final long mTimeoutMs;
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @NonNull
+    final PackageMonitor mPackageMonitor;
+
+    private final Object mHandlerToken = new Object();
+
+    private final Object mLock = new Object();
+
+    // Used outside of the handler
+    private boolean mStarted;
+
+    // Used inside the handler
+    @Nullable private Instant mUpdatePendingUntil;
+
+    @NonNull
+    @GuardedBy("mLock")
+    private Set<String> mAllowedPackages = Set.of();
+
+    public ContentProtectionAllowlistManager(
+            @NonNull ContentCaptureManagerService contentCaptureManagerService,
+            @NonNull Handler handler,
+            long timeoutMs) {
+        mContentCaptureManagerService = contentCaptureManagerService;
+        mHandler = handler;
+        mTimeoutMs = timeoutMs;
+        mPackageMonitor = createPackageMonitor();
+    }
+
+    /** Starts the manager. */
+    public void start(long delayMs) {
+        if (mStarted) {
+            return;
+        }
+        mStarted = true;
+        mHandler.postDelayed(this::handleInitialUpdate, mHandlerToken, delayMs);
+        // PackageMonitor will be registered inside handleInitialUpdate to respect the initial delay
+    }
+
+    /** Stops the manager. */
+    public void stop() {
+        try {
+            mPackageMonitor.unregister();
+        } catch (IllegalStateException ex) {
+            // Swallow, throws if not registered
+        }
+        mHandler.removeCallbacksAndMessages(mHandlerToken);
+        mUpdatePendingUntil = null;
+        mStarted = false;
+    }
 
     /** Returns true if the package is allowed. */
     public boolean isAllowed(@NonNull String packageName) {
-        Slog.v(TAG, packageName);
-        return false;
+        Set<String> allowedPackages;
+        synchronized (mLock) {
+            allowedPackages = mAllowedPackages;
+        }
+        return allowedPackages.contains(packageName);
+    }
+
+    private void setAllowlist(@NonNull List<String> packages) {
+        synchronized (mLock) {
+            mAllowedPackages = packages.stream().collect(Collectors.toUnmodifiableSet());
+        }
+        mUpdatePendingUntil = null;
+    }
+
+    private void handleInitialUpdate() {
+        handleUpdate();
+
+        // Initial update done, start listening to package updates now
+        mPackageMonitor.register(
+                mContentCaptureManagerService.getContext(), UserHandle.ALL, mHandler);
+    }
+
+    private void handleUpdate() {
+        if (!blocklistUpdateEnabled()) {
+            return;
+        }
+
+        /**
+         * PackageMonitor callback can be invoked more than once in a matter of milliseconds on the
+         * same monitor instance for the same package (eg: b/295969873). This check acts both as a
+         * simple generic rate limit and as a mitigation for this quirk.
+         */
+        if (mUpdatePendingUntil != null && Instant.now().isBefore(mUpdatePendingUntil)) {
+            return;
+        }
+
+        RemoteContentProtectionService remoteContentProtectionService =
+                mContentCaptureManagerService.createRemoteContentProtectionService();
+        if (remoteContentProtectionService == null) {
+            return;
+        }
+
+        // If there are any pending updates queued already, they can be removed immediately
+        mHandler.removeCallbacksAndMessages(mHandlerToken);
+        mUpdatePendingUntil = Instant.now().plusMillis(mTimeoutMs);
+    }
+
+    /** @hide */
+    @NonNull
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    protected PackageMonitor createPackageMonitor() {
+        return new ContentProtectionPackageMonitor();
+    }
+
+    private final class ContentProtectionPackageMonitor extends PackageMonitor {
+
+        // This callback might be invoked multiple times, for more info refer to the comment above
+        @Override
+        public void onSomePackagesChanged() {
+            handleUpdate();
+        }
     }
 }

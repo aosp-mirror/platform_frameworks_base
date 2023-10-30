@@ -20,6 +20,8 @@ import static android.Manifest.permission.MANAGE_CONTENT_CAPTURE;
 import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
 import static android.service.contentcapture.ContentCaptureService.setClientState;
 import static android.view.contentcapture.ContentCaptureHelper.toList;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG;
@@ -219,6 +221,12 @@ public class ContentCaptureManagerService extends
     @GuardedBy("mLock")
     int mDevCfgContentProtectionOptionalGroupsThreshold;
 
+    @GuardedBy("mLock")
+    long mDevCfgContentProtectionAllowlistDelayMs;
+
+    @GuardedBy("mLock")
+    long mDevCfgContentProtectionAllowlistTimeoutMs;
+
     private final Executor mDataShareExecutor = Executors.newCachedThreadPool();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -231,11 +239,17 @@ public class ContentCaptureManagerService extends
     final GlobalContentCaptureOptions mGlobalContentCaptureOptions =
             new GlobalContentCaptureOptions();
 
-    @Nullable private final ComponentName mContentProtectionServiceComponentName;
+    @GuardedBy("mLock")
+    @Nullable
+    private ComponentName mContentProtectionServiceComponentName;
 
-    @Nullable private final ContentProtectionAllowlistManager mContentProtectionAllowlistManager;
+    @GuardedBy("mLock")
+    @Nullable
+    private ContentProtectionAllowlistManager mContentProtectionAllowlistManager;
 
-    @Nullable private final ContentProtectionConsentManager mContentProtectionConsentManager;
+    @GuardedBy("mLock")
+    @Nullable
+    private ContentProtectionConsentManager mContentProtectionConsentManager;
 
     public ContentCaptureManagerService(@NonNull Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
@@ -278,21 +292,6 @@ public class ContentCaptureManagerService extends
             mGlobalContentCaptureOptions.setServiceInfo(userId,
                     mServiceNameResolver.getServiceName(userId),
                     mServiceNameResolver.isTemporary(userId));
-        }
-
-        if (getEnableContentProtectionReceiverLocked()) {
-            mContentProtectionServiceComponentName = getContentProtectionServiceComponentName();
-            if (mContentProtectionServiceComponentName != null) {
-                mContentProtectionAllowlistManager = createContentProtectionAllowlistManager();
-                mContentProtectionConsentManager = createContentProtectionConsentManager();
-            } else {
-                mContentProtectionAllowlistManager = null;
-                mContentProtectionConsentManager = null;
-            }
-        } else {
-            mContentProtectionServiceComponentName = null;
-            mContentProtectionAllowlistManager = null;
-            mContentProtectionConsentManager = null;
         }
     }
 
@@ -442,6 +441,8 @@ public class ContentCaptureManagerService extends
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD:
+                case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS:
+                case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS:
                     setFineTuneParamsFromDeviceConfig();
                     return;
                 default:
@@ -453,8 +454,15 @@ public class ContentCaptureManagerService extends
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     protected void setFineTuneParamsFromDeviceConfig() {
+        boolean enableContentProtectionReceiverOld;
+        boolean enableContentProtectionReceiverNew;
         String contentProtectionRequiredGroupsConfig;
         String contentProtectionOptionalGroupsConfig;
+        int contentProtectionOptionalGroupsThreshold;
+        long contentProtectionAllowlistDelayMs;
+        long contentProtectionAllowlistTimeoutMs;
+        ContentProtectionAllowlistManager contentProtectionAllowlistManagerOld;
+
         synchronized (mLock) {
             mDevCfgMaxBufferSize =
                     DeviceConfig.getInt(
@@ -488,12 +496,9 @@ public class ContentCaptureManagerService extends
                             ContentCaptureManager
                                     .DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
                             false);
-            mDevCfgEnableContentProtectionReceiver =
-                    DeviceConfig.getBoolean(
-                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                            ContentCaptureManager
-                                    .DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER,
-                            ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER);
+
+            enableContentProtectionReceiverOld = mDevCfgEnableContentProtectionReceiver;
+            enableContentProtectionReceiverNew = getDeviceConfigEnableContentProtectionReceiver();
             mDevCfgContentProtectionBufferSize =
                     DeviceConfig.getInt(
                             DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
@@ -512,12 +517,25 @@ public class ContentCaptureManagerService extends
                             DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG,
                             ContentCaptureManager
                                     .DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG);
-            mDevCfgContentProtectionOptionalGroupsThreshold =
+            contentProtectionOptionalGroupsThreshold =
                     DeviceConfig.getInt(
                             DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                             DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD,
                             ContentCaptureManager
                                     .DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD);
+            contentProtectionAllowlistDelayMs =
+                    DeviceConfig.getLong(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS,
+                            ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS);
+            contentProtectionAllowlistTimeoutMs =
+                    DeviceConfig.getLong(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS,
+                            ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS);
+
+            contentProtectionAllowlistManagerOld = mContentProtectionAllowlistManager;
+
             if (verbose) {
                 Slog.v(
                         TAG,
@@ -535,7 +553,7 @@ public class ContentCaptureManagerService extends
                                 + ", disableFlushForViewTreeAppearing="
                                 + mDevCfgDisableFlushForViewTreeAppearing
                                 + ", enableContentProtectionReceiver="
-                                + mDevCfgEnableContentProtectionReceiver
+                                + enableContentProtectionReceiverNew
                                 + ", contentProtectionBufferSize="
                                 + mDevCfgContentProtectionBufferSize
                                 + ", contentProtectionRequiredGroupsConfig="
@@ -543,7 +561,11 @@ public class ContentCaptureManagerService extends
                                 + ", contentProtectionOptionalGroupsConfig="
                                 + contentProtectionOptionalGroupsConfig
                                 + ", contentProtectionOptionalGroupsThreshold="
-                                + mDevCfgContentProtectionOptionalGroupsThreshold);
+                                + contentProtectionOptionalGroupsThreshold
+                                + ", contentProtectionAllowlistDelayMs="
+                                + contentProtectionAllowlistDelayMs
+                                + ", contentProtectionAllowlistTimeoutMs="
+                                + contentProtectionAllowlistTimeoutMs);
             }
         }
 
@@ -551,9 +573,37 @@ public class ContentCaptureManagerService extends
                 parseContentProtectionGroupsConfig(contentProtectionRequiredGroupsConfig);
         List<List<String>> contentProtectionOptionalGroups =
                 parseContentProtectionGroupsConfig(contentProtectionOptionalGroupsConfig);
+        ComponentName contentProtectionServiceComponentNameNew = null;
+        ContentProtectionAllowlistManager contentProtectionAllowlistManagerNew = null;
+        ContentProtectionConsentManager contentProtectionConsentManagerNew = null;
+
+        if (contentProtectionAllowlistManagerOld != null && !enableContentProtectionReceiverNew) {
+            contentProtectionAllowlistManagerOld.stop();
+        }
+        if (!enableContentProtectionReceiverOld && enableContentProtectionReceiverNew) {
+            contentProtectionServiceComponentNameNew = getContentProtectionServiceComponentName();
+            if (contentProtectionServiceComponentNameNew != null) {
+                contentProtectionAllowlistManagerNew =
+                        createContentProtectionAllowlistManager(
+                                contentProtectionAllowlistTimeoutMs);
+                contentProtectionAllowlistManagerNew.start(contentProtectionAllowlistDelayMs);
+                contentProtectionConsentManagerNew = createContentProtectionConsentManager();
+            }
+        }
+
         synchronized (mLock) {
+            mDevCfgEnableContentProtectionReceiver = enableContentProtectionReceiverNew;
             mDevCfgContentProtectionRequiredGroups = contentProtectionRequiredGroups;
             mDevCfgContentProtectionOptionalGroups = contentProtectionOptionalGroups;
+            mDevCfgContentProtectionOptionalGroupsThreshold =
+                    contentProtectionOptionalGroupsThreshold;
+            mDevCfgContentProtectionAllowlistDelayMs = contentProtectionAllowlistDelayMs;
+
+            if (enableContentProtectionReceiverOld ^ enableContentProtectionReceiverNew) {
+                mContentProtectionServiceComponentName = contentProtectionServiceComponentNameNew;
+                mContentProtectionAllowlistManager = contentProtectionAllowlistManagerNew;
+                mContentProtectionConsentManager = contentProtectionConsentManagerNew;
+            }
         }
     }
 
@@ -837,27 +887,34 @@ public class ContentCaptureManagerService extends
         pw.print(prefix2);
         pw.print("contentProtectionOptionalGroupsThreshold: ");
         pw.println(mDevCfgContentProtectionOptionalGroupsThreshold);
+        pw.print(prefix2);
+        pw.print("contentProtectionAllowlistDelayMs: ");
+        pw.println(mDevCfgContentProtectionAllowlistDelayMs);
+        pw.print(prefix2);
+        pw.print("contentProtectionAllowlistTimeoutMs: ");
+        pw.println(mDevCfgContentProtectionAllowlistTimeoutMs);
         pw.print(prefix);
         pw.println("Global Options:");
         mGlobalContentCaptureOptions.dump(prefix2, pw);
     }
 
-    /**
-     * Used by the constructor in order to be able to override the value in the tests.
-     *
-     * @hide
-     */
+    /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    @GuardedBy("mLock")
-    protected boolean getEnableContentProtectionReceiverLocked() {
-        return mDevCfgEnableContentProtectionReceiver;
+    protected boolean getDeviceConfigEnableContentProtectionReceiver() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER,
+                ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER);
     }
 
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @NonNull
-    protected ContentProtectionAllowlistManager createContentProtectionAllowlistManager() {
-        return new ContentProtectionAllowlistManager();
+    protected ContentProtectionAllowlistManager createContentProtectionAllowlistManager(
+            long timeoutMs) {
+        // Same handler as used by AbstractMasterSystemService
+        return new ContentProtectionAllowlistManager(
+                this, BackgroundThread.getHandler(), timeoutMs);
     }
 
     /** @hide */
@@ -874,6 +931,9 @@ public class ContentCaptureManagerService extends
     @Nullable
     private ComponentName getContentProtectionServiceComponentName() {
         String flatComponentName = getContentProtectionServiceFlatComponentName();
+        if (flatComponentName == null) {
+            return null;
+        }
         return ComponentName.unflattenFromString(flatComponentName);
     }
 
@@ -898,27 +958,27 @@ public class ContentCaptureManagerService extends
                 getContext(), componentName, /* isTemp= */ false, UserHandle.getCallingUserId());
     }
 
+    /** @hide */
     @Nullable
-    private RemoteContentProtectionService createRemoteContentProtectionService() {
-        if (mContentProtectionServiceComponentName == null) {
-            // This case should not be possible but make sure
-            return null;
-        }
+    public RemoteContentProtectionService createRemoteContentProtectionService() {
+        ComponentName componentName;
         synchronized (mLock) {
-            if (!mDevCfgEnableContentProtectionReceiver) {
+            if (!mDevCfgEnableContentProtectionReceiver
+                    || mContentProtectionServiceComponentName == null) {
                 return null;
             }
+            componentName = mContentProtectionServiceComponentName;
         }
 
         // Check permissions by trying to construct {@link ContentCaptureServiceInfo}
         try {
-            createContentProtectionServiceInfo(mContentProtectionServiceComponentName);
+            createContentProtectionServiceInfo(componentName);
         } catch (Exception ex) {
             // Swallow, exception was already logged
             return null;
         }
 
-        return createRemoteContentProtectionService(mContentProtectionServiceComponentName);
+        return createRemoteContentProtectionService(componentName);
     }
 
     /** @hide */
@@ -974,6 +1034,16 @@ public class ContentCaptureManagerService extends
         return Arrays.stream(group.split(CONTENT_PROTECTION_GROUP_CONFIG_SEPARATOR_VALUE))
                 .filter(value -> !value.isEmpty())
                 .toList();
+    }
+
+    @GuardedBy("mLock")
+    private boolean isContentProtectionEnabledLocked() {
+        return mDevCfgEnableContentProtectionReceiver
+                && mContentProtectionServiceComponentName != null
+                && mContentProtectionAllowlistManager != null
+                && mContentProtectionConsentManager != null
+                && !(mDevCfgContentProtectionRequiredGroups.isEmpty()
+                        && mDevCfgContentProtectionOptionalGroups.isEmpty());
     }
 
     final class ContentCaptureManagerServiceStub extends IContentCaptureManager.Stub {
@@ -1406,22 +1476,17 @@ public class ContentCaptureManagerService extends
 
         private boolean isContentProtectionReceiverEnabled(
                 @UserIdInt int userId, @NonNull String packageName) {
-            if (mContentProtectionServiceComponentName == null
-                    || mContentProtectionAllowlistManager == null
-                    || mContentProtectionConsentManager == null) {
-                return false;
-            }
+            ContentProtectionConsentManager consentManager;
+            ContentProtectionAllowlistManager allowlistManager;
             synchronized (mLock) {
-                if (!mDevCfgEnableContentProtectionReceiver) {
+                if (!isContentProtectionEnabledLocked()) {
                     return false;
                 }
-                if (mDevCfgContentProtectionRequiredGroups.isEmpty()
-                        && mDevCfgContentProtectionOptionalGroups.isEmpty()) {
-                    return false;
-                }
+                consentManager = mContentProtectionConsentManager;
+                allowlistManager = mContentProtectionAllowlistManager;
             }
-            return mContentProtectionConsentManager.isConsentGranted(userId)
-                    && mContentProtectionAllowlistManager.isAllowed(packageName);
+            return consentManager.isConsentGranted(userId)
+                    && allowlistManager.isAllowed(packageName);
         }
     }
 
