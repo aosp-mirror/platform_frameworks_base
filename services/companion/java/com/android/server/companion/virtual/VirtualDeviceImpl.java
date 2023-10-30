@@ -167,7 +167,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceLog mVirtualDeviceLog;
     private final String mOwnerPackageName;
     private final int mDeviceId;
-    private @Nullable final String mPersistentDeviceId;
+    @Nullable
+    private final String mPersistentDeviceId;
     // Thou shall not hold the mVirtualDeviceLock over the mInputController calls.
     // Holding the lock can lead to lock inversion with GlobalWindowManagerLock.
     // 1. After display is created the window manager calls into VDM during construction
@@ -191,6 +192,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final IVirtualDeviceActivityListener mActivityListener;
     private final IVirtualDeviceSoundEffectListener mSoundEffectListener;
     private final DisplayManagerGlobal mDisplayManager;
+    private final DisplayManagerInternal mDisplayManagerInternal;
     @GuardedBy("mVirtualDeviceLock")
     private final Map<IBinder, IntentFilter> mIntentInterceptors = new ArrayMap<>();
     @NonNull
@@ -313,6 +315,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mParams = params;
         mDevicePolicies = params.getDevicePolicies();
         mDisplayManager = displayManager;
+        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         if (inputController == null) {
             mInputController = new InputController(
                     context.getMainThreadHandler(),
@@ -971,8 +974,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             @NonNull Set<String> displayCategories) {
         final boolean activityLaunchAllowedByDefault =
                 Flags.dynamicPolicy()
-                        ? getDevicePolicy(POLICY_TYPE_ACTIVITY) == DEVICE_POLICY_DEFAULT
-                        : mParams.getDefaultActivityPolicy() == ACTIVITY_POLICY_DEFAULT_ALLOWED;
+                    ? getDevicePolicy(POLICY_TYPE_ACTIVITY) == DEVICE_POLICY_DEFAULT
+                    : mParams.getDefaultActivityPolicy() == ACTIVITY_POLICY_DEFAULT_ALLOWED;
         final boolean crossTaskNavigationAllowedByDefault =
                 mParams.getDefaultNavigationPolicy() == NAVIGATION_POLICY_DEFAULT_ALLOWED;
         final boolean showTasksInHostDeviceRecents =
@@ -987,7 +990,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 activityLaunchAllowedByDefault,
                 mActivityPolicyExemptions,
                 crossTaskNavigationAllowedByDefault,
-                /*crossTaskNavigationExemptions=*/crossTaskNavigationAllowedByDefault
+                /* crossTaskNavigationExemptions= */crossTaskNavigationAllowedByDefault
                         ? mParams.getBlockedCrossTaskNavigations()
                         : mParams.getAllowedCrossTaskNavigations(),
                 mPermissionDialogComponent,
@@ -1016,12 +1019,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         synchronized (mVirtualDeviceLock) {
             gwpc = createWindowPolicyControllerLocked(virtualDisplayConfig.getDisplayCategories());
         }
-        DisplayManagerInternal displayManager = LocalServices.getService(
-                DisplayManagerInternal.class);
         int displayId;
-        displayId = displayManager.createVirtualDisplay(virtualDisplayConfig, callback,
+        displayId = mDisplayManagerInternal.createVirtualDisplay(virtualDisplayConfig, callback,
                 this, gwpc, packageName);
-        gwpc.setDisplayId(displayId);
+        gwpc.setDisplayId(displayId, /* isMirrorDisplay= */ Flags.interactiveScreenMirror()
+                && mDisplayManagerInternal.getDisplayIdToMirror(displayId)
+                    != Display.INVALID_DISPLAY);
 
         boolean showPointer;
         synchronized (mVirtualDeviceLock) {

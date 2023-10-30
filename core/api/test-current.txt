@@ -866,6 +866,14 @@ package android.companion {
 
 }
 
+package android.companion.virtual {
+
+  public final class VirtualDeviceManager {
+    method @FlaggedApi("android.companion.virtual.flags.interactive_screen_mirror") public boolean isVirtualDeviceOwnedMirrorDisplay(int);
+  }
+
+}
+
 package android.content {
 
   public final class AttributionSource implements android.os.Parcelable {

@@ -41,6 +41,7 @@ import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -232,6 +233,12 @@ public class FrameworkServicesModule {
     @Singleton
     static DisplayManager provideDisplayManager(Context context) {
         return context.getSystemService(DisplayManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static VirtualDeviceManager provideVirtualDeviceManager(Context context) {
+        return context.getSystemService(VirtualDeviceManager.class);
     }
 
     @Provides

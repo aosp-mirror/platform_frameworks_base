@@ -31,6 +31,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_S
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
@@ -57,6 +58,7 @@ import android.app.AppOpsManager;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.flags.Flags;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
@@ -1482,7 +1484,12 @@ public final class DisplayManagerService extends SystemService {
         if ((flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
             flags &= ~VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
         }
-        if ((flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) == 0 && virtualDevice != null) {
+        // Put the display in the virtual device's display group only if it's not a mirror display,
+        // and if it doesn't need its own display group. So effectively, mirror displays go into the
+        // default display group.
+        if ((flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) == 0
+                && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) == 0
+                && virtualDevice != null) {
             flags |= VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
         }
 
@@ -1516,11 +1523,16 @@ public final class DisplayManagerService extends SystemService {
 
         if (callingUid != Process.SYSTEM_UID
                 && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
-            if (!canProjectVideo(projection)) {
+            // Only a valid media projection or a virtual device can create a mirror virtual
+            // display.
+            if (!canProjectVideo(projection)
+                    && !isMirroringSupportedByVirtualDevice(virtualDevice)) {
                 throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
                         + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
                         + "MediaProjection token in order to create a screen sharing virtual "
-                        + "display.");
+                        + "display. In order to create a virtual display that does not perform"
+                        + "screen sharing (mirroring), please use the flag"
+                        + "VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY.");
             }
         }
         if (callingUid != Process.SYSTEM_UID && (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
@@ -1538,6 +1550,15 @@ public final class DisplayManagerService extends SystemService {
                 throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                         + "create a trusted virtual display.");
             }
+        }
+
+        // Mirror virtual displays created by a virtual device are not allowed to show
+        // presentations.
+        if (virtualDevice != null && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0
+                && (flags & VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
+            Slog.d(TAG, "Mirror displays created by a virtual device cannot show "
+                    + "presentations, hence ignoring flag VIRTUAL_DISPLAY_FLAG_PRESENTATION.");
+            flags &= ~VIRTUAL_DISPLAY_FLAG_PRESENTATION;
         }
 
         if (callingUid != Process.SYSTEM_UID
@@ -1737,6 +1758,10 @@ public final class DisplayManagerService extends SystemService {
         mDisplayDeviceRepo.onDisplayDeviceEvent(device,
                 DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
         return -1;
+    }
+
+    private static boolean isMirroringSupportedByVirtualDevice(IVirtualDevice virtualDevice) {
+        return Flags.interactiveScreenMirror() && virtualDevice != null;
     }
 
     private void resizeVirtualDisplayInternal(IBinder appToken,

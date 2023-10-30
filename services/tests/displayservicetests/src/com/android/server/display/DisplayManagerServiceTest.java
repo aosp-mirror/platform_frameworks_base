@@ -18,10 +18,13 @@ package com.android.server.display;
 
 import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
 import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
+import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 
@@ -60,6 +63,7 @@ import android.app.PropertyInvalidatedCache;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.flags.Flags;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -92,6 +96,7 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -181,6 +186,8 @@ public class DisplayManagerServiceTest {
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
     @Rule(order = 1)
     public Expect expect = Expect.create();
+    @Rule
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private Context mContext;
 
@@ -312,7 +319,6 @@ public class DisplayManagerServiceTest {
     @Mock DisplayDeviceConfig mMockDisplayDeviceConfig;
     @Mock PackageManagerInternal mMockPackageManagerInternal;
 
-
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
     @Mock DisplayManagerFlags mMockFlags;
 
@@ -320,6 +326,7 @@ public class DisplayManagerServiceTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(false);
+        mSetFlagsRule.disableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
 
         LocalServices.removeServiceForTest(InputManagerInternal.class);
         LocalServices.addService(InputManagerInternal.class, mMockInputManagerInternal);
@@ -1138,6 +1145,236 @@ public class DisplayManagerServiceTest {
                 (displayManager.getDisplayDeviceInfoInternal(defaultDisplayGroupDisplayId).flags
                         & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED),
                 0);
+    }
+
+    /**
+     * Tests that it's not allowed to create an auto-mirror virtual display without
+     * CAPTURE_VIDEO_OUTPUT permission or a virtual device.
+     */
+    @Test
+    public void createAutoMirrorDisplay_withoutPermission_withoutVirtualDevice_throwsException() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        when(mContext.checkCallingPermission(CAPTURE_VIDEO_OUTPUT)).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR)
+                        .setUniqueId("uniqueId --- mirror display");
+        assertThrows(SecurityException.class, () -> {
+            localService.createVirtualDisplay(
+                            builder.build(),
+                            mMockAppToken /* callback */,
+                            null /* virtualDeviceToken */,
+                            mock(DisplayWindowPolicyController.class),
+                            PACKAGE_NAME);
+        });
+    }
+
+    /**
+     * Tests that it's not allowed to create an auto-mirror virtual display when display mirroring
+     * is not supported in a virtual device.
+     */
+    @Test
+    public void createAutoMirrorDisplay_virtualDeviceDoesntSupportMirroring_throwsException()
+            throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        when(mContext.checkCallingPermission(CAPTURE_VIDEO_OUTPUT)).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR)
+                        .setUniqueId("uniqueId --- mirror display");
+        assertThrows(SecurityException.class, () -> {
+            localService.createVirtualDisplay(
+                    builder.build(),
+                    mMockAppToken /* callback */,
+                    virtualDevice /* virtualDeviceToken */,
+                    mock(DisplayWindowPolicyController.class),
+                    PACKAGE_NAME);
+        });
+    }
+
+    /**
+     * Tests that the virtual display is added to the default display group when created with
+     * VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR using a virtual device.
+     */
+    @Test
+    public void createAutoMirrorVirtualDisplay_addsDisplayToDefaultDisplayGroup() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+
+        // Create an auto-mirror virtual display using a virtual device.
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR)
+                        .setUniqueId("uniqueId --- default display group");
+        int displayId =
+                localService.createVirtualDisplay(
+                        builder.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+
+        // The virtual display should be in the default display group.
+        assertEquals(Display.DEFAULT_DISPLAY_GROUP,
+                localService.getDisplayInfo(displayId).displayGroupId);
+    }
+
+    /**
+     * Tests that the virtual display mirrors the default display when created with
+     * VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR using a virtual device.
+     */
+    @Test
+    public void createAutoMirrorVirtualDisplay_mirrorsDefaultDisplay() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+
+        // Create an auto-mirror virtual display using a virtual device.
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR)
+                        .setUniqueId("uniqueId --- mirror display");
+        int displayId =
+                localService.createVirtualDisplay(
+                        builder.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+
+        // The virtual display should mirror the default display.
+        assertEquals(Display.DEFAULT_DISPLAY, localService.getDisplayIdToMirror(displayId));
+    }
+
+    /**
+     * Tests that the virtual display does not mirror any other display when created with
+     * VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY using a virtual device.
+     */
+    @Test
+    public void createOwnContentOnlyVirtualDisplay_doesNotMirrorAnyDisplay() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+
+        // Create an auto-mirror virtual display using a virtual device.
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY)
+                        .setUniqueId("uniqueId --- own content only display");
+        int displayId =
+                localService.createVirtualDisplay(
+                        builder.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+
+        // The virtual display should not mirror any display.
+        assertEquals(Display.INVALID_DISPLAY, localService.getDisplayIdToMirror(displayId));
+        // The virtual display should have FLAG_OWN_CONTENT_ONLY set.
+        assertEquals(DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY,
+                (displayManager.getDisplayDeviceInfoInternal(displayId).flags
+                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY));
+    }
+
+    /**
+     * Tests that the virtual display should not be always unlocked when created with
+     * VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR using a virtual device.
+     */
+    @Test
+    public void createAutoMirrorVirtualDisplay_flagAlwaysUnlockedNotSet() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+        when(mContext.checkCallingPermission(ADD_ALWAYS_UNLOCKED_DISPLAY))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        // Create an auto-mirror virtual display using a virtual device.
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+                                | VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED)
+                        .setUniqueId("uniqueId --- mirror display");
+        int displayId =
+                localService.createVirtualDisplay(
+                        builder.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+
+        // The virtual display should not have FLAG_ALWAYS_UNLOCKED set.
+        assertEquals(0, (displayManager.getDisplayDeviceInfoInternal(displayId).flags
+                        & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED));
+    }
+
+    /**
+     * Tests that the virtual display should not allow presentation when created with
+     * VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR using a virtual device.
+     */
+    @Test
+    public void createAutoMirrorVirtualDisplay_flagPresentationNotSet() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+
+        // Create an auto-mirror virtual display using a virtual device.
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+                                | VIRTUAL_DISPLAY_FLAG_PRESENTATION)
+                        .setUniqueId("uniqueId --- mirror display");
+        int displayId =
+                localService.createVirtualDisplay(
+                        builder.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+
+        // The virtual display should not have FLAG_PRESENTATION set.
+        assertEquals(0, (displayManager.getDisplayDeviceInfoInternal(displayId).flags
+                        & DisplayDeviceInfo.FLAG_PRESENTATION));
     }
 
     @Test

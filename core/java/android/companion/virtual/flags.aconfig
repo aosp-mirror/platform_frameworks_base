@@ -56,3 +56,10 @@ flag {
   description: "Enable express metrics in VDM"
   bug: "307297730"
 }
+
+flag {
+  name: "interactive_screen_mirror"
+  namespace: "virtual_devices"
+  description: "Enable interactive screen mirroring using Virtual Devices"
+  bug: "292212199"
+}

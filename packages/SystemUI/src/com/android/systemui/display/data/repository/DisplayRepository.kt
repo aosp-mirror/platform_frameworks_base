@@ -56,6 +56,9 @@ interface DisplayRepository {
     /** Display change event indicating a change to the given displayId has occurred. */
     val displayChangeEvent: Flow<Int>
 
+    /** Display addition event indicating a new display has been added. */
+    val displayAdditionEvent: Flow<Display?>
+
     /** Provides the current set of displays. */
     val displays: Flow<Set<Display>>
 
@@ -125,6 +128,11 @@ constructor(
 
     override val displayChangeEvent: Flow<Int> =
         allDisplayEvents.filter { it is DisplayEvent.Changed }.map { it.displayId }
+
+    override val displayAdditionEvent: Flow<Display?> =
+        allDisplayEvents
+            .filter { it is DisplayEvent.Added }
+            .map { displayManager.getDisplay(it.displayId) }
 
     private val enabledDisplays =
         allDisplayEvents

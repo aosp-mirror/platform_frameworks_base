@@ -42,6 +42,7 @@ import android.companion.virtualnative.IVirtualDeviceManagerNative;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Binder;
@@ -66,6 +67,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.modules.expresslog.Counter;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceImpl.PendingTrampoline;
 import com.android.server.wm.ActivityInterceptorCallback;
@@ -543,6 +545,17 @@ public class VirtualDeviceManagerService extends SystemService {
             if (virtualDevice != null) {
                 virtualDevice.playSoundEffect(effectType);
             }
+        }
+
+        @Override // Binder call
+        public boolean isVirtualDeviceOwnedMirrorDisplay(int displayId) {
+            if (getDeviceIdForDisplayId(displayId) == Context.DEVICE_ID_DEFAULT) {
+                return false;
+            }
+
+            DisplayManagerInternal displayManager = LocalServices.getService(
+                    DisplayManagerInternal.class);
+            return displayManager.getDisplayIdToMirror(displayId) != Display.INVALID_DISPLAY;
         }
 
         @Nullable
