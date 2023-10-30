@@ -70,7 +70,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -3304,7 +3303,7 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
                 SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
-                        "setCornerRadius", this, sc, "w=" + width + " h=" + height);
+                        "setWindowCrop", this, sc, "w=" + width + " h=" + height);
             }
             nativeSetWindowCrop(mNativeObject, sc.mNativeObject, 0, 0, width, height);
             return this;
