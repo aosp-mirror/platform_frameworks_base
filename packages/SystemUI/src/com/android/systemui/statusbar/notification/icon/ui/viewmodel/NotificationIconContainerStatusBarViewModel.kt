@@ -61,7 +61,7 @@ constructor(
             darkIconInteractor.tintAreas,
             darkIconInteractor.tintColor,
             // Included so that tints are re-applied after entries are changed.
-            notificationsInteractor.notifications,
+            notificationsInteractor.topLevelRepresentativeNotifications,
         ) { areas, tint, _ ->
             NotificationIconColorLookup { viewBounds: Rect ->
                 if (DarkIconDispatcher.isInAreas(areas, viewBounds)) {

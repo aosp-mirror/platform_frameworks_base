@@ -41,7 +41,7 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
 
     @Test
     fun setRenderedList_preservesOrdering() = runTest {
-        val notifs by collectLastValue(notifsInteractor.notifications)
+        val notifs by collectLastValue(notifsInteractor.topLevelRepresentativeNotifications)
         val keys = (1..50).shuffled().map { "$it" }
         val entries =
             keys.map {

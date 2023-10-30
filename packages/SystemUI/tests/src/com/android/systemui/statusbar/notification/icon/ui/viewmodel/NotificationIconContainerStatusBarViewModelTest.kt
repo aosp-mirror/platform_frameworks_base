@@ -42,6 +42,7 @@ import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpNotificationIconViewStateRepository
 import com.android.systemui.statusbar.notification.shared.activeNotificationModel
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -342,14 +343,17 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
                 val icon: Icon = mock()
                 shadeRepository.setLegacyShadeExpansion(0f)
                 activeNotificationsRepository.activeNotifications.value =
-                    listOf(
-                            activeNotificationModel(
-                                key = "notif1",
-                                groupKey = "group",
-                                statusBarIcon = icon
+                    ActiveNotificationsStore.Builder()
+                        .apply {
+                            addIndividualNotif(
+                                activeNotificationModel(
+                                    key = "notif1",
+                                    groupKey = "group",
+                                    statusBarIcon = icon
+                                )
                             )
-                        )
-                        .associateBy { it.key }
+                        }
+                        .build()
                 val isolatedIcon by collectLastValue(underTest.isolatedIcon)
                 runCurrent()
 
@@ -368,14 +372,17 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
                 val icon: Icon = mock()
                 shadeRepository.setLegacyShadeExpansion(.5f)
                 activeNotificationsRepository.activeNotifications.value =
-                    listOf(
-                            activeNotificationModel(
-                                key = "notif1",
-                                groupKey = "group",
-                                statusBarIcon = icon
+                    ActiveNotificationsStore.Builder()
+                        .apply {
+                            addIndividualNotif(
+                                activeNotificationModel(
+                                    key = "notif1",
+                                    groupKey = "group",
+                                    statusBarIcon = icon
+                                )
                             )
-                        )
-                        .associateBy { it.key }
+                        }
+                        .build()
                 val isolatedIcon by collectLastValue(underTest.isolatedIcon)
                 runCurrent()
 
