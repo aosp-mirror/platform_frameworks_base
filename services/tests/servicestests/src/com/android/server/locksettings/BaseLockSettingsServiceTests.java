@@ -254,6 +254,8 @@ public abstract class BaseLockSettingsServiceTests {
                 .thenReturn(true);
         when(res.getBoolean(eq(com.android.internal.R.bool.config_strongAuthRequiredOnBoot)))
                 .thenReturn(true);
+        when(res.getBoolean(eq(com.android.internal.R.bool.config_repairModeSupported)))
+                .thenReturn(true);
         return res;
     }
 
@@ -302,17 +304,17 @@ public abstract class BaseLockSettingsServiceTests {
 
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
-            mStorageManager.unlockUserKey(/* userId= */ (int) args[0],
+            mStorageManager.unlockCeStorage(/* userId= */ (int) args[0],
                     /* secret= */ (byte[]) args[2]);
             return null;
-        }).when(sm).unlockUserKey(anyInt(), anyInt(), any());
+        }).when(sm).unlockCeStorage(anyInt(), anyInt(), any());
 
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
-            mStorageManager.setUserKeyProtection(/* userId= */ (int) args[0],
+            mStorageManager.setCeStorageProtection(/* userId= */ (int) args[0],
                     /* secret= */ (byte[]) args[1]);
             return null;
-        }).when(sm).setUserKeyProtection(anyInt(), any());
+        }).when(sm).setCeStorageProtection(anyInt(), any());
 
         return sm;
     }

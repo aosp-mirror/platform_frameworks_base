@@ -345,7 +345,7 @@ public class UserControllerTest {
         assertWithMessage("should not have received intents")
                 .that(getActions(mInjector.mSentIntents)).isEmpty();
         // TODO(b/140868593): should have received a USER_UNLOCK_MSG message as well, but it doesn't
-        // because StorageManager.isUserKeyUnlocked(TEST_PRE_CREATED_USER_ID) returns false - to
+        // because StorageManager.isCeStorageUnlocked(TEST_PRE_CREATED_USER_ID) returns false - to
         // properly fix it, we'd need to move this class to FrameworksMockingServicesTests so we can
         // mock static methods (but moving this class would involve changing the presubmit tests,
         // and the cascade effect goes on...). In fact, a better approach would to not assert the
@@ -648,7 +648,7 @@ public class UserControllerTest {
         // checking.
         waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
         verify(mInjector.mStorageManagerMock, times(0))
-                .lockUserKey(anyInt());
+                .lockCeStorage(anyInt());
 
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_ID1,
                 numerOfUserSwitches, true);
@@ -663,7 +663,7 @@ public class UserControllerTest {
         mUserController.finishUserStopped(ussUser1, /* allowDelayedLocking= */ true);
         waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
         verify(mInjector.mStorageManagerMock, times(1))
-                .lockUserKey(TEST_USER_ID);
+                .lockCeStorage(TEST_USER_ID);
     }
 
     /**
@@ -757,7 +757,7 @@ public class UserControllerTest {
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
 
         verify(mInjector.mStorageManagerMock, never())
-                .unlockUserKey(eq(TEST_USER_ID), anyInt(), any());
+                .unlockCeStorage(eq(TEST_USER_ID), anyInt(), any());
     }
 
     @Test
@@ -1035,7 +1035,7 @@ public class UserControllerTest {
         mUserController.finishUserStopped(ussUser, delayedLocking);
         waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
         verify(mInjector.mStorageManagerMock, times(expectLocking ? 1 : 0))
-                .lockUserKey(userId);
+                .lockCeStorage(userId);
     }
 
     private void addForegroundUserAndContinueUserSwitch(int newUserId, int expectedOldUserId,

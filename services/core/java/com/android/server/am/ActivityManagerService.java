@@ -2249,7 +2249,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
         // TODO(b/148767783): should we check all profiles under user0?
-        UserspaceRebootLogger.logEventAsync(StorageManager.isUserKeyUnlocked(userId),
+        UserspaceRebootLogger.logEventAsync(StorageManager.isCeStorageUnlocked(userId),
                 BackgroundThread.getExecutor());
     }
 
@@ -4564,7 +4564,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // We carefully use the same state that PackageManager uses for
             // filtering, since we use this flag to decide if we need to install
             // providers when user is unlocked later
-            app.setUnlocked(StorageManager.isUserKeyUnlocked(app.userId));
+            app.setUnlocked(StorageManager.isCeStorageUnlocked(app.userId));
         }
 
         boolean normalMode = mProcessesReady || isAllowedWhileBooting(app.info);

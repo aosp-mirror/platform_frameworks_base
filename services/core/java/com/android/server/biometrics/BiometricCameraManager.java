@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.biometrics;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
-import android.os.SystemService;
-import android.util.Slog;
+/**
+ * Interface for biometrics to get camera status.
+ */
+public interface BiometricCameraManager {
+    /**
+     * Returns true if any camera is in use.
+     */
+    boolean isAnyCameraUnavailable();
 
-public class BrickReceiver extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        Slog.w("BrickReceiver", "!!! BRICKING DEVICE !!!");
-        SystemService.start("brick");
-    }
+    /**
+     * Returns true if privacy is enabled and camera access is disabled.
+     */
+    boolean isCameraPrivacyEnabled();
 }

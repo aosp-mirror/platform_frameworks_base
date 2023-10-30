@@ -1580,28 +1580,64 @@ public class StorageManager {
                 DEFAULT_FULL_THRESHOLD_BYTES);
     }
 
-    /** {@hide} */
-    public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
+    /**
+     * Creates the keys for a user's credential-encrypted (CE) and device-encrypted (DE) storage.
+     * <p>
+     * This creates the user's CE key and DE key for internal storage, then adds them to the kernel.
+     * Then, if the user is not ephemeral, this stores the DE key (encrypted) on flash.  (The CE key
+     * is not stored until {@link IStorageManager#setCeStorageProtection()}.)
+     * <p>
+     * This does not create the CE and DE directories themselves.  For that, see {@link
+     * #prepareUserStorage()}.
+     * <p>
+     * This is only intended to be called by UserManagerService, as part of creating a user.
+     *
+     * @param userId ID of the user
+     * @param serialNumber serial number of the user
+     * @param ephemeral whether the user is ephemeral
+     * @throws RuntimeException on error.  The user's keys already existing is considered an error.
+     * @hide
+     */
+    public void createUserStorageKeys(int userId, int serialNumber, boolean ephemeral) {
         try {
-            mStorageManager.createUserKey(userId, serialNumber, ephemeral);
+            mStorageManager.createUserStorageKeys(userId, serialNumber, ephemeral);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    /** {@hide} */
-    public void destroyUserKey(int userId) {
+    /**
+     * Destroys the keys for a user's credential-encrypted (CE) and device-encrypted (DE) storage.
+     * <p>
+     * This evicts the keys from the kernel (if present), which "locks" the corresponding
+     * directories.  Then, this deletes the encrypted keys from flash.  This operates on all the
+     * user's CE and DE keys, for both internal and adoptable storage.
+     * <p>
+     * This does not destroy the CE and DE directories themselves.  For that, see {@link
+     * #destroyUserStorage()}.
+     * <p>
+     * This is only intended to be called by UserManagerService, as part of removing a user.
+     *
+     * @param userId ID of the user
+     * @throws RuntimeException on error.  On error, as many things as possible are still destroyed.
+     * @hide
+     */
+    public void destroyUserStorageKeys(int userId) {
         try {
-            mStorageManager.destroyUserKey(userId);
+            mStorageManager.destroyUserStorageKeys(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    /** {@hide} */
-    public void lockUserKey(int userId) {
+    /**
+     * Locks the user's credential-encrypted (CE) storage.
+     *
+     * @hide
+     */
+    public void lockCeStorage(int userId) {
         try {
-            mStorageManager.lockUserKey(userId);
+            mStorageManager.lockCeStorage(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1628,17 +1664,26 @@ public class StorageManager {
     /** {@hide} */
     @TestApi
     public static boolean isUserKeyUnlocked(int userId) {
+        return isCeStorageUnlocked(userId);
+    }
+
+    /**
+     * Returns true if the user's credential-encrypted (CE) storage is unlocked.
+     *
+     * @hide
+     */
+    public static boolean isCeStorageUnlocked(int userId) {
         if (sStorageManager == null) {
             sStorageManager = IStorageManager.Stub
                     .asInterface(ServiceManager.getService("mount"));
         }
         if (sStorageManager == null) {
-            Slog.w(TAG, "Early during boot, assuming locked");
+            Slog.w(TAG, "Early during boot, assuming CE storage is locked");
             return false;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            return sStorageManager.isUserKeyUnlocked(userId);
+            return sStorageManager.isCeStorageUnlocked(userId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } finally {

@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.LongDef;
@@ -1449,6 +1450,7 @@ public abstract class PackageManager {
             INSTALL_ALLOW_DOWNGRADE,
             INSTALL_STAGED,
             INSTALL_REQUEST_UPDATE_OWNERSHIP,
+            INSTALL_IGNORE_DEXOPT_PROFILE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -1672,6 +1674,18 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FROM_MANAGED_USER_OR_PROFILE = 1 << 26;
+
+    /**
+     * If set, all dexopt profiles are ignored by dexopt during the installation, including the
+     * profile in the DM file and the profile embedded in the APK file. If an invalid profile is
+     * provided during installation, no warning will be reported by {@code adb install}.
+     *
+     * This option does not affect later dexopt operations (e.g., background dexopt and manual `pm
+     * compile` invocations).
+     *
+     * @hide
+     */
+    public static final int INSTALL_IGNORE_DEXOPT_PROFILE = 1 << 28;
 
     /**
      * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
@@ -3638,6 +3652,7 @@ public abstract class PackageManager {
      * The device is capable of communicating with other devices via
      * <a href="https://www.threadgroup.org">Thread</a> networking protocol.
      */
+    @FlaggedApi("com.android.net.thread.flags.thread_enabled")
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_THREAD_NETWORK = "android.hardware.thread_network";
 

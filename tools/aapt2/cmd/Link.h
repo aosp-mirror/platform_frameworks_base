@@ -323,6 +323,7 @@ class LinkCommand : public Command {
             "should only be used together with the --static-lib flag.",
         &options_.merge_only);
     AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
+    AddOptionalFlagList("--feature-flags", "Placeholder, to be implemented.", &feature_flags_args_);
   }
 
   int Action(const std::vector<std::string>& args) override;
@@ -347,6 +348,7 @@ class LinkCommand : public Command {
   std::optional<std::string> stable_id_file_path_;
   std::vector<std::string> split_args_;
   std::optional<std::string> trace_folder_;
+  std::vector<std::string> feature_flags_args_;
 };
 
 }// namespace aapt

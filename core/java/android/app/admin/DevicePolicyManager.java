@@ -16111,11 +16111,6 @@ public class DevicePolicyManager {
      * Called by a profile owner of an organization-owned managed profile to suspend personal
      * apps on the device. When personal apps are suspended the device can only be used for calls.
      *
-     * <p>When personal apps are suspended, an ongoing notification about that is shown to the user.
-     * When the user taps the notification, system invokes {@link #ACTION_CHECK_POLICY_COMPLIANCE}
-     * in the profile owner package. Profile owner implementation that uses personal apps suspension
-     * must handle this intent.
-     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
      * @param suspended Whether personal apps should be suspended.
      * @throws IllegalStateException if the profile owner doesn't have an activity that handles

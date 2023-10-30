@@ -21,22 +21,20 @@
 #include <android/font.h>
 #include <android/font_matcher.h>
 #include <android/system_fonts.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <hwui/MinikinSkia.h>
+#include <libxml/parser.h>
+#include <log/log.h>
+#include <minikin/FontCollection.h>
+#include <minikin/LocaleList.h>
+#include <minikin/SystemFonts.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <errno.h>
-#include <fcntl.h>
-#include <libxml/tree.h>
-#include <log/log.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include <hwui/MinikinSkia.h>
-#include <minikin/FontCollection.h>
-#include <minikin/LocaleList.h>
-#include <minikin/SystemFonts.h>
 
 struct XmlCharDeleter {
     void operator()(xmlChar* b) { xmlFree(b); }

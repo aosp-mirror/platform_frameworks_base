@@ -15,6 +15,8 @@
  */
 package com.android.server.audio;
 
+import static android.media.AudioSystem.isBluetoothDevice;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
@@ -78,11 +80,50 @@ public class AudioDeviceInventory {
 
     private static final String TAG = "AS.AudioDeviceInventory";
 
+    private static final String SETTING_DEVICE_SEPARATOR_CHAR = "|";
+    private static final String SETTING_DEVICE_SEPARATOR = "\\|";
+
     // lock to synchronize all access to mConnectedDevices and mApmConnectedDevices
     private final Object mDevicesLock = new Object();
 
     //Audio Analytics ids.
     private static final String mMetricsId = "audio.device.";
+
+    private final Object mDeviceInventoryLock = new Object();
+    @GuardedBy("mDeviceCatalogLock")
+    private final ArrayList<AdiDeviceState> mDeviceInventory = new ArrayList<>(0);
+    List<AdiDeviceState> getImmutableDeviceInventory() {
+        synchronized (mDeviceInventoryLock) {
+            return List.copyOf(mDeviceInventory);
+        }
+    }
+
+    void addDeviceStateToInventory(AdiDeviceState deviceState) {
+        synchronized (mDeviceInventoryLock) {
+            mDeviceInventory.add(deviceState);
+        }
+    }
+
+    AdiDeviceState findDeviceStateForAudioDeviceAttributes(AudioDeviceAttributes ada,
+            int canonicalDeviceType) {
+        final boolean isWireless = isBluetoothDevice(ada.getInternalType());
+        synchronized (mDeviceInventoryLock) {
+            for (AdiDeviceState deviceSetting : mDeviceInventory) {
+                if (deviceSetting.getDeviceType() == canonicalDeviceType
+                        && (!isWireless || ada.getAddress().equals(
+                        deviceSetting.getDeviceAddress()))) {
+                    return deviceSetting;
+                }
+            }
+        }
+        return null;
+    }
+
+    void clearDeviceInventory() {
+        synchronized (mDeviceInventoryLock) {
+            mDeviceInventory.clear();
+        }
+    }
 
     // List of connected devices
     // Key for map created from DeviceInfo.makeDeviceListKey()
@@ -341,6 +382,12 @@ public class AudioDeviceInventory {
         mAppliedPresetRolesInt.forEach((key, devices) -> {
             pw.println("  " + prefix + "preset: " + key.first
                     +  " role:" + key.second + " devices:" + devices); });
+        pw.println("\ndevices:\n");
+        synchronized (mDeviceInventoryLock) {
+            for (AdiDeviceState device : mDeviceInventory) {
+                pw.println("\t" + device + "\n");
+            }
+        }
     }
 
     //------------------------------------------------------------
@@ -1198,7 +1245,7 @@ public class AudioDeviceInventory {
 
                     AudioDeviceInfo device = Stream.of(connectedDevices)
                             .filter(d -> d.getInternalType() == ada.getInternalType())
-                            .filter(d -> (!AudioSystem.isBluetoothDevice(d.getInternalType())
+                            .filter(d -> (!isBluetoothDevice(d.getInternalType())
                                             || (d.getAddress().equals(ada.getAddress()))))
                             .findFirst()
                             .orElse(null);
@@ -1619,7 +1666,7 @@ public class AudioDeviceInventory {
         }
 
         for (DeviceInfo di : mConnectedDevices.values()) {
-            if (!AudioSystem.isBluetoothDevice(di.mDeviceType)) {
+            if (!isBluetoothDevice(di.mDeviceType)) {
                 continue;
             }
             AudioDeviceAttributes ada =
@@ -1733,7 +1780,7 @@ public class AudioDeviceInventory {
         }
         HashSet<String> processedAddresses = new HashSet<>(0);
         for (DeviceInfo di : mConnectedDevices.values()) {
-            if (!AudioSystem.isBluetoothDevice(di.mDeviceType)
+            if (!isBluetoothDevice(di.mDeviceType)
                     || processedAddresses.contains(di.mDeviceAddress)) {
                 continue;
             }
@@ -1743,7 +1790,7 @@ public class AudioDeviceInventory {
                         + di.mDeviceAddress + ", preferredProfiles: " + preferredProfiles);
             }
             for (DeviceInfo di2 : mConnectedDevices.values()) {
-                if (!AudioSystem.isBluetoothDevice(di2.mDeviceType)
+                if (!isBluetoothDevice(di2.mDeviceType)
                         || !di.mDeviceAddress.equals(di2.mDeviceAddress)) {
                     continue;
                 }
@@ -2356,6 +2403,40 @@ public class AudioDeviceInventory {
                 return null;
             }
             return di.mSensorUuid;
+        }
+    }
+
+    /*package*/ String getDeviceSettings() {
+        int deviceCatalogSize = 0;
+        synchronized (mDeviceInventoryLock) {
+            deviceCatalogSize = mDeviceInventory.size();
+        }
+        final StringBuilder settingsBuilder = new StringBuilder(
+                deviceCatalogSize * AdiDeviceState.getPeristedMaxSize());
+
+        synchronized (mDeviceInventoryLock) {
+            for (int i = 0; i < mDeviceInventory.size(); i++) {
+                settingsBuilder.append(mDeviceInventory.get(i).toPersistableString());
+                if (i != mDeviceInventory.size() - 1) {
+                    settingsBuilder.append(SETTING_DEVICE_SEPARATOR_CHAR);
+                }
+            }
+        }
+        return settingsBuilder.toString();
+    }
+
+    /*package*/ void setDeviceSettings(String settings) {
+        clearDeviceInventory();
+        String[] devSettings = TextUtils.split(Objects.requireNonNull(settings),
+                SETTING_DEVICE_SEPARATOR);
+        // small list, not worth overhead of Arrays.stream(devSettings)
+        for (String setting : devSettings) {
+            AdiDeviceState devState = AdiDeviceState.fromPersistedString(setting);
+            // Note if the device is not compatible with spatialization mode or the device
+            // type is not canonical, it will be ignored in {@link SpatializerHelper}.
+            if (devState != null) {
+                addDeviceStateToInventory(devState);
+            }
         }
     }
 

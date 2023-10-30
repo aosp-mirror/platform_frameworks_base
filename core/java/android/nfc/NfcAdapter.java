@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -37,6 +38,7 @@ import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
 import android.nfc.tech.NfcF;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -376,6 +378,8 @@ public final class NfcAdapter {
      * <p>An external NFC field detected when device locked and SecureNfc enabled.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC =
             "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
 
@@ -942,7 +946,8 @@ public final class NfcAdapter {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public int getAdapterState() {
         try {
             return sService.getState();
@@ -1592,6 +1597,40 @@ public final class NfcAdapter {
             }
         }
         mNfcActivityManager.disableReaderMode(activity);
+    }
+
+    // Flags arguments to NFC adapter to enable/disable NFC
+    private static final int DISABLE_POLLING_FLAGS = 0x1000;
+    private static final int ENABLE_POLLING_FLAGS = 0x0000;
+
+    /**
+     * Privileged API to enable disable reader polling.
+     * Note: Use with caution! The app is responsible for ensuring that the polling state is
+     * returned to normal.
+     *
+     * @see #enableReaderMode(Activity, ReaderCallback, int, Bundle)  for more detailed
+     * documentation.
+     *
+     * @param enablePolling whether to enable or disable polling.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @SuppressLint("VisiblySynchronized")
+    public void setReaderMode(boolean enablePolling) {
+        synchronized (NfcAdapter.class) {
+            if (!sHasNfcFeature) {
+                throw new UnsupportedOperationException();
+            }
+        }
+        Binder token = new Binder();
+        int flags = enablePolling ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
+        try {
+            NfcAdapter.sService.setReaderMode(token, null, flags, null);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
     }
 
     /**

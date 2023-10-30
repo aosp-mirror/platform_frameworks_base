@@ -13,3 +13,10 @@ flag {
     description: "Flag for NFC reader option API changes"
     bug: "291187960"
 }
+
+flag {
+    name: "enable_nfc_user_restriction"
+    namespace: "nfc"
+    description: "Flag for NFC user restriction"
+    bug: "291187960"
+}

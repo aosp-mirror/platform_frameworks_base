@@ -9926,6 +9926,13 @@ public final class Settings {
         public static final String SPATIAL_AUDIO_ENABLED = "spatial_audio_enabled";
 
         /**
+         * Internal collection of audio device inventory items
+         * The device item stored are {@link com.android.server.audio.AdiDeviceState}
+         * @hide
+         */
+        public static final String AUDIO_DEVICE_INVENTORY = "audio_device_inventory";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -17963,6 +17970,15 @@ public final class Settings {
          */
         public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
                 "review_permissions_notification_state";
+
+        /**
+         * Whether repair mode is active on the device.
+         * <p>
+         * Set to 1 for true and 0 for false.
+         *
+         * @hide
+         */
+        public static final String REPAIR_MODE_ACTIVE = "repair_mode_active";
 
         /**
          * Settings migrated from Wear OS settings provider.
