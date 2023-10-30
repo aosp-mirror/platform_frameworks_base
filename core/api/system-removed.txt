@@ -15,7 +15,7 @@ package android.app {
     method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
   }
 
-  public static final class Notification.TvExtender implements android.app.Notification.Extender {
+  @FlaggedApi("android.app.api_tvextender") public static final class Notification.TvExtender implements android.app.Notification.Extender {
     method @Deprecated public String getChannel();
   }
 
