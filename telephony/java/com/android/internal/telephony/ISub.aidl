@@ -239,6 +239,7 @@ interface ISub {
     int getSubId(int slotIndex);
 
     int getDefaultSubId();
+    int getDefaultSubIdAsUser(int userId);
 
     int getPhoneId(int subId);
 
@@ -251,10 +252,12 @@ interface ISub {
     void setDefaultDataSubId(int subId);
 
     int getDefaultVoiceSubId();
+    int getDefaultVoiceSubIdAsUser(int userId);
 
     void setDefaultVoiceSubId(int subId);
 
     int getDefaultSmsSubId();
+    int getDefaultSmsSubIdAsUser(int userId);
 
     void setDefaultSmsSubId(int subId);
 
