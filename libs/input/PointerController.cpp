@@ -175,8 +175,7 @@ void PointerController::setPosition(float x, float y) {
 
 FloatPoint PointerController::getPosition() const {
     if (!mEnabled) {
-        return FloatPoint{AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                          AMOTION_EVENT_INVALID_CURSOR_POSITION};
+        return FloatPoint{0, 0};
     }
 
     const int32_t displayId = mCursorController.getDisplayId();
