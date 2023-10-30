@@ -99,8 +99,12 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             WindowMagnificationManager windowMagnificationMgr,
             AccessibilityTraceManager trace,
             Callback callback,
-            boolean detectTripleTap, boolean detectShortcutTrigger, int displayId) {
-        super(displayId, detectTripleTap, detectShortcutTrigger, trace, callback);
+            boolean detectSingleFingerTripleTap,
+            boolean detectTwoFingerTripleTap,
+            boolean detectShortcutTrigger,
+            int displayId) {
+        super(displayId, detectSingleFingerTripleTap, detectTwoFingerTripleTap,
+                detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
             Slog.i(mLogTag,
                     "WindowMagnificationGestureHandler() , displayId = " + displayId + ")");

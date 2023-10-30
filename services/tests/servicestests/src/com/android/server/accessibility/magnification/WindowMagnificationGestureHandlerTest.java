@@ -97,7 +97,8 @@ public class WindowMagnificationGestureHandlerTest {
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationGestureHandler = new SpyWindowMagnificationGestureHandler(
                 mContext, mWindowMagnificationManager, mMockTrace, mMockCallback,
-                /** detectTripleTap= */true,   /** detectShortcutTrigger= */true, DISPLAY_0);
+                /** detectSingleFingerTripleTap= */ true, /** detectTwoFingerTripleTap= */ true,
+                /** detectShortcutTrigger= */ true, DISPLAY_0);
         mMockWindowMagnificationGestureHandler =
                 mWindowMagnificationGestureHandler.getMockGestureHandler();
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
@@ -391,9 +392,10 @@ public class WindowMagnificationGestureHandlerTest {
                 WindowMagnificationManager windowMagnificationMgr,
                 AccessibilityTraceManager trace,
                 Callback callback,
-                boolean detectTripleTap, boolean detectShortcutTrigger, int displayId) {
-            super(context, windowMagnificationMgr, trace, callback, detectTripleTap,
-                    detectShortcutTrigger, displayId);
+                boolean detectSingleFingerTripleTap, boolean detectTwoFingerTripleTap,
+                boolean detectShortcutTrigger, int displayId) {
+            super(context, windowMagnificationMgr, trace, callback, detectSingleFingerTripleTap,
+                    detectTwoFingerTripleTap, detectShortcutTrigger, displayId);
             mMockWindowMagnificationGestureHandler = mock(WindowMagnificationGestureHandler.class);
         }
 
