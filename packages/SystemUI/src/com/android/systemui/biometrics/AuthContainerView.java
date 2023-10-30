@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_BIOMETRIC_PROMPT_TRANSITION;
 
 import android.animation.Animator;
@@ -63,7 +64,6 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.biometrics.AuthController.ScaleFactorProvider;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
@@ -76,8 +76,8 @@ import com.android.systemui.biometrics.ui.binder.Spaghetti;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -280,7 +280,6 @@ public class AuthContainerView extends LinearLayout
 
     // TODO(b/251476085): remove Config and further decompose these properties out of view classes
     AuthContainerView(@NonNull Config config,
-            @NonNull FeatureFlags featureFlags,
             @NonNull CoroutineScope applicationCoroutineScope,
             @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
             @Nullable List<FaceSensorPropertiesInternal> faceProps,
@@ -295,7 +294,7 @@ public class AuthContainerView extends LinearLayout
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull @Background DelayableExecutor bgExecutor,
             @NonNull VibratorHelper vibratorHelper) {
-        this(config, featureFlags, applicationCoroutineScope, fpProps, faceProps,
+        this(config, applicationCoroutineScope, fpProps, faceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
                 jankMonitor, promptSelectorInteractor, promptCredentialInteractor, promptViewModel,
                 credentialViewModelProvider, new Handler(Looper.getMainLooper()), bgExecutor,
@@ -304,7 +303,6 @@ public class AuthContainerView extends LinearLayout
 
     @VisibleForTesting
     AuthContainerView(@NonNull Config config,
-            @NonNull FeatureFlags featureFlags,
             @NonNull CoroutineScope applicationCoroutineScope,
             @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
             @Nullable List<FaceSensorPropertiesInternal> faceProps,
@@ -368,7 +366,7 @@ public class AuthContainerView extends LinearLayout
         showPrompt(config, layoutInflater, promptViewModel,
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
                 Utils.findFirstSensorProperties(faceProps, mConfig.mSensorIds),
-                vibratorHelper, featureFlags);
+                vibratorHelper);
 
         // TODO: De-dupe the logic with AuthCredentialPasswordView
         setOnKeyListener((v, keyCode, event) -> {
@@ -390,8 +388,7 @@ public class AuthContainerView extends LinearLayout
             @NonNull PromptViewModel viewModel,
             @Nullable FingerprintSensorPropertiesInternal fpProps,
             @Nullable FaceSensorPropertiesInternal faceProps,
-            @NonNull VibratorHelper vibratorHelper,
-            @NonNull FeatureFlags featureFlags
+            @NonNull VibratorHelper vibratorHelper
     ) {
         if (Utils.isBiometricAllowed(config.mPromptInfo)) {
             mPromptSelectorInteractorProvider.get().useBiometricsForAuthentication(
@@ -407,7 +404,7 @@ public class AuthContainerView extends LinearLayout
                     getJankListener(view, TRANSIT,
                             BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
                     mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
-                    vibratorHelper, featureFlags);
+                    vibratorHelper);
 
             // TODO(b/251476085): migrate these dependencies
             if (fpProps != null && fpProps.isAnyUdfpsType()) {

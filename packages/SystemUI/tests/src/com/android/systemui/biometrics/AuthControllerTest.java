@@ -88,7 +88,6 @@ import com.android.systemui.biometrics.domain.interactor.PromptCredentialInterac
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -195,7 +194,6 @@ public class AuthControllerTest extends SysuiTestCase {
     private Handler mHandler;
     private DelayableExecutor mBackgroundExecutor;
     private TestableAuthController mAuthController;
-    private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     @Before
     public void setup() throws RemoteException {
@@ -1023,7 +1021,7 @@ public class AuthControllerTest extends SysuiTestCase {
         private PromptInfo mLastBiometricPromptInfo;
 
         TestableAuthController(Context context) {
-            super(context, mFeatureFlags, null /* applicationCoroutineScope */,
+            super(context, null /* applicationCoroutineScope */,
                     mExecution, mCommandQueue, mActivityTaskManager, mWindowManager,
                     mFingerprintManager, mFaceManager, () -> mUdfpsController,
                     () -> mSideFpsController, mDisplayManager, mWakefulnessLifecycle,
