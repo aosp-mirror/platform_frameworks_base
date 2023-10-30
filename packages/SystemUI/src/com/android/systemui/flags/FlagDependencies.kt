@@ -19,6 +19,7 @@ package com.android.systemui.flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import javax.inject.Inject
 
 /** A class in which engineers can define flag dependencies */
@@ -26,6 +27,7 @@ import javax.inject.Inject
 class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, handler: Handler) :
     FlagDependenciesBase(featureFlags, handler) {
     override fun defineDependencies() {
+        NotificationsLiveDataStoreRefactor.token dependsOn NotificationIconContainerRefactor.token
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
     }
 }
