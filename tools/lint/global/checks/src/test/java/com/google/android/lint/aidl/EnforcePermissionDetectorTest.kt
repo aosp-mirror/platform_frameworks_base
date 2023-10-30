@@ -155,6 +155,27 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
                 """.addLineContinuation())
     }
 
+    fun testDetectIssuesAnnotationOnNonStubMethod() {
+        lint().files(java(
+            """
+            package test.pkg;
+            public class TestClass42 extends IFooMethod.Stub {
+                @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET)
+                public void aRegularMethodNotPartOfStub() {
+                }
+            }
+            """).indented(),
+                *stubs
+        )
+        .run()
+        .expect("""
+                src/test/pkg/TestClass42.java:3: Error: The method aRegularMethodNotPartOfStub does not override an AIDL generated method [MisusingEnforcePermissionAnnotation]
+                    @android.annotation.EnforcePermission(android.Manifest.permission.INTERNET)
+                    ^
+                1 errors, 0 warnings
+                """.addLineContinuation())
+    }
+
     fun testDetectIssuesEmptyAnnotationOnMethod() {
         lint().files(java(
             """
