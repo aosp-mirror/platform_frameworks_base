@@ -224,6 +224,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     final SparseArray<IBinder> mOverlayWindowTokens = new SparseArray();
 
+    // All the embedded accessibility overlays that have been added by this service.
+    private List<SurfaceControl> mOverlays = new ArrayList<>();
+
     /** The timestamp of requesting to take screenshot in milliseconds */
     private long mRequestTakeScreenshotTimestampMs;
     /**
@@ -1554,6 +1557,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final int displayId = displays[i].getDisplayId();
             onDisplayRemoved(displayId);
         }
+        if (Flags.cleanupA11yOverlays()) {
+            detachAllOverlays();
+        }
     }
 
     /**
@@ -2677,6 +2683,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         try {
             mSystemSupport.attachAccessibilityOverlayToDisplay(
                     interactionId, displayId, sc, callback);
+            mOverlays.add(sc);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -2707,10 +2714,23 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 connection
                         .getRemote()
                         .attachAccessibilityOverlayToWindow(sc, interactionId, callback);
+                mOverlays.add(sc);
             }
 
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    protected void detachAllOverlays() {
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        for (SurfaceControl sc : mOverlays) {
+            if (sc.isValid()) {
+                t.reparent(sc, null);
+            }
+        }
+        t.apply();
+        t.close();
+        mOverlays.clear();
     }
 }
