@@ -28,11 +28,14 @@ import static com.android.packageinstaller.v2.model.uninstallstagedata.Uninstall
 
 import android.Manifest;
 import android.app.AppOpsManager;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.UninstallCompleteCallback;
@@ -42,12 +45,14 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallReady;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired;
+import java.io.IOException;
 import java.util.List;
 
 public class UninstallRepository {
@@ -244,6 +249,22 @@ public class UninstallRepository {
             uarBuilder.setTitle(mTargetAppLabel.toString());
         }
 
+        boolean suggestToKeepAppData = false;
+        try {
+            PackageInfo pkgInfo = mPackageManager.getPackageInfo(mTargetPackageName, 0);
+            suggestToKeepAppData =
+                pkgInfo.applicationInfo != null && pkgInfo.applicationInfo.hasFragileUserData();
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Cannot check hasFragileUserData for " + mTargetPackageName, e);
+        }
+
+        long appDataSize = 0;
+        if (suggestToKeepAppData) {
+            appDataSize = getAppDataSize(mTargetPackageName,
+                mUninstallFromAllUsers ? null : mUninstalledUser);
+        }
+        uarBuilder.setAppDataSize(appDataSize);
+
         return uarBuilder.build();
     }
 
@@ -306,6 +327,48 @@ public class UninstallRepository {
         UserManager customUserManager = mContext.createContextAsUser(userHandle, 0)
             .getSystemService(UserManager.class);
         return customUserManager.isUserOfType(UserManager.USER_TYPE_PROFILE_CLONE);
+    }
+
+    /**
+     * Get number of bytes of the app data of the package.
+     *
+     * @param pkg The package that might have app data.
+     * @param user The user the package belongs to or {@code null} if files of all users should
+     *     be counted.
+     * @return The number of bytes.
+     */
+    private long getAppDataSize(@NonNull String pkg, @Nullable UserHandle user) {
+        if (user != null) {
+            return getAppDataSizeForUser(pkg, user);
+        }
+        // We are uninstalling from all users. Get cumulative app data size for all users.
+        List<UserHandle> userHandles = mUserManager.getUserHandles(true);
+        long totalAppDataSize = 0;
+        int numUsers = userHandles.size();
+        for (int i = 0; i < numUsers; i++) {
+            totalAppDataSize += getAppDataSizeForUser(pkg, userHandles.get(i));
+        }
+        return totalAppDataSize;
+    }
+
+    /**
+     * Get number of bytes of the app data of the package.
+     *
+     * @param pkg The package that might have app data.
+     * @param user The user the package belongs to
+     * @return The number of bytes.
+     */
+    private long getAppDataSizeForUser(@NonNull String pkg, @NonNull UserHandle user) {
+        StorageStatsManager storageStatsManager =
+            mContext.getSystemService(StorageStatsManager.class);
+        try {
+            StorageStats stats = storageStatsManager.queryStatsForPackage(
+                mPackageManager.getApplicationInfo(pkg, 0).storageUuid, pkg, user);
+            return stats.getDataBytes();
+        } catch (PackageManager.NameNotFoundException | IOException | SecurityException e) {
+            Log.e(TAG, "Cannot determine amount of app data for " + pkg, e);
+        }
+        return 0;
     }
 
     public static class CallerInfo {

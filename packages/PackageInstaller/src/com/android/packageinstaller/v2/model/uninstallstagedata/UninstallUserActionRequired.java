@@ -21,10 +21,12 @@ public class UninstallUserActionRequired extends UninstallStage {
     private final int mStage = UninstallStage.STAGE_USER_ACTION_REQUIRED;
     private final String mTitle;
     private final String mMessage;
+    private final long mAppDataSize;
 
-    public UninstallUserActionRequired(String title, String message) {
+    public UninstallUserActionRequired(String title, String message, long appDataSize) {
         mTitle = title;
         mMessage = message;
+        mAppDataSize = appDataSize;
     }
 
     public String getTitle() {
@@ -33,6 +35,10 @@ public class UninstallUserActionRequired extends UninstallStage {
 
     public String getMessage() {
         return mMessage;
+    }
+
+    public long getAppDataSize() {
+        return mAppDataSize;
     }
 
     @Override
@@ -44,6 +50,7 @@ public class UninstallUserActionRequired extends UninstallStage {
 
         private String mTitle;
         private String mMessage;
+        private long mAppDataSize = 0;
 
         public Builder setTitle(String title) {
             mTitle = title;
@@ -55,8 +62,13 @@ public class UninstallUserActionRequired extends UninstallStage {
             return this;
         }
 
+        public Builder setAppDataSize(long appDataSize) {
+            mAppDataSize = appDataSize;
+            return this;
+        }
+
         public UninstallUserActionRequired build() {
-            return new UninstallUserActionRequired(mTitle, mMessage);
+            return new UninstallUserActionRequired(mTitle, mMessage, mAppDataSize);
         }
     }
 }
