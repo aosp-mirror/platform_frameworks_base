@@ -3062,21 +3062,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Request to put the a freeform activity into fullscreen. This will only be allowed if the
-     * activity is on a freeform display, such as a desktop device. The requester has to be the
-     * top-most activity of the focused display, and the request should be a response to a user
-     * input. When getting fullscreen and receiving corresponding
+     * Request to put the freeform activity into fullscreen. The requester has to be the top-most
+     * activity of the focused display which can be verified using
+     * {@link #onTopResumedActivityChanged(boolean)}. The request should also be a response to a
+     * user input. When getting fullscreen and receiving corresponding
      * {@link #onConfigurationChanged(Configuration)} and
      * {@link #onMultiWindowModeChanged(boolean, Configuration)}, the activity should relayout
      * itself and the system bars' visibilities can be controlled as usual fullscreen apps.
      *
      * Calling it again with the exit request can restore the activity to the previous status.
      * This will only happen when it got into fullscreen through this API.
-     *
-     * If an app wants to be in fullscreen always, it should claim as not being resizable
-     * by setting
-     * <a href="https://developer.android.com/guide/topics/large-screens/multi-window-support#resizeableActivity">
-     * {@code android:resizableActivity="false"}</a> instead of calling this API.
      *
      * @param request Can be {@link #FULLSCREEN_MODE_REQUEST_ENTER} or
      *                {@link #FULLSCREEN_MODE_REQUEST_EXIT} to indicate this request is to get
