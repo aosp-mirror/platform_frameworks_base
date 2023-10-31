@@ -414,8 +414,9 @@ public class BackgroundActivityStartController {
         }
 
         BalVerdict resultForCaller = checkBackgroundActivityStartAllowedByCaller(state);
-        BalVerdict resultForRealCaller = callingUid == realCallingUid
+        BalVerdict resultForRealCaller = callingUid == realCallingUid && resultForCaller.allows()
                 ? resultForCaller // no need to calculate again
+                // otherwise we might need to recalculate because the logic is not the same
                 : checkBackgroundActivityStartAllowedBySender(state, checkedOptions);
 
         if (resultForCaller.allows()
