@@ -54,6 +54,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.events.ANIMATING_OUT
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -208,6 +209,16 @@ open class AuthContainerViewTest : SysuiTestCase() {
             authContainer?.requestId ?: 0L,
             true /* startFingerprintNow */
         )
+    }
+
+    @Test
+    fun testIgnoresAnimatedInWhenDialogAnimatingOut() {
+        val container = initializeFingerprintContainer(addToView = false)
+        container.mContainerState = ANIMATING_OUT
+        container.addToView()
+        waitForIdleSync()
+
+        verify(callback, never()).onDialogAnimatedIn(anyLong(), anyBoolean())
     }
 
     @Test
