@@ -30,6 +30,8 @@ import java.lang.annotation.Target;
  *
  * The method must be {@code public static} with a single argument that takes
  * {@link Class}.
+ *
+ * @hide
  */
 @Target({TYPE})
 @Retention(RetentionPolicy.CLASS)
