@@ -1179,7 +1179,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 synchronized (mInternal.mOomAdjuster.mCachedAppOptimizer.mFreezerLock) {
                     app.mOptRecord.setFreezeSticky(isSticky);
                     mInternal.mOomAdjuster.mCachedAppOptimizer.unfreezeAppInternalLSP(app, 0,
-                            false);
+                            true);
                 }
             }
         }
