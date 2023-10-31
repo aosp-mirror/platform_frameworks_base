@@ -16,14 +16,20 @@
 package com.android.systemui.biometrics
 
 import android.hardware.biometrics.common.AuthenticateReason
+import kotlinx.coroutines.flow.Flow
 
-/** Provides the status of the interactive to auth feature. */
+/**
+ * Provides the status of the interactive to auth feature.
+ *
+ * This controls whether fingerprint authentication can be used to unlock the device any time versus
+ * only when the device is interactive. This is controlled by the user through a settings toggle.
+ */
 interface FingerprintInteractiveToAuthProvider {
     /**
-     * @param userId the user Id.
-     * @return true if the InteractiveToAuthFeature is enabled, false if disabled.
+     * Whether the setting is enabled for the current user. This is the opposite of the "Touch to
+     * Unlock" settings toggle.
      */
-    fun isEnabled(userId: Int): Boolean
+    val enabledForCurrentUser: Flow<Boolean>
 
     /**
      * @param userId the user Id.
