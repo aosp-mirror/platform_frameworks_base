@@ -13,24 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.biometrics
 
-package com.android.systemui.biometrics;
-
-import android.hardware.biometrics.common.AuthenticateReason;
+import android.hardware.biometrics.common.AuthenticateReason
 
 /** Provides the status of the interactive to auth feature. */
-public interface FingerprintInteractiveToAuthProvider {
+interface FingerprintInteractiveToAuthProvider {
     /**
-     *
      * @param userId the user Id.
      * @return true if the InteractiveToAuthFeature is enabled, false if disabled.
      */
-    boolean isEnabled(int userId);
+    fun isEnabled(userId: Int): Boolean
 
     /**
-     *
      * @param userId the user Id.
      * @return Vendor extension if needed for authentication.
      */
-    AuthenticateReason.Vendor getVendorExtension(int userId);
+    fun getVendorExtension(userId: Int): AuthenticateReason.Vendor?
 }
