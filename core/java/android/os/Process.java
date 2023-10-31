@@ -1505,7 +1505,7 @@ public class Process {
      * fully removed, otherwise system resources may leak.
      * @hide
      */
-    public static final native int sendSignalToProcessGroup(int uid, int pid, int signal);
+    public static final native boolean sendSignalToProcessGroup(int uid, int pid, int signal);
 
     /**
       * Freeze the cgroup for the given UID.
