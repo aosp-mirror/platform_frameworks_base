@@ -19,6 +19,7 @@ package com.android.systemui.biometrics.domain.interactor
 import android.content.Context
 import android.hardware.biometrics.SensorLocationInternal
 import android.view.WindowManager
+import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.domain.model.SideFpsSensorLocation
 import com.android.systemui.biometrics.shared.model.DisplayRotation
@@ -27,17 +28,16 @@ import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.log.SideFpsLogger
 import com.android.systemui.res.R
+import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SideFpsSensorInteractor
 @Inject
@@ -47,6 +47,8 @@ constructor(
     windowManager: WindowManager,
     displayStateInteractor: DisplayStateInteractor,
     featureFlags: FeatureFlagsClassic,
+    fingerprintInteractiveToAuthProvider: Optional<FingerprintInteractiveToAuthProvider>,
+    private val logger: SideFpsLogger,
 ) {
 
     private val sensorForCurrentDisplay =
@@ -65,12 +67,18 @@ constructor(
         flowOf(context.resources?.getInteger(R.integer.config_restToUnlockDuration)?.toLong() ?: 0L)
 
     val isProlongedTouchRequiredForAuthentication: Flow<Boolean> =
-        isAvailable.flatMapLatest { sfpsAvailable ->
-            if (sfpsAvailable) {
-                // todo (b/305236201) also add the settings check here.
-                flowOf(featureFlags.isEnabled(Flags.REST_TO_UNLOCK))
-            } else {
-                flowOf(false)
+        if (
+            fingerprintInteractiveToAuthProvider.isEmpty ||
+                !featureFlags.isEnabled(Flags.REST_TO_UNLOCK)
+        ) {
+            flowOf(false)
+        } else {
+            combine(
+                isAvailable,
+                fingerprintInteractiveToAuthProvider.get().enabledForCurrentUser
+            ) { sfpsAvailable, isSettingEnabled ->
+                logger.logStateChange(sfpsAvailable, isSettingEnabled)
+                sfpsAvailable && isSettingEnabled
             }
         }
 
@@ -125,6 +133,15 @@ constructor(
                         }
                     }
                 }
+
+            logger.sensorLocationStateChanged(
+                size,
+                rotation,
+                displayWidth,
+                displayHeight,
+                sensorWidth,
+                isSensorVerticalInDefaultOrientation
+            )
 
             SideFpsSensorLocation(
                 left = sensorLeft,
