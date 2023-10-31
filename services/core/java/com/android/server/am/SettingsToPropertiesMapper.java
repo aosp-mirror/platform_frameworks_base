@@ -148,6 +148,7 @@ public class SettingsToPropertiesMapper {
         "mainline_sdk",
         "media_audio",
         "media_drm",
+        "media_tv",
         "media_solutions",
         "nfc",
         "pdf_viewer",
