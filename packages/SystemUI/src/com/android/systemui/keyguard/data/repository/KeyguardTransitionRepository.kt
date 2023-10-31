@@ -115,7 +115,8 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     private var updateTransitionId: UUID? = null
 
     init {
-        // Seed with transitions signaling a boot into lockscreen state
+        // Seed with transitions signaling a boot into lockscreen state. If updating this, please
+        // also update FakeKeyguardTransitionRepository.
         emitTransition(
             TransitionStep(
                 KeyguardState.OFF,

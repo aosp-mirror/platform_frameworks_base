@@ -231,12 +231,10 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
 
             surfaceBehindIsAnimatingFlow.emit(true)
             runCurrent()
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.FINISHED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                )
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
             )
             runCurrent()
 
