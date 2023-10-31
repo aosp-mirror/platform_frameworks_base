@@ -1280,9 +1280,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // Check whether the Intent should be embedded in the known Task.
         final TaskContainer taskContainer = mTaskContainers.valueAt(0);
         if (taskContainer.isInPictureInPicture()
-                || taskContainer.getTopNonFinishingActivity() == null) {
+                || taskContainer.getTopNonFinishingActivity(false /* includeOverlay */) == null) {
             // We don't embed activity when it is in PIP, or if we can't find any other owner
-            // activity in the Task.
+            // activity in non-overlay container in the Task.
             return null;
         }
 
@@ -1431,7 +1431,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         } else {
             final TaskContainer taskContainer = getTaskContainer(taskId);
             activityInTask = taskContainer != null
-                    ? taskContainer.getTopNonFinishingActivity()
+                    ? taskContainer.getTopNonFinishingActivity(true /* includeOverlay */)
                     : null;
         }
         if (activityInTask == null) {
@@ -1760,10 +1760,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (!container.getTaskContainer().isVisible()) {
             // Wait until the Task is visible to avoid unnecessary update when the Task is still in
             // background.
-            return;
-        }
-
-        if (container.isFinished()) {
             return;
         }
 

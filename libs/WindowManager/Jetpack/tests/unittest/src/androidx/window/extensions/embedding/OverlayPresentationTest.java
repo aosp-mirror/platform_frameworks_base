@@ -415,6 +415,17 @@ public class OverlayPresentationTest {
     }
 
     @Test
+    public void testGetTopNonFinishingActivityWithOverlay() {
+        createTestOverlayContainer(TASK_ID, "test1");
+        final Activity activity = createMockActivity();
+        final TaskFragmentContainer container = createMockTaskFragmentContainer(activity);
+        final TaskContainer task = container.getTaskContainer();
+
+        assertThat(task.getTopNonFinishingActivity(true /* includeOverlay */)).isEqualTo(mActivity);
+        assertThat(task.getTopNonFinishingActivity(false /* includeOverlay */)).isEqualTo(activity);
+    }
+
+    @Test
     public void testUpdateContainer_dontInvokeUpdateOverlayForNonOverlayContainer() {
         TaskFragmentContainer taskFragmentContainer = createMockTaskFragmentContainer(mActivity);
 

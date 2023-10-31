@@ -235,9 +235,13 @@ class TaskContainer {
     }
 
     @Nullable
-    Activity getTopNonFinishingActivity() {
+    Activity getTopNonFinishingActivity(boolean includeOverlay) {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
-            final Activity activity = mContainers.get(i).getTopNonFinishingActivity();
+            final TaskFragmentContainer container = mContainers.get(i);
+            if (!includeOverlay && container.isOverlay()) {
+                continue;
+            }
+            final Activity activity = container.getTopNonFinishingActivity();
             if (activity != null) {
                 return activity;
             }
