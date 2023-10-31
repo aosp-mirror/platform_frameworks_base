@@ -167,6 +167,11 @@ final class RadioModule {
             fireLater(() -> {
                 synchronized (mLock) {
                     fanoutAidlCallbackLocked((cb, uid) -> {
+                        if (!ConversionUtils.configFlagMeetsSdkVersionRequirement(flag, uid)) {
+                            Slogf.e(TAG, "onConfigFlagUpdated: cannot send program info "
+                                    + "requiring higher target SDK version");
+                            return;
+                        }
                         cb.onConfigFlagUpdated(flag, value);
                     });
                 }
