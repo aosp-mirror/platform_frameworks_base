@@ -179,6 +179,8 @@ import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
+import android.companion.AssociationInfo;
+import android.companion.AssociationRequest;
 import android.companion.ICompanionDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -545,6 +547,15 @@ public class NotificationManagerService extends SystemService {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long ENFORCE_NO_CLEAR_FLAG_ON_MEDIA_NOTIFICATION = 264179692L;
+
+    /**
+     * App calls to {@link android.app.NotificationManager#setInterruptionFilter} and
+     * {@link android.app.NotificationManager#setNotificationPolicy} manage DND through the
+     * creation and activation of an implicit {@link android.app.AutomaticZenRule}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES = 308670109L;
 
     private static final Duration POST_WAKE_LOCK_TIMEOUT = Duration.ofSeconds(30);
 
@@ -5343,6 +5354,12 @@ public class NotificationManagerService extends SystemService {
             if (zen == -1) throw new IllegalArgumentException("Invalid filter: " + filter);
             final int callingUid = Binder.getCallingUid();
             final boolean isSystemOrSystemUi = isCallerIsSystemOrSystemUi();
+
+            if (android.app.Flags.modesApi() && !canManageGlobalZenPolicy(pkg, callingUid)) {
+                mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(pkg, callingUid, zen);
+                return;
+            }
+
             final long identity = Binder.clearCallingIdentity();
             try {
                 mZenModeHelper.setManualZenMode(zen, null, pkg, "setInterruptionFilter",
@@ -5424,6 +5441,16 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "Notification policy access denied calling " + method);
                 throw new SecurityException("Notification policy access denied");
             }
+        }
+
+        private boolean canManageGlobalZenPolicy(String callingPkg, int callingUid) {
+            boolean isCompatChangeEnabled = Binder.withCleanCallingIdentity(
+                    () -> CompatChanges.isChangeEnabled(MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES,
+                            callingUid));
+            return !isCompatChangeEnabled
+                    || isCallerIsSystemOrSystemUi()
+                    || hasCompanionDevice(callingPkg, UserHandle.getUserId(callingUid),
+                            AssociationRequest.DEVICE_PROFILE_WATCH);
         }
 
         private void enforcePolicyAccess(String pkg, String method) {
@@ -5619,6 +5646,10 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public Policy getNotificationPolicy(String pkg) {
+            final int callingUid = Binder.getCallingUid();
+            if (android.app.Flags.modesApi() && !canManageGlobalZenPolicy(pkg, callingUid)) {
+                return mZenModeHelper.getNotificationPolicyFromImplicitZenRule(pkg);
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 return mZenModeHelper.getNotificationPolicy();
@@ -5649,6 +5680,10 @@ public class NotificationManagerService extends SystemService {
             enforcePolicyAccess(pkg, "setNotificationPolicy");
             int callingUid = Binder.getCallingUid();
             boolean isSystemOrSystemUi = isCallerIsSystemOrSystemUi();
+
+            boolean shouldApplyAsImplicitRule = android.app.Flags.modesApi()
+                    && !canManageGlobalZenPolicy(pkg, callingUid);
+
             final long identity = Binder.clearCallingIdentity();
             try {
                 final ApplicationInfo applicationInfo = mPackageManager.getApplicationInfo(pkg,
@@ -5687,15 +5722,20 @@ public class NotificationManagerService extends SystemService {
                 policy = new Policy(policy.priorityCategories,
                         policy.priorityCallSenders, policy.priorityMessageSenders,
                         newVisualEffects, policy.priorityConversationSenders);
-                ZenLog.traceSetNotificationPolicy(pkg, applicationInfo.targetSdkVersion, policy);
-                mZenModeHelper.setNotificationPolicy(policy, callingUid, isSystemOrSystemUi);
+
+                if (shouldApplyAsImplicitRule) {
+                    mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, callingUid, policy);
+                } else {
+                    ZenLog.traceSetNotificationPolicy(pkg, applicationInfo.targetSdkVersion,
+                            policy);
+                    mZenModeHelper.setNotificationPolicy(policy, callingUid, isSystemOrSystemUi);
+                }
             } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set notification policy", e);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
         }
-
-
 
         @Override
         public List<String> getEnabledNotificationListenerPackages() {
@@ -10556,6 +10596,12 @@ public class NotificationManagerService extends SystemService {
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {
+        return hasCompanionDevice(info.component.getPackageName(),
+                info.userid, /* withDeviceProfile= */ null);
+    }
+
+    private boolean hasCompanionDevice(String pkg, @UserIdInt int userId,
+            @Nullable @AssociationRequest.DeviceProfile String withDeviceProfile) {
         if (mCompanionManager == null) {
             mCompanionManager = getCompanionManager();
         }
@@ -10565,17 +10611,19 @@ public class NotificationManagerService extends SystemService {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            List<?> associations = mCompanionManager.getAssociations(
-                    info.component.getPackageName(), info.userid);
-            if (!ArrayUtils.isEmpty(associations)) {
-                return true;
+            List<AssociationInfo> associations = mCompanionManager.getAssociations(pkg, userId);
+            for (AssociationInfo association : associations) {
+                if (withDeviceProfile == null || withDeviceProfile.equals(
+                        association.getDeviceProfile())) {
+                    return true;
+                }
             }
         } catch (SecurityException se) {
             // Not a privileged listener
         } catch (RemoteException re) {
             Slog.e(TAG, "Cannot reach companion device service", re);
         } catch (Exception e) {
-            Slog.e(TAG, "Cannot verify listener " + info, e);
+            Slog.e(TAG, "Cannot verify caller pkg=" + pkg + ", userId=" + userId, e);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
