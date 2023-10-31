@@ -412,7 +412,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // wasContained} restricts the preferred root task is set only when moving an existing
         // root task to top instead of adding a new root task that may be too early (e.g. in the
         // middle of launching or reparenting).
-        final boolean isTopFocusableTask = moveToTop && child.isTopActivityFocusable();
+        final boolean isTopFocusableTask = moveToTop && child != mRootPinnedTask
+                && child.isTopActivityFocusable();
         if (isTopFocusableTask) {
             mPreferredTopFocusableRootTask =
                     child.shouldBeVisible(null /* starting */) ? child : null;
