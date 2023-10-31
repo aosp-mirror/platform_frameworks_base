@@ -206,3 +206,11 @@ flag {
     description: "Feature flag to enable pre-verified domains"
     bug: "307327678"
 }
+
+flag {
+    name: "min_target_sdk_24"
+    namespace: "responsible_apis"
+    description: "Feature flag to bump min target sdk to 24"
+    bug: "297603927"
+    is_fixed_read_only: true
+}
