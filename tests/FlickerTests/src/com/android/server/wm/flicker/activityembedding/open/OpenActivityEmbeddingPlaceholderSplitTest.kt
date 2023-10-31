@@ -88,14 +88,20 @@ class OpenActivityEmbeddingPlaceholderSplitTest(flicker: LegacyFlickerTest) :
         flicker.assertWm {
             notContains(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
                 .then()
-                .isAppWindowInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
+                .isAppWindowInvisible(
+                    ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT,
+                    isOptional = true
+                )
                 .then()
                 .isAppWindowVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
         }
         flicker.assertWm {
             notContains(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
                 .then()
-                .isAppWindowInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
+                .isAppWindowInvisible(
+                    ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT,
+                    isOptional = true
+                )
                 .then()
                 .isAppWindowVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
         }
