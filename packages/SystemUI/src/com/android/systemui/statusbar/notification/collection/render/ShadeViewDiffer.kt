@@ -127,6 +127,9 @@ class ShadeViewDiffer(
         }
     }
 
+    /**
+     * Attach the Child Nodes to the parentNode using the structure from specMap
+     */
     private fun attachChildren(
         parentNode: ShadeNode,
         specMap: Map<NodeController, NodeSpec>

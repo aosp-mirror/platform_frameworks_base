@@ -16,19 +16,27 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewStub;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ConversationLayout;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.ConversationAvatar;
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.FacePile;
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleIcon;
 
 /**
  * A hybrid view which may contain information about one ore more conversations.
@@ -37,6 +45,7 @@ public class HybridConversationNotificationView extends HybridNotificationView {
 
     private ImageView mConversationIconView;
     private TextView mConversationSenderName;
+    private ViewStub mConversationFacePileStub;
     private View mConversationFacePile;
     private int mSingleAvatarSize;
     private int mFacePileSize;
@@ -65,7 +74,16 @@ public class HybridConversationNotificationView extends HybridNotificationView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mConversationIconView = requireViewById(com.android.internal.R.id.conversation_icon);
-        mConversationFacePile = requireViewById(com.android.internal.R.id.conversation_face_pile);
+        if (AsyncHybridViewInflation.isEnabled()) {
+            mConversationFacePileStub =
+                    requireViewById(com.android.internal.R.id.conversation_face_pile);
+        } else {
+            // TODO(b/217799515): This usage is vague because mConversationFacePile represents both
+            //  View and ViewStub at different stages of View inflation, should be removed when
+            //  AsyncHybridViewInflation flag is removed
+            mConversationFacePile =
+                    requireViewById(com.android.internal.R.id.conversation_face_pile);
+        }
         mConversationSenderName = requireViewById(R.id.conversation_notification_sender);
         applyTextColor(mConversationSenderName, mSecondaryTextColor);
         mFacePileSize = getResources()
@@ -85,7 +103,8 @@ public class HybridConversationNotificationView extends HybridNotificationView {
 
     @Override
     public void bind(@Nullable CharSequence title, @Nullable CharSequence text,
-            @Nullable View contentView) {
+                     @Nullable View contentView) {
+        AsyncHybridViewInflation.assertInLegacyMode();
         if (!(contentView instanceof ConversationLayout)) {
             super.bind(title, text, contentView);
             return;
@@ -137,6 +156,77 @@ public class HybridConversationNotificationView extends HybridNotificationView {
         super.bind(conversationTitle, conversationText, conversationLayout);
     }
 
+    /**
+     * Set the avatar using ConversationAvatar from SingleLineViewModel
+     *
+     * @param conversationAvatar the icon needed for a single-line conversation view, it should be
+     *                           either an instance of SingleIcon or FacePile
+     */
+    public void setAvatar(@NonNull ConversationAvatar conversationAvatar) {
+        if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) return;
+        if (conversationAvatar instanceof SingleIcon) {
+            SingleIcon avatar = (SingleIcon) conversationAvatar;
+            if (mConversationFacePile != null) mConversationFacePile.setVisibility(GONE);
+            mConversationIconView.setVisibility(VISIBLE);
+            mConversationIconView.setImageDrawable(avatar.getIconDrawable());
+            setSize(mConversationIconView, mSingleAvatarSize);
+            return;
+        }
+
+        // If conversationAvatar is not a SingleIcon, it should be a FacePile.
+        // Bind the face pile with it.
+        FacePile facePileModel = (FacePile) conversationAvatar;
+        mConversationIconView.setVisibility(GONE);
+        // Inflate mConversationFacePile from ViewStub
+        if (mConversationFacePile == null) {
+            mConversationFacePile = mConversationFacePileStub.inflate();
+        }
+        mConversationFacePile.setVisibility(VISIBLE);
+
+        ImageView facePileBottomBg = mConversationFacePile.requireViewById(
+                com.android.internal.R.id.conversation_face_pile_bottom_background);
+        ImageView facePileBottom = mConversationFacePile.requireViewById(
+                com.android.internal.R.id.conversation_face_pile_bottom);
+        ImageView facePileTop = mConversationFacePile.requireViewById(
+                com.android.internal.R.id.conversation_face_pile_top);
+
+        int bottomBackgroundColor = facePileModel.getBottomBackgroundColor();
+        facePileBottomBg.setImageTintList(ColorStateList.valueOf(bottomBackgroundColor));
+
+        facePileBottom.setImageDrawable(facePileModel.getBottomIconDrawable());
+        facePileTop.setImageDrawable(facePileModel.getTopIconDrawable());
+
+        setSize(mConversationFacePile, mFacePileSize);
+        setSize(facePileBottom, mFacePileAvatarSize);
+        setSize(facePileTop, mFacePileAvatarSize);
+        setSize(facePileBottomBg, mFacePileAvatarSize + 2 * mFacePileProtectionWidth);
+
+        mTransformationHelper.addViewTransformingToSimilar(facePileTop);
+        mTransformationHelper.addViewTransformingToSimilar(facePileBottom);
+        mTransformationHelper.addViewTransformingToSimilar(facePileBottomBg);
+
+    }
+
+    /**
+     * bind the text views
+     */
+    public void setText(
+            CharSequence titleText,
+            CharSequence contentText,
+            CharSequence conversationSenderName
+    ) {
+        if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) return;
+        if (conversationSenderName == null) {
+            mConversationSenderName.setVisibility(GONE);
+        } else {
+            mConversationSenderName.setVisibility(VISIBLE);
+            mConversationSenderName.setText(conversationSenderName);
+        }
+        // TODO (b/217799515): super.bind() doesn't use contentView, remove the contentView
+        //  argument when the flag is removed
+        super.bind(/* title = */ titleText, /* text = */ contentText, /* contentView = */ null);
+    }
+
     private static void setSize(View view, int size) {
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) view.getLayoutParams();
         lp.width = size;
@@ -152,5 +242,10 @@ public class HybridConversationNotificationView extends HybridNotificationView {
     public void setNotificationFaded(boolean faded) {
         super.setNotificationFaded(faded);
         NotificationFadeAware.setLayerTypeForFaded(mConversationFacePile, faded);
+    }
+
+    @VisibleForTesting
+    TextView getConversationSenderNameView() {
+        return mConversationSenderName;
     }
 }

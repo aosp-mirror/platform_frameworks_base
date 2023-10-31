@@ -88,6 +88,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     private Notification.Builder mBuilder;
     private ExpandableNotificationRow mRow;
 
+    private NotificationTestHelper mHelper;
+
     @Mock private NotifRemoteViewCache mCache;
     @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
     @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
@@ -119,11 +121,11 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 .setContentTitle("Title")
                 .setContentText("Text")
                 .setStyle(new Notification.BigTextStyle().bigText("big text"));
-        NotificationTestHelper helper = new NotificationTestHelper(
+        mHelper = new NotificationTestHelper(
                 mContext,
                 mDependency,
                 TestableLooper.get(this));
-        ExpandableNotificationRow row = helper.createRow(mBuilder.build());
+        ExpandableNotificationRow row = mHelper.createRow(mBuilder.build());
         mRow = spy(row);
         when(mNotifLayoutInflaterFactoryProvider.provide(any(), any()))
                 .thenReturn(mNotifLayoutInflaterFactory);

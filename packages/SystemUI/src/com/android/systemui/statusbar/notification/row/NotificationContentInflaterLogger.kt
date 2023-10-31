@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_SINGLE_LINE
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import javax.inject.Inject
 
@@ -99,6 +100,26 @@ constructor(@NotifInflationLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logInflateSingleLine(
+        entry: NotificationEntry,
+        @InflationFlag inflationFlags: Int,
+        isConversation: Boolean
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = entry.logKey
+                int1 = inflationFlags
+                bool1 = isConversation
+            },
+            {
+                "inflateSingleLineView, inflationFlags: ${flagToString(int1)} for $str1, " +
+                    "isConversation: $bool1"
+            }
+        )
+    }
+
     companion object {
         fun flagToString(@InflationFlag flag: Int): String {
             if (flag == 0) {
@@ -120,6 +141,9 @@ constructor(@NotifInflationLog private val buffer: LogBuffer) {
             }
             if (flag and FLAG_CONTENT_VIEW_PUBLIC != 0) {
                 l.add("PUBLIC")
+            }
+            if (flag and FLAG_CONTENT_VIEW_SINGLE_LINE != 0) {
+                l.add("SINGLE_LINE")
             }
             return l.joinToString("|")
         }
