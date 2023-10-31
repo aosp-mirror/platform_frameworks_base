@@ -2088,8 +2088,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity,
                 injector.getBackgroundHandler());
         mDexOptHelper = new DexOptHelper(this);
-        mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mUserManager,
-                mBroadcastHelper, mProtectedPackages);
+        mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mBroadcastHelper,
+                mProtectedPackages);
         mDistractingPackageHelper = new DistractingPackageHelper(this, mBroadcastHelper,
                 mSuspendPackageHelper);
         mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
@@ -6148,7 +6148,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
                     appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid,
-                    false /* forQuietMode */, quarantined);
+                    quarantined);
         }
 
         @Override
@@ -6597,12 +6597,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended) {
             return mSuspendPackageHelper.setPackagesSuspendedByAdmin(
                     snapshotComputer(), userId, packageNames, suspended);
-        }
-
-        @Override
-        public void setPackagesSuspendedForQuietMode(int userId, boolean suspended) {
-            mSuspendPackageHelper.setPackagesSuspendedForQuietMode(
-                    snapshotComputer(), userId, suspended);
         }
 
         @Override

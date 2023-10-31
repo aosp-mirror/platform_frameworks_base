@@ -16,8 +16,6 @@
 
 package com.android.server.devicepolicy;
 
-import static com.android.server.devicepolicy.DevicePolicyManagerService.DEFAULT_KEEP_PROFILES_RUNNING_FLAG;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -200,7 +198,7 @@ class DevicePolicyData {
      * Effective state of the feature flag. It is updated to the current configuration value
      * during boot and doesn't change value after than unless overridden by test code.
      */
-    boolean mEffectiveKeepProfilesRunning = DEFAULT_KEEP_PROFILES_RUNNING_FLAG;
+    boolean mEffectiveKeepProfilesRunning = false;
 
     DevicePolicyData(@UserIdInt int userId) {
         mUserId = userId;
@@ -401,7 +399,7 @@ class DevicePolicyData {
                 out.endTag(null, TAG_BYPASS_ROLE_QUALIFICATIONS);
             }
 
-            if (policyData.mEffectiveKeepProfilesRunning != DEFAULT_KEEP_PROFILES_RUNNING_FLAG) {
+            if (policyData.mEffectiveKeepProfilesRunning) {
                 out.startTag(null, TAG_KEEP_PROFILES_RUNNING);
                 out.attributeBoolean(null, ATTR_VALUE, policyData.mEffectiveKeepProfilesRunning);
                 out.endTag(null, TAG_KEEP_PROFILES_RUNNING);
@@ -592,7 +590,7 @@ class DevicePolicyData {
                     policy.mCurrentRoleHolder = parser.getAttributeValue(null, ATTR_VALUE);
                 } else if (TAG_KEEP_PROFILES_RUNNING.equals(tag)) {
                     policy.mEffectiveKeepProfilesRunning = parser.getAttributeBoolean(
-                            null, ATTR_VALUE, DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
+                            null, ATTR_VALUE, false);
                 // Deprecated tags below
                 } else if (TAG_PROTECTED_PACKAGES.equals(tag)) {
                     if (policy.mUserControlDisabledPackages == null) {
