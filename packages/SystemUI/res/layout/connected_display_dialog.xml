@@ -30,11 +30,11 @@
         android:layout_width="@dimen/connected_display_dialog_logo_size"
         android:layout_height="@dimen/connected_display_dialog_logo_size"
         android:background="@drawable/circular_background"
-        android:backgroundTint="?androidprv:attr/materialColorPrimary"
+        android:backgroundTint="?androidprv:attr/materialColorSecondary"
         android:importantForAccessibility="no"
         android:padding="6dp"
         android:src="@drawable/stat_sys_connected_display"
-        android:tint="?androidprv:attr/materialColorOnPrimary" />
+        android:tint="?androidprv:attr/materialColorOnSecondary" />
 
     <TextView
         android:id="@+id/connected_display_dialog_title"
