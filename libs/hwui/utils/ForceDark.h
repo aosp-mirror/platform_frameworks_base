@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-#include "TreeInfo.h"
+#ifndef FORCEDARKUTILS_H
+#define FORCEDARKUTILS_H
 
-#include "renderthread/CanvasContext.h"
+namespace android {
+namespace uirenderer {
 
-namespace android::uirenderer {
+/**
+ * The type of force dark set on the renderer, if any.
+ *
+ * This should stay in sync with the java @IntDef in
+ * frameworks/base/graphics/java/android/graphics/ForceDarkType.java
+ */
+enum class ForceDarkType : __uint8_t { NONE = 0, FORCE_DARK = 1, FORCE_INVERT_COLOR_DARK = 2 };
 
-TreeInfo::TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContext)
-        : mode(mode)
-        , prepareTextures(mode == MODE_FULL)
-        , canvasContext(canvasContext)
-        , disableForceDark(canvasContext.getForceDarkType() == ForceDarkType::NONE ? 1 : 0)
-        , screenSize(canvasContext.getNextFrameSize()) {}
+} /* namespace uirenderer */
+} /* namespace android */
 
-}  // namespace android::uirenderer
+#endif  // FORCEDARKUTILS_H

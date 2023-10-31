@@ -49,6 +49,7 @@ import static org.junit.Assume.assumeTrue;
 import android.app.Instrumentation;
 import android.app.UiModeManager;
 import android.content.Context;
+import android.graphics.ForceDarkType;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.SystemProperties;
@@ -593,7 +594,7 @@ public class ViewRootImplTest {
                 mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
         );
 
-        assertThat(mViewRootImpl.isForceDarkEnabled()).isFalse();
+        assertThat(mViewRootImpl.determineForceDarkType()).isEqualTo(ForceDarkType.NONE);
     }
 
     @Test
@@ -613,7 +614,8 @@ public class ViewRootImplTest {
                 mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
         );
 
-        assertThat(mViewRootImpl.isForceDarkEnabled()).isTrue();
+        assertThat(mViewRootImpl.determineForceDarkType())
+                .isEqualTo(ForceDarkType.FORCE_INVERT_COLOR_DARK);
     }
 
     @Test
@@ -634,7 +636,7 @@ public class ViewRootImplTest {
                 mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
         );
 
-        assertThat(mViewRootImpl.isForceDarkEnabled()).isFalse();
+        assertThat(mViewRootImpl.determineForceDarkType()).isEqualTo(ForceDarkType.NONE);
     }
 
     @Test
@@ -654,7 +656,7 @@ public class ViewRootImplTest {
                 mViewRootImpl.updateConfiguration(sContext.getDisplayNoVerify().getDisplayId())
         );
 
-        assertThat(mViewRootImpl.isForceDarkEnabled()).isTrue();
+        assertThat(mViewRootImpl.determineForceDarkType()).isEqualTo(ForceDarkType.FORCE_DARK);
     }
 
     private boolean setForceDarkSysProp(boolean isForceDarkEnabled) {

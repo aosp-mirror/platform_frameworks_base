@@ -417,8 +417,8 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observerPtr) 
     });
 }
 
-void RenderProxy::setForceDark(bool enable) {
-    mRenderThread.queue().post([this, enable]() { mContext->setForceDark(enable); });
+void RenderProxy::setForceDark(ForceDarkType type) {
+    mRenderThread.queue().post([this, type]() { mContext->setForceDark(type); });
 }
 
 void RenderProxy::copySurfaceInto(ANativeWindow* window, std::shared_ptr<CopyRequest>&& request) {
