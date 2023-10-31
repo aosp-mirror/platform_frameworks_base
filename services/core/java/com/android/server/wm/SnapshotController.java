@@ -98,9 +98,14 @@ class SnapshotController {
                 final TaskFragment tf = info.mContainer.asTaskFragment();
                 final ActivityRecord ar = tf != null ? tf.getTopMostActivity()
                         : info.mContainer.asActivityRecord();
-                final boolean taskVis = ar != null && ar.getTask().isVisibleRequested();
-                if (ar != null && !ar.isVisibleRequested() && taskVis) {
-                    mActivitySnapshotController.recordSnapshot(ar);
+                if (ar != null && !ar.isVisibleRequested() && ar.getTask().isVisibleRequested()) {
+                    final WindowState mainWindow = ar.findMainWindow(false);
+                    // Only capture activity snapshot if this app has adapted to back predict
+                    if (mainWindow != null
+                            && mainWindow.getOnBackInvokedCallbackInfo() != null
+                            && mainWindow.getOnBackInvokedCallbackInfo().isSystemCallback()) {
+                        mActivitySnapshotController.recordSnapshot(ar);
+                    }
                 }
             }
         }
