@@ -34,6 +34,9 @@
     <dimen name="navigation_handle_bottom">10dp</dimen>
     <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
     <dimen name="navigation_home_handle_width">108dp</dimen>
+    <!-- Used while animating the navbar during a long press. -->
+    <dimen name="navigation_home_handle_additional_width_for_animation">20dp</dimen>
+    <dimen name="navigation_home_handle_additional_height_for_animation">4dp</dimen>
 
     <!-- Size of the nav bar edge panels, should be greater to the
          edge sensitivity + the drag threshold -->

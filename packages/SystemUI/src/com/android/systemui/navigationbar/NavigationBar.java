@@ -112,7 +112,6 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.res.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -130,6 +129,7 @@ import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
@@ -396,6 +396,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         @Override
         public void setAssistantOverridesRequested(int[] invocationTypes) {
             mAssistManagerLazy.get().setAssistantOverridesRequested(invocationTypes);
+        }
+
+        @Override
+        public void animateNavBarLongPress(boolean isTouchDown, long durationMs) {
+            mView.getHomeHandle().animateLongPress(isTouchDown, durationMs);
         }
 
         @Override
