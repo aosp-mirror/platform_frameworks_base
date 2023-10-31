@@ -153,9 +153,8 @@ java_library {
 }
 
 java_defaults {
-    name: "WMShellFlickerTestsDefault",
+    name: "WMShellFlickerTestsDefaultWithoutTemplate",
     manifest: "manifests/AndroidManifest.xml",
-    test_config_template: "AndroidTestTemplate.xml",
     platform_apis: true,
     certificate: "platform",
     optimize: {
@@ -180,6 +179,12 @@ java_defaults {
         ":FlickerTestApp",
         "trace_config/*",
     ],
+}
+
+java_defaults {
+    name: "WMShellFlickerTestsDefault",
+    defaults: ["WMShellFlickerTestsDefaultWithoutTemplate"],
+    test_config_template: "AndroidTestTemplate.xml",
 }
 
 android_test {
@@ -276,6 +281,23 @@ android_test {
 }
 
 android_test {
+    name: "WMShellFlickerTestsPipAppsCSuite",
+    defaults: ["WMShellFlickerTestsDefaultWithoutTemplate"],
+    additional_manifests: ["manifests/AndroidManifestPip.xml"],
+    package_name: "com.android.wm.shell.flicker.pip.apps",
+    instrumentation_target_package: "com.android.wm.shell.flicker.pip.apps",
+    srcs: [
+        ":WMShellFlickerTestsBase-src",
+        ":WMShellFlickerTestsPipApps-src",
+        ":WMShellFlickerTestsPipCommon-src",
+    ],
+    test_suites: [
+        "device-tests",
+        "csuite",
+    ],
+}
+
+android_test {
     name: "WMShellFlickerTestsSplitScreenGroup1",
     defaults: ["WMShellFlickerTestsDefault"],
     additional_manifests: ["manifests/AndroidManifestSplitScreen.xml"],
@@ -326,4 +348,9 @@ android_test {
         ":WMShellFlickerTestsBase-src",
         ":WMShellFlickerServicePlatinumTests-src",
     ],
+}
+
+csuite_test {
+    name: "csuite-1p3p-pip-flickers",
+    test_config_template: "csuiteDefaultTemplate.xml",
 }

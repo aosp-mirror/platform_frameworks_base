@@ -16,29 +16,32 @@
 
 package com.android.settingslib.spa.widget.ui
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import com.android.settingslib.spa.framework.util.wrapOnSwitchWithLog
 
 @Composable
-fun SettingsSwitch(
-    checked: State<Boolean?>,
-    changeable: State<Boolean>,
+internal fun SettingsSwitch(
+    checked: Boolean?,
+    changeable: () -> Boolean,
     onCheckedChange: ((newChecked: Boolean) -> Unit)? = null,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
-    val checkedValue = checked.value
-    if (checkedValue != null) {
+    if (checked != null) {
         Switch(
-            checked = checkedValue,
+            checked = checked,
             onCheckedChange = wrapOnSwitchWithLog(onCheckedChange),
-            enabled = changeable.value,
+            enabled = changeable(),
+            interactionSource = interactionSource,
         )
     } else {
         Switch(
             checked = false,
             onCheckedChange = null,
             enabled = false,
+            interactionSource = interactionSource,
         )
     }
 }

@@ -95,8 +95,8 @@ private fun DrawScope.drawLinearBarTrack(
 fun CircularProgressBar(progress: Float, radius: Float = 40f) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(
-            progress = progress,
-            modifier = Modifier.size(radius.dp, radius.dp)
+            progress = { progress },
+            modifier = Modifier.size(radius.dp, radius.dp),
         )
     }
 }

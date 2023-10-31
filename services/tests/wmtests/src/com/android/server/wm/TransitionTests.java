@@ -2438,41 +2438,36 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testTransitionsTriggerPerformanceHints() {
-        assumeTrue(explicitRefreshRateHints());
-        SystemPerformanceHinter systemPerformanceHinter = mock(SystemPerformanceHinter.class);
-        final TransitionController controller = new TestTransitionController(mAtm);
+        final boolean explicitRefreshRateHints = explicitRefreshRateHints();
+        final var session = new SystemPerformanceHinter.HighPerfSession[1];
+        if (explicitRefreshRateHints) {
+            final SystemPerformanceHinter perfHinter = mWm.mSystemPerformanceHinter;
+            spyOn(perfHinter);
+            doAnswer(invocation -> {
+                session[0] = (SystemPerformanceHinter.HighPerfSession) invocation.callRealMethod();
+                return session[0];
+            }).when(perfHinter).createSession(anyInt(), anyInt(), anyString());
+        }
+        final TransitionController controller = mDisplayContent.mTransitionController;
         final TestTransitionPlayer player = registerTestTransitionPlayer();
-
-        mSyncEngine = createTestBLASTSyncEngine();
-        controller.setSyncEngine(mSyncEngine);
-        controller.setSystemPerformanceHinter(systemPerformanceHinter);
-        SystemPerformanceHinter.HighPerfSession session = mock(
-                SystemPerformanceHinter.HighPerfSession.class);
-        doReturn(session).when(systemPerformanceHinter).startSession(anyInt(), anyInt(),
-                anyString());
-
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
-        final Task task = createTask(mDisplayContent,
-                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
-        final ActivityRecord act = createActivityRecord(task);
-        act.setVisibleRequested(true);
-        act.setVisible(true);
+        controller.moveToCollecting(transitA);
+        transitA.collectExistenceChange(app);
+        controller.requestStartTransition(transitA, app.getTask(),
+                null /* remoteTransition */, null /* displayChange */);
+        player.start();
 
-        controller.startCollectOrQueue(transitA, (deferred) -> {
-        });
-        transitA.collect(act);
+        verify(mDisplayContent).enableHighPerfTransition(true);
+        if (explicitRefreshRateHints) {
+            verify(session[0]).start();
+        }
 
-        verify(systemPerformanceHinter).startSession(
-                eq(SystemPerformanceHinter.HINT_SF), anyInt(), eq("Transition collected"));
-
-        transitA.start();
-        transitA.setAllReady();
-
-        // Aborting here doesn't abort the transition, it aborts the sync allowing the transition to
-        // finish successfully.
-        mSyncEngine.abort(transitA.getSyncId());
-        controller.finishTransition(transitA);
-        verify(session).close();
+        player.finish();
+        verify(mDisplayContent).enableHighPerfTransition(false);
+        if (explicitRefreshRateHints) {
+            verify(session[0]).close();
+        }
     }
 
     @Test

@@ -16,7 +16,11 @@
 
 package com.android.server.os;
 
+import android.app.admin.flags.Flags;
+import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
+
 import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
@@ -29,7 +33,11 @@ import android.os.IBinder;
 import android.os.IDumpstateListener;
 import android.os.Process;
 import android.os.RemoteException;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Pair;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -37,6 +45,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -49,12 +58,17 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 public class BugreportManagerServiceImplTest {
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private Context mContext;
     private BugreportManagerServiceImpl mService;
     private BugreportManagerServiceImpl.BugreportFileManager mBugreportFileManager;
 
     private int mCallingUid = 1234;
     private String mCallingPackage  = "test.package";
+    private AtomicFile mMappingFile;
 
     private String mBugreportFile = "bugreport-file.zip";
     private String mBugreportFile2 = "bugreport-file2.zip";
@@ -62,17 +76,20 @@ public class BugreportManagerServiceImplTest {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
+        mMappingFile = new AtomicFile(mContext.getFilesDir(), "bugreport-mapping.xml");
         ArraySet<String> mAllowlistedPackages = new ArraySet<>();
         mAllowlistedPackages.add(mContext.getPackageName());
         mService = new BugreportManagerServiceImpl(
-                new BugreportManagerServiceImpl.Injector(mContext, mAllowlistedPackages));
-        mBugreportFileManager = new BugreportManagerServiceImpl.BugreportFileManager();
+                new BugreportManagerServiceImpl.Injector(mContext, mAllowlistedPackages,
+                        mMappingFile));
+        mBugreportFileManager = new BugreportManagerServiceImpl.BugreportFileManager(mMappingFile);
     }
 
     @After
     public void tearDown() throws Exception {
         // Changes to RoleManager persist between tests, so we need to clear out any funny
         // business we did in previous tests.
+        mMappingFile.delete();
         RoleManager roleManager = mContext.getSystemService(RoleManager.class);
         CallbackFuture future = new CallbackFuture();
         runWithShellPermissionIdentity(
@@ -99,11 +116,26 @@ public class BugreportManagerServiceImplTest {
         assertThrows(IllegalArgumentException.class, () ->
                 mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
                         mContext, callingInfo, Process.myUserHandle().getIdentifier(),
-                        "unknown-file.zip"));
+                        "unknown-file.zip", /* forceUpdateMapping= */ true));
 
         // No exception should be thrown.
         mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
-                mContext, callingInfo, mContext.getUserId(), mBugreportFile);
+                mContext, callingInfo, mContext.getUserId(), mBugreportFile,
+                /* forceUpdateMapping= */ true);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
+    public void testBugreportFileManagerKeepFilesOnRetrieval() {
+        Pair<Integer, String> callingInfo = new Pair<>(mCallingUid, mCallingPackage);
+        mBugreportFileManager.addBugreportFileForCaller(
+                callingInfo, mBugreportFile, /* keepOnRetrieval= */ true);
+
+        mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
+                mContext, callingInfo, mContext.getUserId(), mBugreportFile,
+                /* forceUpdateMapping= */ true);
+
+        assertThat(mBugreportFileManager.mBugreportFilesToPersist).containsExactly(mBugreportFile);
     }
 
     @Test
@@ -116,9 +148,11 @@ public class BugreportManagerServiceImplTest {
 
         // No exception should be thrown.
         mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
-                mContext, callingInfo, mContext.getUserId(), mBugreportFile);
+                mContext, callingInfo, mContext.getUserId(), mBugreportFile,
+                /* forceUpdateMapping= */ true);
         mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
-                mContext, callingInfo, mContext.getUserId(), mBugreportFile2);
+                mContext, callingInfo, mContext.getUserId(), mBugreportFile2,
+                /* forceUpdateMapping= */ true);
     }
 
     @Test
@@ -127,7 +161,7 @@ public class BugreportManagerServiceImplTest {
         assertThrows(IllegalArgumentException.class,
                 () -> mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
                         mContext, callingInfo, Process.myUserHandle().getIdentifier(),
-                        "test-file.zip"));
+                        "test-file.zip", /* forceUpdateMapping= */ true));
     }
 
     @Test
@@ -143,10 +177,8 @@ public class BugreportManagerServiceImplTest {
     }
 
     @Test
-    public void testCancelBugreportWithoutRole() throws Exception {
-        // Clear out allowlisted packages.
-        mService = new BugreportManagerServiceImpl(
-                new BugreportManagerServiceImpl.Injector(mContext, new ArraySet<>()));
+    public void testCancelBugreportWithoutRole() {
+        clearAllowlist();
 
         assertThrows(SecurityException.class, () -> mService.cancelBugreport(
                 Binder.getCallingUid(), mContext.getPackageName()));
@@ -154,9 +186,7 @@ public class BugreportManagerServiceImplTest {
 
     @Test
     public void testCancelBugreportWithRole() throws Exception {
-        // Clear out allowlisted packages.
-        mService = new BugreportManagerServiceImpl(
-                new BugreportManagerServiceImpl.Injector(mContext, new ArraySet<>()));
+        clearAllowlist();
         RoleManager roleManager = mContext.getSystemService(RoleManager.class);
         CallbackFuture future = new CallbackFuture();
         runWithShellPermissionIdentity(
@@ -173,6 +203,11 @@ public class BugreportManagerServiceImplTest {
 
         assertThat(future.get()).isEqualTo(true);
         mService.cancelBugreport(Binder.getCallingUid(), mContext.getPackageName());
+    }
+
+    private void clearAllowlist() {
+        mService = new BugreportManagerServiceImpl(
+                new BugreportManagerServiceImpl.Injector(mContext, new ArraySet<>(), mMappingFile));
     }
 
     private static class Listener implements IDumpstateListener {

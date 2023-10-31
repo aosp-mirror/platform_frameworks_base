@@ -29,11 +29,11 @@ import android.content.Context;
 import android.os.PerformanceHintManager;
 import android.os.Trace;
 import android.util.Log;
+import android.view.Display;
 import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.function.Supplier;
 
 /**
@@ -45,6 +45,7 @@ import java.util.function.Supplier;
 public class SystemPerformanceHinter {
     private static final String TAG = "SystemPerformanceHinter";
 
+    private static final int HINT_NO_OP = 0;
     // Change app and SF wakeup times to allow sf more time to composite a frame
     public static final int HINT_SF_EARLY_WAKEUP = 1 << 0;
     // Force max refresh rate
@@ -88,14 +89,17 @@ public class SystemPerformanceHinter {
         private final @HintFlags int hintFlags;
         private final String reason;
         private final int displayId;
-        private final int traceCookie;
+        private String mTraceName;
 
         protected HighPerfSession(@HintFlags int hintFlags, int displayId, @NonNull String reason) {
             this.hintFlags = hintFlags;
             this.reason = reason;
             this.displayId = displayId;
-            this.traceCookie = new Random().nextInt();
-            if (hintFlags != 0) {
+        }
+
+        /** Makes this session active. It is no-op if this session is already active. */
+        public void start() {
+            if (!mActiveSessions.contains(this)) {
                 startSession(this);
             }
         }
@@ -103,14 +107,35 @@ public class SystemPerformanceHinter {
         /**
          * Closes this session.
          */
+        @Override
         public void close() {
-            if (hintFlags != 0) {
-                endSession(this);
-            }
+            endSession(this);
         }
 
+        @Override
         public void finalize() {
             close();
+        }
+
+        boolean asyncTraceBegin() {
+            if (!Trace.isTagEnabled(mTraceTag)) {
+                mTraceName = null;
+                return false;
+            }
+            if (mTraceName == null) {
+                mTraceName = "PerfSession-d" + displayId + "-" + reason;
+            }
+            Trace.asyncTraceForTrackBegin(mTraceTag, TAG, mTraceName,
+                    System.identityHashCode(this));
+            return true;
+        }
+
+        boolean asyncTraceEnd() {
+            if (mTraceName == null) {
+                return false;
+            }
+            Trace.asyncTraceForTrackEnd(mTraceTag, TAG, System.identityHashCode(this));
+            return true;
         }
     }
 
@@ -119,13 +144,21 @@ public class SystemPerformanceHinter {
      */
     private class NoOpHighPerfSession extends HighPerfSession {
         public NoOpHighPerfSession() {
-            super(0 /* hintFlags */, -1 /* displayId */, "");
+            super(HINT_NO_OP, Display.INVALID_DISPLAY, "");
         }
 
+        @Override
+        public void start() {
+        }
+
+        @Override
         public void close() {
             // Do nothing
         }
     }
+
+    /** The tag category of trace. */
+    public long mTraceTag = Trace.TRACE_TAG_APP;
 
     // The active sessions
     private final ArrayList<HighPerfSession> mActiveSessions = new ArrayList<>();
@@ -133,7 +166,6 @@ public class SystemPerformanceHinter {
     private final PerformanceHintManager mPerfHintManager;
     private @Nullable PerformanceHintManager.Session mAdpfSession;
     private @Nullable DisplayRootProvider mDisplayRootProvider;
-
 
     /**
      * Constructor for the hinter.
@@ -167,12 +199,12 @@ public class SystemPerformanceHinter {
         mAdpfSession = adpfSession;
     }
 
-    /**
-     * Starts a session that requires high performance.
-     * @hide
-     */
-    public HighPerfSession startSession(@HintFlags int hintFlags, int displayId,
+    /** Creates a session that requires high performance. */
+    public HighPerfSession createSession(@HintFlags int hintFlags, int displayId,
             @NonNull String reason) {
+        if (hintFlags == HINT_NO_OP) {
+            throw new IllegalArgumentException("Not allow empty hint flags");
+        }
         if (mDisplayRootProvider == null && (hintFlags & HINT_SF_FRAME_RATE) != 0) {
             throw new IllegalArgumentException(
                     "Using SF frame rate hints requires a valid display root provider");
@@ -193,9 +225,20 @@ public class SystemPerformanceHinter {
     }
 
     /**
-     * Starts a session that requires high performance.
+     * Starts a new session that requires high performance.
      */
+    public HighPerfSession startSession(@HintFlags int hintFlags, int displayId,
+            @NonNull String reason) {
+        final HighPerfSession session = createSession(hintFlags, displayId, reason);
+        if (session.hintFlags != HINT_NO_OP) {
+            startSession(session);
+        }
+        return session;
+    }
+
+    /** Starts the session that requires high performance. */
     private void startSession(HighPerfSession session) {
+        final boolean isTraceEnabled = session.asyncTraceBegin();
         int oldGlobalFlags = calculateActiveHintFlags(HINT_GLOBAL);
         int oldPerDisplayFlags = calculateActiveHintFlagsForDisplay(HINT_PER_DISPLAY,
                 session.displayId);
@@ -217,19 +260,24 @@ public class SystemPerformanceHinter {
             mTransaction.setFrameRateCategory(
                     displaySurfaceControl, FRAME_RATE_CATEGORY_HIGH, /* smoothSwitchOnly= */ false);
             transactionChanged = true;
-            Trace.beginAsyncSection("PerfHint-framerate-" + session.displayId + "-"
-                    + session.reason, session.traceCookie);
+            if (isTraceEnabled) {
+                asyncTraceBegin(HINT_SF_FRAME_RATE, session.displayId);
+            }
         }
 
         // Global flags
         if (nowEnabled(oldGlobalFlags, newGlobalFlags, HINT_SF_EARLY_WAKEUP)) {
             mTransaction.setEarlyWakeupStart();
             transactionChanged = true;
-            Trace.beginAsyncSection("PerfHint-early_wakeup-" + session.reason, session.traceCookie);
+            if (isTraceEnabled) {
+                asyncTraceBegin(HINT_SF_EARLY_WAKEUP, Display.INVALID_DISPLAY);
+            }
         }
         if (nowEnabled(oldGlobalFlags, newGlobalFlags, HINT_ADPF)) {
             mAdpfSession.sendHint(PerformanceHintManager.Session.CPU_LOAD_UP);
-            Trace.beginAsyncSection("PerfHint-adpf-" + session.reason, session.traceCookie);
+            if (isTraceEnabled) {
+                asyncTraceBegin(HINT_ADPF, Display.INVALID_DISPLAY);
+            }
         }
         if (transactionChanged) {
             mTransaction.applyAsyncUnsafe();
@@ -240,6 +288,7 @@ public class SystemPerformanceHinter {
      * Ends a session that requires high performance.
      */
     private void endSession(HighPerfSession session) {
+        final boolean isTraceEnabled = session.asyncTraceEnd();
         int oldGlobalFlags = calculateActiveHintFlags(HINT_GLOBAL);
         int oldPerDisplayFlags = calculateActiveHintFlagsForDisplay(HINT_PER_DISPLAY,
                 session.displayId);
@@ -261,19 +310,24 @@ public class SystemPerformanceHinter {
             mTransaction.setFrameRateCategory(displaySurfaceControl, FRAME_RATE_CATEGORY_DEFAULT,
                     /* smoothSwitchOnly= */ false);
             transactionChanged = true;
-            Trace.endAsyncSection("PerfHint-framerate-" + session.displayId + "-" + session.reason,
-                    session.traceCookie);
+            if (isTraceEnabled) {
+                asyncTraceEnd(HINT_SF_FRAME_RATE);
+            }
         }
 
         // Global flags
         if (nowDisabled(oldGlobalFlags, newGlobalFlags, HINT_SF_EARLY_WAKEUP)) {
             mTransaction.setEarlyWakeupEnd();
             transactionChanged = true;
-            Trace.endAsyncSection("PerfHint-early_wakeup-" + session.reason, session.traceCookie);
+            if (isTraceEnabled) {
+                asyncTraceEnd(HINT_SF_EARLY_WAKEUP);
+            }
         }
         if (nowDisabled(oldGlobalFlags, newGlobalFlags, HINT_ADPF)) {
             mAdpfSession.sendHint(PerformanceHintManager.Session.CPU_LOAD_RESET);
-            Trace.endAsyncSection("PerfHint-adpf-" + session.reason, session.traceCookie);
+            if (isTraceEnabled) {
+                asyncTraceEnd(HINT_ADPF);
+            }
         }
         if (transactionChanged) {
             mTransaction.applyAsyncUnsafe();
@@ -321,6 +375,23 @@ public class SystemPerformanceHinter {
             }
         }
         return flags;
+    }
+
+    private void asyncTraceBegin(@HintFlags int flag, int displayId) {
+        final String prefix = switch (flag) {
+            case HINT_SF_EARLY_WAKEUP -> "PerfHint-early_wakeup";
+            case HINT_SF_FRAME_RATE -> "PerfHint-framerate";
+            case HINT_ADPF -> "PerfHint-adpf";
+            default -> "PerfHint-" + flag;
+        };
+        final String name = displayId != Display.INVALID_DISPLAY
+                ? (prefix + "-d" + displayId) : prefix;
+        Trace.asyncTraceForTrackBegin(mTraceTag, TAG, name,
+                flag ^ System.identityHashCode(this));
+    }
+
+    private void asyncTraceEnd(@HintFlags int flag) {
+        Trace.asyncTraceForTrackEnd(mTraceTag, TAG, flag ^ System.identityHashCode(this));
     }
 
     /**

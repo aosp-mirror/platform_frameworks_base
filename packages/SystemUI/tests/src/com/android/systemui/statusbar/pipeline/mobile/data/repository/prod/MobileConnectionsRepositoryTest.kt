@@ -31,6 +31,7 @@ import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
@@ -1223,12 +1224,14 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 whenever(it.subscriptionId).thenReturn(SUB_1_ID)
                 whenever(it.groupUuid).thenReturn(GROUP_1)
                 whenever(it.carrierName).thenReturn(SUB_1_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
         private val MODEL_1 =
             SubscriptionModel(
                 subscriptionId = SUB_1_ID,
                 groupUuid = GROUP_1,
                 carrierName = SUB_1_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
 
         // Subscription 2
@@ -1240,12 +1243,14 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 whenever(it.subscriptionId).thenReturn(SUB_2_ID)
                 whenever(it.groupUuid).thenReturn(GROUP_2)
                 whenever(it.carrierName).thenReturn(SUB_2_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
         private val MODEL_2 =
             SubscriptionModel(
                 subscriptionId = SUB_2_ID,
                 groupUuid = GROUP_2,
                 carrierName = SUB_2_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
 
         // Subs 3 and 4 are considered to be in the same group ------------------------------------
@@ -1257,6 +1262,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_3_ID_GROUPED)
                 whenever(it.groupUuid).thenReturn(GROUP_ID_3_4)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
 
         // Subscription 4
@@ -1265,6 +1271,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_4_ID_GROUPED)
                 whenever(it.groupUuid).thenReturn(GROUP_ID_3_4)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
 
         // Subs 3 and 4 are considered to be in the same group ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1279,9 +1286,14 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_CM_ID)
                 whenever(it.carrierName).thenReturn(SUB_CM_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
         private val MODEL_CM =
-            SubscriptionModel(subscriptionId = SUB_CM_ID, carrierName = SUB_CM_NAME)
+            SubscriptionModel(
+                subscriptionId = SUB_CM_ID,
+                carrierName = SUB_CM_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
+            )
 
         private val WIFI_INFO_CM =
             mock<WifiInfo>().apply {

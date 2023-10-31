@@ -146,6 +146,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_SENT_INVALID_MESSAGE = "sent_invalid_msg";
     private static final String ATT_SENT_VALID_MESSAGE = "sent_valid_msg";
     private static final String ATT_USER_DEMOTED_INVALID_MSG_APP = "user_demote_msg_app";
+    private static final String ATT_SENT_VALID_BUBBLE = "sent_valid_bubble";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -313,6 +314,7 @@ public class PreferencesHelper implements RankingConfig {
             r.hasSentValidMessage = parser.getAttributeBoolean(null, ATT_SENT_VALID_MESSAGE, false);
             r.userDemotedMsgApp = parser.getAttributeBoolean(
                     null, ATT_USER_DEMOTED_INVALID_MSG_APP, false);
+            r.hasSentValidBubble = parser.getAttributeBoolean(null, ATT_SENT_VALID_BUBBLE, false);
 
             final int innerDepth = parser.getDepth();
             int type;
@@ -564,8 +566,7 @@ public class PreferencesHelper implements RankingConfig {
     public void writeXml(TypedXmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, TAG_RANKING);
         out.attributeInt(null, ATT_VERSION, XML_VERSION);
-        if (mHideSilentStatusBarIcons != DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS
-                && (!forBackup || userId == UserHandle.USER_SYSTEM)) {
+        if (mHideSilentStatusBarIcons != DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS) {
             out.startTag(null, TAG_STATUS_ICONS);
             out.attributeBoolean(null, ATT_HIDE_SILENT, mHideSilentStatusBarIcons);
             out.endTag(null, TAG_STATUS_ICONS);
@@ -614,6 +615,7 @@ public class PreferencesHelper implements RankingConfig {
                         r.hasSentValidMessage);
                 out.attributeBoolean(null, ATT_USER_DEMOTED_INVALID_MSG_APP,
                         r.userDemotedMsgApp);
+                out.attributeBoolean(null, ATT_SENT_VALID_BUBBLE, r.hasSentValidBubble);
 
                 if (!forBackup) {
                     out.attributeInt(null, ATT_UID, r.uid);

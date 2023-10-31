@@ -20,11 +20,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BatteryChargingFull
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.ui.SettingsBody
@@ -32,11 +30,11 @@ import com.android.settingslib.spa.widget.ui.SettingsBody
 @Composable
 internal fun BasePreference(
     title: String,
-    summary: State<String>,
+    summary: () -> String,
     modifier: Modifier = Modifier,
     singleLineSummary: Boolean = false,
     icon: @Composable (() -> Unit)? = null,
-    enabled: State<Boolean> = true.toState(),
+    enabled: () -> Boolean = { true },
     paddingStart: Dp = SettingsDimension.itemPaddingStart,
     paddingEnd: Dp = SettingsDimension.itemPaddingEnd,
     paddingVertical: Dp = SettingsDimension.itemPaddingVertical,
@@ -46,7 +44,7 @@ internal fun BasePreference(
         title = title,
         subTitle = {
             SettingsBody(
-                body = summary.value,
+                body = summary(),
                 maxLines = if (singleLineSummary) 1 else Int.MAX_VALUE,
             )
         },
@@ -66,7 +64,7 @@ private fun BasePreferencePreview() {
     SettingsTheme {
         BasePreference(
             title = "Screen Saver",
-            summary = "Clock".toState(),
+            summary = { "Clock" },
         )
     }
 }
@@ -77,7 +75,7 @@ private fun BasePreferenceIconPreview() {
     SettingsTheme {
         BasePreference(
             title = "Screen Saver",
-            summary = "Clock".toState(),
+            summary = { "Clock" },
             icon = {
                 Icon(imageVector = Icons.Outlined.BatteryChargingFull, contentDescription = null)
             },

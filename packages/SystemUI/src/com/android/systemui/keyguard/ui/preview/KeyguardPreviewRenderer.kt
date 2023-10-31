@@ -127,12 +127,19 @@ constructor(
             false,
         )
 
+    private val displayId = bundle.getInt(KEY_DISPLAY_ID, DEFAULT_DISPLAY)
+    private val display: Display? = displayManager.getDisplay(displayId)
+    /**
+     * Returns a key that should make the KeyguardPreviewRenderer unique and if two of them have the
+     * same key they will be treated as the same KeyguardPreviewRenderer. Primary this is used to
+     * prevent memory leaks by allowing removal of the old KeyguardPreviewRenderer.
+     */
+    val id = Pair(hostToken, displayId)
+
     /** [shouldHideClock] here means that we never create and bind the clock views */
     private val shouldHideClock: Boolean =
         bundle.getBoolean(ClockPreviewConstants.KEY_HIDE_CLOCK, false)
     private val wallpaperColors: WallpaperColors? = bundle.getParcelable(KEY_COLORS)
-    private val displayId = bundle.getInt(KEY_DISPLAY_ID, DEFAULT_DISPLAY)
-    private val display: Display? = displayManager.getDisplay(displayId)
 
     private var host: SurfaceControlViewHost
 

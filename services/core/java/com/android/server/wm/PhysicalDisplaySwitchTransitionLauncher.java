@@ -34,6 +34,8 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.wm.DeviceStateController.DeviceState;
 
 public class PhysicalDisplaySwitchTransitionLauncher {
@@ -117,14 +119,27 @@ public class PhysicalDisplaySwitchTransitionLauncher {
         displayChange.setEndAbsBounds(endAbsBounds);
         displayChange.setPhysicalDisplayChanged(true);
 
-        final Transition t = mTransitionController.requestTransitionIfNeeded(TRANSIT_CHANGE,
-                0 /* flags */,
-                mDisplayContent, mDisplayContent, null /* remoteTransition */,
-                displayChange);
+        mTransition = null;
 
-        if (t != null) {
-            mDisplayContent.mAtmService.startPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-            mTransition = t;
+        if (mTransitionController.isCollecting()) {
+            // Add display container to the currently collecting transition
+            mTransitionController.collect(mDisplayContent);
+            mTransition = mTransitionController.getCollectingTransition();
+
+            // Make sure that transition is not ready until we finish the remote display change
+            mTransition.setReady(mDisplayContent, false);
+
+            ProtoLog.d(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Adding display switch to existing collecting transition");
+        } else {
+            mTransition = mTransitionController.requestTransitionIfNeeded(TRANSIT_CHANGE,
+                    0 /* flags */,
+                    mDisplayContent, mDisplayContent, null /* remoteTransition */,
+                    displayChange);
+        }
+
+        if (mTransition != null) {
+            mAtmService.startPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
         }
 
         mShouldRequestTransitionOnDisplaySwitch = false;

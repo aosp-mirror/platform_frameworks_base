@@ -1265,6 +1265,7 @@ public class JobInfo implements Parcelable {
 
         /** @hide */
         @NonNull
+        @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
         public Builder setBias(int bias) {
             mBias = bias;
             return this;

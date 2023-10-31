@@ -119,11 +119,11 @@ fun Preference(
     EntryHighlight {
         BasePreference(
             title = model.title,
-            summary = model.summary,
+            summary = { model.summary.value },
             singleLineSummary = singleLineSummary,
             modifier = modifier,
             icon = model.icon,
-            enabled = model.enabled,
+            enabled = { model.enabled.value },
         )
     }
 }

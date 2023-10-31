@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.content.Context
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.util.Log
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
@@ -96,6 +97,7 @@ constructor(
                     subscriptionId = subId,
                     isOpportunistic = false,
                     carrierName = DEFAULT_CARRIER_NAME,
+                    profileClass = PROFILE_CLASS_UNSET,
                 )
                 .also { subscriptionInfoCache[subId] = it }
 

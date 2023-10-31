@@ -32,13 +32,13 @@ import android.telephony.ServiceState
 import android.telephony.ServiceState.STATE_IN_SERVICE
 import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
 import android.telephony.SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
-import android.telephony.TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED
 import android.telephony.TelephonyManager.DATA_ACTIVITY_DORMANT
 import android.telephony.TelephonyManager.DATA_ACTIVITY_IN
 import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
@@ -132,6 +132,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             SubscriptionModel(
                 subscriptionId = SUB_1_ID,
                 carrierName = DEFAULT_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
         )
 
@@ -677,6 +678,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 SubscriptionModel(
                     subscriptionId = SUB_1_ID,
                     carrierName = DEFAULT_NAME,
+                    profileClass = PROFILE_CLASS_UNSET,
                 )
 
             assertThat(latest?.name).isEqualTo(DEFAULT_NAME)
@@ -686,6 +688,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 SubscriptionModel(
                     subscriptionId = SUB_1_ID,
                     carrierName = updatedName,
+                    profileClass = PROFILE_CLASS_UNSET,
                 )
 
             assertThat(latest?.name).isEqualTo(updatedName)
@@ -980,9 +983,9 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     companion object {
         private const val SUB_1_ID = 1
 
-        private val DEFAULT_NAME = "Fake Mobile Network"
+        private const val DEFAULT_NAME = "Fake Mobile Network"
         private val DEFAULT_NAME_MODEL = NetworkNameModel.Default(DEFAULT_NAME)
-        private val SEP = "-"
+        private const val SEP = "-"
 
         private const val SPN = "testSpn"
         private const val PLMN = "testPlmn"

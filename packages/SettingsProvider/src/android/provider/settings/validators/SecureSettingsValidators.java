@@ -312,10 +312,6 @@ public class SecureSettingsValidators {
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED,
                 BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Secure.ACCESSIBILITY_MAGNIFICATION_GESTURE,
-                new InclusiveIntegerRangeValidator(
-                        Secure.ACCESSIBILITY_MAGNIFICATION_GESTURE_NONE,
-                        Secure.ACCESSIBILITY_MAGNIFICATION_GESTURE_ALL));
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);

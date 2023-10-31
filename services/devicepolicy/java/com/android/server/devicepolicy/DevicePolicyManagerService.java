@@ -219,6 +219,7 @@ import static android.app.admin.ProvisioningException.ERROR_REMOVE_NON_REQUIRED_
 import static android.app.admin.ProvisioningException.ERROR_SETTING_PROFILE_OWNER_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_SET_DEVICE_OWNER_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_STARTING_PROFILE_FAILED;
+import static android.app.admin.flags.Flags.dumpsysPolicyEngineMigrationEnabled;
 import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_AVAILABLE;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE;
@@ -11022,6 +11023,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.println();
                 mStatLogger.dump(pw);
                 pw.println();
+                if (dumpsysPolicyEngineMigrationEnabled()) {
+                    mDevicePolicyEngine.dump(pw);
+                    pw.println();
+                }
                 pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
                 pw.println("Logout user: " + getLogoutUserIdUnchecked());
                 pw.println();

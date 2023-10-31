@@ -34,3 +34,10 @@ flag {
   description: "Clip z-above surfaceviews to global clip rect"
   bug: "298621623"
 }
+
+flag {
+  name: "requested_formats_v"
+  namespace: "core_graphics"
+  description: "Enable r_8, r_16_uint, rg_1616_uint, and rgba_10101010 in the SDK"
+  bug: "292545615"
+}

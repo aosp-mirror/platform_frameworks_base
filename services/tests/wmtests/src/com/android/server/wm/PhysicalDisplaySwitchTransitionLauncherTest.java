@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -61,8 +62,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @Presubmit
-@RunWith(WindowTestRunner.class)
-public class PhysicalDisplaySwitchTransitionLauncherTest extends WindowTestsBase {
+public class PhysicalDisplaySwitchTransitionLauncherTest {
 
     @Mock
     DisplayContent mDisplayContent;
@@ -72,6 +72,8 @@ public class PhysicalDisplaySwitchTransitionLauncherTest extends WindowTestsBase
     Resources mResources;
     @Mock
     ActivityTaskManagerService mActivityTaskManagerService;
+    @Mock
+    BLASTSyncEngine mSyncEngine;
     @Mock
     TransitionController mTransitionController;
 
@@ -217,6 +219,20 @@ public class PhysicalDisplaySwitchTransitionLauncherTest extends WindowTestsBase
     }
 
     @Test
+    public void testDisplaySwitchAfterUnfolding_otherCollectingTransition_collectsDisplaySwitch() {
+        givenCollectingTransition(createTransition(TRANSIT_CHANGE));
+        givenAllAnimationsEnabled();
+        mTarget.foldStateChanged(FOLDED);
+
+        mTarget.foldStateChanged(OPEN);
+        requestDisplaySwitch();
+
+        // Collects to the current transition
+        verify(mTransitionController).collect(mDisplayContent);
+    }
+
+
+    @Test
     public void testDisplaySwitch_whenNoContentInDisplayContent_noTransition() {
         givenAllAnimationsEnabled();
         givenDisplayContentHasContent(false);
@@ -265,6 +281,15 @@ public class PhysicalDisplaySwitchTransitionLauncherTest extends WindowTestsBase
 
     private void givenShellTransitionsEnabled(boolean enabled) {
         when(mTransitionController.isShellTransitionsEnabled()).thenReturn(enabled);
+    }
+
+    private void givenCollectingTransition(@Nullable Transition transition) {
+        when(mTransitionController.isCollecting()).thenReturn(transition != null);
+        when(mTransitionController.getCollectingTransition()).thenReturn(transition);
+    }
+
+    private Transition createTransition(int type) {
+        return new Transition(type, /* flags= */ 0, mTransitionController, mSyncEngine);
     }
 
     private void givenDisplayContentHasContent(boolean hasContent) {

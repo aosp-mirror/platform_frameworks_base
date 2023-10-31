@@ -35,7 +35,7 @@ interface KeyEventRepository {
 class KeyEventRepositoryImpl
 @Inject
 constructor(
-    val commandQueue: CommandQueue,
+    private val commandQueue: CommandQueue,
 ) : KeyEventRepository {
     override val isPowerButtonDown: Flow<Boolean> = conflatedCallbackFlow {
         val callback =
@@ -46,6 +46,7 @@ constructor(
                     }
                 }
             }
+        trySendWithFailureLogging(false, TAG, "init isPowerButtonDown")
         commandQueue.addCallback(callback)
         awaitClose { commandQueue.removeCallback(callback) }
     }

@@ -89,7 +89,7 @@ fun ListPreference(model: ListPreferenceModel) {
         ) {
             Column(modifier = Modifier.selectableGroup()) {
                 for (option in model.options) {
-                    Radio(option, model.selectedId, model.enabled) {
+                    Radio(option, model.selectedId.intValue, model.enabled.value) {
                         dialogOpened = false
                         model.onIdSelected(it)
                     }
@@ -113,12 +113,11 @@ fun ListPreference(model: ListPreferenceModel) {
 @Composable
 private fun Radio(
     option: ListPreferenceOption,
-    selectedId: IntState,
-    enabledState: State<Boolean>,
+    selectedId: Int,
+    enabled: Boolean,
     onIdSelected: (id: Int) -> Unit,
 ) {
-    val selected = option.id == selectedId.intValue
-    val enabled = enabledState.value
+    val selected = option.id == selectedId
     Row(
         modifier = Modifier
             .fillMaxWidth()

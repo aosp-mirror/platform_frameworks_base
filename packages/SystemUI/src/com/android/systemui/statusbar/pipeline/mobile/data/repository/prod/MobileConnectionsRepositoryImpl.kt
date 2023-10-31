@@ -408,6 +408,7 @@ constructor(
             isOpportunistic = isOpportunistic,
             groupUuid = groupUuid,
             carrierName = carrierName.toString(),
+            profileClass = profileClass,
         )
 
     companion object {

@@ -17,6 +17,8 @@
 package com.android.wm.shell.activityembedding;
 
 
+import static android.app.ActivityOptions.ANIM_CUSTOM;
+
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 
@@ -199,8 +201,12 @@ class ActivityEmbeddingAnimationSpec {
     Animation loadOpenAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
+        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final Animation animation;
-        if (shouldShowBackdrop(info, change)) {
+        if (options != null && options.getType() == ANIM_CUSTOM) {
+            animation = mTransitionAnimation.loadAnimationRes(options.getPackageName(),
+                    isEnter ? options.getEnterResId() : options.getExitResId());
+        } else if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                     ? com.android.internal.R.anim.task_fragment_clear_top_open_enter
                     : com.android.internal.R.anim.task_fragment_clear_top_open_exit);
@@ -223,8 +229,12 @@ class ActivityEmbeddingAnimationSpec {
     Animation loadCloseAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
+        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final Animation animation;
-        if (shouldShowBackdrop(info, change)) {
+        if (options != null && options.getType() == ANIM_CUSTOM) {
+            animation = mTransitionAnimation.loadAnimationRes(options.getPackageName(),
+                    isEnter ? options.getEnterResId() : options.getExitResId());
+        } else if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                     ? com.android.internal.R.anim.task_fragment_clear_top_close_enter
                     : com.android.internal.R.anim.task_fragment_clear_top_close_exit);

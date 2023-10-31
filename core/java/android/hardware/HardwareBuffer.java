@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.LongDef;
@@ -65,6 +66,10 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             DS_FP32UI8,
             S_UI8,
             YCBCR_P010,
+            R_8,
+            R_16_UINT,
+            RG_1616_UINT,
+            RGBA_10101010,
     })
     public @interface Format {
     }
@@ -105,7 +110,19 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
      * little-endian value, with the lower 6 bits set to zero.
      */
-    public static final int YCBCR_P010 = 0x36;
+    public static final int YCBCR_P010    = 0x36;
+    /** Format: 8 bits red */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
+    public static final int R_8           = 0x38;
+    /** Format: 16 bits red */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
+    public static final int R_16_UINT     = 0x39;
+    /** Format: 16 bits each red, green */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
+    public static final int RG_1616_UINT  = 0x3a;
+    /** Format: 10 bits each red, green, blue, alpha */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
+    public static final int RGBA_10101010 = 0x3b;
 
     // Note: do not rename, this field is used by native code
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)

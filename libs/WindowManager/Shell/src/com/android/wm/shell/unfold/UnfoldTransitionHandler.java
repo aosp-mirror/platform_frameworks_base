@@ -20,6 +20,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
 
+import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.os.IBinder;
 import android.view.SurfaceControl;
@@ -74,9 +75,9 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             Executor executor,
             Transitions transitions) {
         mUnfoldProgressProvider = unfoldProgressProvider;
+        mTransitions = transitions;
         mTransactionPool = transactionPool;
         mExecutor = executor;
-        mTransitions = transitions;
 
         mAnimators.add(splitUnfoldTaskAnimator);
         mAnimators.add(fullscreenUnfoldAnimator);
@@ -104,6 +105,16 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionFinishCallback finishCallback) {
+        if (hasUnfold(info) && transition != mTransition) {
+            // Take over transition that has unfold, we might receive it if no other handler
+            // accepted request in handleRequest, e.g. for rotation + unfold or
+            // TRANSIT_NONE + unfold transitions
+            mTransition = transition;
+
+            ProtoLog.v(WM_SHELL_TRANSITIONS, "UnfoldTransitionHandler: "
+                    + "take over startAnimation");
+        }
+
         if (transition != mTransition) return false;
 
         for (int i = 0; i < mAnimators.size(); i++) {
@@ -201,6 +212,33 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
         return (request.getType() == TRANSIT_CHANGE
                 && request.getDisplayChange() != null
                 && request.getDisplayChange().isPhysicalDisplayChanged());
+    }
+
+    /** Whether `transitionInfo` contains an unfold action. */
+    public boolean hasUnfold(@NonNull TransitionInfo transitionInfo) {
+        // Unfold animation won't play when animations are disabled
+        if (!ValueAnimator.areAnimatorsEnabled()) return false;
+
+        for (int i = 0; i < transitionInfo.getChanges().size(); i++) {
+            final TransitionInfo.Change change = transitionInfo.getChanges().get(i);
+            if ((change.getFlags() & TransitionInfo.FLAG_IS_DISPLAY) != 0) {
+                if (change.getEndAbsBounds() == null || change.getStartAbsBounds() == null) {
+                    continue;
+                }
+
+                // Handle only unfolding, currently we don't have an animation when folding
+                final int afterArea =
+                        change.getEndAbsBounds().width() * change.getEndAbsBounds().height();
+                final int beforeArea = change.getStartAbsBounds().width()
+                        * change.getStartAbsBounds().height();
+
+                if (afterArea > beforeArea) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Nullable

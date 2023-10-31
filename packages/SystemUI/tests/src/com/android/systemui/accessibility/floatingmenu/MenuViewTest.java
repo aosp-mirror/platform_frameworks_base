@@ -18,8 +18,6 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.app.UiModeManager.MODE_NIGHT_YES;
 
-import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -69,7 +67,6 @@ public class MenuViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        setFlagDefaults(mSetFlagsRule);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mNightMode = mUiModeManager.getNightMode();
         mUiModeManager.setNightMode(MODE_NIGHT_YES);
