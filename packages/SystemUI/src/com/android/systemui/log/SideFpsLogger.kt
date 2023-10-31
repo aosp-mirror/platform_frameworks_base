@@ -17,8 +17,6 @@
 package com.android.systemui.log
 
 import android.graphics.Point
-import android.graphics.Rect
-import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.BouncerLog
@@ -40,9 +38,9 @@ class SideFpsLogger @Inject constructor(@BouncerLog private val buffer: LogBuffe
     fun sfpsProgressBarStateChanged(
         visible: Boolean,
         location: Point,
-        shouldRotate: Boolean,
         fpDetectRunning: Boolean,
-        sensorWidth: Int
+        sensorWidth: Int,
+        rotation: Float,
     ) {
         buffer.log(
             TAG,
@@ -51,14 +49,14 @@ class SideFpsLogger @Inject constructor(@BouncerLog private val buffer: LogBuffe
                 bool1 = visible
                 int1 = location.x
                 int2 = location.y
-                bool2 = shouldRotate
+                str1 = "$rotation"
                 bool3 = fpDetectRunning
                 long1 = sensorWidth.toLong()
             },
             {
                 "SFPS progress bar state changed: visible: $bool1, " +
                     "sensorLocation (x, y): ($int1, $int2), " +
-                    "shouldRotate = $bool2, " +
+                    "rotation = $str1, " +
                     "fpDetectRunning: $bool3, " +
                     "sensorWidth: $long1"
             }
@@ -87,44 +85,25 @@ class SideFpsLogger @Inject constructor(@BouncerLog private val buffer: LogBuffe
         )
     }
 
-    fun logStateChange(sfpsAvailable: Boolean, settingEnabled: Boolean) {
-        buffer.log(
-            TAG,
-            LogLevel.DEBUG,
-            {
-                bool1 = sfpsAvailable
-                bool2 = settingEnabled
-            },
-            { "SFPS rest to unlock state changed: sfpsAvailable: $bool1, settingEnabled: $bool2" }
-        )
-    }
-
     fun sensorLocationStateChanged(
-        windowSize: Rect?,
-        rotation: DisplayRotation,
-        displayWidth: Int,
-        displayHeight: Int,
-        sensorWidth: Int,
-        sensorVerticalInDefaultOrientation: Boolean
+        pointOnScreenX: Int,
+        pointOnScreenY: Int,
+        sensorLength: Int,
+        isSensorVerticalInDefaultOrientation: Boolean
     ) {
         buffer.log(
             TAG,
             LogLevel.DEBUG,
             {
-                str1 = "$windowSize"
-                str2 = rotation.name
-                int1 = displayWidth
-                int2 = displayHeight
-                long1 = sensorWidth.toLong()
-                bool1 = sensorVerticalInDefaultOrientation
+                int1 = pointOnScreenX
+                int2 = pointOnScreenY
+                str2 = "$sensorLength"
+                bool1 = isSensorVerticalInDefaultOrientation
             },
             {
-                "sensorLocation state changed: " +
-                    "windowSize: $str1, " +
-                    "rotation: $str2, " +
-                    "widthInRotation0: $int1, " +
-                    "heightInRotation0: $int2, " +
-                    "sensorWidth: $long1, " +
+                "SideFpsSensorLocation state changed: " +
+                    "pointOnScreen: ($int1, $int2), " +
+                    "sensorLength: $str2, " +
                     "sensorVerticalInDefaultOrientation: $bool1"
             }
         )
