@@ -17,17 +17,31 @@
 package com.android.packageinstaller.v2.viewmodel;
 
 import android.app.Application;
+import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.v2.model.UninstallRepository;
+import com.android.packageinstaller.v2.model.UninstallRepository.CallerInfo;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
 
 public class UninstallViewModel extends AndroidViewModel {
 
     private static final String TAG = UninstallViewModel.class.getSimpleName();
     private final UninstallRepository mRepository;
+    private final MutableLiveData<UninstallStage> mCurrentUninstallStage = new MutableLiveData<>();
 
     public UninstallViewModel(@NonNull Application application, UninstallRepository repository) {
         super(application);
         mRepository = repository;
+    }
+
+    public MutableLiveData<UninstallStage> getCurrentUninstallStage() {
+        return mCurrentUninstallStage;
+    }
+
+    public void preprocessIntent(Intent intent, CallerInfo callerInfo) {
+        UninstallStage stage = mRepository.performPreUninstallChecks(intent, callerInfo);
+        mCurrentUninstallStage.setValue(stage);
     }
 }

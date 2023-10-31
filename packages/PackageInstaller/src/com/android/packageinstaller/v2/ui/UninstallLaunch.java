@@ -16,13 +16,17 @@
 
 package com.android.packageinstaller.v2.ui;
 
+import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.android.packageinstaller.v2.model.UninstallRepository;
+import com.android.packageinstaller.v2.model.UninstallRepository.CallerInfo;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModelFactory;
 
@@ -49,5 +53,21 @@ public class UninstallLaunch extends FragmentActivity{
         mUninstallViewModel = new ViewModelProvider(this,
             new UninstallViewModelFactory(this.getApplication(), mUninstallRepository)).get(
             UninstallViewModel.class);
+
+        Intent intent = getIntent();
+        CallerInfo callerInfo = new CallerInfo(
+            intent.getStringExtra(EXTRA_CALLING_ACTIVITY_NAME),
+            intent.getIntExtra(EXTRA_CALLING_PKG_UID, INVALID_UID));
+        mUninstallViewModel.preprocessIntent(intent, callerInfo);
+
+        mUninstallViewModel.getCurrentUninstallStage().observe(this,
+            this::onUninstallStageChange);
+    }
+
+    /**
+     * Main controller of the UI. This method shows relevant dialogs / fragments based on the
+     * uninstall stage
+     */
+    private void onUninstallStageChange(UninstallStage uninstallStage) {
     }
 }
