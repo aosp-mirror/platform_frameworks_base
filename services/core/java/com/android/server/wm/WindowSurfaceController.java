@@ -28,7 +28,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
 import android.os.Debug;
@@ -53,18 +52,6 @@ class WindowSurfaceController {
 
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
-    private float mSurfaceX = 0;
-    private float mSurfaceY = 0;
-
-    // Initialize to the identity matrix.
-    private float mLastDsdx = 1;
-    private float mLastDtdx = 0;
-    private float mLastDsdy = 0;
-    private float mLastDtdy = 1;
-
-    private float mSurfaceAlpha = 0;
-
-    private int mSurfaceLayer = 0;
 
     private final String title;
 
@@ -73,8 +60,6 @@ class WindowSurfaceController {
     private final int mWindowType;
     private final Session mWindowSession;
 
-    // Used to track whether we have called detach children on the way to invisibility.
-    boolean mChildrenDetached;
 
     WindowSurfaceController(String name, int format, int flags, WindowStateAnimator animator,
             int windowType) {
@@ -157,44 +142,11 @@ class WindowSurfaceController {
         }
     }
 
-    void setPosition(SurfaceControl.Transaction t, float left, float top) {
-        final boolean surfaceMoved = mSurfaceX != left || mSurfaceY != top;
-        if (!surfaceMoved) {
-            return;
-        }
-
-        mSurfaceX = left;
-        mSurfaceY = top;
-
-        ProtoLog.i(WM_SHOW_TRANSACTIONS,
-                "SURFACE POS (setPositionInTransaction) @ (%f,%f): %s", left, top, title);
-
-        t.setPosition(mSurfaceControl, left, top);
-    }
-
-    void setMatrix(SurfaceControl.Transaction t, float dsdx, float dtdx, float dtdy, float dsdy) {
-        final boolean matrixChanged = mLastDsdx != dsdx || mLastDtdx != dtdx ||
-                                      mLastDtdy != dtdy || mLastDsdy != dsdy;
-        if (!matrixChanged) {
-            return;
-        }
-
-        mLastDsdx = dsdx;
-        mLastDtdx = dtdx;
-        mLastDtdy = dtdy;
-        mLastDsdy = dsdy;
-
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE MATRIX [%f,%f,%f,%f]: %s",
-                dsdx, dtdx, dtdy, dsdy, title);
-        t.setMatrix(mSurfaceControl, dsdx, dtdx, dtdy, dsdy);
-    }
-
     boolean prepareToShowInTransaction(SurfaceControl.Transaction t, float alpha) {
         if (mSurfaceControl == null) {
             return false;
         }
 
-        mSurfaceAlpha = alpha;
         t.setAlpha(mSurfaceControl, alpha);
         return true;
     }
@@ -305,7 +257,6 @@ class WindowSurfaceController {
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(SHOWN, mSurfaceShown);
-        proto.write(LAYER, mSurfaceLayer);
         proto.end(token);
     }
 
@@ -314,13 +265,6 @@ class WindowSurfaceController {
             pw.print(prefix); pw.print("mSurface="); pw.println(mSurfaceControl);
         }
         pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
-        pw.print(" layer="); pw.print(mSurfaceLayer);
-        pw.print(" alpha="); pw.print(mSurfaceAlpha);
-        pw.print(" rect=("); pw.print(mSurfaceX);
-        pw.print(","); pw.print(mSurfaceY); pw.print(") ");
-        pw.print(" transform=("); pw.print(mLastDsdx); pw.print(", ");
-        pw.print(mLastDtdx); pw.print(", "); pw.print(mLastDsdy);
-        pw.print(", "); pw.print(mLastDtdy); pw.println(")");
     }
 
     @Override
