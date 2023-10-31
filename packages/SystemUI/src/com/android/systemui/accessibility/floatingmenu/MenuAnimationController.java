@@ -341,7 +341,16 @@ class MenuAnimationController {
     void moveToEdgeAndHide() {
         mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ true);
         final PointF position = mMenuView.getMenuPosition();
-        moveToPosition(getTuckedMenuPosition());
+        final PointF tuckedPosition = getTuckedMenuPosition();
+        if (Flags.floatingMenuAnimatedTuck()) {
+            flingThenSpringMenuWith(DynamicAnimation.TRANSLATION_X,
+                    Math.signum(tuckedPosition.x - position.x) * ESCAPE_VELOCITY,
+                    FLING_FRICTION_SCALAR,
+                    createDefaultSpringForce(),
+                    tuckedPosition.x);
+        } else {
+            moveToPosition(tuckedPosition);
+        }
 
         // Keep the touch region let users could click extra space to pop up the menu view
         // from the screen edge
@@ -353,7 +362,24 @@ class MenuAnimationController {
     void moveOutEdgeAndShow() {
         mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
 
-        mMenuView.onPositionChanged();
+        if (Flags.floatingMenuAnimatedTuck()) {
+            PointF position = mMenuView.getMenuPosition();
+            springMenuWith(DynamicAnimation.TRANSLATION_X,
+                    createDefaultSpringForce(),
+                    0,
+                    position.x,
+                    true
+            );
+            springMenuWith(DynamicAnimation.TRANSLATION_Y,
+                    createDefaultSpringForce(),
+                    0,
+                    position.y,
+                    true
+            );
+        } else {
+            mMenuView.onPositionChanged();
+        }
+
         mMenuView.onEdgeChangedIfNeeded();
     }
 
@@ -487,6 +513,12 @@ class MenuAnimationController {
 
     private Handler createUiHandler() {
         return new Handler(requireNonNull(Looper.myLooper(), "looper must not be null"));
+    }
+
+    private static SpringForce createDefaultSpringForce() {
+        return new SpringForce()
+                .setStiffness(SPRING_STIFFNESS)
+                .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO);
     }
 
     static class MenuPositionProperty

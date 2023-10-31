@@ -71,6 +71,7 @@ class MenuView extends FrameLayout implements
 
     private final MenuAnimationController mMenuAnimationController;
     private OnTargetFeaturesChangeListener mFeaturesChangeListener;
+    private OnMoveToTuckedListener mMoveToTuckedListener;
 
     MenuView(Context context, MenuViewModel menuViewModel, MenuViewAppearance menuViewAppearance) {
         super(context);
@@ -136,6 +137,10 @@ class MenuView extends FrameLayout implements
 
     void setOnTargetFeaturesChangeListener(OnTargetFeaturesChangeListener listener) {
         mFeaturesChangeListener = listener;
+    }
+
+    void setMoveToTuckedListener(OnMoveToTuckedListener listener) {
+        mMoveToTuckedListener = listener;
     }
 
     void addOnItemTouchListenerToList(RecyclerView.OnItemTouchListener listener) {
@@ -307,8 +312,11 @@ class MenuView extends FrameLayout implements
     void updateMenuMoveToTucked(boolean isMoveToTucked) {
         mIsMoveToTucked = isMoveToTucked;
         mMenuViewModel.updateMenuMoveToTucked(isMoveToTucked);
+        if (mMoveToTuckedListener != null) {
+            mMoveToTuckedListener.onMoveToTuckedChanged(isMoveToTucked);
+        }
 
-        if (Flags.floatingMenuOverlapsNavBarsFlag()) {
+        if (Flags.floatingMenuOverlapsNavBarsFlag() && !Flags.floatingMenuAnimatedTuck()) {
             if (isMoveToTucked) {
                 final float halfWidth = getMenuWidth() / 2.0f;
                 final boolean isOnLeftSide = mMenuAnimationController.isOnLeftSide();
@@ -427,5 +435,12 @@ class MenuView extends FrameLayout implements
          * @param newTargetFeatures the list related to the current accessibility features.
          */
         void onChange(List<AccessibilityTarget> newTargetFeatures);
+    }
+
+    /**
+     * Interface containing a callback for when MoveToTucked changes.
+     */
+    interface OnMoveToTuckedListener {
+        void onMoveToTuckedChanged(boolean moveToTucked);
     }
 }
