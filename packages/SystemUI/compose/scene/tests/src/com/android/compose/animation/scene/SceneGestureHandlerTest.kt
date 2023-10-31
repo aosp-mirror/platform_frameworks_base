@@ -55,8 +55,7 @@ class SceneGestureHandlerTest {
                             builder = scenesBuilder,
                             transitions = EmptyTestTransitions,
                             state = layoutState,
-                            density = Density(1f),
-                            edgeDetector = DefaultEdgeDetector,
+                            density = Density(1f)
                         )
                         .also { it.size = IntSize(SCREEN_SIZE.toInt(), SCREEN_SIZE.toInt()) },
                 orientation = Orientation.Vertical,
