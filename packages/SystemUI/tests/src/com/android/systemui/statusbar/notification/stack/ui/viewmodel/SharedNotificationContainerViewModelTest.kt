@@ -314,26 +314,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             sharedNotificationContainerInteractor.setTopPosition(10f)
 
             assertThat(position)
-                .isEqualTo(
-                    SharedNotificationContainerPosition(top = 10f, bottom = 0f, animate = true)
-                )
-        }
-
-    @Test
-    fun positionOnQS() =
-        testScope.runTest {
-            val position by collectLastValue(underTest.position)
-
-            // Start on lockscreen with shade expanded
-            showLockscreenWithQSExpanded()
-
-            // When not in split shade
-            sharedNotificationContainerInteractor.setTopPosition(10f)
-
-            assertThat(position)
-                .isEqualTo(
-                    SharedNotificationContainerPosition(top = 10f, bottom = 0f, animate = false)
-                )
+                .isEqualTo(SharedNotificationContainerPosition(top = 10f, bottom = 0f))
         }
 
     @Test
@@ -406,18 +387,6 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
             this,
-        )
-    }
-
-    private suspend fun showLockscreenWithQSExpanded() {
-        shadeRepository.setLockscreenShadeExpansion(0f)
-        shadeRepository.setQsExpansion(1f)
-        keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
-        keyguardTransitionRepository.sendTransitionStep(
-            TransitionStep(
-                to = KeyguardState.LOCKSCREEN,
-                transitionState = TransitionState.FINISHED
-            )
         )
     }
 
