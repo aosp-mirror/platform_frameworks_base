@@ -79,6 +79,13 @@ final class SoftInputWindow extends Dialog {
     @WindowState
     private int mWindowState = WindowState.TOKEN_PENDING;
 
+    @Override
+    protected boolean allowsRegisterDefaultOnBackInvokedCallback() {
+        // Do not register OnBackInvokedCallback from Dialog#onStart, InputMethodService will
+        // register CompatOnBackInvokedCallback for input method window.
+        return false;
+    }
+
     /**
      * Set {@link IBinder} window token to the window.
      *

@@ -15,11 +15,14 @@ instead use the generic {@link android.database} classes.
 <a href="{@docRoot}studio/command-line/sqlite3.html">sqlite3</a> command-line
 database tool. On your development machine, run the tool from the
 <code>platform-tools/</code> folder of your SDK. On the emulator, run the tool
-with adb shell, for example, <code>adb -e shell sqlite3</code>.
+with adb shell, for example, <code>adb shell sqlite3</code>.
 
 <p>The version of SQLite depends on the version of Android. See the following table:
 <table style="width:auto;">
   <tr><th>Android API</th><th>SQLite Version</th></tr>
+  <tr><td>API 34</td><td>3.39</td></tr>
+  <tr><td>API 33</td><td>3.32</td></tr>
+  <tr><td>API 32</td><td>3.32</td></tr>
   <tr><td>API 31</td><td>3.32</td></tr>
   <tr><td>API 30</td><td>3.28</td></tr>
   <tr><td>API 28</td><td>3.22</td></tr>
@@ -38,15 +41,19 @@ with adb shell, for example, <code>adb -e shell sqlite3</code>.
 
 <ul>
   <li>If available, use the sqlite3 tool, for example:
-    <code>adb -e shell sqlite3 --version</code>.</li>
+    <code>adb shell sqlite3 --version</code>.</li>
   <li>Create and query an in-memory database as shown in the following code sample:
     <pre>
     String query = "select sqlite_version() AS sqlite_version";
     SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(":memory:", null);
     Cursor cursor = db.rawQuery(query, null);
     String sqliteVersion = "";
-    if (cursor.moveToNext()) {
-        sqliteVersion = cursor.getString(0);
+    try {
+        if (cursor.moveToNext()) {
+            sqliteVersion = cursor.getString(0);
+        }
+    } finally {
+        cursor.close();
     }</pre>
   </li>
 </ul>

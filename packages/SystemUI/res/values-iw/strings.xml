@@ -1055,7 +1055,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"אין רשתות זמינות אחרות"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"אין רשתות זמינות"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"צריך להקיש על רשת כדי להתחבר"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"כדי להתחבר לרשת צריך להקיש עליה"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"צריך לבטל את הנעילה כדי להציג את הרשתות"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"בתהליך חיפוש רשתות…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"נכשל הניסיון להתחבר לרשת"</string>
