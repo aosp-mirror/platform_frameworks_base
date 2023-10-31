@@ -230,7 +230,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Ponovno pokretanje......"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Vraćanje na fabričke postavke"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Ponovno pokretanje......"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"Isključivanje...…"</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"Isključivanje..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Vaš tablet će se isključiti."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Vaš Android TV uređaj će se isključiti."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Sat će se isključiti."</string>
@@ -2036,7 +2036,7 @@
     <string name="autofill_save_type_address" msgid="3111006395818252885">"adresa"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"kreditna kartica"</string>
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"debitna kartica"</string>
-    <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"kartica za plaćanje"</string>
+    <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"platna kartica"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"kartica"</string>
     <string name="autofill_save_type_username" msgid="1018816929884640882">"korisničko ime"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"adresa e-pošte"</string>
