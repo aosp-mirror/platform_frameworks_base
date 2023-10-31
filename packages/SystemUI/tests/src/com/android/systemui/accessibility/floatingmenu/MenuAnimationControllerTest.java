@@ -93,7 +93,8 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         mViewPropertyAnimator = spy(mMenuView.animate());
         doReturn(mViewPropertyAnimator).when(mMenuView).animate();
 
-        mMenuAnimationController = new TestMenuAnimationController(mMenuView);
+        mMenuAnimationController = new TestMenuAnimationController(
+                mMenuView, stubMenuViewAppearance);
         mLastIsMoveToTucked = Prefs.getBoolean(mContext,
                 Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED, /* defaultValue= */ false);
         mEndListenerCaptor = ArgumentCaptor.forClass(DynamicAnimation.OnAnimationEndListener.class);
@@ -277,8 +278,8 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
      * Wrapper class for testing.
      */
     private static class TestMenuAnimationController extends MenuAnimationController {
-        TestMenuAnimationController(MenuView menuView) {
-            super(menuView);
+        TestMenuAnimationController(MenuView menuView, MenuViewAppearance menuViewAppearance) {
+            super(menuView, menuViewAppearance);
         }
 
         @Override

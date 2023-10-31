@@ -78,7 +78,7 @@ class MenuView extends FrameLayout implements
 
         mMenuViewModel = menuViewModel;
         mMenuViewAppearance = menuViewAppearance;
-        mMenuAnimationController = new MenuAnimationController(this);
+        mMenuAnimationController = new MenuAnimationController(this, menuViewAppearance);
         mAdapter = new AccessibilityTargetAdapter(mTargetFeatures);
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
@@ -184,9 +184,17 @@ class MenuView extends FrameLayout implements
                 insets[3]);
 
         final GradientDrawable gradientDrawable = getContainerViewGradient();
-        gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuRadii());
         gradientDrawable.setStroke(mMenuViewAppearance.getMenuStrokeWidth(),
                 mMenuViewAppearance.getMenuStrokeColor());
+        if (Flags.floatingMenuRadiiAnimation()) {
+            mMenuAnimationController.startRadiiAnimation(mMenuViewAppearance.getMenuRadii());
+        } else {
+            gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuRadii());
+        }
+    }
+
+    void setRadii(float[] radii) {
+        getContainerViewGradient().setCornerRadii(radii);
     }
 
     private void onMoveToTucked(boolean isMoveToTucked) {
@@ -391,8 +399,13 @@ class MenuView extends FrameLayout implements
         getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
                 insets[3]);
 
-        final GradientDrawable gradientDrawable = getContainerViewGradient();
-        gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuMovingStateRadii());
+        if (Flags.floatingMenuRadiiAnimation()) {
+            mMenuAnimationController.startRadiiAnimation(
+                    mMenuViewAppearance.getMenuMovingStateRadii());
+        } else {
+            final GradientDrawable gradientDrawable = getContainerViewGradient();
+            gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuMovingStateRadii());
+        }
     }
 
     void onBoundsInParentChanged(int newLeft, int newTop) {
