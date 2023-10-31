@@ -38,7 +38,7 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
 import com.android.systemui.util.leak.RotationUtils.getExactRotation
 import com.android.systemui.util.leak.RotationUtils.getResourcesForRotation
-import com.android.systemui.tracing.traceSection
+import com.android.app.tracing.traceSection
 import java.io.PrintWriter
 import java.lang.Math.max
 import javax.inject.Inject

@@ -30,13 +30,13 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.util.Log
+import com.android.app.tracing.TraceUtils.Companion.runBlocking
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
-import com.android.systemui.tracing.TraceUtils.Companion.runBlocking
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 
