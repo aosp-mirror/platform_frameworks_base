@@ -20,11 +20,13 @@ import android.appwidget.AppWidgetHost
 import android.content.Context
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.model.CommunalContentUiModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 @SysUISingleton
@@ -33,7 +35,7 @@ class CommunalViewModel
 constructor(
     @Application private val context: Context,
     private val appWidgetHost: AppWidgetHost,
-    communalInteractor: CommunalInteractor,
+    private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
 ) {
     /** Whether communal hub should show tutorial content. */
@@ -54,4 +56,9 @@ constructor(
                 )
             }
         }
+
+    val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
+    fun onSceneChanged(scene: CommunalSceneKey) {
+        communalInteractor.onSceneChanged(scene)
+    }
 }

@@ -35,7 +35,9 @@ import android.view.ViewGroupOverlay
 import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -57,6 +59,8 @@ import com.android.systemui.tracing.traceSection
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 private val TAG: String = MediaHierarchyManager::class.java.simpleName
 
@@ -96,11 +100,13 @@ constructor(
     private val mediaManager: MediaDataManager,
     private val keyguardViewController: KeyguardViewController,
     private val dreamOverlayStateController: DreamOverlayStateController,
+    private val communalInteractor: CommunalInteractor,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
     panelEventsEvents: ShadeStateEvents,
     private val secureSettings: SecureSettings,
     @Main private val handler: Handler,
+    @Application private val coroutineScope: CoroutineScope,
     private val splitShadeStateController: SplitShadeStateController,
     private val logger: MediaViewLogger,
 ) {
@@ -209,7 +215,7 @@ constructor(
         else result.setIntersect(animationStartClipping, targetClipping)
     }
 
-    private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_DREAM_OVERLAY + 1)
+    private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_COMMUNAL_HUB + 1)
     /**
      * The last location where this view was at before going to the desired location. This is useful
      * for guided transitions.
@@ -401,6 +407,9 @@ constructor(
             }
         }
 
+    /** Is the communal UI showing */
+    private var isCommunalShowing: Boolean = false
+
     /**
      * The current cross fade progress. 0.5f means it's just switching between the start and the end
      * location and the content is fully faded, while 0.75f means that we're halfway faded in again
@@ -563,6 +572,14 @@ constructor(
             settingsObserver,
             UserHandle.USER_ALL
         )
+
+        // Listen to the communal UI state.
+        coroutineScope.launch {
+            communalInteractor.isCommunalShowing.collect { value ->
+                isCommunalShowing = value
+                updateDesiredLocation(forceNoAnimation = true)
+            }
+        }
     }
 
     private fun updateConfiguration() {
@@ -1115,6 +1132,9 @@ constructor(
                 qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
                 onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
+                // TODO(b/308813166): revisit logic once interactions between the hub and
+                //  shade/keyguard state are finalized
+                isCommunalShowing && communalInteractor.isCommunalEnabled -> LOCATION_COMMUNAL_HUB
                 onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN
                 else -> LOCATION_QQS
             }
@@ -1224,6 +1244,9 @@ constructor(
         /** Attached on the dream overlay */
         const val LOCATION_DREAM_OVERLAY = 3
 
+        /** Attached to a view in the communal UI grid */
+        const val LOCATION_COMMUNAL_HUB = 4
+
         /** Attached at the root of the hierarchy in an overlay */
         const val IN_OVERLAY = -1000
 
@@ -1261,7 +1284,8 @@ private annotation class TransformationType
             MediaHierarchyManager.LOCATION_QS,
             MediaHierarchyManager.LOCATION_QQS,
             MediaHierarchyManager.LOCATION_LOCKSCREEN,
-            MediaHierarchyManager.LOCATION_DREAM_OVERLAY
+            MediaHierarchyManager.LOCATION_DREAM_OVERLAY,
+            MediaHierarchyManager.LOCATION_COMMUNAL_HUB
         ]
 )
 @Retention(AnnotationRetention.SOURCE)
