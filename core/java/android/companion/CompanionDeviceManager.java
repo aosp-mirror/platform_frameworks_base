@@ -221,6 +221,12 @@ public final class CompanionDeviceManager {
     @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @TestApi public static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
     /**
+     * Test message type without a response.
+     *
+     * @hide
+     */
+    public static final int MESSAGE_ONEWAY_PING = 0x43807378; // +PIN
+    /**
      * Message header assigned to the remote authentication handshakes.
      *
      * @hide
@@ -244,6 +250,18 @@ public final class CompanionDeviceManager {
     @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
+    /**
+     * Message header assigned to the one-way message sent from the wearable device.
+     *
+     * @hide
+     */
+    public static final int MESSAGE_ONEWAY_FROM_WEARABLE = 0x43708287; // +FRW
+    /**
+     * Message header assigned to the one-way message sent to the wearable device.
+     *
+     * @hide
+     */
+    public static final int MESSAGE_ONEWAY_TO_WEARABLE = 0x43847987; // +TOW
 
     /**
      * The length limit of Association tag.
