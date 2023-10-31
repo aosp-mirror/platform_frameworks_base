@@ -30,7 +30,7 @@ import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModelFactory;
 
-public class UninstallLaunch extends FragmentActivity{
+public class UninstallLaunch extends FragmentActivity implements UninstallActionListener {
 
     public static final String EXTRA_CALLING_PKG_UID =
         UninstallLaunch.class.getPackageName() + ".callingPkgUid";
@@ -69,5 +69,13 @@ public class UninstallLaunch extends FragmentActivity{
      * uninstall stage
      */
     private void onUninstallStageChange(UninstallStage uninstallStage) {
+    }
+
+    @Override
+    public void onPositiveResponse() {
+    }
+
+    @Override
+    public void onNegativeResponse() {
     }
 }
