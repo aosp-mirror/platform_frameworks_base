@@ -17,9 +17,11 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.view.LayoutInflater
+import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.traceSection
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.reinflateAndBindLatest
+import com.android.systemui.common.ui.view.setImportantForAccessibilityYesNo
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
@@ -36,6 +38,8 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.Notificati
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 /** Binds a [NotificationStackScrollLayout] to its [view model][NotificationListViewModel]. */
 class NotificationListViewBinder
@@ -56,7 +60,16 @@ constructor(
     ) {
         bindShelf(view)
         bindFooter(view)
+        bindEmptyShade(view)
         bindHideList(viewController, viewModel)
+
+        view.repeatWhenAttached {
+            lifecycleScope.launch {
+                viewModel.isImportantForAccessibility.collect { isImportantForAccessibility ->
+                    view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
+                }
+            }
+        }
     }
 
     private fun bindShelf(parentView: NotificationStackScrollLayout) {
@@ -92,6 +105,28 @@ constructor(
                         return@reinflateAndBindLatest disposableHandle
                     }
                 }
+            }
+        }
+    }
+
+    private fun bindEmptyShade(
+        parentView: NotificationStackScrollLayout,
+    ) {
+        parentView.repeatWhenAttached {
+            lifecycleScope.launch {
+                combine(
+                        viewModel.shouldShowEmptyShadeView,
+                        viewModel.areNotificationsHiddenInShade,
+                        viewModel.hasFilteredOutSeenNotifications,
+                        ::Triple
+                    )
+                    .collect { (shouldShow, areNotifsHidden, hasFilteredNotifs) ->
+                        parentView.updateEmptyShadeView(
+                            shouldShow,
+                            areNotifsHidden,
+                            hasFilteredNotifs,
+                        )
+                    }
             }
         }
     }

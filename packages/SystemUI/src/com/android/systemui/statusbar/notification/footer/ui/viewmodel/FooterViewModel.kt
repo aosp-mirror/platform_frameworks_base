@@ -30,10 +30,6 @@ import kotlinx.coroutines.flow.map
 
 /** ViewModel for [FooterView]. */
 class FooterViewModel(seenNotificationsInteractor: SeenNotificationsInteractor) {
-    init {
-        /* Check if */ FooterViewRefactor.isUnexpectedlyInLegacyMode()
-    }
-
     val message: Flow<FooterMessageViewModel> =
         seenNotificationsInteractor.hasFilteredOutSeenNotifications.map { hasFilteredOutNotifs ->
             FooterMessageViewModel(

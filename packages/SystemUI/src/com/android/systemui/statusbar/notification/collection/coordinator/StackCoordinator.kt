@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import com.android.app.tracing.traceSection
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
@@ -23,10 +24,10 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.app.tracing.traceSection
 import javax.inject.Inject
 
 /**
@@ -50,7 +51,7 @@ internal constructor(
     fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
         traceSection("StackCoordinator.onAfterRenderList") {
             controller.setNotifStats(calculateNotifStats(entries))
-            if (NotificationIconContainerRefactor.isEnabled) {
+            if (NotificationIconContainerRefactor.isEnabled || FooterViewRefactor.isEnabled) {
                 renderListInteractor.setRenderedList(entries)
             } else {
                 notificationIconAreaController.updateNotificationIcons(entries)

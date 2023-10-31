@@ -80,6 +80,8 @@ import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository;
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor;
@@ -177,6 +179,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
 
     protected SysuiStatusBarStateController mStatusBarStateController;
     protected ShadeInteractor mShadeInteractor;
+
+    protected ActiveNotificationsInteractor mActiveNotificationsInteractor;
 
     protected Handler mMainHandler;
     protected LockscreenShadeTransitionController.Callback mLockscreenShadeTransitionCallback;
@@ -290,6 +294,9 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 )
         );
 
+        mActiveNotificationsInteractor =
+                new ActiveNotificationsInteractor(new ActiveNotificationListRepository());
+
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
 
@@ -362,6 +369,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mock(KeyguardFaceAuthInteractor.class),
                 mShadeRepository,
                 mShadeInteractor,
+                mActiveNotificationsInteractor,
                 new JavaAdapter(mTestScope.getBackgroundScope()),
                 mCastController,
                 splitShadeStateController

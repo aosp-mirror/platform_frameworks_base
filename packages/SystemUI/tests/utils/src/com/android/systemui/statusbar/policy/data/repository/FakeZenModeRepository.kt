@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy.data.repository
 
-import android.app.NotificationManager
+import android.app.NotificationManager.Policy
 import android.provider.Settings
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
@@ -27,14 +27,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SysUISingleton
 class FakeZenModeRepository @Inject constructor() : ZenModeRepository {
     override val zenMode: MutableStateFlow<Int> = MutableStateFlow(Settings.Global.ZEN_MODE_OFF)
-    override val consolidatedNotificationPolicy: MutableStateFlow<NotificationManager.Policy?> =
+    override val consolidatedNotificationPolicy: MutableStateFlow<Policy?> =
         MutableStateFlow(
-            NotificationManager.Policy(
+            Policy(
                 /* priorityCategories = */ 0,
                 /* priorityCallSenders = */ 0,
                 /* priorityMessageSenders = */ 0,
             )
         )
+
+    fun setSuppressedVisualEffects(suppressedVisualEffects: Int) {
+        consolidatedNotificationPolicy.value =
+            Policy(
+                /* priorityCategories = */ 0,
+                /* priorityCallSenders = */ 0,
+                /* priorityMessageSenders = */ 0,
+                /* suppressedVisualEffects = */ suppressedVisualEffects,
+            )
+    }
 }
 
 @Module

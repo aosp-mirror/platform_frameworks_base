@@ -743,7 +743,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateFooter();
     }
 
-    void setHasFilteredOutSeenNotifications(boolean hasFilteredOutSeenNotifications) {
+    /** Setter for filtered notifs, to be removed with the FooterViewRefactor flag. */
+    public void setHasFilteredOutSeenNotifications(boolean hasFilteredOutSeenNotifications) {
+        FooterViewRefactor.assertInLegacyMode();
         mHasFilteredOutSeenNotifications = hasFilteredOutSeenNotifications;
     }
 
@@ -752,7 +754,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mFooterView == null || mController == null) {
             return;
         }
-        // TODO: move this logic to controller, which will invoke updateFooterView directly
         final boolean showHistory = mController.isHistoryEnabled();
         final boolean showDismissView = shouldShowDismissView();
 
@@ -774,13 +775,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 && (mQsExpansionFraction != 1 || !mQsFullScreen)
                 && !mScreenOffAnimationController.shouldHideNotificationsFooter()
                 && !mIsRemoteInputActive;
-    }
-
-    /**
-     * Return whether there are any clearable notifications
-     */
-    boolean hasActiveClearableNotifications(@SelectedRows int selection) {
-        return mController.hasActiveClearableNotifications(selection);
     }
 
     public NotificationSwipeActionHelper getSwipeActionHelper() {
@@ -1661,8 +1655,44 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * @return the position from where the appear transition ends when expanding.
      * Measured in absolute height.
+     *
+     * TODO(b/308591475): This entire logic can probably be improved as part of the empty shade
+     *  refactor, but for now:
+     *  - if the empty shade is visible, we can assume that the visible notif count is not 0;
+     *  - if the shelf is visible, we can assume there are at least 2 notifications present (this
+     *    is not true for AOD, but this logic refers to the expansion of the shade, where we never
+     *    have the shelf on its own)
      */
     private float getAppearEndPosition() {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            return getAppearEndPositionLegacy();
+        }
+
+        int appearPosition = mAmbientState.getStackTopMargin();
+        if (mEmptyShadeView.getVisibility() == GONE) {
+            if (isHeadsUpTransition()
+                    || (mInHeadsUpPinnedMode && !mAmbientState.isDozing())) {
+                if (mShelf.getVisibility() != GONE) {
+                    appearPosition += mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
+                }
+                appearPosition += getTopHeadsUpPinnedHeight()
+                        + getPositionInLinearLayout(mAmbientState.getTrackedHeadsUpRow());
+            } else if (mShelf.getVisibility() != GONE) {
+                appearPosition += mShelf.getIntrinsicHeight();
+            }
+        } else {
+            appearPosition = mEmptyShadeView.getHeight();
+        }
+        return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
+    }
+
+    /**
+     * The version of {@code getAppearEndPosition} that uses the notif count. The view shouldn't
+     * need to know about that, so we want to phase this out with the footer view refactor.
+     */
+    private float getAppearEndPositionLegacy() {
+        FooterViewRefactor.assertInLegacyMode();
+
         int appearPosition = mAmbientState.getStackTopMargin();
         int visibleNotifCount = mController.getVisibleNotificationCount();
         if (mEmptyShadeView.getVisibility() == GONE && visibleNotifCount > 0) {
@@ -1701,7 +1731,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             // This can't use expansion fraction as that goes only from 0 to 1. Also when
             // appear fraction for HUN is 0, expansion fraction will be already around 0.2-0.3
             // and that makes translation jump immediately.
-            float appearEndPosition = getAppearEndPosition();
+            float appearEndPosition = FooterViewRefactor.isEnabled() ? getAppearEndPosition()
+                    : getAppearEndPositionLegacy();
             float appearStartPosition = getAppearStartPosition();
             float hunAppearFraction = (height - appearStartPosition)
                     / (appearEndPosition - appearStartPosition);
@@ -4602,12 +4633,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         addView(mEmptyShadeView, index);
     }
 
-    void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
+    /** Legacy version, should be removed with the footer refactor flag. */
+    public void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
+        FooterViewRefactor.assertInLegacyMode();
+        updateEmptyShadeView(visible, areNotificationsHiddenInShade,
+                mHasFilteredOutSeenNotifications);
+    }
+
+    /** Trigger an update for the empty shade resources and visibility. */
+    public void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade,
+            boolean hasFilteredOutSeenNotifications) {
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         if (areNotificationsHiddenInShade) {
             updateEmptyShadeView(R.string.dnd_suppressing_shade_text, 0, 0);
-        } else if (mHasFilteredOutSeenNotifications) {
+        } else if (hasFilteredOutSeenNotifications) {
             updateEmptyShadeView(
                     R.string.no_unseen_notif_text,
                     R.string.unlock_to_see_notif_text,
@@ -4784,10 +4824,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void removeContainerView(View v) {
         Assert.isMainThread();
         removeView(v);
-        if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
-            mController.updateShowEmptyShadeView();
-            updateFooter();
-            mController.updateImportantForAccessibility();
+        if (!FooterViewRefactor.isEnabled()) {
+            // A notification was removed, and we're not currently showing the empty shade view.
+            if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
+                mController.updateShowEmptyShadeView();
+                updateFooter();
+                mController.updateImportantForAccessibility();
+            }
         }
 
         updateSpeedBumpIndex();
@@ -4796,10 +4839,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void addContainerView(View v) {
         Assert.isMainThread();
         addView(v);
-        if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
-            mController.updateShowEmptyShadeView();
-            updateFooter();
-            mController.updateImportantForAccessibility();
+        if (!FooterViewRefactor.isEnabled()) {
+            // A notification was added, and we're currently showing the empty shade view.
+            if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
+                mController.updateShowEmptyShadeView();
+                updateFooter();
+                mController.updateImportantForAccessibility();
+            }
         }
 
         updateSpeedBumpIndex();
@@ -4809,7 +4855,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         Assert.isMainThread();
         ensureRemovedFromTransientContainer(v);
         addView(v, index);
-        if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
+        // A notification was added, and we're currently showing the empty shade view.
+        if (!FooterViewRefactor.isEnabled() && v instanceof ExpandableNotificationRow
+                && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
             mController.updateImportantForAccessibility();
@@ -5082,7 +5130,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mEmptyShadeView.getVisibility() == GONE) {
             return getMinExpansionHeight();
         } else {
-            return getAppearEndPosition();
+            return FooterViewRefactor.isEnabled() ? getAppearEndPosition()
+                    : getAppearEndPositionLegacy();
         }
     }
 

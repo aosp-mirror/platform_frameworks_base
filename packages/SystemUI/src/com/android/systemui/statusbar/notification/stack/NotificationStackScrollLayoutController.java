@@ -20,7 +20,6 @@ import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
 import static com.android.app.animation.Interpolators.STANDARD;
-
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -108,7 +107,9 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -223,7 +224,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 @Override
                 public void onViewAttachedToWindow(View v) {
                     mConfigurationController.addCallback(mConfigurationListener);
-                    mZenModeController.addCallback(mZenModeControllerCallback);
+                    if (!FooterViewRefactor.isEnabled()) {
+                        mZenModeController.addCallback(mZenModeControllerCallback);
+                    }
                     final int newBarState = mStatusBarStateController.getState();
                     if (newBarState != mBarState) {
                         mStateListener.onStateChanged(newBarState);
@@ -236,7 +239,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 @Override
                 public void onViewDetachedFromWindow(View v) {
                     mConfigurationController.removeCallback(mConfigurationListener);
-                    mZenModeController.removeCallback(mZenModeControllerCallback);
+                    if (!FooterViewRefactor.isEnabled()) {
+                        mZenModeController.removeCallback(mZenModeControllerCallback);
+                    }
                     mStatusBarStateController.removeCallback(mStateListener);
                 }
             };
@@ -292,7 +297,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
         @Override
         public void onDensityOrFontScaleChanged() {
-            updateShowEmptyShadeView();
+            if (!FooterViewRefactor.isEnabled()) {
+                updateShowEmptyShadeView();
+            }
             mView.reinflateViews();
         }
 
@@ -308,7 +315,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             mView.updateBgColor();
             mView.updateDecorViews();
             mView.reinflateViews();
-            updateShowEmptyShadeView();
+            if (!FooterViewRefactor.isEnabled()) {
+                updateShowEmptyShadeView();
+            }
             updateFooter();
         }
 
@@ -357,7 +366,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
                             mLockscreenUserManager.isAnyProfilePublicMode());
                     mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
-                    updateImportantForAccessibility();
+                    if (!FooterViewRefactor.isEnabled()) {
+                        updateImportantForAccessibility();
+                    }
                 }
             };
 
@@ -673,6 +684,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             UiEventLogger uiEventLogger,
             NotificationRemoteInputManager remoteInputManager,
             VisibilityLocationProviderDelegator visibilityLocationProviderDelegator,
+            ActiveNotificationsInteractor activeNotificationsInteractor,
             SeenNotificationsInteractor seenNotificationsInteractor,
             NotificationListViewBinder viewBinder,
             ShadeController shadeController,
@@ -840,8 +852,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
         mViewBinder.bind(mView, this);
 
-        collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),
-                this::onKeyguardTransitionChanged);
+        if (!FooterViewRefactor.isEnabled()) {
+            collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),
+                    this::onKeyguardTransitionChanged);
+        }
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
@@ -1031,6 +1045,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public int getVisibleNotificationCount() {
+        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle footer
+        //  visibility in the refactored code
         return mNotifStats.getNumActiveNotifs();
     }
 
@@ -1124,6 +1140,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setQsFullScreen(boolean fullScreen) {
+        FooterViewRefactor.assertInLegacyMode();
         mView.setQsFullScreen(fullScreen);
         updateShowEmptyShadeView();
     }
@@ -1273,7 +1290,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     public void updateVisibility(boolean visible) {
         mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
 
-        if (mView.getVisibility() == View.VISIBLE) {
+        // Refactor note: the empty shade's visibility doesn't seem to actually depend on the
+        // parent visibility (so this update seemingly doesn't do anything). Therefore, this is not
+        // modeled in the refactored code.
+        if (!FooterViewRefactor.isEnabled() && mView.getVisibility() == View.VISIBLE) {
             // Synchronize EmptyShadeView visibility with the parent container.
             updateShowEmptyShadeView();
             updateImportantForAccessibility();
@@ -1288,6 +1308,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * are true.
      */
     public void updateShowEmptyShadeView() {
+        FooterViewRefactor.assertInLegacyMode();
+
         Trace.beginSection("NSSLC.updateShowEmptyShadeView");
 
         final boolean shouldShow = getVisibleNotificationCount() == 0
@@ -1331,21 +1353,12 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * auto-scrolling in NSSL.
      */
     public void updateImportantForAccessibility() {
+        FooterViewRefactor.assertInLegacyMode();
         if (getVisibleNotificationCount() == 0 && mView.onKeyguard()) {
             mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         } else {
             mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
-    }
-
-    /**
-     * @return true if {@link StatusBarStateController} is in transition to the KEYGUARD
-     * and false otherwise.
-     */
-    private boolean isInTransitionToKeyguard() {
-        final int currentState = mStatusBarStateController.getState();
-        final int upcomingState = mStatusBarStateController.getCurrentOrUpcomingState();
-        return (currentState != upcomingState && upcomingState == KEYGUARD);
     }
 
     public boolean isShowingEmptyShadeView() {
@@ -1395,10 +1408,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Return whether there are any clearable notifications
      */
     public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
+        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the clear all
+        //  button in the refactored code
         return hasNotifications(selection, true /* clearable */);
     }
 
     public boolean hasNotifications(@SelectedRows int selection, boolean isClearable) {
+        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the clear all
+        //  button in the refactored code
         boolean hasAlertingMatchingClearable = isClearable
                 ? mNotifStats.getHasClearableAlertingNotifs()
                 : mNotifStats.getHasNonClearableAlertingNotifs();
@@ -1678,6 +1695,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     @VisibleForTesting
     void onKeyguardTransitionChanged(TransitionStep transitionStep) {
+        FooterViewRefactor.assertInLegacyMode();
         boolean isTransitionToAod = transitionStep.getTo().equals(KeyguardState.AOD)
                 && (transitionStep.getFrom().equals(KeyguardState.GONE)
                 || transitionStep.getFrom().equals(KeyguardState.OCCLUDED));
@@ -2003,11 +2021,21 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private class NotifStackControllerImpl implements NotifStackController {
         @Override
         public void setNotifStats(@NonNull NotifStats notifStats) {
+            // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once clear all visibility
+            // is handled in the refactored stack.
             mNotifStats = notifStats;
-            mView.setHasFilteredOutSeenNotifications(
-                    mSeenNotificationsInteractor.getHasFilteredOutSeenNotifications().getValue());
+
+            if (!FooterViewRefactor.isEnabled()) {
+                mView.setHasFilteredOutSeenNotifications(
+                        mSeenNotificationsInteractor
+                                .getHasFilteredOutSeenNotifications().getValue());
+            }
+
             updateFooter();
-            updateShowEmptyShadeView();
+
+            if (!FooterViewRefactor.isEnabled()) {
+                updateShowEmptyShadeView();
+            }
         }
     }
 }
