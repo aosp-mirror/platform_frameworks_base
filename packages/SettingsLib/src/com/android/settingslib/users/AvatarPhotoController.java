@@ -36,20 +36,23 @@ import android.provider.MediaStore;
 import android.util.EventLog;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 
 import com.android.settingslib.utils.ThreadUtils;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import libcore.io.Streams;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 class AvatarPhotoController {
 
@@ -71,6 +74,8 @@ class AvatarPhotoController {
         Uri createTempImageUri(File parentDir, String fileName, boolean purge);
 
         ContentResolver getContentResolver();
+
+        Context getContext();
     }
 
     private static final String TAG = "AvatarPhotoController";
@@ -163,14 +168,21 @@ class AvatarPhotoController {
     }
 
     private void copyAndCropPhoto(final Uri pictureUri, boolean delayBeforeCrop) {
-        try {
-            ThreadUtils.postOnBackgroundThread(() -> {
-                final ContentResolver cr = mContextInjector.getContentResolver();
-                try (InputStream in = cr.openInputStream(pictureUri);
-                        OutputStream out = cr.openOutputStream(mPreCropPictureUri)) {
-                    Streams.copy(in, out);
-                } catch (IOException e) {
-                    Log.w(TAG, "Failed to copy photo", e);
+        ListenableFuture<Uri> future = ThreadUtils.getBackgroundExecutor().submit(() -> {
+            final ContentResolver cr = mContextInjector.getContentResolver();
+            try (InputStream in = cr.openInputStream(pictureUri);
+                    OutputStream out = cr.openOutputStream(mPreCropPictureUri)) {
+                Streams.copy(in, out);
+                return mPreCropPictureUri;
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to copy photo", e);
+                return null;
+            }
+        });
+        Futures.addCallback(future, new FutureCallback<>() {
+            @Override
+            public void onSuccess(@Nullable Uri result) {
+                if (result == null) {
                     return;
                 }
                 Runnable cropRunnable = () -> {
@@ -179,15 +191,18 @@ class AvatarPhotoController {
                     }
                 };
                 if (delayBeforeCrop) {
-                    ThreadUtils.postOnMainThreadDelayed(cropRunnable, DELAY_BEFORE_CROP_MILLIS);
+                    mContextInjector.getContext().getMainThreadHandler()
+                            .postDelayed(cropRunnable, DELAY_BEFORE_CROP_MILLIS);
                 } else {
-                    ThreadUtils.postOnMainThread(cropRunnable);
+                    cropRunnable.run();
                 }
+            }
 
-            }).get();
-        } catch (InterruptedException | ExecutionException e) {
-            Log.e(TAG, "Error performing copy-and-crop", e);
-        }
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e(TAG, "Error performing copy-and-crop", t);
+            }
+        }, mContextInjector.getContext().getMainExecutor());
     }
 
     private void cropPhoto(final Uri pictureUri) {
@@ -225,44 +240,49 @@ class AvatarPhotoController {
     }
 
     private void onPhotoNotCropped(final Uri data) {
-        try {
-            ThreadUtils.postOnBackgroundThread(() -> {
-                // Scale and crop to a square aspect ratio
-                Bitmap croppedImage = Bitmap.createBitmap(mPhotoSize, mPhotoSize,
-                        Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(croppedImage);
-                Bitmap fullImage;
-                try {
-                    InputStream imageStream = mContextInjector.getContentResolver()
-                            .openInputStream(data);
-                    fullImage = BitmapFactory.decodeStream(imageStream);
-                } catch (FileNotFoundException fe) {
-                    return;
-                }
-                if (fullImage != null) {
-                    int rotation = getRotation(data);
-                    final int squareSize = Math.min(fullImage.getWidth(),
-                            fullImage.getHeight());
-                    final int left = (fullImage.getWidth() - squareSize) / 2;
-                    final int top = (fullImage.getHeight() - squareSize) / 2;
+        ListenableFuture<Bitmap> future = ThreadUtils.getBackgroundExecutor().submit(() -> {
+            // Scale and crop to a square aspect ratio
+            Bitmap croppedImage = Bitmap.createBitmap(mPhotoSize, mPhotoSize,
+                    Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(croppedImage);
+            Bitmap fullImage;
+            try (InputStream imageStream = mContextInjector.getContentResolver()
+                    .openInputStream(data)) {
+                fullImage = BitmapFactory.decodeStream(imageStream);
+            }
+            if (fullImage == null) {
+                Log.e(TAG, "Image data could not be decoded");
+                return null;
+            }
+            int rotation = getRotation(data);
+            final int squareSize = Math.min(fullImage.getWidth(),
+                    fullImage.getHeight());
+            final int left = (fullImage.getWidth() - squareSize) / 2;
+            final int top = (fullImage.getHeight() - squareSize) / 2;
 
-                    Matrix matrix = new Matrix();
-                    RectF rectSource = new RectF(left, top,
-                            left + squareSize, top + squareSize);
-                    RectF rectDest = new RectF(0, 0, mPhotoSize, mPhotoSize);
-                    matrix.setRectToRect(rectSource, rectDest, Matrix.ScaleToFit.CENTER);
-                    matrix.postRotate(rotation, mPhotoSize / 2f, mPhotoSize / 2f);
-                    canvas.drawBitmap(fullImage, matrix, new Paint());
-                    saveBitmapToFile(croppedImage, new File(mImagesDir, CROP_PICTURE_FILE_NAME));
-
-                    ThreadUtils.postOnMainThread(() -> {
-                        mAvatarUi.returnUriResult(mCropPictureUri);
-                    });
+            Matrix matrix = new Matrix();
+            RectF rectSource = new RectF(left, top,
+                    left + squareSize, top + squareSize);
+            RectF rectDest = new RectF(0, 0, mPhotoSize, mPhotoSize);
+            matrix.setRectToRect(rectSource, rectDest, Matrix.ScaleToFit.CENTER);
+            matrix.postRotate(rotation, mPhotoSize / 2f, mPhotoSize / 2f);
+            canvas.drawBitmap(fullImage, matrix, new Paint());
+            saveBitmapToFile(croppedImage, new File(mImagesDir, CROP_PICTURE_FILE_NAME));
+            return croppedImage;
+        });
+        Futures.addCallback(future, new FutureCallback<>() {
+            @Override
+            public void onSuccess(@Nullable Bitmap result) {
+                if (result != null) {
+                    mAvatarUi.returnUriResult(mCropPictureUri);
                 }
-            }).get();
-        } catch (InterruptedException | ExecutionException e) {
-            Log.e(TAG, "Error performing internal crop", e);
-        }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e(TAG, "Error performing internal crop", t);
+            }
+        }, mContextInjector.getContext().getMainExecutor());
     }
 
     /**
@@ -371,6 +391,11 @@ class AvatarPhotoController {
         @Override
         public ContentResolver getContentResolver() {
             return mContext.getContentResolver();
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
         }
     }
 }
