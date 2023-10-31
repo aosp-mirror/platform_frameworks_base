@@ -33126,6 +33126,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setFrameContentVelocity(float pixelsPerSecond) {
         if (viewVelocityApi()) {
             mFrameContentVelocity = Math.abs(pixelsPerSecond);
+
+            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
+                Trace.setCounter("Set frame velocity", (long) mFrameContentVelocity);
+            }
         }
     }
 
