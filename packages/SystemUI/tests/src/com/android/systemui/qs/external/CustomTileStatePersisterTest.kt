@@ -85,7 +85,7 @@ class CustomTileStatePersisterTest : SysuiTestCase() {
         `when`(sharedPreferences.edit()).thenReturn(editor)
 
         tile = Tile()
-        customTileStatePersister = CustomTileStatePersister(mockContext)
+        customTileStatePersister = CustomTileStatePersisterImpl(mockContext)
     }
 
     @Test
