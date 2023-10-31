@@ -27,6 +27,7 @@ import static com.android.packageinstaller.v2.model.uninstallstagedata.Uninstall
 import static com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted.ABORT_REASON_USER_NOT_ALLOWED;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.usage.StorageStats;
@@ -53,8 +54,10 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallFailed;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallReady;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallSuccess;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUninstalling;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired;
 import java.io.IOException;
@@ -432,6 +435,32 @@ public class UninstallRepository {
 
     private void handleUninstallResult(int status, int legacyStatus, @Nullable String message,
         int serviceId) {
+        if (mCallback != null) {
+            // The caller will be informed about the result via a callback
+            mCallback.onUninstallComplete(mTargetPackageName, legacyStatus, message);
+
+            // Since the caller already received the results, just finish the app at this point
+            mUninstallResult.setValue(null);
+            return;
+        }
+
+        boolean returnResult = mIntent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
+        if (returnResult || mCallingActivity != null) {
+            Intent intent = new Intent();
+            intent.putExtra(Intent.EXTRA_INSTALL_RESULT, legacyStatus);
+
+            if (status == PackageInstaller.STATUS_SUCCESS) {
+                UninstallSuccess.Builder successBuilder = new UninstallSuccess.Builder()
+                    .setResultIntent(intent)
+                    .setActivityResultCode(Activity.RESULT_OK);
+                mUninstallResult.setValue(successBuilder.build());
+            } else {
+                UninstallFailed.Builder failedBuilder = new UninstallFailed.Builder(true)
+                    .setResultIntent(intent)
+                    .setActivityResultCode(Activity.RESULT_FIRST_USER);
+                mUninstallResult.setValue(failedBuilder.build());
+            }
+        }
     }
 
     /**

@@ -31,7 +31,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.android.packageinstaller.v2.model.UninstallRepository;
 import com.android.packageinstaller.v2.model.UninstallRepository.CallerInfo;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallFailed;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallSuccess;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUninstalling;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired;
 import com.android.packageinstaller.v2.ui.fragments.UninstallConfirmationFragment;
@@ -106,6 +108,12 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
             UninstallUninstallingFragment uninstallingDialog = new UninstallUninstallingFragment(
                 uninstalling);
             showDialogInner(uninstallingDialog);
+        } else if (uninstallStage.getStageCode() == UninstallStage.STAGE_FAILED) {
+            UninstallFailed failed = (UninstallFailed) uninstallStage;
+            setResult(failed.getActivityResultCode(), failed.getResultIntent(), true);
+        } else if (uninstallStage.getStageCode() == UninstallStage.STAGE_SUCCESS) {
+            UninstallSuccess success = (UninstallSuccess) uninstallStage;
+            setResult(success.getActivityResultCode(), success.getResultIntent(), true);
         } else {
             Log.e(TAG, "Invalid stage: " + uninstallStage.getStageCode());
             showDialogInner(null);
