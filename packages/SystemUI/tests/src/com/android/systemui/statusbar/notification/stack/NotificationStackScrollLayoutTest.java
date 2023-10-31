@@ -19,8 +19,6 @@ package com.android.systemui.statusbar.notification.stack;
 import static android.view.View.GONE;
 import static android.view.WindowInsets.Type.ime;
 
-import static com.android.systemui.Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR;
-import static com.android.systemui.flags.SetFlagsRuleExtensionsKt.setFlagDefault;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.RUBBER_BAND_FACTOR_NORMAL;
@@ -167,11 +165,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mFeatureFlags.setDefault(Flags.NOTIFICATION_SHELF_REFACTOR);
         mFeatureFlags.setDefault(Flags.NEW_AOD_TRANSITION);
         mFeatureFlags.setDefault(Flags.UNCLEARED_TRANSIENT_HUN_FIX);
-        // Some tests in this file test the FooterView. Since we're refactoring the FooterView
-        // business logic out of the NSSL, the behavior tested in this file will eventually be
-        // tested directly in the new FooterView stack. For now, we just want to make sure that the
-        // old behavior is preserved when the flag is off.
-        setFlagDefault(mSetFlagsRule, FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR);
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);

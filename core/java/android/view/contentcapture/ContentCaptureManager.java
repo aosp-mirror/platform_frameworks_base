@@ -395,6 +395,22 @@ public final class ContentCaptureManager {
     public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD =
             "content_protection_optional_groups_threshold";
 
+    /**
+     * Sets the initial delay for fetching content protection allowlist in milliseconds.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS =
+            "content_protection_allowlist_delay_ms";
+
+    /**
+     * Sets the timeout for fetching content protection allowlist in milliseconds.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS =
+            "content_protection_allowlist_timeout_ms";
+
     /** @hide */
     @TestApi
     public static final int LOGGING_LEVEL_OFF = 0;
@@ -445,6 +461,10 @@ public final class ContentCaptureManager {
     public static final String DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG = "";
     /** @hide */
     public static final int DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD = 0;
+    /** @hide */
+    public static final long DEFAULT_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS = 30000;
+    /** @hide */
+    public static final long DEFAULT_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS = 250;
 
     private final Object mLock = new Object();
 

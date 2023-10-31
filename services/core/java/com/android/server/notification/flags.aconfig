@@ -8,6 +8,13 @@ flag {
 }
 
 flag {
+  name: "modes_api"
+  namespace: "systemui"
+  description: "This flag controls new and updated DND apis"
+  bug: "300477976"
+}
+
+flag {
   name: "polite_notifications"
   namespace: "systemui"
   description: "This flag controls the polite notification feature"

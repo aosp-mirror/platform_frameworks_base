@@ -52,6 +52,7 @@ class TouchTracker {
     private float mStartThresholdX;
     private int mSwipeEdge;
     private boolean mCancelled;
+    private TouchTrackerState mState = TouchTrackerState.INITIAL;
 
     void update(float touchX, float touchY, float velocityX, float velocityY) {
         /**
@@ -76,6 +77,26 @@ class TouchTracker {
         mTriggerBack = triggerBack;
     }
 
+    boolean getTriggerBack() {
+        return mTriggerBack;
+    }
+
+    void setState(TouchTrackerState state) {
+        mState = state;
+    }
+
+    boolean isInInitialState() {
+        return mState == TouchTrackerState.INITIAL;
+    }
+
+    boolean isActive() {
+        return mState == TouchTrackerState.ACTIVE;
+    }
+
+    boolean isFinished() {
+        return mState == TouchTrackerState.FINISHED;
+    }
+
     void setGestureStartLocation(float touchX, float touchY, int swipeEdge) {
         mInitTouchX = touchX;
         mInitTouchY = touchY;
@@ -89,6 +110,7 @@ class TouchTracker {
         mStartThresholdX = 0;
         mCancelled = false;
         mTriggerBack = false;
+        mState = TouchTrackerState.INITIAL;
         mSwipeEdge = BackEvent.EDGE_LEFT;
     }
 
@@ -186,4 +208,9 @@ class TouchTracker {
         mMaxDistance = maxDistance;
         mNonLinearFactor = nonLinearFactor;
     }
+
+    enum TouchTrackerState {
+        INITIAL, ACTIVE, FINISHED
+    }
+
 }

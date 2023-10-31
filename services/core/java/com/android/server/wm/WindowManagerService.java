@@ -1346,8 +1346,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DisplayContent dc = mRoot.getDisplayContent(displayId);
                 return (dc == null) ? null : dc.getSurfaceControl();
             }
-
         }, mTransactionFactory);
+        mSystemPerformanceHinter.mTraceTag = TRACE_TAG_WINDOW_MANAGER;
     }
 
     DisplayAreaPolicy.Provider getDisplayAreaPolicyProvider() {
@@ -7195,6 +7195,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println(separator);
             }
             mConstants.dump(pw);
+            if (dumpAll) {
+                pw.println(separator);
+            }
+            mSystemPerformanceHinter.dump(pw, "");
         }
     }
 

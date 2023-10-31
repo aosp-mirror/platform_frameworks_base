@@ -949,7 +949,9 @@ public class BubbleExpandedView extends LinearLayout {
         if (mTaskView != null
                 && mTaskView.getVisibility() == VISIBLE
                 && mTaskView.isAttachedToWindow()) {
-            mTaskView.onLocationChanged();
+            // post this to the looper, because if the device orientation just changed, we need to
+            // let the current shell transition complete before updating the task view bounds.
+            post(() -> mTaskView.onLocationChanged());
         }
         if (mIsOverflow) {
             // post this to the looper so that the view has a chance to be laid out before it can

@@ -43,8 +43,8 @@ fun MainSwitchPreference(model: SwitchPreferenceModel) {
         ) {
             InternalSwitchPreference(
                 title = model.title,
-                checked = model.checked,
-                changeable = model.changeable,
+                checked = model.checked.value,
+                changeable = model.changeable.value,
                 onCheckedChange = model.onCheckedChange,
                 paddingStart = 20.dp,
                 paddingEnd = 20.dp,

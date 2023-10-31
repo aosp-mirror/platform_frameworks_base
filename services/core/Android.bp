@@ -96,26 +96,11 @@ genrule {
     out: ["com/android/server/location/contexthub/ContextHubStatsLog.java"],
 }
 
-/*
- * This module is used to refer aconfig flag libraries that are
- * added to the framework via static_libs.
- * These libraries are referred here via libs prevent duplication of classes in both
- * the framework and the system server.
-*/
-java_defaults {
-    name: "shared-framework-aconfig-libs",
-    libs: [
-        "display_flags_lib",
-        "camera_platform_flags_core_java_lib",
-    ],
-}
-
 java_library_static {
     name: "services.core.unboosted",
     defaults: [
         "platform_service_defaults",
         "android.hardware.power-java_static",
-        "shared-framework-aconfig-libs",
     ],
     srcs: [
         ":android.hardware.biometrics.face-V3-java-source",

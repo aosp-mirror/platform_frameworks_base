@@ -880,6 +880,7 @@ public final class MediaRoute2Info implements Parcelable {
                 .append(", volumeHandling=").append(getVolumeHandling())
                 .append(", volumeMax=").append(getVolumeMax())
                 .append(", volume=").append(getVolume())
+                .append(", address=").append(getAddress())
                 .append(", deduplicationIds=").append(String.join(",", getDeduplicationIds()))
                 .append(", providerId=").append(getProviderId())
                 .append(", isVisibilityRestricted=").append(mIsVisibilityRestricted)

@@ -11662,45 +11662,6 @@ public final class Settings {
                 "accessibility_magnification_two_finger_triple_tap_enabled";
 
         /**
-         * Controls magnification enable gesture. Accessibility magnification can have one or more
-         * enable gestures.
-         *
-         * @see #ACCESSIBILITY_MAGNIFICATION_GESTURE_NONE
-         * @see #ACCESSIBILITY_MAGNIFICATION_GESTURE_SINGLE_FINGER_TRIPLE_TAP
-         * @see #ACCESSIBILITY_MAGNIFICATION_GESTURE_TWO_FINGER_TRIPLE_TAP
-         * @hide
-         */
-        public static final String ACCESSIBILITY_MAGNIFICATION_GESTURE =
-                "accessibility_magnification_gesture";
-
-        /**
-         * Magnification enable gesture value that is a default value.
-         * @hide
-         */
-        public static final int ACCESSIBILITY_MAGNIFICATION_GESTURE_NONE = 0x0;
-
-        /**
-         * Magnification enable gesture value is single finger triple tap.
-         * @hide
-         */
-        public static final int ACCESSIBILITY_MAGNIFICATION_GESTURE_SINGLE_FINGER_TRIPLE_TAP = 0x1;
-
-        /**
-         * Magnification enable gesture value is two finger triple tap.
-         * @hide
-         */
-        public static final int ACCESSIBILITY_MAGNIFICATION_GESTURE_TWO_FINGER_TRIPLE_TAP = 0x2;
-
-        /**
-         * Magnification enable gesture values include single finger triple tap and two finger
-         * triple tap.
-         * @hide
-         */
-        public static final int ACCESSIBILITY_MAGNIFICATION_GESTURE_ALL =
-                ACCESSIBILITY_MAGNIFICATION_GESTURE_SINGLE_FINGER_TRIPLE_TAP
-                | ACCESSIBILITY_MAGNIFICATION_GESTURE_TWO_FINGER_TRIPLE_TAP;
-
-        /**
          * Controls magnification capability. Accessibility magnification is capable of at least one
          * of the magnification modes.
          *

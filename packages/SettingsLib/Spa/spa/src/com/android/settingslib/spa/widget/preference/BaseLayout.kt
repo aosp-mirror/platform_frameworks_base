@@ -26,13 +26,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsOpacity.alphaForEnabled
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -44,7 +42,7 @@ internal fun BaseLayout(
     subTitle: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
-    enabled: State<Boolean> = true.toState(),
+    enabled: () -> Boolean = { true },
     paddingStart: Dp = SettingsDimension.itemPaddingStart,
     paddingEnd: Dp = SettingsDimension.itemPaddingEnd,
     paddingVertical: Dp = SettingsDimension.itemPaddingVertical,
@@ -56,7 +54,7 @@ internal fun BaseLayout(
             .padding(end = paddingEnd),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val alphaModifier = Modifier.alphaForEnabled(enabled.value)
+        val alphaModifier = Modifier.alphaForEnabled(enabled())
         BaseIcon(icon, alphaModifier, paddingStart)
         Titles(
             title = title,

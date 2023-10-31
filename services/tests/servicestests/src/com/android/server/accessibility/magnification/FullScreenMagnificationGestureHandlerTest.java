@@ -234,9 +234,11 @@ public class FullScreenMagnificationGestureHandlerTest {
         mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(true);
         mClock = new OffsettableClock.Stopped();
 
-        boolean detectTripleTap = true;
+        boolean detectSingleFingerTripleTap = true;
+        boolean detectTwoFingerTripleTap = true;
         boolean detectShortcutTrigger = true;
-        mMgh = newInstance(detectTripleTap, detectShortcutTrigger);
+        mMgh = newInstance(detectSingleFingerTripleTap, detectTwoFingerTripleTap,
+                detectShortcutTrigger);
     }
 
     @After
@@ -251,11 +253,11 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @NonNull
-    private FullScreenMagnificationGestureHandler newInstance(boolean detectTripleTap,
-            boolean detectShortcutTrigger) {
+    private FullScreenMagnificationGestureHandler newInstance(boolean detectSingleFingerTripleTap,
+            boolean detectTwoFingerTripleTap, boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
                 mContext, mFullScreenMagnificationController, mMockTraceManager, mMockCallback,
-                detectTripleTap, detectShortcutTrigger,
+                detectSingleFingerTripleTap, detectTwoFingerTripleTap, detectShortcutTrigger,
                 mWindowMagnificationPromptController, DISPLAY_0,
                 mMockFullScreenMagnificationVibrationHelper, mMockMagnificationLogger);
         if (isWatch()) {
@@ -424,7 +426,8 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     public void testDisablingTripleTap_removesInputLag() {
-        mMgh = newInstance(/* detect3tap */ false, /* detectShortcut */ true);
+        mMgh = newInstance(/* detectSingleFingerTripleTap */ false,
+                /* detectTwoFingerTripleTap */ true, /* detectShortcut */ true);
         goFromStateIdleTo(STATE_IDLE);
         allowEventDelegation();
         tap();

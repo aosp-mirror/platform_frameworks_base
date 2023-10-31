@@ -327,6 +327,6 @@ final class EnforcingAdmin {
     public String toString() {
         return "EnforcingAdmin { mPackageName= " + mPackageName + ", mComponentName= "
                 + mComponentName + ", mAuthorities= " + mAuthorities + ", mUserId= "
-                + mUserId + ", mIsRoleAuthority= " + mIsRoleAuthority + " }";
+                + mUserId + ", mIsRoleAuthority= " + mIsRoleAuthority + " }\n";
     }
 }

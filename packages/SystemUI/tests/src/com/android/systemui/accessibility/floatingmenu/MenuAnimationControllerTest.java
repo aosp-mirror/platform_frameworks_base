@@ -16,8 +16,6 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static com.android.systemui.accessibility.utils.FlagUtils.setFlagDefaults;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.any;
@@ -77,7 +75,6 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        setFlagDefaults(mSetFlagsRule);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);

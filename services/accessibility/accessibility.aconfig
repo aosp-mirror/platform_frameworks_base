@@ -10,6 +10,13 @@ flag {
 }
 
 flag {
+    name: "cleanup_a11y_overlays"
+    namespace: "accessibility"
+    description: "Removes all attached accessibility overlays when a service is removed."
+    bug: "271490102"
+}
+
+flag {
     name: "deprecate_package_list_observer"
     namespace: "accessibility"
     description: "Stops using the deprecated PackageListObserver."

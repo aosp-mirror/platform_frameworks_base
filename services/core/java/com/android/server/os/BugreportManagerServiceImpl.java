@@ -31,6 +31,7 @@ import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.BugreportManager.BugreportCallback;
 import android.os.BugreportParams;
+import android.os.Environment;
 import android.os.IDumpstate;
 import android.os.IDumpstateListener;
 import android.os.RemoteException;
@@ -42,19 +43,32 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.LocalLog;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.SystemConfig;
 import com.android.server.utils.Slogf;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -71,6 +85,12 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private static final boolean DEBUG = false;
     private static final String ROLE_SYSTEM_AUTOMOTIVE_PROJECTION =
             "android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION";
+    private static final String TAG_BUGREPORT_DATA = "bugreport-data";
+    private static final String TAG_BUGREPORT_MAP = "bugreport-map";
+    private static final String TAG_PERSISTENT_BUGREPORT = "persistent-bugreport";
+    private static final String ATTR_CALLING_UID = "calling-uid";
+    private static final String ATTR_CALLING_PACKAGE = "calling-package";
+    private static final String ATTR_BUGREPORT_FILE = "bugreport-file";
 
     private static final String BUGREPORT_SERVICE = "bugreportd";
     private static final long DEFAULT_BUGREPORT_SERVICE_TIMEOUT_MILLIS = 30 * 1000;
@@ -100,13 +120,20 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     static class BugreportFileManager {
 
         private final Object mLock = new Object();
+        private boolean mReadBugreportMapping = false;
+        private final AtomicFile mMappingFile;
 
         @GuardedBy("mLock")
-        private final ArrayMap<Pair<Integer, String>, ArraySet<String>> mBugreportFiles =
+        private ArrayMap<Pair<Integer, String>, ArraySet<String>> mBugreportFiles =
                 new ArrayMap<>();
 
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
         @GuardedBy("mLock")
-        private final Set<String> mBugreportFilesToPersist = new HashSet<>();
+        final Set<String> mBugreportFilesToPersist = new HashSet<>();
+
+        BugreportFileManager(AtomicFile mappingFile) {
+            mMappingFile = mappingFile;
+        }
 
         /**
          * Checks that a given file was generated on behalf of the given caller. If the file was
@@ -116,6 +143,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
          * @param callingInfo a (uid, package name) pair identifying the caller
          * @param bugreportFile the file name which was previously given to the caller in the
          *                      {@link BugreportCallback#onFinished(String)} callback.
+         * @param forceUpdateMapping if {@code true}, updates the bugreport mapping by reading from
+         *                           the mapping file.
          *
          * @throws IllegalArgumentException if {@code bugreportFile} is not associated with
          *                                  {@code callingInfo}.
@@ -124,7 +153,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 conditional = true)
         void ensureCallerPreviouslyGeneratedFile(
                 Context context, Pair<Integer, String> callingInfo, int userId,
-                String bugreportFile) {
+                String bugreportFile, boolean forceUpdateMapping) {
             synchronized (mLock) {
                 if (onboardingBugreportV2Enabled()) {
                     final int uidForUser = Binder.withCleanCallingIdentity(() -> {
@@ -144,6 +173,9 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                                 callingInfo.second + " does not hold the "
                                         + "INTERACT_ACROSS_USERS permission to access "
                                         + "cross-user bugreports.");
+                    }
+                    if (!mReadBugreportMapping || forceUpdateMapping) {
+                        readBugreportMappingLocked();
                     }
                     ArraySet<String> bugreportFilesForUid = mBugreportFiles.get(
                             new Pair<>(uidForUser, callingInfo.second));
@@ -181,26 +213,126 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
          */
         void addBugreportFileForCaller(
                 Pair<Integer, String> caller, String bugreportFile, boolean keepOnRetrieval) {
+            addBugreportMapping(caller, bugreportFile);
+            synchronized (mLock) {
+                if (onboardingBugreportV2Enabled()) {
+                    if (keepOnRetrieval) {
+                        mBugreportFilesToPersist.add(bugreportFile);
+                    }
+                    writeBugreportDataLocked();
+                }
+            }
+        }
+
+        private void addBugreportMapping(Pair<Integer, String> caller, String bugreportFile) {
             synchronized (mLock) {
                 if (!mBugreportFiles.containsKey(caller)) {
                     mBugreportFiles.put(caller, new ArraySet<>());
                 }
                 ArraySet<String> bugreportFilesForCaller = mBugreportFiles.get(caller);
                 bugreportFilesForCaller.add(bugreportFile);
-                if ((onboardingBugreportV2Enabled()) && keepOnRetrieval) {
-                    mBugreportFilesToPersist.add(bugreportFile);
-                }
             }
+        }
+
+        @GuardedBy("mLock")
+        private void readBugreportMappingLocked() {
+            mBugreportFiles = new ArrayMap<>();
+            try (InputStream inputStream = mMappingFile.openRead()) {
+                final TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
+                XmlUtils.beginDocument(parser, TAG_BUGREPORT_DATA);
+                int depth = parser.getDepth();
+                while (XmlUtils.nextElementWithin(parser, depth)) {
+                    String tag = parser.getName();
+                    switch (tag) {
+                        case TAG_BUGREPORT_MAP:
+                            readBugreportMapEntry(parser);
+                            break;
+                        case TAG_PERSISTENT_BUGREPORT:
+                            readPersistentBugreportEntry(parser);
+                            break;
+                        default:
+                            Slog.e(TAG, "Unknown tag while reading bugreport mapping file: "
+                                    + tag);
+                    }
+                }
+                mReadBugreportMapping = true;
+            } catch (FileNotFoundException e) {
+                Slog.i(TAG, "Bugreport mapping file does not exist");
+            } catch (IOException | XmlPullParserException e) {
+                mMappingFile.delete();
+            }
+        }
+
+        @GuardedBy("mLock")
+        private void writeBugreportDataLocked() {
+            if (mBugreportFiles.isEmpty() && mBugreportFilesToPersist.isEmpty()) {
+                return;
+            }
+            try (FileOutputStream stream = mMappingFile.startWrite()) {
+                TypedXmlSerializer out = Xml.resolveSerializer(stream);
+                out.startDocument(null, true);
+                out.startTag(null, TAG_BUGREPORT_DATA);
+                for (Map.Entry<Pair<Integer, String>, ArraySet<String>> entry:
+                        mBugreportFiles.entrySet()) {
+                    Pair<Integer, String> callingInfo = entry.getKey();
+                    ArraySet<String> callersBugreports = entry.getValue();
+                    for (String bugreportFile: callersBugreports) {
+                        writeBugreportMapEntry(callingInfo, bugreportFile, out);
+                    }
+                }
+                for (String file : mBugreportFilesToPersist) {
+                    writePersistentBugreportEntry(file, out);
+                }
+                out.endTag(null, TAG_BUGREPORT_DATA);
+                out.endDocument();
+                mMappingFile.finishWrite(stream);
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to write bugreport mapping file", e);
+            }
+        }
+
+        private void readBugreportMapEntry(TypedXmlPullParser parser)
+                throws XmlPullParserException {
+            int callingUid = parser.getAttributeInt(null, ATTR_CALLING_UID);
+            String callingPackage = parser.getAttributeValue(null, ATTR_CALLING_PACKAGE);
+            String bugreportFile = parser.getAttributeValue(null, ATTR_BUGREPORT_FILE);
+            addBugreportMapping(new Pair<>(callingUid, callingPackage), bugreportFile);
+        }
+
+        private void readPersistentBugreportEntry(TypedXmlPullParser parser)
+                throws XmlPullParserException {
+            String bugreportFile = parser.getAttributeValue(null, ATTR_BUGREPORT_FILE);
+            synchronized (mLock) {
+                mBugreportFilesToPersist.add(bugreportFile);
+            }
+        }
+
+        private void writeBugreportMapEntry(Pair<Integer, String> callingInfo, String bugreportFile,
+                TypedXmlSerializer out) throws IOException {
+            out.startTag(null, TAG_BUGREPORT_MAP);
+            out.attributeInt(null, ATTR_CALLING_UID, callingInfo.first);
+            out.attribute(null, ATTR_CALLING_PACKAGE, callingInfo.second);
+            out.attribute(null, ATTR_BUGREPORT_FILE, bugreportFile);
+            out.endTag(null, TAG_BUGREPORT_MAP);
+        }
+
+        private void writePersistentBugreportEntry(
+                String bugreportFile, TypedXmlSerializer out) throws IOException {
+            out.startTag(null, TAG_PERSISTENT_BUGREPORT);
+            out.attribute(null, ATTR_BUGREPORT_FILE, bugreportFile);
+            out.endTag(null, TAG_PERSISTENT_BUGREPORT);
         }
     }
 
     static class Injector {
         Context mContext;
         ArraySet<String> mAllowlistedPackages;
+        AtomicFile mMappingFile;
 
-        Injector(Context context, ArraySet<String> allowlistedPackages) {
+        Injector(Context context, ArraySet<String> allowlistedPackages, AtomicFile mappingFile) {
             mContext = context;
             mAllowlistedPackages = allowlistedPackages;
+            mMappingFile = mappingFile;
         }
 
         Context getContext() {
@@ -211,11 +343,16 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             return mAllowlistedPackages;
         }
 
+        AtomicFile getMappingFile() {
+            return mMappingFile;
+        }
     }
 
     BugreportManagerServiceImpl(Context context) {
-        this(new Injector(context, SystemConfig.getInstance().getBugreportWhitelistedPackages()));
-
+        this(new Injector(
+                context, SystemConfig.getInstance().getBugreportWhitelistedPackages(),
+                new AtomicFile(new File(new File(
+                        Environment.getDataDirectory(), "system"), "bugreport-mapping.xml"))));
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
@@ -223,7 +360,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         mContext = injector.getContext();
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
-        mBugreportFileManager = new BugreportFileManager();
+        mBugreportFileManager = new BugreportFileManager(injector.getMappingFile());
         mBugreportAllowlistedPackages = injector.getAllowlistedPackages();
     }
 
@@ -296,6 +433,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     @RequiresPermission(value = Manifest.permission.DUMP, conditional = true)
     public void retrieveBugreport(int callingUidUnused, String callingPackage, int userId,
             FileDescriptor bugreportFd, String bugreportFile,
+
             boolean keepBugreportOnRetrievalUnused, IDumpstateListener listener) {
         int callingUid = Binder.getCallingUid();
         enforcePermission(callingPackage, callingUid, false);
@@ -303,7 +441,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         Slogf.i(TAG, "Retrieving bugreport for %s / %d", callingPackage, callingUid);
         try {
             mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
-                    mContext, new Pair<>(callingUid, callingPackage), userId, bugreportFile);
+                    mContext, new Pair<>(callingUid, callingPackage), userId, bugreportFile,
+                    /* forceUpdateMapping= */ false);
         } catch (IllegalArgumentException e) {
             Slog.e(TAG, e.getMessage());
             reportError(listener, IDumpstateListener.BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE);
@@ -657,6 +796,9 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
 
         synchronized (mBugreportFileManager.mLock) {
+            if (!mBugreportFileManager.mReadBugreportMapping) {
+                pw.println("Has not read bugreport mapping");
+            }
             int numberFiles = mBugreportFileManager.mBugreportFiles.size();
             pw.printf("%d pending file%s", numberFiles, (numberFiles > 1 ? "s" : ""));
             if (numberFiles > 0) {

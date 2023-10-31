@@ -65,6 +65,7 @@ public class CameraSessionStats implements Parcelable {
     private String mUserTag;
     private int mVideoStabilizationMode;
     private boolean mUsedUltraWide;
+    private boolean mUsedZoomOverride;
     private int mSessionIndex;
     private CameraExtensionSessionStats mCameraExtensionSessionStats;
 
@@ -84,6 +85,7 @@ public class CameraSessionStats implements Parcelable {
         mStreamStats = new ArrayList<CameraStreamStats>();
         mVideoStabilizationMode = -1;
         mUsedUltraWide = false;
+        mUsedZoomOverride = false;
         mSessionIndex = 0;
         mCameraExtensionSessionStats = new CameraExtensionSessionStats();
     }
@@ -106,6 +108,7 @@ public class CameraSessionStats implements Parcelable {
         mStreamStats = new ArrayList<CameraStreamStats>();
         mVideoStabilizationMode = -1;
         mUsedUltraWide = false;
+        mUsedZoomOverride = false;
         mSessionIndex = sessionIdx;
         mCameraExtensionSessionStats = new CameraExtensionSessionStats();
     }
@@ -152,6 +155,7 @@ public class CameraSessionStats implements Parcelable {
         dest.writeString(mUserTag);
         dest.writeInt(mVideoStabilizationMode);
         dest.writeBoolean(mUsedUltraWide);
+        dest.writeBoolean(mUsedZoomOverride);
         dest.writeInt(mSessionIndex);
         mCameraExtensionSessionStats.writeToParcel(dest, 0);
     }
@@ -180,6 +184,7 @@ public class CameraSessionStats implements Parcelable {
         mVideoStabilizationMode = in.readInt();
 
         mUsedUltraWide = in.readBoolean();
+        mUsedZoomOverride = in.readBoolean();
 
         mSessionIndex = in.readInt();
         mCameraExtensionSessionStats = CameraExtensionSessionStats.CREATOR.createFromParcel(in);
@@ -255,6 +260,10 @@ public class CameraSessionStats implements Parcelable {
 
     public boolean getUsedUltraWide() {
         return mUsedUltraWide;
+    }
+
+    public boolean getUsedZoomOverride() {
+        return mUsedZoomOverride;
     }
 
     public int getSessionIndex() {

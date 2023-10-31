@@ -177,12 +177,14 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             FullScreenMagnificationController fullScreenMagnificationController,
             AccessibilityTraceManager trace,
             Callback callback,
-            boolean detectTripleTap,
+            boolean detectSingleFingerTripleTap,
+            boolean detectTwoFingerTripleTap,
             boolean detectShortcutTrigger,
             @NonNull WindowMagnificationPromptController promptController,
             int displayId,
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper) {
-        this(context, fullScreenMagnificationController, trace, callback, detectTripleTap,
+        this(context, fullScreenMagnificationController, trace, callback,
+                detectSingleFingerTripleTap, detectTwoFingerTripleTap,
                 detectShortcutTrigger, promptController, displayId,
                 fullScreenMagnificationVibrationHelper, /* magnificationLogger= */ null);
     }
@@ -193,16 +195,20 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             FullScreenMagnificationController fullScreenMagnificationController,
             AccessibilityTraceManager trace,
             Callback callback,
-            boolean detectTripleTap,
+            boolean detectSingleFingerTripleTap,
+            boolean detectTwoFingerTripleTap,
             boolean detectShortcutTrigger,
             @NonNull WindowMagnificationPromptController promptController,
             int displayId,
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper,
             MagnificationLogger magnificationLogger) {
-        super(displayId, detectTripleTap, detectShortcutTrigger, trace, callback);
+        super(displayId, detectSingleFingerTripleTap, detectTwoFingerTripleTap,
+                detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
             Log.i(mLogTag,
-                    "FullScreenMagnificationGestureHandler(detectTripleTap = " + detectTripleTap
+                    "FullScreenMagnificationGestureHandler(detectSingleFingerTripleTap = "
+                            + detectSingleFingerTripleTap
+                            + ", detectTwoFingerTripleTap = " + detectTwoFingerTripleTap
                             + ", detectShortcutTrigger = " + detectShortcutTrigger + ")");
         }
         mFullScreenMagnificationController = fullScreenMagnificationController;
