@@ -83,11 +83,7 @@ class SwipeToSceneTest {
             }
             scene(
                 TestScenes.SceneC,
-                userActions =
-                    mapOf(
-                        Swipe.Down to TestScenes.SceneA,
-                        Swipe(SwipeDirection.Down, pointerCount = 2) to TestScenes.SceneB,
-                    ),
+                userActions = mapOf(Swipe.Down to TestScenes.SceneA),
             ) {
                 Box(Modifier.fillMaxSize())
             }
@@ -242,45 +238,6 @@ class SwipeToSceneTest {
         assertThat(transition.progress).isEqualTo(55.dp / LayoutHeight)
 
         // Wait for the animation to finish. We should now be in scene C.
-        rule.waitForIdle()
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)
-    }
-
-    @Test
-    fun multiPointerSwipe() {
-        // Start at scene C.
-        currentScene = TestScenes.SceneC
-
-        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
-        // detected as a drag event.
-        var touchSlop = 0f
-        rule.setContent {
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
-        }
-
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)
-
-        // Swipe down with two fingers.
-        rule.onRoot().performTouchInput {
-            repeat(2) { i -> down(pointerId = i, middle) }
-            repeat(2) { i ->
-                moveBy(pointerId = i, Offset(0f, touchSlop + 10.dp.toPx()), delayMillis = 1_000)
-            }
-        }
-
-        // We are transitioning to B because we used 2 fingers.
-        val transition = layoutState.transitionState
-        assertThat(transition).isInstanceOf(TransitionState.Transition::class.java)
-        assertThat((transition as TransitionState.Transition).fromScene)
-            .isEqualTo(TestScenes.SceneC)
-        assertThat(transition.toScene).isEqualTo(TestScenes.SceneB)
-
-        // Release the fingers and wait for the animation to end. We are back to C because we only
-        // swiped 10dp.
-        rule.onRoot().performTouchInput { repeat(2) { i -> up(pointerId = i) } }
         rule.waitForIdle()
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
         assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)

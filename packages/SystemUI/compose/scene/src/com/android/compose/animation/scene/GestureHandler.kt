@@ -2,6 +2,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import kotlinx.coroutines.CoroutineScope
 
 interface GestureHandler {
     val draggable: DraggableHandler
@@ -9,9 +10,9 @@ interface GestureHandler {
 }
 
 interface DraggableHandler {
-    fun onDragStarted(startedPosition: Offset, pointersDown: Int = 1)
+    suspend fun onDragStarted(coroutineScope: CoroutineScope, startedPosition: Offset)
     fun onDelta(pixels: Float)
-    fun onDragStopped(velocity: Float)
+    suspend fun onDragStopped(coroutineScope: CoroutineScope, velocity: Float)
 }
 
 interface NestedScrollHandler {
