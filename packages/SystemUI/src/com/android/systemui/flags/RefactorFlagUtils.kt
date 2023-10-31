@@ -26,6 +26,7 @@ import android.util.Log
  * ```
  * object SomeRefactor {
  *     const val FLAG_NAME = Flags.SOME_REFACTOR
+ *     val token: FlagToken get() = FlagToken(FLAG_NAME, isEnabled)
  *     @JvmStatic inline val isEnabled get() = Flags.someRefactor()
  *     @JvmStatic inline fun isUnexpectedlyInLegacyMode() =
  *         RefactorFlagUtils.isUnexpectedlyInLegacyMode(isEnabled, FLAG_NAME)
@@ -104,4 +105,9 @@ object RefactorFlagUtils {
 
     /** Tag used for non-crashing logs or when the [ASSERT_TAG] has been silenced. */
     private const val STANDARD_TAG = "RefactorFlag"
+}
+
+/** An object which allows dependency tracking */
+data class FlagToken(val name: String, val isEnabled: Boolean) {
+    override fun toString(): String = "$name (${if (isEnabled) "enabled" else "disabled"})"
 }

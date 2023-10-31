@@ -10,3 +10,6 @@ cinek@google.com
 alexflo@google.com
 dsandler@android.com
 adamcohen@google.com
+
+# Anyone in System UI can declare dependencies between flags
+per-file FlagDependencies.kt = file:../../../../../OWNERS
