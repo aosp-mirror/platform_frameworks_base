@@ -16,18 +16,26 @@
 
 package com.android.packageinstaller.v2.model;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static com.android.packageinstaller.v2.model.PackageUtil.getMaxTargetSdkVersionForUid;
+import static com.android.packageinstaller.v2.model.PackageUtil.getPackageNameForUid;
+import static com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted;
 import static com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted.ABORT_REASON_APP_UNAVAILABLE;
 import static com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted.ABORT_REASON_GENERIC_ERROR;
 import static com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted.ABORT_REASON_USER_NOT_ALLOWED;
 
+import android.Manifest;
+import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.UninstallCompleteCallback;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -41,10 +49,12 @@ public class UninstallRepository {
 
     private static final String TAG = UninstallRepository.class.getSimpleName();
     private final Context mContext;
+    private final AppOpsManager mAppOpsManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
     public UserHandle mUninstalledUser;
     public UninstallCompleteCallback mCallback;
+    private ApplicationInfo mTargetAppInfo;
     private ActivityInfo mTargetActivityInfo;
     private Intent mIntent;
     private String mTargetPackageName;
@@ -53,6 +63,7 @@ public class UninstallRepository {
 
     public UninstallRepository(Context context) {
         mContext = context;
+        mAppOpsManager = context.getSystemService(AppOpsManager.class);
         mPackageManager = context.getPackageManager();
         mUserManager = context.getSystemService(UserManager.class);
     }
@@ -67,6 +78,30 @@ public class UninstallRepository {
             Log.e(TAG, "Could not determine the launching uid.");
             return new UninstallAborted(ABORT_REASON_GENERIC_ERROR);
             // TODO: should we give any indication to the user?
+        }
+
+        String callingPackage = getPackageNameForUid(mContext, callingUid, null);
+        if (callingPackage == null) {
+            Log.e(TAG, "Package not found for originating uid " + callingUid);
+            return new UninstallAborted(ABORT_REASON_GENERIC_ERROR);
+        } else {
+            if (mAppOpsManager.noteOpNoThrow(
+                AppOpsManager.OPSTR_REQUEST_DELETE_PACKAGES, callingUid, callingPackage)
+                != MODE_ALLOWED) {
+                Log.e(TAG, "Install from uid " + callingUid + " disallowed by AppOps");
+                return new UninstallAborted(ABORT_REASON_GENERIC_ERROR);
+            }
+        }
+
+        if (getMaxTargetSdkVersionForUid(mContext, callingUid) >= Build.VERSION_CODES.P
+            && !isPermissionGranted(mContext, Manifest.permission.REQUEST_DELETE_PACKAGES,
+            callingUid)
+            && !isPermissionGranted(mContext, Manifest.permission.DELETE_PACKAGES, callingUid)) {
+            Log.e(TAG, "Uid " + callingUid + " does not have "
+                + Manifest.permission.REQUEST_DELETE_PACKAGES + " or "
+                + Manifest.permission.DELETE_PACKAGES);
+
+            return new UninstallAborted(ABORT_REASON_GENERIC_ERROR);
         }
 
         // Get intent information.
@@ -104,6 +139,18 @@ public class UninstallRepository {
 
         mCallback = intent.getParcelableExtra(PackageInstaller.EXTRA_CALLBACK,
             PackageManager.UninstallCompleteCallback.class);
+
+        try {
+            mTargetAppInfo = mPackageManager.getApplicationInfo(mTargetPackageName,
+                PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ANY_USER));
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Unable to get packageName");
+        }
+
+        if (mTargetAppInfo == null) {
+            Log.e(TAG, "Invalid packageName: " + mTargetPackageName);
+            return new UninstallAborted(ABORT_REASON_APP_UNAVAILABLE);
+        }
 
         // The class name may have been specified (e.g. when deleting an app from all apps)
         final String className = packageUri.getFragment();
