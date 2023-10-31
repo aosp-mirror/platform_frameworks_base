@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.app.PendingIntent;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallerCallback;
@@ -82,7 +83,7 @@ interface IPackageInstaller {
     void requestArchive(String packageName, String callerPackageName, in IntentSender statusReceiver, in UserHandle userHandle);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES,android.Manifest.permission.REQUEST_INSTALL_PACKAGES})")
-    void requestUnarchive(String packageName, String callerPackageName, in UserHandle userHandle);
+    void requestUnarchive(String packageName, String callerPackageName, in IntentSender statusReceiver, in UserHandle userHandle);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)")
     void installPackageArchived(in ArchivedPackageParcel archivedPackageParcel,
@@ -90,4 +91,6 @@ interface IPackageInstaller {
             in IntentSender statusReceiver,
             String installerPackageName, in UserHandle userHandle);
 
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES,android.Manifest.permission.REQUEST_INSTALL_PACKAGES})")
+    void reportUnarchivalStatus(int unarchiveId, int status, long requiredStorageBytes, in PendingIntent userActionIntent, in UserHandle userHandle);
 }

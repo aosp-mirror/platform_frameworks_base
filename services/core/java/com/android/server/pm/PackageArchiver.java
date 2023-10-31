@@ -140,6 +140,8 @@ public class PackageArchiver {
         }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "archiveApp");
+        verifyUninstallPermissions();
+
         CompletableFuture<ArchiveState> archiveStateFuture;
         try {
             archiveStateFuture = createArchiveState(packageName, userId);
@@ -372,9 +374,11 @@ public class PackageArchiver {
     void requestUnarchive(
             @NonNull String packageName,
             @NonNull String callerPackageName,
+            @NonNull IntentSender statusReceiver,
             @NonNull UserHandle userHandle) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(callerPackageName);
+        Objects.requireNonNull(statusReceiver);
         Objects.requireNonNull(userHandle);
 
         Computer snapshot = mPm.snapshotComputer();
@@ -385,6 +389,8 @@ public class PackageArchiver {
         }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "unarchiveApp");
+        verifyInstallPermissions();
+
         PackageStateInternal ps;
         try {
             ps = getPackageState(packageName, snapshot, binderUid, userId);
@@ -400,9 +406,12 @@ public class PackageArchiver {
                                     packageName)));
         }
 
+        // TODO(b/305902395) Introduce a confirmation dialog if the requestor only holds
+        // REQUEST_INSTALL permission.
         int draftSessionId;
         try {
-            draftSessionId = createDraftSession(packageName, installerPackage, userId);
+            draftSessionId = createDraftSession(packageName, installerPackage, statusReceiver,
+                    userId);
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 throw ExceptionUtils.wrap((IOException) e.getCause());
@@ -415,11 +424,36 @@ public class PackageArchiver {
                 () -> unarchiveInternal(packageName, userHandle, installerPackage, draftSessionId));
     }
 
-    private int createDraftSession(String packageName, String installerPackage, int userId) {
+    private void verifyInstallPermissions() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the com.android.permission.INSTALL_PACKAGES "
+                    + "or com.android.permission.REQUEST_INSTALL_PACKAGES permission to request "
+                    + "an unarchival.");
+        }
+    }
+
+    private void verifyUninstallPermissions() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.REQUEST_DELETE_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the com.android.permission.DELETE_PACKAGES "
+                    + "or com.android.permission.REQUEST_DELETE_PACKAGES permission to request "
+                    + "an archival.");
+        }
+    }
+
+    private int createDraftSession(String packageName, String installerPackage,
+            IntentSender statusReceiver, int userId) {
         PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
         sessionParams.setAppPackageName(packageName);
         sessionParams.installFlags = INSTALL_UNARCHIVE_DRAFT;
+        sessionParams.unarchiveIntentSender = statusReceiver;
+
         int installerUid = mPm.snapshotComputer().getPackageUid(installerPackage, 0, userId);
         // Handles case of repeated unarchival calls for the same package.
         int existingSessionId = mPm.mInstallerService.getExistingDraftSessionId(installerUid,
