@@ -237,7 +237,7 @@
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"El teléfono se apagará."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"¿Seguro que quieres apagar el teléfono?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Reiniciar en modo Seguro"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Quieres reiniciar el sistema en modo Seguro? Se inhabilitarán todas las aplicaciones externas que hayas instalado. Esas aplicaciones se restaurarán la próxima vez que reinicies del sistema."</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Quieres reiniciar el sistema en modo Seguro? Se inhabilitarán todas las aplicaciones externas que hayas instalado. Esas aplicaciones se restaurarán la próxima vez que reinicies el sistema."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"Reciente"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"No hay aplicaciones recientes."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opciones del tablet"</string>
