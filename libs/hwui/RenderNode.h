@@ -233,6 +233,7 @@ private:
     void syncProperties();
     void syncDisplayList(TreeObserver& observer, TreeInfo* info);
     void handleForceDark(TreeInfo* info);
+    bool shouldEnableForceDark(TreeInfo* info);
 
     void prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
