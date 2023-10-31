@@ -47,7 +47,6 @@ class SceneTransitionLayoutImpl(
     transitions: SceneTransitions,
     internal val state: SceneTransitionLayoutState,
     density: Density,
-    edgeDetector: EdgeDetector,
 ) {
     internal val scenes = SnapshotStateMap<SceneKey, Scene>()
     internal val elements = SnapshotStateMap<ElementKey, Element>()
@@ -58,7 +57,6 @@ class SceneTransitionLayoutImpl(
     internal var onChangeScene by mutableStateOf(onChangeScene)
     internal var transitions by mutableStateOf(transitions)
     internal var density: Density by mutableStateOf(density)
-    internal var edgeDetector by mutableStateOf(edgeDetector)
 
     /**
      * The size of this layout. Note that this could be [IntSize.Zero] if this layour does not have
