@@ -102,6 +102,11 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+cc_aconfig_library {
+    name: "telephony_flags_c_lib",
+    aconfig_declarations: "telephony_flags",
+}
+
 // Window
 aconfig_declarations {
     name: "com.android.window.flags.window-aconfig",
