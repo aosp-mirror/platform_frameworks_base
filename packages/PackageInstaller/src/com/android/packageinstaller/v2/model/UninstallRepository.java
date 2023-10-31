@@ -17,6 +17,8 @@
 package com.android.packageinstaller.v2.model;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static com.android.packageinstaller.v2.model.PackageUtil.getMaxTargetSdkVersionForUid;
 import static com.android.packageinstaller.v2.model.PackageUtil.getPackageNameForUid;
 import static com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted;
@@ -40,6 +42,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+import androidx.annotation.Nullable;
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallReady;
@@ -201,6 +204,26 @@ public class UninstallRepository {
         } else if (mUninstallFromAllUsers && !isSingleUser) {
             messageBuilder.append(mContext.getString(
                 R.string.uninstall_application_text_all_users));
+        } else if (!mUninstalledUser.equals(myUserHandle)) {
+            // Uninstalling user is issuing uninstall for another user
+            UserManager customUserManager = mContext.createContextAsUser(mUninstalledUser, 0)
+                .getSystemService(UserManager.class);
+            String userName = customUserManager.getUserName();
+
+            String uninstalledUserType = getUninstalledUserType(myUserHandle, mUninstalledUser);
+            String messageString;
+            if (USER_TYPE_PROFILE_MANAGED.equals(uninstalledUserType)) {
+                messageString = mContext.getString(
+                    R.string.uninstall_application_text_current_user_work_profile, userName);
+            } else if (USER_TYPE_PROFILE_CLONE.equals(uninstalledUserType)) {
+                mIsClonedApp = true;
+                messageString = mContext.getString(
+                    R.string.uninstall_application_text_current_user_clone_profile);
+            } else {
+                messageString = mContext.getString(
+                    R.string.uninstall_application_text_user, userName);
+            }
+            messageBuilder.append(messageString);
         } else if (isCloneProfile(mUninstalledUser)) {
             mIsClonedApp = true;
             messageBuilder.append(mContext.getString(
@@ -234,6 +257,29 @@ public class UninstallRepository {
     private boolean isSingleUser() {
         final int userCount = mUserManager.getUserCount();
         return userCount == 1 || (UserManager.isHeadlessSystemUserMode() && userCount == 2);
+    }
+
+    /**
+     * Returns the type of the user from where an app is being uninstalled. We are concerned with
+     * only USER_TYPE_PROFILE_MANAGED and USER_TYPE_PROFILE_CLONE and whether the user and profile
+     * belong to the same profile group.
+     */
+    @Nullable
+    private String getUninstalledUserType(UserHandle myUserHandle,
+        UserHandle uninstalledUserHandle) {
+        if (!mUserManager.isSameProfileGroup(myUserHandle, uninstalledUserHandle)) {
+            return null;
+        }
+
+        UserManager customUserManager = mContext.createContextAsUser(uninstalledUserHandle, 0)
+            .getSystemService(UserManager.class);
+        String[] userTypes = {USER_TYPE_PROFILE_MANAGED, USER_TYPE_PROFILE_CLONE};
+        for (String userType : userTypes) {
+            if (customUserManager.isUserOfType(userType)) {
+                return userType;
+            }
+        }
+        return null;
     }
 
     private boolean hasClonedInstance(String packageName) {
