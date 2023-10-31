@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.Notification.BubbleMetadata
 import android.app.Notification.VISIBILITY_PRIVATE
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
@@ -31,6 +32,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
 import com.android.systemui.statusbar.policy.BatteryController
@@ -179,4 +181,18 @@ class PulseLockscreenVisibilityPrivateSuppressor() :
 class PulseLowImportanceSuppressor() :
     VisualInterruptionFilter(types = setOf(PULSE), reason = "importance less than DEFAULT") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_DEFAULT
+}
+
+class BubbleNotAllowedSuppressor() :
+    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "not allowed") {
+    override fun shouldSuppress(entry: NotificationEntry) = !entry.canBubble()
+}
+
+class BubbleNoMetadataSuppressor() :
+    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "no bubble metadata") {
+
+    private fun isValidMetadata(metadata: BubbleMetadata?) =
+        metadata != null && (metadata.intent != null || metadata.shortcutId != null)
+
+    override fun shouldSuppress(entry: NotificationEntry) = !isValidMetadata(entry.bubbleMetadata)
 }

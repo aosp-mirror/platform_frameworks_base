@@ -306,9 +306,27 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
-    fun testShouldBubble() {
+    fun testShouldBubble_withIntentAndIcon() {
         ensureBubbleState()
-        assertShouldBubble(buildBubbleEntry())
+        assertShouldBubble(buildBubbleEntry { bubbleIsShortcut = false })
+    }
+
+    @Test
+    fun testShouldBubble_withShortcut() {
+        ensureBubbleState()
+        assertShouldBubble(buildBubbleEntry { bubbleIsShortcut = true })
+    }
+
+    @Test
+    fun testShouldNotBubble_notAllowed() {
+        ensureBubbleState()
+        assertShouldNotBubble(buildBubbleEntry { canBubble = false })
+    }
+
+    @Test
+    fun testShouldNotBubble_noBubbleMetadata() {
+        ensureBubbleState()
+        assertShouldNotBubble(buildBubbleEntry { hasBubbleMetadata = false })
     }
 
     @Test
@@ -487,20 +505,29 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var canBubble: Boolean? = null
         var isBubble = false
         var hasBubbleMetadata = false
-        var bubbleSuppressNotification: Boolean? = null
+        var bubbleIsShortcut = false
+        var bubbleSuppressesNotification: Boolean? = null
 
-        private fun buildBubbleMetadata() =
-            BubbleMetadata.Builder(
-                    PendingIntent.getActivity(
-                        context,
-                        /* requestCode = */ 0,
-                        Intent().setPackage(context.packageName),
-                        FLAG_MUTABLE
-                    ),
-                    Icon.createWithResource(context.resources, R.drawable.android)
-                )
-                .apply { bubbleSuppressNotification?.let { setSuppressNotification(it) } }
-                .build()
+        private fun buildBubbleMetadata(): BubbleMetadata {
+            val builder =
+                if (bubbleIsShortcut) {
+                    BubbleMetadata.Builder(context.packageName + ":test_shortcut_id")
+                } else {
+                    BubbleMetadata.Builder(
+                        PendingIntent.getActivity(
+                            context,
+                            /* requestCode = */ 0,
+                            Intent().setPackage(context.packageName),
+                            FLAG_MUTABLE
+                        ),
+                        Icon.createWithResource(context.resources, R.drawable.android)
+                    )
+                }
+
+            bubbleSuppressesNotification?.let { builder.setSuppressNotification(it) }
+
+            return builder.build()
+        }
 
         fun build() =
             Notification.Builder(context, TEST_CHANNEL_ID)

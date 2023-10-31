@@ -65,6 +65,8 @@ constructor(
         addFilter(PulseEffectSuppressor())
         addFilter(PulseLockscreenVisibilityPrivateSuppressor())
         addFilter(PulseLowImportanceSuppressor())
+        addFilter(BubbleNotAllowedSuppressor())
+        addFilter(BubbleNoMetadataSuppressor())
 
         started = true
     }
