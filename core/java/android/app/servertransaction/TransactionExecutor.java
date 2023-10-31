@@ -318,7 +318,7 @@ public class TransactionExecutor {
                     break;
                 case ON_START:
                     mTransactionHandler.handleStartActivity(r, mPendingActions,
-                            null /* activityOptions */);
+                            null /* sceneTransitionInfo */);
                     break;
                 case ON_RESUME:
                     mTransactionHandler.handleResumeActivity(r, false /* finalStateRequest */,

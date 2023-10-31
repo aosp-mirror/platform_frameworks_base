@@ -24,7 +24,9 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
+
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
+
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.AnimRes;
@@ -45,6 +47,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
+import android.app.ActivityOptions.SceneTransitionInfo;
 import android.app.VoiceInteractor.Request;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
@@ -930,8 +933,8 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     final FragmentController mFragments = FragmentController.createController(new HostCallbacks());
 
-    /** The options for scene transition. */
-    ActivityOptions mPendingOptions;
+    /** The scene transition info. */
+    SceneTransitionInfo mSceneTransitionInfo;
 
     /** Whether this activity was launched from a bubble. **/
     boolean mLaunchedFromBubble;
@@ -5796,10 +5799,9 @@ public class Activity extends ContextThemeWrapper
 
     private Bundle transferSpringboardActivityOptions(@Nullable Bundle options) {
         if (options == null && (mWindow != null && !mWindow.isActive())) {
-            final ActivityOptions activityOptions = getActivityOptions();
-            if (activityOptions != null &&
-                    activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
-                return activityOptions.toBundle();
+            final SceneTransitionInfo info = getSceneTransitionInfo();
+            if (info != null) {
+                return ActivityOptions.makeBasic().setSceneTransitionInfo(info).toBundle();
             }
         }
         return options;
@@ -8068,8 +8070,10 @@ public class Activity extends ContextThemeWrapper
      *
      * @param callback the method to call when all visible activities behind this one have been
      * drawn and it is safe to make this activity translucent again.
-     * @param options activity options delivered to the activity below this one. The options
-     * are retrieved using {@link #getActivityOptions}.
+     * @param options activity options that created from
+     *             {@link ActivityOptions#makeSceneTransitionAnimation} which will be converted to
+     *             {@link SceneTransitionInfo} and delivered to the activity below this one. The
+     *              options are retrieved using {@link #getSceneTransitionInfo}.
      * @return <code>true</code> if Window was opaque and will become translucent or
      * <code>false</code> if window was translucent and no change needed to be made.
      *
@@ -8105,27 +8109,27 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
-    public void onNewActivityOptions(ActivityOptions options) {
-        mActivityTransitionState.setEnterActivityOptions(this, options);
+    public void onNewSceneTransitionInfo(ActivityOptions.SceneTransitionInfo info) {
+        mActivityTransitionState.setEnterSceneTransitionInfo(this, info);
         if (!mStopped) {
             mActivityTransitionState.enterReady(this);
         }
     }
 
     /**
-     * Takes the ActivityOptions passed in from the launching activity or passed back
+     * Takes the {@link SceneTransitionInfo} passed in from the launching activity or passed back
      * from an activity launched by this activity in its call to {@link
      * #convertToTranslucent(TranslucentConversionListener, ActivityOptions)}
      *
-     * @return The ActivityOptions passed to {@link #convertToTranslucent}.
+     * @return The {@link SceneTransitionInfo} which based on the ActivityOptions that originally
+     *         passed to {@link #convertToTranslucent}.
      * @hide
      */
-    @UnsupportedAppUsage
-    ActivityOptions getActivityOptions() {
-        final ActivityOptions options = mPendingOptions;
-        // The option only applies once.
-        mPendingOptions = null;
-        return options;
+    SceneTransitionInfo getSceneTransitionInfo() {
+        final SceneTransitionInfo sceneTransitionInfo = mSceneTransitionInfo;
+        // The info only applies once.
+        mSceneTransitionInfo = null;
+        return sceneTransitionInfo;
     }
 
     /**
@@ -8769,7 +8773,7 @@ public class Activity extends ContextThemeWrapper
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
-        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
+        mActivityTransitionState.setEnterSceneTransitionInfo(this, getSceneTransitionInfo());
         dispatchActivityPostCreated(icicle);
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
@@ -8787,7 +8791,7 @@ public class Activity extends ContextThemeWrapper
                     + mComponent.getClassName());
         }
         dispatchActivityPreStarted();
-        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
+        mActivityTransitionState.setEnterSceneTransitionInfo(this, getSceneTransitionInfo());
         mFragments.noteStateNotSaved();
         mCalled = false;
         mFragments.execPendingActions();

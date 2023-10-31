@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.ActivityOptions.SceneTransitionInfo;
 import android.app.ContentProviderHolder;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
@@ -114,7 +115,7 @@ oneway interface IApplicationThread {
     void scheduleCreateBackupAgent(in ApplicationInfo app,
             int backupMode, int userId, int operationType);
     void scheduleDestroyBackupAgent(in ApplicationInfo app, int userId);
-    void scheduleOnNewActivityOptions(IBinder token, in Bundle options);
+    void scheduleOnNewSceneTransitionInfo(IBinder token, in SceneTransitionInfo info);
     void scheduleSuicide();
     void dispatchPackageBroadcast(int cmd, in String[] packages);
     void scheduleCrash(in String msg, int typeId, in Bundle extras);
