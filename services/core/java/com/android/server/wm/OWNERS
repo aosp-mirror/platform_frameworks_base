@@ -18,5 +18,8 @@ rgl@google.com
 yunfanc@google.com
 wilsonshih@google.com
 
-per-file BackgroundActivityStartController.java = set noparent
-per-file BackgroundActivityStartController.java = brufino@google.com, topjohnwu@google.com, achim@google.com, ogunwale@google.com, louischang@google.com, lus@google.com
+# Files related to background activity launches
+per-file Background*Start* = set noparent
+per-file Background*Start* = file:/BAL_OWNERS
+per-file Background*Start* = ogunwale@google.com, louischang@google.com
+
