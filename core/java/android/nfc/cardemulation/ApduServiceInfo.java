@@ -127,6 +127,11 @@ public final class ApduServiceInfo implements Parcelable {
     private final String mSettingsActivityName;
 
     /**
+     * State of the service for CATEGORY_OTHER selection
+     */
+    private boolean mOtherServiceSelectionState;
+
+    /**
      * @hide
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
@@ -134,8 +139,21 @@ public final class ApduServiceInfo implements Parcelable {
             boolean requiresUnlock, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost) {
         this(info, onHost, description, staticAidGroups, dynamicAidGroups,
+                requiresUnlock, bannerResource, uid, settingsActivityName,
+                offHost, staticOffHost, false);
+    }
+
+    /**
+     * @hide
+     */
+    public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
+            List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
+            boolean requiresUnlock, int bannerResource, int uid,
+            String settingsActivityName, String offHost, String staticOffHost,
+            boolean isSelected) {
+        this(info, onHost, description, staticAidGroups, dynamicAidGroups,
                 requiresUnlock, onHost ? true : false, bannerResource, uid,
-                settingsActivityName, offHost, staticOffHost);
+                settingsActivityName, offHost, staticOffHost, isSelected);
     }
 
     /**
@@ -144,7 +162,7 @@ public final class ApduServiceInfo implements Parcelable {
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
             List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
-            String settingsActivityName, String offHost, String staticOffHost) {
+            String settingsActivityName, String offHost, String staticOffHost, boolean isSelected) {
         this.mService = info;
         this.mDescription = description;
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
@@ -163,6 +181,8 @@ public final class ApduServiceInfo implements Parcelable {
         this.mBannerResourceId = bannerResource;
         this.mUid = uid;
         this.mSettingsActivityName = settingsActivityName;
+        this.mOtherServiceSelectionState = isSelected;
+
     }
 
     /**
@@ -351,6 +371,9 @@ public final class ApduServiceInfo implements Parcelable {
         }
         // Set uid
         mUid = si.applicationInfo.uid;
+
+        mOtherServiceSelectionState = false;    // support other category
+
     }
 
     /**
@@ -720,43 +743,47 @@ public final class ApduServiceInfo implements Parcelable {
         dest.writeInt(mBannerResourceId);
         dest.writeInt(mUid);
         dest.writeString(mSettingsActivityName);
+
+        dest.writeInt(mOtherServiceSelectionState ? 1 : 0);
     };
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public static final @NonNull Parcelable.Creator<ApduServiceInfo> CREATOR =
             new Parcelable.Creator<ApduServiceInfo>() {
-        @Override
-        public ApduServiceInfo createFromParcel(Parcel source) {
-            ResolveInfo info = ResolveInfo.CREATOR.createFromParcel(source);
-            String description = source.readString();
-            boolean onHost = source.readInt() != 0;
-            String offHostName = source.readString();
-            String staticOffHostName = source.readString();
-            ArrayList<AidGroup> staticAidGroups = new ArrayList<AidGroup>();
-            int numStaticGroups = source.readInt();
-            if (numStaticGroups > 0) {
-                source.readTypedList(staticAidGroups, AidGroup.CREATOR);
-            }
-            ArrayList<AidGroup> dynamicAidGroups = new ArrayList<AidGroup>();
-            int numDynamicGroups = source.readInt();
-            if (numDynamicGroups > 0) {
-                source.readTypedList(dynamicAidGroups, AidGroup.CREATOR);
-            }
-            boolean requiresUnlock = source.readInt() != 0;
-            boolean requiresScreenOn = source.readInt() != 0;
-            int bannerResource = source.readInt();
-            int uid = source.readInt();
-            String settingsActivityName = source.readString();
-            return new ApduServiceInfo(info, onHost, description, staticAidGroups,
-                    dynamicAidGroups, requiresUnlock, requiresScreenOn, bannerResource, uid,
-                    settingsActivityName, offHostName, staticOffHostName);
-        }
+                @Override
+                public ApduServiceInfo createFromParcel(Parcel source) {
+                    ResolveInfo info = ResolveInfo.CREATOR.createFromParcel(source);
+                    String description = source.readString();
+                    boolean onHost = source.readInt() != 0;
+                    String offHostName = source.readString();
+                    String staticOffHostName = source.readString();
+                    ArrayList<AidGroup> staticAidGroups = new ArrayList<AidGroup>();
+                    int numStaticGroups = source.readInt();
+                    if (numStaticGroups > 0) {
+                        source.readTypedList(staticAidGroups, AidGroup.CREATOR);
+                    }
+                    ArrayList<AidGroup> dynamicAidGroups = new ArrayList<AidGroup>();
+                    int numDynamicGroups = source.readInt();
+                    if (numDynamicGroups > 0) {
+                        source.readTypedList(dynamicAidGroups, AidGroup.CREATOR);
+                    }
+                    boolean requiresUnlock = source.readInt() != 0;
+                    boolean requiresScreenOn = source.readInt() != 0;
+                    int bannerResource = source.readInt();
+                    int uid = source.readInt();
+                    String settingsActivityName = source.readString();
+                    boolean isSelected = source.readInt() != 0;
+                    return new ApduServiceInfo(info, onHost, description, staticAidGroups,
+                            dynamicAidGroups, requiresUnlock, requiresScreenOn, bannerResource, uid,
+                            settingsActivityName, offHostName, staticOffHostName,
+                            isSelected);
+                }
 
-        @Override
-        public ApduServiceInfo[] newArray(int size) {
-            return new ApduServiceInfo[size];
-        }
-    };
+                @Override
+                public ApduServiceInfo[] newArray(int size) {
+                    return new ApduServiceInfo[size];
+                }
+            };
 
     /**
      * Dump contents for debugging.
@@ -779,14 +806,16 @@ public final class ApduServiceInfo implements Parcelable {
         }
         pw.println("    Static AID groups:");
         for (AidGroup group : mStaticAidGroups.values()) {
-            pw.println("        Category: " + group.getCategory());
+            pw.println("        Category: " + group.getCategory()
+                    + "(selected: " + mOtherServiceSelectionState + ")");
             for (String aid : group.getAids()) {
                 pw.println("            AID: " + aid);
             }
         }
         pw.println("    Dynamic AID groups:");
         for (AidGroup group : mDynamicAidGroups.values()) {
-            pw.println("        Category: " + group.getCategory());
+            pw.println("        Category: " + group.getCategory()
+                    + "(selected: " + mOtherServiceSelectionState + ")");
             for (String aid : group.getAids()) {
                 pw.println("            AID: " + aid);
             }
@@ -794,6 +823,22 @@ public final class ApduServiceInfo implements Parcelable {
         pw.println("    Settings Activity: " + mSettingsActivityName);
         pw.println("    Requires Device Unlock: " + mRequiresDeviceUnlock);
         pw.println("    Requires Device ScreenOn: " + mRequiresDeviceScreenOn);
+    }
+
+
+    /**
+     * @hide
+     */
+    public void setOtherServiceState(boolean selected) {
+        mOtherServiceSelectionState = selected;
+    }
+
+
+    /**
+     * @hide
+     */
+    public boolean isSelectedOtherService() {
+        return mOtherServiceSelectionState;
     }
 
     /**
