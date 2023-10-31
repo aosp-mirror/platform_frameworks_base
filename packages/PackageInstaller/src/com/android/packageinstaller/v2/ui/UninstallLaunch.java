@@ -21,6 +21,10 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.ViewModelProvider;
+import com.android.packageinstaller.v2.model.UninstallRepository;
+import com.android.packageinstaller.v2.viewmodel.UninstallViewModel;
+import com.android.packageinstaller.v2.viewmodel.UninstallViewModelFactory;
 
 public class UninstallLaunch extends FragmentActivity{
 
@@ -30,6 +34,9 @@ public class UninstallLaunch extends FragmentActivity{
         UninstallLaunch.class.getPackageName() + ".callingActivityName";
     public static final String TAG = UninstallLaunch.class.getSimpleName();
 
+    private UninstallViewModel mUninstallViewModel;
+    private UninstallRepository mUninstallRepository;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
@@ -37,5 +44,10 @@ public class UninstallLaunch extends FragmentActivity{
         // Never restore any state, esp. never create any fragments. The data in the fragment might
         // be stale, if e.g. the app was uninstalled while the activity was destroyed.
         super.onCreate(null);
+
+        mUninstallRepository = new UninstallRepository(getApplicationContext());
+        mUninstallViewModel = new ViewModelProvider(this,
+            new UninstallViewModelFactory(this.getApplication(), mUninstallRepository)).get(
+            UninstallViewModel.class);
     }
 }
