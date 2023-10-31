@@ -37,8 +37,6 @@ import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.logcatLogBuffer
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags.REST_TO_UNLOCK
 import com.android.systemui.log.SideFpsLogger
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.whenever
@@ -94,7 +92,6 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
         whenever(displayStateInteractor.currentRotation).thenReturn(currentRotation)
 
         contextDisplayInfo.uniqueId = "current-display"
-        val featureFlags = FakeFeatureFlagsClassic().apply { set(REST_TO_UNLOCK, true) }
         whenever(fingerprintInteractiveToAuthProvider.enabledForCurrentUser)
             .thenReturn(isRestToUnlockEnabled)
         underTest =
@@ -103,7 +100,6 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
                 fingerprintRepository,
                 windowManager,
                 displayStateInteractor,
-                featureFlags,
                 Optional.of(fingerprintInteractiveToAuthProvider),
                 SideFpsLogger(logcatLogBuffer("SfpsLogger"))
             )
@@ -136,7 +132,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
     @Test
     fun authenticationDurationIsAvailableWhenSFPSSensorIsAvailable() =
         testScope.runTest {
-            assertThat(collectLastValue(underTest.authenticationDuration)())
+            assertThat(underTest.authenticationDuration)
                 .isEqualTo(context.resources.getInteger(R.integer.config_restToUnlockDuration))
         }
 

@@ -26,8 +26,6 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.SideFpsLogger
 import com.android.systemui.res.R
 import java.util.Optional
@@ -48,7 +46,6 @@ constructor(
     fingerprintPropertyRepository: FingerprintPropertyRepository,
     windowManager: WindowManager,
     displayStateInteractor: DisplayStateInteractor,
-    featureFlags: FeatureFlagsClassic,
     fingerprintInteractiveToAuthProvider: Optional<FingerprintInteractiveToAuthProvider>,
     private val logger: SideFpsLogger,
 ) {
@@ -65,14 +62,11 @@ constructor(
     val isAvailable: Flow<Boolean> =
         fingerprintPropertyRepository.sensorType.map { it == FingerprintSensorType.POWER_BUTTON }
 
-    val authenticationDuration: Flow<Long> =
-        flowOf(context.resources?.getInteger(R.integer.config_restToUnlockDuration)?.toLong() ?: 0L)
+    val authenticationDuration: Long =
+        context.resources?.getInteger(R.integer.config_restToUnlockDuration)?.toLong() ?: 0L
 
     val isProlongedTouchRequiredForAuthentication: Flow<Boolean> =
-        if (
-            fingerprintInteractiveToAuthProvider.isEmpty ||
-                !featureFlags.isEnabled(Flags.REST_TO_UNLOCK)
-        ) {
+        if (fingerprintInteractiveToAuthProvider.isEmpty) {
             flowOf(false)
         } else {
             combine(
