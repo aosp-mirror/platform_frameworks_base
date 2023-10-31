@@ -19,14 +19,20 @@ package com.android.packageinstaller.v2.ui;
 import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import com.android.packageinstaller.v2.model.UninstallRepository;
 import com.android.packageinstaller.v2.model.UninstallRepository.CallerInfo;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
+import com.android.packageinstaller.v2.ui.fragments.UninstallErrorFragment;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModelFactory;
 
@@ -37,9 +43,11 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
     public static final String EXTRA_CALLING_ACTIVITY_NAME =
         UninstallLaunch.class.getPackageName() + ".callingActivityName";
     public static final String TAG = UninstallLaunch.class.getSimpleName();
+    private static final String TAG_DIALOG = "dialog";
 
     private UninstallViewModel mUninstallViewModel;
     private UninstallRepository mUninstallRepository;
+    private FragmentManager mFragmentManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +56,8 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
         // Never restore any state, esp. never create any fragments. The data in the fragment might
         // be stale, if e.g. the app was uninstalled while the activity was destroyed.
         super.onCreate(null);
+
+        mFragmentManager = getSupportFragmentManager();
 
         mUninstallRepository = new UninstallRepository(getApplicationContext());
         mUninstallViewModel = new ViewModelProvider(this,
@@ -69,6 +79,42 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
      * uninstall stage
      */
     private void onUninstallStageChange(UninstallStage uninstallStage) {
+        if (uninstallStage.getStageCode() == UninstallStage.STAGE_ABORTED) {
+            UninstallAborted aborted = (UninstallAborted) uninstallStage;
+            if (aborted.getAbortReason() == UninstallAborted.ABORT_REASON_APP_UNAVAILABLE ||
+                aborted.getAbortReason() == UninstallAborted.ABORT_REASON_USER_NOT_ALLOWED) {
+                UninstallErrorFragment errorDialog = new UninstallErrorFragment(aborted);
+                showDialogInner(errorDialog);
+            } else {
+                setResult(aborted.getActivityResultCode(), null, true);
+            }
+        } else {
+            Log.e(TAG, "Invalid stage: " + uninstallStage.getStageCode());
+            showDialogInner(null);
+        }
+    }
+
+    /**
+     * Replace any visible dialog by the dialog returned by InstallRepository
+     *
+     * @param newDialog The new dialog to display
+     */
+    private void showDialogInner(DialogFragment newDialog) {
+        DialogFragment currentDialog = (DialogFragment) mFragmentManager.findFragmentByTag(
+            TAG_DIALOG);
+        if (currentDialog != null) {
+            currentDialog.dismissAllowingStateLoss();
+        }
+        if (newDialog != null) {
+            newDialog.show(mFragmentManager, TAG_DIALOG);
+        }
+    }
+
+    public void setResult(int resultCode, Intent data, boolean shouldFinish) {
+        super.setResult(resultCode, data);
+        if (shouldFinish) {
+            finish();
+        }
     }
 
     @Override
@@ -77,5 +123,6 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
 
     @Override
     public void onNegativeResponse() {
+        setResult(Activity.RESULT_FIRST_USER, null, true);
     }
 }
