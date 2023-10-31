@@ -29,6 +29,7 @@ aconfig_srcjars = [
     ":android.service.notification.flags-aconfig-java{.generated_srcjars}",
     ":android.view.flags-aconfig-java{.generated_srcjars}",
     ":android.view.accessibility.flags-aconfig-java{.generated_srcjars}",
+    ":audio-framework-aconfig",
     ":camera_platform_flags_core_java_lib{.generated_srcjars}",
     ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
@@ -39,7 +40,6 @@ aconfig_srcjars = [
     ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
     ":android.view.inputmethod.flags-aconfig-java{.generated_srcjars}",
     ":android.widget.flags-aconfig-java{.generated_srcjars}",
-    ":com.android.media.audio.flags-aconfig-java{.generated_srcjars}",
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
     ":sdk_sandbox_flags_lib{.generated_srcjars}",
     ":android.permission.flags-aconfig-java{.generated_srcjars}",
@@ -54,7 +54,6 @@ aconfig_srcjars = [
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.media.tv.flags-aconfig-java{.generated_srcjars}",
-    ":aconfig_midi_flags_java_lib{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
     ":com.android.net.flags-aconfig-java{.generated_srcjars}",
     ":device_policy_aconfig_flags_lib{.generated_srcjars}",
@@ -390,13 +389,6 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.media.tv.flags-aconfig-java",
     aconfig_declarations: "android.media.tv.flags-aconfig",
-    defaults: ["framework-minus-apex-aconfig-java-defaults"],
-}
-
-// Media Audio
-java_aconfig_library {
-    name: "com.android.media.audio.flags-aconfig-java",
-    aconfig_declarations: "aconfig_audio_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

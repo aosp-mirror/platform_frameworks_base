@@ -16,7 +16,7 @@
 
 package com.android.server.midi;
 
-import static com.android.media.midi.flags.Flags.virtualUmp;
+import static android.media.midi.Flags.virtualUmp;
 
 import android.Manifest;
 import android.annotation.NonNull;

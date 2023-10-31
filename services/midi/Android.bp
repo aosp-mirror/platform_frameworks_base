@@ -20,6 +20,5 @@ java_library_static {
     srcs: [":services.midi-sources"],
     libs: [
         "services.core",
-        "aconfig_midi_flags_java_lib",
     ],
 }
