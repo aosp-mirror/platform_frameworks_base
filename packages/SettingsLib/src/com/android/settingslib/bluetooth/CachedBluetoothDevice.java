@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.annotation.CallbackExecutor;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCsipSetCoordinator;
@@ -39,6 +40,7 @@ import android.util.Log;
 import android.util.LruCache;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.ArrayUtils;
@@ -52,8 +54,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 /**
@@ -100,6 +106,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     boolean mIsCoordinatedSetMember = false;
 
     private final Collection<Callback> mCallbacks = new CopyOnWriteArrayList<>();
+
+    private final Map<Callback, Executor> mCallbackExecutorMap = new ConcurrentHashMap<>();
 
     /**
      * Last time a bt profile auto-connect was attempted.
@@ -992,18 +1000,39 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         return new ArrayList<>(mRemovedProfiles);
     }
 
+    /**
+     * @deprecated Use {@link #registerCallback(Executor, Callback)}.
+     */
+    @Deprecated
     public void registerCallback(Callback callback) {
         mCallbacks.add(callback);
     }
 
+    /**
+     * Registers a {@link Callback} that will be invoked when the bluetooth device attribute is
+     * changed.
+     *
+     * @param executor an {@link Executor} to execute given callback
+     * @param callback user implementation of the {@link Callback}
+     */
+    public void registerCallback(
+            @NonNull @CallbackExecutor Executor executor, @NonNull Callback callback) {
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
+        mCallbackExecutorMap.put(callback, executor);
+    }
+
     public void unregisterCallback(Callback callback) {
         mCallbacks.remove(callback);
+        mCallbackExecutorMap.remove(callback);
     }
 
     void dispatchAttributesChanged() {
         for (Callback callback : mCallbacks) {
             callback.onDeviceAttributesChanged();
         }
+        mCallbackExecutorMap.forEach((callback, executor) ->
+                executor.execute(callback::onDeviceAttributesChanged));
     }
 
     @Override
