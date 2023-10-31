@@ -620,6 +620,7 @@ filegroup {
     name: "android-non-updatable-stub-sources",
     srcs: [
         ":framework-mime-sources", // mimemap builds separately but has no separate droidstubs.
+        ":framework-minus-apex-aconfig-srcjars",
         ":framework-non-updatable-sources",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
@@ -686,12 +687,10 @@ stubs_defaults {
         "--hide CallbackInterface",
         "--hide DeprecationMismatch",
         "--hide HiddenSuperclass",
-        "--hide HiddenTypeParameter",
         "--hide MissingPermission",
         "--hide RequiresPermission",
         "--hide SdkConstant",
         "--hide Todo",
-        "--hide UnavailableSymbol",
         "--hide-package android.audio.policy.configuration.V7_0",
         "--hide-package com.android.server",
         "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
