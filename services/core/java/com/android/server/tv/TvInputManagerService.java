@@ -1166,7 +1166,11 @@ public final class TvInputManagerService extends SystemService {
                                 .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__CONNECTION_STATE_CHANGED,
                         mOnScreenInputId, mOnScreenSessionState);
             } else if (mOnScreenInputId != null) {
-                TvInputInfo currentInputInfo = userState.inputMap.get(mOnScreenInputId).info;
+                TvInputState currentInputState = userState.inputMap.get(mOnScreenInputId);
+                TvInputInfo currentInputInfo = null;
+                if (currentInputState != null) {
+                    currentInputInfo = currentInputState.info;
+                }
                 if (currentInputInfo != null && currentInputInfo.getHdmiDeviceInfo() != null
                         && inputId.equals(currentInputInfo.getParentId())) {
                     logExternalInputEvent(
