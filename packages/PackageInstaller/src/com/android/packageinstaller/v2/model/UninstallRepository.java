@@ -40,9 +40,11 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallReady;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired;
 import java.util.List;
 
 public class UninstallRepository {
@@ -57,9 +59,11 @@ public class UninstallRepository {
     private ApplicationInfo mTargetAppInfo;
     private ActivityInfo mTargetActivityInfo;
     private Intent mIntent;
+    private CharSequence mTargetAppLabel;
     private String mTargetPackageName;
     private String mCallingActivity;
     private boolean mUninstallFromAllUsers;
+    private boolean mIsClonedApp;
 
     public UninstallRepository(Context context) {
         mContext = context;
@@ -166,6 +170,96 @@ public class UninstallRepository {
         }
 
         return new UninstallReady();
+    }
+
+    public UninstallStage generateUninstallDetails() {
+        UninstallUserActionRequired.Builder uarBuilder = new UninstallUserActionRequired.Builder();
+        StringBuilder messageBuilder = new StringBuilder();
+
+        mTargetAppLabel = mTargetAppInfo.loadSafeLabel(mPackageManager);
+
+        // If the Activity label differs from the App label, then make sure the user
+        // knows the Activity belongs to the App being uninstalled.
+        if (mTargetActivityInfo != null) {
+            final CharSequence activityLabel = mTargetActivityInfo.loadSafeLabel(mPackageManager);
+            if (CharSequence.compare(activityLabel, mTargetAppLabel) != 0) {
+                messageBuilder.append(
+                    mContext.getString(R.string.uninstall_activity_text, activityLabel));
+                messageBuilder.append(" ").append(mTargetAppLabel).append(".\n\n");
+            }
+        }
+
+        final boolean isUpdate =
+            (mTargetAppInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+        final UserHandle myUserHandle = Process.myUserHandle();
+        boolean isSingleUser = isSingleUser();
+
+        if (isUpdate) {
+            messageBuilder.append(mContext.getString(
+                isSingleUser ? R.string.uninstall_update_text :
+                    R.string.uninstall_update_text_multiuser));
+        } else if (mUninstallFromAllUsers && !isSingleUser) {
+            messageBuilder.append(mContext.getString(
+                R.string.uninstall_application_text_all_users));
+        } else if (isCloneProfile(mUninstalledUser)) {
+            mIsClonedApp = true;
+            messageBuilder.append(mContext.getString(
+                R.string.uninstall_application_text_current_user_clone_profile));
+        } else if (myUserHandle.equals(UserHandle.SYSTEM)
+            && hasClonedInstance(mTargetAppInfo.packageName)) {
+            messageBuilder.append(mContext.getString(
+                R.string.uninstall_application_text_with_clone_instance, mTargetAppLabel));
+        } else {
+            messageBuilder.append(mContext.getString(R.string.uninstall_application_text));
+        }
+
+        uarBuilder.setMessage(messageBuilder.toString());
+
+        if (mIsClonedApp) {
+            uarBuilder.setTitle(mContext.getString(R.string.cloned_app_label, mTargetAppLabel));
+        } else {
+            uarBuilder.setTitle(mTargetAppLabel.toString());
+        }
+
+        return uarBuilder.build();
+    }
+
+    /**
+     * Returns whether there is only one "full" user on this device.
+     *
+     * <p><b>Note:</b> on devices that use {@link android.os.UserManager#isHeadlessSystemUserMode()
+     * headless system user mode}, the system user is not "full", so it's not be considered in the
+     * calculation.</p>
+     */
+    private boolean isSingleUser() {
+        final int userCount = mUserManager.getUserCount();
+        return userCount == 1 || (UserManager.isHeadlessSystemUserMode() && userCount == 2);
+    }
+
+    private boolean hasClonedInstance(String packageName) {
+        // Check if clone user is present on the device.
+        UserHandle cloneUser = null;
+        List<UserHandle> profiles = mUserManager.getUserProfiles();
+        for (UserHandle userHandle : profiles) {
+            if (!userHandle.equals(UserHandle.SYSTEM) && isCloneProfile(userHandle)) {
+                cloneUser = userHandle;
+                break;
+            }
+        }
+        // Check if another instance of given package exists in clone user profile.
+        try {
+            return cloneUser != null
+                && mPackageManager.getPackageUidAsUser(packageName,
+                PackageManager.PackageInfoFlags.of(0), cloneUser.getIdentifier()) > 0;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean isCloneProfile(UserHandle userHandle) {
+        UserManager customUserManager = mContext.createContextAsUser(userHandle, 0)
+            .getSystemService(UserManager.class);
+        return customUserManager.isUserOfType(UserManager.USER_TYPE_PROFILE_CLONE);
     }
 
     public static class CallerInfo {

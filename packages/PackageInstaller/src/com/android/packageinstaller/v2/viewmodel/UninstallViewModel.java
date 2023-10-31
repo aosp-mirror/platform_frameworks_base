@@ -42,6 +42,9 @@ public class UninstallViewModel extends AndroidViewModel {
 
     public void preprocessIntent(Intent intent, CallerInfo callerInfo) {
         UninstallStage stage = mRepository.performPreUninstallChecks(intent, callerInfo);
+        if (stage.getStageCode() != UninstallStage.STAGE_ABORTED) {
+            stage = mRepository.generateUninstallDetails();
+        }
         mCurrentUninstallStage.setValue(stage);
     }
 }
