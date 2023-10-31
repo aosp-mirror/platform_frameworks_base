@@ -12817,15 +12817,6 @@ public final class Settings {
                 "render_shadows_in_compositor";
 
         /**
-         * If true, submit buffers using blast in ViewRootImpl.
-         * (0 = false, 1 = true)
-         * @hide
-         */
-        @Readable
-        public static final String DEVELOPMENT_USE_BLAST_ADAPTER_VR =
-                "use_blast_adapter_vr";
-
-        /**
          * Path to the WindowManager display settings file. If unset, the default file path will
          * be used.
          *

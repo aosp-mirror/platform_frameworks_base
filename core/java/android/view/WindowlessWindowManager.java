@@ -245,8 +245,7 @@ public class WindowlessWindowManager implements IWindowSession {
             }
         }
 
-        final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE |
-                        WindowManagerGlobal.ADD_FLAG_USE_BLAST;
+        final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
 
         sendLayoutParamsToParent();
         // Include whether the window is in touch mode.
