@@ -32,6 +32,8 @@ import com.android.packageinstaller.v2.model.UninstallRepository;
 import com.android.packageinstaller.v2.model.UninstallRepository.CallerInfo;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired;
+import com.android.packageinstaller.v2.ui.fragments.UninstallConfirmationFragment;
 import com.android.packageinstaller.v2.ui.fragments.UninstallErrorFragment;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModelFactory;
@@ -88,6 +90,11 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
             } else {
                 setResult(aborted.getActivityResultCode(), null, true);
             }
+        } else if (uninstallStage.getStageCode() == UninstallStage.STAGE_USER_ACTION_REQUIRED) {
+            UninstallUserActionRequired uar = (UninstallUserActionRequired) uninstallStage;
+            UninstallConfirmationFragment confirmationDialog = new UninstallConfirmationFragment(
+                uar);
+            showDialogInner(confirmationDialog);
         } else {
             Log.e(TAG, "Invalid stage: " + uninstallStage.getStageCode());
             showDialogInner(null);
@@ -118,7 +125,7 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
     }
 
     @Override
-    public void onPositiveResponse() {
+    public void onPositiveResponse(boolean keepData) {
     }
 
     @Override

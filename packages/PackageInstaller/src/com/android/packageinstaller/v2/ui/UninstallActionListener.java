@@ -18,7 +18,7 @@ package com.android.packageinstaller.v2.ui;
 
 public interface UninstallActionListener {
 
-    void onPositiveResponse();
+    void onPositiveResponse(boolean keepData);
 
     void onNegativeResponse();
 }
