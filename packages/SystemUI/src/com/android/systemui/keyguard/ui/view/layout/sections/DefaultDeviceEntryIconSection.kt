@@ -60,8 +60,7 @@ constructor(
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (
-            !featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON) &&
+        if (!featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON) &&
                 !featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)
         ) {
             return
@@ -76,7 +75,7 @@ constructor(
                 DeviceEntryIconView(context, null).apply { id = deviceEntryIconViewId }
             } else {
                 // Flags.MIGRATE_LOCK_ICON
-                LockIconView(context, null).apply { id = deviceEntryIconViewId }
+                LockIconView(context, null).apply { id = R.id.lock_icon_view }
             }
         constraintLayout.addView(view)
     }
@@ -91,7 +90,7 @@ constructor(
                 )
             }
         } else {
-            constraintLayout.findViewById<LockIconView?>(deviceEntryIconViewId)?.let {
+            constraintLayout.findViewById<LockIconView?>(R.id.lock_icon_view)?.let {
                 lockIconViewController.get().setLockIconView(it)
             }
         }
@@ -133,7 +132,11 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        constraintLayout.removeView(deviceEntryIconViewId)
+        if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+            constraintLayout.removeView(deviceEntryIconViewId)
+        } else {
+            constraintLayout.removeView(R.id.lock_icon_view)
+        }
     }
 
     @VisibleForTesting
@@ -148,18 +151,25 @@ constructor(
                 )
             }
 
+        val iconId =
+            if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+                deviceEntryIconViewId
+            } else {
+                R.id.lock_icon_view
+            }
+
         constraintSet.apply {
-            constrainWidth(deviceEntryIconViewId, sensorRect.right - sensorRect.left)
-            constrainHeight(deviceEntryIconViewId, sensorRect.bottom - sensorRect.top)
+            constrainWidth(iconId, sensorRect.right - sensorRect.left)
+            constrainHeight(iconId, sensorRect.bottom - sensorRect.top)
             connect(
-                deviceEntryIconViewId,
+                iconId,
                 ConstraintSet.TOP,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.TOP,
                 sensorRect.top
             )
             connect(
-                deviceEntryIconViewId,
+                iconId,
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,

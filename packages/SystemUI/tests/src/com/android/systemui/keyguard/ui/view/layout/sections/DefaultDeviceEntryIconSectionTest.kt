@@ -106,7 +106,20 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
     }
 
     @Test
-    fun applyConstraints() {
+    fun applyConstraints_udfps_refactor_off() {
+        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
+        val cs = ConstraintSet()
+        underTest.applyConstraints(cs)
+
+        val constraint = cs.getConstraint(R.id.lock_icon_view)
+
+        assertThat(constraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
+        assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
+    }
+
+    @Test
+    fun applyConstraints_udfps_refactor_on() {
+        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
         val cs = ConstraintSet()
         underTest.applyConstraints(cs)
 
@@ -117,7 +130,24 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCenterIcon() {
+    fun testCenterIcon_udfps_refactor_off() {
+        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
+        val cs = ConstraintSet()
+        underTest.centerIcon(Point(5, 6), 1F, cs)
+
+        val constraint = cs.getConstraint(R.id.lock_icon_view)
+
+        assertThat(constraint.layout.mWidth).isEqualTo(2)
+        assertThat(constraint.layout.mHeight).isEqualTo(2)
+        assertThat(constraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
+        assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
+        assertThat(constraint.layout.topMargin).isEqualTo(5)
+        assertThat(constraint.layout.startMargin).isEqualTo(4)
+    }
+
+    @Test
+    fun testCenterIcon_udfps_refactor_on() {
+        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
         val cs = ConstraintSet()
         underTest.centerIcon(Point(5, 6), 1F, cs)
 
