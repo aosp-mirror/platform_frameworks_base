@@ -323,7 +323,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mSensorController = new SensorController(this, mDeviceId,
                 mParams.getVirtualSensorCallback(), mParams.getVirtualSensorConfigs());
         mCameraAccessController = cameraAccessController;
-        mCameraAccessController.startObservingIfNeeded();
+        if (mCameraAccessController != null) {
+            mCameraAccessController.startObservingIfNeeded();
+        }
         if (!Flags.streamPermissions()) {
             mPermissionDialogComponent = getPermissionDialogComponent();
         } else {
@@ -563,7 +565,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
 
             mAppToken.unlinkToDeath(this, 0);
-            mCameraAccessController.stopObservingIfNeeded();
+            if (mCameraAccessController != null) {
+                mCameraAccessController.stopObservingIfNeeded();
+            }
 
             mInputController.close();
             mSensorController.close();
@@ -583,7 +587,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override
     @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     public void onRunningAppsChanged(ArraySet<Integer> runningUids) {
-        mCameraAccessController.blockCameraAccessIfNeeded(runningUids);
+        if (mCameraAccessController != null) {
+            mCameraAccessController.blockCameraAccessIfNeeded(runningUids);
+        }
         mRunningAppsChangedCallback.accept(runningUids);
     }
 
