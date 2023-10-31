@@ -179,8 +179,6 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             val translationY by collectLastValue(underTest.translationY)
             val scale by collectLastValue(underTest.scale)
 
-            underTest.statusViewTop = 100
-
             // Set to dozing (on AOD)
             dozeAmountTransitionStep.emit(TransitionStep(value = 1f))
             // Trigger a change to the burn-in model
@@ -192,37 +190,6 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
                 )
             assertThat(translationX).isEqualTo(20)
             assertThat(translationY).isEqualTo(30)
-            assertThat(scale).isEqualTo(Pair(0.5f, true /* scaleClockOnly */))
-
-            // Set to the beginning of GONE->AOD transition
-            goneToAodTransitionStep.emit(TransitionStep(value = 0f))
-            assertThat(translationX).isEqualTo(0)
-            assertThat(translationY).isEqualTo(0)
-            assertThat(scale).isEqualTo(Pair(1f, true /* scaleClockOnly */))
-        }
-
-    @Test
-    fun translationAndScaleFromBurnFullyDozingStaysOutOfTopInset() =
-        testScope.runTest {
-            val translationX by collectLastValue(underTest.translationX)
-            val translationY by collectLastValue(underTest.translationY)
-            val scale by collectLastValue(underTest.scale)
-
-            underTest.statusViewTop = 100
-            underTest.topInset = 80
-
-            // Set to dozing (on AOD)
-            dozeAmountTransitionStep.emit(TransitionStep(value = 1f))
-            // Trigger a change to the burn-in model
-            burnInFlow.value =
-                BurnInModel(
-                    translationX = 20,
-                    translationY = -30,
-                    scale = 0.5f,
-                )
-            assertThat(translationX).isEqualTo(20)
-            // -20 instead of -30, due to inset of 80
-            assertThat(translationY).isEqualTo(-20)
             assertThat(scale).isEqualTo(Pair(0.5f, true /* scaleClockOnly */))
 
             // Set to the beginning of GONE->AOD transition
