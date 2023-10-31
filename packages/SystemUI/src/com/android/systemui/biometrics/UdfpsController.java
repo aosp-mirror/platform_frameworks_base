@@ -553,19 +553,15 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             Log.w(TAG, "ignoring onTouch with null overlay or animation view controller");
             return false;
         }
-        if (mOverlay.getAnimationViewController().shouldPauseAuth()) {
+        // Wait to receive up or cancel before pausing auth
+        if (mActivePointerId == MotionEvent.INVALID_POINTER_ID
+                && mOverlay.getAnimationViewController().shouldPauseAuth()) {
             Log.w(TAG, "ignoring onTouch with shouldPauseAuth = true");
             return false;
         }
         if (!mOverlay.matchesRequestId(requestId)) {
             Log.w(TAG, "ignoring stale touch event: " + requestId + " current: "
                     + mOverlay.getRequestId());
-            return false;
-        }
-
-        if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
-                && !mAlternateBouncerInteractor.isVisibleState())
-                || mPrimaryBouncerInteractor.isInTransit()) {
             return false;
         }
         if (event.getAction() == MotionEvent.ACTION_DOWN
