@@ -27,9 +27,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
+import com.android.systemui.tracing.TraceUtils.Companion.async
+import com.android.systemui.tracing.TraceUtils.Companion.withContext
 import com.android.systemui.user.data.repository.UserRepository
-import com.android.systemui.util.TraceUtils.Companion.async
-import com.android.systemui.util.TraceUtils.Companion.withContext
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlin.math.max

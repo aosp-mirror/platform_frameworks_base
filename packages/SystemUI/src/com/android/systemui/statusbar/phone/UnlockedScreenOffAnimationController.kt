@@ -31,7 +31,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.TraceUtils
+import com.android.systemui.tracing.TraceUtils
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import com.android.systemui.flags.FeatureFlags

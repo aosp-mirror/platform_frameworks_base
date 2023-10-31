@@ -7,8 +7,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dagger.qualifiers.Tracing
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.util.TraceUtils.Companion.coroutineTracingIsEnabled
-import com.android.systemui.util.tracing.TraceContextElement
+import com.android.systemui.tracing.TraceUtils.Companion.coroutineTracingIsEnabled
+import com.android.systemui.tracing.TraceContextElement
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher

@@ -20,7 +20,7 @@ import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.util.TraceUtils.Companion.launch
+import com.android.systemui.tracing.TraceUtils.Companion.launch
 import kotlinx.coroutines.CoroutineScope
 import java.util.function.Consumer
 import javax.inject.Inject
