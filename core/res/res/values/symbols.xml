@@ -328,6 +328,7 @@
   <java-symbol type="integer" name="config_phonenumber_compare_min_match" />
   <java-symbol type="bool" name="config_single_volume" />
   <java-symbol type="bool" name="config_volume_down_to_enter_silent" />
+  <java-symbol type="bool" name="config_volume_up_to_exit_silent" />
   <java-symbol type="bool" name="config_voice_capable" />
   <java-symbol type="bool" name="config_requireCallCapableAccountForHandle" />
   <java-symbol type="bool" name="config_user_notification_of_restrictied_mobile_access" />
