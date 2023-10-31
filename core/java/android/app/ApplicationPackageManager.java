@@ -48,7 +48,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApkChecksum;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ArchivedPackage;
+import android.content.pm.ArchivedPackageInfo;
 import android.content.pm.ChangedPackages;
 import android.content.pm.Checksum;
 import android.content.pm.ComponentInfo;
@@ -3937,13 +3937,13 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public @Nullable ArchivedPackage getArchivedPackage(@NonNull String packageName) {
+    public @Nullable ArchivedPackageInfo getArchivedPackage(@NonNull String packageName) {
         try {
             var parcel = mPM.getArchivedPackage(packageName, mContext.getUserId());
             if (parcel == null) {
                 return null;
             }
-            return new ArchivedPackage(parcel);
+            return new ArchivedPackageInfo(parcel);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

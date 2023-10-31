@@ -17,8 +17,8 @@
 package com.android.server.pm;
 
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
-import static android.content.pm.ArchivedActivity.bytesFromBitmap;
-import static android.content.pm.ArchivedActivity.drawableToBitmap;
+import static android.content.pm.ArchivedActivityInfo.bytesFromBitmap;
+import static android.content.pm.ArchivedActivityInfo.drawableToBitmap;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_UNARCHIVE;
