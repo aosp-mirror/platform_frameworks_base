@@ -32,9 +32,11 @@ import com.android.packageinstaller.v2.model.UninstallRepository;
 import com.android.packageinstaller.v2.model.UninstallRepository.CallerInfo;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUninstalling;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired;
 import com.android.packageinstaller.v2.ui.fragments.UninstallConfirmationFragment;
 import com.android.packageinstaller.v2.ui.fragments.UninstallErrorFragment;
+import com.android.packageinstaller.v2.ui.fragments.UninstallUninstallingFragment;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.UninstallViewModelFactory;
 
@@ -95,6 +97,15 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
             UninstallConfirmationFragment confirmationDialog = new UninstallConfirmationFragment(
                 uar);
             showDialogInner(confirmationDialog);
+        } else if (uninstallStage.getStageCode() == UninstallStage.STAGE_UNINSTALLING) {
+            // TODO: This shows a fragment whether or not user requests a result or not.
+            //  Originally, if the user does not request a result, we used to show a notification.
+            //  And a fragment if the user requests a result back. Should we consolidate and
+            //  show a fragment always?
+            UninstallUninstalling uninstalling = (UninstallUninstalling) uninstallStage;
+            UninstallUninstallingFragment uninstallingDialog = new UninstallUninstallingFragment(
+                uninstalling);
+            showDialogInner(uninstallingDialog);
         } else {
             Log.e(TAG, "Invalid stage: " + uninstallStage.getStageCode());
             showDialogInner(null);
@@ -126,6 +137,7 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
 
     @Override
     public void onPositiveResponse(boolean keepData) {
+        mUninstallViewModel.initiateUninstall(keepData);
     }
 
     @Override

@@ -28,6 +28,7 @@ import static com.android.packageinstaller.v2.model.uninstallstagedata.Uninstall
 
 import android.Manifest;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
 import android.content.ComponentName;
@@ -39,18 +40,22 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.UninstallCompleteCallback;
+import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallReady;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUninstalling;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired;
 import java.io.IOException;
 import java.util.List;
@@ -58,10 +63,23 @@ import java.util.List;
 public class UninstallRepository {
 
     private static final String TAG = UninstallRepository.class.getSimpleName();
+    private static final String BROADCAST_ACTION =
+        "com.android.packageinstaller.ACTION_UNINSTALL_COMMIT";
+
+    private static final String EXTRA_UNINSTALL_ID =
+        "com.android.packageinstaller.extra.UNINSTALL_ID";
+    private static final String EXTRA_APP_LABEL =
+        "com.android.packageinstaller.extra.APP_LABEL";
+    private static final String EXTRA_IS_CLONE_APP =
+        "com.android.packageinstaller.extra.IS_CLONE_APP";
+    private static final String EXTRA_PACKAGE_NAME =
+        "com.android.packageinstaller.extra.EXTRA_PACKAGE_NAME";
+
     private final Context mContext;
     private final AppOpsManager mAppOpsManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
+    private final MutableLiveData<UninstallStage> mUninstallResult = new MutableLiveData<>();
     public UserHandle mUninstalledUser;
     public UninstallCompleteCallback mCallback;
     private ApplicationInfo mTargetAppInfo;
@@ -72,6 +90,7 @@ public class UninstallRepository {
     private String mCallingActivity;
     private boolean mUninstallFromAllUsers;
     private boolean mIsClonedApp;
+    private int mUninstallId;
 
     public UninstallRepository(Context context) {
         mContext = context;
@@ -369,6 +388,77 @@ public class UninstallRepository {
             Log.e(TAG, "Cannot determine amount of app data for " + pkg, e);
         }
         return 0;
+    }
+
+    public void initiateUninstall(boolean keepData) {
+        // Get an uninstallId to track results and show a notification on non-TV devices.
+        try {
+            mUninstallId = UninstallEventReceiver.addObserver(mContext,
+                EventResultPersister.GENERATE_NEW_ID, this::handleUninstallResult);
+        } catch (EventResultPersister.OutOfIdsException e) {
+            Log.e(TAG, "Failed to start uninstall", e);
+            handleUninstallResult(PackageInstaller.STATUS_FAILURE,
+                PackageManager.DELETE_FAILED_INTERNAL_ERROR, null, 0);
+            return;
+        }
+
+        // TODO: Check with UX whether to show UninstallUninstalling dialog / notification?
+        mUninstallResult.setValue(new UninstallUninstalling(mTargetAppLabel, mIsClonedApp));
+
+        Bundle uninstallData = new Bundle();
+        uninstallData.putInt(EXTRA_UNINSTALL_ID, mUninstallId);
+        uninstallData.putString(EXTRA_PACKAGE_NAME, mTargetPackageName);
+        uninstallData.putBoolean(Intent.EXTRA_UNINSTALL_ALL_USERS, mUninstallFromAllUsers);
+        uninstallData.putCharSequence(EXTRA_APP_LABEL, mTargetAppLabel);
+        uninstallData.putBoolean(EXTRA_IS_CLONE_APP, mIsClonedApp);
+        Log.i(TAG, "Uninstalling extras = " + uninstallData);
+
+        // Get a PendingIntent for result broadcast and issue an uninstall request
+        Intent broadcastIntent = new Intent(BROADCAST_ACTION);
+        broadcastIntent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        broadcastIntent.putExtra(EventResultPersister.EXTRA_ID, mUninstallId);
+        broadcastIntent.setPackage(mContext.getPackageName());
+
+        PendingIntent pendingIntent =
+            PendingIntent.getBroadcast(mContext, mUninstallId, broadcastIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+
+        if (!startUninstall(mTargetPackageName, mUninstalledUser, pendingIntent,
+            mUninstallFromAllUsers, keepData)) {
+            handleUninstallResult(PackageInstaller.STATUS_FAILURE,
+                PackageManager.DELETE_FAILED_INTERNAL_ERROR, null, 0);
+        }
+    }
+
+    private void handleUninstallResult(int status, int legacyStatus, @Nullable String message,
+        int serviceId) {
+    }
+
+    /**
+     * Starts an uninstall for the given package.
+     *
+     * @return {@code true} if there was no exception while uninstalling. This does not represent
+     *     the result of the uninstall. Result will be made available in
+     *     {@link #handleUninstallResult(int, int, String, int)}
+     */
+    private boolean startUninstall(String packageName, UserHandle targetUser,
+        PendingIntent pendingIntent, boolean uninstallFromAllUsers, boolean keepData) {
+        int flags = uninstallFromAllUsers ? PackageManager.DELETE_ALL_USERS : 0;
+        flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
+        try {
+            mContext.createContextAsUser(targetUser, 0)
+                .getPackageManager().getPackageInstaller().uninstall(
+                    new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    flags, pendingIntent.getIntentSender());
+            return true;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Failed to uninstall", e);
+            return false;
+        }
+    }
+
+    public MutableLiveData<UninstallStage> getUninstallResult() {
+        return mUninstallResult;
     }
 
     public static class CallerInfo {

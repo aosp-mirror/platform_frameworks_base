@@ -20,6 +20,7 @@ import android.app.Application;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.v2.model.UninstallRepository;
 import com.android.packageinstaller.v2.model.UninstallRepository.CallerInfo;
@@ -29,7 +30,8 @@ public class UninstallViewModel extends AndroidViewModel {
 
     private static final String TAG = UninstallViewModel.class.getSimpleName();
     private final UninstallRepository mRepository;
-    private final MutableLiveData<UninstallStage> mCurrentUninstallStage = new MutableLiveData<>();
+    private final MediatorLiveData<UninstallStage> mCurrentUninstallStage =
+        new MediatorLiveData<>();
 
     public UninstallViewModel(@NonNull Application application, UninstallRepository repository) {
         super(application);
@@ -46,5 +48,18 @@ public class UninstallViewModel extends AndroidViewModel {
             stage = mRepository.generateUninstallDetails();
         }
         mCurrentUninstallStage.setValue(stage);
+    }
+
+    public void initiateUninstall(boolean keepData) {
+        mRepository.initiateUninstall(keepData);
+        // Since uninstall is an async operation, we will get the uninstall result later in time.
+        // Result of the uninstall will be set in UninstallRepository#mUninstallResult.
+        // As such, mCurrentUninstallStage will need to add another MutableLiveData
+        // as a data source
+        mCurrentUninstallStage.addSource(mRepository.getUninstallResult(), uninstallStage -> {
+            if (uninstallStage != null) {
+                mCurrentUninstallStage.setValue(uninstallStage);
+            }
+        });
     }
 }
