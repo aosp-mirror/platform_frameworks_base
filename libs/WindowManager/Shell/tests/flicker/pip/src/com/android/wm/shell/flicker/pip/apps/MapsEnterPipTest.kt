@@ -69,20 +69,21 @@ open class MapsEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition
     val mainHandler = Handler(Looper.getMainLooper())
     var mockLocationEnabled = false
 
-    val updateLocation = object : Runnable {
-        override fun run() {
-            // early bail out if mocking location is not enabled
-            if (!mockLocationEnabled) return
-            val location = Location("Googleplex")
-            location.latitude = 37.42243438411294
-            location.longitude = -122.08426281892311
-            location.time = System.currentTimeMillis()
-            location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
-            location.accuracy = 100f
-            locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, location)
-            mainHandler.postDelayed(this, 5)
+    val updateLocation =
+        object : Runnable {
+            override fun run() {
+                // early bail out if mocking location is not enabled
+                if (!mockLocationEnabled) return
+                val location = Location("Googleplex")
+                location.latitude = 37.42243438411294
+                location.longitude = -122.08426281892311
+                location.time = System.currentTimeMillis()
+                location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+                location.accuracy = 100f
+                locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, location)
+                mainHandler.postDelayed(this, 5)
+            }
         }
-    }
 
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {
         setup {
@@ -129,9 +130,7 @@ open class MapsEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition
         }
     }
 
-    override val thisTransition: FlickerBuilder.() -> Unit = {
-        transitions { tapl.goHome() }
-    }
+    override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
 
     @Postsubmit
     @Test

@@ -39,10 +39,22 @@ abstract class SwitchBetweenSplitPairsBenchmark(override val flicker: LegacyFlic
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
             setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp,
-                    secondaryApp, flicker.scenario.startRotation)
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, thirdApp, fourthApp,
-                    flicker.scenario.startRotation)
+                SplitScreenUtils.enterSplit(
+                    wmHelper,
+                    tapl,
+                    device,
+                    primaryApp,
+                    secondaryApp,
+                    flicker.scenario.startRotation
+                )
+                SplitScreenUtils.enterSplit(
+                    wmHelper,
+                    tapl,
+                    device,
+                    thirdApp,
+                    fourthApp,
+                    flicker.scenario.startRotation
+                )
                 SplitScreenUtils.waitForSplitComplete(wmHelper, thirdApp, fourthApp)
             }
             transitions {

@@ -35,9 +35,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PipAspectRatioChangeTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
-        transitions {
-            pipApp.changeAspectRatio()
-        }
+        transitions { pipApp.changeAspectRatio() }
     }
 
     @Presubmit

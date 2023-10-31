@@ -53,11 +53,7 @@ class EnterPipOnUserLeaveHintTest(flicker: LegacyFlickerTest) : EnterPipTransiti
         }
     }
 
-    override val defaultTeardown: FlickerBuilder.() -> Unit = {
-        teardown {
-            pipApp.exit(wmHelper)
-        }
-    }
+    override val defaultTeardown: FlickerBuilder.() -> Unit = { teardown { pipApp.exit(wmHelper) } }
 
     @Presubmit
     @Test

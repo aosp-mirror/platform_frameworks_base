@@ -81,8 +81,13 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
                 pipApp.launchViaIntent(wmHelper)
                 tapl.goHome()
                 SplitScreenUtils.enterSplit(
-                    wmHelper, tapl, device, pipApp, secondAppForSplitScreen,
-                    flicker.scenario.startRotation)
+                    wmHelper,
+                    tapl,
+                    device,
+                    pipApp,
+                    secondAppForSplitScreen,
+                    flicker.scenario.startRotation
+                )
                 pipApp.enableAutoEnterForPipActivity()
             }
             teardown {
@@ -132,9 +137,7 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
             if (flicker.scenario.isLandscapeOrSeascapeAtStart) {
                 flicker.assertWmVisibleRegion(pipApp) {
                     // first check against landscape bounds then against portrait bounds
-                    coversAtMost(displayBounds).then().coversAtMost(
-                        portraitDisplayBounds
-                    )
+                    coversAtMost(displayBounds).then().coversAtMost(portraitDisplayBounds)
                 }
             } else {
                 // always check against the display bounds which do not change during transition

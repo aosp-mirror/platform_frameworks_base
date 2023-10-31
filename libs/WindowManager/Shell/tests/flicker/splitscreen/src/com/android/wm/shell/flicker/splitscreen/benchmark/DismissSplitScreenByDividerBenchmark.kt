@@ -35,8 +35,16 @@ abstract class DismissSplitScreenByDividerBenchmark(override val flicker: Legacy
     SplitScreenBase(flicker) {
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
-            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp,
-                secondaryApp, flicker.scenario.startRotation) }
+            setup {
+                SplitScreenUtils.enterSplit(
+                    wmHelper,
+                    tapl,
+                    device,
+                    primaryApp,
+                    secondaryApp,
+                    flicker.scenario.startRotation
+                )
+            }
             transitions {
                 if (tapl.isTablet) {
                     SplitScreenUtils.dragDividerToDismissSplit(

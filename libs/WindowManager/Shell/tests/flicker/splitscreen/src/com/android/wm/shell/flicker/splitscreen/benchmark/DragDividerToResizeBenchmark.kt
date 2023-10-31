@@ -37,8 +37,16 @@ abstract class DragDividerToResizeBenchmark(override val flicker: LegacyFlickerT
     SplitScreenBase(flicker) {
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
-            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp,
-                secondaryApp, flicker.scenario.startRotation) }
+            setup {
+                SplitScreenUtils.enterSplit(
+                    wmHelper,
+                    tapl,
+                    device,
+                    primaryApp,
+                    secondaryApp,
+                    flicker.scenario.startRotation
+                )
+            }
             transitions { SplitScreenUtils.dragDividerToResizeAndWait(device, wmHelper) }
         }
 

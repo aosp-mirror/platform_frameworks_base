@@ -81,9 +81,8 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
     @Test
     override fun pipLayerReduces() {
         flicker.assertLayers {
-            val pipLayerList = this.layers {
-                standardAppHelper.layerMatchesAnyOf(it) && it.isVisible
-            }
+            val pipLayerList =
+                this.layers { standardAppHelper.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
@@ -194,7 +193,8 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
      * transition
      */
     @Postsubmit
-    @Test override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /**
      * Checks that all layers that are visible on the trace, are visible for at least 2 consecutive
@@ -215,9 +215,7 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     /** Checks that all parts of the screen are covered during the transition */
-    @Postsubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         /**

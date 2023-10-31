@@ -36,8 +36,14 @@ abstract class DismissSplitScreenByGoHomeBenchmark(override val flicker: LegacyF
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
             setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp,
-                    flicker.scenario.startRotation)
+                SplitScreenUtils.enterSplit(
+                    wmHelper,
+                    tapl,
+                    device,
+                    primaryApp,
+                    secondaryApp,
+                    flicker.scenario.startRotation
+                )
             }
             transitions {
                 tapl.goHome()

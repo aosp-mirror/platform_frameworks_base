@@ -36,9 +36,7 @@ object Utils {
     fun testSetupRule(navigationMode: NavBar, rotation: Rotation): RuleChain {
         return RuleChain.outerRule(ArtifactSaverRule())
             .around(UnlockScreenRule())
-            .around(
-                NavigationModeRule(navigationMode.value, false)
-            )
+            .around(NavigationModeRule(navigationMode.value, false))
             .around(
                 LaunchAppRule(MessagingAppHelper(instrumentation), clearCacheAfterParsing = false)
             )

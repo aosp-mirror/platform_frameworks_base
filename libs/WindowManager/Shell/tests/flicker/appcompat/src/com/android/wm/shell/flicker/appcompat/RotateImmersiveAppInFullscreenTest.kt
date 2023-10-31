@@ -65,10 +65,12 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 class RotateImmersiveAppInFullscreenTest(flicker: LegacyFlickerTest) : BaseAppCompat(flicker) {
 
-    private val immersiveApp = LetterboxAppHelper(instrumentation,
+    private val immersiveApp =
+        LetterboxAppHelper(
+            instrumentation,
             launcherName = ActivityOptions.PortraitImmersiveActivity.LABEL,
-            component =
-            ActivityOptions.PortraitImmersiveActivity.COMPONENT.toFlickerComponent())
+            component = ActivityOptions.PortraitImmersiveActivity.COMPONENT.toFlickerComponent()
+        )
 
     private val cmdHelper: CommandsHelper = CommandsHelper.getInstance(instrumentation)
     private val execAdb: (String) -> String = { cmd -> cmdHelper.executeShellCommand(cmd) }
@@ -84,8 +86,8 @@ class RotateImmersiveAppInFullscreenTest(flicker: LegacyFlickerTest) : BaseAppCo
                 setStartRotation()
                 immersiveApp.launchViaIntent(wmHelper)
                 startDisplayBounds =
-                        wmHelper.currentState.layerState.physicalDisplayBounds
-                                ?: error("Display not found")
+                    wmHelper.currentState.layerState.physicalDisplayBounds
+                        ?: error("Display not found")
             }
             transitions {
                 if (isCuttlefishDevice) {
@@ -96,12 +98,10 @@ class RotateImmersiveAppInFullscreenTest(flicker: LegacyFlickerTest) : BaseAppCo
                     val rotationButtonSelector = By.res(LAUNCHER_PACKAGE, "rotate_suggestion")
                     uiDevice.wait(Until.hasObject(rotationButtonSelector), FIND_TIMEOUT)
                     uiDevice.findObject(rotationButtonSelector)
-                            ?: error("rotation button not found")
+                        ?: error("rotation button not found")
                 }
             }
-            teardown {
-                immersiveApp.exit(wmHelper)
-            }
+            teardown { immersiveApp.exit(wmHelper) }
         }
 
     @Before
@@ -112,48 +112,40 @@ class RotateImmersiveAppInFullscreenTest(flicker: LegacyFlickerTest) : BaseAppCo
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is in immersive mode.")
-    override fun taskBarLayerIsVisibleAtStartAndEnd() {
-    }
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is in immersive mode.")
-    override fun navBarLayerIsVisibleAtStartAndEnd() {
-    }
+    override fun navBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is in immersive mode.")
-    override fun statusBarLayerIsVisibleAtStartAndEnd() {
-    }
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is in immersive mode.")
-    override fun taskBarWindowIsAlwaysVisible() {
-    }
+    override fun taskBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is in immersive mode.")
-    override fun navBarWindowIsAlwaysVisible() {
-    }
+    override fun navBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
     @Test
     @Ignore("Not applicable to this CUJ. App is in immersive mode.")
-    override fun statusBarWindowIsAlwaysVisible() {
-    }
+    override fun statusBarWindowIsAlwaysVisible() {}
 
     @Test
     @Ignore("Not applicable to this CUJ. App is in immersive mode.")
-    override fun statusBarLayerPositionAtStartAndEnd() {
-    }
+    override fun statusBarLayerPositionAtStartAndEnd() {}
 
     @Test
     @Ignore("Not applicable to this CUJ. App is in immersive mode.")
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-    }
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {}
 
     /** Test that app is fullscreen by checking status bar and task bar visibility. */
     @Postsubmit
@@ -161,8 +153,9 @@ class RotateImmersiveAppInFullscreenTest(flicker: LegacyFlickerTest) : BaseAppCo
     fun appWindowFullScreen() {
         flicker.assertWmEnd {
             this.isAppWindowInvisible(ComponentNameMatcher.STATUS_BAR)
-                    .isAppWindowInvisible(ComponentNameMatcher.TASK_BAR)
-                    .visibleRegion(immersiveApp).coversExactly(startDisplayBounds)
+                .isAppWindowInvisible(ComponentNameMatcher.TASK_BAR)
+                .visibleRegion(immersiveApp)
+                .coversExactly(startDisplayBounds)
         }
     }
 
@@ -170,9 +163,7 @@ class RotateImmersiveAppInFullscreenTest(flicker: LegacyFlickerTest) : BaseAppCo
     @Postsubmit
     @Test
     fun appInOriginalRotation() {
-        flicker.assertWmEnd {
-            this.hasRotation(Rotation.ROTATION_90)
-        }
+        flicker.assertWmEnd { this.hasRotation(Rotation.ROTATION_90) }
     }
 
     companion object {
@@ -189,10 +180,10 @@ class RotateImmersiveAppInFullscreenTest(flicker: LegacyFlickerTest) : BaseAppCo
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return LegacyFlickerTestFactory.nonRotationTests(
-                    supportedRotations = listOf(Rotation.ROTATION_90),
-                    // TODO(b/292403378): 3 button mode not added as rotation button is hidden in taskbar
-                    supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
-
+                supportedRotations = listOf(Rotation.ROTATION_90),
+                // TODO(b/292403378): 3 button mode not added as rotation button is hidden in
+                // taskbar
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
         }
     }

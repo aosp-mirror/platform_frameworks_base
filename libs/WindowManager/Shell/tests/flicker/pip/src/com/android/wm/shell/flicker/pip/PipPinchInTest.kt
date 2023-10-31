@@ -42,8 +42,8 @@ class PipPinchInTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     }
 
     /**
-     * Checks that the visible region area of [pipApp] decreases
-     * and then increases during the animation.
+     * Checks that the visible region area of [pipApp] decreases and then increases during the
+     * animation.
      */
     @Presubmit
     @Test

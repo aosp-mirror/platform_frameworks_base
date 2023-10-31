@@ -58,8 +58,9 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
         return {
             setup {
                 MultiWindowUtils.executeShellCommand(
-                        instrumentation,
-                        "settings put secure force_hide_bubbles_user_education 1")
+                    instrumentation,
+                    "settings put secure force_hide_bubbles_user_education 1"
+                )
                 notifyManager.setBubblesAllowed(
                     testApp.packageName,
                     uid,
@@ -72,8 +73,9 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
 
             teardown {
                 MultiWindowUtils.executeShellCommand(
-                        instrumentation,
-                        "settings put secure force_hide_bubbles_user_education 0")
+                    instrumentation,
+                    "settings put secure force_hide_bubbles_user_education 0"
+                )
                 notifyManager.setBubblesAllowed(
                     testApp.packageName,
                     uid,

@@ -153,15 +153,10 @@ object SplitScreenUtils {
         } else {
             val rotationCheckEnabled = tapl.getExpectedRotationCheckEnabled()
             tapl.setExpectedRotationCheckEnabled(false) // disable rotation check to enter overview
-            val home = tapl.workspace
-                .switchToOverview()
+            val home = tapl.workspace.switchToOverview()
             tapl.setExpectedRotationCheckEnabled(rotationCheckEnabled) // restore rotation checks
             ChangeDisplayOrientationRule.setRotation(rotation)
-            home.currentTask
-                .tapMenu()
-                .tapSplitMenuItem()
-                .currentTask
-                .open()
+            home.currentTask.tapMenu().tapSplitMenuItem().currentTask.open()
         }
         SystemClock.sleep(TIMEOUT_MS)
     }

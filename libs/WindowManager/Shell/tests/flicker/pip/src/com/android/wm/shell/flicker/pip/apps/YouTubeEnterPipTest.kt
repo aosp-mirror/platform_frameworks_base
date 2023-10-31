@@ -70,14 +70,10 @@ open class YouTubeEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
     }
 
     override val defaultTeardown: FlickerBuilder.() -> Unit = {
-        teardown {
-            standardAppHelper.exit(wmHelper)
-        }
+        teardown { standardAppHelper.exit(wmHelper) }
     }
 
-    override val thisTransition: FlickerBuilder.() -> Unit = {
-        transitions { tapl.goHome() }
-    }
+    override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
 
     @Postsubmit
     @Test

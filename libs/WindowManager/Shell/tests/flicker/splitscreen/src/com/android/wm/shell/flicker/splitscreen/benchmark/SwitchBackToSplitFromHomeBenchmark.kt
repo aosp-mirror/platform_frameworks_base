@@ -37,8 +37,14 @@ abstract class SwitchBackToSplitFromHomeBenchmark(override val flicker: LegacyFl
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
             setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp,
-                    secondaryApp, flicker.scenario.startRotation)
+                SplitScreenUtils.enterSplit(
+                    wmHelper,
+                    tapl,
+                    device,
+                    primaryApp,
+                    secondaryApp,
+                    flicker.scenario.startRotation
+                )
 
                 tapl.goHome()
                 wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()

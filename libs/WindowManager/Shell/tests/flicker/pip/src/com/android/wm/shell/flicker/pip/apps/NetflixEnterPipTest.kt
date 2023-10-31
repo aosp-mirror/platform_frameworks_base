@@ -67,25 +67,18 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
             standardAppHelper.launchViaIntent(
                 wmHelper,
                 NetflixAppHelper.getNetflixWatchVideoIntent("70184207"),
-                ComponentNameMatcher(
-                    NetflixAppHelper.PACKAGE_NAME,
-                    NetflixAppHelper.WATCH_ACTIVITY
-                )
+                ComponentNameMatcher(NetflixAppHelper.PACKAGE_NAME, NetflixAppHelper.WATCH_ACTIVITY)
             )
             standardAppHelper.waitForVideoPlaying()
         }
     }
 
     override val defaultTeardown: FlickerBuilder.() -> Unit = {
-        teardown {
-            standardAppHelper.exit(wmHelper)
-        }
+        teardown { standardAppHelper.exit(wmHelper) }
     }
 
     override val thisTransition: FlickerBuilder.() -> Unit = {
-        transitions {
-            tapl.goHomeFromImmersiveFullscreenApp()
-        }
+        transitions { tapl.goHomeFromImmersiveFullscreenApp() }
     }
 
     @Postsubmit
@@ -133,7 +126,8 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
     }
 
     @Postsubmit
-    @Test override fun statusBarWindowIsAlwaysVisible() {
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() {
         // Netflix plays in immersive fullscreen mode, so taskbar will be gone at some point
     }
 
