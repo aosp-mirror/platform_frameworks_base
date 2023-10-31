@@ -24,6 +24,7 @@ import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.IComponentMatcher
 import android.tools.common.traces.component.IComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import android.tools.device.traces.parsers.toFlickerComponent
 import android.view.InputDevice
@@ -42,7 +43,6 @@ import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.flicker.testapp.ActivityOptions.SplitScreen.Primary
 import org.junit.Assert.assertNotNull
-import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 
 object SplitScreenUtils {
     private const val TIMEOUT_MS = 3_000L
