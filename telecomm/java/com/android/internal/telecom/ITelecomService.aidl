@@ -61,7 +61,8 @@ interface ITelecomService {
      * @see TelecomServiceImpl#getCallCapablePhoneAccounts
      */
     ParceledListSlice<PhoneAccountHandle> getCallCapablePhoneAccounts(
-            boolean includeDisabledAccounts, String callingPackage, String callingFeatureId);
+            boolean includeDisabledAccounts, String callingPackage,
+            String callingFeatureId, boolean acrossProfiles);
 
     /**
      * @see TelecomServiceImpl#getSelfManagedPhoneAccounts
