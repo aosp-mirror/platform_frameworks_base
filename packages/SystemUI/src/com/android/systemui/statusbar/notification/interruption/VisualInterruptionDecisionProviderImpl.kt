@@ -41,6 +41,7 @@ constructor(
     private val batteryController: BatteryController,
     private val globalSettings: GlobalSettings,
     private val headsUpManager: HeadsUpManager,
+    private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
     private val logger: NotificationInterruptLogger,
     @Main private val mainHandler: Handler,
     private val powerManager: PowerManager,
@@ -67,6 +68,9 @@ constructor(
         addFilter(PulseLowImportanceSuppressor())
         addFilter(BubbleNotAllowedSuppressor())
         addFilter(BubbleNoMetadataSuppressor())
+        addFilter(HunGroupAlertBehaviorSuppressor())
+        addFilter(HunJustLaunchedFsiSuppressor())
+        addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))
 
         started = true
     }

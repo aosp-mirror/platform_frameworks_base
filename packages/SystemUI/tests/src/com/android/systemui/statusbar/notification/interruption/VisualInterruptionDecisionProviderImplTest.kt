@@ -29,6 +29,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             batteryController,
             globalSettings,
             headsUpManager,
+            keyguardNotificationVisibilityProvider,
             logger,
             mainHandler,
             powerManager,

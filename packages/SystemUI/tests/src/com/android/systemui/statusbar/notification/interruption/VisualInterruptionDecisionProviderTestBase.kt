@@ -20,6 +20,9 @@ import android.app.ActivityManager
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
 import android.app.Notification.FLAG_BUBBLE
+import android.app.Notification.GROUP_ALERT_ALL
+import android.app.Notification.GROUP_ALERT_CHILDREN
+import android.app.Notification.GROUP_ALERT_SUMMARY
 import android.app.Notification.VISIBILITY_PRIVATE
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
@@ -305,6 +308,110 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         assertShouldNotHeadsUp(buildPulseEntry { importance = IMPORTANCE_LOW })
     }
 
+    private fun withPeekAndPulseEntry(
+        extendEntry: EntryBuilder.() -> Unit,
+        block: (NotificationEntry) -> Unit
+    ) {
+        ensurePeekState()
+        block(buildPeekEntry(extendEntry))
+
+        ensurePulseState()
+        block(buildPulseEntry(extendEntry))
+    }
+
+    @Test
+    fun testShouldHeadsUp_groupedSummaryNotif_groupAlertAll() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_ALL
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_groupedSummaryNotif_groupAlertSummary() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_SUMMARY
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldNotHeadsUp_groupedSummaryNotif_groupAlertChildren() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_CHILDREN
+        }) {
+            assertShouldNotHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_ungroupedSummaryNotif_groupAlertChildren() {
+        withPeekAndPulseEntry({
+            isGrouped = false
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_CHILDREN
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_groupedChildNotif_groupAlertAll() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = false
+            groupAlertBehavior = GROUP_ALERT_ALL
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_groupedChildNotif_groupAlertChildren() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = false
+            groupAlertBehavior = GROUP_ALERT_CHILDREN
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldNotHeadsUp_groupedChildNotif_groupAlertSummary() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = false
+            groupAlertBehavior = GROUP_ALERT_SUMMARY
+        }) {
+            assertShouldNotHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_ungroupedChildNotif_groupAlertSummary() {
+        withPeekAndPulseEntry({
+            isGrouped = false
+            isGroupSummary = false
+            groupAlertBehavior = GROUP_ALERT_SUMMARY
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldNotHeadsUp_justLaunchedFsi() {
+        withPeekAndPulseEntry({ hasJustLaunchedFsi = true }) { assertShouldNotHeadsUp(it) }
+    }
+
     @Test
     fun testShouldBubble_withIntentAndIcon() {
         ensureBubbleState()
@@ -355,6 +462,18 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         ensureBubbleState()
         provider.addLegacySuppressor(alwaysSuppressesAwakeHeadsUp)
         assertShouldBubble(buildBubbleEntry())
+    }
+
+    @Test
+    fun testShouldNotAlert_hiddenOnKeyguard() {
+        ensurePeekState({ keyguardShouldHideNotification = true })
+        assertShouldNotHeadsUp(buildPeekEntry())
+
+        ensurePulseState({ keyguardShouldHideNotification = true })
+        assertShouldNotHeadsUp(buildPulseEntry())
+
+        ensureBubbleState({ keyguardShouldHideNotification = true })
+        assertShouldNotBubble(buildBubbleEntry())
     }
 
     @Test
@@ -507,6 +626,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var hasBubbleMetadata = false
         var bubbleIsShortcut = false
         var bubbleSuppressesNotification: Boolean? = null
+        var isGrouped = false
+        var isGroupSummary: Boolean? = null
+        var groupAlertBehavior: Int? = null
+        var hasJustLaunchedFsi = false
 
         private fun buildBubbleMetadata(): BubbleMetadata {
             val builder =
@@ -544,6 +667,14 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     if (hasBubbleMetadata) {
                         setBubbleMetadata(buildBubbleMetadata())
                     }
+
+                    if (isGrouped) {
+                        setGroup(TEST_GROUP_KEY)
+                    }
+
+                    isGroupSummary?.let { setGroupSummary(it) }
+
+                    groupAlertBehavior?.let { setGroupAlertBehavior(it) }
                 }
                 .build()
                 .apply {
@@ -564,6 +695,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 }
                 .build()!!
                 .also {
+                    if (hasJustLaunchedFsi) {
+                        it.notifyFullScreenIntentLaunched()
+                    }
+
                     modifyRanking(it)
                         .apply {
                             suppressedVisualEffects?.let { setSuppressedVisualEffects(it) }
@@ -608,3 +743,4 @@ private const val TEST_CHANNEL_ID = "test_channel"
 private const val TEST_CHANNEL_NAME = "Test Channel"
 private const val TEST_PACKAGE = "test_package"
 private const val TEST_TAG = "test_tag"
+private const val TEST_GROUP_KEY = "test_group_key"
