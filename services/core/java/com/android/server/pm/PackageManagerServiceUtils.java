@@ -30,7 +30,6 @@ import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
-import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
@@ -1299,16 +1298,15 @@ public class PackageManagerServiceUtils {
     }
 
     /**
-     * Given {@code targetDir}, returns {@code targetDir/~~[randomStrA]/[packageName]-[randomStrB].}
+     * Given {@code targetDir}, returns {@code targetDir/~~[randomStrA]/[randomStrB].}
      * Makes sure that {@code targetDir/~~[randomStrA]} directory doesn't exist.
      * Notice that this method doesn't actually create any directory.
      *
      * @param targetDir Directory that is two-levels up from the result directory.
-     * @param packageName Name of the package whose code files are to be installed under the result
-     *                    directory.
-     * @return File object for the directory that should hold the code files of {@code packageName}.
+     *
+     * @return File object for the directory that should hold the code files.
      */
-    public static File getNextCodePath(File targetDir, String packageName) {
+    public static File getNextCodePath(File targetDir) {
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[16];
         File firstLevelDir;
@@ -1320,22 +1318,8 @@ public class PackageManagerServiceUtils {
         } while (firstLevelDir.exists());
 
         random.nextBytes(bytes);
-        String dirName = packageName + RANDOM_CODEPATH_PREFIX + Base64.encodeToString(bytes,
-                Base64.URL_SAFE | Base64.NO_WRAP);
-        final File result = new File(firstLevelDir, dirName);
-        if (DEBUG && !Objects.equals(tryParsePackageName(result.getName()), packageName)) {
-            throw new RuntimeException(
-                    "codepath is off: " + result.getName() + " (" + packageName + ")");
-        }
-        return result;
-    }
-
-    static String tryParsePackageName(@NonNull String codePath) throws IllegalArgumentException {
-        int packageNameEnds = codePath.indexOf(RANDOM_CODEPATH_PREFIX);
-        if (packageNameEnds == -1) {
-            throw new IllegalArgumentException("Not a valid package folder name");
-        }
-        return codePath.substring(0, packageNameEnds);
+        String dirName = Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP);
+        return new File(firstLevelDir, dirName);
     }
 
     /**
