@@ -97,7 +97,10 @@ class QSTileViewModelInterfaceComplianceTest : SysuiTestCase() {
             {
                 object : QSTileDataToStateMapper<Any> {
                     override fun map(config: QSTileConfig, data: Any): QSTileState =
-                        QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {}
+                        QSTileState.build(
+                            { Icon.Resource(0, ContentDescription.Resource(0)) },
+                            ""
+                        ) {}
                 }
             },
             fakeDisabledByPolicyInteractor,

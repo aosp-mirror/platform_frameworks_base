@@ -39,7 +39,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,6 +46,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Provides a hassle-free way to implement new tiles according to current System UI architecture
@@ -83,10 +85,8 @@ class QSTileViewModelImpl<DATA_TYPE>(
 
     private val users: MutableStateFlow<UserHandle> =
         MutableStateFlow(userRepository.getSelectedUserInfo().userHandle)
-    private val userInputs: MutableSharedFlow<QSTileUserAction> =
-        MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    private val forceUpdates: MutableSharedFlow<Unit> =
-        MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val userInputs: MutableSharedFlow<QSTileUserAction> = MutableSharedFlow()
+    private val forceUpdates: MutableSharedFlow<Unit> = MutableSharedFlow()
     private val spec
         get() = config.tileSpec
 
@@ -130,7 +130,7 @@ class QSTileViewModelImpl<DATA_TYPE>(
             tileData.replayCache.isNotEmpty(),
             state.replayCache.isNotEmpty()
         )
-        userInputs.tryEmit(userAction)
+        tileScope.launch { userInputs.emit(userAction) }
     }
 
     override fun destroy() {
@@ -151,11 +151,16 @@ class QSTileViewModelImpl<DATA_TYPE>(
                             emit(DataUpdateTrigger.InitialRequest)
                             qsTileLogger.logInitialRequest(spec)
                         }
+                        .shareIn(tileScope, SharingStarted.WhileSubscribed())
                 tileDataInteractor()
                     .tileData(user, updateTriggers)
+                    // combine makes sure updateTriggers is always listened even if
+                    // tileDataInteractor#tileData doesn't flatMapLatest on it
+                    .combine(updateTriggers) { data, _ -> data }
                     .cancellable()
                     .flowOn(backgroundDispatcher)
             }
+            .distinctUntilChanged()
             .shareIn(
                 tileScope,
                 SharingStarted.WhileSubscribed(),
@@ -171,8 +176,8 @@ class QSTileViewModelImpl<DATA_TYPE>(
      *
      * Subscribing to the result flow twice will result in doubling all actions, logs and analytics.
      */
-    private fun userInputFlow(user: UserHandle): Flow<DataUpdateTrigger> {
-        return userInputs
+    private fun userInputFlow(user: UserHandle): Flow<DataUpdateTrigger> =
+        userInputs
             .filterFalseActions()
             .filterByPolicy(user)
             .throttle(CLICK_THROTTLE_DURATION, systemClock)
@@ -187,7 +192,6 @@ class QSTileViewModelImpl<DATA_TYPE>(
             }
             .onEach { userActionInteractor().handleInput(it.input) }
             .flowOn(backgroundDispatcher)
-    }
 
     private fun Flow<QSTileUserAction>.filterByPolicy(user: UserHandle): Flow<QSTileUserAction> =
         config.policy.let { policy ->
