@@ -30,6 +30,7 @@
 
 #include <SkBitmap.h>
 #include <SkColor.h>
+#include <SkFont.h>
 #include <SkImageInfo.h>
 #include <SkRefCnt.h>
 
@@ -352,6 +353,8 @@ public:
     }
 
     static CallCounts& countsForFunctor(int functor) { return sMockFunctorCounts[functor]; }
+
+    static SkFont defaultFont();
 
 private:
     static std::unordered_map<int, CallCounts> sMockFunctorCounts;
