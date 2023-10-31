@@ -140,6 +140,14 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".v2.ui.UninstallLaunch"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:exported="false">
+        </activity>
+
         <receiver android:name=".UninstallEventReceiver"
             android:permission="android.permission.INSTALL_PACKAGES"
             android:exported="false">
