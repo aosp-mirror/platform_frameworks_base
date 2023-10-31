@@ -192,6 +192,7 @@ class MediaRouter2ServiceImpl {
 
     // Start of methods that implement MediaRouter2 operations.
 
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @NonNull
     public boolean verifyPackageExists(@NonNull String clientPackageName) {
         final int pid = Binder.getCallingPid();
@@ -199,11 +200,7 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
 
         try {
-            mContext.enforcePermission(
-                    Manifest.permission.MEDIA_CONTENT_CONTROL,
-                    pid,
-                    uid,
-                    "Must hold MEDIA_CONTENT_CONTROL permission.");
+            enforcePrivilegedRoutingPermissions(uid, pid);
             PackageManager pm = mContext.getPackageManager();
             pm.getPackageInfo(clientPackageName, PackageManager.PackageInfoFlags.of(0));
             return true;
@@ -482,6 +479,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void registerManager(@NonNull IMediaRouter2Manager manager,
             @NonNull String callerPackageName) {
         Objects.requireNonNull(manager, "manager must not be null");
@@ -727,6 +725,15 @@ class MediaRouter2ServiceImpl {
                             == PackageManager.PERMISSION_GRANTED;
         }
         return hasBluetoothRoutingPermission;
+    }
+
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    private void enforcePrivilegedRoutingPermissions(int callerUid, int callerPid) {
+        mContext.enforcePermission(
+                Manifest.permission.MEDIA_CONTENT_CONTROL,
+                callerPid,
+                callerUid,
+                "Must hold MEDIA_CONTENT_CONTROL permission.");
     }
 
     // End of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
@@ -1161,6 +1168,7 @@ class MediaRouter2ServiceImpl {
         return sessionInfos;
     }
 
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @GuardedBy("mLock")
     private void registerManagerLocked(
             @NonNull IMediaRouter2Manager manager,
@@ -1184,8 +1192,7 @@ class MediaRouter2ServiceImpl {
                             + " callerUserId: %d",
                         callerUid, callerPid, callerPackageName, callerUserId));
 
-        mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, callerPid, callerUid,
-                "Must hold MEDIA_CONTENT_CONTROL permission.");
+        enforcePrivilegedRoutingPermissions(callerUid, callerPid);
 
         UserRecord userRecord = getOrCreateUserRecordLocked(callerUserId);
         managerRecord = new ManagerRecord(
