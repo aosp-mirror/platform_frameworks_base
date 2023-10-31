@@ -3538,7 +3538,7 @@ public class ComputerEngine implements Computer {
     @Override
     public int getPackageStartability(boolean safeMode, @NonNull String packageName, int callingUid,
             @UserIdInt int userId) {
-        final boolean userKeyUnlocked = StorageManager.isUserKeyUnlocked(userId);
+        final boolean ceStorageUnlocked = StorageManager.isCeStorageUnlocked(userId);
         final PackageStateInternal ps = getPackageStateInternal(packageName);
         if (ps == null || shouldFilterApplication(ps, callingUid, userId)
                 || !ps.getUserStateOrDefault(userId).isInstalled()) {
@@ -3553,7 +3553,7 @@ public class ComputerEngine implements Computer {
             return PackageManagerService.PACKAGE_STARTABILITY_FROZEN;
         }
 
-        if (!userKeyUnlocked && !AndroidPackageUtils.isEncryptionAware(ps.getPkg())) {
+        if (!ceStorageUnlocked && !AndroidPackageUtils.isEncryptionAware(ps.getPkg())) {
             return PackageManagerService.PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED;
         }
         return PackageManagerService.PACKAGE_STARTABILITY_OK;
