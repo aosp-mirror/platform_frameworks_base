@@ -43,6 +43,7 @@ import android.annotation.UserIdInt;
 import android.app.PropertyInvalidatedCache;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
+import android.content.res.Resources;
 import android.multiuser.Flags;
 import android.os.Looper;
 import android.os.Parcel;
@@ -50,21 +51,26 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.text.TextUtils;
+import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.frameworks.servicestests.R;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerService.UserData;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -77,6 +83,7 @@ import java.util.List;
 @MediumTest
 public class UserManagerServiceUserInfoTest {
     private UserManagerService mUserManagerService;
+    private Resources mResources;
 
     @Before
     public void setup() {
@@ -96,6 +103,8 @@ public class UserManagerServiceUserInfoTest {
         assertEquals("Multiple users so this test can't run.", 1, users.size());
         assertEquals("Only user present isn't the system user.",
                 UserHandle.USER_SYSTEM, users.get(0).id);
+
+        mResources = InstrumentationRegistry.getTargetContext().getResources();
     }
 
     @Test
@@ -109,7 +118,7 @@ public class UserManagerServiceUserInfoTest {
         byte[] bytes = baos.toByteArray();
 
         UserData read = mUserManagerService.readUserLP(
-                data.info.id, new ByteArrayInputStream(bytes));
+                data.info.id, new ByteArrayInputStream(bytes), 0);
 
         assertUserInfoEquals(data.info, read.info, /* parcelCopy= */ false);
     }
@@ -146,11 +155,13 @@ public class UserManagerServiceUserInfoTest {
         // Clear the restrictions to see if they are properly read in from the user file.
         setUserRestrictions(data.info.id, globalRestriction, localRestriction, false);
 
+        final int userVersion = 10;
         //read the secondary and SYSTEM user file to fetch local/global device policy restrictions.
-        mUserManagerService.readUserLP(data.info.id, new ByteArrayInputStream(secondaryUserBytes));
+        mUserManagerService.readUserLP(data.info.id, new ByteArrayInputStream(secondaryUserBytes),
+                userVersion);
         if (Flags.saveGlobalAndGuestRestrictionsOnSystemUserXmlReadOnly()) {
             mUserManagerService.readUserLP(UserHandle.USER_SYSTEM,
-                    new ByteArrayInputStream(systemUserBytes));
+                    new ByteArrayInputStream(systemUserBytes), userVersion);
         }
 
         assertTrue(mUserManagerService.hasUserRestrictionOnAnyUser(globalRestriction));
@@ -301,6 +312,45 @@ public class UserManagerServiceUserInfoTest {
         assertTrue(mUserManagerService.isUserOfType(105, USER_TYPE_FULL_SYSTEM));
 
         assertTrue(mUserManagerService.isUserOfType(106, USER_TYPE_FULL_DEMO));
+    }
+
+    /** Tests readUserLP upgrading from version 9 to 10+. */
+    @Test
+    public void testUserRestrictionsUpgradeFromV9() throws Exception {
+        final String[] localRestrictions = new String[] {
+            UserManager.DISALLOW_CAMERA,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+        };
+
+        final int userId = 100;
+        UserData data = new UserData();
+        data.info = createUser(userId, FLAG_FULL, "A type");
+
+        mUserManagerService.putUserInfo(data.info);
+
+        for (String restriction : localRestrictions) {
+            assertFalse(mUserManagerService.hasBaseUserRestriction(restriction, userId));
+            assertFalse(mUserManagerService.hasUserRestriction(restriction, userId));
+        }
+
+        // Convert the xml resource to the system storage xml format.
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream os = new DataOutputStream(baos);
+        XmlPullParser in = mResources.getXml(R.xml.user_100_v9);
+        XmlSerializer out = Xml.newBinarySerializer();
+        out.setOutput(os, StandardCharsets.UTF_8.name());
+        Xml.copy(in, out);
+        byte[] userBytes = baos.toByteArray();
+        baos.reset();
+
+        final int userVersion = 9;
+        mUserManagerService.readUserLP(data.info.id, new ByteArrayInputStream(userBytes),
+                userVersion);
+
+        for (String restriction : localRestrictions) {
+            assertFalse(mUserManagerService.hasBaseUserRestriction(restriction, userId));
+            assertTrue(mUserManagerService.hasUserRestriction(restriction, userId));
+        }
     }
 
     /** Creates a UserInfo with the given flags and userType. */
