@@ -16,14 +16,19 @@
 
 package com.android.systemui.communal.shared.model
 
-/** Supported sizes for communal content in the layout grid. */
-enum class CommunalContentSize {
+/**
+ * Supported sizes for communal content in the layout grid.
+ *
+ * @param span The span of the content in a column. For example, if FULL is 6, then 3 represents
+ *   HALF, 2 represents THIRD, and 1 represents SIXTH.
+ */
+enum class CommunalContentSize(val span: Int) {
     /** Content takes the full height of the column. */
-    FULL,
+    FULL(6),
 
     /** Content takes half of the height of the column. */
-    HALF,
+    HALF(3),
 
     /** Content takes a third of the height of the column. */
-    THIRD,
+    THIRD(2),
 }
