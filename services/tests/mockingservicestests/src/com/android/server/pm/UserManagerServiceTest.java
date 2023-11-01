@@ -323,6 +323,7 @@ public final class UserManagerServiceTest {
     @Test
     public void testGetBootUser_Headless_ThrowsIfOnlySystemUserExists() throws Exception {
         setSystemUserHeadless(true);
+        removeNonSystemUsers();
 
         assertThrows(UserManager.CheckedUserOperationException.class,
                 () -> mUmi.getBootUser(/* waitUntilSet= */ false));
@@ -421,6 +422,14 @@ public final class UserManagerServiceTest {
             resultString.append(partialString);
         }
         return resultString.toString();
+    }
+
+    private void removeNonSystemUsers() {
+        for (UserInfo user : mUms.getUsers(true)) {
+            if (!user.getUserHandle().isSystem()) {
+                mUms.removeUserInfo(user.id);
+            }
+        }
     }
 
     private void mockCurrentUser(@UserIdInt int userId) {
