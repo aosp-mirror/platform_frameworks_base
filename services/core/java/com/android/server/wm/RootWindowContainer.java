@@ -1637,8 +1637,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
-        if (!StorageManager.isUserKeyUnlocked(mCurrentUser)) {
-            // Can't launch home on secondary display areas if device is still locked.
+        if (!StorageManager.isCeStorageUnlocked(mCurrentUser)) {
+            // Can't launch home on secondary display areas if CE storage is still locked.
             return false;
         }
 
