@@ -26,6 +26,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.statusbar.BatteryStatusChip
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -74,6 +76,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     private lateinit var systemClock: FakeSystemClock
     private lateinit var chipAnimationController: SystemEventChipAnimationController
     private lateinit var systemStatusAnimationScheduler: SystemStatusAnimationScheduler
+    private val fakeFeatureFlags = FakeFeatureFlags()
 
     @get:Rule val animatorTestRule = AnimatorTestRule()
 
@@ -81,12 +84,15 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
+        fakeFeatureFlags.set(Flags.PLUG_IN_STATUS_BAR_CHIP, true)
+
         systemClock = FakeSystemClock()
         chipAnimationController =
             SystemEventChipAnimationController(
                 mContext,
                 statusBarWindowController,
-                statusBarContentInsetProvider
+                statusBarContentInsetProvider,
+                fakeFeatureFlags
             )
 
         // StatusBarContentInsetProvider is mocked. Ensure that it returns some mocked values.
