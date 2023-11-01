@@ -24,11 +24,21 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 
 @Module(
     includes =
@@ -64,3 +74,35 @@ interface SysUITestModule {
             test.fakeBroadcastDispatcher
     }
 }
+
+interface SysUITestComponent<out T> {
+    val testScope: TestScope
+    val underTest: T
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun <T : SysUITestComponent<*>> T.runTest(block: suspend T.() -> Unit): Unit =
+    testScope.runTest {
+        // Access underTest immediately to force Dagger to instantiate it prior to the test running
+        underTest
+        runCurrent()
+        block()
+    }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun SysUITestComponent<*>.runCurrent() = testScope.runCurrent()
+
+fun <T> SysUITestComponent<*>.collectLastValue(
+    flow: Flow<T>,
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+) = testScope.collectLastValue(flow, context, start)
+
+fun <T> SysUITestComponent<*>.collectValues(
+    flow: Flow<T>,
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+) = testScope.collectValues(flow, context, start)
+
+val SysUITestComponent<*>.backgroundScope
+    get() = testScope.backgroundScope
