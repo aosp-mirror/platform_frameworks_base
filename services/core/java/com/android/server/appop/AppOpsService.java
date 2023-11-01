@@ -1143,22 +1143,32 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }, RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS);
 
-        getPackageManagerInternal().setExternalSourcesPolicy(
-                new PackageManagerInternal.ExternalSourcesPolicy() {
-                    @Override
-                    public int getPackageTrustedToInstallApps(String packageName, int uid) {
-                        int appOpMode = checkOperation(AppOpsManager.OP_REQUEST_INSTALL_PACKAGES,
-                                uid, packageName);
-                        switch (appOpMode) {
-                            case AppOpsManager.MODE_ALLOWED:
-                                return PackageManagerInternal.ExternalSourcesPolicy.USER_TRUSTED;
-                            case AppOpsManager.MODE_ERRORED:
-                                return PackageManagerInternal.ExternalSourcesPolicy.USER_BLOCKED;
-                            default:
-                                return PackageManagerInternal.ExternalSourcesPolicy.USER_DEFAULT;
-                        }
-                    }
-                });
+        getPackageManagerInternal()
+                .setExternalSourcesPolicy(
+                        new PackageManagerInternal.ExternalSourcesPolicy() {
+                            @Override
+                            public int getPackageTrustedToInstallApps(String packageName, int uid) {
+                                final AttributionSource attributionSource =
+                                        new AttributionSource.Builder(uid)
+                                                .setPackageName(packageName)
+                                                .build();
+                                int appOpMode =
+                                        checkOperationWithState(
+                                                AppOpsManager.OP_REQUEST_INSTALL_PACKAGES,
+                                                attributionSource.asState());
+                                switch (appOpMode) {
+                                    case AppOpsManager.MODE_ALLOWED:
+                                        return PackageManagerInternal.ExternalSourcesPolicy
+                                                .USER_TRUSTED;
+                                    case AppOpsManager.MODE_ERRORED:
+                                        return PackageManagerInternal.ExternalSourcesPolicy
+                                                .USER_BLOCKED;
+                                    default:
+                                        return PackageManagerInternal.ExternalSourcesPolicy
+                                                .USER_DEFAULT;
+                                }
+                            }
+                        });
     }
 
     @VisibleForTesting
@@ -2534,22 +2544,41 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    /** @deprecated Use {@link #checkOperationWithStateRaw} instead. */
     @Override
     public int checkOperationRaw(int code, int uid, String packageName,
-            @Nullable String attributionTag) {
-        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
-                true /*raw*/);
+             @Nullable String attributionTag) {
+        final AttributionSource attributionSource = new AttributionSource.Builder(uid)
+                .setPackageName(packageName).setAttributionTag(attributionTag).build();
+        return mCheckOpsDelegateDispatcher.checkOperation(code, attributionSource, true /*raw*/);
     }
 
     @Override
-    public int checkOperation(int code, int uid, String packageName) {
-        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
-                false /*raw*/);
+    public int checkOperationWithStateRaw(int code, AttributionSourceState attributionSourceState) {
+        final AttributionSource attributionSource = new AttributionSource(attributionSourceState);
+        return mCheckOpsDelegateDispatcher.checkOperation(code, attributionSource, true /*raw*/);
     }
 
-    private int checkOperationImpl(int code, int uid, String packageName,
-            @Nullable String attributionTag, boolean raw) {
+    /** @deprecated Use {@link #checkOperationWithState} instead. */
+    @Override
+    public int checkOperation(int code, int uid, String packageName) {
+        final AttributionSource attributionSource = new AttributionSource.Builder(uid)
+                .setPackageName(packageName)
+                .build();
+        return mCheckOpsDelegateDispatcher.checkOperation(code, attributionSource, false /*raw*/);
+    }
+
+    @Override
+    public int checkOperationWithState(int code, AttributionSourceState attributionSourceState) {
+        final AttributionSource attributionSource = new AttributionSource(attributionSourceState);
+        return mCheckOpsDelegateDispatcher.checkOperation(code, attributionSource, false /*raw*/);
+    }
+
+    private int checkOperationImpl(int code, AttributionSource attributionSource, boolean raw) {
         verifyIncomingOp(code);
+        final String packageName = attributionSource.getPackageName();
+        final int uid = attributionSource.getUid();
+        final String attributionTag = attributionSource.getAttributionTag();
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
             return AppOpsManager.opToDefaultMode(code);
         }
@@ -2614,7 +2643,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (mode != AppOpsManager.MODE_ALLOWED) {
             return mode;
         }
-        return checkOperation(code, uid, packageName);
+        final AttributionSource attributionSource = new AttributionSource.Builder(uid)
+                .setPackageName(packageName)
+                .build();
+        return checkOperationWithState(code, attributionSource.asState());
     }
 
     @Override
@@ -2758,17 +2790,38 @@ public class AppOpsService extends IAppOpsService.Stub {
                 proxiedFlags, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
     }
 
+    /** @deprecated Use {@link #noteOperationWithState} instead. */
     @Override
     public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
             String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage) {
-        return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
-                attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+        final AttributionSource attributionSource = new AttributionSource.Builder(uid)
+                .setPackageName(packageName)
+                .setAttributionTag(attributionTag)
+                .build();
+        return mCheckOpsDelegateDispatcher.noteOperation(code, attributionSource,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage);
     }
 
-    private SyncNotedAppOp noteOperationImpl(int code, int uid, @Nullable String packageName,
-            @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp,
+    @Override
+    public SyncNotedAppOp noteOperationWithState(
+            int code,
+            AttributionSourceState attributionSourceState,
+            boolean shouldCollectAsyncNotedOp,
+            String message,
+            boolean shouldCollectMessage) {
+        final AttributionSource attributionSource = new AttributionSource(attributionSourceState);
+        return mCheckOpsDelegateDispatcher.noteOperation(
+                code, attributionSource, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+    }
+
+    private SyncNotedAppOp noteOperationImpl(int code, AttributionSource attributionSource,
+            boolean shouldCollectAsyncNotedOp,
             @Nullable String message, boolean shouldCollectMessage) {
+        final int uid = attributionSource.getUid();
+        final String packageName = attributionSource.getPackageName();
+        final String attributionTag = attributionSource.getAttributionTag();
+
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
@@ -3163,22 +3216,42 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    /** @deprecated Use {@link #startOperationWithState} instead. */
     @Override
     public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-            @Nullable String packageName, @Nullable String attributionTag,
+             @Nullable String packageName, @Nullable String attributionTag,
+             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+             String message, boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
+             int attributionChainId) {
+        final AttributionSource attributionSource = new AttributionSource.Builder(uid)
+                .setPackageName(packageName)
+                .setAttributionTag(attributionTag)
+                .build();
+        return mCheckOpsDelegateDispatcher.startOperation(token, code, attributionSource,
+                startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                attributionFlags, attributionChainId);
+    }
+
+    @Override
+    public SyncNotedAppOp startOperationWithState(IBinder token, int code,
+            AttributionSourceState attributionSourceState,
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
             String message, boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
             int attributionChainId) {
-        return mCheckOpsDelegateDispatcher.startOperation(token, code, uid, packageName,
-                attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+        final AttributionSource attributionSource = new AttributionSource(attributionSourceState);
+        return mCheckOpsDelegateDispatcher.startOperation(token, code, attributionSource,
+                startIfModeDefault, shouldCollectAsyncNotedOp, message,
                 shouldCollectMessage, attributionFlags, attributionChainId);
     }
 
-    private SyncNotedAppOp startOperationImpl(@NonNull IBinder clientId, int code, int uid,
-            @Nullable String packageName, @Nullable String attributionTag,
-            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @NonNull String message,
+    private SyncNotedAppOp startOperationImpl(@NonNull IBinder clientId, int code,
+            AttributionSource attributionSource, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, @NonNull String message,
             boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
             int attributionChainId) {
+        final String packageName = attributionSource.getPackageName();
+        final int uid = attributionSource.getUid();
+        final String attributionTag = attributionSource.getAttributionTag();
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
@@ -3200,7 +3273,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int result = MODE_DEFAULT;
         if (code == OP_RECORD_AUDIO_HOTWORD || code == OP_RECEIVE_AMBIENT_TRIGGER_AUDIO
                 || code == OP_RECORD_AUDIO_SANDBOXED) {
-            result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+            result = checkOperationWithState(OP_RECORD_AUDIO, attributionSource.asState());
             // Check result
             if (result != AppOpsManager.MODE_ALLOWED) {
                 return new SyncNotedAppOp(result, code, attributionTag, packageName);
@@ -3208,7 +3281,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         // As a special case for OP_CAMERA_SANDBOXED.
         if (code == OP_CAMERA_SANDBOXED) {
-            result = checkOperation(OP_CAMERA, uid, packageName);
+            result = checkOperationWithState(OP_CAMERA, attributionSource.asState());
             // Check result
             if (result != AppOpsManager.MODE_ALLOWED) {
                 return new SyncNotedAppOp(result, code, attributionTag, packageName);
@@ -3512,15 +3585,29 @@ public class AppOpsService extends IAppOpsService.Stub {
                 packageName);
     }
 
+    /** @deprecated Use {@link #finishOperationWithState} instead. */
     @Override
     public void finishOperation(IBinder clientId, int code, int uid, String packageName,
             String attributionTag) {
-        mCheckOpsDelegateDispatcher.finishOperation(clientId, code, uid, packageName,
-                attributionTag);
+        final AttributionSource attributionSource = new AttributionSource.Builder(uid)
+                .setPackageName(packageName)
+                .setAttributionTag(attributionTag)
+                .build();
+        mCheckOpsDelegateDispatcher.finishOperation(clientId, code, attributionSource);
     }
 
-    private void finishOperationImpl(IBinder clientId, int code, int uid, String packageName,
-            String attributionTag) {
+    @Override
+    public void finishOperationWithState(IBinder clientId, int code,
+            AttributionSourceState attributionSourceState) {
+        final AttributionSource attributionSource = new AttributionSource(attributionSourceState);
+        mCheckOpsDelegateDispatcher.finishOperation(clientId, code, attributionSource);
+    }
+
+    private void finishOperationImpl(IBinder clientId, int code,
+            AttributionSource attributionSource) {
+        final String packageName = attributionSource.getPackageName();
+        final int uid = attributionSource.getUid();
+        final String attributionTag = attributionSource.getAttributionTag();
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
@@ -5103,8 +5190,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     if (shell.packageName != null) {
-                        shell.mInterface.startOperation(shell.mToken, shell.op, shell.packageUid,
-                                shell.packageName, shell.attributionTag, true, true,
+                        final AttributionSource shellAttributionSource =
+                                new AttributionSource.Builder(shell.packageUid)
+                                        .setPackageName(shell.packageName)
+                                        .setAttributionTag(shell.attributionTag)
+                                        .build();
+                        shell.mInterface.startOperationWithState(shell.mToken, shell.op,
+                                shellAttributionSource.asState(), true, true,
                                 "appops start shell command", true,
                                 AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR, ATTRIBUTION_CHAIN_ID_NONE);
                     } else {
@@ -5119,8 +5211,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     if (shell.packageName != null) {
-                        shell.mInterface.finishOperation(shell.mToken, shell.op, shell.packageUid,
-                                shell.packageName, shell.attributionTag);
+                        final AttributionSource shellAttributionSource =
+                                new AttributionSource.Builder(shell.packageUid)
+                                        .setPackageName(shell.packageName)
+                                        .setAttributionTag(shell.attributionTag)
+                                        .build();
+                        shell.mInterface.finishOperationWithState(shell.mToken, shell.op,
+                                shellAttributionSource.asState());
                     } else {
                         return -1;
                     }
@@ -6666,25 +6763,24 @@ public class AppOpsService extends IAppOpsService.Stub {
             return mCheckOpsDelegate;
         }
 
-        public int checkOperation(int code, int uid, String packageName,
-                @Nullable String attributionTag, boolean raw) {
+        public int checkOperation(int code, AttributionSource attributionSource, boolean raw) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    return mPolicy.checkOperation(code, uid, packageName, attributionTag, raw,
+                    return mPolicy.checkOperation(code, attributionSource, raw,
                             this::checkDelegateOperationImpl);
                 } else {
-                    return mPolicy.checkOperation(code, uid, packageName, attributionTag, raw,
+                    return mPolicy.checkOperation(code, attributionSource, raw,
                             AppOpsService.this::checkOperationImpl);
                 }
             } else if (mCheckOpsDelegate != null) {
-                return checkDelegateOperationImpl(code, uid, packageName, attributionTag, raw);
+                return checkDelegateOperationImpl(code, attributionSource, raw);
             }
-            return checkOperationImpl(code, uid, packageName, attributionTag, raw);
+            return checkOperationImpl(code, attributionSource, raw);
         }
 
-        private int checkDelegateOperationImpl(int code, int uid, String packageName,
-                @Nullable String attributionTag, boolean raw) {
-            return mCheckOpsDelegate.checkOperation(code, uid, packageName, attributionTag, raw,
+        private int checkDelegateOperationImpl(int code, AttributionSource attributionSource,
+                boolean raw) {
+            return mCheckOpsDelegate.checkOperation(code, attributionSource, raw,
                     AppOpsService.this::checkOperationImpl);
         }
 
@@ -6709,32 +6805,32 @@ public class AppOpsService extends IAppOpsService.Stub {
                     AppOpsService.this::checkAudioOperationImpl);
         }
 
-        public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
-                String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
+        public SyncNotedAppOp noteOperation(int code, AttributionSource attributionSource,
+                boolean shouldCollectAsyncNotedOp, String message,
                 boolean shouldCollectMessage) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    return mPolicy.noteOperation(code, uid, packageName, attributionTag,
+                    return mPolicy.noteOperation(code, attributionSource,
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                             this::noteDelegateOperationImpl);
                 } else {
-                    return mPolicy.noteOperation(code, uid, packageName, attributionTag,
+                    return mPolicy.noteOperation(code, attributionSource,
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                             AppOpsService.this::noteOperationImpl);
                 }
             } else if (mCheckOpsDelegate != null) {
-                return noteDelegateOperationImpl(code, uid, packageName,
-                        attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                return noteDelegateOperationImpl(code, attributionSource, shouldCollectAsyncNotedOp,
+                        message, shouldCollectMessage);
             }
-            return noteOperationImpl(code, uid, packageName, attributionTag,
+            return noteOperationImpl(code, attributionSource,
                     shouldCollectAsyncNotedOp, message, shouldCollectMessage);
         }
 
-        private SyncNotedAppOp noteDelegateOperationImpl(int code, int uid,
-                @Nullable String packageName, @Nullable String featureId,
+        private SyncNotedAppOp noteDelegateOperationImpl(int code,
+                AttributionSource attributionSource,
                 boolean shouldCollectAsyncNotedOp, @Nullable String message,
                 boolean shouldCollectMessage) {
-            return mCheckOpsDelegate.noteOperation(code, uid, packageName, featureId,
+            return mCheckOpsDelegate.noteOperation(code, attributionSource,
                     shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                     AppOpsService.this::noteOperationImpl);
         }
@@ -6770,39 +6866,38 @@ public class AppOpsService extends IAppOpsService.Stub {
                     AppOpsService.this::noteProxyOperationImpl);
         }
 
-        public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-                @Nullable String packageName, @NonNull String attributionTag,
-                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage,
-                @AttributionFlags int attributionFlags, int attributionChainId) {
+        public SyncNotedAppOp startOperation(IBinder token, int code,
+                AttributionSource attributionSource, boolean startIfModeDefault,
+                boolean shouldCollectAsyncNotedOp, @Nullable String message,
+                boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
+                int attributionChainId) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    return mPolicy.startOperation(token, code, uid, packageName,
-                            attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                    return mPolicy.startOperation(token, code, attributionSource,
+                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, attributionFlags, attributionChainId,
                             this::startDelegateOperationImpl);
                 } else {
-                    return mPolicy.startOperation(token, code, uid, packageName, attributionTag,
+                    return mPolicy.startOperation(token, code, attributionSource,
                             startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, attributionFlags, attributionChainId,
                             AppOpsService.this::startOperationImpl);
                 }
             } else if (mCheckOpsDelegate != null) {
-                return startDelegateOperationImpl(token, code, uid, packageName, attributionTag,
+                return startDelegateOperationImpl(token, code, attributionSource,
                         startIfModeDefault, shouldCollectAsyncNotedOp, message,
                         shouldCollectMessage, attributionFlags, attributionChainId);
             }
-            return startOperationImpl(token, code, uid, packageName, attributionTag,
+            return startOperationImpl(token, code, attributionSource,
                     startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                     attributionFlags, attributionChainId);
         }
 
-        private SyncNotedAppOp startDelegateOperationImpl(IBinder token, int code, int uid,
-                @Nullable String packageName, @Nullable String attributionTag,
-                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
-                boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
-                int attributionChainId) {
-            return mCheckOpsDelegate.startOperation(token, code, uid, packageName, attributionTag,
+        private SyncNotedAppOp startDelegateOperationImpl(IBinder token, int code,
+                AttributionSource attributionSource, boolean startIfModeDefault,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                @AttributionFlags int attributionFlags, int attributionChainId) {
+            return mCheckOpsDelegate.startOperation(token, code, attributionSource,
                     startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                     attributionFlags, attributionChainId, AppOpsService.this::startOperationImpl);
         }
@@ -6848,26 +6943,26 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributionChainId, AppOpsService.this::startProxyOperationImpl);
         }
 
-        public void finishOperation(IBinder clientId, int code, int uid, String packageName,
-                String attributionTag) {
+        public void finishOperation(IBinder clientId, int code,
+                AttributionSource attributionSource) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    mPolicy.finishOperation(clientId, code, uid, packageName, attributionTag,
+                    mPolicy.finishOperation(clientId, code, attributionSource,
                             this::finishDelegateOperationImpl);
                 } else {
-                    mPolicy.finishOperation(clientId, code, uid, packageName, attributionTag,
+                    mPolicy.finishOperation(clientId, code, attributionSource,
                             AppOpsService.this::finishOperationImpl);
                 }
             } else if (mCheckOpsDelegate != null) {
-                finishDelegateOperationImpl(clientId, code, uid, packageName, attributionTag);
+                finishDelegateOperationImpl(clientId, code, attributionSource);
             } else {
-                finishOperationImpl(clientId, code, uid, packageName, attributionTag);
+                finishOperationImpl(clientId, code, attributionSource);
             }
         }
 
-        private void finishDelegateOperationImpl(IBinder clientId, int code, int uid,
-                String packageName, String attributionTag) {
-            mCheckOpsDelegate.finishOperation(clientId, code, uid, packageName, attributionTag,
+        private void finishDelegateOperationImpl(IBinder clientId, int code,
+                AttributionSource attributionSource) {
+            mCheckOpsDelegate.finishOperation(clientId, code, attributionSource,
                     AppOpsService.this::finishOperationImpl);
         }
 

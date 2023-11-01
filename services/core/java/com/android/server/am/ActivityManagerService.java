@@ -428,10 +428,11 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.BootReceiver;
@@ -3150,8 +3151,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean hasUsageStatsPermission(String callingPackage, int callingUid, int callingPid) {
-        final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
-                callingUid, callingPackage, null, false, "", false).getOpMode();
+        final AttributionSource attributionSource = new AttributionSource.Builder(callingUid)
+                .setPackageName(callingPackage)
+                .build();
+        final int mode = mAppOpsService.noteOperationWithState(AppOpsManager.OP_GET_USAGE_STATS,
+                attributionSource.asState(), false, "", false).getOpMode();
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkPermission(Manifest.permission.PACKAGE_USAGE_STATS, callingPid, callingUid)
                     == PackageManager.PERMISSION_GRANTED;
@@ -5929,9 +5933,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int noteOp(String op, int uid, String packageName) {
             // TODO moltmann: Allow to specify featureId
-            return mActivityManagerService.mAppOpsService
-                    .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName, null,
-                            false, "", false).getOpMode();
+            final AttributionSource attributionSource = new AttributionSource.Builder(uid)
+                    .setPackageName(packageName)
+                    .build();
+            return mActivityManagerService
+                    .mAppOpsService
+                    .noteOperationWithState(
+                            AppOpsManager.strOpToOp(op),
+                            attributionSource.asState(),
+                            false,
+                            "",
+                            false)
+                    .getOpMode();
         }
 
         @Override
@@ -20059,20 +20072,26 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int checkOperation(int code, int uid, String packageName,
-                String attributionTag, boolean raw,
-                QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl) {
+        public int checkOperation(int code, AttributionSource attributionSource, boolean raw,
+                TriFunction<Integer, AttributionSource, Boolean, Integer> superImpl) {
+            final int uid = attributionSource.getUid();
+
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
+                final AttributionSource shellAttributionSource =
+                        new AttributionSource.Builder(shellUid)
+                                .setPackageName("com.android.shell")
+                                .build();
+
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, shellUid, "com.android.shell", null, raw);
+                    return superImpl.apply(code, shellAttributionSource, raw);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(code, uid, packageName, attributionTag, raw);
+            return superImpl.apply(code, attributionSource, raw);
         }
 
         @Override
@@ -20092,23 +20111,30 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
-                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
+        public SyncNotedAppOp noteOperation(int code, AttributionSource attributionSource,
+                boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
-                @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
+                @NonNull QuintFunction<Integer, AttributionSource, Boolean, String, Boolean,
                         SyncNotedAppOp> superImpl) {
+            final int uid = attributionSource.getUid();
+            final String attributionTag = attributionSource.getAttributionTag();
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
+                final AttributionSource shellAttributionSource =
+                        new AttributionSource.Builder(shellUid)
+                                .setPackageName("com.android.shell")
+                                .setAttributionTag(attributionTag)
+                                .build();
                 try {
-                    return superImpl.apply(code, shellUid, "com.android.shell", featureId,
+                    return superImpl.apply(code, shellAttributionSource,
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
+            return superImpl.apply(code, attributionSource, shouldCollectAsyncNotedOp,
                     message, shouldCollectMessage);
         }
 
@@ -20139,28 +20165,37 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-                @Nullable String packageName, @Nullable String attributionTag,
+        public SyncNotedAppOp startOperation(IBinder token, int code,
+                AttributionSource attributionSource,
                 boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @AttributionFlags int attributionFlags, int attributionChainId,
-                @NonNull UndecFunction<IBinder, Integer, Integer, String, String, Boolean,
+                @NonNull NonaFunction<IBinder, Integer, AttributionSource, Boolean,
                         Boolean, String, Boolean, Integer, Integer, SyncNotedAppOp> superImpl) {
+            final int uid = attributionSource.getUid();
+            final String attributionTag = attributionSource.getAttributionTag();
+
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(token, code, shellUid, "com.android.shell",
-                            attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                    final AttributionSource shellAttributionSource =
+                            new AttributionSource.Builder(shellUid)
+                                    .setPackageName("com.android.shell")
+                                    .setAttributionTag(attributionTag)
+                                    .build();
+
+                    return superImpl.apply(token, code, shellAttributionSource,
+                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, attributionFlags, attributionChainId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(token, code, uid, packageName, attributionTag,
-                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    attributionFlags, attributionChainId);
+            return superImpl.apply(token, code, attributionSource, startIfModeDefault,
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
+                    attributionChainId);
         }
 
         @Override
