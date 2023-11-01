@@ -51,6 +51,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.overlay.OverlayPaths;
 import android.net.Uri;
@@ -1956,7 +1957,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         ArchiveState archiveState = null;
 
                         int packageDepth = parser.getDepth();
-                        ArrayMap<String, SuspendParams> suspendParamsMap = null;
+                        ArrayMap<UserPackage, SuspendParams> suspendParamsMap = null;
                         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                                 && (type != XmlPullParser.END_TAG
                                 || parser.getDepth() > packageDepth)) {
@@ -1983,18 +1984,15 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                             parser);
                                     break;
                                 case TAG_SUSPEND_PARAMS:
-                                    final String suspendingPackage = parser.getAttributeValue(null,
-                                            ATTR_SUSPENDING_PACKAGE);
-                                    if (suspendingPackage == null) {
-                                        Slog.wtf(TAG, "No suspendingPackage found inside tag "
-                                                + TAG_SUSPEND_PARAMS);
+                                    Map.Entry<UserPackage, SuspendParams> entry =
+                                            readSuspensionParamsLPr(userId, parser);
+                                    if (entry == null) {
                                         continue;
                                     }
                                     if (suspendParamsMap == null) {
                                         suspendParamsMap = new ArrayMap<>();
                                     }
-                                    suspendParamsMap.put(suspendingPackage,
-                                            SuspendParams.restoreFromXml(parser));
+                                    suspendParamsMap.put(entry.getKey(), entry.getValue());
                                     break;
                                 case TAG_ARCHIVE_STATE:
                                     archiveState = parseArchiveState(parser);
@@ -2016,7 +2014,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                     oldSuspendedLauncherExtras,
                                     false /* quarantined */);
                             suspendParamsMap = new ArrayMap<>();
-                            suspendParamsMap.put(oldSuspendingPackage, suspendParams);
+                            suspendParamsMap.put(
+                                    UserPackage.of(userId, oldSuspendingPackage), suspendParams);
                         }
 
                         if (blockUninstall) {
@@ -2056,6 +2055,20 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 readPackageRestrictionsLPr(userId, origFirstInstallTimes);
             }
         }
+    }
+
+    @Nullable
+    private static Map.Entry<UserPackage, SuspendParams> readSuspensionParamsLPr(
+            int userId, TypedXmlPullParser parser) throws IOException {
+        final String suspendingPackage = parser.getAttributeValue(null, ATTR_SUSPENDING_PACKAGE);
+        if (suspendingPackage == null) {
+            Slog.wtf(TAG, "No suspendingPackage found inside tag " + TAG_SUSPEND_PARAMS);
+            return null;
+        }
+        final int suspendingUserId = userId;
+        return Map.entry(
+                UserPackage.of(suspendingUserId, suspendingPackage),
+                SuspendParams.restoreFromXml(parser));
     }
 
     private static ArchiveState parseArchiveState(TypedXmlPullParser parser)
@@ -2414,10 +2427,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         }
                         if (ustate.isSuspended()) {
                             for (int i = 0; i < ustate.getSuspendParams().size(); i++) {
-                                final String suspendingPackage = ustate.getSuspendParams().keyAt(i);
+                                final UserPackage suspendingPackage =
+                                        ustate.getSuspendParams().keyAt(i);
                                 serializer.startTag(null, TAG_SUSPEND_PARAMS);
                                 serializer.attribute(null, ATTR_SUSPENDING_PACKAGE,
-                                        suspendingPackage);
+                                        suspendingPackage.packageName);
                                 final SuspendParams params =
                                         ustate.getSuspendParams().valueAt(i);
                                 if (params != null) {

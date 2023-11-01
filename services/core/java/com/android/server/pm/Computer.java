@@ -518,7 +518,9 @@ public interface Computer extends PackageDataSnapshot {
     boolean isPackageStoppedForUser(@NonNull String packageName, @UserIdInt int userId)
             throws PackageManager.NameNotFoundException;
 
-    boolean isSuspendingAnyPackages(@NonNull String suspendingPackage, @UserIdInt int userId);
+    /** Check if the package is suspending any package. */
+    boolean isSuspendingAnyPackages(@NonNull String suspendingPackage,
+            @UserIdInt int suspendingUserId, int targetUserId);
 
     @NonNull
     ParceledListSlice<IntentFilter> getAllIntentFilters(@NonNull String packageName);
