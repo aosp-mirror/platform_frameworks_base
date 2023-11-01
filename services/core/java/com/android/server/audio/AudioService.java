@@ -107,6 +107,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
+import android.media.AudioTrack;
 import android.media.BluetoothProfileConnectionInfo;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
@@ -133,7 +134,9 @@ import android.media.IStrategyNonDefaultDevicesDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IStreamAliasingDispatcher;
 import android.media.IVolumeController;
-import android.media.LoudnessCodecFormat;
+import android.media.LoudnessCodecConfigurator;
+import android.media.LoudnessCodecInfo;
+import android.media.MediaCodec;
 import android.media.MediaMetrics;
 import android.media.MediaRecorder.AudioSource;
 import android.media.PlayerBase;
@@ -347,7 +350,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     /*package*/ boolean isPlatformAutomotive() {
-        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+        return mPlatformType == AudioSystem.PLATFORM_AUTOMOTIVE;
     }
 
     /** The controller for the volume UI. */
@@ -941,6 +944,8 @@ public class AudioService extends IAudioService.Stub
 
     private final SoundDoseHelper mSoundDoseHelper;
 
+    private final LoudnessCodecHelper mLoudnessCodecHelper;
+
     private final Object mSupportedSystemUsagesLock = new Object();
     @GuardedBy("mSupportedSystemUsagesLock")
     private @AttributeSystemUsage int[] mSupportedSystemUsages =
@@ -1274,6 +1279,8 @@ public class AudioService extends IAudioService.Stub
         updateStreamVolumeAlias(false /*updateVolumes*/, TAG);
         readPersistedSettings();
         readUserRestrictions();
+
+        mLoudnessCodecHelper = new LoudnessCodecHelper(this);
 
         mPlaybackMonitor =
                 new PlaybackActivityMonitor(context, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM],
@@ -4365,6 +4372,8 @@ public class AudioService extends IAudioService.Stub
         if (mMediaPlaybackActive.getAndSet(mediaActive) != mediaActive && mediaActive) {
             mSoundDoseHelper.scheduleMusicActiveCheck();
         }
+
+        mLoudnessCodecHelper.updateCodecParameters(configs);
 
         // Update playback active state for all apps in audio mode stack.
         // When the audio mode owner becomes active, replace any delayed MSG_UPDATE_AUDIO_MODE
@@ -10562,44 +10571,43 @@ public class AudioService extends IAudioService.Stub
 
     @Override
     public void registerLoudnessCodecUpdatesDispatcher(ILoudnessCodecUpdatesDispatcher dispatcher) {
-        // TODO: implement
+        mLoudnessCodecHelper.registerLoudnessCodecUpdatesDispatcher(dispatcher);
     }
 
     @Override
     public void unregisterLoudnessCodecUpdatesDispatcher(
             ILoudnessCodecUpdatesDispatcher dispatcher) {
-        // TODO: implement
+        mLoudnessCodecHelper.unregisterLoudnessCodecUpdatesDispatcher(dispatcher);
     }
 
+    /** @see LoudnessCodecConfigurator#setAudioTrack(AudioTrack) */
     @Override
-    public void startLoudnessCodecUpdates(int piid) {
-        // TODO: implement
+    public void startLoudnessCodecUpdates(int piid, List<LoudnessCodecInfo> codecInfoList) {
+        mLoudnessCodecHelper.startLoudnessCodecUpdates(piid, codecInfoList);
     }
 
+    /** @see LoudnessCodecConfigurator#setAudioTrack(AudioTrack) */
     @Override
     public void stopLoudnessCodecUpdates(int piid) {
-        // TODO: implement
+        mLoudnessCodecHelper.stopLoudnessCodecUpdates(piid);
     }
 
+    /** @see LoudnessCodecConfigurator#addMediaCodec(MediaCodec) */
     @Override
-    public void addLoudnesssCodecFormat(int piid, LoudnessCodecFormat format) {
-        // TODO: implement
+    public void addLoudnessCodecInfo(int piid, LoudnessCodecInfo codecInfo) {
+        mLoudnessCodecHelper.addLoudnessCodecInfo(piid, codecInfo);
     }
 
+    /** @see LoudnessCodecConfigurator#removeMediaCodec(MediaCodec) */
     @Override
-    public void addLoudnesssCodecFormatList(int piid, List<LoudnessCodecFormat> format) {
-        // TODO: implement
+    public void removeLoudnessCodecInfo(int piid, LoudnessCodecInfo codecInfo) {
+        mLoudnessCodecHelper.removeLoudnessCodecInfo(piid, codecInfo);
     }
 
+    /** @see LoudnessCodecConfigurator#getLoudnessCodecParams(AudioTrack, MediaCodec) */
     @Override
-    public void removeLoudnessCodecFormat(int piid, LoudnessCodecFormat format) {
-        // TODO: implement
-    }
-
-    @Override
-    public PersistableBundle getLoudnessParams(int piid, LoudnessCodecFormat format) {
-        // TODO: implement
-        return null;
+    public PersistableBundle getLoudnessParams(int piid, LoudnessCodecInfo codecInfo) {
+        return mLoudnessCodecHelper.getLoudnessParams(piid, codecInfo);
     }
 
     //==========================================================================================
