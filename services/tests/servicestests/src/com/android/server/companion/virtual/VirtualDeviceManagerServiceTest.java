@@ -59,7 +59,6 @@ import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.companion.virtual.flags.Flags;
-import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
@@ -250,8 +249,6 @@ public class VirtualDeviceManagerServiceTest {
     @Mock
     private SensorManagerInternal mSensorManagerInternalMock;
     @Mock
-    private IVirtualSensorCallback mVirtualSensorCallback;
-    @Mock
     private VirtualSensorCallback mSensorCallback;
     @Mock
     private IVirtualDeviceActivityListener mActivityListener;
@@ -269,7 +266,6 @@ public class VirtualDeviceManagerServiceTest {
     IPowerManager mIPowerManagerMock;
     @Mock
     IThermalService mIThermalServiceMock;
-    private PowerManager mPowerManager;
     @Mock
     private IAudioRoutingCallback mRoutingCallback;
     @Mock
@@ -361,9 +357,10 @@ public class VirtualDeviceManagerServiceTest {
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
                 mDevicePolicyManagerMock);
 
-        mPowerManager = new PowerManager(mContext, mIPowerManagerMock, mIThermalServiceMock,
+        PowerManager powerManager = new PowerManager(mContext, mIPowerManagerMock,
+                mIThermalServiceMock,
                 new Handler(TestableLooper.get(this).getLooper()));
-        when(mContext.getSystemService(Context.POWER_SERVICE)).thenReturn(mPowerManager);
+        when(mContext.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
 
         mInputManagerMockHelper = new InputManagerMockHelper(
                 TestableLooper.get(this), mNativeWrapperMock, mIInputManagerMock);
@@ -1600,6 +1597,54 @@ public class VirtualDeviceManagerServiceTest {
                 WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID_1, /*isNewTask=*/false);
 
         verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openNonBlockedAppOnMirrorDisplay_flagEnabled_cannotBeLaunched() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
+        when(mDisplayManagerInternalMock.getDisplayIdToMirror(anyInt()))
+                .thenReturn(Display.DEFAULT_DISPLAY);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
+                DISPLAY_ID_1);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ActivityInfo activityInfo = getActivityInfo(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME,
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+        assertThat(gwpc.canActivityBeLaunched(activityInfo, null,
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID_1, /*isNewTask=*/ false))
+                .isFalse();
+        // Verify that BlockedAppStreamingActivity also doesn't launch for mirror displays.
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfo, mAssociationInfo.getDisplayName());
+        verify(mContext, never()).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openNonBlockedAppOnMirrorDisplay_flagDisabled_launchesActivity() {
+        when(mDisplayManagerInternalMock.getDisplayIdToMirror(anyInt()))
+                .thenReturn(Display.DEFAULT_DISPLAY);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
+                DISPLAY_ID_1);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ActivityInfo activityInfo = getActivityInfo(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME,
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+        assertThat(gwpc.canActivityBeLaunched(activityInfo, null,
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID_1, /*isNewTask=*/ false))
+                .isTrue();
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfo, mAssociationInfo.getDisplayName());
+        verify(mContext, never()).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
 

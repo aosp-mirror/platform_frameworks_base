@@ -512,7 +512,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
     }
 
     public void showIconIsolated(StatusBarIconView icon, boolean animated) {
-        mNotificationIcons.showIconIsolated(icon, animated);
+        mNotificationIcons.showIconIsolatedLegacy(icon, animated);
     }
 
     public void setIsolatedIconLocation(@NotNull Rect iconDrawingRect, boolean requireStateUpdate) {

@@ -370,11 +370,10 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
         scope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
             runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    to = KeyguardState.GONE,
-                    transitionState = TransitionState.FINISHED,
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.OFF,
+                to = KeyguardState.GONE,
+                scope,
             )
             whenever(screenOffAnimController.shouldShowAodIconsWhenShade()).thenReturn(false)
             runCurrent()

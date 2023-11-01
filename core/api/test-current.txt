@@ -866,6 +866,14 @@ package android.companion {
 
 }
 
+package android.companion.virtual {
+
+  public final class VirtualDeviceManager {
+    method @FlaggedApi("android.companion.virtual.flags.interactive_screen_mirror") public boolean isVirtualDeviceOwnedMirrorDisplay(int);
+  }
+
+}
+
 package android.content {
 
   public final class AttributionSource implements android.os.Parcelable {
@@ -1074,7 +1082,7 @@ package android.content.pm {
     method public android.os.UserHandle getUserHandle();
     method public boolean isAdmin();
     method public boolean isCloneProfile();
-    method public boolean isCommunalProfile();
+    method @FlaggedApi("android.multiuser.support_communal_profile") public boolean isCommunalProfile();
     method public boolean isDemo();
     method public boolean isEnabled();
     method public boolean isEphemeral();

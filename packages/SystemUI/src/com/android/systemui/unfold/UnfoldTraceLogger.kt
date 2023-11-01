@@ -20,9 +20,9 @@ import android.os.Trace
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.tracing.TraceStateLogger
 import com.android.systemui.unfold.system.DeviceStateRepository
 import com.android.systemui.unfold.updates.FoldStateRepository
-import com.android.systemui.util.TraceStateLogger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

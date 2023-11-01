@@ -1282,7 +1282,9 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private boolean isSameUserOrProfileGroupOrTargetIsCommunal(UserInfo asker, UserInfo target) {
         if (asker.id == target.id) return true;
-        if (target.isCommunalProfile()) return true;
+        if (android.multiuser.Flags.supportCommunalProfile()) {
+            if (target.isCommunalProfile()) return true;
+        }
         return (asker.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
                 && asker.profileGroupId == target.profileGroupId);
     }

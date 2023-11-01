@@ -22,13 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.service.contentcapture.ContentCaptureService;
+import android.service.contentcapture.IContentProtectionAllowlistCallback;
 import android.service.contentcapture.IContentProtectionService;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureEvent;
 
 import com.android.internal.infra.ServiceConnector;
-
-import java.time.Duration;
 
 /**
  * Connector for the remote content protection service.
@@ -40,15 +39,16 @@ public class RemoteContentProtectionService
 
     private static final String TAG = RemoteContentProtectionService.class.getSimpleName();
 
-    private static final Duration AUTO_DISCONNECT_TIMEOUT = Duration.ofSeconds(3);
-
     @NonNull private final ComponentName mComponentName;
+
+    private final long mAutoDisconnectTimeoutMs;
 
     public RemoteContentProtectionService(
             @NonNull Context context,
             @NonNull ComponentName componentName,
             int userId,
-            boolean bindAllowInstant) {
+            boolean bindAllowInstant,
+            long autoDisconnectTimeoutMs) {
         super(
                 context,
                 new Intent(ContentCaptureService.PROTECTION_SERVICE_INTERFACE)
@@ -57,11 +57,12 @@ public class RemoteContentProtectionService
                 userId,
                 IContentProtectionService.Stub::asInterface);
         mComponentName = componentName;
+        mAutoDisconnectTimeoutMs = autoDisconnectTimeoutMs;
     }
 
     @Override // from ServiceConnector.Impl
     protected long getAutoDisconnectTimeoutMs() {
-        return AUTO_DISCONNECT_TIMEOUT.toMillis();
+        return mAutoDisconnectTimeoutMs;
     }
 
     @Override // from ServiceConnector.Impl
@@ -75,7 +76,13 @@ public class RemoteContentProtectionService
                         + (isConnected ? "connected" : "disconnected"));
     }
 
+    /** Calls the remote service when login is detected. */
     public void onLoginDetected(@NonNull ParceledListSlice<ContentCaptureEvent> events) {
         run(service -> service.onLoginDetected(events));
+    }
+
+    /** Calls the remote service with a request to update allowlist. */
+    public void onUpdateAllowlistRequest(@NonNull IContentProtectionAllowlistCallback callback) {
+        run(service -> service.onUpdateAllowlistRequest(callback.asBinder()));
     }
 }

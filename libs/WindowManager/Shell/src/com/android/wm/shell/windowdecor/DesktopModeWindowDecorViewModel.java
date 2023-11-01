@@ -57,6 +57,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
@@ -362,7 +363,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
             implements View.OnClickListener, View.OnTouchListener, View.OnLongClickListener,
-            DragDetector.MotionEventHandler{
+            DragDetector.MotionEventHandler {
 
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
@@ -371,6 +372,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         private final GestureDetector mGestureDetector;
 
         private boolean mIsDragging;
+        private boolean mHasLongClicked;
         private boolean mShouldClick;
         private int mDragPointerId = -1;
 
@@ -394,11 +396,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     RunningTaskInfo remainingTask = getOtherSplitTask(mTaskId);
                     mSplitScreenController.moveTaskToFullscreen(remainingTask.taskId);
                 }
-                decoration.closeMaximizeMenu();
             } else if (id == R.id.back_button) {
                 mTaskOperations.injectBackKey();
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
-                decoration.closeMaximizeMenu();
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
                     decoration.createHandleMenu();
@@ -433,7 +433,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDesktopTasksController.ifPresent(c -> c.moveToNextDisplay(mTaskId));
                 }
             } else if (id == R.id.maximize_window) {
-                moveTaskToFront(decoration.mTaskInfo);
                 if (decoration.isMaximizeMenuActive()) {
                     decoration.closeMaximizeMenu();
                     return;
@@ -467,10 +466,26 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         public boolean onTouch(View v, MotionEvent e) {
             final int id = v.getId();
             if (id != R.id.caption_handle && id != R.id.desktop_mode_caption
-                    && id != R.id.open_menu_button && id != R.id.close_window) {
+                    && id != R.id.open_menu_button && id != R.id.close_window
+                    && id != R.id.maximize_window) {
                 return false;
             }
             moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
+
+            if (!mHasLongClicked) {
+                final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+                decoration.closeMaximizeMenu();
+            }
+
+            final long eventDuration = e.getEventTime() - e.getDownTime();
+            final boolean shouldLongClick = id == R.id.maximize_window && !mIsDragging
+                    && !mHasLongClicked && eventDuration >= ViewConfiguration.getLongPressTimeout();
+            if (shouldLongClick) {
+                v.performLongClick();
+                mHasLongClicked = true;
+                return true;
+            }
+
             return mDragDetector.onMotionEvent(v, e);
         }
 
@@ -483,7 +498,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 if (decoration.isMaximizeMenuActive()) {
                     decoration.closeMaximizeMenu();
                 } else {
-                    decoration.closeHandleMenu();
                     decoration.createMaximizeMenu();
                 }
                 return true;
@@ -519,11 +533,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             e.getRawY(0));
                     mIsDragging = false;
                     mShouldClick = true;
+                    mHasLongClicked = false;
                     return true;
                 }
                 case MotionEvent.ACTION_MOVE: {
                     final DesktopModeWindowDecoration decoration =
                             mWindowDecorByTaskId.get(mTaskId);
+                    decoration.closeMaximizeMenu();
                     if (e.findPointerIndex(mDragPointerId) == -1) {
                         mDragPointerId = e.getPointerId(0);
                     }
@@ -542,7 +558,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 case MotionEvent.ACTION_CANCEL: {
                     final boolean wasDragging = mIsDragging;
                     if (!wasDragging) {
-                        if (mShouldClick && v != null) {
+                        if (mShouldClick && v != null && !mHasLongClicked) {
                             v.performClick();
                             mShouldClick = false;
                             return true;
@@ -685,14 +701,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     // If an UP/CANCEL action is received outside of caption bounds, turn off handle menu
     private void handleEventOutsideFocusedCaption(MotionEvent ev,
             DesktopModeWindowDecoration relevantDecor) {
+        // Returns if event occurs within caption
+        if (relevantDecor == null || relevantDecor.checkTouchEventInCaption(ev)) {
+            return;
+        }
+
         final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            if (relevantDecor == null) {
-                return;
-            }
-
             if (!mTransitionDragActive) {
                 relevantDecor.closeHandleMenuIfNeeded(ev);
+                relevantDecor.closeMaximizeMenuIfNeeded(ev);
             }
         }
     }
@@ -1024,7 +1042,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         public void onDragStart(int taskId) {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
             decoration.closeHandleMenu();
-            decoration.closeMaximizeMenu();
         }
     }
 

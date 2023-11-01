@@ -13,7 +13,7 @@ import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.res.R
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
-import com.android.systemui.util.TraceUtils.Companion.launch
+import com.android.systemui.tracing.TraceUtils.Companion.launch
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope

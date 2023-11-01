@@ -751,14 +751,10 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
         }
 
     private suspend fun givenTransitionToLockscreenFinished() {
-        transitionRepository.sendTransitionStep(
-            TransitionStep(
-                from = KeyguardState.AOD,
-                to = KeyguardState.LOCKSCREEN,
-                value = 1f,
-                transitionState = TransitionState.FINISHED,
-                ownerName = "givenTransitionToLockscreenFinished",
-            )
+        transitionRepository.sendTransitionSteps(
+            from = KeyguardState.AOD,
+            to = KeyguardState.LOCKSCREEN,
+            testScope
         )
     }
 }

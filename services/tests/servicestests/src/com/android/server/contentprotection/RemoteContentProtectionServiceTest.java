@@ -21,12 +21,16 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.UserHandle;
+import android.service.contentcapture.IContentProtectionAllowlistCallback;
 import android.service.contentcapture.IContentProtectionService;
 import android.view.contentcapture.ContentCaptureEvent;
 
@@ -57,11 +61,17 @@ import org.mockito.junit.MockitoRule;
 @SmallTest
 public class RemoteContentProtectionServiceTest {
 
-    private final Context mContext = ApplicationProvider.getApplicationContext();
+    private static final long AUTO_DISCONNECT_TIMEOUT_MS = 12345L;
+
+    private static final IBinder BINDER = new Binder();
+
+    private static final Context CONTEXT = ApplicationProvider.getApplicationContext();
 
     @Rule public final MockitoRule mMockitoRule = MockitoJUnit.rule();
 
     @Mock private IContentProtectionService mMockContentProtectionService;
+
+    @Mock private IContentProtectionAllowlistCallback mMockContentProtectionAllowlistCallback;
 
     private RemoteContentProtectionService mRemoteContentProtectionService;
 
@@ -69,9 +79,9 @@ public class RemoteContentProtectionServiceTest {
 
     @Before
     public void setup() {
-        ComponentName componentName = new ComponentName(mContext.getPackageName(), "TestClass");
+        ComponentName componentName = new ComponentName(CONTEXT.getPackageName(), "TestClass");
         mRemoteContentProtectionService =
-                new TestRemoteContentProtectionService(mContext, componentName);
+                new TestRemoteContentProtectionService(CONTEXT, componentName);
     }
 
     @Test
@@ -84,7 +94,7 @@ public class RemoteContentProtectionServiceTest {
     public void getAutoDisconnectTimeoutMs() {
         long actual = mRemoteContentProtectionService.getAutoDisconnectTimeoutMs();
 
-        assertThat(actual).isEqualTo(3000L);
+        assertThat(actual).isEqualTo(AUTO_DISCONNECT_TIMEOUT_MS);
     }
 
     @Test
@@ -99,10 +109,43 @@ public class RemoteContentProtectionServiceTest {
         verify(mMockContentProtectionService).onLoginDetected(events);
     }
 
+    @Test
+    public void onUpdateAllowlistRequest() throws Exception {
+        when(mMockContentProtectionAllowlistCallback.asBinder()).thenReturn(BINDER);
+
+        mRemoteContentProtectionService.onUpdateAllowlistRequest(
+                mMockContentProtectionAllowlistCallback);
+
+        verify(mMockContentProtectionService).onUpdateAllowlistRequest(BINDER);
+    }
+
+    @Test
+    public void onServiceConnectionStatusChanged_connected_noSideEffects() {
+        mRemoteContentProtectionService.onServiceConnectionStatusChanged(
+                mMockContentProtectionService, /* isConnected= */ true);
+
+        verifyZeroInteractions(mMockContentProtectionService);
+        assertThat(mConnectCallCount).isEqualTo(0);
+    }
+
+    @Test
+    public void onServiceConnectionStatusChanged_disconnected_noSideEffects() {
+        mRemoteContentProtectionService.onServiceConnectionStatusChanged(
+                mMockContentProtectionService, /* isConnected= */ false);
+
+        verifyZeroInteractions(mMockContentProtectionService);
+        assertThat(mConnectCallCount).isEqualTo(0);
+    }
+
     private final class TestRemoteContentProtectionService extends RemoteContentProtectionService {
 
         TestRemoteContentProtectionService(Context context, ComponentName componentName) {
-            super(context, componentName, UserHandle.myUserId(), /* bindAllowInstant= */ false);
+            super(
+                    context,
+                    componentName,
+                    UserHandle.myUserId(),
+                    /* bindAllowInstant= */ false,
+                    AUTO_DISCONNECT_TIMEOUT_MS);
         }
 
         @Override // from ServiceConnector

@@ -16,12 +16,18 @@
 package com.android.systemui.statusbar.notification.shared
 
 import com.android.systemui.Flags
+import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the NotificationIconContainer refactor flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object NotificationIconContainerRefactor {
+    /** The aconfig flag name */
     const val FLAG_NAME = Flags.FLAG_NOTIFICATIONS_ICON_CONTAINER_REFACTOR
+
+    /** A token used for dependency declaration */
+    val token: FlagToken
+        get() = FlagToken(FLAG_NAME, isEnabled)
 
     /** Is the refactor enabled? */
     @JvmStatic

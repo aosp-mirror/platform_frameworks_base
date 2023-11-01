@@ -116,5 +116,17 @@
             ],
             "file_patterns": ["VpnManagerService\\.java"]
         }
+    ],
+    "postsubmit": [
+        // these tests need to establish SLO baseline, see go/test-mapping-slo-guide
+        {
+            "name": "CtsPackageManagerTestCases"
+        },
+        {
+            "name": "CtsSuspendAppsTestCases"
+        },
+        {
+            "name": "FrameworksNetTests"
+        }
     ]
 }

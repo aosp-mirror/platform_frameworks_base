@@ -17,7 +17,7 @@ package com.android.systemui.keyguard
 
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
-import com.android.systemui.util.traceSection
+import com.android.systemui.tracing.traceSection
 import javax.inject.Inject
 import javax.inject.Singleton
 

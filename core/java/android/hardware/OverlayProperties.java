@@ -73,7 +73,7 @@ public final class OverlayProperties implements Parcelable {
      * @return True if the device can support fp16, false otherwise.
      * @hide
      */
-    public boolean supportFp16ForHdr() {
+    public boolean isFp16SupportedForHdr() {
         if (mNativeObject == 0) {
             return false;
         }
@@ -88,13 +88,12 @@ public final class OverlayProperties implements Parcelable {
      *         false if GPU composition fallback is otherwise required.
      */
     @FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
-    public boolean supportMixedColorSpaces() {
+    public boolean isMixedColorSpacesSupported() {
         if (mNativeObject == 0) {
             return false;
         }
         return nSupportMixedColorSpaces(mNativeObject);
     }
-
 
     @FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
     @Override

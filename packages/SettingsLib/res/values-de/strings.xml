@@ -216,8 +216,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Profil auswählen"</string>
     <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
     <string name="category_work" msgid="4014193632325996115">"Geschäftlich"</string>
-    <!-- no translation found for category_private (4244892185452788977) -->
-    <skip />
+    <string name="category_private" msgid="4244892185452788977">"Privat"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klonen"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Entwickleroptionen"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Entwickleroptionen aktivieren"</string>
@@ -465,12 +464,6 @@
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Weniger als <xliff:g id="THRESHOLD">%1$s</xliff:g> verbleibend (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Mehr als <xliff:g id="TIME_REMAINING">%1$s</xliff:g> verbleibend (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Mehr als <xliff:g id="TIME_REMAINING">%1$s</xliff:g> verbleibend"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Smartphone wird eventuell bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet wird eventuell bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Gerät wird eventuell bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Smartphone wird eventuell bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet wird eventuell bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Gerät wird eventuell bald ausgeschaltet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Voll in <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – voll in <xliff:g id="TIME">%2$s</xliff:g>"</string>

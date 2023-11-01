@@ -159,7 +159,7 @@ java_library_static {
         "android.hardware.boot-V1.2-java", // HIDL
         "android.hardware.boot-V1-java", // AIDL
         "android.hardware.broadcastradio-V2.0-java", // HIDL
-        "android.hardware.broadcastradio-V1-java", // AIDL
+        "android.hardware.broadcastradio-V2-java", // AIDL
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
@@ -192,12 +192,12 @@ java_library_static {
         "com.android.sysprop.watchdog",
         "ImmutabilityAnnotation",
         "securebox",
-        "android.content.pm.flags-aconfig-java",
         "apache-commons-math",
         "backstage_power_flags_lib",
         "notification_flags_lib",
         "biometrics_flags_lib",
         "am_flags_lib",
+        "com_android_wm_shell_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [

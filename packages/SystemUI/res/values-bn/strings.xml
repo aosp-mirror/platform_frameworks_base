@@ -76,8 +76,7 @@
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"অফিস প্রোফাইলে স্ক্রিনশট সেভ করা হচ্ছে…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্রিনশট সেভ করা হয়েছে"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্রিনশট সেভ করা যায়নি"</string>
-    <!-- no translation found for screenshot_failed_external_display_indication (6555673132061101936) -->
-    <skip />
+    <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"এক্সটার্নাল ডিসপ্লে"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"স্ক্রিনশট সেভ করার আগে ডিভাইসটি অবশ্যই আনলক করতে হবে"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"আবার স্ক্রিনশট নেওয়ার চেষ্টা করুন"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"স্ক্রিনশট সেভ করা যায়নি"</string>
@@ -197,7 +196,8 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"\'ফেস আনলক\' উপলভ্য নেই"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ব্লুটুথ সংযুক্ত হয়েছে৷"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ব্লুটুথ ডিভাইসের আইকন"</string>
-    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"ব্লুটুথ ডিভাইসের সেটিংস গিয়ার"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ব্যাটারি কত শতাংশ আছে তা জানা যায়নি।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>এ সংযুক্ত হয়ে আছে।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> এর সাথে সংযুক্ত৷"</string>
@@ -250,7 +250,8 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"বিরক্ত করবে না"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ব্লুটুথ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"চেনা কোনও ডিভাইস নেই"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"কানেক্ট করার জন্য কোনও ডিভাইসে ট্যাপ করুন"</string>
+    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
+    <skip />
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"নতুন ডিভাইস পেয়ার করুন"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"সব দেখুন"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ব্লুটুথ ব্যবহার করুন"</string>
@@ -282,8 +283,7 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"কাস্ট করা হচ্ছে"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"নামবিহীন ডিভাইস"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"কোনো ডিভাইস উপলব্ধ নয়"</string>
-    <!-- no translation found for quick_settings_cast_no_network (3863016850468559522) -->
-    <skip />
+    <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"কোনও ওয়াই-ফাই বা ইথারনেট কানেকশন উপলভ্য নেই"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"উজ্জ্বলতা"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"কালার ইনভার্সন"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"রঙ সংশোধন"</string>
@@ -1132,7 +1132,6 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"ক্যামেরা বন্ধ করা আছে"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"মাইক্রোফোন বন্ধ করা আছে"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ক্যামেরা ও মাইক্রোফোন বন্ধ আছে"</string>
-    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant শুনছে"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{#টি বিজ্ঞপ্তি}one{#টি বিজ্ঞপ্তি}other{#টি বিজ্ঞপ্তি}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"নোট নেওয়া"</string>
@@ -1183,12 +1182,14 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ক্যামেরা এবং মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\'প্রায়োরিটি\' মোড চালু করা আছে"</string>
-    <string name="assistant_attention_content_description" msgid="6830215897604642875">"অ্যাসিস্ট্যান্ট আপনার কথা শোনার জন্য চালু করা আছে"</string>
+    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
+    <skip />
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"\'সেটিংস\' থেকে ডিফল্ট নোট নেওয়ার অ্যাপ সেট করুন"</string>
     <string name="install_app" msgid="5066668100199613936">"অ্যাপ ইনস্টল করুন"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"এক্সটার্নাল ডিসপ্লে আয়না?"</string>
     <string name="mirror_display" msgid="2515262008898122928">"ডিসপ্লে দেখান"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"বাতিল করুন"</string>
+    <string name="connected_display_icon_desc" msgid="6373560639989971997">"ডিসপ্লে কানেক্ট করা আছে"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"মাইক্রোফোন ও ক্যামেরা"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"সম্প্রতি ব্যবহার করা অ্যাপ"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"সাম্প্রতিক অ্যাক্সেস দেখুন"</string>

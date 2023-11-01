@@ -265,8 +265,8 @@ public class SubscriptionManager {
         }
     }
 
-    private static IntegerPropertyInvalidatedCache<Integer> sGetDefaultSubIdCacheAsUser =
-            new IntegerPropertyInvalidatedCache<>(ISub::getDefaultSubIdAsUser,
+    private static VoidPropertyInvalidatedCache<Integer> sGetDefaultSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSubId,
                     CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
@@ -275,8 +275,8 @@ public class SubscriptionManager {
                     CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
-    private static IntegerPropertyInvalidatedCache<Integer> sGetDefaultSmsSubIdCacheAsUser =
-            new IntegerPropertyInvalidatedCache<>(ISub::getDefaultSmsSubIdAsUser,
+    private static VoidPropertyInvalidatedCache<Integer> sGetDefaultSmsSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSmsSubId,
                     CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
@@ -2309,7 +2309,7 @@ public class SubscriptionManager {
      * @return the "system" default subscription id.
      */
     public static int getDefaultSubscriptionId() {
-        return sGetDefaultSubIdCacheAsUser.query(Process.myUserHandle().getIdentifier());
+        return sGetDefaultSubIdCache.query(null);
     }
 
     /**
@@ -2325,7 +2325,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                subId = iSub.getDefaultVoiceSubIdAsUser(Process.myUserHandle().getIdentifier());
+                subId = iSub.getDefaultVoiceSubId();
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2397,7 +2397,7 @@ public class SubscriptionManager {
      * @return the default SMS subscription Id.
      */
     public static int getDefaultSmsSubscriptionId() {
-        return sGetDefaultSmsSubIdCacheAsUser.query(Process.myUserHandle().getIdentifier());
+        return sGetDefaultSmsSubIdCache.query(null);
     }
 
     /**
@@ -3927,10 +3927,10 @@ public class SubscriptionManager {
      * @hide
      */
     public static void disableCaching() {
-        sGetDefaultSubIdCacheAsUser.disableLocal();
+        sGetDefaultSubIdCache.disableLocal();
         sGetDefaultDataSubIdCache.disableLocal();
         sGetActiveDataSubscriptionIdCache.disableLocal();
-        sGetDefaultSmsSubIdCacheAsUser.disableLocal();
+        sGetDefaultSmsSubIdCache.disableLocal();
         sGetSlotIndexCache.disableLocal();
         sGetSubIdCache.disableLocal();
         sGetPhoneIdCache.disableLocal();
@@ -3941,10 +3941,10 @@ public class SubscriptionManager {
      *
      * @hide */
     public static void clearCaches() {
-        sGetDefaultSubIdCacheAsUser.clear();
+        sGetDefaultSubIdCache.clear();
         sGetDefaultDataSubIdCache.clear();
         sGetActiveDataSubscriptionIdCache.clear();
-        sGetDefaultSmsSubIdCacheAsUser.clear();
+        sGetDefaultSmsSubIdCache.clear();
         sGetSlotIndexCache.clear();
         sGetSubIdCache.clear();
         sGetPhoneIdCache.clear();

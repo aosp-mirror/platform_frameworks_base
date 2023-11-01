@@ -122,4 +122,10 @@ interface IVirtualDeviceManager {
      *   {@code android.media.AudioManager.SystemSoundEffect}
      */
     void playSoundEffect(int deviceId, int effectType);
+
+    /**
+     * Returns whether the given display is an auto-mirror display owned by a virtual
+     * device.
+     */
+    boolean isVirtualDeviceOwnedMirrorDisplay(int displayId);
 }

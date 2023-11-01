@@ -411,6 +411,15 @@ public final class ContentCaptureManager {
     public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS =
             "content_protection_allowlist_timeout_ms";
 
+    /**
+     * Sets the auto disconnect timeout for the content protection service in milliseconds.
+     *
+     * @hide
+     */
+    // Unit can't be in the name in order to pass the checkstyle hook, line would be too long.
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT =
+            "content_protection_auto_disconnect_timeout_ms";
+
     /** @hide */
     @TestApi
     public static final int LOGGING_LEVEL_OFF = 0;
@@ -465,6 +474,8 @@ public final class ContentCaptureManager {
     public static final long DEFAULT_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS = 30000;
     /** @hide */
     public static final long DEFAULT_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS = 250;
+    /** @hide */
+    public static final long DEFAULT_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT_MS = 3000;
 
     private final Object mLock = new Object();
 

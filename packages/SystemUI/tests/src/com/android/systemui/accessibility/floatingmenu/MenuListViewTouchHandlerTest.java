@@ -88,7 +88,8 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
         mStubMenuView = new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance);
         mStubMenuView.setTranslationX(0);
         mStubMenuView.setTranslationY(0);
-        mMenuAnimationController = spy(new MenuAnimationController(mStubMenuView));
+        mMenuAnimationController = spy(new MenuAnimationController(
+                mStubMenuView, stubMenuViewAppearance));
         mDismissView = spy(new DismissView(mContext));
         DismissViewUtils.setup(mDismissView);
         mDismissAnimationController =

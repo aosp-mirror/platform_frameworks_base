@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.tracing
+package com.android.systemui.tracing
 
-import com.android.systemui.util.TraceUtils.Companion.instant
-import com.android.systemui.util.TraceUtils.Companion.traceCoroutine
+import com.android.systemui.tracing.TraceUtils.Companion.instant
+import com.android.systemui.tracing.TraceUtils.Companion.traceCoroutine
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CopyableThreadContextElement
 import kotlinx.coroutines.CoroutineDispatcher

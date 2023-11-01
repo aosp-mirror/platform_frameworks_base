@@ -317,6 +317,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         suspend fun emit(value: State) = flow.emit(value)
         override val connectedDisplayState: Flow<State>
             get() = flow
+        override val connectedDisplayAddition: Flow<Unit>
+            get() = TODO("Not yet implemented")
         override val pendingDisplay: Flow<PendingDisplay?>
             get() = TODO("Not yet implemented")
     }

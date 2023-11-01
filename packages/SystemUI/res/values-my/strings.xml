@@ -76,8 +76,7 @@
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"အလုပ်ပရိုဖိုင်တွင် ဖန်သားပြင်ဓာတ်ပုံ သိမ်းနေသည်…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ဖန်သားပြင်ဓာတ်ပုံကို သိမ်းပြီးပါပြီ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"မျက်နှာပြင်ပုံကို သိမ်း၍မရပါ"</string>
-    <!-- no translation found for screenshot_failed_external_display_indication (6555673132061101936) -->
-    <skip />
+    <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"ပြင်ပဖန်သားပြင်"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ဖန်သားပြင်ဓာတ်ပုံကို မသိမ်းမီ စက်ပစ္စည်းကို လော့ခ်ဖွင့်ထားရမည်"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"မျက်နှာပြင်ပုံကို ထပ်ရိုက်ကြည့်ပါ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ဖန်သားပြင်ဓာတ်ပုံကို သိမ်း၍မရပါ"</string>
@@ -197,7 +196,8 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း မရနိုင်ပါ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ဘလူးတုသ်ချိတ်ဆက်ထားမှု"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ဘလူးတုသ်သုံးစက် သင်္ကေတ"</string>
-    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"ဘလူးတုသ်သုံးစက် ဆက်တင်များ စက်သွားပုံ"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ဘက်ထရီရာခိုင်နှုန်းကို မသိပါ။"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>သို့ ချိတ်ဆက်ထား"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> သို့ချိတ်ဆက်ထားပါသည်။"</string>
@@ -250,7 +250,8 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"မနှောင့်ယှက်ရ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ဘလူးတုသ်"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ချိတ်တွဲထားသည့် ကိရိယာများ မရှိ"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"ချိတ်ဆက်ရန် စက်တစ်ခုကို တို့ပါ"</string>
+    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
+    <skip />
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"စက်အသစ်တွဲချိတ်ရန်"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"အားလုံးကြည့်ရန်"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ဘလူးတုသ်သုံးရန်"</string>
@@ -282,8 +283,7 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"ကာစ်တင်"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"အမည်မတပ် ကိရိယာ"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ကိရိယာများ မရှိ"</string>
-    <!-- no translation found for quick_settings_cast_no_network (3863016850468559522) -->
-    <skip />
+    <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"Wi-Fi (သို့) အီသာနက်ချိတ်ဆက်မှု မရှိပါ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"အလင်းတောက်ပမှု"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"အရောင်ပြောင်းပြန်ပြုလုပ်ရန်"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"အရောင် အမှန်ပြင်ခြင်း"</string>
@@ -1132,7 +1132,6 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"ကင်မရာ ပိတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"မိုက်ပိတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ကင်မရာနှင့် မိုက် ပိတ်ထားသည်"</string>
-    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant နားထောင်နေသည်"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{အကြောင်းကြားချက် # ခု}other{အကြောင်းကြားချက် # ခု}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>၊ <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"မှတ်စုလိုက်ခြင်း"</string>
@@ -1183,12 +1182,14 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ကင်မရာနှင့် မိုက်ခရိုဖုန်းကို ပိတ်ထားသည်"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"မိုက်ခရိုဖုန်းကို ပိတ်ထားသည်"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ဦးစားပေးမုဒ် ဖွင့်ထားသည်"</string>
-    <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant နားထောင်နေသည်"</string>
+    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
+    <skip />
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ဆက်တင်များတွင် မူရင်းမှတ်စုများအက်ပ် သတ်မှတ်ပါ"</string>
     <string name="install_app" msgid="5066668100199613936">"အက်ပ် ထည့်သွင်းရန်"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ပြင်ပဖန်သားပြင်သို့ စကရင်ပွားမလား။"</string>
     <string name="mirror_display" msgid="2515262008898122928">"ဖန်သားပြင်ကို စကရင်ပွားရန်"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"ပယ်ရန်"</string>
+    <string name="connected_display_icon_desc" msgid="6373560639989971997">"ဖန်သားပြင်ကို ချိတ်ဆက်လိုက်ပါပြီ"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"မိုက်ခရိုဖုန်းနှင့် ကင်မရာ"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"လတ်တလော အက်ပ်အသုံးပြုမှု"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"လတ်တလောအသုံးပြုမှုကို ကြည့်ရန်"</string>

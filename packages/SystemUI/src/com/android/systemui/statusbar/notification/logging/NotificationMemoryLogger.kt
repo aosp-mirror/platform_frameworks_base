@@ -26,7 +26,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
-import com.android.systemui.util.traceSection
+import com.android.systemui.tracing.traceSection
 import java.lang.Exception
 import java.util.concurrent.Executor
 import javax.inject.Inject

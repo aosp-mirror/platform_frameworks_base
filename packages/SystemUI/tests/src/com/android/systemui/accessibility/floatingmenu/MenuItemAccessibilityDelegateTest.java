@@ -85,7 +85,8 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
         doReturn(mDraggableBounds).when(mMenuView).getMenuDraggableBounds();
         mStubListView = new RecyclerView(mContext);
-        mMenuAnimationController = spy(new MenuAnimationController(mMenuView));
+        mMenuAnimationController = spy(new MenuAnimationController(mMenuView,
+                stubMenuViewAppearance));
         mMenuItemAccessibilityDelegate =
                 new MenuItemAccessibilityDelegate(new RecyclerViewAccessibilityDelegate(
                         mStubListView), mMenuAnimationController);

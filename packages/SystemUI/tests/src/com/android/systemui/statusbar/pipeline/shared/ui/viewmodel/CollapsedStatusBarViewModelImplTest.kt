@@ -99,13 +99,10 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val job = underTest.isTransitioningFromLockscreenToOccluded.launchIn(this)
 
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    KeyguardState.LOCKSCREEN,
-                    KeyguardState.OCCLUDED,
-                    value = 0f,
-                    TransitionState.FINISHED,
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OCCLUDED,
+                this.testScheduler,
             )
 
             assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isFalse()
@@ -312,7 +309,10 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                     KeyguardState.DREAMING,
                     value = 1.0f,
                     TransitionState.FINISHED,
-                )
+                ),
+                // We're intentionally not sending STARTED to validate that FINISHED steps are
+                // ignored.
+                validateStep = false,
             )
 
             assertThat(emissions).isEmpty()

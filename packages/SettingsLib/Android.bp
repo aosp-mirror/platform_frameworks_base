@@ -14,6 +14,7 @@ android_library {
         "androidx.localbroadcastmanager_localbroadcastmanager",
         "androidx.room_room-runtime",
         "zxing-core",
+        "guava",
 
         "WifiTrackerLibRes",
         "iconloader",

@@ -22,9 +22,12 @@ import static android.service.contentcapture.ContentCaptureService.setClientStat
 import static android.view.contentcapture.ContentCaptureHelper.toList;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD;
 import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG;
+import static android.view.contentcapture.ContentCaptureManager.DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_FALSE;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_OK;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_SECURITY_EXCEPTION;
@@ -226,6 +229,9 @@ public class ContentCaptureManagerService extends
 
     @GuardedBy("mLock")
     long mDevCfgContentProtectionAllowlistTimeoutMs;
+
+    @GuardedBy("mLock")
+    long mDevCfgContentProtectionAutoDisconnectTimeoutMs;
 
     private final Executor mDataShareExecutor = Executors.newCachedThreadPool();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -435,14 +441,15 @@ public class ContentCaptureManagerService extends
                 case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT:
                 case ContentCaptureManager
                         .DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING:
-                case ContentCaptureManager
-                        .DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER:
-                case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE:
+                    // Content protection below
+                case DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER:
+                case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS:
                 case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS:
+                case DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT:
                     setFineTuneParamsFromDeviceConfig();
                     return;
                 default:
@@ -502,8 +509,7 @@ public class ContentCaptureManagerService extends
             mDevCfgContentProtectionBufferSize =
                     DeviceConfig.getInt(
                             DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                            ContentCaptureManager
-                                    .DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE,
+                            DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE,
                             ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE);
             contentProtectionRequiredGroupsConfig =
                     DeviceConfig.getString(
@@ -533,7 +539,12 @@ public class ContentCaptureManagerService extends
                             DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                             DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS,
                             ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS);
-
+            mDevCfgContentProtectionAutoDisconnectTimeoutMs =
+                    DeviceConfig.getLong(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT,
+                            ContentCaptureManager
+                                    .DEFAULT_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT_MS);
             contentProtectionAllowlistManagerOld = mContentProtectionAllowlistManager;
 
             if (verbose) {
@@ -565,7 +576,9 @@ public class ContentCaptureManagerService extends
                                 + ", contentProtectionAllowlistDelayMs="
                                 + contentProtectionAllowlistDelayMs
                                 + ", contentProtectionAllowlistTimeoutMs="
-                                + contentProtectionAllowlistTimeoutMs);
+                                + contentProtectionAllowlistTimeoutMs
+                                + ", contentProtectionAutoDisconnectTimeoutMs="
+                                + mDevCfgContentProtectionAutoDisconnectTimeoutMs);
             }
         }
 
@@ -893,6 +906,9 @@ public class ContentCaptureManagerService extends
         pw.print(prefix2);
         pw.print("contentProtectionAllowlistTimeoutMs: ");
         pw.println(mDevCfgContentProtectionAllowlistTimeoutMs);
+        pw.print(prefix2);
+        pw.print("contentProtectionAutoDisconnectTimeoutMs: ");
+        pw.println(mDevCfgContentProtectionAutoDisconnectTimeoutMs);
         pw.print(prefix);
         pw.println("Global Options:");
         mGlobalContentCaptureOptions.dump(prefix2, pw);
@@ -962,12 +978,14 @@ public class ContentCaptureManagerService extends
     @Nullable
     public RemoteContentProtectionService createRemoteContentProtectionService() {
         ComponentName componentName;
+        long autoDisconnectTimeoutMs;
         synchronized (mLock) {
             if (!mDevCfgEnableContentProtectionReceiver
                     || mContentProtectionServiceComponentName == null) {
                 return null;
             }
             componentName = mContentProtectionServiceComponentName;
+            autoDisconnectTimeoutMs = mDevCfgContentProtectionAutoDisconnectTimeoutMs;
         }
 
         // Check permissions by trying to construct {@link ContentCaptureServiceInfo}
@@ -978,19 +996,20 @@ public class ContentCaptureManagerService extends
             return null;
         }
 
-        return createRemoteContentProtectionService(componentName);
+        return createRemoteContentProtectionService(componentName, autoDisconnectTimeoutMs);
     }
 
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @NonNull
     protected RemoteContentProtectionService createRemoteContentProtectionService(
-            @NonNull ComponentName componentName) {
+            @NonNull ComponentName componentName, long autoDisconnectTimeoutMs) {
         return new RemoteContentProtectionService(
                 getContext(),
                 componentName,
                 UserHandle.getCallingUserId(),
-                isBindInstantServiceAllowed());
+                isBindInstantServiceAllowed(),
+                autoDisconnectTimeoutMs);
     }
 
     /** @hide */

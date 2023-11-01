@@ -24,7 +24,6 @@ import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
-import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.privacy.PrivacyChipBuilder
@@ -35,7 +34,6 @@ import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -56,8 +54,7 @@ constructor(
     connectedDisplayInteractor: ConnectedDisplayInteractor
 ) {
     private val onDisplayConnectedFlow =
-        connectedDisplayInteractor.connectedDisplayState
-                .filter { it != State.DISCONNECTED }
+        connectedDisplayInteractor.connectedDisplayAddition
 
     private var connectedDisplayCollectionJob: Job? = null
     private lateinit var scheduler: SystemStatusAnimationScheduler

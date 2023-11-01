@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
@@ -28,6 +29,10 @@ import androidx.preference.PreferenceScreen;
 import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 import com.android.settingslib.utils.ThreadUtils;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Preference controller for bluetooth address
@@ -75,9 +80,11 @@ public abstract class AbstractBluetoothAddressPreferenceController
     protected void updateConnectivity() {
         BluetoothAdapter bluetooth = BluetoothAdapter.getDefaultAdapter();
         if (bluetooth != null && mBtAddress != null) {
-            ThreadUtils.postOnBackgroundThread(() -> {
-                String address = bluetooth.isEnabled() ? bluetooth.getAddress() : null;
-                ThreadUtils.postOnMainThread(() -> {
+            ListenableFuture<String> future = ThreadUtils.getBackgroundExecutor()
+                    .submit(() -> bluetooth.isEnabled() ? bluetooth.getAddress() : null);
+            Futures.addCallback(future, new FutureCallback<>() {
+                @Override
+                public void onSuccess(@Nullable String address) {
                     if (!TextUtils.isEmpty(address)) {
                         // Convert the address to lowercase for consistency with the wifi MAC
                         // address.
@@ -85,8 +92,11 @@ public abstract class AbstractBluetoothAddressPreferenceController
                     } else {
                         mBtAddress.setSummary(R.string.status_unavailable);
                     }
-                });
-            });
+                }
+
+                @Override
+                public void onFailure(Throwable t) {}
+            }, mContext.getMainExecutor());
         }
     }
 }

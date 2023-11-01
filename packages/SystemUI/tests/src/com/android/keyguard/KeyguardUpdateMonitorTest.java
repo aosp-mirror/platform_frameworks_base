@@ -25,7 +25,6 @@ import static android.hardware.biometrics.SensorProperties.STRENGTH_CONVENIENCE;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_PRIMARY_BOUNCER_SHOWN;
 import static android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_STARTED_WAKING_UP;
-import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFPS_OPTICAL;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
@@ -1688,35 +1687,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // THEN we should still listen for udfps
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(true);
-    }
-
-    @Test
-    public void listeningForSfps_whenGoingToSleep_ifRequireInteractiveToAuthDisabled()
-            throws RemoteException {
-        // GIVEN SFPS supported and enrolled
-        final ArrayList<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
-        props.add(createFingerprintSensorPropertiesInternal(TYPE_POWER_BUTTON,
-                /* isClass3 */ true));
-        when(mAuthController.getSfpsProps()).thenReturn(props);
-        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
-
-        // GIVEN Preconditions for sfps auth to run
-        keyguardNotGoingAway();
-        currentUserIsSystem();
-        currentUserDoesNotHaveTrust();
-        biometricsNotDisabledThroughDevicePolicyManager();
-        biometricsEnabledForCurrentUser();
-        userNotCurrentlySwitching();
-        statusBarShadeIsLocked();
-
-        // WHEN require interactive to auth is disabled & keyguard is going to sleep
-        when(mInteractiveToAuthProvider.isEnabled(anyInt())).thenReturn(false);
-        deviceGoingToSleep();
-
-        mTestableLooper.processAllMessages();
-
-        // THEN we should listen for sfps because screen on to auth is  disabled
-        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
     }
 
     @Test
