@@ -3983,8 +3983,17 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void notifyContentCaptureEvents() {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "notifyContentCaptureEvents");
         try {
+            if (!isContentCaptureEnabled()) {
+                if (DEBUG_CONTENT_CAPTURE) {
+                    Log.d(mTag, "notifyContentCaptureEvents while disabled");
+                }
+                mAttachInfo.mContentCaptureEvents = null;
+                return;
+            }
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "notifyContentCaptureEvents");
+            }
             MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
                     .getMainContentCaptureSession();
             for (int i = 0; i < mAttachInfo.mContentCaptureEvents.size(); i++) {
@@ -4898,12 +4907,13 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_CONTENT_CAPTURE) {
             Log.v(mTag, "performContentCaptureInitialReport() on " + rootView);
         }
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchContentCapture() for "
-                    + getClass().getSimpleName());
-        }
         try {
             if (!isContentCaptureEnabled()) return;
+
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchContentCapture() for "
+                        + getClass().getSimpleName());
+            }
 
             // Initial dispatch of window bounds to content capture
             if (mAttachInfo.mContentCaptureManager != null) {
@@ -4924,12 +4934,13 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_CONTENT_CAPTURE) {
             Log.v(mTag, "handleContentCaptureFlush()");
         }
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "flushContentCapture for "
-                    + getClass().getSimpleName());
-        }
         try {
             if (!isContentCaptureEnabled()) return;
+
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "flushContentCapture for "
+                        + getClass().getSimpleName());
+            }
 
             final ContentCaptureManager ccm = mAttachInfo.mContentCaptureManager;
             if (ccm == null) {
