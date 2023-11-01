@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "link/Linkers.h"
+#include "process/ProductFilter.h"
 
 #include "test/Test.h"
 
@@ -57,17 +57,15 @@ TEST(ProductFilterTest, SelectTwoProducts) {
           .Build(),
       context->GetDiagnostics()));
 
-  ProductFilter filter({"tablet"});
+  ProductFilter filter({"tablet"}, /* remove_default_config_values = */ false);
   ASSERT_TRUE(filter.Consume(context.get(), &table));
 
-  EXPECT_EQ(nullptr, test::GetValueForConfigAndProduct<Id>(
-                         &table, "android:string/one", land, ""));
-  EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(
-                         &table, "android:string/one", land, "tablet"));
-  EXPECT_EQ(nullptr, test::GetValueForConfigAndProduct<Id>(
-                         &table, "android:string/one", port, ""));
-  EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(
-                         &table, "android:string/one", port, "tablet"));
+  EXPECT_EQ(nullptr, test::GetValueForConfigAndProduct<Id>(&table, "android:string/one", land, ""));
+  EXPECT_NE(nullptr,
+            test::GetValueForConfigAndProduct<Id>(&table, "android:string/one", land, "tablet"));
+  EXPECT_EQ(nullptr, test::GetValueForConfigAndProduct<Id>(&table, "android:string/one", port, ""));
+  EXPECT_NE(nullptr,
+            test::GetValueForConfigAndProduct<Id>(&table, "android:string/one", port, "tablet"));
 }
 
 TEST(ProductFilterTest, SelectDefaultProduct) {
@@ -88,15 +86,15 @@ TEST(ProductFilterTest, SelectDefaultProduct) {
       context->GetDiagnostics()));
   ;
 
-  ProductFilter filter(std::unordered_set<std::string>{});
+  ProductFilter filter(std::unordered_set<std::string>{},
+                       /* remove_default_config_values = */ false);
   ASSERT_TRUE(filter.Consume(context.get(), &table));
 
-  EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(
-                         &table, "android:string/one",
-                         ConfigDescription::DefaultConfig(), ""));
-  EXPECT_EQ(nullptr, test::GetValueForConfigAndProduct<Id>(
-                         &table, "android:string/one",
-                         ConfigDescription::DefaultConfig(), "tablet"));
+  EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(&table, "android:string/one",
+                                                           ConfigDescription::DefaultConfig(), ""));
+  EXPECT_EQ(nullptr,
+            test::GetValueForConfigAndProduct<Id>(&table, "android:string/one",
+                                                  ConfigDescription::DefaultConfig(), "tablet"));
 }
 
 TEST(ProductFilterTest, FailOnAmbiguousProduct) {
@@ -123,7 +121,7 @@ TEST(ProductFilterTest, FailOnAmbiguousProduct) {
           .Build(),
       context->GetDiagnostics()));
 
-  ProductFilter filter({"tablet", "no-sdcard"});
+  ProductFilter filter({"tablet", "no-sdcard"}, /* remove_default_config_values = */ false);
   ASSERT_FALSE(filter.Consume(context.get(), &table));
 }
 
@@ -144,8 +142,67 @@ TEST(ProductFilterTest, FailOnMultipleDefaults) {
           .Build(),
       context->GetDiagnostics()));
 
-  ProductFilter filter(std::unordered_set<std::string>{});
+  ProductFilter filter(std::unordered_set<std::string>{},
+                       /* remove_default_config_values = */ false);
   ASSERT_FALSE(filter.Consume(context.get(), &table));
+}
+
+TEST(ProductFilterTest, RemoveDefaultConfigValues) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+
+  const ConfigDescription land = test::ParseConfigOrDie("land");
+  const ConfigDescription port = test::ParseConfigOrDie("port");
+
+  ResourceTable table;
+  ASSERT_TRUE(table.AddResource(
+      NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("land/default.xml")).Build(),
+                    land)
+          .Build(),
+      context->GetDiagnostics()));
+
+  ASSERT_TRUE(table.AddResource(
+      NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("land/tablet.xml")).Build(),
+                    land, "tablet")
+          .Build(),
+      context->GetDiagnostics()));
+
+  ASSERT_TRUE(table.AddResource(
+      NewResourceBuilder(test::ParseNameOrDie("android:string/two"))
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("land/default.xml")).Build(),
+                    land)
+          .Build(),
+      context->GetDiagnostics()));
+
+  ASSERT_TRUE(table.AddResource(
+      NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("port/default.xml")).Build(),
+                    port)
+          .Build(),
+      context->GetDiagnostics()));
+
+  ASSERT_TRUE(table.AddResource(
+      NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("port/tablet.xml")).Build(),
+                    port, "tablet")
+          .Build(),
+      context->GetDiagnostics()));
+
+  ASSERT_TRUE(table.AddResource(
+      NewResourceBuilder(test::ParseNameOrDie("android:string/two"))
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("port/default.xml")).Build(),
+                    port)
+          .Build(),
+      context->GetDiagnostics()));
+
+  ProductFilter filter({"tablet"}, /* remove_default_config_values = */ true);
+  ASSERT_TRUE(filter.Consume(context.get(), &table));
+
+  EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(&table, "android:string/one", land, ""));
+  EXPECT_EQ(nullptr, test::GetValueForConfigAndProduct<Id>(&table, "android:string/two", land, ""));
+  EXPECT_NE(nullptr, test::GetValueForConfigAndProduct<Id>(&table, "android:string/one", port, ""));
+  EXPECT_EQ(nullptr, test::GetValueForConfigAndProduct<Id>(&table, "android:string/two", port, ""));
 }
 
 }  // namespace aapt
