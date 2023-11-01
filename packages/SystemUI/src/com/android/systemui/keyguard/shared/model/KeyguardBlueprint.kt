@@ -22,7 +22,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 /** Determines the constraints for the ConstraintSet in the lockscreen root view. */
 interface KeyguardBlueprint {
     val id: String
-    val sections: Set<KeyguardSection>
+    val sections: List<KeyguardSection>
 
     /**
      * Removes views of old blueprint and add views of new blueprint.

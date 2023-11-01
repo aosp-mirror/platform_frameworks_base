@@ -20,28 +20,26 @@ package com.android.systemui.keyguard.ui.view.layout.blueprints
 import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialIndicatorSection
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
-import com.android.systemui.keyguard.ui.view.layout.items.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
-import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
+import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
+import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeNotificationStackScrollLayoutSection
 import javax.inject.Inject
 
 /**
- * Positions elements of the lockscreen to the default position.
- *
- * This will be the most common use case for phones in portrait mode.
+ * Split-shade layout, mostly used for larger devices like foldables and tablets when in landscape
+ * orientation.
  */
 @SysUISingleton
 @JvmSuppressWildcards
-class DefaultKeyguardBlueprint
+class SplitShadeKeyguardBlueprint
 @Inject
 constructor(
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
@@ -51,14 +49,13 @@ constructor(
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
     defaultStatusViewSection: DefaultStatusViewSection,
     defaultStatusBarSection: DefaultStatusBarSection,
-    defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
+    splitShadeNotificationStackScrollLayoutSection: SplitShadeNotificationStackScrollLayoutSection,
+    splitShadeGuidelines: SplitShadeGuidelines,
     aodNotificationIconsSection: AodNotificationIconsSection,
     aodBurnInSection: AodBurnInSection,
     communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
-    clockSection: ClockSection,
-    smartspaceSection: SmartspaceSection
 ) : KeyguardBlueprint {
-    override val id: String = DEFAULT
+    override val id: String = ID
 
     override val sections =
         listOf(
@@ -69,15 +66,14 @@ constructor(
             defaultSettingsPopupMenuSection,
             defaultStatusViewSection,
             defaultStatusBarSection,
-            defaultNotificationStackScrollLayoutSection,
+            splitShadeNotificationStackScrollLayoutSection,
+            splitShadeGuidelines,
             aodNotificationIconsSection,
             aodBurnInSection,
             communalTutorialIndicatorSection,
-            clockSection,
-            smartspaceSection
         )
 
     companion object {
-        const val DEFAULT = "default"
+        const val ID = "split-shade"
     }
 }

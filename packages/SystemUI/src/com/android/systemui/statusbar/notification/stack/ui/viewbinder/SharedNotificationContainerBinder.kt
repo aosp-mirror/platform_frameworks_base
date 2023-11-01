@@ -22,6 +22,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.launch
 
 /** Binds the shared notification container to its view-model. */
@@ -32,39 +33,46 @@ object SharedNotificationContainerBinder {
         view: SharedNotificationContainer,
         viewModel: SharedNotificationContainerViewModel,
         controller: NotificationStackScrollLayoutController,
-    ) {
-        view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
-                    viewModel.configurationBasedDimensions.collect {
-                        view.updateConstraints(
-                            useSplitShade = it.useSplitShade,
-                            marginStart = it.marginStart,
-                            marginTop = it.marginTop,
-                            marginEnd = it.marginEnd,
-                            marginBottom = it.marginBottom,
-                        )
+    ): DisposableHandle {
+        val disposableHandle =
+            view.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    launch {
+                        viewModel.configurationBasedDimensions.collect {
+                            view.updateConstraints(
+                                useSplitShade = it.useSplitShade,
+                                marginStart = it.marginStart,
+                                marginTop = it.marginTop,
+                                marginEnd = it.marginEnd,
+                                marginBottom = it.marginBottom,
+                            )
 
-                        controller.setOverExpansion(0f)
-                        controller.setOverScrollAmount(0)
-                        controller.updateFooter()
+                            controller.setOverExpansion(0f)
+                            controller.setOverScrollAmount(0)
+                            controller.updateFooter()
+                        }
                     }
-                }
 
-                launch {
-                    viewModel.maxNotifications.collect {
-                        controller.setMaxDisplayedNotifications(it)
+                    launch {
+                        viewModel.maxNotifications.collect {
+                            controller.setMaxDisplayedNotifications(it)
+                        }
                     }
-                }
 
-                launch {
-                    viewModel.position.collect {
-                        val animate = it.animate || controller.isAddOrRemoveAnimationPending()
-                        controller.updateTopPadding(it.top, animate)
+                    launch {
+                        viewModel.position.collect {
+                            val animate = it.animate || controller.isAddOrRemoveAnimationPending()
+                            controller.updateTopPadding(it.top, animate)
+                        }
                     }
-                }
 
-                launch { viewModel.translationY.collect { controller.setTranslationY(it) } }
+                    launch { viewModel.translationY.collect { controller.setTranslationY(it) } }
+                }
+            }
+
+        return object : DisposableHandle {
+            override fun dispose() {
+                disposableHandle.dispose()
             }
         }
     }

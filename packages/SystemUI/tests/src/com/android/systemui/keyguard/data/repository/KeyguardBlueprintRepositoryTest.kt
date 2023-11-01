@@ -25,10 +25,8 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBl
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -43,20 +41,16 @@ class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: KeyguardBlueprintRepository
     @Mock lateinit var configurationRepository: ConfigurationRepository
     @Mock lateinit var defaultLockscreenBlueprint: DefaultKeyguardBlueprint
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
-    private val configurationFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val testScope = TestScope(StandardTestDispatcher())
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         whenever(defaultLockscreenBlueprint.id).thenReturn(DEFAULT)
-        whenever(configurationRepository.onAnyConfigurationChange).thenReturn(configurationFlow)
         underTest =
             KeyguardBlueprintRepository(
                 configurationRepository,
                 setOf(defaultLockscreenBlueprint),
-                testScope.backgroundScope,
             )
     }
 
@@ -64,20 +58,7 @@ class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
     fun testApplyBlueprint_DefaultLayout() {
         testScope.runTest {
             val blueprint by collectLastValue(underTest.blueprint)
-            runCurrent()
             underTest.applyBlueprint(defaultLockscreenBlueprint)
-            runCurrent()
-            assertThat(blueprint).isEqualTo(defaultLockscreenBlueprint)
-        }
-    }
-
-    @Test
-    fun testConfigurationChange() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            runCurrent()
-            configurationFlow.tryEmit(Unit)
-            runCurrent()
             assertThat(blueprint).isEqualTo(defaultLockscreenBlueprint)
         }
     }
@@ -86,9 +67,7 @@ class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
     fun testRefreshBlueprint() {
         testScope.runTest {
             val blueprint by collectLastValue(underTest.blueprint)
-            runCurrent()
             underTest.refreshBlueprint()
-            runCurrent()
             assertThat(blueprint).isEqualTo(defaultLockscreenBlueprint)
         }
     }
