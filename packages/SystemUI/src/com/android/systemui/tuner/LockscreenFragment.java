@@ -48,6 +48,8 @@ import com.android.systemui.statusbar.phone.ExpandableIndicator;
 import com.android.systemui.statusbar.policy.ExtensionController.TunerFactory;
 import com.android.systemui.tuner.ShortcutParser.Shortcut;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -69,6 +71,9 @@ public class LockscreenFragment extends PreferenceFragment {
     private TunerService mTunerService;
     private Handler mHandler;
 
+    // aapt doesn't generate keep rules for android:fragment references in <Preference> tags, so
+    // explicitly declare references per usage in `R.xml.lockscreen_settings`. See b/120445169.
+    @UsesReflection(@KeepTarget(classConstant = ShortcutPicker.class))
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         mTunerService = Dependency.get(TunerService.class);

@@ -20,8 +20,6 @@
     public <init>(android.content.Context, android.util.AttributeSet);
 }
 
--keep class com.android.systemui.tuner.*
-
 # The plugins and core log subpackages act as shared libraries that might be referenced in
 # dynamically-loaded plugin APKs.
 -keep class com.android.systemui.plugins.** {
