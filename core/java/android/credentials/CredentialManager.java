@@ -437,7 +437,14 @@ public final class CredentialManager {
      * Returns {@code true} if the calling application provides a CredentialProviderService that is
      * enabled for the current user, or {@code false} otherwise. CredentialProviderServices are
      * enabled on a per-service basis so the individual component name of the service should be
-     * passed in here.
+     * passed in here. <strong>Usage of this API is discouraged as it is not fully functional, and
+     * may throw a NullPointerException on certain devices and/or API versions.</strong>
+     *
+     * @throws IllegalArgumentException if the componentName package does not match the calling
+     * package name this call will throw an exception
+     *
+     * @throws NullPointerException Usage of this API is discouraged as it is not fully
+     * functional, and may throw a NullPointerException on certain devices and/or API versions
      *
      * @param componentName the component name to check is enabled
      */
