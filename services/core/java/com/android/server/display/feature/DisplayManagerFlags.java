@@ -77,8 +77,8 @@ public class DisplayManagerFlags {
             Flags::enablePowerThrottlingClamper);
 
     private final FlagState mSmallAreaDetectionFlagState = new FlagState(
-            Flags.FLAG_ENABLE_SMALL_AREA_DETECTION,
-            Flags::enableSmallAreaDetection);
+            com.android.graphics.surfaceflinger.flags.Flags.FLAG_ENABLE_SMALL_AREA_DETECTION,
+            com.android.graphics.surfaceflinger.flags.Flags::enableSmallAreaDetection);
 
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {

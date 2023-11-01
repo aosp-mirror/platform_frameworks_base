@@ -104,12 +104,3 @@ flag {
     bug: "211737588"
     is_fixed_read_only: true
 }
-
-flag {
-    name: "enable_small_area_detection"
-    namespace: "display_manager"
-    description: "Feature flag for SmallAreaDetection"
-    bug: "298722189"
-    is_fixed_read_only: true
-}
-

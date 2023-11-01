@@ -57,6 +57,7 @@ aconfig_srcjars = [
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
     ":com.android.net.flags-aconfig-java{.generated_srcjars}",
     ":device_policy_aconfig_flags_lib{.generated_srcjars}",
+    ":surfaceflinger_flags_java_lib{.generated_srcjars}",
 ]
 
 filegroup {
@@ -625,5 +626,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.smartspace.flags-aconfig-java",
     aconfig_declarations: "android.app.smartspace.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// SurfaceFlinger
+java_aconfig_library {
+    name: "surfaceflinger_flags_java_lib",
+    aconfig_declarations: "surfaceflinger_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
