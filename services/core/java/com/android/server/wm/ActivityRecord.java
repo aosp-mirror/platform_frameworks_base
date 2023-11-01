@@ -2887,7 +2887,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final StartingSurfaceController.StartingSurface surface;
-        final WindowState startingWindow = mStartingWindow;
         final boolean animate;
         if (mStartingData != null) {
             if (mStartingData.mWaitForSyncTransactionCommit
@@ -4545,7 +4544,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mTransitionChangeFlags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
                 }
                 // Post cleanup after the visibility and animation are transferred.
-                fromActivity.postWindowRemoveStartingWindowCleanup();
+                fromActivity.postWindowRemoveStartingWindowCleanup(tStartingWindow);
                 fromActivity.mVisibleSetFromTransferredStartingWindow = false;
 
                 mWmService.updateFocusedWindowLocked(
@@ -7461,7 +7460,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void postWindowRemoveStartingWindowCleanup() {
+    void postWindowRemoveStartingWindowCleanup(@NonNull WindowState win) {
+        if (mStartingWindow == win) {
+            // This could only happen when the window is removed from hierarchy. So do not keep its
+            // reference anymore.
+            mStartingWindow = null;
+        }
         if (mChildren.size() == 0 && mVisibleSetFromTransferredStartingWindow) {
             // We set the visible state to true for the token from a transferred starting
             // window. We now reset it back to false since the starting window was the last
