@@ -65,7 +65,12 @@ constructor(
      */
     private val previewMode = MutableStateFlow(PreviewMode())
 
-    public var clockControllerProvider: Provider<ClockController>? = null
+    var clockControllerProvider: Provider<ClockController>? = null
+
+    /** System insets that keyguard needs to stay out of */
+    var topInset: Int = 0
+    /** Status view top, without translation added in */
+    var statusViewTop: Int = 0
 
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardState
@@ -102,9 +107,12 @@ constructor(
                     scale = MathUtils.lerp(burnIn.scale, 1f, 1f - interpolation),
                 )
             } else {
+                // Ensure the desired translation doesn't encroach on the top inset
+                val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolation).toInt()
+                val translationY = -(statusViewTop - Math.max(topInset, statusViewTop + burnInY))
                 BurnInModel(
                     translationX = MathUtils.lerp(0, burnIn.translationX, interpolation).toInt(),
-                    translationY = MathUtils.lerp(0, burnIn.translationY, interpolation).toInt(),
+                    translationY = translationY,
                     scale = MathUtils.lerp(burnIn.scale, 1f, 1f - interpolation),
                     scaleClockOnly = true,
                 )
