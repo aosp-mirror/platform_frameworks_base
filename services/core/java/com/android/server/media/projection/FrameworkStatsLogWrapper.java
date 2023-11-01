@@ -21,8 +21,8 @@ import com.android.internal.util.FrameworkStatsLog;
 /** Wrapper around {@link FrameworkStatsLog} */
 public class FrameworkStatsLogWrapper {
 
-    /** Wrapper around {@link FrameworkStatsLog#write}. */
-    public void write(
+    /** Wrapper around {@link FrameworkStatsLog#write} for MediaProjectionStateChanged atom. */
+    public void writeStateChanged(
             int code,
             int sessionId,
             int state,
@@ -40,5 +40,22 @@ public class FrameworkStatsLogWrapper {
                 targetUid,
                 timeSinceLastActive,
                 creationSource);
+    }
+
+    /** Wrapper around {@link FrameworkStatsLog#write} for MediaProjectionTargetChanged atom. */
+    public void writeTargetChanged(
+            int code,
+            int sessionId,
+            int targetType,
+            int hostUid,
+            int targetUid,
+            int windowingMode) {
+        FrameworkStatsLog.write(
+                code,
+                sessionId,
+                targetType,
+                hostUid,
+                targetUid,
+                windowingMode);
     }
 }

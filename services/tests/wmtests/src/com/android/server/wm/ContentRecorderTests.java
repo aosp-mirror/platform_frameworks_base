@@ -42,6 +42,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
@@ -232,7 +233,7 @@ public class ContentRecorderTests extends WindowTestsBase {
     @Test
     public void testOnConfigurationChanged_neverRecording() {
         defaultInit();
-        mContentRecorder.onConfigurationChanged(ORIENTATION_PORTRAIT);
+        mContentRecorder.onConfigurationChanged(ORIENTATION_PORTRAIT, WINDOWING_MODE_FULLSCREEN);
 
         verify(mTransaction, never()).setPosition(eq(mRecordedSurface), anyFloat(), anyFloat());
         verify(mTransaction, never()).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
@@ -248,7 +249,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         @Configuration.Orientation final int lastOrientation =
                 mDisplayContent.getConfiguration().orientation == ORIENTATION_PORTRAIT
                         ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
-        mContentRecorder.onConfigurationChanged(lastOrientation);
+        mContentRecorder.onConfigurationChanged(lastOrientation, WINDOWING_MODE_FULLSCREEN);
 
         verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
                 anyFloat());
@@ -266,7 +267,8 @@ public class ContentRecorderTests extends WindowTestsBase {
         // The user rotates the device, so the host app resizes the virtual display for the capture.
         resizeDisplay(mDisplayContent, newWidth, mSurfaceSize.y);
         resizeDisplay(mVirtualDisplayContent, newWidth, mSurfaceSize.y);
-        mContentRecorder.onConfigurationChanged(mDisplayContent.getConfiguration().orientation);
+        mContentRecorder.onConfigurationChanged(
+                mDisplayContent.getConfiguration().orientation, WINDOWING_MODE_FULLSCREEN);
 
         verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
                 anyFloat());
@@ -283,7 +285,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         // Change a value that we shouldn't rely upon; it has the wrong type.
         mVirtualDisplayContent.setOverrideOrientation(SCREEN_ORIENTATION_FULL_SENSOR);
         mContentRecorder.onConfigurationChanged(
-                mVirtualDisplayContent.getConfiguration().orientation);
+                mVirtualDisplayContent.getConfiguration().orientation, WINDOWING_MODE_FULLSCREEN);
 
         // No resize is issued, only the initial transformations when we started recording.
         verify(mTransaction).setPosition(eq(mRecordedSurface), anyFloat(),
@@ -307,7 +309,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         doReturn(newSurfaceSize).when(mWm.mDisplayManagerInternal).getDisplaySurfaceDefaultSize(
                 anyInt());
         mContentRecorder.onConfigurationChanged(
-                mVirtualDisplayContent.getConfiguration().orientation);
+                mVirtualDisplayContent.getConfiguration().orientation, WINDOWING_MODE_FULLSCREEN);
 
         // No resize is issued, only the initial transformations when we started recording.
         verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
@@ -379,6 +381,55 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTaskWindowingModeChanged_changeWindowMode_notifyWindowModeChanged() {
+        defaultInit();
+        // WHEN a recording is ongoing.
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+
+        // THEN the windowing mode change callback is notified.
+        verify(mMediaProjectionManagerWrapper)
+                .notifyWindowingModeChanged(mTaskSession.getContentToRecord(),
+                        mTaskSession.getTargetUid(), WINDOWING_MODE_FULLSCREEN);
+
+        // WHEN a configuration change arrives, and the task is now multi-window mode.
+        mTask.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        Configuration configuration = mTask.getConfiguration();
+        mTask.onConfigurationChanged(configuration);
+
+        // THEN windowing mode change callback is notified again.
+        verify(mMediaProjectionManagerWrapper)
+                .notifyWindowingModeChanged(mTaskSession.getContentToRecord(),
+                mTaskSession.getTargetUid(), WINDOWING_MODE_MULTI_WINDOW);
+    }
+
+    @Test
+    public void testTaskWindowingModeChanged_sameWindowMode_notifyWindowModeChanged() {
+        defaultInit();
+        // WHEN a recording is ongoing.
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+
+        // THEN the windowing mode change callback is notified.
+        verify(mMediaProjectionManagerWrapper)
+                .notifyWindowingModeChanged(mTaskSession.getContentToRecord(),
+                        mTaskSession.getTargetUid(), WINDOWING_MODE_FULLSCREEN);
+
+        // WHEN a configuration change arrives, and the task is STILL fullscreen.
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        Configuration configuration = mTask.getConfiguration();
+        mTask.onConfigurationChanged(configuration);
+
+        // THEN the windowing mode change callback is NOT called notified again.
+        verify(mMediaProjectionManagerWrapper, times(1))
+                .notifyWindowingModeChanged(anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
     public void testTaskWindowingModeChanged_pip_stopsRecording() {
         defaultInit();
         // WHEN a recording is ongoing.
@@ -421,9 +472,12 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
 
-        // THEN the visibility change callback is notified.
+        // THEN the visibility change & windowing mode change callbacks are notified.
         verify(mMediaProjectionManagerWrapper)
                 .notifyActiveProjectionCapturedContentVisibilityChanged(true);
+        verify(mMediaProjectionManagerWrapper)
+                .notifyWindowingModeChanged(mTaskSession.getContentToRecord(),
+                        mTaskSession.getTargetUid(), mRootWindowContainer.getWindowingMode());
     }
 
     @Test
@@ -434,9 +488,12 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
 
-        // THEN the visibility change callback is notified.
+        // THEN the visibility change & windowing mode change callbacks are notified.
         verify(mMediaProjectionManagerWrapper)
                 .notifyActiveProjectionCapturedContentVisibilityChanged(true);
+        verify(mMediaProjectionManagerWrapper)
+                .notifyWindowingModeChanged(mDisplaySession.getContentToRecord(),
+                        mDisplaySession.getTargetUid(), mRootWindowContainer.getWindowingMode());
     }
 
     @Test

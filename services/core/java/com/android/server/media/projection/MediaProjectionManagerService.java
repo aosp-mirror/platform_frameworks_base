@@ -479,6 +479,18 @@ public final class MediaProjectionManagerService extends SystemService
         mMediaProjectionMetricsLogger.logAppSelectorDisplayed(hostUid);
     }
 
+    @VisibleForTesting
+    void notifyWindowingModeChanged(int contentToRecord, int targetUid, int windowingMode) {
+        synchronized (mLock) {
+            if (mProjectionGrant == null) {
+                Slog.i(TAG, "Cannot log MediaProjectionTargetChanged atom due to null projection");
+            } else {
+                mMediaProjectionMetricsLogger.logChangedWindowingMode(
+                        contentToRecord, mProjectionGrant.uid, targetUid, windowingMode);
+            }
+        }
+    }
+
     /**
      * Handles result of dialog shown from
      * {@link BinderService#buildReviewGrantedConsentIntentLocked()}.
@@ -899,6 +911,20 @@ public final class MediaProjectionManagerService extends SystemService
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.notifyAppSelectorDisplayed(hostUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyWindowingModeChanged(
+                int contentToRecord, int targetUid, int windowingMode) {
+            notifyWindowingModeChanged_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyWindowingModeChanged(
+                        contentToRecord, targetUid, windowingMode);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

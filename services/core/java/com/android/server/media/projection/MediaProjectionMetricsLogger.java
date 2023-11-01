@@ -16,16 +16,32 @@
 
 package com.android.server.media.projection;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
+
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_APP_TASK;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_DISPLAY;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_FREEFORM;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_FULLSCREEN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_SPLIT_SCREEN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_UNKNOWN;
 
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.util.Log;
+import android.view.ContentRecordingSession.RecordContent;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.time.Duration;
@@ -91,7 +107,7 @@ public class MediaProjectionMetricsLogger {
                 durationSinceLastActiveSession == null
                         ? TIME_SINCE_LAST_ACTIVE_UNKNOWN
                         : (int) durationSinceLastActiveSession.toSeconds();
-        write(
+        writeStateChanged(
                 mSessionIdGenerator.createAndGetNewSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED,
                 hostUid,
@@ -102,13 +118,13 @@ public class MediaProjectionMetricsLogger {
 
     /**
      * Logs that the user entered the setup flow and permission dialog is displayed. This state is
-     * not sent when the permission is already granted and we skipped showing the permission dialog.
+     * not sent when the permission is already granted, and we skipped showing the permission dialog.
      *
      * @param hostUid UID of the package that initiates MediaProjection.
      */
     public void logPermissionRequestDisplayed(int hostUid) {
         Log.d(TAG, "logPermissionRequestDisplayed");
-        write(
+        writeStateChanged(
                 mSessionIdGenerator.getCurrentSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED,
                 hostUid,
@@ -123,7 +139,7 @@ public class MediaProjectionMetricsLogger {
      * @param hostUid UID of the package that initiates MediaProjection.
      */
     public void logProjectionPermissionRequestCancelled(int hostUid) {
-        write(
+        writeStateChanged(
                 mSessionIdGenerator.getCurrentSessionId(),
                 FrameworkStatsLog
                         .MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CANCELLED,
@@ -141,7 +157,7 @@ public class MediaProjectionMetricsLogger {
      */
     public void logAppSelectorDisplayed(int hostUid) {
         Log.d(TAG, "logAppSelectorDisplayed");
-        write(
+        writeStateChanged(
                 mSessionIdGenerator.getCurrentSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED,
                 hostUid,
@@ -158,13 +174,61 @@ public class MediaProjectionMetricsLogger {
      */
     public void logInProgress(int hostUid, int targetUid) {
         Log.d(TAG, "logInProgress");
-        write(
+        writeStateChanged(
                 mSessionIdGenerator.getCurrentSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS,
                 hostUid,
                 targetUid,
                 TIME_SINCE_LAST_ACTIVE_UNKNOWN,
                 MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    /**
+     * Logs that the windowing mode of a projection has changed.
+     *
+     * @param contentToRecord ContentRecordingSession.RecordContent indicating whether it is a
+     *                        task capture or display capture - gets converted to the corresponding
+     *                        TargetType before being logged.
+     * @param hostUid UID of the package that initiates MediaProjection.
+     * @param targetUid UID of the package that is captured if selected.
+     * @param windowingMode Updated WindowConfiguration.WindowingMode of the captured region - gets
+     *                      converted to the corresponding TargetWindowingMode before being logged.
+     */
+    public void logChangedWindowingMode(
+            int contentToRecord, int hostUid, int targetUid, int windowingMode) {
+        Log.d(TAG, "logChangedWindowingMode");
+        writeTargetChanged(
+                mSessionIdGenerator.getCurrentSessionId(),
+                contentToRecordToTargetType(contentToRecord),
+                hostUid,
+                targetUid,
+                windowingModeToTargetWindowingMode(windowingMode));
+
+    }
+
+    @VisibleForTesting
+    public int contentToRecordToTargetType(@RecordContent int recordContentType) {
+        return switch (recordContentType) {
+            case RECORD_CONTENT_DISPLAY ->
+                    MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_DISPLAY;
+            case RECORD_CONTENT_TASK ->
+                    MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_APP_TASK;
+            default -> MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_UNKNOWN;
+        };
+    }
+
+    @VisibleForTesting
+    public int windowingModeToTargetWindowingMode(@WindowingMode int windowingMode) {
+        return switch (windowingMode) {
+            case WINDOWING_MODE_FULLSCREEN ->
+                    MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_FULLSCREEN;
+            case WINDOWING_MODE_FREEFORM ->
+                    MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_FREEFORM;
+            case WINDOWING_MODE_MULTI_WINDOW ->
+                    MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_SPLIT_SCREEN;
+            default ->
+                    MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_UNKNOWN;
+        };
     }
 
     /**
@@ -178,7 +242,7 @@ public class MediaProjectionMetricsLogger {
                 mPreviousState
                         == MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS;
         Log.d(TAG, "logStopped: wasCaptureInProgress=" + wasCaptureInProgress);
-        write(
+        writeStateChanged(
                 mSessionIdGenerator.getCurrentSessionId(),
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED,
                 hostUid,
@@ -191,14 +255,31 @@ public class MediaProjectionMetricsLogger {
         }
     }
 
-    private void write(
+    public void notifyProjectionStateChange(int hostUid, int state, int sessionCreationSource) {
+        writeStateChanged(hostUid, state, sessionCreationSource);
+    }
+
+    private void writeStateChanged(int hostUid, int state, int sessionCreationSource) {
+        mFrameworkStatsLogWrapper.writeStateChanged(
+                /* code */ FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED,
+                /* session_id */ 123,
+                /* state */ state,
+                /* previous_state */ FrameworkStatsLog
+                        .MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN,
+                /* host_uid */ hostUid,
+                /* target_uid */ -1,
+                /* time_since_last_active */ 0,
+                /* creation_source */ sessionCreationSource);
+    }
+
+    private void writeStateChanged(
             int sessionId,
             int state,
             int hostUid,
             int targetUid,
             int timeSinceLastActive,
             int creationSource) {
-        mFrameworkStatsLogWrapper.write(
+        mFrameworkStatsLogWrapper.writeStateChanged(
                 /* code */ FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED,
                 sessionId,
                 state,
@@ -208,5 +289,20 @@ public class MediaProjectionMetricsLogger {
                 timeSinceLastActive,
                 creationSource);
         mPreviousState = state;
+    }
+
+    private void writeTargetChanged(
+            int sessionId,
+            int targetType,
+            int hostUid,
+            int targetUid,
+            int targetWindowingMode) {
+        mFrameworkStatsLogWrapper.writeTargetChanged(
+                /* code */ FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED,
+                sessionId,
+                targetType,
+                hostUid,
+                targetUid,
+                targetWindowingMode);
     }
 }
