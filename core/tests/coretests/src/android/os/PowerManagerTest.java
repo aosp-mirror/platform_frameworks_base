@@ -19,11 +19,17 @@ package android.os;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Flags;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.test.AndroidTestCase;
 
 import androidx.test.InstrumentationRegistry;
@@ -31,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.uiautomator.UiDevice;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -63,6 +70,10 @@ public class PowerManagerTest extends AndroidTestCase {
     static {
         System.loadLibrary("powermanagertest_jni");
     }
+
+    // Required for RequiresFlagsEnabled and RequiresFlagsDisabled annotations to take effect.
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     /**
      * Setup any common data for the upcoming tests.
@@ -454,4 +465,27 @@ public class PowerManagerTest extends AndroidTestCase {
         parcelBatterySaverPolicyConfigToNativeAndVerify(bs2);
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_BATTERY_SAVER_SUPPORTED_CHECK_API)
+    public void testBatterySaverSupported_isSupported() throws RemoteException {
+        IPowerManager powerManager = mock(IPowerManager.class);
+        PowerManager pm = new PowerManager(mContext, powerManager,
+                mock(IThermalService.class),
+                Handler.createAsync(Looper.getMainLooper()));
+        when(powerManager.isBatterySaverSupported()).thenReturn(true);
+
+        assertTrue(pm.isBatterySaverSupported());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_BATTERY_SAVER_SUPPORTED_CHECK_API)
+    public void testBatterySaverSupported_isNotSupported() throws RemoteException {
+        IPowerManager powerManager = mock(IPowerManager.class);
+        PowerManager pm = new PowerManager(mContext, powerManager,
+                mock(IThermalService.class),
+                Handler.createAsync(Looper.getMainLooper()));
+        when(powerManager.isBatterySaverSupported()).thenReturn(false);
+
+        assertFalse(pm.isBatterySaverSupported());
+    }
 }
