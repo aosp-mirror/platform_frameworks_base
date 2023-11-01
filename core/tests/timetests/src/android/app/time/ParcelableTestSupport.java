@@ -47,6 +47,10 @@ public final class ParcelableTestSupport {
         return toReturn;
     }
 
+    /**
+     * Asserts that the parameter can be parceled and unparceled and return an object considered
+     * equal to the original.
+     */
     public static <T extends Parcelable> void assertRoundTripParcelable(T instance) {
         assertEqualsAndHashCode(instance, roundTripParcelable(instance));
     }

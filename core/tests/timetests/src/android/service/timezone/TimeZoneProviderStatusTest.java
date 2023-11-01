@@ -32,15 +32,15 @@ import android.service.timezone.TimeZoneProviderStatus.OperationStatus;
 
 import androidx.test.filters.SmallTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 /** Non-SDK tests. See CTS for SDK API tests. */
 @RunWith(JUnitParamsRunner.class)
@@ -83,6 +83,7 @@ public class TimeZoneProviderStatusTest {
                 providerStatus.couldEnableTelephonyFallback());
     }
 
+    /** Parameters for {@link #couldEnableTelephonyFallback}. */
     public static Integer[][] couldEnableTelephonyFallbackParams() {
         List<Integer[]> params = new ArrayList<>();
         @DependencyStatus int[] dependencyStatuses =

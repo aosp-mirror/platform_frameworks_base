@@ -10,7 +10,6 @@
         {"include-filter": "android.service.notification"},
         {"include-filter": "android.service.quicksettings"},
         {"include-filter": "android.service.settings.suggestions"},
-        {"include-filter": "android.service.timezone"},
         {"exclude-annotation": "org.junit.Ignore"}
       ]
     }

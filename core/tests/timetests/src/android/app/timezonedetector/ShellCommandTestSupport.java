@@ -29,10 +29,17 @@ import java.util.List;
 public final class ShellCommandTestSupport {
     private ShellCommandTestSupport() {}
 
+    /**
+     * Returns a {@link ShellCommand} from the supplied String, where elements of the command are
+     * separated with spaces. No escaping is performed.
+     */
     public static ShellCommand createShellCommandWithArgsAndOptions(String argsWithSpaces) {
         return createShellCommandWithArgsAndOptions(Arrays.asList(argsWithSpaces.split(" ")));
     }
 
+    /**
+     * Returns a {@link ShellCommand} from the supplied list of command line elements.
+     */
     public static ShellCommand createShellCommandWithArgsAndOptions(List<String> args) {
         ShellCommand command = mock(ShellCommand.class);
         class ArgProvider {

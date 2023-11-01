@@ -1,24 +1,11 @@
 {
-  "presubmit": [
-    {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.app.time."
-        }
-      ]
-    }
-  ],
   // TODO(b/182461754): Change to "presubmit" when go/test-mapping-slo-guide allows.
   "postsubmit": [
     {
-      "name": "FrameworksCoreTests",
+      "name": "FrameworksTimeCoreTests",
       "options": [
         {
-          "include-filter": "android.app.timedetector."
-        },
-        {
-          "include-filter": "android.app.timezonedetector."
+          "include-filter": "android.app."
         }
       ]
     },
