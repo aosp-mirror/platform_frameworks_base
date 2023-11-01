@@ -34,6 +34,8 @@ import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.skipParenthesizedExprDown
 
+import java.util.EnumSet
+
 class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement?>> =
             listOf(UMethod::class.java)
@@ -117,7 +119,7 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
                 severity = Severity.ERROR,
                 implementation = Implementation(
                         EnforcePermissionHelperDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
                 )
         )
 
@@ -130,7 +132,7 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
                 severity = Severity.ERROR,
                 implementation = Implementation(
                         EnforcePermissionDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
                 )
         )
 
