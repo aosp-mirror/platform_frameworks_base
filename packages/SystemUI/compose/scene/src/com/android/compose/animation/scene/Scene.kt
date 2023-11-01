@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -99,21 +98,5 @@ private class SceneScopeImpl(
         content: @Composable MovableElementScope.() -> Unit,
     ) {
         MovableElement(layoutImpl, scene, key, modifier, content)
-    }
-}
-
-/** The destination scene when swiping up or left from [upOrLeft]. */
-internal fun Scene.upOrLeft(orientation: Orientation): SceneKey? {
-    return when (orientation) {
-        Orientation.Vertical -> userActions[Swipe.Up]
-        Orientation.Horizontal -> userActions[Swipe.Left]
-    }
-}
-
-/** The destination scene when swiping down or right from [downOrRight]. */
-internal fun Scene.downOrRight(orientation: Orientation): SceneKey? {
-    return when (orientation) {
-        Orientation.Vertical -> userActions[Swipe.Down]
-        Orientation.Horizontal -> userActions[Swipe.Right]
     }
 }
