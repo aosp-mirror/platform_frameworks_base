@@ -343,7 +343,10 @@ public class PackageInstaller {
      * point at the existing base APK (when adding splits to an existing app).
      *
      * @hide
+     * @deprecated Resolved base path of an install session should not be available to unauthorized
+     * callers. Use {@link SessionInfo#getResolvedBaseApkPath()} instead.
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_RESOLVED_BASE_PATH =
             "android.content.pm.extra.RESOLVED_BASE_PATH";
