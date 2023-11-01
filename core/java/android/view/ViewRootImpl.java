@@ -93,6 +93,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -227,6 +228,7 @@ import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.SurfaceCallbackHelper;
+import com.android.window.flags.Flags;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10856,6 +10858,17 @@ public final class ViewRootImpl implements ViewParent,
             return null;
         }
         return mInputEventReceiver.getToken();
+    }
+
+    /**
+     * @return Returns a token used for associating the root surface
+     * to {@link SurfaceControlViewHost}.
+     */
+    @Nullable
+    @Override
+    @FlaggedApi(Flags.FLAG_GET_HOST_TOKEN_API)
+    public IBinder getHostToken() {
+        return getInputToken();
     }
 
     @NonNull

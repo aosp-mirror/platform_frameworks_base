@@ -48,6 +48,9 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.SystemProperties;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.Log;
@@ -60,6 +63,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.ShellIdentityUtils;
+import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -96,6 +100,9 @@ public class ViewRootImplTest {
     // The touch mode state before the test was started, needed to return the system to the original
     // state after the test completes.
     private static boolean sOriginalTouchMode;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @BeforeClass
     public static void setUpClass() {
@@ -336,6 +343,19 @@ public class ViewRootImplTest {
 
         mViewRootImpl.dispatchCompatFakeFocus();
         assertThat(view.hasWindowFocus()).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_GET_HOST_TOKEN_API)
+    public void whenViewIsAttachedToWindow_getHostToken() {
+        View view = new View(sContext);
+        attachViewToWindow(view);
+
+        mViewRootImpl = view.getViewRootImpl();
+
+        assertThat(mViewRootImpl.getHostToken()).isNotEqualTo(null);
+        assertThat(mViewRootImpl.getHostToken())
+                .isEqualTo(mViewRootImpl.getInputToken());
     }
 
     /**

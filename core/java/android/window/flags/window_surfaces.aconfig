@@ -17,3 +17,11 @@ flag {
     is_fixed_read_only: true
     bug: "300019131"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "get_host_token_api"
+    description: "Feature flag to associate the host and embedded windows"
+    is_fixed_read_only: true
+    bug: "304508760"
+}
