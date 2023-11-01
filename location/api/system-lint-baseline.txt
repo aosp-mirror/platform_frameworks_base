@@ -9,3 +9,9 @@ SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, an
     SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
     SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+
+
+UnflaggedApi: android.location.GnssMeasurementRequest#getWorkSource():
+    New API must be flagged with @FlaggedApi: method android.location.GnssMeasurementRequest.getWorkSource()
+UnflaggedApi: android.location.GnssMeasurementRequest.Builder#setWorkSource(android.os.WorkSource):
+    New API must be flagged with @FlaggedApi: method android.location.GnssMeasurementRequest.Builder.setWorkSource(android.os.WorkSource)
