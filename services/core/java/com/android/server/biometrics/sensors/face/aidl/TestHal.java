@@ -20,6 +20,7 @@ import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.EnrollmentStageConfig;
 import android.hardware.biometrics.face.Error;
+import android.hardware.biometrics.face.FaceEnrollOptions;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.ISessionCallback;
@@ -211,6 +212,12 @@ public class TestHal extends IFace.Stub {
             @Override
             public void onContextChanged(OperationContext context) {
                 Slog.w(TAG, "onContextChanged");
+            }
+
+            @Override
+            public ICancellationSignal enrollWithOptions(FaceEnrollOptions options) {
+                return enroll(options.hardwareAuthToken, options.enrollmentType, options.features,
+                        options.nativeHandlePreview);
             }
         };
     }
