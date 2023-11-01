@@ -72,6 +72,13 @@ public class BluetoothMediaDevice extends MediaDevice {
     }
 
     @Override
+    public CharSequence getSummaryForTv(int lowBatteryColorRes) {
+        return isConnected() || mCachedDevice.isBusy()
+                ? mCachedDevice.getTvConnectionSummary(lowBatteryColorRes)
+                : mContext.getString(R.string.bluetooth_saved_device);
+    }
+
+    @Override
     public int getSelectionBehavior() {
         // We don't allow apps to override the selection behavior of system routes.
         return SELECTION_BEHAVIOR_TRANSFER;
