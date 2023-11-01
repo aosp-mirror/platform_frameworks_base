@@ -17,6 +17,7 @@
 package com.android.packageinstaller.v2.model.uninstallstagedata;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.content.Intent;
 
 public class UninstallFailed extends UninstallStage {
@@ -28,12 +29,24 @@ public class UninstallFailed extends UninstallStage {
      * and legacy code.
      */
     private final Intent mResultIntent;
+    /**
+     * When the user does not request a result back, this notification will be shown indicating the
+     * reason for uninstall failure.
+     */
+    private final Notification mUninstallNotification;
+    /**
+     * ID used to show {@link #mUninstallNotification}
+     */
+    private final int mUninstallId;
     private final int mActivityResultCode;
 
-    public UninstallFailed(boolean returnResult, Intent resultIntent, int activityResultCode) {
+    public UninstallFailed(boolean returnResult, Intent resultIntent, int activityResultCode,
+        int uninstallId, Notification uninstallNotification) {
         mReturnResult = returnResult;
         mResultIntent = resultIntent;
         mActivityResultCode = activityResultCode;
+        mUninstallId = uninstallId;
+        mUninstallNotification = uninstallNotification;
     }
 
     public boolean returnResult() {
@@ -46,6 +59,14 @@ public class UninstallFailed extends UninstallStage {
 
     public int getActivityResultCode() {
         return mActivityResultCode;
+    }
+
+    public Notification getUninstallNotification() {
+        return mUninstallNotification;
+    }
+
+    public int getUninstallId() {
+        return mUninstallId;
     }
 
     @Override
@@ -61,9 +82,23 @@ public class UninstallFailed extends UninstallStage {
          * See {@link UninstallFailed#mResultIntent}
          */
         private Intent mResultIntent = null;
+        /**
+         * See {@link UninstallFailed#mUninstallNotification}
+         */
+        private Notification mUninstallNotification;
+        /**
+         * See {@link UninstallFailed#mUninstallId}
+         */
+        private int mUninstallId;
 
         public Builder(boolean returnResult) {
             mReturnResult = returnResult;
+        }
+
+        public Builder setUninstallNotification(int uninstallId, Notification notification) {
+            mUninstallId = uninstallId;
+            mUninstallNotification = notification;
+            return this;
         }
 
         public Builder setResultIntent(Intent intent) {
@@ -77,7 +112,8 @@ public class UninstallFailed extends UninstallStage {
         }
 
         public UninstallFailed build() {
-            return new UninstallFailed(mReturnResult, mResultIntent, mActivityResultCode);
+            return new UninstallFailed(mReturnResult, mResultIntent, mActivityResultCode,
+                mUninstallId, mUninstallNotification);
         }
     }
 }

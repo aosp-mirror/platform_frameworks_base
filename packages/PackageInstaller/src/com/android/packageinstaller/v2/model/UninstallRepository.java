@@ -22,6 +22,7 @@ import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static com.android.packageinstaller.v2.model.PackageUtil.getMaxTargetSdkVersionForUid;
 import static com.android.packageinstaller.v2.model.PackageUtil.getPackageNameForUid;
 import static com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted;
+import static com.android.packageinstaller.v2.model.PackageUtil.isProfileOfOrSame;
 import static com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted.ABORT_REASON_APP_UNAVAILABLE;
 import static com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted.ABORT_REASON_GENERIC_ERROR;
 import static com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted.ABORT_REASON_USER_NOT_ALLOWED;
@@ -29,7 +30,11 @@ import static com.android.packageinstaller.v2.model.uninstallstagedata.Uninstall
 import android.Manifest;
 import android.app.Activity;
 import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
 import android.content.ComponentName;
@@ -42,12 +47,14 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.UninstallCompleteCallback;
 import android.content.pm.VersionedPackage;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,6 +73,7 @@ import java.util.List;
 public class UninstallRepository {
 
     private static final String TAG = UninstallRepository.class.getSimpleName();
+    private static final String UNINSTALL_FAILURE_CHANNEL = "uninstall_failure";
     private static final String BROADCAST_ACTION =
         "com.android.packageinstaller.ACTION_UNINSTALL_COMMIT";
 
@@ -82,6 +90,7 @@ public class UninstallRepository {
     private final AppOpsManager mAppOpsManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
+    private final NotificationManager mNotificationManager;
     private final MutableLiveData<UninstallStage> mUninstallResult = new MutableLiveData<>();
     public UserHandle mUninstalledUser;
     public UninstallCompleteCallback mCallback;
@@ -100,6 +109,7 @@ public class UninstallRepository {
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
         mPackageManager = context.getPackageManager();
         mUserManager = context.getSystemService(UserManager.class);
+        mNotificationManager = context.getSystemService(NotificationManager.class);
     }
 
     public UninstallStage performPreUninstallChecks(Intent intent, CallerInfo callerInfo) {
@@ -460,7 +470,193 @@ public class UninstallRepository {
                     .setActivityResultCode(Activity.RESULT_FIRST_USER);
                 mUninstallResult.setValue(failedBuilder.build());
             }
+            return;
         }
+
+        // Caller did not want the result back. So, we either show a Toast, or a Notification.
+        if (status == PackageInstaller.STATUS_SUCCESS) {
+            UninstallSuccess.Builder successBuilder = new UninstallSuccess.Builder()
+                .setActivityResultCode(legacyStatus)
+                .setMessage(mIsClonedApp
+                    ? mContext.getString(R.string.uninstall_done_clone_app, mTargetAppLabel)
+                    : mContext.getString(R.string.uninstall_done_app, mTargetAppLabel));
+            mUninstallResult.setValue(successBuilder.build());
+        } else {
+            UninstallFailed.Builder failedBuilder = new UninstallFailed.Builder(false);
+            Notification.Builder uninstallFailedNotification = null;
+
+            NotificationChannel uninstallFailureChannel = new NotificationChannel(
+                UNINSTALL_FAILURE_CHANNEL,
+                mContext.getString(R.string.uninstall_failure_notification_channel),
+                NotificationManager.IMPORTANCE_DEFAULT);
+            mNotificationManager.createNotificationChannel(uninstallFailureChannel);
+
+            uninstallFailedNotification = new Notification.Builder(mContext,
+                UNINSTALL_FAILURE_CHANNEL);
+
+            UserHandle myUserHandle = Process.myUserHandle();
+            switch (legacyStatus) {
+                case PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER -> {
+                    // Find out if the package is an active admin for some non-current user.
+                    UserHandle otherBlockingUserHandle =
+                        findUserOfDeviceAdmin(myUserHandle, mTargetPackageName);
+
+                    if (otherBlockingUserHandle == null) {
+                        Log.d(TAG, "Uninstall failed because " + mTargetPackageName
+                            + " is a device admin");
+
+                        addDeviceManagerButton(mContext, uninstallFailedNotification);
+                        setBigText(uninstallFailedNotification, mContext.getString(
+                            R.string.uninstall_failed_device_policy_manager));
+                    } else {
+                        Log.d(TAG, "Uninstall failed because " + mTargetPackageName
+                            + " is a device admin of user " + otherBlockingUserHandle);
+
+                        String userName =
+                            mContext.createContextAsUser(otherBlockingUserHandle, 0)
+                                .getSystemService(UserManager.class).getUserName();
+                        setBigText(uninstallFailedNotification, String.format(
+                            mContext.getString(
+                                R.string.uninstall_failed_device_policy_manager_of_user),
+                            userName));
+                    }
+                }
+                case PackageManager.DELETE_FAILED_OWNER_BLOCKED -> {
+                    UserHandle otherBlockingUserHandle = findBlockingUser(mTargetPackageName);
+                    boolean isProfileOfOrSame = isProfileOfOrSame(mUserManager, myUserHandle,
+                        otherBlockingUserHandle);
+
+                    if (isProfileOfOrSame) {
+                        addDeviceManagerButton(mContext, uninstallFailedNotification);
+                    } else {
+                        addManageUsersButton(mContext, uninstallFailedNotification);
+                    }
+
+                    String bigText = null;
+                    if (otherBlockingUserHandle == null) {
+                        Log.d(TAG, "Uninstall failed for " + mTargetPackageName +
+                            " with code " + status + " no blocking user");
+                    } else if (otherBlockingUserHandle == UserHandle.SYSTEM) {
+                        bigText = mContext.getString(
+                            R.string.uninstall_blocked_device_owner);
+                    } else {
+                        bigText = mContext.getString(mUninstallFromAllUsers ?
+                            R.string.uninstall_all_blocked_profile_owner
+                            : R.string.uninstall_blocked_profile_owner);
+                    }
+                    if (bigText != null) {
+                        setBigText(uninstallFailedNotification, bigText);
+                    }
+                }
+                default -> {
+                    Log.d(TAG, "Uninstall blocked for " + mTargetPackageName
+                        + " with legacy code " + legacyStatus);
+                }
+            }
+
+            uninstallFailedNotification.setContentTitle(
+                mContext.getString(R.string.uninstall_failed_app, mTargetAppLabel));
+            uninstallFailedNotification.setOngoing(false);
+            uninstallFailedNotification.setSmallIcon(R.drawable.ic_error);
+            failedBuilder.setUninstallNotification(mUninstallId,
+                uninstallFailedNotification.build());
+
+            mUninstallResult.setValue(failedBuilder.build());
+        }
+    }
+
+    /**
+     * @param myUserHandle {@link UserHandle} of the current user.
+     * @param packageName Name of the package being uninstalled.
+     * @return the {@link UserHandle} of the user in which a package is a device admin.
+     */
+    @Nullable
+    private UserHandle findUserOfDeviceAdmin(UserHandle myUserHandle, String packageName) {
+        for (UserHandle otherUserHandle : mUserManager.getUserHandles(true)) {
+            // We only catch the case when the user in question is neither the
+            // current user nor its profile.
+            if (isProfileOfOrSame(mUserManager, myUserHandle, otherUserHandle)) {
+                continue;
+            }
+            DevicePolicyManager dpm = mContext.createContextAsUser(otherUserHandle, 0)
+                    .getSystemService(DevicePolicyManager.class);
+            if (dpm.packageHasActiveAdmins(packageName)) {
+                return otherUserHandle;
+            }
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param packageName Name of the package being uninstalled.
+     * @return {@link UserHandle} of the user in which a package is blocked from being uninstalled.
+     */
+    @Nullable
+    private UserHandle findBlockingUser(String packageName) {
+        for (UserHandle otherUserHandle : mUserManager.getUserHandles(true)) {
+            // TODO (b/307399586): Add a negation when the logic of the method
+            //  is fixed
+            if (mPackageManager.canUserUninstall(packageName, otherUserHandle)) {
+                return otherUserHandle;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Set big text for the notification.
+     *
+     * @param builder The builder of the notification
+     * @param text The text to set.
+     */
+    private void setBigText(@NonNull Notification.Builder builder,
+        @NonNull CharSequence text) {
+        builder.setStyle(new Notification.BigTextStyle().bigText(text));
+    }
+
+    /**
+     * Add a button to the notification that links to the user management.
+     *
+     * @param context The context the notification is created in
+     * @param builder The builder of the notification
+     */
+    private void addManageUsersButton(@NonNull Context context,
+        @NonNull Notification.Builder builder) {
+        builder.addAction((new Notification.Action.Builder(
+            Icon.createWithResource(context, R.drawable.ic_settings_multiuser),
+            context.getString(R.string.manage_users),
+            PendingIntent.getActivity(context, 0, getUserSettingsIntent(),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))).build());
+    }
+
+    private Intent getUserSettingsIntent() {
+        Intent intent = new Intent(Settings.ACTION_USER_SETTINGS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
+    }
+
+    /**
+     * Add a button to the notification that links to the device policy management.
+     *
+     * @param context The context the notification is created in
+     * @param builder The builder of the notification
+     */
+    private void addDeviceManagerButton(@NonNull Context context,
+        @NonNull Notification.Builder builder) {
+        builder.addAction((new Notification.Action.Builder(
+            Icon.createWithResource(context, R.drawable.ic_lock),
+            context.getString(R.string.manage_device_administrators),
+            PendingIntent.getActivity(context, 0, getDeviceManagerIntent(),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))).build());
+    }
+
+    private Intent getDeviceManagerIntent() {
+        Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+            "com.android.settings.Settings$DeviceAdminSettingsActivity");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
     }
 
     /**

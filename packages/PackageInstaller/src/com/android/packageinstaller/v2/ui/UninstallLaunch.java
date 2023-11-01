@@ -20,9 +20,11 @@ import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
@@ -54,6 +56,7 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
     private UninstallViewModel mUninstallViewModel;
     private UninstallRepository mUninstallRepository;
     private FragmentManager mFragmentManager;
+    private NotificationManager mNotificationManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +67,7 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
         super.onCreate(null);
 
         mFragmentManager = getSupportFragmentManager();
+        mNotificationManager = getSystemService(NotificationManager.class);
 
         mUninstallRepository = new UninstallRepository(getApplicationContext());
         mUninstallViewModel = new ViewModelProvider(this,
@@ -110,9 +114,16 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
             showDialogInner(uninstallingDialog);
         } else if (uninstallStage.getStageCode() == UninstallStage.STAGE_FAILED) {
             UninstallFailed failed = (UninstallFailed) uninstallStage;
+            if (!failed.returnResult()) {
+                mNotificationManager.notify(failed.getUninstallId(),
+                    failed.getUninstallNotification());
+            }
             setResult(failed.getActivityResultCode(), failed.getResultIntent(), true);
         } else if (uninstallStage.getStageCode() == UninstallStage.STAGE_SUCCESS) {
             UninstallSuccess success = (UninstallSuccess) uninstallStage;
+            if (success.getMessage() != null) {
+                Toast.makeText(this, success.getMessage(), Toast.LENGTH_LONG).show();
+            }
             setResult(success.getActivityResultCode(), success.getResultIntent(), true);
         } else {
             Log.e(TAG, "Invalid stage: " + uninstallStage.getStageCode());

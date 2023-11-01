@@ -21,12 +21,18 @@ import android.content.Intent;
 public class UninstallSuccess extends UninstallStage {
 
     private final int mStage = UninstallStage.STAGE_SUCCESS;
+    private final String mMessage;
     private final Intent mResultIntent;
     private final int mActivityResultCode;
 
-    public UninstallSuccess(Intent resultIntent, int activityResultCode) {
+    public UninstallSuccess(Intent resultIntent, int activityResultCode, String message) {
         mResultIntent = resultIntent;
         mActivityResultCode = activityResultCode;
+        mMessage = message;
+    }
+
+    public String getMessage() {
+        return mMessage;
     }
 
     public Intent getResultIntent() {
@@ -46,6 +52,7 @@ public class UninstallSuccess extends UninstallStage {
 
         private Intent mResultIntent;
         private int mActivityResultCode;
+        private String mMessage;
 
         public Builder() {
         }
@@ -60,8 +67,13 @@ public class UninstallSuccess extends UninstallStage {
             return this;
         }
 
+        public Builder setMessage(String message) {
+            mMessage = message;
+            return this;
+        }
+
         public UninstallSuccess build() {
-            return new UninstallSuccess(mResultIntent, mActivityResultCode);
+            return new UninstallSuccess(mResultIntent, mActivityResultCode, mMessage);
         }
     }
 }
