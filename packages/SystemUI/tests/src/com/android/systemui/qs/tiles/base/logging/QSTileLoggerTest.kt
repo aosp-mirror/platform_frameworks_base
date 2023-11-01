@@ -57,7 +57,7 @@ class QSTileLoggerTest : SysuiTestCase() {
         whenever(logBufferFactory.create(any(), any(), any())).thenReturn(logBuffer)
         underTest =
             QSTileLogger(
-                mapOf(TileSpec.create("chatty_tile") to chattyLogBuffer),
+                mapOf("chatty_tile" to chattyLogBuffer),
                 logBufferFactory,
                 statusBarController
             )
