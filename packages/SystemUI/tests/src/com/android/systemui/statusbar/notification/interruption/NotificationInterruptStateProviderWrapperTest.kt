@@ -39,7 +39,6 @@ class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecision
         get() =
             NotificationInterruptStateProviderWrapper(
                 NotificationInterruptStateProviderImpl(
-                        context.contentResolver,
                         powerManager,
                         ambientDisplayConfiguration,
                         batteryController,
@@ -52,7 +51,9 @@ class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecision
                         keyguardNotificationVisibilityProvider,
                         uiEventLogger,
                         userTracker,
-                        deviceProvisionedController
+                        deviceProvisionedController,
+                        systemClock,
+                        globalSettings,
                     )
                     .also { it.mUseHeadsUp = true }
             )

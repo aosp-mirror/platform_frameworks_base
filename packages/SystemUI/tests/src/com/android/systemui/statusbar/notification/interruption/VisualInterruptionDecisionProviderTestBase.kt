@@ -31,6 +31,8 @@ import android.graphics.drawable.Icon
 import android.hardware.display.FakeAmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
+import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
+import android.provider.Settings.Global.HEADS_UP_ON
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
@@ -47,6 +49,8 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.FakeGlobalSettings
+import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.utils.leaks.FakeBatteryController
 import com.android.systemui.utils.leaks.LeakCheckedTest
 import junit.framework.Assert.assertTrue
@@ -61,6 +65,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val batteryController = FakeBatteryController(leakCheck)
     protected val deviceProvisionedController: DeviceProvisionedController = mock()
     protected val flags: NotifPipelineFlags = mock()
+    protected val globalSettings = FakeGlobalSettings()
     protected val headsUpManager: HeadsUpManager = mock()
     protected val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider =
         mock()
@@ -69,6 +74,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val mainHandler: Handler = mock()
     protected val powerManager: PowerManager = mock()
     protected val statusBarStateController = FakeStatusBarStateController()
+    protected val systemClock = FakeSystemClock()
     protected val uiEventLogger = UiEventLoggerFake()
     protected val userTracker = FakeUserTracker()
 
@@ -76,6 +82,8 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        globalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON)
+
         val user = UserInfo(ActivityManager.getCurrentUser(), "Current user", /* flags = */ 0)
         userTracker.set(listOf(user), /* currentUserIndex = */ 0)
 
