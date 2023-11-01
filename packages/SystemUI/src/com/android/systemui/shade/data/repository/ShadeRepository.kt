@@ -83,6 +83,17 @@ interface ShadeRepository {
     val legacyExpandedOrAwaitingInputTransfer: StateFlow<Boolean>
 
     /**
+     * QuickSettingsController.mExpanded as a flow. Indicates that QS is in expanded state:
+     * - single pane shade: expanding shade and then expanding QS
+     * - split shade: just expanding shade (QS are expanded automatically)
+     */
+    @Deprecated("Use ShadeInteractor instead") val legacyIsQsExpanded: StateFlow<Boolean>
+
+    /** Sets whether QS is expanded. */
+    @Deprecated("Use ShadeInteractor instead")
+    fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean)
+
+    /**
      * Sets whether the expansion fraction is greater than zero or NPVC is about to accept an input
      * transfer from the status bar, home screen, or trackpad.
      */
@@ -174,6 +185,15 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     @Deprecated("Use ShadeInteractor instead")
     override val legacyExpandedOrAwaitingInputTransfer: StateFlow<Boolean> =
         _legacyExpandedOrAwaitingInputTransfer.asStateFlow()
+
+    private val _legacyIsQsExpanded = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyIsQsExpanded: StateFlow<Boolean> = _legacyIsQsExpanded.asStateFlow()
+
+    @Deprecated("Use ShadeInteractor instead")
+    override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {
+        _legacyIsQsExpanded.value = legacyIsQsExpanded
+    }
 
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyExpandedOrAwaitingInputTransfer(

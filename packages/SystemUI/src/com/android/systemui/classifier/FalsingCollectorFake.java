@@ -23,6 +23,10 @@ import javax.inject.Inject;
 /** */
 public class FalsingCollectorFake implements FalsingCollector {
 
+    @Override
+    public void init() {
+    }
+
     @Inject
     public FalsingCollectorFake() {
     }
