@@ -837,15 +837,18 @@ class MediaRouter2ServiceImpl {
     private void unregisterRouter2Locked(@NonNull IMediaRouter2 router, boolean died) {
         RouterRecord routerRecord = mAllRouterRecords.remove(router.asBinder());
         if (routerRecord == null) {
-            Slog.w(TAG, "Ignoring unregistering unknown router2");
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Ignoring unregistering unknown router: %s, died: %b", router, died));
             return;
         }
 
         Slog.i(
                 TAG,
                 TextUtils.formatSimple(
-                        "unregisterRouter2 | package: %s, router id: %d",
-                        routerRecord.mPackageName, routerRecord.mRouterId));
+                        "unregisterRouter2 | package: %s, router id: %d, died: %b",
+                        routerRecord.mPackageName, routerRecord.mRouterId, died));
 
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
@@ -1230,15 +1233,22 @@ class MediaRouter2ServiceImpl {
     private void unregisterManagerLocked(@NonNull IMediaRouter2Manager manager, boolean died) {
         ManagerRecord managerRecord = mAllManagerRecords.remove(manager.asBinder());
         if (managerRecord == null) {
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Ignoring unregistering unknown manager: %s, died: %b", manager, died));
             return;
         }
         UserRecord userRecord = managerRecord.mUserRecord;
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "unregisterManager | package: %s, user: %d, manager: %d",
-                managerRecord.mOwnerPackageName,
-                userRecord.mUserId,
-                managerRecord.mManagerId));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "unregisterManager | package: %s, user: %d, manager: %d, died: %b",
+                        managerRecord.mOwnerPackageName,
+                        userRecord.mUserId,
+                        managerRecord.mManagerId,
+                        died));
 
         userRecord.mManagerRecords.remove(managerRecord);
         managerRecord.dispose();
