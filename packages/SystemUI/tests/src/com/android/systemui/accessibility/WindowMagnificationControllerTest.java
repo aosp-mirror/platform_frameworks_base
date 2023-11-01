@@ -1072,6 +1072,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertTrue(TextUtils.equals(newA11yWindowTitle, getAccessibilityWindowTitle()));
     }
 
+    @Ignore("it's flaky in presubmit but works in abtd, filter for now. b/305654925")
     @Test
     public void onSingleTap_enabled_scaleAnimates() {
         mInstrumentation.runOnMainSync(() -> {
