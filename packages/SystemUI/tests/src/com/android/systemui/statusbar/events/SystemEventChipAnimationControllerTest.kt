@@ -27,6 +27,7 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
@@ -87,7 +88,8 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
             SystemEventChipAnimationController(
                 context = mContext,
                 statusBarWindowController = sbWindowController,
-                contentInsetsProvider = insetsProvider
+                contentInsetsProvider = insetsProvider,
+                featureFlags = FakeFeatureFlags(),
             )
     }
 
