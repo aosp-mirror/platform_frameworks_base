@@ -35,7 +35,6 @@ import android.view.ViewGroupOverlay
 import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
@@ -43,6 +42,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeStateEvents
 import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener
 import com.android.systemui.statusbar.CrossFadeHelper
@@ -53,9 +53,9 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
+import com.android.systemui.tracing.traceSection
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 private val TAG: String = MediaHierarchyManager::class.java.simpleName

@@ -16,6 +16,16 @@
 package com.android.systemui.deviceentry.data
 
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepositoryModule
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepositoryModule
+import com.android.systemui.keyguard.data.repository.FakeTrustRepositoryModule
 import dagger.Module
 
-@Module(includes = [FakeDeviceEntryRepositoryModule::class]) object FakeDeviceEntryDataLayerModule
+@Module(
+    includes =
+        [
+            FakeDeviceEntryRepositoryModule::class,
+            FakeTrustRepositoryModule::class,
+            FakeDeviceEntryFaceAuthRepositoryModule::class,
+        ]
+)
+object FakeDeviceEntryDataLayerModule

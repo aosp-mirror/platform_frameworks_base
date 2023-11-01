@@ -30,6 +30,7 @@ import java.lang.annotation.Target;
  *
  * TODO: Javadoc
  *
+ * @hide
  */
 @Target({TYPE, FIELD, METHOD, CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)

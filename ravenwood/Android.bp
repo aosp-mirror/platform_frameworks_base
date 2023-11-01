@@ -12,6 +12,7 @@ filegroup {
     srcs: [
         "annotations-src/**/*.java",
     ],
+    path: "annotations-src",
     visibility: ["//visibility:public"],
 }
 

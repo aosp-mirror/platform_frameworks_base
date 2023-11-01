@@ -48,7 +48,7 @@ message Transition {
     optional int32 handler = 3;
     optional int64 merge_time_ns = 4;
     optional int64 merge_request_time_ns = 5;
-    optional int32 merged_into = 6;
+    optional int32 merge_target = 6;
     optional int64 abort_time_ns = 7;
 }
 

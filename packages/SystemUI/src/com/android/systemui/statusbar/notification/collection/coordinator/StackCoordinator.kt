@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.RenderNotif
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.util.traceSection
+import com.android.systemui.tracing.traceSection
 import javax.inject.Inject
 
 /**

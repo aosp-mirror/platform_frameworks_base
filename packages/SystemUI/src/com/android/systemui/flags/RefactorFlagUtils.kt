@@ -16,6 +16,7 @@
 
 package com.android.systemui.flags
 
+import android.os.Build
 import android.util.Log
 
 /**
@@ -25,12 +26,18 @@ import android.util.Log
  * ```
  * object SomeRefactor {
  *     const val FLAG_NAME = Flags.SOME_REFACTOR
+ *     val token: FlagToken get() = FlagToken(FLAG_NAME, isEnabled)
  *     @JvmStatic inline val isEnabled get() = Flags.someRefactor()
  *     @JvmStatic inline fun isUnexpectedlyInLegacyMode() =
  *         RefactorFlagUtils.isUnexpectedlyInLegacyMode(isEnabled, FLAG_NAME)
  *     @JvmStatic inline fun assertInLegacyMode() =
  *         RefactorFlagUtils.assertInLegacyMode(isEnabled, FLAG_NAME)
  * }
+ * ```
+ *
+ * Legacy mode crashes can be disabled with the command:
+ * ```
+ * adb shell setprop log.tag.RefactorFlagAssert silent
  * ```
  */
 @Suppress("NOTHING_TO_INLINE")
@@ -51,8 +58,7 @@ object RefactorFlagUtils {
     inline fun isUnexpectedlyInLegacyMode(isEnabled: Boolean, flagName: Any): Boolean {
         val inLegacyMode = !isEnabled
         if (inLegacyMode) {
-            val message = "New code path expects $flagName to be enabled."
-            Log.wtf("RefactorFlag", message, IllegalStateException(message))
+            assertOnEngBuild("New code path expects $flagName to be enabled.")
         }
         return inLegacyMode
     }
@@ -71,4 +77,37 @@ object RefactorFlagUtils {
      */
     inline fun assertInLegacyMode(isEnabled: Boolean, flagName: Any) =
         check(!isEnabled) { "Legacy code path not supported when $flagName is enabled." }
+
+    /**
+     * This will [Log.wtf] with the given message, assuming [ASSERT_TAG] is loggable at that level.
+     * This means an engineer can prevent this from crashing by running the command:
+     * ```
+     * adb shell setprop log.tag.RefactorFlagAssert silent
+     * ```
+     */
+    fun assertOnEngBuild(message: String) {
+        if (Log.isLoggable(ASSERT_TAG, Log.ASSERT)) {
+            val exception = if (Build.isDebuggable()) IllegalStateException(message) else null
+            Log.wtf(ASSERT_TAG, message, exception)
+        } else if (Log.isLoggable(STANDARD_TAG, Log.WARN)) {
+            Log.w(STANDARD_TAG, message)
+        }
+    }
+
+    /**
+     * Tag used to determine if an incorrect flag guard should crash System UI running an eng build.
+     * This is enabled by default. To disable, run:
+     * ```
+     * adb shell setprop log.tag.RefactorFlagAssert silent
+     * ```
+     */
+    private const val ASSERT_TAG = "RefactorFlagAssert"
+
+    /** Tag used for non-crashing logs or when the [ASSERT_TAG] has been silenced. */
+    private const val STANDARD_TAG = "RefactorFlag"
+}
+
+/** An object which allows dependency tracking */
+data class FlagToken(val name: String, val isEnabled: Boolean) {
+    override fun toString(): String = "$name (${if (isEnabled) "enabled" else "disabled"})"
 }

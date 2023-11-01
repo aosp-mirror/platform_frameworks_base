@@ -68,13 +68,11 @@ public class NotificationBigPictureTemplateViewWrapper extends NotificationTempl
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-
+    public void onContentShown(boolean shown) {
+        super.onContentShown(shown);
         BigPictureIconManager imageManager = mRow.getBigPictureIconManager();
         if (imageManager != null) {
-            // TODO(b/283082473) call it a bit earlier for true, as soon as the row starts to expand
-            imageManager.onViewShown(visible);
+            imageManager.onViewShown(shown);
         }
     }
 

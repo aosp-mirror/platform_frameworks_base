@@ -281,7 +281,7 @@ class MenuViewAppearance {
                 : new float[]{radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
     }
 
-    private Rect getWindowAvailableBounds() {
+    public Rect getWindowAvailableBounds() {
         final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
         final WindowInsets windowInsets = windowMetrics.getWindowInsets();
         final Insets insets = windowInsets.getInsetsIgnoringVisibility(

@@ -129,13 +129,12 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
      * Adds an entry in the trace to log that a request to merge a transition was made.
      *
      * @param mergeRequestedTransitionId The id of the transition we are requesting to be merged.
-     * @param playingTransitionId The id of the transition we was to merge the transition into.
      */
     public void logMergeRequested(int mergeRequestedTransitionId, int playingTransitionId) {
         com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
         proto.id = mergeRequestedTransitionId;
         proto.mergeRequestTimeNs = SystemClock.elapsedRealtimeNanos();
-        proto.mergedInto = playingTransitionId;
+        proto.mergeTarget = playingTransitionId;
 
         mTraceBuffer.add(proto);
     }
@@ -150,7 +149,7 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
         com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
         proto.id = mergedTransitionId;
         proto.mergeTimeNs = SystemClock.elapsedRealtimeNanos();
-        proto.mergedInto = playingTransitionId;
+        proto.mergeTarget = playingTransitionId;
 
         mTraceBuffer.add(proto);
     }

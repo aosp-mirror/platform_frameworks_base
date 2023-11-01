@@ -16,13 +16,17 @@
 
 package com.android.systemui.statusbar.notification.row
 
+import android.annotation.DimenRes
 import android.content.res.Resources
 import android.os.UserHandle
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
+import android.testing.ViewUtils
 import android.view.NotificationHeaderView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
@@ -30,20 +34,21 @@ import com.android.internal.R
 import com.android.internal.widget.NotificationActionListLayout
 import com.android.internal.widget.NotificationExpandButton
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.statusbar.notification.FeedbackIcon
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
-import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
@@ -53,89 +58,247 @@ import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper
 class NotificationContentViewTest : SysuiTestCase() {
-    private lateinit var view: NotificationContentView
 
+    private lateinit var row: ExpandableNotificationRow
+    private lateinit var fakeParent: ViewGroup
     @Mock private lateinit var mPeopleNotificationIdentifier: PeopleNotificationIdentifier
 
-    private val notificationContentMargin =
-        mContext.resources.getDimensionPixelSize(R.dimen.notification_content_margin)
+    private val testableResources = mContext.getOrCreateTestableResources()
+    private val contractedHeight =
+        px(com.android.systemui.res.R.dimen.min_notification_layout_height)
+    private val expandedHeight = px(com.android.systemui.res.R.dimen.notification_max_height)
+    private val notificationContentMargin = px(R.dimen.notification_content_margin)
 
     @Before
     fun setup() {
         initMocks(this)
-
-        mDependency.injectMockDependency(MediaOutputDialogFactory::class.java)
-
-        view = spy(NotificationContentView(mContext, /* attrs= */ null))
-        val row = ExpandableNotificationRow(mContext, /* attrs= */ null)
-        row.entry = createMockNotificationEntry(false)
-        val spyRow = spy(row)
-        doReturn(10).whenever(spyRow).intrinsicHeight
-
-        with(view) {
-            initialize(mPeopleNotificationIdentifier, mock(), mock(), mock(), mock())
-            setContainingNotification(spyRow)
-            setHeights(/* smallHeight= */ 10, /* headsUpMaxHeight= */ 20, /* maxHeight= */ 30)
-            contractedChild = createViewWithHeight(10)
-            expandedChild = createViewWithHeight(20)
-            headsUpChild = createViewWithHeight(30)
-            measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-            layout(0, 0, view.measuredWidth, view.measuredHeight)
-        }
+        fakeParent = FrameLayout(mContext, /* attrs= */ null).also { it.visibility = View.GONE }
+        row =
+            spy(
+                ExpandableNotificationRow(mContext, /* attrs= */ null).apply {
+                    entry = createMockNotificationEntry()
+                }
+            )
+        ViewUtils.attachView(fakeParent)
     }
 
-    private fun createViewWithHeight(height: Int) =
-        View(mContext, /* attrs= */ null).apply { minimumHeight = height }
+    @After
+    fun teardown() {
+        fakeParent.removeAllViews()
+        ViewUtils.detachView(fakeParent)
+    }
+
+    @Test
+    fun contractedWrapperSelected_whenShadeIsClosed_wrapperNotNotified() {
+        // GIVEN the shade is closed
+        fakeParent.visibility = View.GONE
+
+        // WHEN a collapsed content is created
+        val view = createContentView(isSystemExpanded = false)
+
+        // THEN the contractedWrapper is set
+        assertEquals(view.contractedWrapper, view.visibleWrapper)
+        // AND the contractedWrapper is visible, but NOT shown
+        verify(view.contractedWrapper).setVisible(true)
+        verify(view.contractedWrapper, never()).onContentShown(anyBoolean())
+    }
+
+    @Test
+    fun contractedWrapperSelected_whenShadeIsOpen_wrapperNotified() {
+        // GIVEN the shade is open
+        fakeParent.visibility = View.VISIBLE
+
+        // WHEN a collapsed content is created
+        val view = createContentView(isSystemExpanded = false)
+
+        // THEN the contractedWrapper is set
+        assertEquals(view.contractedWrapper, view.visibleWrapper)
+        // AND the contractedWrapper is visible and shown
+        verify(view.contractedWrapper, Mockito.atLeastOnce()).setVisible(true)
+        verify(view.contractedWrapper, times(1)).onContentShown(true)
+    }
+
+    @Test
+    fun shadeOpens_collapsedWrapperIsSelected_wrapperNotified() {
+        // GIVEN the shade is closed
+        fakeParent.visibility = View.GONE
+        // AND a collapsed content is created
+        val view = createContentView(isSystemExpanded = false).apply { clearInvocations() }
+
+        // WHEN the shade opens
+        fakeParent.visibility = View.VISIBLE
+        view.onVisibilityAggregated(true)
+
+        // THEN the contractedWrapper is set
+        assertEquals(view.contractedWrapper, view.visibleWrapper)
+        // AND the contractedWrapper is shown
+        verify(view.contractedWrapper, times(1)).onContentShown(true)
+    }
+
+    @Test
+    fun shadeCloses_collapsedWrapperIsShown_wrapperNotified() {
+        // GIVEN the shade is closed
+        fakeParent.visibility = View.VISIBLE
+        // AND a collapsed content is created
+        val view = createContentView(isSystemExpanded = false).apply { clearInvocations() }
+
+        // WHEN the shade opens
+        fakeParent.visibility = View.GONE
+        view.onVisibilityAggregated(false)
+
+        // THEN the contractedWrapper is set
+        assertEquals(view.contractedWrapper, view.visibleWrapper)
+        // AND the contractedWrapper is NOT shown
+        verify(view.contractedWrapper, times(1)).onContentShown(false)
+    }
+
+    @Test
+    fun expandedWrapperSelected_whenShadeIsClosed_wrapperNotNotified() {
+        // GIVEN the shade is closed
+        fakeParent.visibility = View.GONE
+
+        // WHEN a system-expanded content is created
+        val view = createContentView(isSystemExpanded = true)
+
+        // THEN the contractedWrapper is set
+        assertEquals(view.expandedWrapper, view.visibleWrapper)
+        // AND the contractedWrapper is visible, but NOT shown
+        verify(view.expandedWrapper, Mockito.atLeastOnce()).setVisible(true)
+        verify(view.expandedWrapper, never()).onContentShown(anyBoolean())
+    }
+
+    @Test
+    fun expandedWrapperSelected_whenShadeIsOpen_wrapperNotified() {
+        // GIVEN the shade is open
+        fakeParent.visibility = View.VISIBLE
+
+        // WHEN an system-expanded content is created
+        val view = createContentView(isSystemExpanded = true)
+
+        // THEN the expandedWrapper is set
+        assertEquals(view.expandedWrapper, view.visibleWrapper)
+        // AND the expandedWrapper is visible and shown
+        verify(view.expandedWrapper, Mockito.atLeastOnce()).setVisible(true)
+        verify(view.expandedWrapper, times(1)).onContentShown(true)
+    }
+
+    @Test
+    fun shadeOpens_expandedWrapperIsSelected_wrapperNotified() {
+        // GIVEN the shade is closed
+        fakeParent.visibility = View.GONE
+        // AND a system-expanded content is created
+        val view = createContentView(isSystemExpanded = true).apply { clearInvocations() }
+
+        // WHEN the shade opens
+        fakeParent.visibility = View.VISIBLE
+        view.onVisibilityAggregated(true)
+
+        // THEN the expandedWrapper is set
+        assertEquals(view.expandedWrapper, view.visibleWrapper)
+        // AND the expandedWrapper is shown
+        verify(view.expandedWrapper, times(1)).onContentShown(true)
+    }
+
+    @Test
+    fun shadeCloses_expandedWrapperIsShown_wrapperNotified() {
+        // GIVEN the shade is open
+        fakeParent.visibility = View.VISIBLE
+        // AND a system-expanded content is created
+        val view = createContentView(isSystemExpanded = true).apply { clearInvocations() }
+
+        // WHEN the shade opens
+        fakeParent.visibility = View.GONE
+        view.onVisibilityAggregated(false)
+
+        // THEN the expandedWrapper is set
+        assertEquals(view.expandedWrapper, view.visibleWrapper)
+        // AND the expandedWrapper is NOT shown
+        verify(view.expandedWrapper, times(1)).onContentShown(false)
+    }
+
+    @Test
+    fun expandCollapsedNotification_expandedWrapperShown() {
+        // GIVEN the shade is open
+        fakeParent.visibility = View.VISIBLE
+        // AND a collapsed content is created
+        val view = createContentView(isSystemExpanded = false).apply { clearInvocations() }
+
+        // WHEN we collapse the notification
+        whenever(row.intrinsicHeight).thenReturn(expandedHeight)
+        view.contentHeight = expandedHeight
+
+        // THEN the wrappers are updated
+        assertEquals(view.expandedWrapper, view.visibleWrapper)
+        verify(view.contractedWrapper, times(1)).onContentShown(false)
+        verify(view.contractedWrapper).setVisible(false)
+        verify(view.expandedWrapper, times(1)).onContentShown(true)
+        verify(view.expandedWrapper).setVisible(true)
+    }
+
+    @Test
+    fun collapseExpandedNotification_expandedWrapperShown() {
+        // GIVEN the shade is open
+        fakeParent.visibility = View.VISIBLE
+        // AND a system-expanded content is created
+        val view = createContentView(isSystemExpanded = true).apply { clearInvocations() }
+
+        // WHEN we collapse the notification
+        whenever(row.intrinsicHeight).thenReturn(contractedHeight)
+        view.contentHeight = contractedHeight
+
+        // THEN the wrappers are updated
+        assertEquals(view.contractedWrapper, view.visibleWrapper)
+        verify(view.expandedWrapper, times(1)).onContentShown(false)
+        verify(view.expandedWrapper).setVisible(false)
+        verify(view.contractedWrapper, times(1)).onContentShown(true)
+        verify(view.contractedWrapper).setVisible(true)
+    }
 
     @Test
     fun testSetFeedbackIcon() {
         // Given: contractedChild, enpandedChild, and headsUpChild being set
-        val mockContracted = createMockNotificationHeaderView()
-        val mockExpanded = createMockNotificationHeaderView()
-        val mockHeadsUp = createMockNotificationHeaderView()
-
-        with(view) {
-            contractedChild = mockContracted
-            expandedChild = mockExpanded
-            headsUpChild = mockHeadsUp
-        }
+        val view = createContentView(isSystemExpanded = false)
 
         // When: FeedBackIcon is set
-        view.setFeedbackIcon(
+        val icon =
             FeedbackIcon(
                 R.drawable.ic_feedback_alerted,
                 R.string.notification_feedback_indicator_alerted
             )
-        )
+        view.setFeedbackIcon(icon)
 
-        // Then: contractedChild, enpandedChild, and headsUpChild should be set to be visible
-        verify(mockContracted).visibility = View.VISIBLE
-        verify(mockExpanded).visibility = View.VISIBLE
-        verify(mockHeadsUp).visibility = View.VISIBLE
+        // Then: contractedChild, enpandedChild, and headsUpChild is updated with the feedbackIcon
+        verify(view.contractedWrapper).setFeedbackIcon(icon)
+        verify(view.expandedWrapper).setFeedbackIcon(icon)
+        verify(view.headsUpWrapper).setFeedbackIcon(icon)
     }
-
-    private fun createMockNotificationHeaderView() =
-        mock<NotificationHeaderView>().apply {
-            whenever(this.findViewById<View>(R.id.feedback)).thenReturn(this)
-            whenever(this.context).thenReturn(mContext)
-        }
 
     @Test
     fun testExpandButtonFocusIsCalled() {
         val mockContractedEB = mock<NotificationExpandButton>()
-        val mockContracted = createMockNotificationHeaderView(mockContractedEB)
+        val mockContracted = createMockNotificationHeaderView(contractedHeight, mockContractedEB)
 
         val mockExpandedEB = mock<NotificationExpandButton>()
-        val mockExpanded = createMockNotificationHeaderView(mockExpandedEB)
+        val mockExpanded = createMockNotificationHeaderView(expandedHeight, mockExpandedEB)
 
         val mockHeadsUpEB = mock<NotificationExpandButton>()
-        val mockHeadsUp = createMockNotificationHeaderView(mockHeadsUpEB)
+        val mockHeadsUp = createMockNotificationHeaderView(contractedHeight, mockHeadsUpEB)
 
-        // Set up all 3 child forms
-        view.contractedChild = mockContracted
-        view.expandedChild = mockExpanded
-        view.headsUpChild = mockHeadsUp
+        val view =
+            createContentView(
+                isSystemExpanded = false,
+            )
+
+        // Update all 3 child forms
+        view.apply {
+            contractedChild = mockContracted
+            expandedChild = mockExpanded
+            headsUpChild = mockHeadsUp
+
+            expandedWrapper = spy(expandedWrapper)
+        }
 
         // This is required to call requestAccessibilityFocus()
         view.setFocusOnVisibilityChange()
@@ -143,35 +306,41 @@ class NotificationContentViewTest : SysuiTestCase() {
         // The following will initialize the view and switch from not visible to expanded.
         // (heads-up is actually an alternate form of contracted, hence this enters expanded state)
         view.setHeadsUp(true)
+        assertEquals(view.expandedWrapper, view.visibleWrapper)
         verify(mockContractedEB, never()).requestAccessibilityFocus()
         verify(mockExpandedEB).requestAccessibilityFocus()
         verify(mockHeadsUpEB, never()).requestAccessibilityFocus()
     }
 
-    private fun createMockNotificationHeaderView(mockExpandedEB: NotificationExpandButton) =
-        mock<NotificationHeaderView>().apply {
-            whenever(this.animate()).thenReturn(mock())
-            whenever(this.findViewById<View>(R.id.expand_button)).thenReturn(mockExpandedEB)
-            whenever(this.context).thenReturn(mContext)
-        }
+    private fun createMockNotificationHeaderView(
+        height: Int,
+        mockExpandedEB: NotificationExpandButton
+    ) =
+        spy(NotificationHeaderView(mContext, /* attrs= */ null).apply { minimumHeight = height })
+            .apply {
+                whenever(this.animate()).thenReturn(mock())
+                whenever(this.findViewById<View>(R.id.expand_button)).thenReturn(mockExpandedEB)
+            }
 
     @Test
     fun testRemoteInputVisibleSetsActionsUnimportantHideDescendantsForAccessibility() {
-        val mockContracted = mock<NotificationHeaderView>()
+        val mockContracted = spy(createViewWithHeight(contractedHeight))
 
         val mockExpandedActions = mock<NotificationActionListLayout>()
-        val mockExpanded = mock<NotificationHeaderView>()
+        val mockExpanded = spy(createViewWithHeight(expandedHeight))
         whenever(mockExpanded.findViewById<View>(R.id.actions)).thenReturn(mockExpandedActions)
 
         val mockHeadsUpActions = mock<NotificationActionListLayout>()
-        val mockHeadsUp = mock<NotificationHeaderView>()
+        val mockHeadsUp = spy(createViewWithHeight(contractedHeight))
         whenever(mockHeadsUp.findViewById<View>(R.id.actions)).thenReturn(mockHeadsUpActions)
 
-        with(view) {
-            contractedChild = mockContracted
-            expandedChild = mockExpanded
-            headsUpChild = mockHeadsUp
-        }
+        val view =
+            createContentView(
+                isSystemExpanded = false,
+                contractedView = mockContracted,
+                expandedView = mockExpanded,
+                headsUpView = mockHeadsUp
+            )
 
         view.setRemoteInputVisible(true)
 
@@ -184,21 +353,23 @@ class NotificationContentViewTest : SysuiTestCase() {
 
     @Test
     fun testRemoteInputInvisibleSetsActionsAutoImportantForAccessibility() {
-        val mockContracted = mock<NotificationHeaderView>()
+        val mockContracted = spy(createViewWithHeight(contractedHeight))
 
         val mockExpandedActions = mock<NotificationActionListLayout>()
-        val mockExpanded = mock<NotificationHeaderView>()
+        val mockExpanded = spy(createViewWithHeight(expandedHeight))
         whenever(mockExpanded.findViewById<View>(R.id.actions)).thenReturn(mockExpandedActions)
 
         val mockHeadsUpActions = mock<NotificationActionListLayout>()
-        val mockHeadsUp = mock<NotificationHeaderView>()
+        val mockHeadsUp = spy(createViewWithHeight(contractedHeight))
         whenever(mockHeadsUp.findViewById<View>(R.id.actions)).thenReturn(mockHeadsUpActions)
 
-        with(view) {
-            contractedChild = mockContracted
-            expandedChild = mockExpanded
-            headsUpChild = mockHeadsUp
-        }
+        val view =
+            createContentView(
+                isSystemExpanded = false,
+                contractedView = mockContracted,
+                expandedView = mockExpanded,
+                headsUpView = mockHeadsUp
+            )
 
         view.setRemoteInputVisible(false)
 
@@ -212,7 +383,7 @@ class NotificationContentViewTest : SysuiTestCase() {
     fun setExpandedChild_notShowBubbleButton_marginTargetBottomMarginShouldNotChange() {
         // Given: bottom margin of actionListMarginTarget is notificationContentMargin
         // Bubble button should not be shown for the given NotificationEntry
-        val mockNotificationEntry = createMockNotificationEntry(/* showButton= */ false)
+        val mockNotificationEntry = createMockNotificationEntry()
         val mockContainingNotification = createMockContainingNotification(mockNotificationEntry)
         val actionListMarginTarget =
             spy(createLinearLayoutWithBottomMargin(notificationContentMargin))
@@ -223,7 +394,9 @@ class NotificationContentViewTest : SysuiTestCase() {
                 )
             )
             .thenReturn(actionListMarginTarget)
-        view.setContainingNotification(mockContainingNotification)
+        val view = createContentView(isSystemExpanded = false)
+
+        view.setContainingNotification(mockContainingNotification) // maybe not needed
 
         // When: call NotificationContentView.setExpandedChild() to set the expandedChild
         view.expandedChild = mockExpandedChild
@@ -237,7 +410,7 @@ class NotificationContentViewTest : SysuiTestCase() {
     fun setExpandedChild_showBubbleButton_marginTargetBottomMarginShouldChangeToZero() {
         // Given: bottom margin of actionListMarginTarget is notificationContentMargin
         // Bubble button should be shown for the given NotificationEntry
-        val mockNotificationEntry = createMockNotificationEntry(/* showButton= */ true)
+        val mockNotificationEntry = createMockNotificationEntry()
         val mockContainingNotification = createMockContainingNotification(mockNotificationEntry)
         val actionListMarginTarget =
             spy(createLinearLayoutWithBottomMargin(notificationContentMargin))
@@ -248,10 +421,12 @@ class NotificationContentViewTest : SysuiTestCase() {
                 )
             )
             .thenReturn(actionListMarginTarget)
+        val view = createContentView(isSystemExpanded = false)
+
         view.setContainingNotification(mockContainingNotification)
 
         // Given: controller says bubbles are enabled for the user
-        view.setBubblesEnabledForUser(true);
+        view.setBubblesEnabledForUser(true)
 
         // When: call NotificationContentView.setExpandedChild() to set the expandedChild
         view.expandedChild = mockExpandedChild
@@ -263,7 +438,7 @@ class NotificationContentViewTest : SysuiTestCase() {
     @Test
     fun onNotificationUpdated_notShowBubbleButton_marginTargetBottomMarginShouldNotChange() {
         // Given: bottom margin of actionListMarginTarget is notificationContentMargin
-        val mockNotificationEntry = createMockNotificationEntry(/* showButton= */ false)
+        val mockNotificationEntry = createMockNotificationEntry()
         val mockContainingNotification = createMockContainingNotification(mockNotificationEntry)
         val actionListMarginTarget =
             spy(createLinearLayoutWithBottomMargin(notificationContentMargin))
@@ -274,13 +449,15 @@ class NotificationContentViewTest : SysuiTestCase() {
                 )
             )
             .thenReturn(actionListMarginTarget)
+        val view = createContentView(isSystemExpanded = false)
+
         view.setContainingNotification(mockContainingNotification)
         view.expandedChild = mockExpandedChild
         assertEquals(notificationContentMargin, getMarginBottom(actionListMarginTarget))
 
         // When: call NotificationContentView.onNotificationUpdated() to update the
         // NotificationEntry, which should not show bubble button
-        view.onNotificationUpdated(createMockNotificationEntry(/* showButton= */ false))
+        view.onNotificationUpdated(createMockNotificationEntry())
 
         // Then: bottom margin of actionListMarginTarget should not change, still be 20
         assertEquals(notificationContentMargin, getMarginBottom(actionListMarginTarget))
@@ -289,7 +466,7 @@ class NotificationContentViewTest : SysuiTestCase() {
     @Test
     fun onNotificationUpdated_showBubbleButton_marginTargetBottomMarginShouldChangeToZero() {
         // Given: bottom margin of actionListMarginTarget is notificationContentMargin
-        val mockNotificationEntry = createMockNotificationEntry(/* showButton= */ false)
+        val mockNotificationEntry = createMockNotificationEntry()
         val mockContainingNotification = createMockContainingNotification(mockNotificationEntry)
         val actionListMarginTarget =
             spy(createLinearLayoutWithBottomMargin(notificationContentMargin))
@@ -300,19 +477,20 @@ class NotificationContentViewTest : SysuiTestCase() {
                 )
             )
             .thenReturn(actionListMarginTarget)
+        val view = createContentView(isSystemExpanded = false, expandedView = mockExpandedChild)
+
         view.setContainingNotification(mockContainingNotification)
-        view.expandedChild = mockExpandedChild
         assertEquals(notificationContentMargin, getMarginBottom(actionListMarginTarget))
 
         // When: call NotificationContentView.onNotificationUpdated() to update the
         // NotificationEntry, which should show bubble button
-        view.onNotificationUpdated(createMockNotificationEntry(true))
+        view.onNotificationUpdated(createMockNotificationEntry(/*true*/ ))
 
         // Then: no bubble yet
         assertEquals(notificationContentMargin, getMarginBottom(actionListMarginTarget))
 
         // Given: controller says bubbles are enabled for the user
-        view.setBubblesEnabledForUser(true);
+        view.setBubblesEnabledForUser(true)
 
         // Then: bottom margin of actionListMarginTarget should not change, still be 20
         assertEquals(0, getMarginBottom(actionListMarginTarget))
@@ -321,81 +499,63 @@ class NotificationContentViewTest : SysuiTestCase() {
     @Test
     fun onSetAnimationRunning() {
         // Given: contractedWrapper, enpandedWrapper, and headsUpWrapper being set
-        val mockContracted = mock<NotificationViewWrapper>()
-        val mockExpanded = mock<NotificationViewWrapper>()
-        val mockHeadsUp = mock<NotificationViewWrapper>()
-
-        view.setContractedWrapper(mockContracted)
-        view.setExpandedWrapper(mockExpanded)
-        view.setHeadsUpWrapper(mockHeadsUp)
+        val view = createContentView(isSystemExpanded = false)
 
         // When: we set content animation running.
         assertTrue(view.setContentAnimationRunning(true))
 
         // Then: contractedChild, expandedChild, and headsUpChild should have setAnimationsRunning
         // called on them.
-        verify(mockContracted, times(1)).setAnimationsRunning(true)
-        verify(mockExpanded, times(1)).setAnimationsRunning(true)
-        verify(mockHeadsUp, times(1)).setAnimationsRunning(true)
+        verify(view.contractedWrapper, times(1)).setAnimationsRunning(true)
+        verify(view.expandedWrapper, times(1)).setAnimationsRunning(true)
+        verify(view.headsUpWrapper, times(1)).setAnimationsRunning(true)
 
         // When: we set content animation running true _again_.
         assertFalse(view.setContentAnimationRunning(true))
 
         // Then: the children should not have setAnimationRunning called on them again.
         // Verify counts number of calls so far on the object, so these still register as 1.
-        verify(mockContracted, times(1)).setAnimationsRunning(true)
-        verify(mockExpanded, times(1)).setAnimationsRunning(true)
-        verify(mockHeadsUp, times(1)).setAnimationsRunning(true)
+        verify(view.contractedWrapper, times(1)).setAnimationsRunning(true)
+        verify(view.expandedWrapper, times(1)).setAnimationsRunning(true)
+        verify(view.headsUpWrapper, times(1)).setAnimationsRunning(true)
     }
 
     @Test
     fun onSetAnimationStopped() {
         // Given: contractedWrapper, expandedWrapper, and headsUpWrapper being set
-        val mockContracted = mock<NotificationViewWrapper>()
-        val mockExpanded = mock<NotificationViewWrapper>()
-        val mockHeadsUp = mock<NotificationViewWrapper>()
-
-        view.setContractedWrapper(mockContracted)
-        view.setExpandedWrapper(mockExpanded)
-        view.setHeadsUpWrapper(mockHeadsUp)
+        val view = createContentView(isSystemExpanded = false)
 
         // When: we set content animation running.
         assertTrue(view.setContentAnimationRunning(true))
 
         // Then: contractedChild, expandedChild, and headsUpChild should have setAnimationsRunning
         // called on them.
-        verify(mockContracted).setAnimationsRunning(true)
-        verify(mockExpanded).setAnimationsRunning(true)
-        verify(mockHeadsUp).setAnimationsRunning(true)
+        verify(view.contractedWrapper).setAnimationsRunning(true)
+        verify(view.expandedWrapper).setAnimationsRunning(true)
+        verify(view.headsUpWrapper).setAnimationsRunning(true)
 
         // When: we set content animation running false, the state changes, so the function
         // returns true.
         assertTrue(view.setContentAnimationRunning(false))
 
         // Then: the children have their animations stopped.
-        verify(mockContracted).setAnimationsRunning(false)
-        verify(mockExpanded).setAnimationsRunning(false)
-        verify(mockHeadsUp).setAnimationsRunning(false)
+        verify(view.contractedWrapper).setAnimationsRunning(false)
+        verify(view.expandedWrapper).setAnimationsRunning(false)
+        verify(view.headsUpWrapper).setAnimationsRunning(false)
     }
 
     @Test
     fun onSetAnimationInitStopped() {
         // Given: contractedWrapper, expandedWrapper, and headsUpWrapper being set
-        val mockContracted = mock<NotificationViewWrapper>()
-        val mockExpanded = mock<NotificationViewWrapper>()
-        val mockHeadsUp = mock<NotificationViewWrapper>()
-
-        view.setContractedWrapper(mockContracted)
-        view.setExpandedWrapper(mockExpanded)
-        view.setHeadsUpWrapper(mockHeadsUp)
+        val view = createContentView(isSystemExpanded = false)
 
         // When: we try to stop the animations before they've been started.
         assertFalse(view.setContentAnimationRunning(false))
 
         // Then: the children should not have setAnimationRunning called on them again.
-        verify(mockContracted, never()).setAnimationsRunning(false)
-        verify(mockExpanded, never()).setAnimationsRunning(false)
-        verify(mockHeadsUp, never()).setAnimationsRunning(false)
+        verify(view.contractedWrapper, never()).setAnimationsRunning(false)
+        verify(view.expandedWrapper, never()).setAnimationsRunning(false)
+        verify(view.headsUpWrapper, never()).setAnimationsRunning(false)
     }
 
     private fun createMockContainingNotification(notificationEntry: NotificationEntry) =
@@ -405,7 +565,7 @@ class NotificationContentViewTest : SysuiTestCase() {
             whenever(this.bubbleClickListener).thenReturn(View.OnClickListener {})
         }
 
-    private fun createMockNotificationEntry(showButton: Boolean) =
+    private fun createMockNotificationEntry() =
         mock<NotificationEntry>().apply {
             whenever(mPeopleNotificationIdentifier.getPeopleNotificationType(this))
                 .thenReturn(PeopleNotificationIdentifier.TYPE_FULL_PERSON)
@@ -426,10 +586,9 @@ class NotificationContentViewTest : SysuiTestCase() {
     }
 
     private fun createMockExpandedChild(notificationEntry: NotificationEntry) =
-        mock<ExpandableNotificationRow>().apply {
+        spy(createViewWithHeight(expandedHeight)).apply {
             whenever(this.findViewById<ImageView>(R.id.bubble_button)).thenReturn(mock())
             whenever(this.findViewById<View>(R.id.actions_container)).thenReturn(mock())
-            whenever(this.entry).thenReturn(notificationEntry)
             whenever(this.context).thenReturn(mContext)
 
             val resourcesMock: Resources = mock()
@@ -437,6 +596,56 @@ class NotificationContentViewTest : SysuiTestCase() {
             whenever(this.resources).thenReturn(resourcesMock)
         }
 
+    private fun createContentView(
+        isSystemExpanded: Boolean,
+        contractedView: View = createViewWithHeight(contractedHeight),
+        expandedView: View = createViewWithHeight(expandedHeight),
+        headsUpView: View = createViewWithHeight(contractedHeight),
+        row: ExpandableNotificationRow = this.row
+    ): NotificationContentView {
+        val height = if (isSystemExpanded) expandedHeight else contractedHeight
+        doReturn(height).whenever(row).intrinsicHeight
+
+        return spy(NotificationContentView(mContext, /* attrs= */ null))
+            .apply {
+                initialize(mPeopleNotificationIdentifier, mock(), mock(), mock(), mock())
+                setContainingNotification(row)
+                setHeights(
+                    /* smallHeight= */ contractedHeight,
+                    /* headsUpMaxHeight= */ contractedHeight,
+                    /* maxHeight= */ expandedHeight
+                )
+                contractedChild = contractedView
+                expandedChild = expandedView
+                headsUpChild = headsUpView
+                contractedWrapper = spy(contractedWrapper)
+                expandedWrapper = spy(expandedWrapper)
+                headsUpWrapper = spy(headsUpWrapper)
+
+                if (isSystemExpanded) {
+                    contentHeight = expandedHeight
+                }
+            }
+            .also { contentView ->
+                fakeParent.addView(contentView)
+                contentView.mockRequestLayout()
+            }
+    }
+
+    private fun createViewWithHeight(height: Int) =
+        View(mContext, /* attrs= */ null).apply { minimumHeight = height }
+
     private fun getMarginBottom(layout: LinearLayout): Int =
         (layout.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
+
+    private fun px(@DimenRes id: Int): Int = testableResources.resources.getDimensionPixelSize(id)
+}
+
+private fun NotificationContentView.mockRequestLayout() {
+    measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+    layout(0, 0, measuredWidth, measuredHeight)
+}
+
+private fun NotificationContentView.clearInvocations() {
+    Mockito.clearInvocations(contractedWrapper, expandedWrapper, headsUpWrapper)
 }

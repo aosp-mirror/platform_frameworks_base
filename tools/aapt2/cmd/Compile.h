@@ -44,6 +44,7 @@ struct CompileOptions {
   // See comments on aapt::ResourceParserOptions.
   bool preserve_visibility_of_styleables = false;
   bool verbose = false;
+  std::optional<std::string> product_;
 };
 
 /** Parses flags and compiles resources to be used in linking.  */
@@ -87,6 +88,10 @@ class CompileCommand : public Command {
                     "Sets the ratio of resources to generate grammatical gender strings for. The "
                     "ratio has to be a float number between 0 and 1.",
                     &options_.pseudo_localize_gender_ratio);
+    AddOptionalFlag("--filter-product",
+                    "Leave only resources specific to the given product. All "
+                    "other resources (including defaults) are removed.",
+                    &options_.product_);
   }
 
   int Action(const std::vector<std::string>& args) override;

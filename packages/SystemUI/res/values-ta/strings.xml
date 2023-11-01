@@ -76,8 +76,7 @@
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"பணிக் கணக்கில் ஸ்கிரீன்ஷாட் சேமிக்கப்படுகிறது…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ஸ்கிரீன்ஷாட் சேமிக்கப்பட்டது"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ஸ்கிரீன் ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
-    <!-- no translation found for screenshot_failed_external_display_indication (6555673132061101936) -->
-    <skip />
+    <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"வெளித் திரை"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ஸ்கிரீன்ஷாட் சேமிக்கப்படுவதற்கு முன்பு சாதனம் அன்லாக் செய்யப்பட வேண்டும்"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ஸ்கிரீன் ஷாட்டை மீண்டும் எடுக்க முயலவும்"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ஸ்கிரீன்ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
@@ -197,7 +196,8 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"முகம் காட்டித் திறத்தல் அம்சம் கிடைக்கவில்லை"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"புளூடூத் இணைக்கப்பட்டது."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"புளூடூத் சாதன ஐகான்"</string>
-    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"புளூடூத் சாதன அமைப்புகளின் பற்சக்கர ஐகான்"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"பேட்டரி சதவீதம் தெரியவில்லை."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>க்கு இணைக்கப்பட்டது."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது."</string>
@@ -250,7 +250,8 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"புளூடூத்"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"இணைக்கப்பட்ட சாதனங்கள் இல்லை"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"இணைக்க ஒரு சாதனத்தைத் தட்டுங்கள்"</string>
+    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
+    <skip />
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"புதிய சாதனத்தை இணைத்தல்"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"அனைத்தையும் காட்டு"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"புளூடூத்தைப் பயன்படுத்துதல்"</string>
@@ -282,8 +283,7 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"அனுப்புகிறது"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"பெயரிடப்படாத சாதனம்"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"சாதனங்கள் இல்லை"</string>
-    <!-- no translation found for quick_settings_cast_no_network (3863016850468559522) -->
-    <skip />
+    <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"வைஃபை அல்லது ஈதர்நெட் இணைப்பு இல்லை"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ஒளிர்வு"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"கலர் இன்வெர்ஷன்"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"கலர் கரெக்‌ஷன்"</string>
@@ -1132,7 +1132,6 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"கேமரா முடக்கப்பட்டுள்ளது"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"மைக் முடக்கப்பட்டுள்ளது"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"கேமராவும் மைக்கும் ஆஃப் செய்யப்பட்டுள்ளன"</string>
-    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant கேட்டுக்கொண்டிருக்கிறது"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# அறிவிப்பு}other{# அறிவிப்புகள்}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"குறிப்பெடுத்தல்"</string>
@@ -1183,12 +1182,14 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"கேமராவும் மைக்ரோஃபோனும் தடுக்கப்பட்டுள்ளன"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"மைக்ரோஃபோன் தடுக்கப்பட்டுள்ளது"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"முன்னுரிமைப் பயன்முறை இயக்கத்தில் உள்ளது"</string>
-    <string name="assistant_attention_content_description" msgid="6830215897604642875">"அசிஸ்டண்ட்டின் கவனம் இயக்கத்தில் உள்ளது"</string>
+    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
+    <skip />
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"குறிப்பு எடுப்பதற்கான இயல்புநிலை ஆப்ஸை அமைப்புகளில் அமையுங்கள்"</string>
     <string name="install_app" msgid="5066668100199613936">"ஆப்ஸை நிறுவுங்கள்"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"வெளிப்புறக் காட்சிக்கு மிரர் செய்யவா?"</string>
     <string name="mirror_display" msgid="2515262008898122928">"டிஸ்பிளேயை மிரர் செய்"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"வேண்டாம்"</string>
+    <string name="connected_display_icon_desc" msgid="6373560639989971997">"டிஸ்ப்ளே இணைக்கப்பட்டது"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"மைக்ரோஃபோனும் கேமராவும்"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"சமீபத்திய ஆப்ஸ் பயன்பாடு"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"சமீபத்திய அணுகலைக் காட்டு"</string>

@@ -525,11 +525,11 @@ interface IWindowManager
         out InputChannel inputChannel);
 
     /**
-     * Destroy an input consumer by name and display id.
+     * Destroy an input consumer by token and display id.
      * This method will also dispose the input channels associated with that InputConsumer.
      */
     @UnsupportedAppUsage
-    boolean destroyInputConsumer(String name, int displayId);
+    boolean destroyInputConsumer(IBinder token, int displayId);
 
     /**
      * Return the touch region for the current IME window, or an empty region if there is none.

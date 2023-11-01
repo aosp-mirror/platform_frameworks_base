@@ -76,8 +76,7 @@
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Guardando captura en el perfil de trabajo…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Se ha guardado la captura de pantalla"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"No se ha podido guardar la captura de pantalla"</string>
-    <!-- no translation found for screenshot_failed_external_display_indication (6555673132061101936) -->
-    <skip />
+    <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Pantalla externa"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"El dispositivo debe desbloquearse para que se pueda guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Vuelve a intentar hacer la captura de pantalla"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"No se puede guardar la captura de pantalla"</string>
@@ -197,7 +196,8 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Desbloqueo facial no disponible"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth conectado"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Icono de dispositivo Bluetooth"</string>
-    <string name="accessibility_bluetooth_device_settings_gear" msgid="4188853273831773436">"Rueda dentada de ajustes del dispositivo Bluetooth"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentaje de batería desconocido."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Conectado a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Conectado a <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -250,7 +250,8 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"No molestar"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"No hay dispositivos vinculados disponibles"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="6869579539763980182">"Toca un dispositivo para conectarlo"</string>
+    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
+    <skip />
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Empareja un nuevo dispositivo"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Ver todos"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Usar Bluetooth"</string>
@@ -282,8 +283,7 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"Enviando"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sin nombre"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
-    <!-- no translation found for quick_settings_cast_no_network (3863016850468559522) -->
-    <skip />
+    <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"Sin conexión Wi-Fi ni Ethernet"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corrección de color"</string>
@@ -1132,7 +1132,6 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"La cámara está desactivada"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"El micrófono está desactivado"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"La cámara y el micrófono están desactivados"</string>
-    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"El Asistente está escuchando"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}many{# notificaciones}other{# notificaciones}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"Toma de notas"</string>
@@ -1183,12 +1182,14 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Cámara y micrófono bloqueados"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Micrófono bloqueado"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Modo Prioridad activado"</string>
-    <string name="assistant_attention_content_description" msgid="6830215897604642875">"El Asistente está activado"</string>
+    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
+    <skip />
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Configura la aplicación de notas predeterminada en Ajustes"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalar aplicación"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"¿Replicar en pantalla externa?"</string>
     <string name="mirror_display" msgid="2515262008898122928">"Replicar pantalla"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Cerrar"</string>
+    <string name="connected_display_icon_desc" msgid="6373560639989971997">"Pantalla conectada"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Micrófono y cámara"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Uso reciente en aplicaciones"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Ver acceso reciente"</string>

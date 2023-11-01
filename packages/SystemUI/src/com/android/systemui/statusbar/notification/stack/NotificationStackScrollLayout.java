@@ -4963,7 +4963,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // Avoid Flicking during clear all
         // when the shade finishes closing, onExpansionStopped will call
         // resetScrollPosition to setOwnScrollY to 0
-        if (mAmbientState.isClosing()) {
+        if (mAmbientState.isClosing() || mAmbientState.isClearAllInProgress()) {
             return;
         }
 

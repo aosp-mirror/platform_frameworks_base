@@ -386,7 +386,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
         // two gestures are waiting to be processed at the moment, skip any further user touches
         if (mCurrentTracker.isFinished() && mQueuedTracker.isFinished()) {
-            Log.d(TAG, "Ignoring MotionEvent because two gestures are already being queued.");
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW,
+                    "Ignoring MotionEvent because two gestures are already being queued.");
             return;
         }
 
@@ -420,7 +421,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         } else if (mQueuedTracker.isInInitialState()) {
             touchTracker = mQueuedTracker;
         } else {
-            Log.w(TAG, "Cannot start tracking new gesture with neither tracker in initial state.");
+            ProtoLog.w(WM_SHELL_BACK_PREVIEW,
+                    "Cannot start tracking new gesture with neither tracker in initial state.");
             return;
         }
         touchTracker.setGestureStartLocation(touchX, touchY, swipeEdge);
@@ -449,7 +451,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull TouchTracker touchTracker) {
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Received backNavigationInfo:%s", backNavigationInfo);
         if (backNavigationInfo == null) {
-            Log.e(TAG, "Received BackNavigationInfo is null.");
+            ProtoLog.e(WM_SHELL_BACK_PREVIEW, "Received BackNavigationInfo is null.");
             return;
         }
         final int backType = backNavigationInfo.getType();
@@ -475,7 +477,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private void injectBackKey() {
-        Log.d(TAG, "injectBackKey");
+        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "injectBackKey");
         sendBackEvent(KeyEvent.ACTION_DOWN);
         sendBackEvent(KeyEvent.ACTION_UP);
     }
@@ -491,7 +493,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ev.setDisplayId(mContext.getDisplay().getDisplayId());
         if (!mContext.getSystemService(InputManager.class)
                 .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC)) {
-            Log.e(TAG, "Inject input event fail");
+            ProtoLog.e(WM_SHELL_BACK_PREVIEW, "Inject input event fail");
         }
     }
 
@@ -669,7 +671,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         TouchTracker activeTouchTracker = getActiveTracker();
         if (!mBackGestureStarted || activeTouchTracker == null) {
             // This can happen when an unfinished gesture has been reset in resetTouchTracker
-            Log.d(TAG, "onGestureFinished called while no gesture is started");
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW,
+                    "onGestureFinished called while no gesture is started");
             return;
         }
         boolean triggerBack = activeTouchTracker.getTriggerBack();
@@ -687,8 +690,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             // No focus window found or core are running recents animation, inject back key as
             // legacy behavior, or new back gesture was started while previous has not finished yet
             if (!mQueuedTracker.isInInitialState()) {
-                Log.e(TAG, "mBackNavigationInfo is null AND there is another back animation in "
-                        + "progress");
+                ProtoLog.e(WM_SHELL_BACK_PREVIEW, "mBackNavigationInfo is null AND there is "
+                        + "another back animation in progress");
             }
             mCurrentTracker.reset();
             if (triggerBack) {
@@ -702,7 +705,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         // Simply trigger and finish back navigation when no animator defined.
         if (!shouldDispatchToAnimator()
                 || mShellBackAnimationRegistry.isAnimationCancelledOrNull(backType)) {
-            Log.d(TAG, "Trigger back without dispatching to animator.");
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Trigger back without dispatching to animator.");
             invokeOrCancelBack(mCurrentTracker);
             mCurrentTracker.reset();
             return;
@@ -748,13 +751,14 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
         mPostCommitAnimationInProgress = false;
 
-        Log.d(TAG, "BackAnimationController: onBackAnimationFinished()");
+        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: onBackAnimationFinished()");
 
         if (mCurrentTracker.isActive() || mCurrentTracker.isFinished()) {
             // Trigger the real back.
             invokeOrCancelBack(mCurrentTracker);
         } else {
-            Log.d(TAG, "mCurrentBackGestureInfo was null when back animation finished");
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW,
+                    "mCurrentBackGestureInfo was null when back animation finished");
         }
         resetTouchTracker();
     }
@@ -773,23 +777,25 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 mBackGestureStarted = false;
                 dispatchOnBackCancelled(mActiveCallback);
                 finishBackNavigation(false);
-                Log.d(TAG, "resetTouchTracker -> reset an unfinished gesture");
+                ProtoLog.d(WM_SHELL_BACK_PREVIEW,
+                        "resetTouchTracker -> reset an unfinished gesture");
             } else {
-                Log.d(TAG, "resetTouchTracker -> no queued gesture");
+                ProtoLog.d(WM_SHELL_BACK_PREVIEW, "resetTouchTracker -> no queued gesture");
             }
             return;
         }
 
         if (mCurrentTracker.isFinished() && mCurrentTracker.getTriggerBack()) {
-            Log.d(TAG, "resetTouchTracker -> start queued back navigation AND post commit "
-                    + "animation");
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "resetTouchTracker -> start queued back navigation "
+                    + "AND post commit animation");
             injectBackKey();
             finishBackNavigation(true);
             mCurrentTracker.reset();
         } else if (!mCurrentTracker.isFinished()) {
-            Log.d(TAG, "resetTouchTracker -> queued gesture not finished; do nothing");
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW,
+                    "resetTouchTracker -> queued gesture not finished; do nothing");
         } else {
-            Log.d(TAG, "resetTouchTracker -> reset queued gesture");
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "resetTouchTracker -> reset queued gesture");
             mCurrentTracker.reset();
         }
     }
@@ -821,7 +827,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         mShellExecutor.execute(
                                 () -> {
                                     if (mBackNavigationInfo == null) {
-                                        Log.e(TAG, "Lack of navigation info to start animation.");
+                                        ProtoLog.e(WM_SHELL_BACK_PREVIEW,
+                                                "Lack of navigation info to start animation.");
                                         return;
                                     }
                                     final BackAnimationRunner runner =

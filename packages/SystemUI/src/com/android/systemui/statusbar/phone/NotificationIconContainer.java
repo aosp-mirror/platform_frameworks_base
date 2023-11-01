@@ -701,13 +701,13 @@ public class NotificationIconContainer extends ViewGroup {
     }
 
     @Deprecated
-    public void showIconIsolated(StatusBarIconView icon, boolean animated) {
+    public void showIconIsolatedLegacy(StatusBarIconView icon, boolean animated) {
         NotificationIconContainerRefactor.assertInLegacyMode();
         if (animated) {
-            showIconIsolatedAnimated(icon, null);
-        } else {
-            showIconIsolated(icon);
+            mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
         }
+        mIsolatedIcon = icon;
+        updateState();
     }
 
     public void showIconIsolatedAnimated(StatusBarIconView icon,

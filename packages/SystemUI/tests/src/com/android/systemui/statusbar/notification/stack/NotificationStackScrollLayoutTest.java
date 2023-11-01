@@ -786,6 +786,25 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetOwnScrollY_clearAllInProgress_scrollYDoesNotChange() {
+        // Given: clear all is in progress, scrollY is 0
+        mAmbientState.setScrollY(0);
+        assertEquals(0, mAmbientState.getScrollY());
+        mAmbientState.setClearAllInProgress(true);
+
+        // When: call NotificationStackScrollLayout.setOwnScrollY to set scrollY to 1
+        mStackScroller.setOwnScrollY(1);
+
+        // Then: scrollY should not change, it should still be 0
+        assertEquals(0, mAmbientState.getScrollY());
+
+        // Reset scrollY and mAmbientState.mIsClosing to avoid interfering with other tests
+        mAmbientState.setClearAllInProgress(false);
+        mStackScroller.setOwnScrollY(0);
+        assertEquals(0, mAmbientState.getScrollY());
+    }
+
+    @Test
     public void onShadeFlingClosingEnd_scrollYShouldBeSetToZero() {
         // Given: mAmbientState.mIsClosing is set to be true
         // mIsExpanded is set to be false

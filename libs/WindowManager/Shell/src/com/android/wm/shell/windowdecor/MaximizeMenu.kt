@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.SurfaceControlViewHost
+import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
@@ -150,5 +151,29 @@ class MaximizeMenu(
         maximizeMenuView.requireViewById<Button>(
                 R.id.maximize_menu_snap_left_button
         ).setOnClickListener(onClickListener)
+    }
+
+    /**
+     * A valid menu input is one of the following:
+     * An input that happens in the menu views.
+     * Any input before the views have been laid out.
+     *
+     * @param inputPoint the input to compare against.
+     */
+    fun isValidMenuInput(inputPoint: PointF): Boolean {
+        val menuView = maximizeMenu?.mWindowViewHost?.view ?: return true
+        return !viewsLaidOut() || pointInView(menuView, inputPoint.x - menuPosition.x,
+                inputPoint.y - menuPosition.y)
+    }
+
+    private fun pointInView(v: View, x: Float, y: Float): Boolean {
+        return v.left <= x && v.right >= x && v.top <= y && v.bottom >= y
+    }
+
+    /**
+     * Check if the views for maximize menu can be seen.
+     */
+    private fun viewsLaidOut(): Boolean {
+        return maximizeMenu?.mWindowViewHost?.view?.isLaidOut ?: false
     }
 }

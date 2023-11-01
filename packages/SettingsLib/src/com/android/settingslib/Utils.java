@@ -607,6 +607,8 @@ public class Utils {
                     userType = UserIconInfo.TYPE_CLONED;
                 } else if (ui.isManagedProfile()) {
                     userType = UserIconInfo.TYPE_WORK;
+                } else if (ui.isPrivateProfile()) {
+                    userType = UserIconInfo.TYPE_PRIVATE;
                 }
             }
         } catch (Exception e) {

@@ -26,6 +26,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.graphics.PointF;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -39,6 +42,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.settings.SecureSettings;
@@ -70,6 +74,10 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Mock
     private AccessibilityManager mAccessibilityManager;
 
@@ -85,7 +93,8 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         mViewPropertyAnimator = spy(mMenuView.animate());
         doReturn(mViewPropertyAnimator).when(mMenuView).animate();
 
-        mMenuAnimationController = new TestMenuAnimationController(mMenuView);
+        mMenuAnimationController = new TestMenuAnimationController(
+                mMenuView, stubMenuViewAppearance);
         mLastIsMoveToTucked = Prefs.getBoolean(mContext,
                 Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED, /* defaultValue= */ false);
         mEndListenerCaptor = ArgumentCaptor.forClass(DynamicAnimation.OnAnimationEndListener.class);
@@ -223,6 +232,24 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         verifyZeroInteractions(onSpringAnimationsEndCallback);
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FLOATING_MENU_ANIMATED_TUCK)
+    public void tuck_animates() {
+        mMenuAnimationController.cancelAnimations();
+        mMenuAnimationController.moveToEdgeAndHide();
+        assertThat(mMenuAnimationController.getAnimation(
+                DynamicAnimation.TRANSLATION_X).isRunning()).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FLOATING_MENU_ANIMATED_TUCK)
+    public void untuck_animates() {
+        mMenuAnimationController.cancelAnimations();
+        mMenuAnimationController.moveOutEdgeAndShow();
+        assertThat(mMenuAnimationController.getAnimation(
+                DynamicAnimation.TRANSLATION_X).isRunning()).isTrue();
+    }
+
     private void setupAndRunSpringAnimations() {
         final float stiffness = 700f;
         final float dampingRatio = 0.85f;
@@ -251,8 +278,8 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
      * Wrapper class for testing.
      */
     private static class TestMenuAnimationController extends MenuAnimationController {
-        TestMenuAnimationController(MenuView menuView) {
-            super(menuView);
+        TestMenuAnimationController(MenuView menuView, MenuViewAppearance menuViewAppearance) {
+            super(menuView, menuViewAppearance);
         }
 
         @Override

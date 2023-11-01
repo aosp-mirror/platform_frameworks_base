@@ -160,7 +160,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
             if (dc == null) {
                 return;
             }
-            dc.getInputMonitor().destroyInputConsumer(mName);
+            dc.getInputMonitor().destroyInputConsumer(mToken);
             unlinkFromDeathRecipient();
         }
     }

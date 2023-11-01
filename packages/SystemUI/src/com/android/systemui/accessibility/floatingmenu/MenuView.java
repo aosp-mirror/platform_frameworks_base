@@ -71,13 +71,14 @@ class MenuView extends FrameLayout implements
 
     private final MenuAnimationController mMenuAnimationController;
     private OnTargetFeaturesChangeListener mFeaturesChangeListener;
+    private OnMoveToTuckedListener mMoveToTuckedListener;
 
     MenuView(Context context, MenuViewModel menuViewModel, MenuViewAppearance menuViewAppearance) {
         super(context);
 
         mMenuViewModel = menuViewModel;
         mMenuViewAppearance = menuViewAppearance;
-        mMenuAnimationController = new MenuAnimationController(this);
+        mMenuAnimationController = new MenuAnimationController(this, menuViewAppearance);
         mAdapter = new AccessibilityTargetAdapter(mTargetFeatures);
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
@@ -138,6 +139,10 @@ class MenuView extends FrameLayout implements
         mFeaturesChangeListener = listener;
     }
 
+    void setMoveToTuckedListener(OnMoveToTuckedListener listener) {
+        mMoveToTuckedListener = listener;
+    }
+
     void addOnItemTouchListenerToList(RecyclerView.OnItemTouchListener listener) {
         mTargetFeaturesView.addOnItemTouchListener(listener);
     }
@@ -179,9 +184,17 @@ class MenuView extends FrameLayout implements
                 insets[3]);
 
         final GradientDrawable gradientDrawable = getContainerViewGradient();
-        gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuRadii());
         gradientDrawable.setStroke(mMenuViewAppearance.getMenuStrokeWidth(),
                 mMenuViewAppearance.getMenuStrokeColor());
+        if (Flags.floatingMenuRadiiAnimation()) {
+            mMenuAnimationController.startRadiiAnimation(mMenuViewAppearance.getMenuRadii());
+        } else {
+            gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuRadii());
+        }
+    }
+
+    void setRadii(float[] radii) {
+        getContainerViewGradient().setCornerRadii(radii);
     }
 
     private void onMoveToTucked(boolean isMoveToTucked) {
@@ -307,8 +320,11 @@ class MenuView extends FrameLayout implements
     void updateMenuMoveToTucked(boolean isMoveToTucked) {
         mIsMoveToTucked = isMoveToTucked;
         mMenuViewModel.updateMenuMoveToTucked(isMoveToTucked);
+        if (mMoveToTuckedListener != null) {
+            mMoveToTuckedListener.onMoveToTuckedChanged(isMoveToTucked);
+        }
 
-        if (Flags.floatingMenuOverlapsNavBarsFlag()) {
+        if (Flags.floatingMenuOverlapsNavBarsFlag() && !Flags.floatingMenuAnimatedTuck()) {
             if (isMoveToTucked) {
                 final float halfWidth = getMenuWidth() / 2.0f;
                 final boolean isOnLeftSide = mMenuAnimationController.isOnLeftSide();
@@ -383,8 +399,13 @@ class MenuView extends FrameLayout implements
         getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
                 insets[3]);
 
-        final GradientDrawable gradientDrawable = getContainerViewGradient();
-        gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuMovingStateRadii());
+        if (Flags.floatingMenuRadiiAnimation()) {
+            mMenuAnimationController.startRadiiAnimation(
+                    mMenuViewAppearance.getMenuMovingStateRadii());
+        } else {
+            final GradientDrawable gradientDrawable = getContainerViewGradient();
+            gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuMovingStateRadii());
+        }
     }
 
     void onBoundsInParentChanged(int newLeft, int newTop) {
@@ -427,5 +448,12 @@ class MenuView extends FrameLayout implements
          * @param newTargetFeatures the list related to the current accessibility features.
          */
         void onChange(List<AccessibilityTarget> newTargetFeatures);
+    }
+
+    /**
+     * Interface containing a callback for when MoveToTucked changes.
+     */
+    interface OnMoveToTuckedListener {
+        void onMoveToTuckedChanged(boolean moveToTucked);
     }
 }

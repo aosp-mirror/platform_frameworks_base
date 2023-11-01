@@ -104,7 +104,6 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.IRemoteViewsFactory;
 
@@ -130,7 +129,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -225,10 +223,8 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int BITMAP_REFLECTION_ACTION_TAG = 12;
     private static final int TEXT_VIEW_SIZE_ACTION_TAG = 13;
     private static final int VIEW_PADDING_ACTION_TAG = 14;
-    private static final int SET_REMOTE_VIEW_ADAPTER_LIST_TAG = 15;
     private static final int SET_REMOTE_INPUTS_ACTION_TAG = 18;
     private static final int LAYOUT_PARAM_ACTION_TAG = 19;
-    private static final int OVERRIDE_TEXT_COLORS_TAG = 20;
     private static final int SET_RIPPLE_DRAWABLE_COLOR_TAG = 21;
     private static final int SET_INT_TAG_TAG = 22;
     private static final int REMOVE_FROM_PARENT_ACTION_TAG = 23;
@@ -494,17 +490,6 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Override all text colors in this layout and replace them by the given text color.
-     *
-     * @param textColor The color to use.
-     *
-     * @hide
-     */
-    public void overrideTextColors(int textColor) {
-        addAction(new OverrideTextColorsAction(textColor));
-    }
-
-    /**
      * Sets an integer tag to the view.
      *
      * @hide
@@ -640,7 +625,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * SUBCLASSES MUST BE IMMUTABLE SO CLONE WORKS!!!!!
      */
-    private abstract static class Action implements Parcelable {
+    private abstract static class Action {
         @IdRes
         @UnsupportedAppUsage
         int mViewId;
@@ -651,10 +636,6 @@ public class RemoteViews implements Parcelable, Filter {
         public static final int MERGE_REPLACE = 0;
         public static final int MERGE_APPEND = 1;
         public static final int MERGE_IGNORE = 2;
-
-        public int describeContents() {
-            return 0;
-        }
 
         public void setHierarchyRootData(HierarchyRootData root) {
             // Do nothing
@@ -689,6 +670,8 @@ public class RemoteViews implements Parcelable, Filter {
         public void visitUris(@NonNull Consumer<Uri> visitor) {
             // Nothing to visit by default.
         }
+
+        public abstract void writeToParcel(Parcel dest, int flags);
     }
 
     /**
@@ -1017,86 +1000,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_PENDING_INTENT_TEMPLATE_TAG;
-        }
-    }
-
-    private static class SetRemoteViewsAdapterList extends Action {
-        int mViewTypeCount;
-        ArrayList<RemoteViews> mList;
-
-        public SetRemoteViewsAdapterList(@IdRes int id, ArrayList<RemoteViews> list,
-                int viewTypeCount) {
-            this.mViewId = id;
-            this.mList = list;
-            this.mViewTypeCount = viewTypeCount;
-        }
-
-        public SetRemoteViewsAdapterList(Parcel parcel) {
-            mViewId = parcel.readInt();
-            mViewTypeCount = parcel.readInt();
-            mList = parcel.createTypedArrayList(RemoteViews.CREATOR);
-        }
-
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mViewId);
-            dest.writeInt(mViewTypeCount);
-            dest.writeTypedList(mList, flags);
-        }
-
-        @Override
-        public void apply(View root, ViewGroup rootParent, ActionApplyParams params) {
-            final View target = root.findViewById(mViewId);
-            if (target == null) return;
-
-            // Ensure that we are applying to an AppWidget root
-            if (!(rootParent instanceof AppWidgetHostView)) {
-                Log.e(LOG_TAG, "SetRemoteViewsAdapterIntent action can only be used for " +
-                        "AppWidgets (root id: " + mViewId + ")");
-                return;
-            }
-            // Ensure that we are calling setRemoteAdapter on an AdapterView that supports it
-            if (!(target instanceof AbsListView) && !(target instanceof AdapterViewAnimator)) {
-                Log.e(LOG_TAG, "Cannot setRemoteViewsAdapter on a view which is not " +
-                        "an AbsListView or AdapterViewAnimator (id: " + mViewId + ")");
-                return;
-            }
-
-            if (target instanceof AbsListView) {
-                AbsListView v = (AbsListView) target;
-                Adapter a = v.getAdapter();
-                if (a instanceof RemoteViewsListAdapter && mViewTypeCount <= a.getViewTypeCount()) {
-                    ((RemoteViewsListAdapter) a).setViewsList(mList);
-                } else {
-                    v.setAdapter(new RemoteViewsListAdapter(v.getContext(), mList, mViewTypeCount,
-                            params.colorResources));
-                }
-            } else if (target instanceof AdapterViewAnimator) {
-                AdapterViewAnimator v = (AdapterViewAnimator) target;
-                Adapter a = v.getAdapter();
-                if (a instanceof RemoteViewsListAdapter && mViewTypeCount <= a.getViewTypeCount()) {
-                    ((RemoteViewsListAdapter) a).setViewsList(mList);
-                } else {
-                    v.setAdapter(new RemoteViewsListAdapter(v.getContext(), mList, mViewTypeCount,
-                            params.colorResources));
-                }
-            }
-        }
-
-        @Override
-        public int getActionTag() {
-            return SET_REMOTE_VIEW_ADAPTER_LIST_TAG;
-        }
-
-        @Override
-        public String getUniqueKey() {
-            return (SET_REMOTE_ADAPTER_TAG + "_" + mViewId);
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            for (RemoteViews remoteViews : mList) {
-                remoteViews.visitUris(visitor);
-            }
         }
     }
 
@@ -3491,51 +3394,6 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    /**
-     * Helper action to override all textViewColors
-     */
-    private static class OverrideTextColorsAction extends Action {
-        private final int mTextColor;
-
-        public OverrideTextColorsAction(int textColor) {
-            this.mTextColor = textColor;
-        }
-
-        public OverrideTextColorsAction(Parcel parcel) {
-            mTextColor = parcel.readInt();
-        }
-
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mTextColor);
-        }
-
-        @Override
-        public void apply(View root, ViewGroup rootParent, ActionApplyParams params) {
-            // Let's traverse the viewtree and override all textColors!
-            Stack<View> viewsToProcess = new Stack<>();
-            viewsToProcess.add(root);
-            while (!viewsToProcess.isEmpty()) {
-                View v = viewsToProcess.pop();
-                if (v instanceof TextView) {
-                    TextView textView = (TextView) v;
-                    textView.setText(ContrastColorUtil.clearColorSpans(textView.getText()));
-                    textView.setTextColor(mTextColor);
-                }
-                if (v instanceof ViewGroup) {
-                    ViewGroup viewGroup = (ViewGroup) v;
-                    for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                        viewsToProcess.push(viewGroup.getChildAt(i));
-                    }
-                }
-            }
-        }
-
-        @Override
-        public int getActionTag() {
-            return OVERRIDE_TEXT_COLORS_TAG;
-        }
-    }
-
     private static class SetIntTagAction extends Action {
         @IdRes private final int mViewId;
         @IdRes private final int mKey;
@@ -4156,14 +4014,10 @@ public class RemoteViews implements Parcelable, Filter {
                 return new ViewPaddingAction(parcel);
             case BITMAP_REFLECTION_ACTION_TAG:
                 return new BitmapReflectionAction(parcel);
-            case SET_REMOTE_VIEW_ADAPTER_LIST_TAG:
-                return new SetRemoteViewsAdapterList(parcel);
             case SET_REMOTE_INPUTS_ACTION_TAG:
                 return new SetRemoteInputsAction(parcel);
             case LAYOUT_PARAM_ACTION_TAG:
                 return new LayoutParamAction(parcel);
-            case OVERRIDE_TEXT_COLORS_TAG:
-                return new OverrideTextColorsAction(parcel);
             case SET_RIPPLE_DRAWABLE_COLOR_TAG:
                 return new SetRippleDrawableColor(parcel);
             case SET_INT_TAG_TAG:
@@ -4910,7 +4764,11 @@ public class RemoteViews implements Parcelable, Filter {
     @Deprecated
     public void setRemoteAdapter(@IdRes int viewId, ArrayList<RemoteViews> list,
             int viewTypeCount) {
-        addAction(new SetRemoteViewsAdapterList(viewId, list, viewTypeCount));
+        RemoteCollectionItems.Builder b = new RemoteCollectionItems.Builder();
+        for (int i = 0; i < list.size(); i++) {
+            b.addItem(i, list.get(i));
+        }
+        setRemoteAdapter(viewId, b.setViewTypeCount(viewTypeCount).build());
     }
 
     /**

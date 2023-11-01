@@ -241,9 +241,13 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             throws RemoteException {
         enableWindowMagnificationWithoutAnimation();
 
+        // Wait for Rects updated.
+        waitForIdleSync();
+        View mirrorView = mWindowManager.getAttachedView();
         final float targetScale = 1.0f;
-        final float targetCenterX = DEFAULT_CENTER_X + 100;
-        final float targetCenterY = DEFAULT_CENTER_Y + 100;
+        // Move the magnifier to the top left corner, within the boundary
+        final float targetCenterX = mirrorView.getWidth() / 2.0f;
+        final float targetCenterY = mirrorView.getHeight() / 2.0f;
 
         Mockito.reset(mSpyController);
         mInstrumentation.runOnMainSync(() -> {

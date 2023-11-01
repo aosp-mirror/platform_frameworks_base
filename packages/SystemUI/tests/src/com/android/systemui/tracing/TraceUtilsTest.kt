@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.util
+package com.android.systemui.tracing
 
 import android.os.Handler
 import android.os.Looper
@@ -76,7 +76,7 @@ class TraceUtilsTest : SysuiTestCase() {
     @Test
     fun testLongTraceSection_doesNotThrow_whenUsingHelper() {
         traceSection(SECTION_NAME_THATS_TOO_LONG) {
-            Log.v(TAG, "com.android.systemui.util.traceSection() block.")
+            Log.v(TAG, "com.android.systemui.tracing.traceSection() block.")
         }
     }
 

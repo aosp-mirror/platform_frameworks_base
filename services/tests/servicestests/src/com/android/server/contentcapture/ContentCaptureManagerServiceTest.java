@@ -662,7 +662,7 @@ public class ContentCaptureManagerServiceTest {
 
         @Override
         protected RemoteContentProtectionService createRemoteContentProtectionService(
-                @NonNull ComponentName componentName) {
+                @NonNull ComponentName componentName, long autoDisconnectTimeoutMs) {
             mRemoteContentProtectionServicesCreated++;
             return mMockRemoteContentProtectionService;
         }

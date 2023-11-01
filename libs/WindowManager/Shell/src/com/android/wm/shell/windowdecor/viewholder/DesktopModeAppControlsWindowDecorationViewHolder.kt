@@ -41,6 +41,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         openMenuButton.setOnTouchListener(onCaptionTouchListener)
         closeWindowButton.setOnClickListener(onCaptionButtonClickListener)
         maximizeWindowButton.setOnClickListener(onCaptionButtonClickListener)
+        maximizeWindowButton.setOnTouchListener(onCaptionTouchListener)
         maximizeWindowButton.onLongClickListener = onLongClickListener
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         appNameTextView.text = appName

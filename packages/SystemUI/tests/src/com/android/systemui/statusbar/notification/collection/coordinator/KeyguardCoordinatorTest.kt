@@ -28,8 +28,6 @@ import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
@@ -51,8 +49,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
-import java.util.function.Consumer
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -66,6 +62,8 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import java.util.function.Consumer
+import kotlin.time.Duration.Companion.seconds
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -131,8 +129,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
             collectionListener.onEntryAdded(fakeEntry)
 
             // WHEN: The device transitions to AOD
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(to = KeyguardState.AOD, transitionState = TransitionState.STARTED),
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.AOD,
+                this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -147,8 +147,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         keyguardRepository.setKeyguardShowing(false)
         whenever(statusBarStateController.isExpanded).thenReturn(false)
         runKeyguardCoordinatorTest {
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    this.testScheduler,
             )
 
             // WHEN: A notification is posted
@@ -161,8 +163,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
             // WHEN: The keyguard is now showing
             keyguardRepository.setKeyguardShowing(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.AOD)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -171,8 +175,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
             // WHEN: The keyguard goes away
             keyguardRepository.setKeyguardShowing(false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.AOD, to = KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.GONE,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -337,8 +343,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         runKeyguardCoordinatorTest {
             val fakeEntry = NotificationEntryBuilder().build()
             collectionListener.onEntryAdded(fakeEntry)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.AOD, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -348,15 +356,19 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
             // WHEN: Keyguard is no longer showing
             keyguardRepository.setKeyguardShowing(false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
             // WHEN: Keyguard is shown again
             keyguardRepository.setKeyguardShowing(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.AOD)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -370,16 +382,20 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         // GIVEN: Keyguard is showing, unseen notification is present
         keyguardRepository.setKeyguardShowing(true)
         runKeyguardCoordinatorTest {
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             val fakeEntry = NotificationEntryBuilder().build()
             collectionListener.onEntryAdded(fakeEntry)
 
             // WHEN: Keyguard is no longer showing
             keyguardRepository.setKeyguardShowing(false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    this.testScheduler,
             )
 
             // WHEN: Keyguard is shown again
@@ -397,8 +413,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         keyguardRepository.setKeyguardShowing(true)
         keyguardRepository.setIsDozing(false)
         runKeyguardCoordinatorTest {
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             val firstEntry = NotificationEntryBuilder().setId(1).build()
             collectionListener.onEntryAdded(firstEntry)
@@ -419,15 +437,19 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
             // WHEN: the keyguard is no longer showing
             keyguardRepository.setKeyguardShowing(false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
             // WHEN: Keyguard is shown again
             keyguardRepository.setKeyguardShowing(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -445,8 +467,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         keyguardRepository.setKeyguardShowing(true)
         keyguardRepository.setIsDozing(false)
         runKeyguardCoordinatorTest {
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -473,15 +497,19 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
             // WHEN: the keyguard is no longer showing
             keyguardRepository.setKeyguardShowing(false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
             // WHEN: Keyguard is shown again
             keyguardRepository.setKeyguardShowing(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -496,8 +524,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         keyguardRepository.setKeyguardShowing(true)
         keyguardRepository.setIsDozing(false)
         runKeyguardCoordinatorTest {
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -524,15 +554,19 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
             // WHEN: the keyguard is no longer showing
             keyguardRepository.setKeyguardShowing(false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
             // WHEN: Keyguard is shown again
             keyguardRepository.setKeyguardShowing(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -547,8 +581,10 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         keyguardRepository.setKeyguardShowing(true)
         keyguardRepository.setIsDozing(false)
         runKeyguardCoordinatorTest {
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
@@ -571,15 +607,19 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
             // WHEN: the keyguard is no longer showing
             keyguardRepository.setKeyguardShowing(false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 
             // WHEN: Keyguard is shown again
             keyguardRepository.setKeyguardShowing(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.GONE, to = KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    this.testScheduler,
             )
             testScheduler.runCurrent()
 

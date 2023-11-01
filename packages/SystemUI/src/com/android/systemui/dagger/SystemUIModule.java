@@ -54,6 +54,7 @@ import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FlagDependenciesModule;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
@@ -182,6 +183,7 @@ import javax.inject.Named;
         DreamModule.class,
         FalsingModule.class,
         FlagsModule.class,
+        FlagDependenciesModule.class,
         FooterActionsModule.class,
         KeyEventRepositoryModule.class,
         KeyboardModule.class,

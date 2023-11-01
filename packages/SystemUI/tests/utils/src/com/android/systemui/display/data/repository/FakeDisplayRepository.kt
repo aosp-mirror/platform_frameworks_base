@@ -47,6 +47,10 @@ class FakeDisplayRepository : DisplayRepository {
     private val flow = MutableSharedFlow<Set<Display>>(replay = 1)
     private val pendingDisplayFlow =
         MutableSharedFlow<DisplayRepository.PendingDisplay?>(replay = 1)
+    private val displayAdditionEventFlow = MutableSharedFlow<Display?>(replay = 1)
+
+    /** Emits [value] as [displayAdditionEvent] flow value. */
+    suspend fun emit(value: Display?) = displayAdditionEventFlow.emit(value)
 
     /** Emits [value] as [displays] flow value. */
     suspend fun emit(value: Set<Display>) = flow.emit(value)
@@ -59,6 +63,9 @@ class FakeDisplayRepository : DisplayRepository {
 
     override val pendingDisplay: Flow<DisplayRepository.PendingDisplay?>
         get() = pendingDisplayFlow
+
+    override val displayAdditionEvent: Flow<Display?>
+        get() = displayAdditionEventFlow
 
     private val _displayChangeEvent = MutableSharedFlow<Int>(replay = 1)
     override val displayChangeEvent: Flow<Int> = _displayChangeEvent

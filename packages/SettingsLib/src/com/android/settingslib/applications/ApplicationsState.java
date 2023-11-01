@@ -1679,7 +1679,7 @@ public class ApplicationsState {
             ensureLabel(context);
             // Speed up the cache of the label description if they haven't been created.
             if (this.labelDescription == null) {
-                ThreadUtils.postOnBackgroundThread(
+                var unused = ThreadUtils.getBackgroundExecutor().submit(
                         () -> this.ensureLabelDescriptionLocked(context));
             }
             UserManager um = UserManager.get(context);

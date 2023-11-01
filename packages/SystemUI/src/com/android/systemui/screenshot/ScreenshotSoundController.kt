@@ -20,7 +20,7 @@ import android.media.MediaPlayer
 import android.util.Log
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.util.TraceUtils.Companion.async
+import com.android.systemui.tracing.TraceUtils.Companion.async
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds

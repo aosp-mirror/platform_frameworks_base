@@ -34,7 +34,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.DisplayTracker
-import com.android.systemui.util.TraceUtils.Companion.launch
+import com.android.systemui.tracing.TraceUtils.Companion.launch
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher

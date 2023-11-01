@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.tracing
+package com.android.systemui.tracing
 
 import android.os.Build
 import android.util.Log
-import com.android.systemui.util.TraceUtils.Companion.beginSlice
-import com.android.systemui.util.TraceUtils.Companion.endSlice
-import com.android.systemui.util.TraceUtils.Companion.traceCoroutine
+import com.android.systemui.tracing.TraceUtils.Companion.beginSlice
+import com.android.systemui.tracing.TraceUtils.Companion.endSlice
+import com.android.systemui.tracing.TraceUtils.Companion.traceCoroutine
 import kotlin.random.Random
 
 /**

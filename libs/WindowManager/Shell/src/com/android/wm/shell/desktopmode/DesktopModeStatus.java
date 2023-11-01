@@ -18,10 +18,14 @@ package com.android.wm.shell.desktopmode;
 
 import android.os.SystemProperties;
 
+import com.android.wm.shell.Flags;
+
 /**
  * Constants for desktop mode feature
  */
 public class DesktopModeStatus {
+
+    private static final boolean ENABLE_DESKTOP_WINDOWING = Flags.enableDesktopWindowing();
 
     /**
      * Flag to indicate whether desktop mode proto is available on the device
@@ -54,6 +58,12 @@ public class DesktopModeStatus {
      * Return {@code true} is desktop windowing proto 2 is enabled
      */
     public static boolean isEnabled() {
+        // Check for aconfig flag first
+        if (ENABLE_DESKTOP_WINDOWING) {
+            return true;
+        }
+        // Fall back to sysprop flag
+        // TODO(b/304778354): remove sysprop once desktop aconfig flag supports dynamic overriding
         return IS_PROTO2_ENABLED;
     }
 

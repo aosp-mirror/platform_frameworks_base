@@ -72,7 +72,7 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
                 onFinish = { 10f },
             )
         var animationValues = collectLastValue(flow)
-        repository.sendTransitionStep(step(1f, TransitionState.FINISHED))
+        repository.sendTransitionStep(step(1f, TransitionState.FINISHED), validateStep = false)
         assertThat(animationValues()).isEqualTo(10f)
     }
 

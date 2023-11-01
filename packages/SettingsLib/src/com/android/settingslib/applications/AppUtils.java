@@ -281,7 +281,7 @@ public class AppUtils {
 
         for (int i = 0; i < Math.min(appEntries.size(), number); i++) {
             final ApplicationsState.AppEntry entry = appEntries.get(i);
-            ThreadUtils.postOnBackgroundThread(() -> {
+            var unused = ThreadUtils.getBackgroundExecutor().submit(() -> {
                 getIcon(context, entry);
             });
         }

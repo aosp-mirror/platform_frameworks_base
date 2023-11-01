@@ -117,9 +117,9 @@
     <item msgid="588467578853244035">"פועל"</item>
   </string-array>
   <string-array name="tile_states_night">
-    <item msgid="7857498964264855466">"לא זמין"</item>
-    <item msgid="2744885441164350155">"כבוי"</item>
-    <item msgid="151121227514952197">"פועל"</item>
+    <item msgid="7857498964264855466">"לא זמינה"</item>
+    <item msgid="2744885441164350155">"מושבתת"</item>
+    <item msgid="151121227514952197">"פועלת"</item>
   </string-array>
   <string-array name="tile_states_screenrecord">
     <item msgid="1085836626613341403">"לא זמין"</item>

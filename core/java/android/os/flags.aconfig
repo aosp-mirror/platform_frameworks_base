@@ -1,6 +1,13 @@
 package: "android.os"
 
 flag {
+    name: "android_os_build_vanilla_ice_cream"
+    namespace: "build"
+    description: "Feature flag for adding the VANILLA_ICE_CREAM constant."
+    bug: "264658905"
+}
+
+flag {
     name: "state_of_health_public"
     namespace: "system_sw_battery"
     description: "Feature flag for making state_of_health a public api."

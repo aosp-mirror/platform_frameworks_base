@@ -57,12 +57,14 @@ public class PrimarySwitchPreferenceTest {
                 com.android.settingslib.widget.preference.twotarget.R.layout.preference_two_target,
                 null));
         mWidgetView = mHolder.itemView.findViewById(android.R.id.widget_frame);
-        inflater.inflate(R.layout.preference_widget_primary_switch, mWidgetView, true);
+        inflater.inflate(androidx.preference.R.layout.preference_widget_switch_compat, mWidgetView,
+                true);
     }
 
     @Test
     public void setChecked_shouldUpdateButtonCheckedState() {
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
         mPreference.onBindViewHolder(mHolder);
 
         mPreference.setChecked(true);
@@ -74,7 +76,8 @@ public class PrimarySwitchPreferenceTest {
 
     @Test
     public void setSwitchEnabled_shouldUpdateButtonEnabledState() {
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
         mPreference.onBindViewHolder(mHolder);
 
         mPreference.setSwitchEnabled(true);
@@ -86,7 +89,8 @@ public class PrimarySwitchPreferenceTest {
 
     @Test
     public void setSwitchEnabled_shouldUpdateButtonEnabledState_beforeViewBound() {
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
 
         mPreference.setSwitchEnabled(false);
         mPreference.onBindViewHolder(mHolder);
@@ -97,7 +101,8 @@ public class PrimarySwitchPreferenceTest {
     public void clickWidgetView_shouldToggleButton() {
         assertThat(mWidgetView).isNotNull();
 
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
         mPreference.onBindViewHolder(mHolder);
 
         toggle.performClick();
@@ -111,7 +116,8 @@ public class PrimarySwitchPreferenceTest {
     public void clickWidgetView_shouldNotToggleButtonIfDisabled() {
         assertThat(mWidgetView).isNotNull();
 
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
         mPreference.onBindViewHolder(mHolder);
         toggle.setEnabled(false);
 
@@ -122,7 +128,8 @@ public class PrimarySwitchPreferenceTest {
     @Test
     public void clickWidgetView_shouldNotifyPreferenceChanged() {
 
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
 
         final OnPreferenceChangeListener listener = mock(OnPreferenceChangeListener.class);
         mPreference.setOnPreferenceChangeListener(listener);
@@ -139,7 +146,8 @@ public class PrimarySwitchPreferenceTest {
 
     @Test
     public void setDisabledByAdmin_hasEnforcedAdmin_shouldDisableButton() {
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
         toggle.setEnabled(true);
         mPreference.onBindViewHolder(mHolder);
 
@@ -149,7 +157,8 @@ public class PrimarySwitchPreferenceTest {
 
     @Test
     public void setDisabledByAdmin_noEnforcedAdmin_shouldEnableButton() {
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
         toggle.setEnabled(false);
         mPreference.onBindViewHolder(mHolder);
 
@@ -159,7 +168,8 @@ public class PrimarySwitchPreferenceTest {
 
     @Test
     public void onBindViewHolder_toggleButtonShouldHaveContentDescription() {
-        final CompoundButton toggle = (CompoundButton) mHolder.findViewById(R.id.switchWidget);
+        final CompoundButton toggle =
+                (CompoundButton) mHolder.findViewById(androidx.preference.R.id.switchWidget);
         final String label = "TestButton";
         mPreference.setTitle(label);
 

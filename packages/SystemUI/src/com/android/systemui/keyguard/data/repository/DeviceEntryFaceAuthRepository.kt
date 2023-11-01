@@ -383,7 +383,12 @@ constructor(
                 "isFaceAuthEnrolledAndEnabled"
             ),
             Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
-            Pair(powerInteractor.isAsleep.isFalse(), "deviceNotAsleep"),
+            Pair(
+                keyguardTransitionInteractor
+                    .isInTransitionToStateWhere(KeyguardState::deviceIsAsleepInState)
+                    .isFalse(),
+                "deviceNotTransitioningToAsleepState"
+            ),
             Pair(
                 keyguardInteractor.isSecureCameraActive
                     .isFalse()

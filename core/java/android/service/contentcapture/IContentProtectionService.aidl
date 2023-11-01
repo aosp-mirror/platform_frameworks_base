@@ -17,6 +17,7 @@
 package android.service.contentcapture;
 
 import android.content.pm.ParceledListSlice;
+import android.os.IBinder;
 import android.view.contentcapture.ContentCaptureEvent;
 
 /**
@@ -27,4 +28,6 @@ import android.view.contentcapture.ContentCaptureEvent;
 oneway interface IContentProtectionService {
 
     void onLoginDetected(in ParceledListSlice events);
+
+    void onUpdateAllowlistRequest(in IBinder callback);
 }

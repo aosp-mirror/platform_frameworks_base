@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.tracing
+package com.android.systemui.tracing
 
-import com.android.systemui.util.TraceUtils.Companion.traceCoroutine
+import com.android.systemui.tracing.TraceUtils.Companion.traceCoroutine
 
 /**
  * Represents a section of code executing in a coroutine. This can be split up into multiple slices
