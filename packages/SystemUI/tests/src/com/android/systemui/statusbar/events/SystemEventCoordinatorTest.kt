@@ -21,7 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State.CONNECTED
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.mockito.any
@@ -48,7 +48,6 @@ import org.mockito.MockitoAnnotations
 class SystemEventCoordinatorTest : SysuiTestCase() {
 
     private val fakeSystemClock = FakeSystemClock()
-    private val featureFlags = FakeFeatureFlags()
     private val testScope = TestScope(UnconfinedTestDispatcher())
     private val connectedDisplayInteractor = FakeConnectedDisplayInteractor()
 
@@ -66,7 +65,6 @@ class SystemEventCoordinatorTest : SysuiTestCase() {
                     batteryController,
                     privacyController,
                     context,
-                    featureFlags,
                     TestScope(UnconfinedTestDispatcher()),
                     connectedDisplayInteractor
                 )
