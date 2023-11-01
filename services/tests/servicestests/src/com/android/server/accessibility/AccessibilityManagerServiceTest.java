@@ -535,6 +535,78 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
+    public void testOnClientChange_magnificationTripleTapEnabled_requestConnection() {
+        when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
+
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        userState.setMagnificationSingleFingerTripleTapEnabledLocked(true);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr).requestConnection(true);
+    }
+
+    @SmallTest
+    @Test
+    public void testOnClientChange_magnificationTripleTapDisabled_requestDisconnection() {
+        when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
+
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        //userState.setMagnificationSingleFingerTripleTapEnabledLocked(false);
+        userState.setMagnificationSingleFingerTripleTapEnabledLocked(false);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr).requestConnection(false);
+    }
+
+    @SmallTest
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testOnClientChange_magnificationTwoFingerTripleTapEnabled_requestConnection() {
+        when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
+
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        userState.setMagnificationTwoFingerTripleTapEnabledLocked(true);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr).requestConnection(true);
+    }
+
+    @SmallTest
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testOnClientChange_magnificationTwoFingerTripleTapDisabled_requestDisconnection() {
+        when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
+
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        //userState.setMagnificationSingleFingerTripleTapEnabledLocked(false);
+        userState.setMagnificationTwoFingerTripleTapEnabledLocked(false);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr).requestConnection(false);
+    }
+
+    @SmallTest
+    @Test
     public void testOnClientChange_boundServiceCanControlMagnification_requestConnection() {
         when(mProxyManager.canRetrieveInteractiveWindowsLocked()).thenReturn(false);
 
@@ -545,6 +617,64 @@ public class AccessibilityManagerServiceTest {
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
         verify(mMockWindowMagnificationMgr).requestConnection(true);
+    }
+
+    @SmallTest
+    @Test
+    public void testOnClientChange_magnificationTripleTapDisabled_removeMagnificationButton() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        userState.setMagnificationSingleFingerTripleTapEnabledLocked(false);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr, atLeastOnce()).removeMagnificationButton(anyInt());
+    }
+
+    @SmallTest
+    @Test
+    public void testOnClientChange_magnificationTripleTapEnabled_keepMagnificationButton() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        userState.setMagnificationSingleFingerTripleTapEnabledLocked(true);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr, never()).removeMagnificationButton(anyInt());
+    }
+
+    @SmallTest
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void onClientChange_magnificationTwoFingerTripleTapDisabled_removeMagnificationButton() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        userState.setMagnificationTwoFingerTripleTapEnabledLocked(false);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr, atLeastOnce()).removeMagnificationButton(anyInt());
+    }
+
+    @SmallTest
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void onClientChange_magnificationTwoFingerTripleTapEnabled_keepMagnificationButton() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        userState.setMagnificationTwoFingerTripleTapEnabledLocked(true);
+
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
+
+        verify(mMockWindowMagnificationMgr, never()).removeMagnificationButton(anyInt());
     }
 
     @Test
