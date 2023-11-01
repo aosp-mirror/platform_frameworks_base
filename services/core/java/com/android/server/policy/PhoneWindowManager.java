@@ -19,6 +19,7 @@ package com.android.server.policy;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
+import static android.app.AppOpsManager.OP_CREATE_ACCESSIBILITY_OVERLAY;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
@@ -31,6 +32,7 @@ import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.IInputConstants.INVALID_INPUT_DEVICE_ID;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
+import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.STATE_OFF;
@@ -2992,12 +2994,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // Window manager does the checking for this.
                     outAppOp[0] = OP_TOAST_WINDOW;
                     return ADD_OKAY;
+                case TYPE_ACCESSIBILITY_OVERLAY:
+                    if (createAccessibilityOverlayAppOpEnabled()) {
+                        outAppOp[0] = OP_CREATE_ACCESSIBILITY_OVERLAY;
+                        return ADD_OKAY;
+                    }
                 case TYPE_INPUT_METHOD:
                 case TYPE_WALLPAPER:
                 case TYPE_PRESENTATION:
                 case TYPE_PRIVATE_PRESENTATION:
                 case TYPE_VOICE_INTERACTION:
-                case TYPE_ACCESSIBILITY_OVERLAY:
                 case TYPE_QS_DIALOG:
                 case TYPE_NAVIGATION_BAR_PANEL:
                     // The window manager will check these.
