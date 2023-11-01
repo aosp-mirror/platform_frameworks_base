@@ -6510,11 +6510,11 @@ class Task extends TaskFragment {
                 mActivityType = ACTIVITY_TYPE_STANDARD;
             }
 
-            if (mActivityType != ACTIVITY_TYPE_STANDARD
+            if (!DisplayContent.alwaysCreateRootTask(tda.getWindowingMode(), mActivityType)
                     && mActivityType != ACTIVITY_TYPE_UNDEFINED) {
-                // For now there can be only one root task of a particular non-standard activity
-                // type on a display. So, get that ignoring whatever windowing mode it is
-                // currently in.
+                // Only Recents or Standard activity types are allowed to have more than one
+                // root task on a display, this is independent of whatever windowing mode it
+                // is currently in.
                 Task rootTask = tda.getRootTask(WINDOWING_MODE_UNDEFINED, mActivityType);
                 if (rootTask != null) {
                     throw new IllegalArgumentException("Root task=" + rootTask + " of activityType="
