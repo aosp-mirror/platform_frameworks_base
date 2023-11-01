@@ -274,7 +274,7 @@
     <string name="quick_settings_done" msgid="2163641301648855793">"تم"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"إغلاق"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"متصل"</string>
-    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"الجهاز متّصل، ومستوى طاقة البطارية <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"متّصل، ومستوى البطارية <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"جارٍ الاتصال..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"نقطة اتصال"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"جارٍ التفعيل…"</string>
@@ -795,7 +795,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>، <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"‏ميزة Wi-Fi غير مفعّلة"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"تم إيقاف البلوتوث."</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"البلوتوث غير مفعّل"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"تم إيقاف وضع \"عدم الإزعاج\""</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"ميزة \"عدم الإزعاج\" مفعَّلة."</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
