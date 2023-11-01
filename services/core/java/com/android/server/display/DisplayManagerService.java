@@ -102,6 +102,7 @@ import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -239,6 +240,10 @@ public final class DisplayManagerService extends SystemService {
     private static final String FORCE_WIFI_DISPLAY_ENABLE = "persist.debug.wfd.enable";
 
     private static final String PROP_DEFAULT_DISPLAY_TOP_INSET = "persist.sys.displayinset.top";
+
+    @VisibleForTesting
+    static final String ENABLE_ON_CONNECT =
+            "persist.sys.display.enable_on_connect.external";
     private static final long WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT = 10000;
     // This value needs to be in sync with the threshold
     // in RefreshRateConfigs::getFrameRateDivisor.
@@ -1942,10 +1947,14 @@ public final class DisplayManagerService extends SystemService {
         }
 
         setupLogicalDisplay(display);
-
         // TODO(b/292196201) Remove when the display can be disabled before DPC is created.
         if (display.getDisplayInfoLocked().type == Display.TYPE_EXTERNAL) {
-            display.setEnabledLocked(false);
+            if ((Build.IS_ENG || Build.IS_USERDEBUG)
+                    && SystemProperties.getBoolean(ENABLE_ON_CONNECT, false)) {
+                Slog.w(TAG, "External display is enabled by default, bypassing user consent.");
+            } else {
+                display.setEnabledLocked(false);
+            }
         }
 
         sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_CONNECTED);
