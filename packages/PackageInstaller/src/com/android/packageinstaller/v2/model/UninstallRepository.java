@@ -682,6 +682,13 @@ public class UninstallRepository {
         }
     }
 
+    public void cancelInstall() {
+        if (mCallback != null) {
+            mCallback.onUninstallComplete(mTargetPackageName,
+                PackageManager.DELETE_FAILED_ABORTED, "Cancelled by user");
+        }
+    }
+
     public MutableLiveData<UninstallStage> getUninstallResult() {
         return mUninstallResult;
     }

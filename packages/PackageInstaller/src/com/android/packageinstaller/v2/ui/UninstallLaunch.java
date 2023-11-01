@@ -161,6 +161,7 @@ public class UninstallLaunch extends FragmentActivity implements UninstallAction
 
     @Override
     public void onNegativeResponse() {
+        mUninstallViewModel.cancelInstall();
         setResult(Activity.RESULT_FIRST_USER, null, true);
     }
 }

@@ -62,4 +62,8 @@ public class UninstallViewModel extends AndroidViewModel {
             }
         });
     }
+
+    public void cancelInstall() {
+        mRepository.cancelInstall();
+    }
 }
