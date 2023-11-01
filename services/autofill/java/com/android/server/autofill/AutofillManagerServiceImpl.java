@@ -19,7 +19,7 @@ package com.android.server.autofill;
 import static android.service.autofill.FillEventHistory.Event.NO_SAVE_UI_REASON_NONE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
-import static android.service.autofill.FillRequest.FLAG_SCREEN_HAS_CREDMAN_FIELD;
+import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
@@ -104,10 +104,6 @@ final class AutofillManagerServiceImpl
         extends AbstractPerUserSystemService<AutofillManagerServiceImpl, AutofillManagerService> {
 
     private static final String TAG = "AutofillManagerServiceImpl";
-
-    private static final ComponentName CREDMAN_SERVICE_COMPONENT_NAME =
-            new ComponentName("com.android.credentialmanager",
-                    "com.android.credentialmanager.autofill.CredentialAutofillService");
     private static final int MAX_SESSION_ID_CREATE_TRIES = 2048;
 
     /** Minimum interval to prune abandoned sessions */
@@ -536,22 +532,15 @@ final class AutofillManagerServiceImpl
                 || mSessions.indexOfKey(sessionId) >= 0);
 
         assertCallerLocked(clientActivity, compatMode);
-
         ComponentName serviceComponentName = mInfo == null ? null
                 : mInfo.getServiceInfo().getComponentName();
-
-        if (isAutofillCredmanIntegrationEnabled()
-                && ((flags & FLAG_SCREEN_HAS_CREDMAN_FIELD) != 0)) {
-            // Hardcode to credential manager proxy service
-            Slog.i(TAG, "Routing to CredentialAutofillService");
-            serviceComponentName = CREDMAN_SERVICE_COMPONENT_NAME;
-        }
+        boolean isPrimaryCredential = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
 
         final Session newSession = new Session(this, mUi, getContext(), mHandler, mUserId, mLock,
                 sessionId, taskId, clientUid, clientActivityToken, clientCallback, hasCallback,
                 mUiLatencyHistory, mWtfHistory, serviceComponentName,
                 clientActivity, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
-                flags, mInputMethodManagerInternal);
+                flags, mInputMethodManagerInternal, isPrimaryCredential);
         mSessions.put(newSession.id, newSession);
 
         return newSession;

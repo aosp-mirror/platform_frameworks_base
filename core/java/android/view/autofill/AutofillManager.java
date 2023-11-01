@@ -24,6 +24,7 @@ import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
 import static android.service.autofill.FillRequest.FLAG_SCREEN_HAS_CREDMAN_FIELD;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
+import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
@@ -61,7 +62,6 @@ import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.Flags;
-import android.service.autofill.IFillCallback;
 import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -729,6 +729,9 @@ public final class AutofillManager {
     // focus due to autofill showing biometric activity, password manager, or password breach check.
     private boolean mRelayoutFix;
 
+    // Indicates whether the credman integration is enabled.
+    private final boolean mIsCredmanIntegrationEnabled;
+
     // Indicates whether called the showAutofillDialog() method.
     private boolean mShowAutofillDialogCalled = false;
 
@@ -952,6 +955,7 @@ public final class AutofillManager {
                 AutofillFeatureFlags.shouldAlwaysIncludeWebviewInAssistStructure();
 
         mRelayoutFix = Flags.relayout();
+        mIsCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
     }
 
     /**
@@ -1804,7 +1808,9 @@ public final class AutofillManager {
             }
             return mCallback;
         }
-
+        if (mIsCredmanIntegrationEnabled && isCredmanRequested(view)) {
+            flags |= FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
+        }
         mIsFillRequested.set(true);
 
         // don't notify entered when Activity is already in background
@@ -3384,6 +3390,9 @@ public final class AutofillManager {
     }
 
     private boolean isCredmanRequested(View view) {
+        if (view == null) {
+            return false;
+        }
         if (view.isCredential()) {
             return true;
         }
