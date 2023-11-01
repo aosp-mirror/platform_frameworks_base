@@ -48,6 +48,18 @@ constructor(
     private val systemClock: SystemClock,
     private val userTracker: UserTracker,
 ) : VisualInterruptionDecisionProvider {
+    private var started = false
+
+    override fun start() {
+        check(!started)
+
+        addCondition(PeekDisabledSuppressor(globalSettings, headsUpManager, logger, mainHandler))
+        addCondition(PulseDisabledSuppressor(ambientDisplayConfiguration, userTracker))
+        addCondition(PulseBatterySaverSuppressor(batteryController))
+
+        started = true
+    }
+
     private class DecisionImpl(
         override val shouldInterrupt: Boolean,
         override val logReason: String
@@ -76,27 +88,33 @@ constructor(
 
     fun addCondition(condition: VisualInterruptionCondition) {
         conditions.add(condition)
+        condition.start()
     }
 
     fun addFilter(filter: VisualInterruptionFilter) {
         filters.add(filter)
+        filter.start()
     }
 
     override fun makeUnloggedHeadsUpDecision(entry: NotificationEntry): Decision {
+        check(started)
         return makeHeadsUpDecision(entry)
     }
 
     override fun makeAndLogHeadsUpDecision(entry: NotificationEntry): Decision {
+        check(started)
         return makeHeadsUpDecision(entry).also { logHeadsUpDecision(entry, it) }
     }
 
     override fun makeUnloggedFullScreenIntentDecision(
         entry: NotificationEntry
     ): FullScreenIntentDecision {
+        check(started)
         return makeFullScreenDecision(entry)
     }
 
     override fun logFullScreenIntentDecision(decision: FullScreenIntentDecision) {
+        check(started)
         val decisionImpl =
             decision as? FullScreenIntentDecisionImpl
                 ?: run {
@@ -112,6 +130,7 @@ constructor(
     }
 
     override fun makeAndLogBubbleDecision(entry: NotificationEntry): Decision {
+        check(started)
         return makeBubbleDecision(entry).also { logBubbleDecision(entry, it) }
     }
 

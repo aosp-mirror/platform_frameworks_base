@@ -30,9 +30,10 @@ import android.content.Intent
 import android.content.pm.UserInfo
 import android.graphics.drawable.Icon
 import android.hardware.display.FakeAmbientDisplayConfiguration
-import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
+import android.provider.Settings.Global.HEADS_UP_OFF
 import android.provider.Settings.Global.HEADS_UP_ON
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
@@ -54,6 +55,7 @@ import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.utils.leaks.FakeBatteryController
 import com.android.systemui.utils.leaks.LeakCheckedTest
+import com.android.systemui.utils.os.FakeHandler
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Before
@@ -73,7 +75,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         mock()
     protected val keyguardStateController: KeyguardStateController = mock()
     protected val logger: NotificationInterruptLogger = mock()
-    protected val mainHandler: Handler = mock()
+    protected val mainHandler = FakeHandler(Looper.getMainLooper())
     protected val powerManager: PowerManager = mock()
     protected val statusBarStateController = FakeStatusBarStateController()
     protected val systemClock = FakeSystemClock()
@@ -108,12 +110,20 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
         whenever(keyguardNotificationVisibilityProvider.shouldHideNotification(any()))
             .thenReturn(false)
+
+        provider.start()
     }
 
     @Test
     fun testShouldPeek() {
         ensurePeekState()
         assertShouldHeadsUp(buildPeekEntry())
+    }
+
+    @Test
+    fun testShouldNotPeek_settingDisabled() {
+        ensurePeekState { hunSettingEnabled = false }
+        assertShouldNotHeadsUp(buildPeekEntry())
     }
 
     @Test
@@ -179,6 +189,18 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
+    fun testShouldNotPulse_disabled() {
+        ensurePulseState { pulseOnNotificationsEnabled = false }
+        assertShouldNotHeadsUp(buildPulseEntry())
+    }
+
+    @Test
+    fun testShouldNotPulse_batterySaver() {
+        ensurePulseState { isAodPowerSave = true }
+        assertShouldNotHeadsUp(buildPulseEntry())
+    }
+
+    @Test
     fun testShouldBubble() {
         ensureBubbleState()
         assertShouldBubble(buildBubbleEntry())
@@ -231,6 +253,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     private data class State(
+        var hunSettingEnabled: Boolean? = null,
         var hunSnoozed: Boolean? = null,
         var isAodPowerSave: Boolean? = null,
         var isDozing: Boolean? = null,
@@ -244,6 +267,11 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     private fun setState(state: State): Unit =
         state.run {
+            hunSettingEnabled?.let {
+                val newSetting = if (it) HEADS_UP_ON else HEADS_UP_OFF
+                globalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, newSetting)
+            }
+
             hunSnoozed?.let { whenever(headsUpManager.isSnoozed(TEST_PACKAGE)).thenReturn(it) }
 
             isAodPowerSave?.let { batteryController.setIsAodPowerSave(it) }
@@ -277,6 +305,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             .run(this::setState)
 
     private fun ensurePeekState(block: State.() -> Unit = {}) = ensureState {
+        hunSettingEnabled = true
         hunSnoozed = false
         isDozing = false
         isDreaming = false

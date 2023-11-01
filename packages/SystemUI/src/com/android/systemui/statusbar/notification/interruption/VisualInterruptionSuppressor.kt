@@ -51,6 +51,12 @@ sealed interface VisualInterruptionSuppressor {
 
     /** An optional UiEvent ID to be recorded when this suppresses an interruption. */
     val uiEventId: UiEventEnum?
+
+    /**
+     * Called after the suppressor is added to the [VisualInterruptionDecisionProvider] but before
+     * any other methods are called on the suppressor.
+     */
+    fun start() {}
 }
 
 /** A reason why visual interruptions might be suppressed regardless of the notification. */
