@@ -27,9 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Contains fields required for archived package installation,
+ * i.e. installation without an APK.
+ */
 @DataClass(genBuilder = false, genConstructor = false, genSetters = true)
 @FlaggedApi(Flags.FLAG_ARCHIVING)
-public final class ArchivedPackage {
+public final class ArchivedPackageInfo {
     /** Name of the package as used to identify it in the system */
     private @NonNull String mPackageName;
     /** Signing certificates used to sign the package. */
@@ -74,10 +78,10 @@ public final class ArchivedPackage {
      * {@link Intent#CATEGORY_LAUNCHER}.
      * @see LauncherApps#getActivityList
      */
-    private @NonNull List<ArchivedActivity> mLauncherActivities;
+    private @NonNull List<ArchivedActivityInfo> mLauncherActivities;
 
-    public ArchivedPackage(@NonNull String packageName, @NonNull SigningInfo signingInfo,
-            @NonNull List<ArchivedActivity> launcherActivities) {
+    public ArchivedPackageInfo(@NonNull String packageName, @NonNull SigningInfo signingInfo,
+            @NonNull List<ArchivedActivityInfo> launcherActivities) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(signingInfo);
         Objects.requireNonNull(launcherActivities);
@@ -90,7 +94,7 @@ public final class ArchivedPackage {
      * Constructs the archived package from parcel.
      * @hide
      */
-    public ArchivedPackage(@NonNull ArchivedPackageParcel parcel) {
+    public ArchivedPackageInfo(@NonNull ArchivedPackageParcel parcel) {
         mPackageName = parcel.packageName;
         mSigningInfo = new SigningInfo(parcel.signingDetails);
         mVersionCode = parcel.versionCode;
@@ -102,7 +106,7 @@ public final class ArchivedPackage {
         mLauncherActivities = new ArrayList<>();
         if (parcel.archivedActivities != null) {
             for (var activityParcel : parcel.archivedActivities) {
-                mLauncherActivities.add(new ArchivedActivity(activityParcel));
+                mLauncherActivities.add(new ArchivedActivityInfo(activityParcel));
             }
         }
     }
@@ -135,7 +139,7 @@ public final class ArchivedPackage {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/ArchivedPackage.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/ArchivedPackageInfo.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -224,7 +228,7 @@ public final class ArchivedPackage {
      * @see LauncherApps#getActivityList
      */
     @DataClass.Generated.Member
-    public @NonNull List<ArchivedActivity> getLauncherActivities() {
+    public @NonNull List<ArchivedActivityInfo> getLauncherActivities() {
         return mLauncherActivities;
     }
 
@@ -232,7 +236,7 @@ public final class ArchivedPackage {
      * Name of the package as used to identify it in the system
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setPackageName(@NonNull String value) {
+    public @NonNull ArchivedPackageInfo setPackageName(@NonNull String value) {
         mPackageName = value;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPackageName);
@@ -243,7 +247,7 @@ public final class ArchivedPackage {
      * Signing certificates used to sign the package.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setSigningInfo(@NonNull SigningInfo value) {
+    public @NonNull ArchivedPackageInfo setSigningInfo(@NonNull SigningInfo value) {
         mSigningInfo = value;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSigningInfo);
@@ -255,7 +259,7 @@ public final class ArchivedPackage {
      * {@link android.R.styleable#AndroidManifest_versionCode versionCode} attribute.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setVersionCode( int value) {
+    public @NonNull ArchivedPackageInfo setVersionCode( int value) {
         mVersionCode = value;
         return this;
     }
@@ -265,7 +269,7 @@ public final class ArchivedPackage {
      * {@link android.R.styleable#AndroidManifest_versionCode versionCodeMajor} attribute.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setVersionCodeMajor( int value) {
+    public @NonNull ArchivedPackageInfo setVersionCodeMajor( int value) {
         mVersionCodeMajor = value;
         return this;
     }
@@ -276,7 +280,7 @@ public final class ArchivedPackage {
      * attribute.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setTargetSdkVersion( int value) {
+    public @NonNull ArchivedPackageInfo setTargetSdkVersion( int value) {
         mTargetSdkVersion = value;
         return this;
     }
@@ -287,7 +291,7 @@ public final class ArchivedPackage {
      * attribute.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setDefaultToDeviceProtectedStorage(@NonNull String value) {
+    public @NonNull ArchivedPackageInfo setDefaultToDeviceProtectedStorage(@NonNull String value) {
         mDefaultToDeviceProtectedStorage = value;
         return this;
     }
@@ -299,7 +303,7 @@ public final class ArchivedPackage {
      * attribute.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setRequestLegacyExternalStorage(@NonNull String value) {
+    public @NonNull ArchivedPackageInfo setRequestLegacyExternalStorage(@NonNull String value) {
         mRequestLegacyExternalStorage = value;
         return this;
     }
@@ -310,7 +314,7 @@ public final class ArchivedPackage {
      * {@link android.R.styleable#AndroidManifestApplication_hasFragileUserData} attribute.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setUserDataFragile(@NonNull String value) {
+    public @NonNull ArchivedPackageInfo setUserDataFragile(@NonNull String value) {
         mUserDataFragile = value;
         return this;
     }
@@ -322,7 +326,7 @@ public final class ArchivedPackage {
      * @see LauncherApps#getActivityList
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedPackage setLauncherActivities(@NonNull List<ArchivedActivity> value) {
+    public @NonNull ArchivedPackageInfo setLauncherActivities(@NonNull List<ArchivedActivityInfo> value) {
         mLauncherActivities = value;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mLauncherActivities);
@@ -330,10 +334,10 @@ public final class ArchivedPackage {
     }
 
     @DataClass.Generated(
-            time = 1697824890503L,
+            time = 1698789995536L,
             codegenVersion = "1.0.23",
-            sourceFile = "frameworks/base/core/java/android/content/pm/ArchivedPackage.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.String mPackageName\nprivate @android.annotation.NonNull android.content.pm.SigningInfo mSigningInfo\nprivate  int mVersionCode\nprivate  int mVersionCodeMajor\nprivate  int mTargetSdkVersion\nprivate @android.annotation.Nullable java.lang.String mDefaultToDeviceProtectedStorage\nprivate @android.annotation.Nullable java.lang.String mRequestLegacyExternalStorage\nprivate @android.annotation.Nullable java.lang.String mUserDataFragile\nprivate @android.annotation.NonNull java.util.List<android.content.pm.ArchivedActivity> mLauncherActivities\n  android.content.pm.ArchivedPackageParcel getParcel()\nclass ArchivedPackage extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")
+            sourceFile = "frameworks/base/core/java/android/content/pm/ArchivedPackageInfo.java",
+            inputSignatures = "private @android.annotation.NonNull java.lang.String mPackageName\nprivate @android.annotation.NonNull android.content.pm.SigningInfo mSigningInfo\nprivate  int mVersionCode\nprivate  int mVersionCodeMajor\nprivate  int mTargetSdkVersion\nprivate @android.annotation.Nullable java.lang.String mDefaultToDeviceProtectedStorage\nprivate @android.annotation.Nullable java.lang.String mRequestLegacyExternalStorage\nprivate @android.annotation.Nullable java.lang.String mUserDataFragile\nprivate @android.annotation.NonNull java.util.List<android.content.pm.ArchivedActivityInfo> mLauncherActivities\n  android.content.pm.ArchivedPackageParcel getParcel()\nclass ArchivedPackageInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")
     @Deprecated
     private void __metadata() {}
 

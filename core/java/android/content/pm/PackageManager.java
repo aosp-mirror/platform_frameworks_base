@@ -11032,7 +11032,7 @@ public abstract class PackageManager {
      * @see PackageInstaller#installPackageArchived
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
-    public @Nullable ArchivedPackage getArchivedPackage(@NonNull String packageName) {
+    public @Nullable ArchivedPackageInfo getArchivedPackage(@NonNull String packageName) {
         throw new UnsupportedOperationException(
                 "getArchivedPackage not implemented in subclass");
     }

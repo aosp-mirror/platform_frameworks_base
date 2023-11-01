@@ -32,9 +32,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * Contains fields required to show archived package in Launcher.
+ * @see ArchivedPackageInfo
+ */
 @DataClass(genBuilder = false, genConstructor = false, genSetters = true)
 @FlaggedApi(Flags.FLAG_ARCHIVING)
-public final class ArchivedActivity {
+public final class ArchivedActivityInfo {
     /** The label for the activity. */
     private @NonNull CharSequence mLabel;
     /** The component name of this activity. */
@@ -47,7 +51,7 @@ public final class ArchivedActivity {
     /** Monochrome icon, if defined, of the activity. */
     private @Nullable Drawable mMonochromeIcon;
 
-    public ArchivedActivity(@NonNull CharSequence label, @NonNull ComponentName componentName) {
+    public ArchivedActivityInfo(@NonNull CharSequence label, @NonNull ComponentName componentName) {
         Objects.requireNonNull(label);
         Objects.requireNonNull(componentName);
         mLabel = label;
@@ -55,7 +59,7 @@ public final class ArchivedActivity {
     }
 
     /* @hide */
-    ArchivedActivity(@NonNull ArchivedActivityParcel parcel) {
+    ArchivedActivityInfo(@NonNull ArchivedActivityParcel parcel) {
         mLabel = parcel.title;
         mComponentName = parcel.originalComponentName;
         mIcon = drawableFromCompressedBitmap(parcel.iconBitmap);
@@ -149,7 +153,7 @@ public final class ArchivedActivity {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/ArchivedActivity.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/ArchivedActivityInfo.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -193,7 +197,7 @@ public final class ArchivedActivity {
      * The label for the activity.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedActivity setLabel(@NonNull CharSequence value) {
+    public @NonNull ArchivedActivityInfo setLabel(@NonNull CharSequence value) {
         mLabel = value;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mLabel);
@@ -204,7 +208,7 @@ public final class ArchivedActivity {
      * The component name of this activity.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedActivity setComponentName(@NonNull ComponentName value) {
+    public @NonNull ArchivedActivityInfo setComponentName(@NonNull ComponentName value) {
         mComponentName = value;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mComponentName);
@@ -216,7 +220,7 @@ public final class ArchivedActivity {
      * launcher.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedActivity setIcon(@NonNull Drawable value) {
+    public @NonNull ArchivedActivityInfo setIcon(@NonNull Drawable value) {
         mIcon = value;
         return this;
     }
@@ -225,16 +229,16 @@ public final class ArchivedActivity {
      * Monochrome icon, if defined, of the activity.
      */
     @DataClass.Generated.Member
-    public @NonNull ArchivedActivity setMonochromeIcon(@NonNull Drawable value) {
+    public @NonNull ArchivedActivityInfo setMonochromeIcon(@NonNull Drawable value) {
         mMonochromeIcon = value;
         return this;
     }
 
     @DataClass.Generated(
-            time = 1698173429911L,
+            time = 1698789991876L,
             codegenVersion = "1.0.23",
-            sourceFile = "frameworks/base/core/java/android/content/pm/ArchivedActivity.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.content.ComponentName mComponentName\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mIcon\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mMonochromeIcon\n @android.annotation.NonNull android.content.pm.ArchivedActivityParcel getParcel()\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable)\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable,int)\npublic static  byte[] bytesFromBitmap(android.graphics.Bitmap)\nprivate static  android.graphics.drawable.Drawable drawableFromCompressedBitmap(byte[])\nclass ArchivedActivity extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")
+            sourceFile = "frameworks/base/core/java/android/content/pm/ArchivedActivityInfo.java",
+            inputSignatures = "private @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.content.ComponentName mComponentName\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mIcon\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mMonochromeIcon\n @android.annotation.NonNull android.content.pm.ArchivedActivityParcel getParcel()\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable)\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable,int)\npublic static  byte[] bytesFromBitmap(android.graphics.Bitmap)\nprivate static  android.graphics.drawable.Drawable drawableFromCompressedBitmap(byte[])\nclass ArchivedActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")
     @Deprecated
     private void __metadata() {}
 
