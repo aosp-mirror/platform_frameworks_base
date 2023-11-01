@@ -25,6 +25,7 @@ import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.VISIBILITY_NO_OVERRIDE
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_MUTABLE
+import android.content.Context
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.graphics.drawable.Icon
@@ -53,6 +54,7 @@ import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.utils.leaks.FakeBatteryController
 import com.android.systemui.utils.leaks.LeakCheckedTest
+import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -80,6 +82,23 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     protected abstract val provider: VisualInterruptionDecisionProvider
 
+    private val neverSuppresses = object : NotificationInterruptSuppressor {}
+
+    private val alwaysSuppressesInterruptions =
+        object : NotificationInterruptSuppressor {
+            override fun suppressInterruptions(entry: NotificationEntry?) = true
+        }
+
+    private val alwaysSuppressesAwakeInterruptions =
+        object : NotificationInterruptSuppressor {
+            override fun suppressAwakeInterruptions(entry: NotificationEntry?) = true
+        }
+
+    private val alwaysSuppressesAwakeHeadsUp =
+        object : NotificationInterruptSuppressor {
+            override fun suppressAwakeHeadsUp(entry: NotificationEntry?) = true
+        }
+
     @Before
     fun setUp() {
         globalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON)
@@ -87,154 +106,333 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         val user = UserInfo(ActivityManager.getCurrentUser(), "Current user", /* flags = */ 0)
         userTracker.set(listOf(user), /* currentUserIndex = */ 0)
 
-        whenever(headsUpManager.isSnoozed(any())).thenReturn(false)
         whenever(keyguardNotificationVisibilityProvider.shouldHideNotification(any()))
             .thenReturn(false)
     }
 
     @Test
     fun testShouldPeek() {
-        ensureStateForPeek()
+        ensurePeekState()
+        assertShouldHeadsUp(buildPeekEntry())
+    }
 
-        assertTrue(provider.makeUnloggedHeadsUpDecision(createPeekEntry()).shouldInterrupt)
+    @Test
+    fun testShouldPeek_defaultLegacySuppressor() {
+        ensurePeekState()
+        provider.addLegacySuppressor(neverSuppresses)
+        assertShouldHeadsUp(buildPeekEntry())
+    }
+
+    @Test
+    fun testShouldNotPeek_legacySuppressInterruptions() {
+        ensurePeekState()
+        provider.addLegacySuppressor(alwaysSuppressesInterruptions)
+        assertShouldNotHeadsUp(buildPeekEntry())
+    }
+
+    @Test
+    fun testShouldNotPeek_legacySuppressAwakeInterruptions() {
+        ensurePeekState()
+        provider.addLegacySuppressor(alwaysSuppressesAwakeInterruptions)
+        assertShouldNotHeadsUp(buildPeekEntry())
+    }
+
+    @Test
+    fun testShouldNotPeek_legacySuppressAwakeHeadsUp() {
+        ensurePeekState()
+        provider.addLegacySuppressor(alwaysSuppressesAwakeHeadsUp)
+        assertShouldNotHeadsUp(buildPeekEntry())
     }
 
     @Test
     fun testShouldPulse() {
-        ensureStateForPulse()
-
-        assertTrue(provider.makeUnloggedHeadsUpDecision(createPulseEntry()).shouldInterrupt)
+        ensurePulseState()
+        assertShouldHeadsUp(buildPulseEntry())
     }
 
     @Test
-    fun testShouldFsi_awake() {
-        ensureStateForAwakeFsi()
-
-        assertTrue(provider.makeUnloggedFullScreenIntentDecision(createFsiEntry()).shouldInterrupt)
+    fun testShouldPulse_defaultLegacySuppressor() {
+        ensurePulseState()
+        provider.addLegacySuppressor(neverSuppresses)
+        assertShouldHeadsUp(buildPulseEntry())
     }
 
     @Test
-    fun testShouldFsi_dreaming() {
-        ensureStateForDreamingFsi()
-
-        assertTrue(provider.makeUnloggedFullScreenIntentDecision(createFsiEntry()).shouldInterrupt)
+    fun testShouldNotPulse_legacySuppressInterruptions() {
+        ensurePulseState()
+        provider.addLegacySuppressor(alwaysSuppressesInterruptions)
+        assertShouldNotHeadsUp(buildPulseEntry())
     }
 
     @Test
-    fun testShouldFsi_keyguard() {
-        ensureStateForKeyguardFsi()
+    fun testShouldPulse_legacySuppressAwakeInterruptions() {
+        ensurePulseState()
+        provider.addLegacySuppressor(alwaysSuppressesAwakeInterruptions)
+        assertShouldHeadsUp(buildPulseEntry())
+    }
 
-        assertTrue(provider.makeUnloggedFullScreenIntentDecision(createFsiEntry()).shouldInterrupt)
+    @Test
+    fun testShouldPulse_legacySuppressAwakeHeadsUp() {
+        ensurePulseState()
+        provider.addLegacySuppressor(alwaysSuppressesAwakeHeadsUp)
+        assertShouldHeadsUp(buildPulseEntry())
     }
 
     @Test
     fun testShouldBubble() {
-        assertTrue(provider.makeAndLogBubbleDecision(createBubbleEntry()).shouldInterrupt)
+        ensureBubbleState()
+        assertShouldBubble(buildBubbleEntry())
     }
 
-    private fun ensureStateForPeek() {
-        whenever(powerManager.isScreenOn).thenReturn(true)
-        statusBarStateController.dozing = false
-        statusBarStateController.dreaming = false
+    @Test
+    fun testShouldBubble_defaultLegacySuppressor() {
+        ensureBubbleState()
+        provider.addLegacySuppressor(neverSuppresses)
+        assertShouldBubble(buildBubbleEntry())
     }
 
-    private fun ensureStateForPulse() {
-        ambientDisplayConfiguration.fakePulseOnNotificationEnabled = true
-        batteryController.setIsAodPowerSave(false)
-        statusBarStateController.dozing = true
+    @Test
+    fun testShouldNotBubble_legacySuppressInterruptions() {
+        ensureBubbleState()
+        provider.addLegacySuppressor(alwaysSuppressesInterruptions)
+        assertShouldNotBubble(buildBubbleEntry())
     }
 
-    private fun ensureStateForAwakeFsi() {
-        whenever(powerManager.isInteractive).thenReturn(false)
-        statusBarStateController.dreaming = false
-        statusBarStateController.state = SHADE
+    @Test
+    fun testShouldNotBubble_legacySuppressAwakeInterruptions() {
+        ensureBubbleState()
+        provider.addLegacySuppressor(alwaysSuppressesAwakeInterruptions)
+        assertShouldNotBubble(buildBubbleEntry())
     }
 
-    private fun ensureStateForDreamingFsi() {
-        whenever(powerManager.isInteractive).thenReturn(true)
-        statusBarStateController.dreaming = true
-        statusBarStateController.state = SHADE
+    @Test
+    fun testShouldBubble_legacySuppressAwakeHeadsUp() {
+        ensureBubbleState()
+        provider.addLegacySuppressor(alwaysSuppressesAwakeHeadsUp)
+        assertShouldBubble(buildBubbleEntry())
     }
 
-    private fun ensureStateForKeyguardFsi() {
-        whenever(powerManager.isInteractive).thenReturn(true)
-        statusBarStateController.dreaming = false
-        statusBarStateController.state = KEYGUARD
+    @Test
+    fun testShouldFsi_notInteractive() {
+        ensureNotInteractiveFsiState()
+        assertShouldFsi(buildFsiEntry())
     }
 
-    private fun createNotif(
-        hasFsi: Boolean = false,
-        bubbleMetadata: BubbleMetadata? = null
-    ): Notification {
-        return Notification.Builder(context, TEST_CHANNEL_ID)
-            .apply {
-                setContentTitle(TEST_CONTENT_TITLE)
-                setContentText(TEST_CONTENT_TEXT)
+    @Test
+    fun testShouldFsi_dreaming() {
+        ensureDreamingFsiState()
+        assertShouldFsi(buildFsiEntry())
+    }
 
-                if (hasFsi) {
-                    setFullScreenIntent(mock(), /* highPriority = */ true)
-                }
+    @Test
+    fun testShouldFsi_keyguard() {
+        ensureKeyguardFsiState()
+        assertShouldFsi(buildFsiEntry())
+    }
 
-                if (bubbleMetadata != null) {
-                    setBubbleMetadata(bubbleMetadata)
-                }
+    private data class State(
+        var hunSnoozed: Boolean? = null,
+        var isAodPowerSave: Boolean? = null,
+        var isDozing: Boolean? = null,
+        var isDreaming: Boolean? = null,
+        var isInteractive: Boolean? = null,
+        var isScreenOn: Boolean? = null,
+        var keyguardShouldHideNotification: Boolean? = null,
+        var pulseOnNotificationsEnabled: Boolean? = null,
+        var statusBarState: Int? = null,
+    )
+
+    private fun setState(state: State): Unit =
+        state.run {
+            hunSnoozed?.let { whenever(headsUpManager.isSnoozed(TEST_PACKAGE)).thenReturn(it) }
+
+            isAodPowerSave?.let { batteryController.setIsAodPowerSave(it) }
+
+            isDozing?.let { statusBarStateController.dozing = it }
+
+            isDreaming?.let { statusBarStateController.dreaming = it }
+
+            isInteractive?.let { whenever(powerManager.isInteractive).thenReturn(it) }
+
+            isScreenOn?.let { whenever(powerManager.isScreenOn).thenReturn(it) }
+
+            keyguardShouldHideNotification?.let {
+                whenever(keyguardNotificationVisibilityProvider.shouldHideNotification(any()))
+                    .thenReturn(it)
             }
-            .setContentTitle(TEST_CONTENT_TITLE)
-            .setContentText(TEST_CONTENT_TEXT)
-            .build()
-    }
 
-    private fun createBubbleMetadata(): BubbleMetadata {
-        val pendingIntent =
-            PendingIntent.getActivity(
-                context,
-                /* requestCode = */ 0,
-                Intent().setPackage(context.packageName),
-                FLAG_MUTABLE
-            )
-
-        val icon = Icon.createWithResource(context.resources, R.drawable.android)
-
-        return BubbleMetadata.Builder(pendingIntent, icon).build()
-    }
-
-    private fun createEntry(
-        notif: Notification,
-        importance: Int = IMPORTANCE_DEFAULT,
-        canBubble: Boolean? = null
-    ): NotificationEntry {
-        return NotificationEntryBuilder()
-            .apply {
-                setPkg(TEST_PACKAGE)
-                setOpPkg(TEST_PACKAGE)
-                setTag(TEST_TAG)
-                setChannel(NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, importance))
-                setNotification(notif)
-                setImportance(importance)
-
-                if (canBubble != null) {
-                    setCanBubble(canBubble)
-                }
+            pulseOnNotificationsEnabled?.let {
+                ambientDisplayConfiguration.fakePulseOnNotificationEnabled = it
             }
-            .build()
-    }
 
-    private fun createPeekEntry() = createEntry(notif = createNotif(), importance = IMPORTANCE_HIGH)
-
-    private fun createPulseEntry() =
-        createEntry(notif = createNotif(), importance = IMPORTANCE_HIGH).also {
-            modifyRanking(it).setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build()
+            statusBarState?.let { statusBarStateController.state = it }
         }
 
-    private fun createFsiEntry() =
-        createEntry(notif = createNotif(hasFsi = true), importance = IMPORTANCE_HIGH)
+    private fun ensureState(block: State.() -> Unit) =
+        State()
+            .apply {
+                keyguardShouldHideNotification = false
+                apply(block)
+            }
+            .run(this::setState)
 
-    private fun createBubbleEntry() =
-        createEntry(
-            notif = createNotif(bubbleMetadata = createBubbleMetadata()),
-            importance = IMPORTANCE_HIGH,
-            canBubble = true
-        )
+    private fun ensurePeekState(block: State.() -> Unit = {}) = ensureState {
+        hunSnoozed = false
+        isDozing = false
+        isDreaming = false
+        isScreenOn = true
+        run(block)
+    }
+
+    private fun ensurePulseState(block: State.() -> Unit = {}) = ensureState {
+        isAodPowerSave = false
+        isDozing = true
+        pulseOnNotificationsEnabled = true
+        run(block)
+    }
+
+    private fun ensureBubbleState(block: State.() -> Unit = {}) = ensureState(block)
+
+    private fun ensureNotInteractiveFsiState(block: State.() -> Unit = {}) = ensureState {
+        isDreaming = false
+        isInteractive = false
+        statusBarState = SHADE
+        run(block)
+    }
+
+    private fun ensureDreamingFsiState(block: State.() -> Unit = {}) = ensureState {
+        isDreaming = true
+        isInteractive = true
+        statusBarState = SHADE
+        run(block)
+    }
+
+    private fun ensureKeyguardFsiState(block: State.() -> Unit = {}) = ensureState {
+        isDreaming = false
+        isInteractive = true
+        statusBarState = KEYGUARD
+        run(block)
+    }
+
+    private fun assertShouldHeadsUp(entry: NotificationEntry) =
+        provider.makeUnloggedHeadsUpDecision(entry).let {
+            assertTrue("unexpected suppressed HUN: ${it.logReason}", it.shouldInterrupt)
+        }
+
+    private fun assertShouldNotHeadsUp(entry: NotificationEntry) =
+        provider.makeUnloggedHeadsUpDecision(entry).let {
+            assertFalse("unexpected unsuppressed HUN: ${it.logReason}", it.shouldInterrupt)
+        }
+
+    private fun assertShouldBubble(entry: NotificationEntry) =
+        provider.makeAndLogBubbleDecision(entry).let {
+            assertTrue("unexpected suppressed bubble: ${it.logReason}", it.shouldInterrupt)
+        }
+
+    private fun assertShouldNotBubble(entry: NotificationEntry) =
+        provider.makeAndLogBubbleDecision(entry).let {
+            assertFalse("unexpected unsuppressed bubble: ${it.logReason}", it.shouldInterrupt)
+        }
+
+    private fun assertShouldFsi(entry: NotificationEntry) =
+        provider.makeUnloggedFullScreenIntentDecision(entry).let {
+            assertTrue("unexpected suppressed FSI: ${it.logReason}", it.shouldInterrupt)
+        }
+
+    private fun assertShouldNotFsi(entry: NotificationEntry) =
+        provider.makeUnloggedFullScreenIntentDecision(entry).let {
+            assertFalse("unexpected unsuppressed FSI: ${it.logReason}", it.shouldInterrupt)
+        }
+
+    private class EntryBuilder(val context: Context) {
+        var importance = IMPORTANCE_DEFAULT
+        var suppressedVisualEffects: Int? = null
+        var whenMs: Long? = null
+        var visibilityOverride: Int? = null
+        var hasFsi = false
+        var canBubble: Boolean? = null
+        var hasBubbleMetadata = false
+        var bubbleSuppressNotification: Boolean? = null
+
+        private fun buildBubbleMetadata() =
+            BubbleMetadata.Builder(
+                    PendingIntent.getActivity(
+                        context,
+                        /* requestCode = */ 0,
+                        Intent().setPackage(context.packageName),
+                        FLAG_MUTABLE
+                    ),
+                    Icon.createWithResource(context.resources, R.drawable.android)
+                )
+                .apply { bubbleSuppressNotification?.let { setSuppressNotification(it) } }
+                .build()
+
+        fun build() =
+            Notification.Builder(context, TEST_CHANNEL_ID)
+                .apply {
+                    setContentTitle(TEST_CONTENT_TITLE)
+                    setContentText(TEST_CONTENT_TEXT)
+
+                    if (hasFsi) {
+                        setFullScreenIntent(mock(), /* highPriority = */ true)
+                    }
+
+                    whenMs?.let { setWhen(it) }
+
+                    if (hasBubbleMetadata) {
+                        setBubbleMetadata(buildBubbleMetadata())
+                    }
+                }
+                .build()
+                .let { NotificationEntryBuilder().setNotification(it) }
+                .apply {
+                    setPkg(TEST_PACKAGE)
+                    setOpPkg(TEST_PACKAGE)
+                    setTag(TEST_TAG)
+
+                    setImportance(importance)
+                    setChannel(NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, importance))
+
+                    canBubble?.let { setCanBubble(it) }
+                }
+                .build()!!
+                .also {
+                    modifyRanking(it)
+                        .apply {
+                            suppressedVisualEffects?.let { setSuppressedVisualEffects(it) }
+                            visibilityOverride?.let { setVisibilityOverride(it) }
+                        }
+                        .build()
+                }
+    }
+
+    private fun buildEntry(block: EntryBuilder.() -> Unit) =
+        EntryBuilder(context).also(block).build()
+
+    private fun buildPeekEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+        importance = IMPORTANCE_HIGH
+        run(block)
+    }
+
+    private fun buildPulseEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+        importance = IMPORTANCE_DEFAULT
+        visibilityOverride = VISIBILITY_NO_OVERRIDE
+        run(block)
+    }
+
+    private fun buildFsiEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+        importance = IMPORTANCE_HIGH
+        hasFsi = true
+        run(block)
+    }
+
+    private fun buildBubbleEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+        canBubble = true
+        hasBubbleMetadata = true
+        run(block)
+    }
+
+    private fun whenAgo(whenAgeMs: Long) = systemClock.currentTimeMillis() - whenAgeMs
 }
 
 private const val TEST_CONTENT_TITLE = "Test Content Title"

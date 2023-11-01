@@ -104,7 +104,7 @@ class FakeStatusBarStateController : SysuiStatusBarStateController {
 
     override fun isDreaming() = dreaming
 
-    override fun setIsDreaming(drreaming: Boolean): Boolean {
+    override fun setIsDreaming(dreaming: Boolean): Boolean {
         dreaming != this.dreaming || return false
         this.dreaming = dreaming
         callbacks.forEach { it.onDreamingChanged(dreaming) }
