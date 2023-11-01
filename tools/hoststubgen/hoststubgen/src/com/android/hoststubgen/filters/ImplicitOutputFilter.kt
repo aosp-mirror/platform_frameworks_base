@@ -98,10 +98,10 @@ class ImplicitOutputFilter(
         // If we throw from the static initializer, the class would be useless, so we convert it
         // "keep" instead.
         if (methodName == CLASS_INITIALIZER_NAME && descriptor == CLASS_INITIALIZER_DESC &&
-            fallback.policy == FilterPolicy.Throw) {
+                fallback.policy == FilterPolicy.Throw) {
             // TODO Maybe show a warning?? But that'd be too noisy with --default-throw.
-            return FilterPolicy.Keep.withReason(
-                "'throw' on static initializer is handled as 'keep'" +
+            return FilterPolicy.Ignore.withReason(
+                "'throw' on static initializer is handled as 'ignore'" +
                         " [original throw reason: ${fallback.reason}]")
         }
 

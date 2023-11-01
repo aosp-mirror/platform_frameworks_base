@@ -127,11 +127,11 @@ public class TinyFrameworkClassTest {
 
     @Test
     public void testClassLoadHook() {
-        assertThat(TinyFrameworkClassWithInitializer.sInitialized).isTrue();
+        assertThat(TinyFrameworkClassWithInitializerStub.sInitialized).isTrue();
 
         // Having this line before assertThat() will ensure these class are already loaded.
-        var classes = new Class[] {
-                TinyFrameworkClassWithInitializer.class,
+        var classes = new Class[]{
+                TinyFrameworkClassWithInitializerStub.class,
                 TinyFrameworkClassAnnotations.class,
                 TinyFrameworkForTextPolicy.class,
         };
@@ -143,6 +143,18 @@ public class TinyFrameworkClassTest {
         // This class doesn't have a class load hook, so shouldn't be included.
         assertThat(TinyFrameworkClassLoadHook.sLoadedClasses)
                 .doesNotContain(TinyFrameworkNestedClasses.class);
+    }
+
+    @Test
+    public void testStaticInitializer_Default() {
+        assertThat(TinyFrameworkClassWithInitializerDefault.sInitialized).isFalse();
+        assertThat(TinyFrameworkClassWithInitializerDefault.sObject).isNull();
+    }
+
+    @Test
+    public void testStaticInitializer_Stub() {
+        assertThat(TinyFrameworkClassWithInitializerStub.sInitialized).isTrue();
+        assertThat(TinyFrameworkClassWithInitializerStub.sObject).isNotNull();
     }
 
     /**

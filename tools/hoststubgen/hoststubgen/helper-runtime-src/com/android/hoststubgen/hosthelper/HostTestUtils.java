@@ -23,6 +23,8 @@ import java.util.HashMap;
 
 import javax.annotation.concurrent.GuardedBy;
 
+import org.junit.AssumptionViolatedException;
+
 /**
  * Utilities used in the host side test environment.
  */
@@ -63,7 +65,7 @@ public class HostTestUtils {
      */
     public static void onThrowMethodCalled() {
         // TODO: Maybe add call tracking?
-        throw new RuntimeException("This method is not supported on the host side");
+        throw new AssumptionViolatedException("This method is not supported on the host side");
     }
 
     /**

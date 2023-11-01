@@ -364,31 +364,74 @@ RuntimeVisibleAnnotations:
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
-## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializer.class
-  Compiled from "TinyFrameworkClassWithInitializer.java"
-public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializer
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerDefault.class
+  Compiled from "TinyFrameworkClassWithInitializerDefault.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializerDefault
   minor version: 0
   major version: 61
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
-  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializer
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerDefault
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 1, attributes: 3
+  interfaces: 0, fields: 2, methods: 0, attributes: 3
   public static boolean sInitialized;
     descriptor: Z
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
 
-  public com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializer();
+  public static java.lang.Object sObject;
+    descriptor: Ljava/lang/Object;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+}
+SourceFile: "TinyFrameworkClassWithInitializerDefault.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerStub.class
+  Compiled from "TinyFrameworkClassWithInitializerStub.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializerStub
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerStub
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 2, methods: 1, attributes: 3
+  public static boolean sInitialized;
+    descriptor: Z
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static java.lang.Object sObject;
+    descriptor: Ljava/lang/Object;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  static {};
     descriptor: ()V
-    flags: (0x0001) ACC_PUBLIC
+    flags: (0x0008) ACC_STATIC
     Code:
-      stack=3, locals=1, args_size=1
+      stack=3, locals=0, args_size=0
          x: new           #x                 // class java/lang/RuntimeException
          x: dup
          x: ldc           #x                 // String Stub!
          x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
          x: athrow
 }
-SourceFile: "TinyFrameworkClassWithInitializer.java"
+SourceFile: "TinyFrameworkClassWithInitializerStub.java"
 RuntimeVisibleAnnotations:
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
@@ -400,7 +443,9 @@ RuntimeInvisibleAnnotations:
       value="com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded"
     )
   x: #x()
-    android.hosttest.annotation.HostSideTestWholeClassStub
+    android.hosttest.annotation.HostSideTestStub
+  x: #x()
+    android.hosttest.annotation.HostSideTestStaticInitializerStub
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkExceptionTester.class
   Compiled from "TinyFrameworkExceptionTester.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkExceptionTester
