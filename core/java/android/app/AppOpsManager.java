@@ -16,10 +16,13 @@
 
 package android.app;
 
+import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
+
 import static java.lang.Long.max;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -1495,9 +1498,17 @@ public class AppOpsManager {
     public static final int OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA =
             AppProtoEnums.APP_OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA;
 
+    /**
+     * Creation of an overlay using accessibility services
+     *
+     * @hide
+     */
+    public static final int OP_CREATE_ACCESSIBILITY_OVERLAY =
+            AppProtoEnums.APP_OP_CREATE_ACCESSIBILITY_OVERLAY;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 138;
+    public static final int _NUM_OP = 139;
 
     /**
      * All app ops represented as strings.
@@ -1641,7 +1652,8 @@ public class AppOpsManager {
             OPSTR_CAMERA_SANDBOXED,
             OPSTR_RECORD_AUDIO_SANDBOXED,
             OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA
+            OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
+            OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
     })
     public @interface AppOpString {}
 
@@ -2270,6 +2282,16 @@ public class AppOpsManager {
     public static final String OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA =
             "android:RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA";
 
+    /**
+     * Creation of an overlay using accessibility services
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED)
+    public static final String OPSTR_CREATE_ACCESSIBILITY_OVERLAY =
+            "android:create_accessibility_overlay";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2819,7 +2841,11 @@ public class AppOpsManager {
                 OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
                 "RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA")
                 .setPermission(Manifest.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA)
-                .setDefaultMode(AppOpsManager.MODE_DEFAULT).build()
+                .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
+        new AppOpInfo.Builder(OP_CREATE_ACCESSIBILITY_OVERLAY,
+                OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
+                "CREATE_ACCESSIBILITY_OVERLAY")
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
