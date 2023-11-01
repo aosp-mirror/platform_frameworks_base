@@ -46,6 +46,12 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -56,6 +62,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.pkg.ArchiveState;
@@ -367,12 +374,40 @@ public class PackageArchiver {
         // TODO(b/298452477) Handle monochrome icons.
         // In the rare case the archived app defined more than two launcher activities, we choose
         // the first one arbitrarily.
-        return decodeIcon(activityInfos.get(0));
+        return includeCloudOverlay(decodeIcon(activityInfos.get(0)));
     }
 
     @VisibleForTesting
     Bitmap decodeIcon(ArchiveActivityInfo archiveActivityInfo) {
         return BitmapFactory.decodeFile(archiveActivityInfo.getIconBitmap().toString());
+    }
+
+    Bitmap includeCloudOverlay(Bitmap bitmap) {
+        Drawable cloudDrawable =
+                mContext.getResources()
+                        .getDrawable(R.drawable.archived_app_cloud_overlay, mContext.getTheme());
+        if (cloudDrawable == null) {
+            Slog.e(TAG, "Unable to locate cloud overlay for archived app!");
+            return bitmap;
+        }
+        BitmapDrawable appIconDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
+        PorterDuffColorFilter colorFilter =
+                new PorterDuffColorFilter(
+                        Color.argb(0.32f /* alpha */, 0f /* red */, 0f /* green */, 0f /* blue */),
+                        PorterDuff.Mode.SRC_ATOP);
+        appIconDrawable.setColorFilter(colorFilter);
+        appIconDrawable.setBounds(
+                0 /* left */,
+                0 /* top */,
+                cloudDrawable.getIntrinsicWidth(),
+                cloudDrawable.getIntrinsicHeight());
+        LayerDrawable layerDrawable =
+                new LayerDrawable(new Drawable[] {appIconDrawable, cloudDrawable});
+        final int iconSize = mContext.getSystemService(
+                ActivityManager.class).getLauncherLargeIconSize();
+        Bitmap appIconWithCloudOverlay = drawableToBitmap(layerDrawable, iconSize);
+        bitmap.recycle();
+        return appIconWithCloudOverlay;
     }
 
     private void verifyArchived(PackageStateInternal ps, int userId)
