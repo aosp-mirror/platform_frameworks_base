@@ -36,6 +36,7 @@ per-file GameMode* = file:/GAME_MANAGER_OWNERS
 per-file GameState* = file:/GAME_MANAGER_OWNERS
 per-file IGameManager* = file:/GAME_MANAGER_OWNERS
 per-file IGameMode* = file:/GAME_MANAGER_OWNERS
+per-file BackgroundStartPrivileges.java = file:/BAL_OWNERS
 
 # ActivityThread
 per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
