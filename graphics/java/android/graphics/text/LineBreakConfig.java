@@ -28,6 +28,8 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.os.Build;
 import android.os.LocaleList;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,7 +42,7 @@ import java.util.Objects;
  * <a href="https://www.w3.org/TR/css-text-3/#line-break-property" class="external">
  * line-break property</a> for more information.
  */
-public final class LineBreakConfig {
+public final class LineBreakConfig implements Parcelable {
 
     /**
      * A feature ID for automatic line break word style.
@@ -161,12 +163,12 @@ public final class LineBreakConfig {
      *
      * This is useful when you want to preserve some words in the same line by using
      * {@link android.text.style.LineBreakConfigSpan} or
-     * {@link android.text.style.LineBreakConfigSpan.NoBreakSpan} as a shorthand.
+     * {@link android.text.style.LineBreakConfigSpan#createNoBreakSpan()} as a shorthand.
      * Note that even if this style is specified, the grapheme based line break is still performed
      * for preventing clipping text.
      *
      * @see android.text.style.LineBreakConfigSpan
-     * @see android.text.style.LineBreakConfigSpan.NoBreakSpan
+     * @see android.text.style.LineBreakConfigSpan#createNoBreakSpan()
      */
     @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public static final int LINE_BREAK_STYLE_NO_BREAK = 4;
@@ -457,8 +459,9 @@ public final class LineBreakConfig {
      *
      * <p>Use {@link LineBreakConfig.Builder} to create the
      * {@code LineBreakConfig} instance.
+     * @hide
      */
-    private LineBreakConfig(@LineBreakStyle int lineBreakStyle,
+    public LineBreakConfig(@LineBreakStyle int lineBreakStyle,
             @LineBreakWordStyle int lineBreakWordStyle,
             @Hyphenation int hyphenation) {
         mLineBreakStyle = lineBreakStyle;
@@ -606,4 +609,35 @@ public final class LineBreakConfig {
                 + ", mHyphenation= " + mHyphenation
                 + '}';
     }
+
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(mLineBreakStyle);
+        dest.writeInt(mLineBreakWordStyle);
+        dest.writeInt(mHyphenation);
+    }
+
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static final @NonNull Creator<LineBreakConfig> CREATOR = new Creator<>() {
+
+        @Override
+        public LineBreakConfig createFromParcel(Parcel source) {
+            final int lineBreakStyle = source.readInt();
+            final int lineBreakWordStyle = source.readInt();
+            final int hyphenation = source.readInt();
+            return new LineBreakConfig(lineBreakStyle, lineBreakWordStyle, hyphenation);
+        }
+
+        @Override
+        public LineBreakConfig[] newArray(int size) {
+            return new LineBreakConfig[size];
+        }
+    };
 }

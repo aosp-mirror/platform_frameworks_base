@@ -21,6 +21,9 @@ import static com.android.text.flags.Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.graphics.text.LineBreakConfig;
+import android.os.Parcel;
+import android.text.ParcelableSpan;
+import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -28,7 +31,7 @@ import java.util.Objects;
  * LineBreakSpan for changing line break style of the specific region of the text.
  */
 @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
-public class LineBreakConfigSpan {
+public final class LineBreakConfigSpan implements ParcelableSpan {
     private final LineBreakConfig mLineBreakConfig;
 
     /**
@@ -47,6 +50,28 @@ public class LineBreakConfigSpan {
     @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
     public @NonNull LineBreakConfig getLineBreakConfig() {
         return mLineBreakConfig;
+    }
+
+    /**
+     * A specialized {@link LineBreakConfigSpan} that used for preventing line break.
+     *
+     * This is useful when you want to preserve some words in the same line.
+     * Note that even if this style is specified, the grapheme based line break is still performed
+     * for preventing clipping text.
+     *
+     * @see LineBreakConfigSpan
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static @NonNull LineBreakConfigSpan createNoBreakSpan() {
+        return new LineBreakConfigSpan(sNoBreakConfig);
+    }
+
+    /**
+     * A specialized {@link LineBreakConfigSpan} that used for preventing hyphenation.
+     */
+    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
+    public static @NonNull LineBreakConfigSpan createNoHyphenationSpan() {
+        return new LineBreakConfigSpan(sNoHyphenationConfig);
     }
 
     @Override
@@ -75,37 +100,46 @@ public class LineBreakConfigSpan {
             .setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_NO_BREAK)
             .build();
 
-    /**
-     * A specialized {@link LineBreakConfigSpan} that used for preventing hyphenation.
-     */
-    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
-    public static final class NoHyphenationSpan extends LineBreakConfigSpan {
-        /**
-         * Construct a new {@link NoHyphenationSpan}.
-         */
-        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
-        public NoHyphenationSpan() {
-            super(sNoHyphenationConfig);
-        }
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    /**
-     * A specialized {@link LineBreakConfigSpan} that used for preventing line break.
-     *
-     * This is useful when you want to preserve some words in the same line.
-     * Note that even if this style is specified, the grapheme based line break is still performed
-     * for preventing clipping text.
-     *
-     * @see LineBreakConfigSpan
-     */
-    @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
-    public static final class NoBreakSpan extends LineBreakConfigSpan {
-        /**
-         * Construct a new {@link NoBreakSpan}.
-         */
-        @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
-        public NoBreakSpan() {
-            super(sNoBreakConfig);
-        }
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        writeToParcelInternal(dest, flags);
     }
+
+    @Override
+    public int getSpanTypeId() {
+        return getSpanTypeIdInternal();
+    }
+
+    /** @hide */
+    @Override
+    public int getSpanTypeIdInternal() {
+        return TextUtils.LINE_BREAK_CONFIG_SPAN;
+    }
+
+    /** @hide */
+    @Override
+    public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
+        dest.writeParcelable(mLineBreakConfig, flags);
+    }
+
+    @NonNull
+    public static final Creator<LineBreakConfigSpan> CREATOR = new Creator<>() {
+
+        @Override
+        public LineBreakConfigSpan createFromParcel(Parcel source) {
+            LineBreakConfig lbc = source.readParcelable(
+                    LineBreakConfig.class.getClassLoader(), LineBreakConfig.class);
+            return new LineBreakConfigSpan(lbc);
+        }
+
+        @Override
+        public LineBreakConfigSpan[] newArray(int size) {
+            return new LineBreakConfigSpan[size];
+        }
+    };
 }
