@@ -767,11 +767,11 @@
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"ਪਹੁੰਚ ਸੂਚਨਾਵਾਂ"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"ਐਪ ਨੂੰ ਸੂਚਨਾਵਾਂ ਨੂੰ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨ, ਜਾਂਚ ਕਰਨ ਅਤੇ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਹੋਰਾਂ ਐਪਸ ਵੱਲੋਂ ਪੋਸਟ ਕੀਤੀਆਂ ਸਮੇਤ।"</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"ਇੱਕ ਸੂਚਨਾ ਸੁਣਨ ਵਾਲੀ ਸੇਵਾ ਨਾਲ ਜੋੜੋ"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ਹੋਲਡਰ ਨੂੰ ਇੱਕ ਸੂਚਨਾ ਸੁਣਨ ਵਾਲੀ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ਹੋਲਡਰ ਨੂੰ ਇੱਕ ਸੂਚਨਾ ਸੁਣਨ ਵਾਲੀ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫ਼ੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="permlab_bindConditionProviderService" msgid="5245421224814878483">"ਇੱਕ ਸਥਿਤੀ ਪ੍ਰਦਾਤਾ ਸੇਵਾ ਨਾਲ ਜੋੜੋ"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"ਧਾਰਕ ਨੂੰ ਇੱਕ ਸਥਿਤੀ ਪ੍ਰਦਾਤਾ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"ਧਾਰਕ ਨੂੰ ਇੱਕ ਸਥਿਤੀ ਪ੍ਰਦਾਤਾ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫ਼ੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"ਇੱਕ ਡ੍ਰੀਮ ਸੇਵਾ ਨਾਲ ਜੋੜੋ"</string>
-    <string name="permdesc_bindDreamService" msgid="9129615743300572973">"ਹੋਲਡਰ ਨੂੰ ਇੱਕ ਡ੍ਰੀਮ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <string name="permdesc_bindDreamService" msgid="9129615743300572973">"ਹੋਲਡਰ ਨੂੰ ਇੱਕ ਡ੍ਰੀਮ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫ਼ੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"ਕੈਰੀਅਰ-ਵੱਲੋਂ ਮੁਹੱਈਆ ਕੀਤੇ ਕੌਂਫਿਗਰੇਸ਼ਨ ਐਪ ਦੀ ਬੇਨਤੀ ਕਰੋ"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"ਹੋਲਡਰ ਨੂੰ ਕੈਰੀਅਰ-ਵੱਲੋਂ ਮੁਹੱਈਆ ਕੀਤੇ ਕੌਂਫਿਗਰੇਸ਼ਨ ਐਪ ਦੀ ਬੇਨਤੀ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਸ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"ਨੈੱਟਵਰਕ ਸਥਿਤੀਆਂ ਤੇ ਟਿੱਪਣੀਆਂ ਸੁਣੋ"</string>
@@ -785,7 +785,7 @@
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"DRM ਸਰਟੀਫਿਕੇਟ ਹਟਾਓ"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ DRM ਸਰਟੀਫਿਕੇਟ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"ਇੱਕ ਕੈਰੀਅਰ ਮੈਸੇਜਿੰਗ ਸੇਵਾ ਨਾਲ ਜੋੜੋ"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ਹੋਲਡਰ ਨੂੰ ਇੱਕ ਕੈਰੀਅਰ ਮੈਸੇਜਿੰਗ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ਹੋਲਡਰ ਨੂੰ ਇੱਕ ਕੈਰੀਅਰ ਮੈਸੇਜਿੰਗ ਸੇਵਾ ਦੇ ਉੱਚ-ਪੱਧਰ ਦੇ ਇੰਟਰਫ਼ੇਸ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"ਕੈਰੀਅਰ ਸੇਵਾਵਾਂ ਨਾਲ ਜੋੜੋ"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"ਹੋਲਡਰ ਨੂੰ ਕੈਰੀਅਰ ਸੇਵਾਵਾਂ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਸ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਤੱਕ ਪਹੁੰਚ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
