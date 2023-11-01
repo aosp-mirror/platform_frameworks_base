@@ -106,6 +106,10 @@ public class SystemUiSystemPropertiesFlags {
         /** b/301242692: Visit extra URIs used in notifications to prevent security issues. */
         public static final Flag VISIT_RISKY_URIS = devFlag(
                 "persist.sysui.notification.visit_risky_uris");
+
+        /** b/303716154: For debugging only: use short bitmap duration. */
+        public static final Flag DEBUG_SHORT_BITMAP_DURATION = devFlag(
+                "persist.sysui.notification.debug_short_bitmap_duration");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////
