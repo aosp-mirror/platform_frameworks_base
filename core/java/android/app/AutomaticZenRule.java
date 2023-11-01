@@ -16,16 +16,23 @@
 
 package android.app;
 
+import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.NotificationManager.InterruptionFilter;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.notification.Condition;
 import android.service.notification.ZenPolicy;
+import android.view.WindowInsetsController;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -36,7 +43,67 @@ public final class AutomaticZenRule implements Parcelable {
     private static final int ENABLED = 1;
     /* @hide */
     private static final int DISABLED = 0;
-    private boolean enabled = false;
+
+    /**
+     * Rule is of an unknown type. This is the default value if not provided by the owning app.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_UNKNOWN = -1;
+    /**
+     * Rule is of a known type, but not one of the specific types.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_OTHER = 0;
+    /**
+     * The type for rules triggered according to a time-based schedule.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_SCHEDULE_TIME = 1;
+    /**
+     * The type for rules triggered by calendar events.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_SCHEDULE_CALENDAR = 2;
+    /**
+     * The type for rules triggered by bedtime/sleeping, like time of day, or snore detection.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_BEDTIME = 3;
+    /**
+     * The type for rules triggered by driving detection, like Bluetooth connections or vehicle
+     * sounds.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_DRIVING = 4;
+    /**
+     * The type for rules triggered by the user entering an immersive activity, like opening an app
+     * using {@link WindowInsetsController#hide(int)}.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_IMMERSIVE = 5;
+    /**
+     * The type for rules that have a {@link ZenPolicy} that implies that the
+     * device should not make sound and potentially hide some visual effects; may be triggered
+     * when entering a location where silence is requested, like a theater.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_THEATER = 6;
+    /**
+     * The type for rules created and managed by a device owner. These rules may not be fully
+     * editable by the device user.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int TYPE_MANAGED = 7;
+
+    /** @hide */
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_UNKNOWN, TYPE_OTHER, TYPE_SCHEDULE_TIME, TYPE_SCHEDULE_CALENDAR, TYPE_BEDTIME,
+            TYPE_DRIVING, TYPE_IMMERSIVE, TYPE_THEATER, TYPE_MANAGED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Type {}
+
+    private boolean enabled;
     private String name;
     private @InterruptionFilter int interruptionFilter;
     private Uri conditionId;
@@ -46,6 +113,10 @@ public final class AutomaticZenRule implements Parcelable {
     private ZenPolicy mZenPolicy;
     private boolean mModified = false;
     private String mPkg;
+    private int mType = TYPE_UNKNOWN;
+    private int mIconResId;
+    private String mTriggerDescription;
+    private boolean mAllowManualInvocation;
 
     /**
      * The maximum string length for any string contained in this automatic zen rule. This pertains
@@ -53,6 +124,12 @@ public final class AutomaticZenRule implements Parcelable {
      * @hide
      */
     public static final int MAX_STRING_LENGTH = 1000;
+
+    /**
+     * The maximum string length for the trigger description rule, given UI constraints.
+     * @hide
+     */
+    public static final int MAX_DESC_LENGTH = 150;
 
     /**
      * Creates an automatic zen rule.
@@ -97,6 +174,7 @@ public final class AutomaticZenRule implements Parcelable {
      *               action ({@link Condition#STATE_TRUE}).
      * @param enabled Whether the rule is enabled.
      */
+    // TODO (b/309088420): deprecate this constructor in favor of the builder
     public AutomaticZenRule(@NonNull String name, @Nullable ComponentName owner,
             @Nullable ComponentName configurationActivity, @NonNull Uri conditionId,
             @Nullable ZenPolicy policy, int interruptionFilter, boolean enabled) {
@@ -134,6 +212,12 @@ public final class AutomaticZenRule implements Parcelable {
         mZenPolicy = source.readParcelable(null, android.service.notification.ZenPolicy.class);
         mModified = source.readInt() == ENABLED;
         mPkg = source.readString();
+        if (Flags.modesApi()) {
+            mAllowManualInvocation = source.readBoolean();
+            mIconResId = source.readInt();
+            mTriggerDescription = getTrimmedString(source.readString(), MAX_DESC_LENGTH);
+            mType = source.readInt();
+        }
     }
 
     /**
@@ -269,6 +353,81 @@ public final class AutomaticZenRule implements Parcelable {
         return mPkg;
     }
 
+    /**
+     * Gets the type of the rule.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public int getType() {
+        return mType;
+    }
+
+    /**
+     * Sets the type of the rule.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public void setType(@Type int type) {
+        mType = type;
+    }
+
+    /**
+     * Gets the user visible description of when this rule is active
+     * (see {@link Condition#STATE_TRUE}).
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public @Nullable String getTriggerDescription() {
+        return mTriggerDescription;
+    }
+
+    /**
+     * Sets a user visible description of when this rule will be active
+     * (see {@link Condition#STATE_TRUE}).
+     *
+     * A description should be a (localized) string like "Mon-Fri, 9pm-7am" or
+     * "When connected to [Car Name]".
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public void setTriggerDescription(@Nullable String triggerDescription) {
+        mTriggerDescription = triggerDescription;
+    }
+
+    /**
+     * Gets the resource id of the drawable icon for this rule.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public @DrawableRes int getIconResId() {
+        return mIconResId;
+    }
+
+    /**
+     * Sets a resource id of a tintable vector drawable representing the rule in image form.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public void setIconResId(int iconResId) {
+        mIconResId = iconResId;
+    }
+
+    /**
+     * Gets whether this rule can be manually activated by the user even when the triggering
+     * condition for the rule is not met.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public boolean isManualInvocationAllowed() {
+        return mAllowManualInvocation;
+    }
+
+    /**
+     * Sets whether this rule can be manually activated by the user even when the triggering
+     * condition for the rule is not met.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public void setManualInvocationAllowed(boolean allowManualInvocation) {
+        mAllowManualInvocation = allowManualInvocation;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -291,11 +450,17 @@ public final class AutomaticZenRule implements Parcelable {
         dest.writeParcelable(mZenPolicy, 0);
         dest.writeInt(mModified ? ENABLED : DISABLED);
         dest.writeString(mPkg);
+        if (Flags.modesApi()) {
+            dest.writeBoolean(mAllowManualInvocation);
+            dest.writeInt(mIconResId);
+            dest.writeString(mTriggerDescription);
+            dest.writeInt(mType);
+        }
     }
 
     @Override
     public String toString() {
-        return new StringBuilder(AutomaticZenRule.class.getSimpleName()).append('[')
+        StringBuilder sb = new StringBuilder(AutomaticZenRule.class.getSimpleName()).append('[')
                 .append("enabled=").append(enabled)
                 .append(",name=").append(name)
                 .append(",interruptionFilter=").append(interruptionFilter)
@@ -304,8 +469,16 @@ public final class AutomaticZenRule implements Parcelable {
                 .append(",owner=").append(owner)
                 .append(",configActivity=").append(configurationActivity)
                 .append(",creationTime=").append(creationTime)
-                .append(",mZenPolicy=").append(mZenPolicy)
-                .append(']').toString();
+                .append(",mZenPolicy=").append(mZenPolicy);
+
+        if (Flags.modesApi()) {
+            sb.append(",allowManualInvocation=").append(mAllowManualInvocation)
+                    .append(",iconResId=").append(mIconResId)
+                    .append(",triggerDescription=").append(mTriggerDescription)
+                    .append(",type=").append(mType);
+        }
+
+        return sb.append(']').toString();
     }
 
     @Override
@@ -313,7 +486,7 @@ public final class AutomaticZenRule implements Parcelable {
         if (!(o instanceof AutomaticZenRule)) return false;
         if (o == this) return true;
         final AutomaticZenRule other = (AutomaticZenRule) o;
-        return other.enabled == enabled
+        boolean finalEquals = other.enabled == enabled
                 && other.mModified == mModified
                 && Objects.equals(other.name, name)
                 && other.interruptionFilter == interruptionFilter
@@ -323,10 +496,23 @@ public final class AutomaticZenRule implements Parcelable {
                 && Objects.equals(other.configurationActivity, configurationActivity)
                 && Objects.equals(other.mPkg, mPkg)
                 && other.creationTime == creationTime;
+        if (Flags.modesApi()) {
+            return finalEquals
+                    && other.mAllowManualInvocation == mAllowManualInvocation
+                    && other.mIconResId == mIconResId
+                    && Objects.equals(other.mTriggerDescription, mTriggerDescription)
+                    && other.mType == mType;
+        }
+        return finalEquals;
     }
 
     @Override
     public int hashCode() {
+        if (Flags.modesApi()) {
+            return Objects.hash(enabled, name, interruptionFilter, conditionId, owner,
+                    configurationActivity, mZenPolicy, mModified, creationTime, mPkg,
+                    mAllowManualInvocation, mIconResId, mTriggerDescription, mType);
+        }
         return Objects.hash(enabled, name, interruptionFilter, conditionId, owner,
                 configurationActivity, mZenPolicy, mModified, creationTime, mPkg);
     }
@@ -357,8 +543,12 @@ public final class AutomaticZenRule implements Parcelable {
      * Returns a truncated copy of the string if the string is longer than MAX_STRING_LENGTH.
      */
     private static String getTrimmedString(String input) {
-        if (input != null && input.length() > MAX_STRING_LENGTH) {
-            return input.substring(0, MAX_STRING_LENGTH);
+        return getTrimmedString(input, MAX_STRING_LENGTH);
+    }
+
+    private static String getTrimmedString(String input, int length) {
+        if (input != null && input.length() > length) {
+            return input.substring(0, length);
         }
         return input;
     }
@@ -372,5 +562,139 @@ public final class AutomaticZenRule implements Parcelable {
             return Uri.parse(getTrimmedString(input.toString()));
         }
         return input;
+    }
+
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final class Builder {
+        private String mName;
+        private ComponentName mOwner;
+        private Uri mConditionId;
+        private int mInterruptionFilter;
+        private boolean mEnabled;
+        private ComponentName mConfigurationActivity = null;
+        private ZenPolicy mPolicy = null;
+        private int mType;
+        private String mDescription;
+        private int mIconResId;
+        private boolean mAllowManualInvocation;
+        private long mCreationTime;
+        private String mPkg;
+
+        public Builder(@NonNull AutomaticZenRule rule) {
+            mName = rule.getName();
+            mOwner = rule.getOwner();
+            mConditionId = rule.getConditionId();
+            mInterruptionFilter = rule.getInterruptionFilter();
+            mEnabled = rule.isEnabled();
+            mConfigurationActivity = rule.getConfigurationActivity();
+            mPolicy = rule.getZenPolicy();
+            mType = rule.getType();
+            mDescription = rule.getTriggerDescription();
+            mIconResId = rule.getIconResId();
+            mAllowManualInvocation = rule.isManualInvocationAllowed();
+            mCreationTime = rule.getCreationTime();
+            mPkg = rule.getPackageName();
+        }
+
+        public Builder(@NonNull String name, @NonNull Uri conditionId) {
+            mName = name;
+            mConditionId = conditionId;
+        }
+
+        public @NonNull Builder setName(@NonNull String name) {
+            mName = name;
+            return this;
+        }
+
+        public @NonNull Builder setOwner(@Nullable ComponentName owner) {
+            mOwner = owner;
+            return this;
+        }
+
+        public @NonNull Builder setConditionId(@NonNull Uri conditionId) {
+            mConditionId = conditionId;
+            return this;
+        }
+
+        public @NonNull Builder setInterruptionFilter(
+                @InterruptionFilter int interruptionFilter) {
+            mInterruptionFilter = interruptionFilter;
+            return this;
+        }
+
+        public @NonNull Builder setEnabled(boolean enabled) {
+            mEnabled = enabled;
+            return this;
+        }
+
+        public @NonNull Builder setConfigurationActivity(
+                @Nullable ComponentName configurationActivity) {
+            mConfigurationActivity = configurationActivity;
+            return this;
+        }
+
+        public @NonNull Builder setZenPolicy(@Nullable ZenPolicy policy) {
+            mPolicy = policy;
+            return this;
+        }
+
+        /**
+         * Sets the type of the rule
+         */
+        public @NonNull Builder setType(@Type int type) {
+            mType = type;
+            return this;
+        }
+
+        /**
+         * Sets a user visible description of when this rule will be active
+         * (see {@link Condition#STATE_TRUE}).
+         *
+         * A description should be a (localized) string like "Mon-Fri, 9pm-7am" or
+         * "When connected to [Car Name]".
+         */
+        public @NonNull Builder setTriggerDescription(@Nullable String description) {
+            mDescription = description;
+            return this;
+        }
+
+        /**
+         * Sets a resource id of a tintable vector drawable representing the rule in image form.
+         */
+        public @NonNull Builder setIconResId(@DrawableRes int iconResId) {
+            mIconResId = iconResId;
+            return this;
+        }
+
+        /**
+         * Sets whether this rule can be manually activated by the user even when the triggering
+         * condition for the rule is not met.
+         */
+        public @NonNull Builder setManualInvocationAllowed(boolean allowManualInvocation) {
+            mAllowManualInvocation = allowManualInvocation;
+            return this;
+        }
+
+        /**
+         * Sets the time at which this rule was created, in milliseconds since epoch
+         * @hide
+         */
+        public @NonNull Builder setCreationTime(long creationTime) {
+            mCreationTime = creationTime;
+            return this;
+        }
+
+        public @NonNull AutomaticZenRule build() {
+            AutomaticZenRule rule = new AutomaticZenRule(mName, mOwner, mConfigurationActivity,
+                    mConditionId, mPolicy, mInterruptionFilter, mEnabled);
+            rule.creationTime = mCreationTime;
+            rule.mType = mType;
+            rule.mTriggerDescription = mDescription;
+            rule.mIconResId = mIconResId;
+            rule.mAllowManualInvocation = mAllowManualInvocation;
+            rule.setPackageName(mPkg);
+
+            return rule;
+        }
     }
 }

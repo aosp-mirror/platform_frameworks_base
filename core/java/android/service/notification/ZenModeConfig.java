@@ -28,6 +28,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OF
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.AutomaticZenRule;
+import android.app.Flags;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -177,6 +179,10 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_CREATION_TIME = "creationTime";
     private static final String RULE_ATT_ENABLER = "enabler";
     private static final String RULE_ATT_MODIFIED = "modified";
+    private static final String RULE_ATT_ALLOW_MANUAL = "userInvokable";
+    private static final String RULE_ATT_TYPE = "type";
+    private static final String RULE_ATT_ICON = "rule_icon";
+    private static final String RULE_ATT_TRIGGER_DESC = "triggerDesc";
 
     @UnsupportedAppUsage
     public boolean allowAlarms = DEFAULT_ALLOW_ALARMS;
@@ -212,7 +218,7 @@ public class ZenModeConfig implements Parcelable {
         allowCallsFrom = source.readInt();
         allowMessagesFrom = source.readInt();
         user = source.readInt();
-        manualRule = source.readParcelable(null, android.service.notification.ZenModeConfig.ZenRule.class);
+        manualRule = source.readParcelable(null, ZenRule.class);
         final int len = source.readInt();
         if (len > 0) {
             final String[] ids = new String[len];
@@ -622,6 +628,12 @@ public class ZenModeConfig implements Parcelable {
         }
         rt.modified = safeBoolean(parser, RULE_ATT_MODIFIED, false);
         rt.zenPolicy = readZenPolicyXml(parser);
+        if (Flags.modesApi()) {
+            rt.allowManualInvocation = safeBoolean(parser, RULE_ATT_ALLOW_MANUAL, false);
+            rt.iconResId = safeInt(parser, RULE_ATT_ICON, 0);
+            rt.triggerDescription = parser.getAttributeValue(null, RULE_ATT_TRIGGER_DESC);
+            rt.type = safeInt(parser, RULE_ATT_TYPE, AutomaticZenRule.TYPE_UNKNOWN);
+        }
         return rt;
     }
 
@@ -655,6 +667,14 @@ public class ZenModeConfig implements Parcelable {
             writeZenPolicyXml(rule.zenPolicy, out);
         }
         out.attributeBoolean(null, RULE_ATT_MODIFIED, rule.modified);
+        if (Flags.modesApi()) {
+            out.attributeBoolean(null, RULE_ATT_ALLOW_MANUAL, rule.allowManualInvocation);
+            out.attributeInt(null, RULE_ATT_ICON, rule.iconResId);
+            if (rule.triggerDescription != null) {
+                out.attribute(null, RULE_ATT_TRIGGER_DESC, rule.triggerDescription);
+            }
+            out.attributeInt(null, RULE_ATT_TYPE, rule.type);
+        }
     }
 
     public static Condition readConditionXml(TypedXmlPullParser parser) {
@@ -1726,6 +1746,11 @@ public class ZenModeConfig implements Parcelable {
         public ZenPolicy zenPolicy;
         public boolean modified;    // rule has been modified from initial creation
         public String pkg;
+        public int type = AutomaticZenRule.TYPE_UNKNOWN;
+        public String triggerDescription;
+        // TODO (b/308672670): switch to string res name
+        public int iconResId;
+        public boolean allowManualInvocation;
 
         public ZenRule() { }
 
@@ -1750,6 +1775,12 @@ public class ZenModeConfig implements Parcelable {
             zenPolicy = source.readParcelable(null, android.service.notification.ZenPolicy.class);
             modified = source.readInt() == 1;
             pkg = source.readString();
+            if (Flags.modesApi()) {
+                allowManualInvocation = source.readBoolean();
+                iconResId = source.readInt();
+                triggerDescription = source.readString();
+                type = source.readInt();
+            }
         }
 
         @Override
@@ -1788,11 +1819,17 @@ public class ZenModeConfig implements Parcelable {
             dest.writeParcelable(zenPolicy, 0);
             dest.writeInt(modified ? 1 : 0);
             dest.writeString(pkg);
+            if (Flags.modesApi()) {
+                dest.writeBoolean(allowManualInvocation);
+                dest.writeInt(iconResId);
+                dest.writeString(triggerDescription);
+                dest.writeInt(type);
+            }
         }
 
         @Override
         public String toString() {
-            return new StringBuilder(ZenRule.class.getSimpleName()).append('[')
+            StringBuilder sb = new StringBuilder(ZenRule.class.getSimpleName()).append('[')
                     .append("id=").append(id)
                     .append(",state=").append(condition == null ? "STATE_FALSE"
                             : Condition.stateToString(condition.state))
@@ -1808,8 +1845,16 @@ public class ZenModeConfig implements Parcelable {
                     .append(",enabler=").append(enabler)
                     .append(",zenPolicy=").append(zenPolicy)
                     .append(",modified=").append(modified)
-                    .append(",condition=").append(condition)
-                    .append(']').toString();
+                    .append(",condition=").append(condition);
+
+            if (Flags.modesApi()) {
+                sb.append(",allowManualInvocation=").append(allowManualInvocation)
+                        .append(",iconResId=").append(iconResId)
+                        .append(",triggerDescription=").append(triggerDescription)
+                        .append(",type=").append(type);
+            }
+
+            return sb.append(']').toString();
         }
 
         /** @hide */
@@ -1845,7 +1890,7 @@ public class ZenModeConfig implements Parcelable {
             if (!(o instanceof ZenRule)) return false;
             if (o == this) return true;
             final ZenRule other = (ZenRule) o;
-            return other.enabled == enabled
+            boolean finalEquals = other.enabled == enabled
                     && other.snoozing == snoozing
                     && Objects.equals(other.name, name)
                     && other.zenMode == zenMode
@@ -1858,10 +1903,25 @@ public class ZenModeConfig implements Parcelable {
                     && Objects.equals(other.zenPolicy, zenPolicy)
                     && Objects.equals(other.pkg, pkg)
                     && other.modified == modified;
+
+            if (Flags.modesApi()) {
+                return finalEquals
+                        && other.allowManualInvocation == allowManualInvocation
+                        && other.iconResId == iconResId
+                        && Objects.equals(other.triggerDescription, triggerDescription)
+                        && other.type == type;
+            }
+
+            return finalEquals;
         }
 
         @Override
         public int hashCode() {
+            if (Flags.modesApi()) {
+                return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
+                        component, configurationActivity, pkg, id, enabler, zenPolicy, modified,
+                        allowManualInvocation, iconResId, triggerDescription, type);
+            }
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                     component, configurationActivity, pkg, id, enabler, zenPolicy, modified);
         }
