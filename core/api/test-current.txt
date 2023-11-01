@@ -777,6 +777,25 @@ package android.app.job {
 
 }
 
+package android.app.pinner {
+
+  @FlaggedApi("android.app.pinner_service_client_api") public final class PinnedFileStat implements android.os.Parcelable {
+    ctor @FlaggedApi("android.app.pinner_service_client_api") public PinnedFileStat(@NonNull String, long, @NonNull String);
+    method @FlaggedApi("android.app.pinner_service_client_api") public int describeContents();
+    method @FlaggedApi("android.app.pinner_service_client_api") public long getBytesPinned();
+    method @FlaggedApi("android.app.pinner_service_client_api") @NonNull public String getFilename();
+    method @FlaggedApi("android.app.pinner_service_client_api") @NonNull public String getGroupName();
+    method @FlaggedApi("android.app.pinner_service_client_api") public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi("android.app.pinner_service_client_api") @NonNull public static final android.os.Parcelable.Creator<android.app.pinner.PinnedFileStat> CREATOR;
+  }
+
+  @FlaggedApi("android.app.pinner_service_client_api") public class PinnerServiceClient {
+    ctor @FlaggedApi("android.app.pinner_service_client_api") public PinnerServiceClient();
+    method @FlaggedApi("android.app.pinner_service_client_api") @NonNull public java.util.List<android.app.pinner.PinnedFileStat> getPinnerStats();
+  }
+
+}
+
 package android.app.prediction {
 
   public final class AppPredictor {
