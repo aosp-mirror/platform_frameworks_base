@@ -116,8 +116,13 @@ public class QrCamera extends Handler {
             mDecodeTask = null;
         }
         if (mCamera != null) {
-            mCamera.stopPreview();
-            releaseCamera();
+            try {
+                mCamera.stopPreview();
+                releaseCamera();
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Stop previewing camera failed:" + e);
+                mCamera = null;
+            }
         }
     }
 
