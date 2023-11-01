@@ -292,9 +292,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     // changed RunningTaskInfo when it finishes.
     private ActivityManager.RunningTaskInfo mDeferredTaskInfo;
     private WindowContainerToken mToken;
-    private SurfaceControl mLeash;
+    protected SurfaceControl mLeash;
     protected PipTransitionState mPipTransitionState;
-    private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
+    protected PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
     protected PictureInPictureParams mPictureInPictureParams;
     private IntConsumer mOnDisplayIdChangeCallback;
@@ -968,12 +968,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        cancelCurrentAnimator();
+        cancelAnimationOnTaskVanished();
         onExitPipFinished(info);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mPipTransitionController.forceFinishTransition();
         }
+    }
+
+    protected void cancelAnimationOnTaskVanished() {
+        cancelCurrentAnimator();
     }
 
     @Override
@@ -1095,7 +1099,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     /** Called when exiting PIP transition is finished to do the state cleanup. */
-    void onExitPipFinished(TaskInfo info) {
+    public void onExitPipFinished(TaskInfo info) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "onExitPipFinished: %s, state=%s leash=%s",
                 info.topActivity, mPipTransitionState, mLeash);
