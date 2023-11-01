@@ -380,6 +380,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mOccludingAppRequestingFace;
     private boolean mSecureCameraLaunched;
     private boolean mAllowedDisplayStateWhileAwakeForFaceAuth = true;
+    private boolean mBiometricPromptShowing;
     @VisibleForTesting
     protected boolean mTelephonyCapable;
     private boolean mAllowFingerprintOnCurrentOccludingActivity;
@@ -2010,9 +2011,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             };
 
     private final FingerprintManager.FingerprintDetectionCallback mFingerprintDetectionCallback =
-            (sensorId, userId, isStrongBiometric) -> {
-                // Trigger the fingerprint detected path so the bouncer can be shown
-                handleBiometricDetected(userId, FINGERPRINT, isStrongBiometric);
+            new FingerprintManager.FingerprintDetectionCallback() {
+                @Override
+                public void onDetectionError(int errorMsgId) {
+                    handleFingerprintError(errorMsgId, "");
+                }
+
+                @Override
+                public void onFingerprintDetected(int sensorId, int userId,
+                        boolean isStrongBiometric) {
+                    handleBiometricDetected(userId, FINGERPRINT, isStrongBiometric);
+                }
             };
 
     private final FaceManager.FaceDetectionCallback mFaceDetectionCallback
@@ -2641,6 +2650,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mainExecutor.execute(() -> updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                         FACE_AUTH_TRIGGERED_ENROLLMENTS_CHANGED));
             }
+
+            @Override
+            public void onBiometricPromptShown() {
+                // SysUI should give priority to the biometric prompt requesting FP instead of
+                // taking over the fingerprint listening state.
+                mBiometricPromptShowing = true;
+            }
+
+            @Override
+            public void onBiometricPromptDismissed() {
+                mBiometricPromptShowing = false;
+                updateFingerprintListeningState(BIOMETRIC_ACTION_START);
+            }
         });
         if (mConfigFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
             mPostureController.addCallback(mPostureCallback);
@@ -3139,7 +3161,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
-                && shouldListenBouncerState && shouldListenUdfpsState;
+                && shouldListenBouncerState && shouldListenUdfpsState && !mBiometricPromptShowing;
         logListenerModelData(
                 new KeyguardFingerprintListenModel(
                     System.currentTimeMillis(),
@@ -3148,6 +3170,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mAllowFingerprintOnCurrentOccludingActivity,
                     mAlternateBouncerShowing,
                     biometricEnabledForUser,
+                    mBiometricPromptShowing,
                     mPrimaryBouncerIsOrWillBeShowing,
                     userCanSkipBouncer,
                     mCredentialAttempted,
