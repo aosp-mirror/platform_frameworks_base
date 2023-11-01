@@ -9694,6 +9694,27 @@ public class CarrierConfigManager {
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
     /**
+     * An integer key holds the time interval for refreshing or re-querying the satellite
+     * entitlement status from the entitlement server to ensure it is the latest.
+     *
+     * The default value is 30 days (1 month).
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT =
+            "satellite_entitlement_status_refresh_days_int";
+
+    /**
+     * This configuration enables device to query the entitlement server to get the satellite
+     * configuration.
+     * This will need agreement the carrier before enabling this flag.
+     *
+     * The default value is false.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL =
+            "satellite_entitlement_supported_bool";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -10799,6 +10820,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         sDefaults.putBoolean(KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL, true);
+        sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 30);
+        sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
