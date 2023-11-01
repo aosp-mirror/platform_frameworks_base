@@ -21,8 +21,8 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
+import android.widget.Switch
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -34,6 +34,7 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.AccessPointController
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.InternetTileBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.model.InternetTileModel
@@ -96,6 +97,7 @@ constructor(
 
     override fun handleUpdateState(state: QSTile.BooleanState, arg: Any?) {
         state.label = mContext.resources.getString(R.string.quick_settings_internet_label)
+        state.expandedAccessibilityClassName = Switch::class.java.name
 
         model.applyTo(state, mContext)
     }
