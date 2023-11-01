@@ -25,6 +25,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -118,8 +119,15 @@ constructor(
                     }
                 }
             } else {
-                interactor.topPosition.map { top ->
-                    keyguardInteractor.sharedNotificationContainerPosition.value.copy(top = top)
+                interactor.topPosition.sample(shadeInteractor.qsExpansion, ::Pair).map {
+                    (top, qsExpansion) ->
+                    // When QS expansion > 0, it should directly set the top padding so do not
+                    // animate it
+                    val animate = qsExpansion == 0f
+                    keyguardInteractor.sharedNotificationContainerPosition.value.copy(
+                        top = top,
+                        animate = animate
+                    )
                 }
             }
         }

@@ -59,10 +59,8 @@ object SharedNotificationContainerBinder {
 
                 launch {
                     viewModel.position.collect {
-                        controller.updateTopPadding(
-                            it.top,
-                            controller.isAddOrRemoveAnimationPending()
-                        )
+                        val animate = it.animate || controller.isAddOrRemoveAnimationPending()
+                        controller.updateTopPadding(it.top, animate)
                     }
                 }
 
