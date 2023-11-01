@@ -1984,6 +1984,9 @@ public class AudioSystem
     public static native int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register);
 
     /** @hide */
+    public static native int getRegisteredPolicyMixes(@NonNull List<AudioMix> devices);
+
+    /** @hide */
     public static native int updatePolicyMixes(
             AudioMix[] mixes,
             AudioMixingRule[] updatedMixingRules);

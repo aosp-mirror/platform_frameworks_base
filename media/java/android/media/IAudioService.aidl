@@ -365,6 +365,8 @@ interface IAudioService {
 
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
 
+    List<AudioMix> getRegisteredPolicyMixes();
+
     void unregisterAudioPolicy(in IAudioPolicyCallback pcb);
 
     int addMixForPolicy(in AudioPolicyConfig policyConfig, in IAudioPolicyCallback pcb);
