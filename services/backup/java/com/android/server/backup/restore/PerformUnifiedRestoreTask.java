@@ -63,6 +63,7 @@ import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupAndRestoreFeatureFlags;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.BackupUtils;
+import com.android.server.backup.Flags;
 import com.android.server.backup.OperationStorage;
 import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.PackageManagerBackupAgent;
@@ -263,7 +264,14 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                         continue;
                     }
 
-                    if (backupEligibilityRules.appIsEligibleForBackup(info.applicationInfo)) {
+
+                    ApplicationInfo applicationInfo = info.applicationInfo;
+                    if (backupEligibilityRules.appIsEligibleForBackup(applicationInfo)) {
+                        if (Flags.enableSkippingRestoreLaunchedApps()
+                            && !backupEligibilityRules.isAppEligibleForRestore(applicationInfo)) {
+                            continue;
+                        }
+
                         mAcceptSet.add(info);
                     }
                 } catch (NameNotFoundException e) {
