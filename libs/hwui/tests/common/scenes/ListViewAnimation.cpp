@@ -57,7 +57,7 @@ class ListViewAnimation : public TestListViewSceneBase {
                 128 * 3;
         paint.setColor(bgDark ? Color::White : Color::Grey_700);
 
-        SkFont font;
+        SkFont font = TestUtils::defaultFont();
         font.setSize(size / 2);
         char charToShow = 'A' + (rand() % 26);
         const SkPoint pos = {SkIntToScalar(size / 2),
