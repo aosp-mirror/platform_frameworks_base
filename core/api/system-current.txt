@@ -37,7 +37,7 @@ package android {
     field public static final String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
     field public static final String ALLOW_PLACE_IN_MULTI_PANE_SETTINGS = "android.permission.ALLOW_PLACE_IN_MULTI_PANE_SETTINGS";
     field public static final String ALLOW_SLIPPERY_TOUCHES = "android.permission.ALLOW_SLIPPERY_TOUCHES";
-    field public static final String ALWAYS_UPDATE_WALLPAPER = "android.permission.ALWAYS_UPDATE_WALLPAPER";
+    field @FlaggedApi("com.android.window.flags.always_update_wallpaper_permission") public static final String ALWAYS_UPDATE_WALLPAPER = "android.permission.ALWAYS_UPDATE_WALLPAPER";
     field public static final String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String ASSOCIATE_COMPANION_DEVICES = "android.permission.ASSOCIATE_COMPANION_DEVICES";
