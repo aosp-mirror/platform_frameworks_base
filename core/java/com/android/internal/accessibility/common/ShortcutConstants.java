@@ -60,6 +60,17 @@ public final class ShortcutConstants {
     }
 
     /**
+     * A list of possible {@link UserShortcutType}. Should stay in sync with the
+     * non-default IntDef types.
+     */
+    public static final int[] USER_SHORTCUT_TYPES = {
+            UserShortcutType.SOFTWARE,
+            UserShortcutType.HARDWARE,
+            UserShortcutType.TRIPLETAP
+    };
+
+
+    /**
      * Annotation for the different accessibility fragment type.
      *
      * {@code VOLUME_SHORTCUT_TOGGLE} for displaying appearance with switch bar and only one
