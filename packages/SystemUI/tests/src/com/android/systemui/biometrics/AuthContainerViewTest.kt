@@ -505,7 +505,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
                 this.authenticators = authenticators
             }
         },
-        featureFlags,
         testScope.backgroundScope,
         fingerprintProps,
         faceProps,
@@ -519,9 +518,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         PromptViewModel(
             displayStateInteractor,
             promptSelectorInteractor,
-            vibrator,
             context,
-            featureFlags
         ),
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),

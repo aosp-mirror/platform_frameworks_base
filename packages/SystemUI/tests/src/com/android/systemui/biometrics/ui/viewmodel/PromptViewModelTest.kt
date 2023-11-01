@@ -44,18 +44,16 @@ import com.android.systemui.biometrics.shared.model.toSensorType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.display.data.repository.FakeDisplayRepository
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -64,9 +62,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 4
@@ -95,7 +91,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
     private lateinit var iconViewModel: PromptIconViewModel
-    private val featureFlags = FakeFeatureFlags()
 
     @Before
     fun setup() {
@@ -125,10 +120,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
 
-        viewModel =
-            PromptViewModel(displayStateInteractor, selector, vibrator, mContext, featureFlags)
+        viewModel = PromptViewModel(displayStateInteractor, selector, mContext)
         iconViewModel = viewModel.iconViewModel
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 
     @Test
@@ -180,26 +173,29 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun play_haptic_on_confirm_when_confirmation_required_otherwise_on_authenticated() =
+    fun set_haptic_on_confirm_when_confirmation_required_otherwise_on_authenticated() =
         runGenericTest {
             val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
             viewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
 
-            verify(vibrator, if (expectConfirmation) never() else times(1))
-                .vibrateAuthSuccess(any())
+            val confirmConstant by collectLastValue(viewModel.hapticsToPlay)
+            assertThat(confirmConstant)
+                .isEqualTo(
+                    if (expectConfirmation) HapticFeedbackConstants.NO_HAPTICS
+                    else HapticFeedbackConstants.CONFIRM
+                )
 
             if (expectConfirmation) {
                 viewModel.confirmAuthenticated()
             }
 
-            verify(vibrator).vibrateAuthSuccess(any())
-            verify(vibrator, never()).vibrateAuthError(any())
+            val confirmedConstant by collectLastValue(viewModel.hapticsToPlay)
+            assertThat(confirmedConstant).isEqualTo(HapticFeedbackConstants.CONFIRM)
         }
 
     @Test
-    fun playSuccessHaptic_onwayHapticsEnabled_SetsConfirmConstant() = runGenericTest {
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
+    fun playSuccessHaptic_SetsConfirmConstant() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
         viewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
 
@@ -212,8 +208,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun playErrorHaptic_onwayHapticsEnabled_SetsRejectConstant() = runGenericTest {
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
+    fun playErrorHaptic_SetsRejectConstant() = runGenericTest {
         viewModel.showTemporaryError("test", "messageAfterError", false)
 
         val currentConstant by collectLastValue(viewModel.hapticsToPlay)
@@ -251,7 +246,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                             DisplayRotation.ROTATION_180 ->
                                 R.raw.biometricprompt_fingerprint_to_error_landscape
                             DisplayRotation.ROTATION_270 ->
-                                R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright
+                                R.raw
+                                    .biometricprompt_symbol_fingerprint_to_error_portrait_bottomright
                             else -> throw Exception("invalid rotation")
                         }
                     assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
@@ -496,7 +492,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                             DisplayRotation.ROTATION_180 ->
                                 R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
                             DisplayRotation.ROTATION_270 ->
-                                R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_bottomright
+                                R.raw
+                                    .biometricprompt_symbol_fingerprint_to_success_portrait_bottomright
                             else -> throw Exception("invalid rotation")
                         }
                     assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
@@ -733,7 +730,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun plays_haptic_on_errors() = runGenericTest {
+    fun set_haptic_on_errors() = runGenericTest {
         viewModel.showTemporaryError(
             "so sad",
             messageAfterError = "",
@@ -741,8 +738,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = true,
         )
 
-        verify(vibrator).vibrateAuthError(any())
-        verify(vibrator, never()).vibrateAuthSuccess(any())
+        val constant by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(constant).isEqualTo(HapticFeedbackConstants.REJECT)
     }
 
     @Test
@@ -754,8 +751,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = false,
         )
 
-        verify(vibrator, never()).vibrateAuthError(any())
-        verify(vibrator, never()).vibrateAuthSuccess(any())
+        val constant by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(constant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
     }
 
     private suspend fun TestScope.showTemporaryErrors(
