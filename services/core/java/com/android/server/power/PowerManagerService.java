@@ -3584,7 +3584,7 @@ public final class PowerManagerService extends SystemService
                         mBrightWhenDozingConfig);
                 int wakefulness = powerGroup.getWakefulnessLocked();
                 if (DEBUG_SPEW) {
-                    Slog.d(TAG, "updateDisplayPowerStateLocked: displayReady=" + ready
+                    Slog.d(TAG, "updatePowerGroupsLocked: displayReady=" + ready
                             + ", groupId=" + groupId
                             + ", policy=" + policyToString(powerGroup.getPolicyLocked())
                             + ", mWakefulness="
