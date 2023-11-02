@@ -55,15 +55,19 @@ class RadiiAnimator {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
                 animationListener.onRadiiAnimationUpdate(evaluate(/* t = */ 0.0f));
+                animationListener.onRadiiAnimationStart();
             }
 
             @Override
-            public void onAnimationEnd(@NonNull Animator animation) {}
+            public void onAnimationEnd(@NonNull Animator animation) {
+                animationListener.onRadiiAnimationStop();
+            }
 
             @Override
             public void onAnimationCancel(@NonNull Animator animation) {
                 animationListener.onRadiiAnimationUpdate(
                         evaluate(mAnimationDriver.getAnimatedFraction()));
+                animationListener.onRadiiAnimationStop();
             }
 
             @Override
