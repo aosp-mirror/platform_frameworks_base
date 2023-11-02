@@ -66,8 +66,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
-import android.view.View;
-import android.view.WindowManager;
 import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
@@ -451,17 +449,11 @@ public class DisplayAreaTest extends WindowTestsBase {
     @Test
     public void testGetOrientation() {
         final DisplayArea.Tokens area = new DisplayArea.Tokens(mWm, ABOVE_TASKS, "test");
-        final WindowToken token = createWindowToken(TYPE_APPLICATION_OVERLAY);
-        spyOn(token);
-        doReturn(mock(DisplayContent.class)).when(token).getDisplayContent();
-        doNothing().when(token).setParent(any());
-        final WindowState win = createWindowState(token);
-        spyOn(win);
-        doNothing().when(win).setParent(any());
+        mDisplayContent.addChild(area, POSITION_TOP);
+        final WindowState win = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay");
         win.mAttrs.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        token.addChild(win, 0);
-        area.addChild(token);
-
+        win.mToken.reparent(area, POSITION_TOP);
+        spyOn(win);
         doReturn(true).when(win).isVisible();
 
         assertEquals("Visible window can request orientation",
@@ -751,13 +743,6 @@ public class DisplayAreaTest extends WindowTestsBase {
         SurfaceControl.Builder makeChildSurface(WindowContainer child) {
             return new MockSurfaceControlBuilder();
         }
-    }
-
-    private WindowState createWindowState(WindowToken token) {
-        return new WindowState(mWm, getTestSession(), new TestIWindow(), token,
-                null /* parentWindow */, 0 /* appOp */, new WindowManager.LayoutParams(),
-                View.VISIBLE, 0 /* ownerId */, 0 /* showUserId */,
-                false /* ownerCanAddInternalSystemWindow */);
     }
 
     private WindowToken createWindowToken(int type) {

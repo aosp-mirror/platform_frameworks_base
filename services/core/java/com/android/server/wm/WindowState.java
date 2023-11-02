@@ -1089,6 +1089,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mClient = c;
         mAppOp = appOp;
         mToken = token;
+        mDisplayContent = token.mDisplayContent;
         mActivityRecord = mToken.asActivityRecord();
         mOwnerUid = ownerId;
         mShowUserId = showUserId;
@@ -1562,11 +1563,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void orientationChangeTimedOut() {
         mOrientationChangeTimedOut = true;
-    }
-
-    @Override
-    public DisplayContent getDisplayContent() {
-        return mToken.getDisplayContent();
     }
 
     @Override
