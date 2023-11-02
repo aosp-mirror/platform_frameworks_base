@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.dagger
+package com.android.systemui.communal.data.repository
 
-import com.android.systemui.communal.data.repository.CommunalMediaRepositoryModule
-import com.android.systemui.communal.data.repository.CommunalRepositoryModule
-import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
-import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
+import dagger.Binds
 import dagger.Module
 
-@Module(
-    includes =
-        [
-            CommunalMediaRepositoryModule::class,
-            CommunalRepositoryModule::class,
-            CommunalTutorialRepositoryModule::class,
-            CommunalWidgetRepositoryModule::class,
-        ]
-)
-class CommunalModule
+@Module
+interface CommunalMediaRepositoryModule {
+    @Binds fun communalMediaRepository(impl: CommunalMediaRepositoryImpl): CommunalMediaRepository
+}

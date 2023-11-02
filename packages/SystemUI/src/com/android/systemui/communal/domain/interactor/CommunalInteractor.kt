@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
@@ -34,6 +35,7 @@ class CommunalInteractor
 constructor(
     private val communalRepository: CommunalRepository,
     widgetRepository: CommunalWidgetRepository,
+    mediaRepository: CommunalMediaRepository,
 ) {
 
     /** Whether communal features are enabled. */
@@ -50,6 +52,9 @@ constructor(
      * (have an allocated id).
      */
     val widgetContent: Flow<List<CommunalWidgetContentModel>> = widgetRepository.communalWidgets
+
+    /** A flow indicating whether or not media is playing. */
+    val mediaPlaying: Flow<Boolean> = mediaRepository.mediaPlaying
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
