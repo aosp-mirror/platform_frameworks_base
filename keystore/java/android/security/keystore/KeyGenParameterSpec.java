@@ -1596,6 +1596,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * {@link #getAttestationChallenge()} returns non-null and the spec is used to generate a
          * symmetric (AES or HMAC) key, {@link javax.crypto.KeyGenerator#generateKey()} will throw
          * {@link java.security.InvalidAlgorithmParameterException}.
+         *
+         * <p>The challenge may be up to 128 bytes.
          */
         @NonNull
         public Builder setAttestationChallenge(byte[] attestationChallenge) {
