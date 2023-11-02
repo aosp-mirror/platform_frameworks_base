@@ -16,15 +16,17 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.graphics.drawable.Icon
+import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationEntryModel
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.update
-
-private typealias ModelStore = Map<String, ActiveNotificationModel>
 
 /**
  * Logic for passing information from the
@@ -38,24 +40,61 @@ constructor(
     private val sectionStyleProvider: SectionStyleProvider,
 ) {
     /**
-     * Sets the current list of rendered notification entries as displayed in the notification
-     * stack.
-     *
-     * @see com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository.activeNotifications
+     * Sets the current list of rendered notification entries as displayed in the notification list.
      */
     fun setRenderedList(entries: List<ListEntry>) {
         repository.activeNotifications.update { existingModels ->
-            entries
-                .asSequence()
-                .mapNotNull { it.representativeEntry }
-                .associateBy(
-                    keySelector = { it.key },
-                    valueTransform = { it.toModel(existingModels) },
-                )
+            buildActiveNotificationsStore(existingModels, sectionStyleProvider) {
+                entries.forEach(::addListEntry)
+            }
+        }
+    }
+}
+
+private fun buildActiveNotificationsStore(
+    existingModels: ActiveNotificationsStore,
+    sectionStyleProvider: SectionStyleProvider,
+    block: ActiveNotificationsStoreBuilder.() -> Unit
+): ActiveNotificationsStore =
+    ActiveNotificationsStoreBuilder(existingModels, sectionStyleProvider).apply(block).build()
+
+private class ActiveNotificationsStoreBuilder(
+    private val existingModels: ActiveNotificationsStore,
+    private val sectionStyleProvider: SectionStyleProvider,
+) {
+    private val builder = ActiveNotificationsStore.Builder()
+
+    fun build(): ActiveNotificationsStore = builder.build()
+
+    /**
+     * Convert a [ListEntry] into [ActiveNotificationEntryModel]s, and add them to the
+     * [ActiveNotificationsStore]. Special care is taken to avoid re-allocating models if the result
+     * would be identical to an existing model (at the expense of additional computations).
+     */
+    fun addListEntry(entry: ListEntry) {
+        when (entry) {
+            is GroupEntry -> {
+                entry.summary?.let { summary ->
+                    val summaryModel = summary.toModel()
+                    val childModels = entry.children.map { it.toModel() }
+                    builder.addNotifGroup(
+                        existingModels.createOrReuse(
+                            key = entry.key,
+                            summary = summaryModel,
+                            children = childModels
+                        )
+                    )
+                }
+            }
+            else -> {
+                entry.representativeEntry?.let { notifEntry ->
+                    builder.addIndividualNotif(notifEntry.toModel())
+                }
+            }
         }
     }
 
-    private fun NotificationEntry.toModel(existingModels: ModelStore): ActiveNotificationModel =
+    private fun NotificationEntry.toModel(): ActiveNotificationModel =
         existingModels.createOrReuse(
             key = key,
             groupKey = sbn.groupKey,
@@ -69,76 +108,98 @@ constructor(
             shelfIcon = icons.shelfIcon?.sourceIcon,
             statusBarIcon = icons.statusBarIcon?.sourceIcon,
         )
+}
 
-    private fun ModelStore.createOrReuse(
-        key: String,
-        groupKey: String?,
-        isAmbient: Boolean,
-        isRowDismissed: Boolean,
-        isSilent: Boolean,
-        isLastMessageFromReply: Boolean,
-        isSuppressedFromStatusBar: Boolean,
-        isPulsing: Boolean,
-        aodIcon: Icon?,
-        shelfIcon: Icon?,
-        statusBarIcon: Icon?
-    ): ActiveNotificationModel {
-        return this[key]?.takeIf {
-            it.isCurrent(
-                key = key,
-                groupKey = groupKey,
-                isAmbient = isAmbient,
-                isRowDismissed = isRowDismissed,
-                isSilent = isSilent,
-                isLastMessageFromReply = isLastMessageFromReply,
-                isSuppressedFromStatusBar = isSuppressedFromStatusBar,
-                isPulsing = isPulsing,
-                aodIcon = aodIcon,
-                shelfIcon = shelfIcon,
-                statusBarIcon = statusBarIcon
-            )
-        }
-            ?: ActiveNotificationModel(
-                key = key,
-                groupKey = groupKey,
-                isAmbient = isAmbient,
-                isRowDismissed = isRowDismissed,
-                isSilent = isSilent,
-                isLastMessageFromReply = isLastMessageFromReply,
-                isSuppressedFromStatusBar = isSuppressedFromStatusBar,
-                isPulsing = isPulsing,
-                aodIcon = aodIcon,
-                shelfIcon = shelfIcon,
-                statusBarIcon = statusBarIcon,
-            )
+private fun ActiveNotificationsStore.createOrReuse(
+    key: String,
+    groupKey: String?,
+    isAmbient: Boolean,
+    isRowDismissed: Boolean,
+    isSilent: Boolean,
+    isLastMessageFromReply: Boolean,
+    isSuppressedFromStatusBar: Boolean,
+    isPulsing: Boolean,
+    aodIcon: Icon?,
+    shelfIcon: Icon?,
+    statusBarIcon: Icon?
+): ActiveNotificationModel {
+    return individuals[key]?.takeIf {
+        it.isCurrent(
+            key = key,
+            groupKey = groupKey,
+            isAmbient = isAmbient,
+            isRowDismissed = isRowDismissed,
+            isSilent = isSilent,
+            isLastMessageFromReply = isLastMessageFromReply,
+            isSuppressedFromStatusBar = isSuppressedFromStatusBar,
+            isPulsing = isPulsing,
+            aodIcon = aodIcon,
+            shelfIcon = shelfIcon,
+            statusBarIcon = statusBarIcon
+        )
     }
+        ?: ActiveNotificationModel(
+            key = key,
+            groupKey = groupKey,
+            isAmbient = isAmbient,
+            isRowDismissed = isRowDismissed,
+            isSilent = isSilent,
+            isLastMessageFromReply = isLastMessageFromReply,
+            isSuppressedFromStatusBar = isSuppressedFromStatusBar,
+            isPulsing = isPulsing,
+            aodIcon = aodIcon,
+            shelfIcon = shelfIcon,
+            statusBarIcon = statusBarIcon,
+        )
+}
 
-    private fun ActiveNotificationModel.isCurrent(
-        key: String,
-        groupKey: String?,
-        isAmbient: Boolean,
-        isRowDismissed: Boolean,
-        isSilent: Boolean,
-        isLastMessageFromReply: Boolean,
-        isSuppressedFromStatusBar: Boolean,
-        isPulsing: Boolean,
-        aodIcon: Icon?,
-        shelfIcon: Icon?,
-        statusBarIcon: Icon?
-    ): Boolean {
-        return when {
-            key != this.key -> false
-            groupKey != this.groupKey -> false
-            isAmbient != this.isAmbient -> false
-            isRowDismissed != this.isRowDismissed -> false
-            isSilent != this.isSilent -> false
-            isLastMessageFromReply != this.isLastMessageFromReply -> false
-            isSuppressedFromStatusBar != this.isSuppressedFromStatusBar -> false
-            isPulsing != this.isPulsing -> false
-            aodIcon != this.aodIcon -> false
-            shelfIcon != this.shelfIcon -> false
-            statusBarIcon != this.statusBarIcon -> false
-            else -> true
-        }
+private fun ActiveNotificationModel.isCurrent(
+    key: String,
+    groupKey: String?,
+    isAmbient: Boolean,
+    isRowDismissed: Boolean,
+    isSilent: Boolean,
+    isLastMessageFromReply: Boolean,
+    isSuppressedFromStatusBar: Boolean,
+    isPulsing: Boolean,
+    aodIcon: Icon?,
+    shelfIcon: Icon?,
+    statusBarIcon: Icon?
+): Boolean {
+    return when {
+        key != this.key -> false
+        groupKey != this.groupKey -> false
+        isAmbient != this.isAmbient -> false
+        isRowDismissed != this.isRowDismissed -> false
+        isSilent != this.isSilent -> false
+        isLastMessageFromReply != this.isLastMessageFromReply -> false
+        isSuppressedFromStatusBar != this.isSuppressedFromStatusBar -> false
+        isPulsing != this.isPulsing -> false
+        aodIcon != this.aodIcon -> false
+        shelfIcon != this.shelfIcon -> false
+        statusBarIcon != this.statusBarIcon -> false
+        else -> true
+    }
+}
+
+private fun ActiveNotificationsStore.createOrReuse(
+    key: String,
+    summary: ActiveNotificationModel,
+    children: List<ActiveNotificationModel>,
+): ActiveNotificationGroupModel {
+    return groups[key]?.takeIf { it.isCurrent(key, summary, children) }
+        ?: ActiveNotificationGroupModel(key, summary, children)
+}
+
+private fun ActiveNotificationGroupModel.isCurrent(
+    key: String,
+    summary: ActiveNotificationModel,
+    children: List<ActiveNotificationModel>,
+): Boolean {
+    return when {
+        key != this.key -> false
+        summary != this.summary -> false
+        children != this.children -> false
+        else -> true
     }
 }

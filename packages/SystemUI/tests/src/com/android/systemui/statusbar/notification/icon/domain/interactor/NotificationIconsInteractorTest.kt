@@ -25,6 +25,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.shared.activeNotificationModel
 import com.android.systemui.statusbar.notification.shared.byIsAmbient
@@ -77,7 +78,9 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
     fun setup() =
         with(testComponent) {
             activeNotificationListRepository.activeNotifications.value =
-                testIcons.associateBy { it.key }
+                ActiveNotificationsStore.Builder()
+                    .apply { testIcons.forEach(::addIndividualNotif) }
+                    .build()
         }
 
     @Test
@@ -196,7 +199,9 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
     fun setup() =
         with(testComponent) {
             activeNotificationListRepository.activeNotifications.value =
-                testIcons.associateBy { it.key }
+                ActiveNotificationsStore.Builder()
+                    .apply { testIcons.forEach(::addIndividualNotif) }
+                    .build()
         }
 
     @Test
@@ -318,7 +323,9 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
     fun setup() =
         with(testComponent) {
             activeNotificationListRepository.activeNotifications.value =
-                testIcons.associateBy { it.key }
+                ActiveNotificationsStore.Builder()
+                    .apply { testIcons.forEach(::addIndividualNotif) }
+                    .build()
         }
 
     @Test

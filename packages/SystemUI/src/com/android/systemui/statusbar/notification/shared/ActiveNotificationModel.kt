@@ -17,9 +17,17 @@ package com.android.systemui.statusbar.notification.shared
 
 import android.graphics.drawable.Icon
 
-/** Model for entries in the notification stack. */
+/**
+ * Model for a top-level "entry" in the notification list, either an
+ * [individual notification][ActiveNotificationModel], or a [group][ActiveNotificationGroupModel].
+ */
+sealed class ActiveNotificationEntryModel
+
+/**
+ * Model for an individual notification in the notification list. These can appear as either an
+ * individual top-level notification, or as a child or summary of a [ActiveNotificationGroupModel].
+ */
 data class ActiveNotificationModel(
-    /** Notification key associated with this entry. */
     val key: String,
     /** Notification group key associated with this entry. */
     val groupKey: String?,
@@ -47,4 +55,11 @@ data class ActiveNotificationModel(
     val shelfIcon: Icon?,
     /** Icon to display in the status bar. */
     val statusBarIcon: Icon?,
-)
+) : ActiveNotificationEntryModel()
+
+/** Model for a group of notifications. */
+data class ActiveNotificationGroupModel(
+    val key: String,
+    val summary: ActiveNotificationModel,
+    val children: List<ActiveNotificationModel>,
+) : ActiveNotificationEntryModel()
