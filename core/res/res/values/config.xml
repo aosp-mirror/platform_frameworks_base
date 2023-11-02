@@ -2213,7 +2213,10 @@
     <bool name="config_single_volume">false</bool>
 
     <!-- Volume policy -->
+    <!-- Strongly consider keeping these 2 values in sync - otherwise vol up/vol down have confusing
+    asymmetric behavior, as in b/279645379 -->
     <bool name="config_volume_down_to_enter_silent">false</bool>
+    <bool name="config_volume_up_to_exit_silent">false</bool>
 
     <!-- The number of volume steps for the notification stream -->
     <integer name="config_audio_notif_vol_steps">7</integer>
