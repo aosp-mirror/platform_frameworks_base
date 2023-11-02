@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
@@ -103,6 +105,8 @@ public class PackageArchiverTest {
     @Mock
     private ActivityManager mActivityManager;
     @Mock
+    private AppOpsManager mAppOpsManager;
+    @Mock
     private PackageManager mPackageManager;
     @Mock
     private PackageInstallerService mInstallerService;
@@ -160,12 +164,17 @@ public class PackageArchiverTest {
         when(mPackageState.getUserStateOrDefault(eq(mUserId))).thenReturn(mUserState);
 
         when(mContext.getSystemService(LauncherApps.class)).thenReturn(mLauncherApps);
+        when(mContext.getSystemService(AppOpsManager.class)).thenReturn(
+                mAppOpsManager);
         when(mLauncherApps.getActivityList(eq(PACKAGE), eq(UserHandle.CURRENT))).thenReturn(
                 mLauncherActivityInfos);
 
         when(mContext.getSystemService(ActivityManager.class)).thenReturn(mActivityManager);
         when(mActivityManager.getLauncherLargeIconDensity()).thenReturn(100);
 
+        when(mAppOpsManager.checkOp(
+                eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),
+                anyInt(), eq(PACKAGE))).thenReturn(MODE_ALLOWED);
         doReturn(mComputer).when(mPackageManagerService).snapshotComputer();
         when(mComputer.getPackageUid(eq(CALLER_PACKAGE), eq(0L), eq(mUserId))).thenReturn(
                 Binder.getCallingUid());
@@ -305,6 +314,21 @@ public class PackageArchiverTest {
     }
 
     @Test
+    public void archiveApp_appOptedOutOfArchiving() {
+        when(mAppOpsManager.checkOp(
+                eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),
+                anyInt(), eq(PACKAGE))).thenReturn(MODE_IGNORED);
+
+        Exception e = assertThrows(
+                ParcelableException.class,
+                () -> mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
+                        UserHandle.CURRENT));
+        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
+        assertThat(e.getCause()).hasMessageThat().isEqualTo(
+                TextUtils.formatSimple("The app %s is opted out of archiving.", PACKAGE));
+    }
+
+    @Test
     public void archiveApp_success() {
         mArchiveManager.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
         rule.mocks().getHandler().flush();
@@ -316,6 +340,39 @@ public class PackageArchiverTest {
         assertThat(mPackageSetting.readUserState(
                 UserHandle.CURRENT.getIdentifier()).getArchiveState()).isEqualTo(
                 createArchiveState());
+    }
+
+    @Test
+    public void isAppArchivable_success() throws PackageManager.NameNotFoundException {
+        assertThat(mArchiveManager.isAppArchivable(PACKAGE, UserHandle.CURRENT)).isTrue();
+    }
+
+    @Test
+    public void isAppArchivable_installerDoesntSupportUnarchival()
+            throws PackageManager.NameNotFoundException {
+        doReturn(new ParceledListSlice<>(List.of()))
+                .when(mPackageManagerService).queryIntentReceivers(any(), any(), any(), anyLong(),
+                        eq(mUserId));
+
+        assertThat(mArchiveManager.isAppArchivable(PACKAGE, UserHandle.CURRENT)).isFalse();
+    }
+
+    @Test
+    public void isAppArchivable_noMainActivities() throws PackageManager.NameNotFoundException {
+        when(mLauncherApps.getActivityList(eq(PACKAGE), eq(UserHandle.CURRENT))).thenReturn(
+                List.of());
+
+        assertThat(mArchiveManager.isAppArchivable(PACKAGE, UserHandle.CURRENT)).isFalse();
+    }
+
+    @Test
+    public void isAppArchivable_appOptedOutOfArchiving()
+            throws PackageManager.NameNotFoundException {
+        when(mAppOpsManager.checkOp(
+                eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),
+                anyInt(), eq(PACKAGE))).thenReturn(MODE_IGNORED);
+
+        assertThat(mArchiveManager.isAppArchivable(PACKAGE, UserHandle.CURRENT)).isFalse();
     }
 
     @Test
