@@ -313,7 +313,8 @@ public class VcnGatewayConnectionConfigTest {
 
     @Test
     public void testBuilderAndGettersSafeModeDisabled() {
-        final VcnGatewayConnectionConfig config = newBuilderMinimal().enableSafeMode(false).build();
+        final VcnGatewayConnectionConfig config =
+                newBuilderMinimal().setSafeModeEnabled(false).build();
 
         assertFalse(config.isSafeModeEnabled());
     }
@@ -335,7 +336,8 @@ public class VcnGatewayConnectionConfigTest {
 
     @Test
     public void testPersistableBundleSafeModeDisabled() {
-        final VcnGatewayConnectionConfig config = newBuilderMinimal().enableSafeMode(false).build();
+        final VcnGatewayConnectionConfig config =
+                newBuilderMinimal().setSafeModeEnabled(false).build();
 
         assertEquals(config, new VcnGatewayConnectionConfig(config.toPersistableBundle()));
     }
@@ -456,7 +458,7 @@ public class VcnGatewayConnectionConfigTest {
         assertEquals(config.isSafeModeEnabled(), configEqual.isSafeModeEnabled());
 
         final VcnGatewayConnectionConfig configNotEqual =
-                newBuilderMinimal().enableSafeMode(false).build();
+                newBuilderMinimal().setSafeModeEnabled(false).build();
 
         assertEquals(config, configEqual);
         assertNotEquals(config, configNotEqual);

@@ -493,7 +493,7 @@ public final class VcnGatewayConnectionConfig {
     /**
      * Check whether safe mode is enabled
      *
-     * @see Builder#enableSafeMode(boolean)
+     * @see Builder#setSafeModeEnabled(boolean)
      */
     @FlaggedApi(FLAG_SAFE_MODE_CONFIG)
     public boolean isSafeModeEnabled() {
@@ -815,8 +815,8 @@ public final class VcnGatewayConnectionConfig {
          *
          * <p>If a VCN fails to provide connectivity within a system-provided timeout, it will enter
          * safe mode. In safe mode, the VCN Network will be torn down and the system will restore
-         * connectivity by allowing underlying cellular networks to be used as default. At the same
-         * time, VCN will continue to retry until it succeeds.
+         * connectivity by allowing underlying cellular or WiFi networks to be used as default. At
+         * the same time, VCN will continue to retry until it succeeds.
          *
          * <p>When safe mode is disabled and VCN connection fails to provide connectivity, end users
          * might not have connectivity, and may not have access to carrier-owned underlying
@@ -826,7 +826,7 @@ public final class VcnGatewayConnectionConfig {
          */
         @FlaggedApi(FLAG_SAFE_MODE_CONFIG)
         @NonNull
-        public Builder enableSafeMode(boolean enabled) {
+        public Builder setSafeModeEnabled(boolean enabled) {
             mIsSafeModeDisabled = !enabled;
             return this;
         }
