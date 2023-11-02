@@ -75,6 +75,7 @@ public class BackgroundActivityStartController {
 
     private static final long ASM_GRACEPERIOD_TIMEOUT_MS = TIMEOUT_MS;
     private static final int ASM_GRACEPERIOD_MAX_REPEATS = 5;
+    private static final int NO_PROCESS_UID = -1;
     public static final ActivityOptions ACTIVITY_OPTIONS_SYSTEM_DEFINED =
             ActivityOptions.makeBasic()
                     .setPendingIntentBackgroundActivityStartMode(
@@ -649,7 +650,7 @@ public class BackgroundActivityStartController {
         if (PendingIntentRecord.isPendingIntentBalAllowedByPermission(checkedOptions)
                 && ActivityManager.checkComponentPermission(
                 android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
-                state.mRealCallingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
+                state.mRealCallingUid, NO_PROCESS_UID, true) == PackageManager.PERMISSION_GRANTED) {
             return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
                     /*background*/ false,
                     "realCallingUid has BAL permission.");
@@ -834,7 +835,7 @@ public class BackgroundActivityStartController {
                 /* caller_activity_class_name */
                 sourceRecord != null ? sourceRecord.info.name : null,
                 /* target_task_top_activity_uid */
-                targetTopActivity != null ? targetTopActivity.getUid() : -1,
+                targetTopActivity != null ? targetTopActivity.getUid() : NO_PROCESS_UID,
                 /* target_task_top_activity_class_name */
                 targetTopActivity != null ? targetTopActivity.info.name : null,
                 /* target_task_is_different */
@@ -988,13 +989,13 @@ public class BackgroundActivityStartController {
                 /* caller_activity_class_name */
                 callerActivityClassName,
                 /* target_task_top_activity_uid */
-                topActivity == null ? -1 : topActivity.getUid(),
+                topActivity == null ? NO_PROCESS_UID : topActivity.getUid(),
                 /* target_task_top_activity_class_name */
                 topActivity == null ? null : topActivity.info.name,
                 /* target_task_is_different */
                 false,
                 /* target_activity_uid */
-                -1,
+                NO_PROCESS_UID,
                 /* target_activity_class_name */
                 null,
                 /* target_intent_action */
