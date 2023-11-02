@@ -185,10 +185,11 @@
     <dimen name="bubble_pointer_overlap">1dp</dimen>
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
-    <!-- Height of button allowing users to adjust settings for bubbles. -->
-    <dimen name="bubble_manage_button_height">36dp</dimen>
-    <!-- Height of manage button including margins. -->
-    <dimen name="bubble_manage_button_total_height">68dp</dimen>
+    <!-- Height of button allowing users to adjust settings for bubbles. We use sp so that the
+         button can scale with the font size. -->
+    <dimen name="bubble_manage_button_height">36sp</dimen>
+    <!-- Touch area height of the manage button. -->
+    <dimen name="bubble_manage_button_touch_area_height">48dp</dimen>
     <!-- The margin around the outside of the manage button. -->
     <dimen name="bubble_manage_button_margin">16dp</dimen>
     <!-- Height of an item in the bubble manage menu. -->
