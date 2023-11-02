@@ -433,10 +433,15 @@ public class BackgroundActivityStartController {
     static class BalVerdict {
 
         static final BalVerdict BLOCK = new BalVerdict(BAL_BLOCK, false, "Blocked");
+        static final BalVerdict ALLOW_BY_DEFAULT =
+                new BalVerdict(BAL_ALLOW_DEFAULT, false, "Default");
         private final @BalCode int mCode;
         private final boolean mBackground;
         private final String mMessage;
         private String mProcessInfo;
+        // indicates BAL would be blocked because only creator of the PI has the privilege to allow
+        // BAL, the sender does not have the privilege to allow BAL.
+        private boolean mOnlyCreatorAllows;
 
         BalVerdict(@BalCode int balCode, boolean background, String message) {
             this.mBackground = background;
@@ -455,6 +460,15 @@ public class BackgroundActivityStartController {
 
         boolean allows() {
             return !blocks();
+        }
+
+        BalVerdict setOnlyCreatorAllows(boolean onlyCreatorAllows) {
+            mOnlyCreatorAllows = onlyCreatorAllows;
+            return this;
+        }
+
+        boolean onlyCreatorAllows() {
+            return mOnlyCreatorAllows;
         }
 
         public String toString() {
@@ -566,6 +580,10 @@ public class BackgroundActivityStartController {
         BalVerdict resultForRealCaller = state.callerIsRealCaller() && resultForCaller.allows()
                 ? resultForCaller
                 : checkBackgroundActivityStartAllowedBySender(state, checkedOptions);
+        if (state.isPendingIntent()) {
+            resultForCaller.setOnlyCreatorAllows(
+                    resultForCaller.allows() && resultForRealCaller.blocks());
+        }
 
         if (resultForCaller.allows()
                 && checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
