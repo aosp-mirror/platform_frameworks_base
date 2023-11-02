@@ -3861,7 +3861,7 @@ package android.content.pm {
     method public boolean getInstallAsVirtualPreload();
     method public int getPendingUserActionReason();
     method public boolean getRequestDowngrade();
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_INSTALLED_SESSION_PATHS) public String getResolvedBaseApkPath();
+    method @FlaggedApi("android.content.pm.get_resolved_apk_path") @Nullable @RequiresPermission(android.Manifest.permission.READ_INSTALLED_SESSION_PATHS) public String getResolvedBaseApkPath();
     method public int getRollbackDataPolicy();
     method @NonNull public java.util.Set<java.lang.String> getWhitelistedRestrictedPermissions();
   }
