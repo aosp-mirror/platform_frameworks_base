@@ -28,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
+import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -742,6 +743,11 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             if (!change.hasFlags(FLAG_IS_OCCLUDED)) {
                 allOccluded = false;
+            }
+            // The change has already animated by back gesture, don't need to play transition
+            // animation on it.
+            if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
+                info.getChanges().remove(i);
             }
         }
         // There does not need animation when:

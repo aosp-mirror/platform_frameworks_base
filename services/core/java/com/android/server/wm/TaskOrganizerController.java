@@ -35,6 +35,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -733,7 +734,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      *         the task was removed from hierarchy.
      */
     int addWindowlessStartingSurface(Task task, ActivityRecord activity, SurfaceControl root,
-            TaskSnapshot taskSnapshot, IWindowlessStartingSurfaceCallback callback) {
+            TaskSnapshot taskSnapshot, Configuration configuration,
+            IWindowlessStartingSurfaceCallback callback) {
         final Task rootTask = task.getRootTask();
         if (rootTask == null) {
             return INVALID_TASK_ID;
@@ -743,6 +745,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             return INVALID_TASK_ID;
         }
         final StartingWindowInfo info = task.getStartingWindowInfo(activity);
+        info.taskInfo.configuration.setTo(configuration);
         info.taskInfo.taskDescription = activity.taskDescription;
         info.taskSnapshot = taskSnapshot;
         info.windowlessStartingSurfaceCallback = callback;
@@ -1195,8 +1198,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     public boolean handleInterceptBackPressedOnTaskRoot(Task task) {
-        if (task == null || !task.isOrganized()
-                || !mInterceptBackPressedOnRootTasks.contains(task.mTaskId)) {
+        if (!shouldInterceptBackPressedOnRootTask(task)) {
             return false;
         }
         final TaskOrganizerPendingEventsQueue pendingEventsQueue =
@@ -1227,6 +1229,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         pendingEventsQueue.addPendingTaskEvent(pending);
         mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
         return true;
+    }
+
+    boolean shouldInterceptBackPressedOnRootTask(Task task) {
+        return task != null && task.isOrganized()
+                && mInterceptBackPressedOnRootTasks.contains(task.mTaskId);
     }
 
     public void dump(PrintWriter pw, String prefix) {
