@@ -482,7 +482,7 @@
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Helitugevust vähendati ohutumale tasemele"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Kõrvaklappide helitugevus on olnud suur soovitatavast ajast kauem"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Kõrvaklappide helitugevus on ületanud selle nädala ohutuspiirangu"</string>
-    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Jätkake kuulamist"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Jätka kuulamist"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Vähenda helitugevust"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Rakendus on kinnitatud"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade."</string>

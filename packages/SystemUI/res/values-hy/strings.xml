@@ -390,7 +390,7 @@
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Ավելացնելով նոր օգտատեր՝ դուք դուրս կգաք հյուրի ռեժիմից։ Հյուրի ընթացիկ աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն։"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Սահմանաչափը սպառված է"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Հնարավոր է ստեղծել միայն մեկ օգտատեր։}one{Կարող եք առավելագույնը # օգտատեր ավելացնել։}other{Կարող եք առավելագույնը # օգտատեր ավելացնել։}}"</string>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Հեռացնե՞լ օգտատիրոջը:"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Հեռացնե՞լ օգտատիրոջը"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Այս օգտատիրոջ բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Հեռացնել"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Սկսե՞լ տեսագրումը կամ հեռարձակումը <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածով"</string>
@@ -1111,7 +1111,7 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Հասանելի դարձնե՞լ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> հավելվածին սարքի բոլոր մատյանները"</string>
-    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Թույլատրել մեկանգամյա մուտքը"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Թույլատրել մեկանգամյա մուտք"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Չթույլատրել"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Այն, ինչ տեղի է ունենում ձեր սարքում, գրանցվում է սարքի մատյաններում։ Հավելվածները կարող են դրանք օգտագործել անսարքությունները հայտնաբերելու և վերացնելու նպատակով։\n\nՔանի որ որոշ մատյաններ անձնական տեղեկություններ են պարունակում, խորհուրդ ենք տալիս հասանելի դարձնել ձեր սարքի բոլոր մատյանները միայն այն հավելվածներին, որոնց վստահում եք։ \n\nԵթե այս հավելվածին նման թույլտվություն չեք տվել, դրան նախկինի պես հասանելի կլինեն իր մատյանները։ Հնարավոր է՝ ձեր սարքի արտադրողին ևս հասանելի լինեն սարքի որոշ մատյաններ և տեղեկություններ։"</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Իմանալ ավելին"</string>
