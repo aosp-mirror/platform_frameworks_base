@@ -207,12 +207,6 @@ public class QuickSettingsController implements Dumpable {
 
     /** Indicates QS is at its max height */
     private boolean mFullyExpanded;
-    /**
-     * Determines if QS should be already expanded when expanding shade.
-     * Used for split shade, two finger gesture as well as accessibility shortcut to QS.
-     * It needs to be set when movement starts as it resets at the end of expansion/collapse.
-     */
-    private boolean mExpandImmediate;
     private boolean mExpandedWhenExpandingStarted;
     private boolean mAnimatingHiddenFromCollapsed;
     private boolean mVisible;
@@ -512,7 +506,7 @@ public class QuickSettingsController implements Dumpable {
     /** */
     @VisibleForTesting
     boolean isExpandImmediate() {
-        return mExpandImmediate;
+        return mShadeRepository.getLegacyExpandImmediate().getValue();
     }
 
     float getInitialTouchY() {
@@ -602,7 +596,7 @@ public class QuickSettingsController implements Dumpable {
         // close the whole shade with one motion. Also this will be always true when closing
         // split shade as there QS are always expanded so every collapsing motion is motion from
         // expanded QS to closed panel
-        return mExpandImmediate || (getExpanded()
+        return isExpandImmediate() || (getExpanded()
                 && !isTracking() && !isExpansionAnimating()
                 && !mExpansionFromOverscroll);
     }
@@ -792,7 +786,7 @@ public class QuickSettingsController implements Dumpable {
                 && mBarState == SHADE) {
             Log.wtf(TAG,
                     "setting QS height to 0 in split shade while shade is open(ing). "
-                            + "Value of mExpandImmediate = " + mExpandImmediate);
+                            + "Value of isExpandImmediate() = " + isExpandImmediate());
         }
         int maxHeight = getMaxExpansionHeight();
         height = Math.min(Math.max(
@@ -941,10 +935,9 @@ public class QuickSettingsController implements Dumpable {
     }
 
     void setExpandImmediate(boolean expandImmediate) {
-        if (expandImmediate != mExpandImmediate) {
+        if (expandImmediate != isExpandImmediate()) {
             mShadeLog.logQsExpandImmediateChanged(expandImmediate);
-            mExpandImmediate = expandImmediate;
-            mShadeExpansionStateManager.notifyExpandImmediateChange(expandImmediate);
+            mShadeRepository.setLegacyExpandImmediate(expandImmediate);
         }
     }
 
@@ -996,7 +989,7 @@ public class QuickSettingsController implements Dumpable {
     public void updateExpansion() {
         if (mQs == null) return;
         final float squishiness;
-        if ((mExpandImmediate || getExpanded()) && !mSplitShadeEnabled) {
+        if ((isExpandImmediate() || getExpanded()) && !mSplitShadeEnabled) {
             squishiness = 1;
         } else if (mTransitioningToFullShadeProgress > 0.0f) {
             squishiness = mLockscreenShadeTransitionController.getQsSquishTransitionFraction();
@@ -2077,8 +2070,8 @@ public class QuickSettingsController implements Dumpable {
         ipw.println(getExpanded());
         ipw.print("mFullyExpanded=");
         ipw.println(mFullyExpanded);
-        ipw.print("mExpandImmediate=");
-        ipw.println(mExpandImmediate);
+        ipw.print("isExpandImmediate()=");
+        ipw.println(isExpandImmediate());
         ipw.print("mExpandedWhenExpandingStarted=");
         ipw.println(mExpandedWhenExpandingStarted);
         ipw.print("mAnimatingHiddenFromCollapsed=");

@@ -69,6 +69,20 @@ constructor(
             .distinctUntilChanged()
             .stateIn(scope, SharingStarted.Eagerly, false)
 
+    override val isQsBypassingShade: Flow<Boolean> =
+        sceneInteractor.transitionState
+            .flatMapLatest { state ->
+                when (state) {
+                    is ObservableTransitionState.Idle -> flowOf(false)
+                    is ObservableTransitionState.Transition ->
+                        flowOf(
+                            state.toScene == SceneKey.QuickSettings &&
+                                state.fromScene != SceneKey.Shade
+                        )
+                }
+            }
+            .distinctUntilChanged()
+
     override val anyExpansion: StateFlow<Float> =
         createAnyExpansionFlow(scope, shadeExpansion, qsExpansion)
 

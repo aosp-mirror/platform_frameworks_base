@@ -169,12 +169,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
         }
     }
 
-    fun notifyExpandImmediateChange(expandImmediateEnabled: Boolean) {
-        for (cb in shadeStateEventsListeners) {
-            cb.onExpandImmediateChanged(expandImmediateEnabled)
-        }
-    }
-
     private fun debugLog(msg: String) {
         if (!DEBUG) return
         Log.v(TAG, msg)
