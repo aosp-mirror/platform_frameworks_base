@@ -64,6 +64,7 @@ class ShortcutKeyTestBase {
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
     TestPhoneWindowManager mPhoneWindowManager;
+    DispatchedKeyHandler mDispatchedKeyHandler = event -> false;
     final Context mContext = spy(getInstrumentation().getTargetContext());
 
     /** Modifier key to meta state */
@@ -100,6 +101,10 @@ class ShortcutKeyTestBase {
         doReturn(mSettingsProviderRule.mockContentResolver(mContext))
                 .when(mContext).getContentResolver();
         mPhoneWindowManager = new TestPhoneWindowManager(mContext, supportSettingsUpdate);
+    }
+
+    protected final void setDispatchedKeyHandler(DispatchedKeyHandler keyHandler) {
+        mDispatchedKeyHandler = keyHandler;
     }
 
     @After
@@ -174,9 +179,20 @@ class ShortcutKeyTestBase {
         int actions = mPhoneWindowManager.interceptKeyBeforeQueueing(keyEvent);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             if (0 == mPhoneWindowManager.interceptKeyBeforeDispatching(keyEvent)) {
-                mPhoneWindowManager.dispatchUnhandledKey(keyEvent);
+                if (!mDispatchedKeyHandler.onKeyDispatched(keyEvent)) {
+                    mPhoneWindowManager.dispatchUnhandledKey(keyEvent);
+                }
             }
         }
         mPhoneWindowManager.dispatchAllPendingEvents();
+    }
+
+    interface DispatchedKeyHandler {
+        /**
+         * Called when a key event is dispatched to app.
+         *
+         * @return true if the event is consumed by app.
+         */
+        boolean onKeyDispatched(KeyEvent event);
     }
 }
