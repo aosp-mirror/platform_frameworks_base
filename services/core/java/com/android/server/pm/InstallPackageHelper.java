@@ -1867,7 +1867,8 @@ final class InstallPackageHelper {
 
         final File targetDir = resolveTargetDir(request.getInstallFlags(), request.getCodeFile());
         final File beforeCodeFile = request.getCodeFile();
-        final File afterCodeFile = PackageManagerServiceUtils.getNextCodePath(targetDir);
+        final File afterCodeFile = PackageManagerServiceUtils.getNextCodePath(targetDir,
+                parsedPackage.getPackageName());
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Renaming " + beforeCodeFile + " to " + afterCodeFile);
         final boolean onIncremental = mPm.mIncrementalManager != null
@@ -3098,7 +3099,8 @@ final class InstallPackageHelper {
             return null;
         }
         final File dstCodePath =
-                PackageManagerServiceUtils.getNextCodePath(Environment.getDataAppDirectory(null));
+                PackageManagerServiceUtils.getNextCodePath(Environment.getDataAppDirectory(null),
+                        packageName);
         int ret = PackageManagerServiceUtils.decompressFiles(codePath, dstCodePath, packageName);
         if (ret == PackageManager.INSTALL_SUCCEEDED) {
             ret = PackageManagerServiceUtils.extractNativeBinaries(dstCodePath, packageName);
