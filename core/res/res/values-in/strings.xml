@@ -802,7 +802,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Mengizinkan pemegang mengupdate aplikasi yang sebelumnya diinstal tanpa tindakan pengguna"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau upaya pembukaan kunci layar"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Memantau upaya pembukaan kunci layar"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci perangkat Android TV atau menghapus semua data perangkat Android TV jika terlalu banyak sandi salah diketikkan."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci sistem infotainmen atau menghapus semua data sistem infotainmen jika terlalu banyak kesalahan memasukkan sandi."</string>
@@ -1639,7 +1639,7 @@
     <string name="media_route_status_in_use" msgid="6684112905244944724">"Sedang digunakan"</string>
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"Layar Built-In"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"Layar HDMI"</string>
-    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"Overlay #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", aman"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Lupa Pola?"</string>
@@ -1683,7 +1683,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Hapus"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Tetap mendengarkan dengan volume tinggi?\n\nVolume headphone tinggi selama lebih lama dari yang direkomendasikan, yang dapat merusak pendengaran Anda"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Suara keras terdeteksi\n\nVolume headphone tinggi selama lebih lama dari yang direkomendasikan, yang dapat merusak pendengaran Anda"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Suara keras terdeteksi\n\nVolume headphone lebih tinggi dari yang direkomendasikan, yang dapat merusak pendengaran Anda"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Aktifkan pintasan untuk fitur aksesibilitas?"</string>

@@ -118,7 +118,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Enheden er blevet låst af administratoren"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheden blev låst manuelt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ikke genkendt"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aktivér kameraadgang i Indstillinger for at bruge ansigtslås"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aktivér kameraadgang i Indstillinger for at bruge ansigtsoplåsning"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage, før du skal kontakte dit mobilselskab for at låse din enhed op.}one{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage.}other{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}one{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}other{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Standard"</string>
