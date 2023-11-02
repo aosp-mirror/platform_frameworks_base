@@ -275,7 +275,7 @@ public class ActivityOptionsTest {
                 case "android.activity.launchTypeBubble": // KEY_LAUNCHED_FROM_BUBBLE
                 case "android.activity.splashScreenStyle": // KEY_SPLASH_SCREEN_STYLE
                 case "android.activity.launchIntoPipParams": // KEY_LAUNCH_INTO_PIP_PARAMS
-                case "android.activity.dismissKeyguard": // KEY_DISMISS_KEYGUARD
+                case "android.activity.dismissKeyguardIfInsecure": // KEY_DISMISS_KEYGUARD_IF_INSECURE
                 case "android.activity.pendingIntentCreatorBackgroundActivityStartMode":
                     // KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE
                 case "android.activity.launchCookie": // KEY_LAUNCH_COOKIE
