@@ -2414,6 +2414,18 @@ public final class ProcessList {
                 allowlistedAppDataInfoMap = null;
             }
 
+            boolean bindOverrideSysprops = false;
+            String[] syspropOverridePkgNames = DeviceConfig.getString(
+                    DeviceConfig.NAMESPACE_APP_COMPAT,
+                            "appcompat_sysprop_override_pkgs", "").split(",");
+            String[] pkgs = app.getPackageList();
+            for (int i = 0; i < pkgs.length; i++) {
+                if (ArrayUtils.contains(syspropOverridePkgNames, pkgs[i])) {
+                    bindOverrideSysprops = true;
+                    break;
+                }
+            }
+
             AppStateTracker ast = mService.mServices.mAppStateTracker;
             if (ast != null) {
                 final boolean inBgRestricted = ast.isAppBackgroundRestricted(
@@ -2436,6 +2448,7 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         app.getDisabledCompatChanges(),
+                        bindOverrideSysprops,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
             } else if (hostingRecord.usesAppZygote()) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
@@ -2447,7 +2460,7 @@ public final class ProcessList {
                         app.info.dataDir, null, app.info.packageName,
                         /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, isTopApp,
                         app.getDisabledCompatChanges(), pkgDataInfoMap, allowlistedAppDataInfoMap,
-                        false, false,
+                        false, false, bindOverrideSysprops,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
             } else {
                 regularZygote = true;
@@ -2457,6 +2470,7 @@ public final class ProcessList {
                         app.info.dataDir, invokeWith, app.info.packageName, zygotePolicyFlags,
                         isTopApp, app.getDisabledCompatChanges(), pkgDataInfoMap,
                         allowlistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
+                        bindOverrideSysprops,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
                 // By now the process group should have been created by zygote.
                 app.mProcessGroupCreated = true;
