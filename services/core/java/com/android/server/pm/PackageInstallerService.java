@@ -50,6 +50,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -558,17 +559,22 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         // App package name and label length is restricted so that really long strings aren't
         // written to disk.
-        if (params.appPackageName != null
-                && params.appPackageName.length() > SessionParams.MAX_PACKAGE_NAME_LENGTH) {
+        if (params.appPackageName != null && !isValidPackageName(params.appPackageName)) {
             params.appPackageName = null;
         }
 
         params.appLabel = TextUtils.trimToSize(params.appLabel,
                 PackageItemInfo.MAX_SAFE_LABEL_LENGTH);
 
-        String requestedInstallerPackageName = (params.installerPackageName != null
-                && params.installerPackageName.length() < SessionParams.MAX_PACKAGE_NAME_LENGTH)
-                ? params.installerPackageName : installerPackageName;
+        // Validate installer package name.
+        if (params.installerPackageName != null && !isValidPackageName(
+                params.installerPackageName)) {
+            params.installerPackageName = null;
+        }
+
+        String requestedInstallerPackageName =
+                params.installerPackageName != null ? params.installerPackageName
+                        : installerPackageName;
 
         if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
@@ -861,6 +867,67 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         } while (n++ < 32);
 
         throw new IllegalStateException("Failed to allocate session ID");
+    }
+
+    /**
+     * For those names would be used as a part of the file name. Limits size to 223 and reserves 32
+     * for the OS.
+     */
+    private static final int MAX_FILE_NAME_SIZE = 223;
+
+    /**
+     * Check if the given name is valid.
+     *
+     * @param name The name to check.
+     * @param requireSeparator {@code true} if the name requires containing a separator at least.
+     * @param requireFilename {@code true} to apply file name validation to the given name. It also
+     *                        limits length of the name to the {@link #MAX_FILE_NAME_SIZE}.
+     * @return Success if it's valid.
+     */
+    private static String validateName(String name, boolean requireSeparator,
+            boolean requireFilename) {
+        final int N = name.length();
+        boolean hasSep = false;
+        boolean front = true;
+        for (int i = 0; i < N; i++) {
+            final char c = name.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                front = false;
+                continue;
+            }
+            if (!front) {
+                if ((c >= '0' && c <= '9') || c == '_') {
+                    continue;
+                }
+            }
+            if (c == '.') {
+                hasSep = true;
+                front = true;
+                continue;
+            }
+            return "bad character '" + c + "'";
+        }
+        if (requireFilename) {
+            if (!FileUtils.isValidExtFilename(name)) {
+                return "Invalid filename";
+            } else if (N > MAX_FILE_NAME_SIZE) {
+                return "the length of the name is greater than " + MAX_FILE_NAME_SIZE;
+            }
+        }
+        return hasSep || !requireSeparator ? null : "must have at least one '.' separator";
+    }
+
+    private static boolean isValidPackageName(String packageName) {
+        if (packageName.length() > SessionParams.MAX_PACKAGE_NAME_LENGTH) {
+            return false;
+        }
+        // "android" is a valid package name
+        String errorMessage = validateName(
+                packageName, /* requireSeparator= */ false, /* requireFilename */ true);
+        if (errorMessage != null) {
+            return false;
+        }
+        return true;
     }
 
     private File getTmpSessionDir(String volumeUuid) {
