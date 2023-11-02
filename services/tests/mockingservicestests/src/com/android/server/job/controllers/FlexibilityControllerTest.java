@@ -189,10 +189,7 @@ public class FlexibilityControllerTest {
     }
 
     private static JobInfo.Builder createJob(int id) {
-        return new JobInfo.Builder(id, new ComponentName("foo", "bar"))
-                .setPrefersBatteryNotLow(true)
-                .setPrefersCharging(true)
-                .setPrefersDeviceIdle(true);
+        return new JobInfo.Builder(id, new ComponentName("foo", "bar"));
     }
 
     private JobStatus createJobStatus(String testTag, JobInfo.Builder job) {
@@ -536,15 +533,12 @@ public class FlexibilityControllerTest {
             jb = createJob(i);
             if (i > 0) {
                 jb.setRequiresDeviceIdle(true);
-                jb.setPrefersDeviceIdle(false);
             }
             if (i > 1) {
                 jb.setRequiresBatteryNotLow(true);
-                jb.setPrefersBatteryNotLow(false);
             }
             if (i > 2) {
                 jb.setRequiresCharging(true);
-                jb.setPrefersCharging(false);
             }
             jobs[i] = createJobStatus("", jb);
             flexTracker.add(jobs[i]);
@@ -553,55 +547,53 @@ public class FlexibilityControllerTest {
         synchronized (mFlexibilityController.mLock) {
             ArrayList<ArraySet<JobStatus>> trackedJobs = flexTracker.getArrayList();
             assertEquals(1, trackedJobs.get(0).size());
-            assertEquals(1, trackedJobs.get(1).size());
+            assertEquals(0, trackedJobs.get(1).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(3, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
+
+            flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
+            assertEquals(1, trackedJobs.get(0).size());
+            assertEquals(0, trackedJobs.get(1).size());
             assertEquals(1, trackedJobs.get(2).size());
-            assertEquals(1, trackedJobs.get(3).size());
+            assertEquals(2, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
             assertEquals(1, trackedJobs.get(0).size());
             assertEquals(1, trackedJobs.get(1).size());
-            assertEquals(2, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
-            assertEquals(0, trackedJobs.get(4).size());
-
-            flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
-            assertEquals(1, trackedJobs.get(0).size());
-            assertEquals(2, trackedJobs.get(1).size());
-            assertEquals(1, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(2, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
             assertEquals(2, trackedJobs.get(0).size());
-            assertEquals(1, trackedJobs.get(1).size());
-            assertEquals(1, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(1).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(2, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.remove(jobs[1]);
             assertEquals(2, trackedJobs.get(0).size());
-            assertEquals(1, trackedJobs.get(1).size());
+            assertEquals(0, trackedJobs.get(1).size());
             assertEquals(0, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(1, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
             flexTracker.resetJobNumDroppedConstraints(jobs[0], FROZEN_TIME);
+            assertEquals(1, trackedJobs.get(0).size());
+            assertEquals(0, trackedJobs.get(1).size());
+            assertEquals(0, trackedJobs.get(2).size());
+            assertEquals(2, trackedJobs.get(3).size());
+            assertEquals(0, trackedJobs.get(4).size());
+
+            flexTracker.adjustJobsRequiredConstraints(jobs[0], -2, FROZEN_TIME);
             assertEquals(1, trackedJobs.get(0).size());
             assertEquals(1, trackedJobs.get(1).size());
             assertEquals(0, trackedJobs.get(2).size());
             assertEquals(1, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
-            flexTracker.adjustJobsRequiredConstraints(jobs[0], -2, FROZEN_TIME);
-            assertEquals(1, trackedJobs.get(0).size());
-            assertEquals(2, trackedJobs.get(1).size());
-            assertEquals(0, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
-            assertEquals(0, trackedJobs.get(4).size());
-
-            // Over halfway through the flex window. The job that prefers all flex constraints
-            // should have its first flex constraint dropped.
             final long nowElapsed = ((DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS / 2)
                     + HOUR_IN_MILLIS);
             JobSchedulerService.sElapsedRealtimeClock =
@@ -609,9 +601,9 @@ public class FlexibilityControllerTest {
 
             flexTracker.resetJobNumDroppedConstraints(jobs[0], nowElapsed);
             assertEquals(1, trackedJobs.get(0).size());
-            assertEquals(1, trackedJobs.get(1).size());
+            assertEquals(0, trackedJobs.get(1).size());
             assertEquals(1, trackedJobs.get(2).size());
-            assertEquals(0, trackedJobs.get(3).size());
+            assertEquals(1, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
         }
     }
@@ -626,13 +618,8 @@ public class FlexibilityControllerTest {
 
     @Test
     public void testExceptions_UserInitiated() {
-        JobInfo.Builder jb = createJob(0)
-                .setUserInitiated(true)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                // Attempt to add flex constraints to the job. For now, we will ignore them.
-                .setPrefersBatteryNotLow(true)
-                .setPrefersCharging(true)
-                .setPrefersDeviceIdle(false);
+        JobInfo.Builder jb = createJob(0);
+        jb.setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         JobStatus js = createJobStatus("testExceptions_UserInitiated", jb);
         assertFalse(js.hasFlexibilityConstraint());
     }
@@ -648,10 +635,10 @@ public class FlexibilityControllerTest {
 
     @Test
     public void testExceptions_NoFlexibleConstraints() {
-        JobInfo.Builder jb = createJob(0)
-                .setPrefersBatteryNotLow(false)
-                .setPrefersCharging(false)
-                .setPrefersDeviceIdle(false);
+        JobInfo.Builder jb = createJob(0);
+        jb.setRequiresDeviceIdle(true);
+        jb.setRequiresCharging(true);
+        jb.setRequiresBatteryNotLow(true);
         JobStatus js = createJobStatus("testExceptions_NoFlexibleConstraints", jb);
         assertFalse(js.hasFlexibilityConstraint());
     }
@@ -710,47 +697,12 @@ public class FlexibilityControllerTest {
         JobStatus js = createJobStatus("testTopAppBypass", jb);
         synchronized (mFlexibilityController.mLock) {
             js.setHasAccessToUnmetered(false);
-            assertEquals(0, mFlexibilityController.getNumSatisfiedFlexibleConstraintsLocked(js));
+            assertEquals(0, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
             js.setHasAccessToUnmetered(true);
-            assertEquals(1, mFlexibilityController.getNumSatisfiedFlexibleConstraintsLocked(js));
+            assertEquals(1, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
             js.setHasAccessToUnmetered(false);
-            assertEquals(0, mFlexibilityController.getNumSatisfiedFlexibleConstraintsLocked(js));
+            assertEquals(0, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
         }
-    }
-
-    @Test
-    public void testGetNumSatisfiedFlexibleConstraints() {
-        long nowElapsed = FROZEN_TIME;
-        mFlexibilityController.setConstraintSatisfied(CONSTRAINT_BATTERY_NOT_LOW, true, nowElapsed);
-        mFlexibilityController.setConstraintSatisfied(CONSTRAINT_CHARGING, true, nowElapsed);
-        mFlexibilityController.setConstraintSatisfied(CONSTRAINT_IDLE, true, nowElapsed);
-        JobInfo.Builder jb = createJob(0)
-                .setPrefersBatteryNotLow(false)
-                .setPrefersCharging(false)
-                .setPrefersDeviceIdle(false);
-        JobStatus js = createJobStatus("testGetNumSatisfiedFlexibleConstraints", jb);
-        assertEquals(0, mFlexibilityController.getNumSatisfiedFlexibleConstraintsLocked(js));
-
-        jb = createJob(0)
-                .setPrefersBatteryNotLow(true)
-                .setPrefersCharging(false)
-                .setPrefersDeviceIdle(false);
-        js = createJobStatus("testGetNumSatisfiedFlexibleConstraints", jb);
-        assertEquals(1, mFlexibilityController.getNumSatisfiedFlexibleConstraintsLocked(js));
-
-        jb = createJob(0)
-                .setPrefersBatteryNotLow(true)
-                .setPrefersCharging(false)
-                .setPrefersDeviceIdle(true);
-        js = createJobStatus("testGetNumSatisfiedFlexibleConstraints", jb);
-        assertEquals(2, mFlexibilityController.getNumSatisfiedFlexibleConstraintsLocked(js));
-
-        jb = createJob(0)
-                .setPrefersBatteryNotLow(true)
-                .setPrefersCharging(true)
-                .setPrefersDeviceIdle(true);
-        js = createJobStatus("testGetNumSatisfiedFlexibleConstraints", jb);
-        assertEquals(3, mFlexibilityController.getNumSatisfiedFlexibleConstraintsLocked(js));
     }
 
     @Test
@@ -784,11 +736,8 @@ public class FlexibilityControllerTest {
             jb = createJob(i);
             constraints = constraintCombinations[i];
             jb.setRequiresDeviceIdle((constraints & CONSTRAINT_IDLE) != 0);
-            jb.setPrefersDeviceIdle((constraints & CONSTRAINT_IDLE) == 0);
             jb.setRequiresBatteryNotLow((constraints & CONSTRAINT_BATTERY_NOT_LOW) != 0);
-            jb.setPrefersBatteryNotLow((constraints & CONSTRAINT_BATTERY_NOT_LOW) == 0);
             jb.setRequiresCharging((constraints & CONSTRAINT_CHARGING) != 0);
-            jb.setPrefersCharging((constraints & CONSTRAINT_CHARGING) == 0);
             synchronized (mFlexibilityController.mLock) {
                 mFlexibilityController.maybeStartTrackingJobLocked(
                         createJobStatus(String.valueOf(i), jb), null);
