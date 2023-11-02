@@ -23,6 +23,10 @@ import javax.inject.Inject
 
 @SysUISingleton
 class FalsingCollectorNoOp @Inject constructor() : FalsingCollector {
+    override fun init() {
+        logDebug("NOOP: init")
+    }
+
     override fun onSuccessfulUnlock() {
         logDebug("NOOP: onSuccessfulUnlock")
     }

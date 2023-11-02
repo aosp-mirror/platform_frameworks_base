@@ -20,6 +20,8 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
+import static android.provider.Settings.Global.HEADS_UP_ON;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
@@ -51,7 +53,6 @@ import android.app.NotificationChannel;
 import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.IntentFilter;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -180,10 +181,15 @@ import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -197,8 +203,6 @@ import java.io.PrintWriter;
 import java.util.Optional;
 
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -319,6 +323,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
+    private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
@@ -349,8 +354,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
                 Handler.createAsync(Looper.myLooper()));
 
+        mFakeGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
+
         mNotificationInterruptStateProvider =
-                new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
+                new TestableNotificationInterruptStateProviderImpl(
                         mPowerManager,
                         mAmbientDisplayConfiguration,
                         mStatusBarStateController,
@@ -363,7 +370,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mock(KeyguardNotificationVisibilityProvider.class),
                         mock(UiEventLogger.class),
                         mUserTracker,
-                        mDeviceProvisionedController);
+                        mDeviceProvisionedController,
+                        mFakeSystemClock,
+                        mFakeGlobalSettings);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -1162,7 +1171,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
             NotificationInterruptStateProviderImpl {
 
         TestableNotificationInterruptStateProviderImpl(
-                ContentResolver contentResolver,
                 PowerManager powerManager,
                 AmbientDisplayConfiguration ambientDisplayConfiguration,
                 StatusBarStateController controller,
@@ -1175,9 +1183,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
                 UiEventLogger uiEventLogger,
                 UserTracker userTracker,
-                DeviceProvisionedController deviceProvisionedController) {
+                DeviceProvisionedController deviceProvisionedController,
+                SystemClock systemClock,
+                GlobalSettings globalSettings) {
             super(
-                    contentResolver,
                     powerManager,
                     ambientDisplayConfiguration,
                     batteryController,
@@ -1190,7 +1199,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     keyguardNotificationVisibilityProvider,
                     uiEventLogger,
                     userTracker,
-                    deviceProvisionedController
+                    deviceProvisionedController,
+                    systemClock,
+                    globalSettings
             );
             mUseHeadsUp = true;
         }

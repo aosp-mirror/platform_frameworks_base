@@ -113,6 +113,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.role.RoleManager;
 import android.app.usage.AppStandbyInfo;
+import android.content.AttributionSource;
+import android.content.AttributionSourceState;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -2454,9 +2456,12 @@ public final class BackgroundRestrictionTest {
             doReturn(granted ? MODE_ALLOWED : MODE_IGNORED)
                     .when(mAppOpsManager)
                     .checkOpNoThrow(op, uid, packageName);
+            AttributionSource attributionSource =
+                    new AttributionSource.Builder(uid).setPackageName(packageName).build();
+            AttributionSourceState attributionSourceState = attributionSource.asState();
             doReturn(granted ? MODE_ALLOWED : MODE_IGNORED)
                     .when(mIAppOpsService)
-                    .checkOperation(op, uid, packageName);
+                    .checkOperationWithState(eq(op), eq(attributionSourceState));
         } catch (RemoteException e) {
             // Ignore.
         }

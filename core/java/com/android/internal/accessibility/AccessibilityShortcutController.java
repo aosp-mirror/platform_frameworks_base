@@ -53,10 +53,13 @@ import android.util.Slog;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.Flags;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.internal.accessibility.util.ShortcutUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
@@ -66,6 +69,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class to help manage the accessibility shortcut key
@@ -364,9 +368,23 @@ public class AccessibilityShortcutController {
                         })
                 .setPositiveButton(R.string.accessibility_shortcut_off,
                         (DialogInterface d, int which) -> {
-                            Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
-                                    userId);
+                            if (Flags.updateAlwaysOnA11yService()) {
+                                Set<String> targetServices =
+                                        ShortcutUtils.getShortcutTargetsFromSettings(
+                                                mContext,
+                                                ShortcutConstants.UserShortcutType.HARDWARE,
+                                                userId);
+
+                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
+                                        userId);
+                                ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
+                                        mContext, targetServices, userId);
+                            } else {
+                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
+                                        userId);
+                            }
 
                             // If canceled, treat as if the dialog has never been shown
                             Settings.Secure.putIntForUser(mContext.getContentResolver(),

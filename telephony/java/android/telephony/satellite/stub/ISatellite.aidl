@@ -16,13 +16,13 @@
 
 package android.telephony.satellite.stub;
 
+import android.telephony.IBooleanConsumer;
+import android.telephony.IIntegerConsumer;
+
 import android.telephony.satellite.stub.INtnSignalStrengthConsumer;
 import android.telephony.satellite.stub.ISatelliteCapabilitiesConsumer;
 import android.telephony.satellite.stub.ISatelliteListener;
 import android.telephony.satellite.stub.SatelliteDatagram;
-
-import com.android.internal.telephony.IBooleanConsumer;
-import com.android.internal.telephony.IIntegerConsumer;
 
 /**
  * {@hide}

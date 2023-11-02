@@ -22,3 +22,10 @@ flag {
     description: "Enable force force-dark for smart inversion and dark theme everywhere"
     bug: "282821643"
 }
+
+flag {
+    namespace: "accessibility"
+    name: "update_always_on_a11y_service"
+    description: "Updates the Always-On A11yService state when the user changes the enablement of the shortcut."
+    bug: "298869916"
+}

@@ -19,6 +19,7 @@ import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -54,6 +55,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telecom.ClientTransactionalServiceRepository;
 import com.android.internal.telecom.ClientTransactionalServiceWrapper;
 import com.android.internal.telecom.ITelecomService;
+import com.android.server.telecom.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -410,6 +412,14 @@ public class TelecomManager {
      */
     public static final String EXTRA_CALL_CREATED_TIME_MILLIS =
             "android.telecom.extra.CALL_CREATED_TIME_MILLIS";
+
+    /**
+     * The extra for call log uri that was used to mark missed calls as read when dialer gets the
+     * notification on reboot.
+     */
+    @FlaggedApi(Flags.FLAG_ADD_CALL_URI_FOR_MISSED_CALLS)
+    public static final String EXTRA_CALL_LOG_URI =
+            "android.telecom.extra.CALL_LOG_URI";
 
     /**
      * Optional extra for incoming containing a long which specifies the time the
@@ -2361,6 +2371,11 @@ public class TelecomManager {
      * <p>
      * <b>Note</b>: {@link android.app.Notification.CallStyle} notifications should be posted after
      * the call is placed in order for the notification to be non-dismissible.
+     * <p><b>Note</b>: Call Forwarding MMI codes can only be dialed by applications that are
+     * configured as the user defined default dialer or system dialer role. If a call containing a
+     * call forwarding MMI code is placed by an application that is not in one of these roles, the
+     * dialer will be launched with a UI showing the MMI code already populated so that the user can
+     * confirm the action before the call is placed.
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
      */

@@ -50,6 +50,8 @@ public abstract class InputMethodManagerInternal {
     /**
      * Called by the power manager to tell the input method manager whether it
      * should start watching for wake events.
+     *
+     * @param interactive the interactive mode parameter
      */
     public abstract void setInteractive(boolean interactive);
 
@@ -61,16 +63,16 @@ public abstract class InputMethodManagerInternal {
     /**
      * Returns the list of installed input methods for the specified user.
      *
-     * @param userId The user ID to be queried.
-     * @return A list of {@link InputMethodInfo}.  VR-only IMEs are already excluded.
+     * @param userId the user ID to be queried
+     * @return a list of {@link InputMethodInfo}. VR-only IMEs are already excluded
      */
     public abstract List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId);
 
     /**
      * Returns the list of installed input methods that are enabled for the specified user.
      *
-     * @param userId The user ID to be queried.
-     * @return A list of {@link InputMethodInfo} that are enabled for {@code userId}.
+     * @param userId the user ID to be queried
+     * @return a list of {@link InputMethodInfo} that are enabled for {@code userId}
      */
     public abstract List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId);
 
@@ -78,8 +80,10 @@ public abstract class InputMethodManagerInternal {
      * Called by the Autofill Frameworks to request an {@link InlineSuggestionsRequest} from
      * the input method.
      *
+     * @param userId      the user ID to be queried
      * @param requestInfo information needed to create an {@link InlineSuggestionsRequest}.
-     * @param cb {@link IInlineSuggestionsRequestCallback} used to pass back the request object.
+     * @param cb          {@link IInlineSuggestionsRequestCallback} used to pass back the request
+     *                    object
      */
     public abstract void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
             InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb);
@@ -88,8 +92,8 @@ public abstract class InputMethodManagerInternal {
      * Force switch to the enabled input method by {@code imeId} for current user. If the input
      * method with {@code imeId} is not enabled or not installed, do nothing.
      *
-     * @param imeId  The input method ID to be switched to.
-     * @param userId The user ID to be queried.
+     * @param imeId  the input method ID to be switched to
+     * @param userId the user ID to be queried
      * @return {@code true} if the current input method was successfully switched to the input
      * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
      * to be switched.
@@ -100,28 +104,30 @@ public abstract class InputMethodManagerInternal {
      * Force enable or disable the input method associated with {@code imeId} for given user. If
      * the input method associated with {@code imeId} is not installed, do nothing.
      *
-     * @param imeId  The input method ID to be enabled or disabled.
+     * @param imeId   the input method ID to be enabled or disabled
      * @param enabled {@code true} if the input method associated with {@code imeId} should be
-     *                enabled.
-     * @param userId The user ID to be queried.
+     *                enabled
+     * @param userId  the user ID to be queried
      * @return {@code true} if the input method associated with {@code imeId} was successfully
-     *         enabled or disabled, {@code false} if the input method specified is not installed
-     *         or was unable to be enabled/disabled for some other reason.
+     * enabled or disabled, {@code false} if the input method specified is not installed
+     * or was unable to be enabled/disabled for some other reason.
      */
     public abstract boolean setInputMethodEnabled(String imeId, boolean enabled,
             @UserIdInt int userId);
 
     /**
      * Registers a new {@link InputMethodListListener}.
+     *
+     * @param listener the listener to add
      */
     public abstract void registerInputMethodListListener(InputMethodListListener listener);
 
     /**
      * Transfers input focus from a given input token to that of the IME window.
      *
-     * @param sourceInputToken The source token.
-     * @param displayId The display hosting the IME window.
-     * @return {@code true} if the transfer is successful.
+     * @param sourceInputToken the source token.
+     * @param displayId        the display hosting the IME window
+     * @return {@code true} if the transfer is successful
      */
     public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
             int displayId);
@@ -132,7 +138,7 @@ public abstract class InputMethodManagerInternal {
      * or SystemUI).
      *
      * @param windowToken the window token that is now in control, or {@code null} if no client
-     *                   window is in control of the IME.
+     *                    window is in control of the IME
      */
     public abstract void reportImeControl(@Nullable IBinder windowToken);
 
@@ -163,8 +169,8 @@ public abstract class InputMethodManagerInternal {
      * Callback when the IInputMethodSession from the accessibility service with the specified
      * accessibilityConnectionId is created.
      *
-     * @param accessibilityConnectionId The connection id of the accessibility service.
-     * @param session The session passed back from the accessibility service.
+     * @param accessibilityConnectionId the connection id of the accessibility service
+     * @param session                   the session passed back from the accessibility service
      */
     public abstract void onSessionForAccessibilityCreated(int accessibilityConnectionId,
             IAccessibilityInputMethodSession session);
@@ -173,7 +179,7 @@ public abstract class InputMethodManagerInternal {
      * Unbind the accessibility service with the specified accessibilityConnectionId from current
      * client.
      *
-     * @param accessibilityConnectionId The connection id of the accessibility service.
+     * @param accessibilityConnectionId the connection id of the accessibility service
      */
     public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId);
 
@@ -181,7 +187,7 @@ public abstract class InputMethodManagerInternal {
      * Switch the keyboard layout in response to a keyboard shortcut.
      *
      * @param direction {@code 1} to switch to the next subtype, {@code -1} to switch to the
-     *                           previous subtype.
+     *                  previous subtype
      */
     public abstract void switchKeyboardLayout(int direction);
 
@@ -192,7 +198,7 @@ public abstract class InputMethodManagerInternal {
     public abstract boolean isAnyInputConnectionActive();
 
     /**
-     * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
+     * Fake implementation of {@link InputMethodManagerInternal}. All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
             new InputMethodManagerInternal() {
@@ -282,7 +288,7 @@ public abstract class InputMethodManagerInternal {
             };
 
     /**
-     * @return Global instance if exists.  Otherwise, a fallback no-op instance.
+     * @return Global instance if exists. Otherwise, a fallback no-op instance.
      */
     @NonNull
     public static InputMethodManagerInternal get() {

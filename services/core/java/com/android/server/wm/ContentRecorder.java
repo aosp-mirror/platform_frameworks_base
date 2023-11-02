@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Context.MEDIA_PROJECTION_SERVICE;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
@@ -100,6 +101,8 @@ final class ContentRecorder implements WindowContainerListener {
     @Configuration.Orientation
     private int mLastOrientation = ORIENTATION_UNDEFINED;
 
+    private int mLastWindowingMode = WINDOWING_MODE_UNDEFINED;
+
     private final boolean mCorrectForAnisotropicPixels;
 
     ContentRecorder(@NonNull DisplayContent displayContent) {
@@ -156,7 +159,8 @@ final class ContentRecorder implements WindowContainerListener {
      * Handle a configuration change on the display content, and resize recording if needed.
      * @param lastOrientation the prior orientation of the configuration
      */
-    void onConfigurationChanged(@Configuration.Orientation int lastOrientation) {
+    void onConfigurationChanged(
+            @Configuration.Orientation int lastOrientation, int lastWindowingMode) {
         // Update surface for MediaProjection, if this DisplayContent is being used for recording.
         if (!isCurrentlyRecording() || mLastRecordedBounds == null) {
             return;
@@ -183,6 +187,16 @@ final class ContentRecorder implements WindowContainerListener {
                 pauseRecording();
                 return;
             }
+        }
+
+        // Record updated windowing mode, if necessary.
+        int recordedContentWindowingMode = mRecordedWindowContainer.getWindowingMode();
+        if (lastWindowingMode != recordedContentWindowingMode) {
+            mMediaProjectionManager.notifyWindowingModeChanged(
+                    mContentRecordingSession.getContentToRecord(),
+                    mContentRecordingSession.getTargetUid(),
+                    recordedContentWindowingMode
+            );
         }
 
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
@@ -327,8 +341,10 @@ final class ContentRecorder implements WindowContainerListener {
             return;
         }
 
+        final int contentToRecord = mContentRecordingSession.getContentToRecord();
+
         // TODO(b/297514518) Do not start capture if the app is in PIP, the bounds are inaccurate.
-        if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
+        if (contentToRecord == RECORD_CONTENT_TASK) {
             if (mRecordedWindowContainer.asTask().inPinnedWindowingMode()) {
                 ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                         "Content Recording: Display %d should start recording, but "
@@ -375,7 +391,7 @@ final class ContentRecorder implements WindowContainerListener {
 
         // Notify the client about the visibility of the mirrored region, now that we have begun
         // capture.
-        if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
+        if (contentToRecord == RECORD_CONTENT_TASK) {
             mMediaProjectionManager.notifyActiveProjectionCapturedContentVisibilityChanged(
                     mRecordedWindowContainer.asTask().isVisibleRequested());
         } else {
@@ -384,6 +400,11 @@ final class ContentRecorder implements WindowContainerListener {
             mMediaProjectionManager.notifyActiveProjectionCapturedContentVisibilityChanged(
                     currentDisplayState != DISPLAY_STATE_OFF);
         }
+
+        // Record initial windowing mode after recording starts.
+        mMediaProjectionManager.notifyWindowingModeChanged(
+                contentToRecord, mContentRecordingSession.getTargetUid(),
+                mRecordedWindowContainer.getWindowConfiguration().getWindowingMode());
 
         // No need to clean up. In SurfaceFlinger, parents hold references to their children. The
         // mirrored SurfaceControl is alive since the parent DisplayContent SurfaceControl is
@@ -617,8 +638,9 @@ final class ContentRecorder implements WindowContainerListener {
             Configuration mergedOverrideConfiguration) {
         WindowContainerListener.super.onMergedOverrideConfigurationChanged(
                 mergedOverrideConfiguration);
-        onConfigurationChanged(mLastOrientation);
+        onConfigurationChanged(mLastOrientation, mLastWindowingMode);
         mLastOrientation = mergedOverrideConfiguration.orientation;
+        mLastWindowingMode = mergedOverrideConfiguration.windowConfiguration.getWindowingMode();
     }
 
     // WindowContainerListener
@@ -635,6 +657,7 @@ final class ContentRecorder implements WindowContainerListener {
         void stopActiveProjection();
         void notifyActiveProjectionCapturedContentResized(int width, int height);
         void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);
+        void notifyWindowingModeChanged(int contentToRecord, int targetUid, int windowingMode);
     }
 
     private static final class RemoteMediaProjectionManagerWrapper implements
@@ -697,6 +720,22 @@ final class ContentRecorder implements WindowContainerListener {
                         "Content Recording: Unable to tell MediaProjectionManagerService about "
                                 + "visibility change on the active projection: %s",
                         e);
+            }
+        }
+
+        @Override
+        public void notifyWindowingModeChanged(int contentToRecord, int targetUid,
+                int windowingMode) {
+            fetchMediaProjectionManager();
+            if (mIMediaProjectionManager == null) {
+                return;
+            }
+            try {
+                mIMediaProjectionManager.notifyWindowingModeChanged(
+                        contentToRecord, targetUid, windowingMode);
+            } catch (RemoteException e) {
+                ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Unable to tell log windowing mode change: %s", e);
             }
         }
 

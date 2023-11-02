@@ -156,7 +156,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             KeyguardStateController keyguardStateController,
             ScreenOffAnimationController screenOffAnimationController,
             AuthController authController,
-            ShadeExpansionStateManager shadeExpansionStateManager,
             Lazy<ShadeInteractor> shadeInteractorLazy,
             ShadeWindowLogger logger,
             Lazy<SelectedUserInteractor> userInteractor) {
@@ -185,7 +184,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 .addCallback(mStateListener,
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         configurationController.addCallback(this);
-        shadeExpansionStateManager.addQsExpansionListener(this::onQsExpansionChanged);
 
         float desiredPreferredRefreshRate = context.getResources()
                 .getInteger(R.integer.config_keyguardRefreshRate);
@@ -302,6 +300,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 mWindowRootView,
                 mShadeInteractorLazy.get().isAnyExpanded(),
                 this::onShadeOrQsExpanded
+        );
+        collectFlow(
+                mWindowRootView,
+                mShadeInteractorLazy.get().isQsExpanded(),
+                this::onQsExpansionChanged
         );
     }
 

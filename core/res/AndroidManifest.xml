@@ -4065,6 +4065,7 @@
     <!-- Allow apps to always update wallpaper by sending data.
         @SystemApi
         @hide
+        @FlaggedApi("com.android.window.flags.always_update_wallpaper_permission")
     -->
     <permission android:name="android.permission.ALWAYS_UPDATE_WALLPAPER"
         android:protectionLevel="internal|role" />

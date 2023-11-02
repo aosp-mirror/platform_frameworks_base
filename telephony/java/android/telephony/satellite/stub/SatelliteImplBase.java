@@ -19,10 +19,10 @@ package android.telephony.satellite.stub;
 import android.annotation.NonNull;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.telephony.IBooleanConsumer;
+import android.telephony.IIntegerConsumer;
 import android.util.Log;
 
-import com.android.internal.telephony.IBooleanConsumer;
-import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.List;

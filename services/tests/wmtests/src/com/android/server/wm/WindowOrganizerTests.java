@@ -614,7 +614,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         t.setForceTranslucent(taskFragment.mRemoteToken.toWindowContainerToken(), true);
         mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
                 t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
-                false /* shouldApplyIndependently */);
+                false /* shouldApplyIndependently */, null /* remoteTransition */);
 
         // Should be not visible and not focusable after the transaction.
         assertFalse(taskFragment.shouldBeVisible(null));
@@ -628,7 +628,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         t.setForceTranslucent(taskFragment.mRemoteToken.toWindowContainerToken(), false);
         mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
                 t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
-                false /* shouldApplyIndependently */);
+                false /* shouldApplyIndependently */, null /* remoteTransition */);
 
         // Should be visible and focusable after the transaction.
         assertTrue(taskFragment.shouldBeVisible(null));
@@ -680,7 +680,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertThrows(SecurityException.class, () ->
                 mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
                         t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE,
-                        false /* shouldApplyIndependently */)
+                        false /* shouldApplyIndependently */, null /* remoteTransition */)
         );
     }
 

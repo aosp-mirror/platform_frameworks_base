@@ -15,13 +15,17 @@
  */
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
+import android.os.IBinder;
 import android.window.SurfaceSyncGroup;
+
+import com.android.window.flags.Flags;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -175,6 +179,21 @@ public interface AttachedSurfaceControl {
      * @throws IllegalArgumentException If negative insets are provided.
      */
     default void setChildBoundingInsets(@NonNull Rect insets) {
+    }
+
+    /**
+     * Gets the token used for associating this {@link AttachedSurfaceControl} with
+     * {@link SurfaceControlViewHost} instances.
+     *
+     * <p>This token should be passed to {@link SurfaceControlViewHost}'s constructor.
+     *
+     * @return The SurfaceControlViewHost link token.
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_GET_HOST_TOKEN_API)
+    default IBinder getHostToken() {
+        throw new UnsupportedOperationException("The getHostToken needs to be "
+            + "implemented before making this call.");
     }
 
     /**

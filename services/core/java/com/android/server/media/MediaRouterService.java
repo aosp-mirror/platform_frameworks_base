@@ -409,6 +409,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     }
 
     // Binder call
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @Override
     public boolean verifyPackageExists(String clientPackageName) {
         return mService2.verifyPackageExists(clientPackageName);
@@ -536,6 +537,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     }
 
     // Binder call
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @Override
     public void registerManager(IMediaRouter2Manager manager, String callerPackageName) {
         final int uid = Binder.getCallingUid();

@@ -20,3 +20,10 @@ flag {
     description: "If true, content protection setting ui is displayed in Settings > Privacy & Security > More security & privacy."
     bug: "305792348"
 }
+
+flag {
+    name: "create_accessibility_overlay_app_op_enabled"
+    namespace: "content_protection"
+    description: "If true, an appop is logged on creation of accessibility overlays."
+    bug: "289081465"
+}

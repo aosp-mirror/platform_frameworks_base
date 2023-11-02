@@ -19,6 +19,8 @@
 #include "DeferredLayerUpdater.h"
 #include "hwui/Paint.h"
 
+#include <hwui/MinikinSkia.h>
+#include <hwui/Typeface.h>
 #include <minikin/Layout.h>
 #include <pipeline/skia/SkiaOpenGLPipeline.h>
 #include <pipeline/skia/SkiaVulkanPipeline.h>
@@ -177,6 +179,14 @@ SkRect TestUtils::getLocalClipBounds(const SkCanvas* canvas) {
     SkRect outlineInLocalCoord;
     invertedTotalMatrix.mapRect(&outlineInLocalCoord, outlineInDeviceCoord);
     return outlineInLocalCoord;
+}
+
+SkFont TestUtils::defaultFont() {
+    const std::shared_ptr<minikin::MinikinFont>& minikinFont =
+      Typeface::resolveDefault(nullptr)->fFontCollection->getFamilyAt(0)->getFont(0)->baseTypeface();
+    SkTypeface* skTypeface = reinterpret_cast<const MinikinFontSkia*>(minikinFont.get())->GetSkTypeface();
+    LOG_ALWAYS_FATAL_IF(skTypeface == nullptr);
+    return SkFont(sk_ref_sp(skTypeface));
 }
 
 } /* namespace uirenderer */

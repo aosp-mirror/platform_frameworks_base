@@ -189,4 +189,13 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
             underTest.setUdfpsTransitionToFullShadeProgress(1f)
             assertThat(underTest.udfpsTransitionToFullShadeProgress.value).isEqualTo(1f)
         }
+
+    @Test
+    fun updateLegacyIsQsExpanded() =
+        testScope.runTest {
+            assertThat(underTest.legacyIsQsExpanded.value).isEqualTo(false)
+
+            underTest.setLegacyIsQsExpanded(true)
+            assertThat(underTest.legacyIsQsExpanded.value).isEqualTo(true)
+        }
 }

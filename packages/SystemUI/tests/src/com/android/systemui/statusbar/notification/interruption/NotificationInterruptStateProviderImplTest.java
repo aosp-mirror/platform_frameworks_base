@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.notification.interruption;
 
+package com.android.systemui.statusbar.notification.interruption;
 
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
@@ -27,6 +27,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.VISIBILITY_NO_OVERRIDE;
+import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
+import static android.provider.Settings.Global.HEADS_UP_ON;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -61,9 +63,9 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -74,6 +76,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -120,6 +124,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     UserTracker mUserTracker;
     @Mock
     DeviceProvisionedController mDeviceProvisionedController;
+    FakeSystemClock mSystemClock;
+    FakeGlobalSettings mGlobalSettings;
 
     private NotificationInterruptStateProviderImpl mNotifInterruptionStateProvider;
 
@@ -129,10 +135,12 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         mUiEventLoggerFake = new UiEventLoggerFake();
+        mSystemClock = new FakeSystemClock();
+        mGlobalSettings = new FakeGlobalSettings();
+        mGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
 
         mNotifInterruptionStateProvider =
                 new NotificationInterruptStateProviderImpl(
-                        mContext.getContentResolver(),
                         mPowerManager,
                         mAmbientDisplayConfiguration,
                         mBatteryController,
@@ -145,7 +153,9 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mKeyguardNotificationVisibilityProvider,
                         mUiEventLoggerFake,
                         mUserTracker,
-                        mDeviceProvisionedController);
+                        mDeviceProvisionedController,
+                        mSystemClock,
+                        mGlobalSettings);
         mNotifInterruptionStateProvider.mUseHeadsUp = true;
     }
 
@@ -426,7 +436,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     private long makeWhenHoursAgo(long hoursAgo) {
-        return System.currentTimeMillis() - (1000 * 60 * 60 * hoursAgo);
+        return mSystemClock.currentTimeMillis() - (1000 * 60 * 60 * hoursAgo);
     }
 
     @Test

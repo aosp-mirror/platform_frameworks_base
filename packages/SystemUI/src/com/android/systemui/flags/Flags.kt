@@ -400,8 +400,7 @@ object Flags {
     // 600- status bar
 
     // TODO(b/291315866): Tracking Bug
-    @JvmField val SIGNAL_CALLBACK_DEPRECATION =
-        unreleasedFlag("signal_callback_deprecation", teamfood = true)
+    @JvmField val SIGNAL_CALLBACK_DEPRECATION = releasedFlag("signal_callback_deprecation")
 
     // TODO(b/301610137): Tracking bug
     @JvmField val NEW_NETWORK_SLICE_UI = unreleasedFlag("new_network_slice_ui", teamfood = true)
@@ -414,15 +413,14 @@ object Flags {
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag("plug_in_status_bar_chip")
 
     // TODO(b/292533677): Tracking Bug
-    val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
-        unreleasedFlag("wifi_tracker_lib_for_wifi_icon", teamfood = true)
+    val WIFI_TRACKER_LIB_FOR_WIFI_ICON = releasedFlag("wifi_tracker_lib_for_wifi_icon")
 
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
         releasedFlag("incompatible_charging_battery_icon")
 
     // TODO(b/293585143): Tracking Bug
-    val INSTANT_TETHER = unreleasedFlag("instant_tether", teamfood = true)
+    val INSTANT_TETHER = releasedFlag("instant_tether")
 
     // TODO(b/294588085): Tracking Bug
     val WIFI_SECONDARY_NETWORKS = releasedFlag("wifi_secondary_networks")

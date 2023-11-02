@@ -20,7 +20,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyBoolean;
@@ -354,26 +353,8 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     }
 
     @Test
-    public void playHaptic_onTouchExploration_NoOneWayHaptics_usesVibrate() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
-
-        // WHEN request to vibrate on touch exploration
-        mUnderTest.vibrateOnTouchExploration();
-
-        // THEN vibrates
-        verify(mVibrator).vibrate(
-                anyInt(),
-                any(),
-                eq(UdfpsController.EFFECT_CLICK),
-                eq("lock-icon-down"),
-                any());
-    }
-
-    @Test
-    public void playHaptic_onTouchExploration_withOneWayHaptics_performHapticFeedback() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-
-        // WHEN request to vibrate on touch exploration
+    public void playHaptic_onTouchExploration_performHapticFeedback() {
+       // WHEN request to vibrate on touch exploration
         mUnderTest.vibrateOnTouchExploration();
 
         // THEN performHapticFeedback is used
@@ -381,25 +362,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     }
 
     @Test
-    public void playHaptic_onLongPress_NoOneWayHaptics_usesVibrate() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
-
-        // WHEN request to vibrate on long press
-        mUnderTest.vibrateOnLongPress();
-
-        // THEN uses vibrate
-        verify(mVibrator).vibrate(
-                anyInt(),
-                any(),
-                eq(UdfpsController.EFFECT_CLICK),
-                eq("lock-screen-lock-icon-longpress"),
-                any());
-    }
-
-    @Test
-    public void playHaptic_onLongPress_withOneWayHaptics_performHapticFeedback() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-
+    public void playHaptic_onLongPress_performHapticFeedback() {
         // WHEN request to vibrate on long press
         mUnderTest.vibrateOnLongPress();
 
@@ -411,7 +374,6 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     public void longPress_showBouncer_sceneContainerNotEnabled() {
         init(/* useMigrationFlag= */ false);
         mSceneTestUtils.getSceneContainerFlags().setEnabled(false);
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(false);
 
         // WHEN longPress
@@ -426,7 +388,6 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     public void longPress_showBouncer() {
         init(/* useMigrationFlag= */ false);
         mSceneTestUtils.getSceneContainerFlags().setEnabled(true);
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(false);
 
         // WHEN longPress
@@ -441,7 +402,6 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     public void longPress_falsingTriggered_doesNotShowBouncer() {
         init(/* useMigrationFlag= */ false);
         mSceneTestUtils.getSceneContainerFlags().setEnabled(true);
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(true);
 
         // WHEN longPress

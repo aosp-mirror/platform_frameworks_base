@@ -16,6 +16,14 @@
 
 package com.android.server.media.projection;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
+
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CANCELLED;
@@ -24,6 +32,13 @@ import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_APP_TASK;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_DISPLAY;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_FREEFORM;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_FULLSCREEN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_SPLIT_SCREEN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_UNKNOWN;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,10 +53,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.FrameworkStatsLog;
 
+import com.google.common.truth.Expect;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
@@ -60,11 +79,17 @@ public class MediaProjectionMetricsLoggerTest {
     private static final int TEST_TARGET_UID = 456;
     private static final int TEST_CREATION_SOURCE = 789;
 
+    private static final int TEST_WINDOWING_MODE = 987;
+    private static final int TEST_CONTENT_TO_RECORD = 654;
+
     @Mock private FrameworkStatsLogWrapper mFrameworkStatsLogWrapper;
     @Mock private MediaProjectionSessionIdGenerator mSessionIdGenerator;
     @Mock private MediaProjectionTimestampStore mTimestampStore;
 
     private MediaProjectionMetricsLogger mLogger;
+
+    @Rule
+    public Expect mExpect = Expect.create();
 
     @Before
     public void setUp() {
@@ -93,7 +118,7 @@ public class MediaProjectionMetricsLoggerTest {
     public void logInitiated_logsHostUid() {
         mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
 
-        verifyHostUidLogged(TEST_HOST_UID);
+        verifyStateChangedHostUidLogged(TEST_HOST_UID);
     }
 
     @Test
@@ -107,7 +132,7 @@ public class MediaProjectionMetricsLoggerTest {
     public void logInitiated_logsUnknownTargetUid() {
         mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
 
-        verifyTargetUidLogged(-2);
+        verifyStageChangedTargetUidLogged(-2);
     }
 
     @Test
@@ -178,14 +203,14 @@ public class MediaProjectionMetricsLoggerTest {
     public void logStopped_logsHostUid() {
         mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
 
-        verifyHostUidLogged(TEST_HOST_UID);
+        verifyStateChangedHostUidLogged(TEST_HOST_UID);
     }
 
     @Test
     public void logStopped_logsTargetUid() {
         mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
 
-        verifyTargetUidLogged(TEST_TARGET_UID);
+        verifyStageChangedTargetUidLogged(TEST_TARGET_UID);
     }
 
     @Test
@@ -263,14 +288,14 @@ public class MediaProjectionMetricsLoggerTest {
     public void logInProgress_logsHostUid() {
         mLogger.logInProgress(TEST_HOST_UID, TEST_TARGET_UID);
 
-        verifyHostUidLogged(TEST_HOST_UID);
+        verifyStateChangedHostUidLogged(TEST_HOST_UID);
     }
 
     @Test
     public void logInProgress_logsTargetUid() {
         mLogger.logInProgress(TEST_HOST_UID, TEST_TARGET_UID);
 
-        verifyTargetUidLogged(TEST_TARGET_UID);
+        verifyStageChangedTargetUidLogged(TEST_TARGET_UID);
     }
 
     @Test
@@ -336,14 +361,14 @@ public class MediaProjectionMetricsLoggerTest {
     public void logPermissionRequestDisplayed_logsHostUid() {
         mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
 
-        verifyHostUidLogged(TEST_HOST_UID);
+        verifyStateChangedHostUidLogged(TEST_HOST_UID);
     }
 
     @Test
     public void logPermissionRequestDisplayed_logsUnknownTargetUid() {
         mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
 
-        verifyTargetUidLogged(-2);
+        verifyStageChangedTargetUidLogged(-2);
     }
 
     @Test
@@ -409,14 +434,14 @@ public class MediaProjectionMetricsLoggerTest {
     public void logAppSelectorDisplayed_logsHostUid() {
         mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
 
-        verifyHostUidLogged(TEST_HOST_UID);
+        verifyStateChangedHostUidLogged(TEST_HOST_UID);
     }
 
     @Test
     public void logAppSelectorDisplayed_logsUnknownTargetUid() {
         mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
 
-        verifyTargetUidLogged(-2);
+        verifyStageChangedTargetUidLogged(-2);
     }
 
     @Test
@@ -492,14 +517,14 @@ public class MediaProjectionMetricsLoggerTest {
     public void logProjectionPermissionRequestCancelled_logsHostUid() {
         mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
 
-        verifyHostUidLogged(TEST_HOST_UID);
+        verifyStateChangedHostUidLogged(TEST_HOST_UID);
     }
 
     @Test
     public void logProjectionPermissionRequestCancelled_logsUnknownTargetUid() {
         mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
 
-        verifyTargetUidLogged(-2);
+        verifyStageChangedTargetUidLogged(-2);
     }
 
     @Test
@@ -510,9 +535,88 @@ public class MediaProjectionMetricsLoggerTest {
                 MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
     }
 
+    @Test
+    public void logWindowingModeChanged_logsTargetChangedAtomId() {
+        mLogger.logChangedWindowingMode(
+                TEST_CONTENT_TO_RECORD, TEST_HOST_UID, TEST_TARGET_UID, TEST_WINDOWING_MODE);
+
+        verifyTargetChangedAtomIdLogged();
+    }
+
+    @Test
+    public void logWindowingModeChanged_logsTargetType() {
+        MediaProjectionMetricsLogger logger = Mockito.spy(mLogger);
+        final int testTargetType = 111;
+        when(logger.contentToRecordToTargetType(TEST_CONTENT_TO_RECORD)).thenReturn(testTargetType);
+        logger.logChangedWindowingMode(
+                TEST_CONTENT_TO_RECORD, TEST_HOST_UID, TEST_TARGET_UID, TEST_WINDOWING_MODE);
+        verifyTargetTypeLogged(testTargetType);
+    }
+
+    @Test
+    public void logWindowingModeChanged_logsHostUid() {
+        mLogger.logChangedWindowingMode(
+                TEST_CONTENT_TO_RECORD, TEST_HOST_UID, TEST_TARGET_UID, TEST_WINDOWING_MODE);
+        verifyTargetChangedHostUidLogged(TEST_HOST_UID);
+    }
+
+    @Test
+    public void logWindowingModeChanged_logsTargetUid() {
+        mLogger.logChangedWindowingMode(
+                TEST_CONTENT_TO_RECORD, TEST_HOST_UID, TEST_TARGET_UID, TEST_WINDOWING_MODE);
+        verifyTargetChangedTargetUidLogged(TEST_TARGET_UID);
+    }
+
+    @Test
+    public void logWindowingModeChanged_logsTargetWindowingMode() {
+        MediaProjectionMetricsLogger logger = Mockito.spy(mLogger);
+        final int testTargetWindowingMode = 222;
+        when(logger.windowingModeToTargetWindowingMode(TEST_WINDOWING_MODE))
+                .thenReturn(testTargetWindowingMode);
+        logger.logChangedWindowingMode(
+                TEST_CONTENT_TO_RECORD, TEST_HOST_UID, TEST_TARGET_UID, TEST_WINDOWING_MODE);
+        verifyWindowingModeLogged(testTargetWindowingMode);
+    }
+
+    @Test
+    public void testContentToRecordToTargetType() {
+        mExpect.that(mLogger.contentToRecordToTargetType(RECORD_CONTENT_DISPLAY))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_DISPLAY);
+
+        mExpect.that(mLogger.contentToRecordToTargetType(RECORD_CONTENT_TASK))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_APP_TASK);
+
+        mExpect.that(mLogger.contentToRecordToTargetType(2))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_UNKNOWN);
+
+        mExpect.that(mLogger.contentToRecordToTargetType(-1))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_UNKNOWN);
+
+        mExpect.that(mLogger.contentToRecordToTargetType(100))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_UNKNOWN);
+    }
+
+    @Test
+    public void testWindowingModeToTargetWindowingMode() {
+        mExpect.that(mLogger.windowingModeToTargetWindowingMode(WINDOWING_MODE_FULLSCREEN))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_FULLSCREEN);
+
+        mExpect.that(mLogger.windowingModeToTargetWindowingMode(WINDOWING_MODE_MULTI_WINDOW))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_SPLIT_SCREEN);
+
+        mExpect.that(mLogger.windowingModeToTargetWindowingMode(WINDOWING_MODE_FREEFORM))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_FREEFORM);
+
+        mExpect.that(mLogger.windowingModeToTargetWindowingMode(WINDOWING_MODE_PINNED))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_UNKNOWN);
+
+        mExpect.that(mLogger.windowingModeToTargetWindowingMode(WINDOWING_MODE_UNDEFINED))
+                .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_UNKNOWN);
+    }
+
     private void verifyStateChangedAtomIdLogged() {
         verify(mFrameworkStatsLogWrapper)
-                .write(
+                .writeStateChanged(
                         /* code= */ eq(FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED),
                         /* sessionId= */ anyInt(),
                         /* state= */ anyInt(),
@@ -525,7 +629,7 @@ public class MediaProjectionMetricsLoggerTest {
 
     private void verifyStateLogged(int state) {
         verify(mFrameworkStatsLogWrapper)
-                .write(
+                .writeStateChanged(
                         /* code= */ anyInt(),
                         /* sessionId= */ anyInt(),
                         eq(state),
@@ -536,9 +640,9 @@ public class MediaProjectionMetricsLoggerTest {
                         /* creationSource= */ anyInt());
     }
 
-    private void verifyHostUidLogged(int hostUid) {
+    private void verifyStateChangedHostUidLogged(int hostUid) {
         verify(mFrameworkStatsLogWrapper)
-                .write(
+                .writeStateChanged(
                         /* code= */ anyInt(),
                         /* sessionId= */ anyInt(),
                         /* state= */ anyInt(),
@@ -551,7 +655,7 @@ public class MediaProjectionMetricsLoggerTest {
 
     private void verifyCreationSourceLogged(int creationSource) {
         verify(mFrameworkStatsLogWrapper)
-                .write(
+                .writeStateChanged(
                         /* code= */ anyInt(),
                         /* sessionId= */ anyInt(),
                         /* state= */ anyInt(),
@@ -562,9 +666,9 @@ public class MediaProjectionMetricsLoggerTest {
                         eq(creationSource));
     }
 
-    private void verifyTargetUidLogged(int targetUid) {
+    private void verifyStageChangedTargetUidLogged(int targetUid) {
         verify(mFrameworkStatsLogWrapper)
-                .write(
+                .writeStateChanged(
                         /* code= */ anyInt(),
                         /* sessionId= */ anyInt(),
                         /* state= */ anyInt(),
@@ -577,7 +681,7 @@ public class MediaProjectionMetricsLoggerTest {
 
     private void verifyTimeSinceLastActiveSessionLogged(int timeSinceLastActiveSession) {
         verify(mFrameworkStatsLogWrapper)
-                .write(
+                .writeStateChanged(
                         /* code= */ anyInt(),
                         /* sessionId= */ anyInt(),
                         /* state= */ anyInt(),
@@ -590,7 +694,7 @@ public class MediaProjectionMetricsLoggerTest {
 
     private void verifySessionIdLogged(int newSessionId) {
         verify(mFrameworkStatsLogWrapper)
-                .write(
+                .writeStateChanged(
                         /* code= */ anyInt(),
                         /* sessionId= */ eq(newSessionId),
                         /* state= */ anyInt(),
@@ -603,7 +707,7 @@ public class MediaProjectionMetricsLoggerTest {
 
     private void verifyPreviousStateLogged(int previousState) {
         verify(mFrameworkStatsLogWrapper)
-                .write(
+                .writeStateChanged(
                         /* code= */ anyInt(),
                         /* sessionId= */ anyInt(),
                         /* state= */ anyInt(),
@@ -612,5 +716,60 @@ public class MediaProjectionMetricsLoggerTest {
                         /* targetUid= */ anyInt(),
                         /* timeSinceLastActive= */ anyInt(),
                         /* creationSource= */ anyInt());
+    }
+
+    private void verifyTargetChangedAtomIdLogged() {
+        verify(mFrameworkStatsLogWrapper)
+                .writeTargetChanged(
+                        eq(FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED),
+                        /* sessionId= */ anyInt(),
+                        /* targetType= */ anyInt(),
+                        /* hostUid= */ anyInt(),
+                        /* targetUid= */ anyInt(),
+                        /* targetWindowingMode= */ anyInt());
+    }
+
+    private void verifyTargetTypeLogged(int targetType) {
+        verify(mFrameworkStatsLogWrapper)
+                .writeTargetChanged(
+                        /* code= */ anyInt(),
+                        /* sessionId= */ anyInt(),
+                        eq(targetType),
+                        /* hostUid= */ anyInt(),
+                        /* targetUid= */ anyInt(),
+                        /* targetWindowingMode= */ anyInt());
+    }
+
+    private void verifyTargetChangedHostUidLogged(int hostUid) {
+        verify(mFrameworkStatsLogWrapper)
+                .writeTargetChanged(
+                        /* code= */ anyInt(),
+                        /* sessionId= */ anyInt(),
+                        /* targetType= */ anyInt(),
+                        eq(hostUid),
+                        /* targetUid= */ anyInt(),
+                        /* targetWindowingMode= */ anyInt());
+    }
+
+    private void verifyTargetChangedTargetUidLogged(int targetUid) {
+        verify(mFrameworkStatsLogWrapper)
+                .writeTargetChanged(
+                        /* code= */ anyInt(),
+                        /* sessionId= */ anyInt(),
+                        /* targetType= */ anyInt(),
+                        /* hostUid= */ anyInt(),
+                        eq(targetUid),
+                        /* targetWindowingMode= */ anyInt());
+    }
+
+    private void verifyWindowingModeLogged(int targetWindowingMode) {
+        verify(mFrameworkStatsLogWrapper)
+                .writeTargetChanged(
+                        /* code= */ anyInt(),
+                        /* sessionId= */ anyInt(),
+                        /* targetType= */ anyInt(),
+                        /* hostUid= */ anyInt(),
+                        /* targetUid= */ anyInt(),
+                        eq(targetWindowingMode));
     }
 }

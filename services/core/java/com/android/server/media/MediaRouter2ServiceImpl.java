@@ -192,6 +192,7 @@ class MediaRouter2ServiceImpl {
 
     // Start of methods that implement MediaRouter2 operations.
 
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @NonNull
     public boolean verifyPackageExists(@NonNull String clientPackageName) {
         final int pid = Binder.getCallingPid();
@@ -199,11 +200,7 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
 
         try {
-            mContext.enforcePermission(
-                    Manifest.permission.MEDIA_CONTENT_CONTROL,
-                    pid,
-                    uid,
-                    "Must hold MEDIA_CONTENT_CONTROL permission.");
+            enforcePrivilegedRoutingPermissions(uid, pid);
             PackageManager pm = mContext.getPackageManager();
             pm.getPackageInfo(clientPackageName, PackageManager.PackageInfoFlags.of(0));
             return true;
@@ -482,6 +479,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void registerManager(@NonNull IMediaRouter2Manager manager,
             @NonNull String callerPackageName) {
         Objects.requireNonNull(manager, "manager must not be null");
@@ -729,6 +727,15 @@ class MediaRouter2ServiceImpl {
         return hasBluetoothRoutingPermission;
     }
 
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    private void enforcePrivilegedRoutingPermissions(int callerUid, int callerPid) {
+        mContext.enforcePermission(
+                Manifest.permission.MEDIA_CONTENT_CONTROL,
+                callerPid,
+                callerUid,
+                "Must hold MEDIA_CONTENT_CONTROL permission.");
+    }
+
     // End of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
 
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
@@ -837,15 +844,18 @@ class MediaRouter2ServiceImpl {
     private void unregisterRouter2Locked(@NonNull IMediaRouter2 router, boolean died) {
         RouterRecord routerRecord = mAllRouterRecords.remove(router.asBinder());
         if (routerRecord == null) {
-            Slog.w(TAG, "Ignoring unregistering unknown router2");
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Ignoring unregistering unknown router: %s, died: %b", router, died));
             return;
         }
 
         Slog.i(
                 TAG,
                 TextUtils.formatSimple(
-                        "unregisterRouter2 | package: %s, router id: %d",
-                        routerRecord.mPackageName, routerRecord.mRouterId));
+                        "unregisterRouter2 | package: %s, router id: %d, died: %b",
+                        routerRecord.mPackageName, routerRecord.mRouterId, died));
 
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
@@ -1161,6 +1171,7 @@ class MediaRouter2ServiceImpl {
         return sessionInfos;
     }
 
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @GuardedBy("mLock")
     private void registerManagerLocked(
             @NonNull IMediaRouter2Manager manager,
@@ -1184,8 +1195,7 @@ class MediaRouter2ServiceImpl {
                             + " callerUserId: %d",
                         callerUid, callerPid, callerPackageName, callerUserId));
 
-        mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, callerPid, callerUid,
-                "Must hold MEDIA_CONTENT_CONTROL permission.");
+        enforcePrivilegedRoutingPermissions(callerUid, callerPid);
 
         UserRecord userRecord = getOrCreateUserRecordLocked(callerUserId);
         managerRecord = new ManagerRecord(
@@ -1230,15 +1240,22 @@ class MediaRouter2ServiceImpl {
     private void unregisterManagerLocked(@NonNull IMediaRouter2Manager manager, boolean died) {
         ManagerRecord managerRecord = mAllManagerRecords.remove(manager.asBinder());
         if (managerRecord == null) {
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Ignoring unregistering unknown manager: %s, died: %b", manager, died));
             return;
         }
         UserRecord userRecord = managerRecord.mUserRecord;
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "unregisterManager | package: %s, user: %d, manager: %d",
-                managerRecord.mOwnerPackageName,
-                userRecord.mUserId,
-                managerRecord.mManagerId));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "unregisterManager | package: %s, user: %d, manager: %d, died: %b",
+                        managerRecord.mOwnerPackageName,
+                        userRecord.mUserId,
+                        managerRecord.mManagerId,
+                        died));
 
         userRecord.mManagerRecords.remove(managerRecord);
         managerRecord.dispose();

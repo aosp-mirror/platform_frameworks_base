@@ -298,6 +298,43 @@ public class PackageMonitorTest {
     }
 
     @Test
+    public void testPackageMonitorDoHandlePackageEventPackageRemovedReplacingArchived() {
+        PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor());
+
+        Intent intent = new Intent(Intent.ACTION_PACKAGE_REMOVED);
+        intent.setData(Uri.fromParts("package", FAKE_PACKAGE_NAME, null));
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, FAKE_USER_ID);
+        intent.putExtra(Intent.EXTRA_UID, FAKE_PACKAGE_UID);
+        intent.putExtra(Intent.EXTRA_REPLACING, true);
+        intent.putExtra(Intent.EXTRA_ARCHIVAL, true);
+        intent.putExtra(Intent.EXTRA_REMOVED_FOR_ALL_USERS, true);
+        spyPackageMonitor.doHandlePackageEvent(intent);
+
+        verify(spyPackageMonitor, times(1)).onBeginPackageChanges();
+        verify(spyPackageMonitor, times(1))
+                .onPackageUpdateStarted(eq(FAKE_PACKAGE_NAME), eq(FAKE_PACKAGE_UID));
+        verify(spyPackageMonitor, times(1)).onPackageModified(eq(FAKE_PACKAGE_NAME));
+
+        ArgumentCaptor<Bundle> argumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(spyPackageMonitor, times(1))
+                .onPackageDisappearedWithExtras(eq(FAKE_PACKAGE_NAME), argumentCaptor.capture());
+        Bundle capturedExtras = argumentCaptor.getValue();
+        Bundle expectedExtras = intent.getExtras();
+        assertThat(capturedExtras.getInt(Intent.EXTRA_USER_HANDLE))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_USER_HANDLE));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_UID))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_UID));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REPLACING))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REPLACING));
+        assertThat(capturedExtras.getInt(Intent.EXTRA_REMOVED_FOR_ALL_USERS))
+                .isEqualTo(expectedExtras.getInt(Intent.EXTRA_REMOVED_FOR_ALL_USERS));
+
+        verify(spyPackageMonitor, times(1))
+                .onPackageDisappeared(eq(FAKE_PACKAGE_NAME), eq(PackageMonitor.PACKAGE_UPDATING));
+        verify(spyPackageMonitor, times(1)).onFinishPackageChanges();
+    }
+
+    @Test
     public void testPackageMonitorDoHandlePackageEventPackageRemovedNotReplacing()
             throws Exception {
         PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor());

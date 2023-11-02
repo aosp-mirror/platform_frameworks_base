@@ -17483,9 +17483,8 @@ public class TelephonyManager {
      * {@link CarrierConfigManager
      * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}
      * and return {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED}.
-     *
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_SLICING_ADDITIONAL_ERROR_CODES)
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED = 16;
 
     /**

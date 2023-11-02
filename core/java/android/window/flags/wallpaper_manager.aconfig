@@ -1,0 +1,8 @@
+package: "com.android.window.flags"
+
+flag {
+    name: "always_update_wallpaper_permission"
+    namespace: "wear_frameworks"
+    description: "Allow out of focus process to update wallpaper complications"
+    bug: "271132915"
+}

@@ -31,10 +31,8 @@ import android.content.res.Configuration;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -76,8 +74,7 @@ public class WindowTokenClient extends Binder {
      * Attaches {@code context} to this {@link WindowTokenClient}. Each {@link WindowTokenClient}
      * can only attach one {@link Context}.
      * <p>This method must be called before invoking
-     * {@link android.view.IWindowManager#attachWindowContextToDisplayArea(IBinder, int, int,
-     * Bundle)}.<p/>
+     * {@link android.view.IWindowManager#attachWindowContextToDisplayArea}.<p/>
      *
      * @param context context to be attached
      * @throws IllegalStateException if attached context has already existed.

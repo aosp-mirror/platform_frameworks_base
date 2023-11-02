@@ -275,7 +275,31 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
         }
         wct.setTaskFragmentOrganizer(mInterface);
         try {
-            getController().applyTransaction(wct, transitionType, shouldApplyIndependently);
+            getController().applyTransaction(
+                    wct, transitionType, shouldApplyIndependently, null /* remoteTransition */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Applies a transaction with a {@link RemoteTransition}. Only a system organizer is allowed to
+     * use {@link RemoteTransition}. See {@link TaskFragmentOrganizer#registerOrganizer(boolean)}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG)
+    public void applySystemTransaction(@NonNull WindowContainerTransaction wct,
+            @TaskFragmentTransitionType int transitionType,
+            @Nullable RemoteTransition remoteTransition) {
+        if (wct.isEmpty()) {
+            return;
+        }
+        wct.setTaskFragmentOrganizer(mInterface);
+        try {
+            getController().applyTransaction(
+                    wct, transitionType, remoteTransition != null /* shouldApplyIndependently */,
+                    remoteTransition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

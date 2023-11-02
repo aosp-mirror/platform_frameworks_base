@@ -32,17 +32,15 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -64,13 +62,11 @@ constructor(
     private val wakeUpCoordinator: NotificationWakeUpCoordinator,
     private val bypassController: KeyguardBypassController,
     private val headsUpManager: HeadsUpManager,
-    private val roundnessManager: NotificationRoundnessManager,
     configurationController: ConfigurationController,
     private val statusBarStateController: StatusBarStateController,
     private val falsingManager: FalsingManager,
-    shadeExpansionStateManager: ShadeExpansionStateManager,
+    private val shadeInteractor: ShadeInteractor,
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
-    private val falsingCollector: FalsingCollector,
     dumpManager: DumpManager
 ) : Gefingerpoken, Dumpable {
     companion object {
@@ -115,7 +111,6 @@ constructor(
 
     private val isFalseTouch: Boolean
         get() = falsingManager.isFalseTouch(NOTIFICATION_DRAG_DOWN)
-    var qsExpanded: Boolean = false
     var pulseExpandAbortListener: Runnable? = null
     var bouncerShowing: Boolean = false
 
@@ -126,12 +121,6 @@ constructor(
                 initResources(context)
             }
         })
-
-        shadeExpansionStateManager.addQsExpansionListener { isQsExpanded ->
-            if (qsExpanded != isQsExpanded) {
-                qsExpanded = isQsExpanded
-            }
-        }
 
         mPowerManager = context.getSystemService(PowerManager::class.java)
         dumpManager.registerDumpable(this)
@@ -148,7 +137,8 @@ constructor(
     }
 
     private fun canHandleMotionEvent(): Boolean {
-        return wakeUpCoordinator.canShowPulsingHuns && !qsExpanded && !bouncerShowing
+        return wakeUpCoordinator.canShowPulsingHuns && !shadeInteractor.isQsExpanded.value &&
+            !bouncerShowing
     }
 
     private fun startExpansion(event: MotionEvent): Boolean {
@@ -379,7 +369,6 @@ constructor(
             it.println("isExpanding: $isExpanding")
             it.println("leavingLockscreen: $leavingLockscreen")
             it.println("mPulsing: $mPulsing")
-            it.println("qsExpanded: $qsExpanded")
             it.println("bouncerShowing: $bouncerShowing")
         }
     }

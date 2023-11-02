@@ -51,3 +51,11 @@ flag {
     description: "Enables the scene container framework go/flexiglass."
     bug: "283121968"
 }
+
+flag {
+    name: "visual_interruptions_refactor"
+    namespace: "systemui"
+    description: "Enables the refactored version of the code to decide when notifications "
+        "HUN, bubble, pulse, or FSI."
+    bug: "261728888"
+}

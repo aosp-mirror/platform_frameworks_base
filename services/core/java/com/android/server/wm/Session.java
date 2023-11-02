@@ -86,6 +86,7 @@ import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerService.H;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -166,8 +167,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mCanSetUnrestrictedGestureExclusion =
                 service.mContext.checkCallingOrSelfPermission(SET_UNRESTRICTED_GESTURE_EXCLUSION)
                         == PERMISSION_GRANTED;
-        mCanAlwaysUpdateWallpaper =
-                service.mContext.checkCallingOrSelfPermission(ALWAYS_UPDATE_WALLPAPER)
+        mCanAlwaysUpdateWallpaper = Flags.alwaysUpdateWallpaperPermission()
+                && service.mContext.checkCallingOrSelfPermission(ALWAYS_UPDATE_WALLPAPER)
                         == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         mDragDropController = mService.mDragDropController;

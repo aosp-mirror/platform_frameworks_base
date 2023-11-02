@@ -22,6 +22,8 @@ import static android.provider.Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT;
 
 import static com.android.providers.settings.Flags.supportOverrides;
 
+import android.aconfig.Aconfig.parsed_flag;
+import android.aconfig.Aconfig.parsed_flags;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.AttributionSource;
@@ -39,12 +41,13 @@ import android.provider.DeviceConfigShellCommandHandler;
 import android.provider.Settings;
 import android.provider.Settings.Config.SyncDisabledMode;
 import android.provider.UpdatableDeviceConfigServiceReadiness;
+import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -56,18 +59,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * Receives shell commands from the command line related to device config flags, and dispatches them
  * to the SettingsProvider.
  */
 public final class DeviceConfigService extends Binder {
-    private static final List<String> aconfigTextProtoFilesOnDevice = List.of(
-        "/system/etc/aconfig_flags.textproto",
-        "/system_ext/etc/aconfig_flags.textproto",
-        "/system_ext/etc/aconfig_flags.textproto",
-        "/vendor/etc/aconfig_flags.textproto");
+    private static final List<String> sAconfigTextProtoFilesOnDevice = List.of(
+            "/system/etc/aconfig_flags.pb",
+            "/system_ext/etc/aconfig_flags.pb",
+            "/system_ext/etc/aconfig_flags.pb",
+            "/vendor/etc/aconfig_flags.pb");
 
     private static final List<String> PRIVATE_NAMESPACES = List.of(
             "device_config_overrides",
@@ -75,6 +77,8 @@ public final class DeviceConfigService extends Binder {
             "token_staged");
 
     final SettingsProvider mProvider;
+
+    private static final String TAG = "DeviceConfigService";
 
     public DeviceConfigService(SettingsProvider provider) {
         mProvider = provider;
@@ -94,62 +98,55 @@ public final class DeviceConfigService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-      final IContentProvider iprovider = mProvider.getIContentProvider();
-      pw.println("DeviceConfig flags:");
-      for (String line : MyShellCommand.listAll(iprovider)) {
-        pw.println(line);
-      }
+        final IContentProvider iprovider = mProvider.getIContentProvider();
+        pw.println("DeviceConfig flags:");
+        for (String line : MyShellCommand.listAll(iprovider)) {
+            pw.println(line);
+        }
 
-      ArrayList<String> missingFiles = new ArrayList<String>();
-      for (String fileName : aconfigTextProtoFilesOnDevice) {
-        File aconfigFile = new File(fileName);
-        if (!aconfigFile.exists()) {
-          missingFiles.add(fileName);
+        ArrayList<String> missingFiles = new ArrayList<String>();
+        for (String fileName : sAconfigTextProtoFilesOnDevice) {
+            File aconfigFile = new File(fileName);
+            if (!aconfigFile.exists()) {
+                missingFiles.add(fileName);
+            }
         }
-      }
 
-      if (missingFiles.isEmpty()) {
-        pw.println("\nAconfig flags:");
-        for (String name : MyShellCommand.listAllAconfigFlags(iprovider)) {
-          pw.println(name);
+        if (missingFiles.isEmpty()) {
+            pw.println("\nAconfig flags:");
+            for (String name : MyShellCommand.listAllAconfigFlags(iprovider)) {
+                pw.println(name);
+            }
+        } else {
+            pw.println("\nFailed to dump aconfig flags due to missing files:");
+            for (String fileName : missingFiles) {
+                pw.println(fileName);
+            }
         }
-      } else {
-        pw.println("\nFailed to dump aconfig flags due to missing files:");
-        for (String fileName : missingFiles) {
-          pw.println(fileName);
-        }
-      }
     }
 
     private static HashSet<String> getAconfigFlagNamesInDeviceConfig() {
         HashSet<String> nameSet = new HashSet<String>();
-        for (String fileName : aconfigTextProtoFilesOnDevice) {
-          try{
-            File aconfigFile = new File(fileName);
-            String packageName = "";
-            String namespace = "";
-            String name = "";
-
-            try (Scanner scanner = new Scanner(aconfigFile)) {
-              while (scanner.hasNextLine()) {
-                String data = scanner.nextLine().replaceAll("\\s+","");
-                if (data.startsWith("package:\"")) {
-                  packageName = data.substring(9, data.length()-1);
-                } else if (data.startsWith("name:\"")) {
-                  name = data.substring(6, data.length()-1);
-                } else if (data.startsWith("namespace:\"")) {
-                  namespace = data.substring(11, data.length()-1);
-                  nameSet.add(namespace + "/" + packageName + "." + name);
+        try {
+            for (String fileName : sAconfigTextProtoFilesOnDevice) {
+                byte[] contents = (new FileInputStream(fileName)).readAllBytes();
+                parsed_flags parsedFlags = parsed_flags.parseFrom(contents);
+                if (parsedFlags == null) {
+                    Slog.e(TAG, "failed to parse aconfig protobuf from " + fileName);
+                    continue;
                 }
-              }
+
+                for (parsed_flag flag : parsedFlags.getParsedFlagList()) {
+                    String namespace = flag.getNamespace();
+                    String packageName = flag.getPackage();
+                    String name = flag.getName();
+                    nameSet.add(namespace + "/" + packageName + "." + name);
+                }
             }
-
-          } catch (FileNotFoundException e) {
-            continue;
-          }
+        } catch (IOException e) {
+            Slog.e(TAG, "failed to read aconfig protobuf", e);
         }
-
-      return nameSet;
+        return nameSet;
     }
 
     private void callUpdableDeviceConfigShellCommandHandler(FileDescriptor in, FileDescriptor out,
