@@ -3206,6 +3206,15 @@ public final class Telephony {
         public static final String INFRASTRUCTURE_BITMASK = "infrastructure_bitmask";
 
         /**
+         * Indicating if the APN is used for eSIM bootsrap provisioning. The default value is 0 (Not
+         * used for eSIM bootstrap provisioning).
+         *
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String ESIM_BOOTSTRAP_PROVISIONING = "esim_bootstrap_provisioning";
+
+        /**
          * MVNO type:
          * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
          * <P>Type: TEXT</P>
