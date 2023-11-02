@@ -59,3 +59,10 @@ flag {
         "HUN, bubble, pulse, or FSI."
     bug: "261728888"
 }
+
+flag {
+    name: "haptic_brightness_slider"
+    namespace: "systemui"
+    description: "Adds haptic feedback to the brightness slider."
+    bug: "296467915"
+}
