@@ -103,6 +103,7 @@ import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.taskview.TaskViewFactoryController;
 import com.android.wm.shell.taskview.TaskViewTransitions;
+import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
@@ -613,14 +614,22 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            HomeTransitionObserver homeTransitionObserver) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
         return new Transitions(context, shellInit, shellCommandHandler, shellController, organizer,
                 pool, displayController, mainExecutor, mainHandler, animExecutor,
-                rootTaskDisplayAreaOrganizer);
+                rootTaskDisplayAreaOrganizer, homeTransitionObserver);
+    }
+
+    @WMSingleton
+    @Provides
+    static HomeTransitionObserver provideHomeTransitionObserver(Context context,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new HomeTransitionObserver(context, mainExecutor);
     }
 
     @WMSingleton
