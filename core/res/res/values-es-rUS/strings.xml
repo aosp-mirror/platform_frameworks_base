@@ -803,11 +803,11 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permite al titular actualizar la app que instaló previamente sin acción del usuario"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlar la longitud y los caracteres permitidos en las contraseñas y los PIN para el bloqueo de pantalla."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisa los intentos para desbloquear la pantalla"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisar los intentos para desbloquear la pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Controla la cantidad de contraseñas incorrectas ingresadas al desbloquear la pantalla y bloquea la tablet o borra todos los datos de la tablet si se ingresaron demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Supervisa la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquea el dispositivo Android TV o borra todos sus datos si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear el sistema de infoentretenimiento, o borrar todos los datos del sistema, si se ingresaron demasiadas contraseñas incorrectas."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Supervisar la cantidad de contraseñas ingresadas incorrectamente al desbloquear la pantalla, y bloquear el dispositivo o borrar todos sus datos si se ingresan demasiadas contraseñas incorrectas."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Supervisa la cantidad de contraseñas ingresadas incorrectamente al desbloquear la pantalla, y bloquea el dispositivo o borra todos sus datos si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear la tablet, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Supervisa la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquea el dispositivo Android TV o borra todos los datos del usuario si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear el sistema de infoentretenimiento, o borrar todos los datos de perfil, si se ingresaron demasiadas contraseñas incorrectas."</string>
@@ -1908,7 +1908,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Se cambió la solicitud SS por una videollamada"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Se cambió la solicitud SS por una solicitud USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Se cambió a una nueva solicitud SS"</string>
-    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Alerta de suplantación de identidad (phishing)"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Alerta de phishing"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil de trabajo"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Alerta enviada"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Verificado"</string>
