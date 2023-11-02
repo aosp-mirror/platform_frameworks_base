@@ -8,3 +8,4 @@ per-file *NetworkSecurityPolicy.java = file:net/OWNERS
 per-file Confirmation*.java = file:/keystore/OWNERS
 per-file FileIntegrityManager.java = file:platform/system/security:/fsverity/OWNERS
 per-file IFileIntegrityService.aidl = file:platform/system/security:/fsverity/OWNERS
+per-file *.aconfig = victorhsieh@google.com
