@@ -6348,6 +6348,10 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean startActivityIfNeeded(@RequiresPermission @NonNull Intent intent,
             int requestCode, @Nullable Bundle options) {
+        if (Instrumentation.DEBUG_START_ACTIVITY) {
+            Log.d("Instrumentation", "startActivity: intent=" + intent
+                    + " requestCode=" + requestCode + " options=" + options, new Throwable());
+        }
         if (mParent == null) {
             int result = ActivityManager.START_RETURN_INTENT_TO_CALLER;
             try {
