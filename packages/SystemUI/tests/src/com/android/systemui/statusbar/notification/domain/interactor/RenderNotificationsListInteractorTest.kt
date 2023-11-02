@@ -19,6 +19,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.byKey
 import com.android.systemui.util.mockito.mock
@@ -42,7 +43,17 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
     fun setRenderedList_preservesOrdering() = runTest {
         val notifs by collectLastValue(notifsInteractor.notifications)
         val keys = (1..50).shuffled().map { "$it" }
-        val entries = keys.map { mock<ListEntry> { whenever(key).thenReturn(it) } }
+        val entries =
+            keys.map {
+                mock<ListEntry> {
+                    val mockRep = mock<NotificationEntry> {
+                        whenever(key).thenReturn(it)
+                        whenever(sbn).thenReturn(mock())
+                        whenever(icons).thenReturn(mock())
+                    }
+                    whenever(representativeEntry).thenReturn(mockRep)
+                }
+            }
         underTest.setRenderedList(entries)
         assertThat(notifs).comparingElementsUsing(byKey).containsExactlyElementsIn(keys).inOrder()
     }

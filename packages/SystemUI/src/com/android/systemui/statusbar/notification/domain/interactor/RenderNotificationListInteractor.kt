@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.graphics.drawable.Icon
 import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
@@ -44,28 +45,29 @@ constructor(
      */
     fun setRenderedList(entries: List<ListEntry>) {
         repository.activeNotifications.update { existingModels ->
-            entries.associateBy(
-                keySelector = { it.key },
-                valueTransform = { it.toModel(existingModels) },
-            )
+            entries
+                .asSequence()
+                .mapNotNull { it.representativeEntry }
+                .associateBy(
+                    keySelector = { it.key },
+                    valueTransform = { it.toModel(existingModels) },
+                )
         }
     }
 
-    private fun ListEntry.toModel(
-        existingModels: ModelStore,
-    ): ActiveNotificationModel =
+    private fun NotificationEntry.toModel(existingModels: ModelStore): ActiveNotificationModel =
         existingModels.createOrReuse(
             key = key,
-            groupKey = representativeEntry?.sbn?.groupKey,
+            groupKey = sbn.groupKey,
             isAmbient = sectionStyleProvider.isMinimized(this),
-            isRowDismissed = representativeEntry?.isRowDismissed == true,
+            isRowDismissed = isRowDismissed,
             isSilent = sectionStyleProvider.isSilent(this),
-            isLastMessageFromReply = representativeEntry?.isLastMessageFromReply == true,
-            isSuppressedFromStatusBar = representativeEntry?.shouldSuppressStatusBar() == true,
-            isPulsing = representativeEntry?.showingPulsing() == true,
-            aodIcon = representativeEntry?.icons?.aodIcon?.sourceIcon,
-            shelfIcon = representativeEntry?.icons?.shelfIcon?.sourceIcon,
-            statusBarIcon = representativeEntry?.icons?.statusBarIcon?.sourceIcon,
+            isLastMessageFromReply = isLastMessageFromReply,
+            isSuppressedFromStatusBar = shouldSuppressStatusBar(),
+            isPulsing = showingPulsing(),
+            aodIcon = icons.aodIcon?.sourceIcon,
+            shelfIcon = icons.shelfIcon?.sourceIcon,
+            statusBarIcon = icons.statusBarIcon?.sourceIcon,
         )
 
     private fun ModelStore.createOrReuse(
