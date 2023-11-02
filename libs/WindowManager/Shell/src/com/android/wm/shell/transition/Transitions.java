@@ -205,12 +205,6 @@ public class Transitions implements RemoteCallable<Transitions>,
      */
     private static final int SYNC_ALLOWANCE_MS = 120;
 
-    /**
-     * Keyguard gets a more generous timeout to finish its animations, because we are always holding
-     * a sleep token during occlude/unocclude transitions and we want them to finish playing cleanly
-     */
-    private static final int SYNC_ALLOWANCE_KEYGUARD_MS = 2000;
-
     /** For testing only. Disables the force-finish timeout on sync. */
     private boolean mDisableForceSync = false;
 
@@ -1209,11 +1203,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (track.mActiveTransition == playing) {
                 if (!mDisableForceSync) {
                     // Give it a short amount of time to process it before forcing.
-                    final int tolerance = KeyguardTransitionHandler.handles(playing.mInfo)
-                            ? SYNC_ALLOWANCE_KEYGUARD_MS
-                            : SYNC_ALLOWANCE_MS;
                     mMainExecutor.executeDelayed(
-                            () -> finishForSync(reason, trackIdx, playing), tolerance);
+                            () -> finishForSync(reason, trackIdx, playing), SYNC_ALLOWANCE_MS);
                 }
                 break;
             }
