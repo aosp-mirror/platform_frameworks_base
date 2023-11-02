@@ -132,13 +132,16 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
+    // TODO(b/278765923): Replace these with domain-agnostic state
     /* Maximum number of icons on AOD when also showing overflow dot. */
     private int mMaxIconsOnAod;
-
     /* Maximum number of icons in short shelf on lockscreen when also showing overflow dot. */
     private int mMaxIconsOnLockscreen;
     /* Maximum number of icons in the status bar when also showing overflow dot. */
     private int mMaxStaticIcons;
+    private boolean mDozing;
+    private boolean mOnLockScreen;
+    private boolean mOverrideIconColor;
 
     private boolean mIsStaticLayout = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
@@ -147,9 +150,6 @@ public class NotificationIconContainer extends ViewGroup {
     private int mActualLayoutWidth = NO_VALUE;
     private float mActualPaddingEnd = NO_VALUE;
     private float mActualPaddingStart = NO_VALUE;
-    private boolean mDozing;
-    private boolean mOnLockScreen;
-    private boolean mInNotificationIconShelf;
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
     private int mCannedAnimationStartIndex = -1;
@@ -284,7 +284,7 @@ public class NotificationIconContainer extends ViewGroup {
     public String toString() {
         return "NotificationIconContainer("
                 + "dozing=" + mDozing + " onLockScreen=" + mOnLockScreen
-                + " inNotificationIconShelf=" + mInNotificationIconShelf
+                + " overrideIconColor=" + mOverrideIconColor
                 + " speedBumpIndex=" + mSpeedBumpIndex
                 + " themedTextColorPrimary=#" + Integer.toHexString(mThemedTextColorPrimary) + ')';
     }
@@ -739,8 +739,15 @@ public class NotificationIconContainer extends ViewGroup {
         mOnLockScreen = onLockScreen;
     }
 
+    @Deprecated
     public void setInNotificationIconShelf(boolean inShelf) {
-        mInNotificationIconShelf = inShelf;
+        NotificationIconContainerRefactor.assertInLegacyMode();
+        mOverrideIconColor = inShelf;
+    }
+
+    public void setOverrideIconColor(boolean override) {
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
+        mOverrideIconColor = override;
     }
 
     public class IconState extends ViewState {
@@ -858,7 +865,7 @@ public class NotificationIconContainer extends ViewGroup {
                     }
                 }
                 icon.setVisibleState(visibleState, animationsAllowed);
-                icon.setIconColor(mInNotificationIconShelf ? mThemedTextColorPrimary : iconColor,
+                icon.setIconColor(mOverrideIconColor ? mThemedTextColorPrimary : iconColor,
                         needsCannedAnimation && animationsAllowed);
                 if (animate) {
                     animateTo(icon, animationProperties);

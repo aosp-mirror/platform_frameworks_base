@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -151,7 +152,11 @@ public class NotificationShelf extends ActivatableNotificationView {
                 R.dimen.notification_corner_animation_distance);
         mEnableNotificationClipping = res.getBoolean(R.bool.notification_enable_clipping);
 
-        mShelfIcons.setInNotificationIconShelf(true);
+        if (NotificationIconContainerRefactor.isEnabled()) {
+            mShelfIcons.setOverrideIconColor(true);
+        } else {
+            mShelfIcons.setInNotificationIconShelf(true);
+        }
         if (!mShowNotificationShelf) {
             setVisibility(GONE);
         }
