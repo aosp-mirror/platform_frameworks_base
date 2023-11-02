@@ -18,7 +18,6 @@ package com.android.server.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
-import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTHENTICATED_PENDING_SYSUI;
@@ -61,6 +60,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -70,12 +70,17 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.keymaster.HardwareAuthenticatorType;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
+import android.security.GateKeeper;
 import android.security.KeyStore;
+import android.security.authorization.IKeystoreAuthorization;
+import android.service.gatekeeper.IGateKeeperService;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
@@ -91,6 +96,7 @@ import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
@@ -103,6 +109,9 @@ import java.util.Random;
 @Presubmit
 @SmallTest
 public class BiometricServiceTest {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final String TEST_PACKAGE_NAME = "test_package";
     private static final long TEST_REQUEST_ID = 44;
@@ -155,10 +164,16 @@ public class BiometricServiceTest {
     @Mock
     private BiometricCameraManager mBiometricCameraManager;
 
+    @Mock
+    private IKeystoreAuthorization mKeystoreAuthService;
+
+    @Mock
+    private IGateKeeperService mGateKeeperService;
+
     BiometricContextProvider mBiometricContextProvider;
 
     @Before
-    public void setUp() {
+    public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
 
         resetReceivers();
@@ -196,6 +211,9 @@ public class BiometricServiceTest {
                 mStatusBarService, null /* handler */,
                 mAuthSessionCoordinator);
         when(mInjector.getBiometricContext(any())).thenReturn(mBiometricContextProvider);
+        when(mInjector.getKeystoreAuthorizationService()).thenReturn(mKeystoreAuthService);
+        when(mInjector.getGateKeeperService()).thenReturn(mGateKeeperService);
+        when(mGateKeeperService.getSecureUserId(anyInt())).thenReturn(42L);
 
         final String[] config = {
                 "0:2:15",  // ID0:Fingerprint:Strong
@@ -1610,6 +1628,44 @@ public class BiometricServiceTest {
         verify(callback).onChanged(true, userInfo1.id);
         verify(callback).onChanged(false, userInfo2.id);
         verifyNoMoreInteractions(callback);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testGetLastAuthenticationTime_flagOff_throwsUnsupportedOperationException()
+            throws RemoteException {
+        mSetFlagsRule.disableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
+
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.mImpl.getLastAuthenticationTime(0, Authenticators.BIOMETRIC_STRONG);
+    }
+
+    @Test
+    public void testGetLastAuthenticationTime_flagOn_callsKeystoreAuthorization()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
+
+        final int[] hardwareAuthenticators = new int[] {
+                HardwareAuthenticatorType.PASSWORD,
+                HardwareAuthenticatorType.FINGERPRINT
+        };
+
+        final int userId = 0;
+        final long secureUserId = mGateKeeperService.getSecureUserId(userId);
+
+        assertNotEquals(GateKeeper.INVALID_SECURE_USER_ID, secureUserId);
+
+        final long expectedResult = 31337L;
+
+        when(mKeystoreAuthService.getLastAuthTime(eq(secureUserId), eq(hardwareAuthenticators)))
+                .thenReturn(expectedResult);
+
+        mBiometricService = new BiometricService(mContext, mInjector);
+
+        final long result = mBiometricService.mImpl.getLastAuthenticationTime(userId,
+                Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL);
+
+        assertEquals(expectedResult, result);
+        verify(mKeystoreAuthService).getLastAuthTime(eq(secureUserId), eq(hardwareAuthenticators));
     }
 
     // Helper methods

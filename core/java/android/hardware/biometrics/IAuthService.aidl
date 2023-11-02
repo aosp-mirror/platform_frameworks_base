@@ -57,6 +57,9 @@ interface IAuthService {
     // Checks if biometrics can be used.
     int canAuthenticate(String opPackageName, int userId, int authenticators);
 
+    // Gets the time of last authentication for the given user and authenticators.
+    long getLastAuthenticationTime(int userId, int authenticators);
+
     // Checks if any biometrics are enrolled.
     boolean hasEnrolledBiometrics(int userId, String opPackageName);
 
