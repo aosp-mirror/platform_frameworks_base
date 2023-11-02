@@ -16,6 +16,8 @@
 
 package com.android.systemui.authentication.domain.interactor
 
+import com.android.app.tracing.TraceUtils.Companion.async
+import com.android.app.tracing.TraceUtils.Companion.withContext
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
@@ -27,8 +29,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
-import com.android.systemui.tracing.TraceUtils.Companion.async
-import com.android.systemui.tracing.TraceUtils.Companion.withContext
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject

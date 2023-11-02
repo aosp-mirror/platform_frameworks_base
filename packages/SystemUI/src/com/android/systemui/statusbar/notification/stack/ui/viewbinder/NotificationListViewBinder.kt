@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.view.LayoutInflater
+import com.android.app.tracing.traceSection
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.reinflateAndBindLatest
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -31,7 +32,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.tracing.traceSection
 
 /** Binds a [NotificationStackScrollLayout] to its [view model][NotificationListViewModel]. */
 object NotificationListViewBinder {

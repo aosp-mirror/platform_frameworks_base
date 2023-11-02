@@ -26,12 +26,12 @@ import android.os.Handler
 import android.os.Trace
 import android.util.Log
 import android.view.Display
+import com.android.app.tracing.traceSection
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.DisplayEvent
-import com.android.systemui.tracing.traceSection
 import com.android.systemui.util.Compile
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

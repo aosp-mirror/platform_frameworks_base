@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
+import com.android.app.tracing.traceSection
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
@@ -27,7 +28,6 @@ import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.tracing.traceSection
 import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
