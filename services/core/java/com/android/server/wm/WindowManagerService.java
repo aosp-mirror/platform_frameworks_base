@@ -8407,12 +8407,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 SurfaceControlViewHost.SurfacePackage overlay) {
             if (overlay == null) {
                 throw new IllegalArgumentException("Invalid overlay passed in for task=" + taskId);
-            } else if (overlay.getSurfaceControl() == null
-                    || !overlay.getSurfaceControl().isValid()) {
-                throw new IllegalArgumentException(
-                        "Invalid overlay surfacecontrol passed in for task=" + taskId);
             }
             synchronized (mGlobalLock) {
+                if (overlay.getSurfaceControl() == null
+                        || !overlay.getSurfaceControl().isValid()) {
+                    throw new IllegalArgumentException(
+                            "Invalid overlay surfacecontrol passed in for task=" + taskId);
+                }
                 final Task task = mRoot.getRootTask(taskId);
                 if (task == null) {
                     throw new IllegalArgumentException("no task with taskId" + taskId);
