@@ -62,6 +62,9 @@ constructor(
         addFilter(PeekNotImportantSuppressor())
         addCondition(PeekDeviceNotInUseSuppressor(powerManager, statusBarStateController))
         addFilter(PeekOldWhenSuppressor(systemClock))
+        addFilter(PulseEffectSuppressor())
+        addFilter(PulseLockscreenVisibilityPrivateSuppressor())
+        addFilter(PulseLowImportanceSuppressor())
 
         started = true
     }
