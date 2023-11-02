@@ -654,8 +654,8 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"Atzera: itzuli aurreko egoerara (atzera egiteko botoia)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"Atzitu hasierako pantaila"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Ikusi irekitako aplikazioen ikuspegi orokorra"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Joan azken aplikazioetako batetik bestera (aurrera)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Joan azken aplikazioetako batetik bestera (atzera)"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Joan azkenaldian erabilitako aplikazio batetik bestera (aurrera)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Joan azkenaldian erabilitako aplikazio batetik bestera (atzera)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Atzitu aplikazio guztien zerrenda eta bilatu (adibidez, bilatzeko aukeraren edo Exekutatzeko tresna aplikazioaren bidez)"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Ezkutatu eta erakutsi (berriro) zereginen barra"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Atzitu sistemaren ezarpenak"</string>
@@ -769,7 +769,7 @@
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"Ezkerreko lasterbideak desblokeatzeko ere balio du"</string>
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"Eskuineko lasterbideak desblokeatzeko ere balio du"</string>
     <string name="lockscreen_none" msgid="4710862479308909198">"Bat ere ez"</string>
-    <string name="tuner_launch_app" msgid="3906265365971743305">"Abiarazi <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_launch_app" msgid="3906265365971743305">"Exekutatu <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="tuner_other_apps" msgid="7767462881742291204">"Beste aplikazio batzuk"</string>
     <string name="tuner_circle" msgid="5270591778160525693">"Zirkulua"</string>
     <string name="tuner_plus" msgid="4130366441154416484">"Plus"</string>
@@ -1062,7 +1062,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Oraingoz ez da automatikoki konektatuko wifira"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ikusi guztiak"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Sarea aldatzeko, deskonektatu Etherneta"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Gailuaren funtzionamendua hobetzeko, aplikazioek eta zerbitzuek wifi-sareak bilatzen jarraituko dute, baita wifi-konexioa desaktibatuta dagoenean ere. Aukera hori aldatzeko, joan wifi-sareen bilaketaren ezarpenetara. "<annotation id="link">"Aldatu"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Gailuaren funtzionamendua hobetzeko, aplikazioek eta zerbitzuek wifi-sareak bilatzen jarraituko dute, baita wifi-konexioa desaktibatuta dagoenean ere. Aukera hori aldatzeko, joan wifi-sareak bilatzeko eginbidearen ezarpenetara. "<annotation id="link">"Aldatu"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desaktibatu hegaldi modua"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioak lauza hau gehitu nahi du Ezarpen bizkorrak menuan:"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Gehitu lauza"</string>
@@ -1113,7 +1113,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Gailuko erregistro guztiak erabiltzeko baimena eman nahi diozu <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> aplikazioari?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Eman behin erabiltzeko baimena"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ez eman baimenik"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Gailuko erregistroetan gailuan gertatzen den guztia gordetzen da. Arazoak bilatu eta konpontzeko erabil ditzakete aplikazioek erregistro horiek.\n\nBaliteke erregistro batzuek kontuzko informazioa edukitzea. Beraz, eman gailuko erregistro guztiak erabiltzeko baimena fidagarritzat jotzen dituzun aplikazioei bakarrik. \n\nNahiz eta gailuko erregistro guztiak erabiltzeko baimena ez eman aplikazio honi, aplikazioak hari dagozkion erregistroak atzitu ahalko ditu. Gainera, baliteke gailuaren fabrikatzaileak gailuko erregistro edo datu batzuk atzitu ahal izatea."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Gailuko erregistroetan gailuan gertatzen den guztia gordetzen da. Arazoak bilatu eta konpontzeko erabil ditzakete aplikazioek erregistro horiek.\n\nBaliteke erregistro batzuek kontuzko informazioa edukitzea. Beraz, eman gailuko erregistro guztiak erabiltzeko baimena fidagarritzat jotzen dituzun aplikazioei bakarrik. \n\nNahiz eta gailuko erregistro guztiak erabiltzeko baimena ez eman aplikazio honi, aplikazioak hari dagozkion erregistroak erabili ahalko ditu. Gainera, baliteke gailuaren fabrikatzaileak gailuko erregistro edo datu batzuk erabili ahal izatea."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Lortu informazio gehiago"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Lortu informazio gehiago <xliff:g id="URL">%s</xliff:g> helbidean"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Ireki <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
