@@ -19,6 +19,7 @@ import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
 import android.util.Log
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
@@ -106,9 +107,19 @@ constructor(
         condition.start()
     }
 
+    @VisibleForTesting
+    fun removeCondition(condition: VisualInterruptionCondition) {
+        conditions.remove(condition)
+    }
+
     fun addFilter(filter: VisualInterruptionFilter) {
         filters.add(filter)
         filter.start()
+    }
+
+    @VisibleForTesting
+    fun removeFilter(filter: VisualInterruptionFilter) {
+        filters.remove(filter)
     }
 
     override fun makeUnloggedHeadsUpDecision(entry: NotificationEntry): Decision {

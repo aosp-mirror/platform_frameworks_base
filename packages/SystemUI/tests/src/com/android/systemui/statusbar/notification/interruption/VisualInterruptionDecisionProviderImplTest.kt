@@ -18,6 +18,11 @@ package com.android.systemui.statusbar.notification.interruption
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
+import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
@@ -37,5 +42,180 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             systemClock,
             userTracker,
         )
+    }
+
+    @Test
+    fun testNothingCondition_suppressesNothing() {
+        withCondition(TestCondition(types = emptySet()) { true }) {
+            assertPeekNotSuppressed()
+            assertPulseNotSuppressed()
+            assertBubbleNotSuppressed()
+        }
+    }
+
+    @Test
+    fun testNothingFilter_suppressesNothing() {
+        withFilter(TestFilter(types = emptySet()) { true }) {
+            assertPeekNotSuppressed()
+            assertPulseNotSuppressed()
+            assertBubbleNotSuppressed()
+        }
+    }
+
+    @Test
+    fun testPeekCondition_suppressesOnlyPeek() {
+        withCondition(TestCondition(types = setOf(PEEK)) { true }) {
+            assertPeekSuppressed()
+            assertPulseNotSuppressed()
+            assertBubbleNotSuppressed()
+        }
+    }
+
+    @Test
+    fun testPeekFilter_suppressesOnlyPeek() {
+        withFilter(TestFilter(types = setOf(PEEK)) { true }) {
+            assertPeekSuppressed()
+            assertPulseNotSuppressed()
+            assertBubbleNotSuppressed()
+        }
+    }
+
+    @Test
+    fun testPulseCondition_suppressesOnlyPulse() {
+        withCondition(TestCondition(types = setOf(PULSE)) { true }) {
+            assertPeekNotSuppressed()
+            assertPulseSuppressed()
+            assertBubbleNotSuppressed()
+        }
+    }
+
+    @Test
+    fun testPulseFilter_suppressesOnlyPulse() {
+        withFilter(TestFilter(types = setOf(PULSE)) { true }) {
+            assertPeekNotSuppressed()
+            assertPulseSuppressed()
+            assertBubbleNotSuppressed()
+        }
+    }
+
+    @Test
+    fun testBubbleCondition_suppressesOnlyBubble() {
+        withCondition(TestCondition(types = setOf(BUBBLE)) { true }) {
+            assertPeekNotSuppressed()
+            assertPulseNotSuppressed()
+            assertBubbleSuppressed()
+        }
+    }
+
+    @Test
+    fun testBubbleFilter_suppressesOnlyBubble() {
+        withFilter(TestFilter(types = setOf(BUBBLE)) { true }) {
+            assertPeekNotSuppressed()
+            assertPulseNotSuppressed()
+            assertBubbleSuppressed()
+        }
+    }
+
+    @Test
+    fun testCondition_differentState() {
+        ensurePeekState()
+        val entry = buildPeekEntry()
+
+        var stateShouldSuppress = false
+        withCondition(TestCondition(types = setOf(PEEK)) { stateShouldSuppress }) {
+            assertShouldHeadsUp(entry)
+
+            stateShouldSuppress = true
+            assertShouldNotHeadsUp(entry)
+
+            stateShouldSuppress = false
+            assertShouldHeadsUp(entry)
+        }
+    }
+
+    @Test
+    fun testFilter_differentState() {
+        ensurePeekState()
+        val entry = buildPeekEntry()
+
+        var stateShouldSuppress = false
+        withFilter(TestFilter(types = setOf(PEEK)) { stateShouldSuppress }) {
+            assertShouldHeadsUp(entry)
+
+            stateShouldSuppress = true
+            assertShouldNotHeadsUp(entry)
+
+            stateShouldSuppress = false
+            assertShouldHeadsUp(entry)
+        }
+    }
+
+    @Test
+    fun testFilter_differentNotif() {
+        ensurePeekState()
+
+        val suppressedEntry = buildPeekEntry()
+        val unsuppressedEntry = buildPeekEntry()
+
+        withFilter(TestFilter(types = setOf(PEEK)) { it == suppressedEntry }) {
+            assertShouldNotHeadsUp(suppressedEntry)
+            assertShouldHeadsUp(unsuppressedEntry)
+        }
+    }
+
+    private fun assertPeekSuppressed() {
+        ensurePeekState()
+        assertShouldNotHeadsUp(buildPeekEntry())
+    }
+
+    private fun assertPeekNotSuppressed() {
+        ensurePeekState()
+        assertShouldHeadsUp(buildPeekEntry())
+    }
+
+    private fun assertPulseSuppressed() {
+        ensurePulseState()
+        assertShouldNotHeadsUp(buildPulseEntry())
+    }
+
+    private fun assertPulseNotSuppressed() {
+        ensurePulseState()
+        assertShouldHeadsUp(buildPulseEntry())
+    }
+
+    private fun assertBubbleSuppressed() {
+        ensureBubbleState()
+        assertShouldNotBubble(buildBubbleEntry())
+    }
+
+    private fun assertBubbleNotSuppressed() {
+        ensureBubbleState()
+        assertShouldBubble(buildBubbleEntry())
+    }
+
+    private fun withCondition(condition: VisualInterruptionCondition, block: () -> Unit) {
+        provider.addCondition(condition)
+        block()
+        provider.removeCondition(condition)
+    }
+
+    private fun withFilter(filter: VisualInterruptionFilter, block: () -> Unit) {
+        provider.addFilter(filter)
+        block()
+        provider.removeFilter(filter)
+    }
+
+    private class TestCondition(
+        types: Set<VisualInterruptionType>,
+        val onShouldSuppress: () -> Boolean
+    ) : VisualInterruptionCondition(types = types, reason = "") {
+        override fun shouldSuppress(): Boolean = onShouldSuppress()
+    }
+
+    private class TestFilter(
+        types: Set<VisualInterruptionType>,
+        val onShouldSuppress: (NotificationEntry) -> Boolean = { true }
+    ) : VisualInterruptionFilter(types = types, reason = "") {
+        override fun shouldSuppress(entry: NotificationEntry) = onShouldSuppress(entry)
     }
 }

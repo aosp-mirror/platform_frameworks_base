@@ -494,7 +494,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         assertShouldFsi(buildFsiEntry())
     }
 
-    private data class State(
+    protected data class State(
         var hunSettingEnabled: Boolean? = null,
         var hunSnoozed: Boolean? = null,
         var isAodPowerSave: Boolean? = null,
@@ -507,7 +507,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var statusBarState: Int? = null,
     )
 
-    private fun setState(state: State): Unit =
+    protected fun setState(state: State): Unit =
         state.run {
             hunSettingEnabled?.let {
                 val newSetting = if (it) HEADS_UP_ON else HEADS_UP_OFF
@@ -538,7 +538,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             statusBarState?.let { statusBarStateController.state = it }
         }
 
-    private fun ensureState(block: State.() -> Unit) =
+    protected fun ensureState(block: State.() -> Unit) =
         State()
             .apply {
                 keyguardShouldHideNotification = false
@@ -546,7 +546,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             }
             .run(this::setState)
 
-    private fun ensurePeekState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensurePeekState(block: State.() -> Unit = {}) = ensureState {
         hunSettingEnabled = true
         hunSnoozed = false
         isDozing = false
@@ -555,67 +555,67 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         run(block)
     }
 
-    private fun ensurePulseState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensurePulseState(block: State.() -> Unit = {}) = ensureState {
         isAodPowerSave = false
         isDozing = true
         pulseOnNotificationsEnabled = true
         run(block)
     }
 
-    private fun ensureBubbleState(block: State.() -> Unit = {}) = ensureState(block)
+    protected fun ensureBubbleState(block: State.() -> Unit = {}) = ensureState(block)
 
-    private fun ensureNotInteractiveFsiState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensureNotInteractiveFsiState(block: State.() -> Unit = {}) = ensureState {
         isDreaming = false
         isInteractive = false
         statusBarState = SHADE
         run(block)
     }
 
-    private fun ensureDreamingFsiState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensureDreamingFsiState(block: State.() -> Unit = {}) = ensureState {
         isDreaming = true
         isInteractive = true
         statusBarState = SHADE
         run(block)
     }
 
-    private fun ensureKeyguardFsiState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensureKeyguardFsiState(block: State.() -> Unit = {}) = ensureState {
         isDreaming = false
         isInteractive = true
         statusBarState = KEYGUARD
         run(block)
     }
 
-    private fun assertShouldHeadsUp(entry: NotificationEntry) =
+    protected fun assertShouldHeadsUp(entry: NotificationEntry) =
         provider.makeUnloggedHeadsUpDecision(entry).let {
             assertTrue("unexpected suppressed HUN: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldNotHeadsUp(entry: NotificationEntry) =
+    protected fun assertShouldNotHeadsUp(entry: NotificationEntry) =
         provider.makeUnloggedHeadsUpDecision(entry).let {
             assertFalse("unexpected unsuppressed HUN: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldBubble(entry: NotificationEntry) =
+    protected fun assertShouldBubble(entry: NotificationEntry) =
         provider.makeAndLogBubbleDecision(entry).let {
             assertTrue("unexpected suppressed bubble: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldNotBubble(entry: NotificationEntry) =
+    protected fun assertShouldNotBubble(entry: NotificationEntry) =
         provider.makeAndLogBubbleDecision(entry).let {
             assertFalse("unexpected unsuppressed bubble: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldFsi(entry: NotificationEntry) =
+    protected fun assertShouldFsi(entry: NotificationEntry) =
         provider.makeUnloggedFullScreenIntentDecision(entry).let {
             assertTrue("unexpected suppressed FSI: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldNotFsi(entry: NotificationEntry) =
+    protected fun assertShouldNotFsi(entry: NotificationEntry) =
         provider.makeUnloggedFullScreenIntentDecision(entry).let {
             assertFalse("unexpected unsuppressed FSI: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private class EntryBuilder(val context: Context) {
+    protected class EntryBuilder(val context: Context) {
         var importance = IMPORTANCE_DEFAULT
         var suppressedVisualEffects: Int? = null
         var whenMs: Long? = null
@@ -708,27 +708,27 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 }
     }
 
-    private fun buildEntry(block: EntryBuilder.() -> Unit) =
+    protected fun buildEntry(block: EntryBuilder.() -> Unit) =
         EntryBuilder(context).also(block).build()
 
-    private fun buildPeekEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+    protected fun buildPeekEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         importance = IMPORTANCE_HIGH
         run(block)
     }
 
-    private fun buildPulseEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+    protected fun buildPulseEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         importance = IMPORTANCE_DEFAULT
         visibilityOverride = VISIBILITY_NO_OVERRIDE
         run(block)
     }
 
-    private fun buildBubbleEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+    protected fun buildBubbleEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         canBubble = true
         hasBubbleMetadata = true
         run(block)
     }
 
-    private fun buildFsiEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+    protected fun buildFsiEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         importance = IMPORTANCE_HIGH
         hasFsi = true
         run(block)
