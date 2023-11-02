@@ -49,6 +49,9 @@ import android.provider.Settings.Global.HEADS_UP_OFF
 import android.provider.Settings.Global.HEADS_UP_ON
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.statusbar.FakeStatusBarStateController
@@ -78,6 +81,20 @@ import org.junit.Test
 import org.mockito.Mockito.`when` as whenever
 
 abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
+    private val fakeLogBuffer =
+        LogBuffer(
+            name = "FakeLog",
+            maxSize = 1,
+            logcatEchoTracker =
+                object : LogcatEchoTracker {
+                    override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean =
+                        true
+
+                    override fun isTagLoggable(tagName: String, level: LogLevel): Boolean = true
+                },
+            systrace = false
+        )
+
     private val leakCheck = LeakCheckedTest.SysuiLeakCheck()
 
     protected val ambientDisplayConfiguration = FakeAmbientDisplayConfiguration(context)
@@ -90,8 +107,9 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider =
         mock()
     protected val keyguardStateController = FakeKeyguardStateController(leakCheck)
-    protected val logger: NotificationInterruptLogger = mock()
     protected val mainHandler = FakeHandler(Looper.getMainLooper())
+    protected val newLogger = VisualInterruptionDecisionLogger(fakeLogBuffer)
+    protected val oldLogger = NotificationInterruptLogger(fakeLogBuffer)
     protected val powerManager: PowerManager = mock()
     protected val statusBarStateController = FakeStatusBarStateController()
     protected val systemClock = FakeSystemClock()
@@ -119,13 +137,8 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        globalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON)
-
         val user = UserInfo(ActivityManager.getCurrentUser(), "Current user", /* flags = */ 0)
         userTracker.set(listOf(user), /* currentUserIndex = */ 0)
-
-        whenever(keyguardNotificationVisibilityProvider.shouldHideNotification(any()))
-            .thenReturn(false)
 
         provider.start()
     }
@@ -866,12 +879,12 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     protected fun assertShouldHeadsUp(entry: NotificationEntry) =
-        provider.makeUnloggedHeadsUpDecision(entry).let {
+        provider.makeAndLogHeadsUpDecision(entry).let {
             assertTrue("unexpected suppressed HUN: ${it.logReason}", it.shouldInterrupt)
         }
 
     protected fun assertShouldNotHeadsUp(entry: NotificationEntry) =
-        provider.makeUnloggedHeadsUpDecision(entry).let {
+        provider.makeAndLogHeadsUpDecision(entry).let {
             assertFalse("unexpected unsuppressed HUN: ${it.logReason}", it.shouldInterrupt)
         }
 
@@ -887,6 +900,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     protected fun assertShouldFsi(entry: NotificationEntry) =
         provider.makeUnloggedFullScreenIntentDecision(entry).let {
+            provider.logFullScreenIntentDecision(it)
             assertTrue("unexpected suppressed FSI: ${it.logReason}", it.shouldInterrupt)
         }
 
@@ -895,6 +909,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         expectWouldInterruptWithoutDnd: Boolean? = null
     ) =
         provider.makeUnloggedFullScreenIntentDecision(entry).let {
+            provider.logFullScreenIntentDecision(it)
             assertFalse("unexpected unsuppressed FSI: ${it.logReason}", it.shouldInterrupt)
             if (expectWouldInterruptWithoutDnd != null) {
                 assertEquals(

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.interruption
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
+import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -46,7 +47,7 @@ constructor(
     private val headsUpManager: HeadsUpManager,
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
     keyguardStateController: KeyguardStateController,
-    private val logger: NotificationInterruptLogger,
+    private val logger: VisualInterruptionDecisionLogger,
     @Main private val mainHandler: Handler,
     private val powerManager: PowerManager,
     private val statusBarStateController: StatusBarStateController,
@@ -79,8 +80,11 @@ constructor(
     }
 
     private class FullScreenIntentDecisionImpl(
+        val entry: NotificationEntry,
         private val fsiDecision: FullScreenIntentDecisionProvider.Decision
     ) : FullScreenIntentDecision {
+        var hasBeenLogged = false
+
         override val shouldInterrupt
             get() = fsiDecision.shouldFsi
 
@@ -89,6 +93,12 @@ constructor(
 
         override val logReason
             get() = fsiDecision.logReason
+
+        val shouldLog
+            get() = fsiDecision.shouldLog
+
+        val isWarning
+            get() = fsiDecision.isWarning
     }
 
     private val fullScreenIntentDecisionProvider =
@@ -206,7 +216,7 @@ constructor(
         entry: NotificationEntry,
         loggable: LoggableDecision
     ) {
-        // Not yet implemented.
+        logger.logDecision(type.name, entry, loggable.decision)
     }
 
     override fun makeUnloggedFullScreenIntentDecision(
@@ -217,13 +227,29 @@ constructor(
         val couldHeadsUp = makeUnloggedHeadsUpDecision(entry).shouldInterrupt
         val fsiDecision =
             fullScreenIntentDecisionProvider.makeFullScreenIntentDecision(entry, couldHeadsUp)
-        return FullScreenIntentDecisionImpl(fsiDecision)
+        return FullScreenIntentDecisionImpl(entry, fsiDecision)
     }
 
     override fun logFullScreenIntentDecision(decision: FullScreenIntentDecision) {
         check(started)
 
-        // Not yet implemented.
+        if (decision !is FullScreenIntentDecisionImpl) {
+            Log.wtf(TAG, "FSI decision $decision was not created by this class")
+            return
+        }
+
+        if (decision.hasBeenLogged) {
+            Log.wtf(TAG, "FSI decision $decision has already been logged")
+            return
+        }
+
+        decision.hasBeenLogged = true
+
+        if (!decision.shouldLog) {
+            return
+        }
+
+        logger.logFullScreenIntentDecision(decision.entry, decision, decision.isWarning)
     }
 
     private fun checkSuppressInterruptions(entry: NotificationEntry) =
