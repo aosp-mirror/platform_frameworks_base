@@ -410,9 +410,6 @@ object Flags {
     val FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS =
         releasedFlag("filter_provisioning_network_subscriptions")
 
-    // TODO(b/265892345): Tracking Bug
-    val PLUG_IN_STATUS_BAR_CHIP = releasedFlag("plug_in_status_bar_chip")
-
     // TODO(b/292533677): Tracking Bug
     val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
         unreleasedFlag("wifi_tracker_lib_for_wifi_icon", teamfood = true)
