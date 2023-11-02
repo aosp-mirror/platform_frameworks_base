@@ -23,6 +23,7 @@ public class TestCurrentUserIdentityInjector implements CurrentUserIdentityInjec
 
     private Integer mCurrentUserId;
 
+    /** Initializes the current user ID. */
     public void initializeCurrentUserId(@UserIdInt int userId) {
         mCurrentUserId = userId;
     }

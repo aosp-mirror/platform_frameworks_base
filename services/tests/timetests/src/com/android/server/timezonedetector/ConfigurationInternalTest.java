@@ -35,11 +35,11 @@ import android.app.time.TimeZoneCapabilities;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link ConfigurationInternal} and associated {@link TimeZoneCapabilitiesAndConfig}

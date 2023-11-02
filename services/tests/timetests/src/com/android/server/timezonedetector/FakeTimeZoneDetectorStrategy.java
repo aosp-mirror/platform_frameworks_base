@@ -43,7 +43,7 @@ public class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
                 this::notifyChangeListeners);
     }
 
-    public void initializeConfigurationAndStatus(
+    void initializeConfigurationAndStatus(
             ConfigurationInternal configuration, TimeZoneDetectorStatus status) {
         mFakeServiceConfigAccessor.initializeCurrentUserConfiguration(configuration);
         mStatus = Objects.requireNonNull(status);

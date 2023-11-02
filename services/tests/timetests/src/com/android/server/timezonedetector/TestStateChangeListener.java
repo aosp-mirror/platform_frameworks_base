@@ -27,6 +27,7 @@ public class TestStateChangeListener implements StateChangeListener {
         mNotificationsReceived++;
     }
 
+    /** Asserts the expected number of notifications have been received, then resets the count. */
     public void assertNotificationsReceivedAndReset(int expectedCount) {
         assertNotificationsReceived(expectedCount);
         resetNotificationsReceivedCount();

@@ -72,6 +72,9 @@ import android.service.timezone.TimeZoneProviderStatus;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedTelephonyTimeZoneSuggestion;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,9 +85,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 /**
  * White-box unit tests for {@link TimeZoneDetectorStrategyImpl}.

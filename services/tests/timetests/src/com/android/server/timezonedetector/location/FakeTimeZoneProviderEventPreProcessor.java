@@ -38,6 +38,7 @@ public final class FakeTimeZoneProviderEventPreProcessor
         return timeZoneProviderEvent;
     }
 
+    /** Enters a mode where {@link #preProcess} will always return "uncertain" events. */
     public void enterUncertainMode() {
         mIsUncertain = true;
     }

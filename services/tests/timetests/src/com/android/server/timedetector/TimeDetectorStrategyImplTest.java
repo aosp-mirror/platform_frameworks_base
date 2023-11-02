@@ -51,6 +51,9 @@ import com.android.server.timedetector.TimeDetectorStrategy.Origin;
 import com.android.server.timezonedetector.StateChangeListener;
 import com.android.server.timezonedetector.TestStateChangeListener;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,9 +64,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 @RunWith(JUnitParamsRunner.class)
 public class TimeDetectorStrategyImplTest {

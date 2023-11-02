@@ -28,6 +28,7 @@ public class TestCallerIdentityInjector implements CallerIdentityInjector {
     private int mCallingUserId;
     private Integer mCurrentCallingUserId;
 
+    /** Initializes the calling user ID. */
     public void initializeCallingUserId(@UserIdInt int userId) {
         mCallingUserId = userId;
         mCurrentCallingUserId = userId;

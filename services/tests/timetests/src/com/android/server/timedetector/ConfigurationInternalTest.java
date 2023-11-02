@@ -33,13 +33,13 @@ import android.app.time.TimeConfiguration;
 
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.time.Instant;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 /**
  * Tests for {@link ConfigurationInternal} and associated {@link TimeCapabilitiesAndConfig}
