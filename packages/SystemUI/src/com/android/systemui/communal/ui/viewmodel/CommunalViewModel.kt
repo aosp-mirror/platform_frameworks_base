@@ -20,7 +20,6 @@ import android.appwidget.AppWidgetHost
 import android.content.Context
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
-import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.ui.model.CommunalContentUiModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -42,16 +41,16 @@ constructor(
 
     /** List of widgets to be displayed in the communal hub. */
     val widgetContent: Flow<List<CommunalContentUiModel>> =
-        communalInteractor.widgetContent.map {
-            it.map {
+        communalInteractor.widgetContent.map { widgets ->
+            widgets.map Widget@{ widget ->
                 // TODO(b/306406256): As adding and removing widgets functionalities are
                 // supported, cache the host views so they're not recreated each time.
-                val hostView = appWidgetHost.createView(context, it.appWidgetId, it.providerInfo)
-                return@map CommunalContentUiModel(
+                val hostView =
+                    appWidgetHost.createView(context, widget.appWidgetId, widget.providerInfo)
+                return@Widget CommunalContentUiModel(
+                    // TODO(b/308148193): a more scalable solution for unique ids.
+                    id = "widget_${widget.appWidgetId}",
                     view = hostView,
-                    priority = it.priority,
-                    // All widgets have HALF size.
-                    size = CommunalContentSize.HALF,
                 )
             }
         }

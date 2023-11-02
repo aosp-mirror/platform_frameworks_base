@@ -1,13 +1,6 @@
 package: "android.companion.virtual.flags"
 
 flag {
-  name: "more_logs"
-  namespace: "virtual_devices"
-  description: "More logs to test flags with"
-  bug: "291725823"
-}
-
-flag {
   name: "enable_native_vdm"
   namespace: "virtual_devices"
   description: "Enable native VDM service"

@@ -35,7 +35,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Pair;
@@ -46,6 +48,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
+import com.android.settingslib.media.flags.Flags;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
@@ -82,6 +85,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private static final long MAX_HOGP_DELAY_FOR_AUTO_CONNECT = 30000;
     private static final long MAX_LEAUDIO_DELAY_FOR_AUTO_CONNECT = 30000;
     private static final long MAX_MEDIA_PROFILE_CONNECT_DELAY = 60000;
+
+    private static final int DEFAULT_LOW_BATTERY_THRESHOLD = 20;
+
+    // To be used instead of a resource id to indicate that low battery states should not be
+    // changed to a different color.
+    private static final int SUMMARY_NO_COLOR_FOR_LOW_BATTERY = 0;
 
     private final Context mContext;
     private final BluetoothAdapter mLocalAdapter;
@@ -1189,6 +1198,46 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * @param shortSummary {@code true} if need to return short version summary
      */
     public String getConnectionSummary(boolean shortSummary) {
+        CharSequence summary = getConnectionSummary(shortSummary, false /* isTvSummary */,
+                SUMMARY_NO_COLOR_FOR_LOW_BATTERY);
+        if (summary != null) {
+            return summary.toString();
+        }
+        return null;
+    }
+
+    /**
+     * Returns android tv string that describes the connection state of this device.
+     */
+    public CharSequence getTvConnectionSummary() {
+        return getTvConnectionSummary(SUMMARY_NO_COLOR_FOR_LOW_BATTERY);
+    }
+
+    /**
+     * Returns android tv string that describes the connection state of this device, with low
+     * battery states highlighted in color.
+     *
+     * @param lowBatteryColorRes - resource id for the color that should be used for the part of the
+     *                           CharSequence that contains low battery information.
+     */
+    public CharSequence getTvConnectionSummary(int lowBatteryColorRes) {
+        return getConnectionSummary(false /* shortSummary */, true /* isTvSummary */,
+                lowBatteryColorRes);
+    }
+
+    /**
+     * Return summary that describes connection state of this device. Summary depends on:
+     * 1. Whether device has battery info
+     * 2. Whether device is in active usage(or in phone call)
+     *
+     * @param shortSummary       {@code true} if need to return short version summary
+     * @param isTvSummary        {@code true} if the summary should be TV specific
+     * @param lowBatteryColorRes Resource id of the color to be used for low battery strings. Use
+     *                           {@link SUMMARY_NO_COLOR_FOR_LOW_BATTERY} if no separate color
+     *                           should be used.
+     */
+    private CharSequence getConnectionSummary(boolean shortSummary, boolean isTvSummary,
+            int lowBatteryColorRes) {
         boolean profileConnected = false;    // Updated as long as BluetoothProfile is connected
         boolean a2dpConnected = true;        // A2DP is connected
         boolean hfpConnected = true;         // HFP is connected
@@ -1315,17 +1364,82 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
         }
 
-        if (stringRes != R.string.bluetooth_pairing
-                || getBondState() == BluetoothDevice.BOND_BONDING) {
-            if (isTwsBatteryAvailable(leftBattery, rightBattery)) {
-                return mContext.getString(stringRes, Utils.formatPercentage(leftBattery),
-                        Utils.formatPercentage(rightBattery));
-            } else {
-                return mContext.getString(stringRes, batteryLevelPercentageString);
-            }
-        } else {
+        if (stringRes == R.string.bluetooth_pairing
+                && getBondState() != BluetoothDevice.BOND_BONDING) {
             return null;
         }
+
+        boolean summaryIncludesBatteryLevel = stringRes == R.string.bluetooth_battery_level
+                || stringRes == R.string.bluetooth_active_battery_level
+                || stringRes == R.string.bluetooth_active_battery_level_untethered
+                || stringRes == R.string.bluetooth_battery_level_untethered;
+        if (isTvSummary && summaryIncludesBatteryLevel && Flags.enableTvMediaOutputDialog()) {
+            return getTvBatterySummary(batteryLevel, leftBattery, rightBattery, lowBatteryColorRes);
+        }
+
+        if (isTwsBatteryAvailable(leftBattery, rightBattery)) {
+            return mContext.getString(stringRes, Utils.formatPercentage(leftBattery),
+                    Utils.formatPercentage(rightBattery));
+        } else {
+            return mContext.getString(stringRes, batteryLevelPercentageString);
+        }
+    }
+
+    private CharSequence getTvBatterySummary(int mainBattery, int leftBattery, int rightBattery,
+            int lowBatteryColorRes) {
+        // Since there doesn't seem to be a way to use format strings to add the
+        // percentages and also mark which part of the string is left and right to color
+        // them, we are using one string resource per battery.
+        Resources res = mContext.getResources();
+        SpannableStringBuilder spannableBuilder = new SpannableStringBuilder();
+        if (leftBattery >= 0 || rightBattery >= 0) {
+            // Not switching the left and right for RTL to keep the left earbud always on
+            // the left.
+            if (leftBattery >= 0) {
+                String left = res.getString(
+                        R.string.bluetooth_battery_level_untethered_left,
+                        Utils.formatPercentage(leftBattery));
+                addBatterySpan(spannableBuilder, left, isBatteryLow(leftBattery,
+                                BluetoothDevice.METADATA_UNTETHERED_LEFT_LOW_BATTERY_THRESHOLD),
+                        lowBatteryColorRes);
+            }
+            if (rightBattery >= 0) {
+                if (!spannableBuilder.isEmpty()) {
+                    spannableBuilder.append(" ");
+                }
+                String right = res.getString(
+                        R.string.bluetooth_battery_level_untethered_right,
+                        Utils.formatPercentage(rightBattery));
+                addBatterySpan(spannableBuilder, right, isBatteryLow(rightBattery,
+                                BluetoothDevice.METADATA_UNTETHERED_RIGHT_LOW_BATTERY_THRESHOLD),
+                        lowBatteryColorRes);
+            }
+        } else {
+            addBatterySpan(spannableBuilder, res.getString(R.string.tv_bluetooth_battery_level,
+                            Utils.formatPercentage(mainBattery)),
+                    isBatteryLow(mainBattery, BluetoothDevice.METADATA_MAIN_LOW_BATTERY_THRESHOLD),
+                    lowBatteryColorRes);
+        }
+        return spannableBuilder;
+    }
+
+    private void addBatterySpan(SpannableStringBuilder builder,
+            String batteryString, boolean lowBattery, int lowBatteryColorRes) {
+        if (lowBattery && lowBatteryColorRes != SUMMARY_NO_COLOR_FOR_LOW_BATTERY) {
+            builder.append(batteryString,
+                    new ForegroundColorSpan(mContext.getResources().getColor(lowBatteryColorRes)),
+                    0 /* flags */);
+        } else {
+            builder.append(batteryString);
+        }
+    }
+
+    private boolean isBatteryLow(int batteryLevel, int metadataKey) {
+        int lowBatteryThreshold = BluetoothUtils.getIntMetaData(mDevice, metadataKey);
+        if (lowBatteryThreshold <= 0) {
+            lowBatteryThreshold = DEFAULT_LOW_BATTERY_THRESHOLD;
+        }
+        return batteryLevel <= lowBatteryThreshold;
     }
 
     private boolean isTwsBatteryAvailable(int leftBattery, int rightBattery) {

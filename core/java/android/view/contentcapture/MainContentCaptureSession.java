@@ -44,6 +44,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
@@ -373,11 +374,25 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             return;
         }
 
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            if (eventType == TYPE_VIEW_TREE_APPEARING) {
+                Trace.asyncTraceBegin(
+                        Trace.TRACE_TAG_VIEW, /* methodName= */ "sendEventAsync", /* cookie= */ 0);
+            }
+        }
+
         if (isContentProtectionReceiverEnabled()) {
             sendContentProtectionEvent(event);
         }
         if (isContentCaptureReceiverEnabled()) {
             sendContentCaptureEvent(event, forceFlush);
+        }
+
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            if (eventType == TYPE_VIEW_TREE_APPEARED) {
+                Trace.asyncTraceEnd(
+                        Trace.TRACE_TAG_VIEW, /* methodName= */ "sendEventAsync", /* cookie= */ 0);
+            }
         }
     }
 

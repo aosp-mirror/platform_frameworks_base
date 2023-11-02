@@ -9,7 +9,7 @@ import com.android.systemui.communal.shared.model.CommunalContentSize
  * This model stays in the UI layer.
  */
 data class CommunalContentUiModel(
+    val id: String,
     val view: View,
-    val size: CommunalContentSize,
-    val priority: Int,
+    val size: CommunalContentSize = CommunalContentSize.HALF,
 )

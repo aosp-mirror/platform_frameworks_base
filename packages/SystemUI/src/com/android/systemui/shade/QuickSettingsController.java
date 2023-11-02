@@ -207,12 +207,6 @@ public class QuickSettingsController implements Dumpable {
     /** pointerId of the pointer we're currently tracking */
     private int mTrackingPointer;
 
-    /**
-     * Indicates that QS is in expanded state which can happen by:
-     * - single pane shade: expanding shade and then expanding QS
-     * - split shade: just expanding shade (QS are expanded automatically)
-     */
-    private boolean mExpanded;
     /** Indicates QS is at its max height */
     private boolean mFullyExpanded;
     /**
@@ -594,9 +588,8 @@ public class QuickSettingsController implements Dumpable {
         return twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag;
     }
 
-
     public boolean getExpanded() {
-        return mExpanded;
+        return mShadeRepository.getLegacyIsQsExpanded().getValue();
     }
 
     @VisibleForTesting
@@ -613,7 +606,7 @@ public class QuickSettingsController implements Dumpable {
         // close the whole shade with one motion. Also this will be always true when closing
         // split shade as there QS are always expanded so every collapsing motion is motion from
         // expanded QS to closed panel
-        return mExpandImmediate || (mExpanded
+        return mExpandImmediate || (getExpanded()
                 && !isTracking() && !isExpansionAnimating()
                 && !mExpansionFromOverscroll);
     }
@@ -778,11 +771,11 @@ public class QuickSettingsController implements Dumpable {
 
     @VisibleForTesting
     void setExpanded(boolean expanded) {
-        boolean changed = mExpanded != expanded;
+        boolean changed = getExpanded() != expanded;
         if (changed) {
-            mExpanded = expanded;
+            mShadeRepository.setLegacyIsQsExpanded(expanded);
             updateQsState();
-            mShadeExpansionStateManager.onQsExpansionChanged(expanded);
+            mPanelViewControllerLazy.get().onQsExpansionChanged(expanded);
             mShadeLog.logQsExpansionChanged("QS Expansion Changed.", expanded,
                     getMinExpansionHeight(), getMaxExpansionHeight(),
                     mStackScrollerOverscrolling, mAnimatorExpand, mAnimating);
@@ -846,7 +839,7 @@ public class QuickSettingsController implements Dumpable {
     /** Called when Shade view layout changed. Updates QS expansion or
      * starts size change animation if height has changed. */
     void handleShadeLayoutChanged(int oldMaxHeight) {
-        if (mExpanded && mFullyExpanded) {
+        if (getExpanded() && mFullyExpanded) {
             mExpansionHeight = mMaxExpansionHeight;
             if (mExpansionHeightSetToMaxListener != null) {
                 mExpansionHeightSetToMaxListener.onExpansionHeightSetToMax(true);
@@ -988,24 +981,24 @@ public class QuickSettingsController implements Dumpable {
     }
 
     void updateQsState() {
-        boolean qsFullScreen = mExpanded && !mSplitShadeEnabled;
+        boolean qsFullScreen = getExpanded() && !mSplitShadeEnabled;
         mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
         mNotificationStackScrollLayoutController.setScrollingEnabled(
                 mBarState != KEYGUARD && (!qsFullScreen || mExpansionFromOverscroll));
 
         if (mQsStateUpdateListener != null) {
-            mQsStateUpdateListener.onQsStateUpdated(mExpanded, mStackScrollerOverscrolling);
+            mQsStateUpdateListener.onQsStateUpdated(getExpanded(), mStackScrollerOverscrolling);
         }
 
         if (mQs == null) return;
-        mQs.setExpanded(mExpanded);
+        mQs.setExpanded(getExpanded());
     }
 
     /** update expanded state of QS */
     public void updateExpansion() {
         if (mQs == null) return;
         final float squishiness;
-        if ((mExpandImmediate || mExpanded) && !mSplitShadeEnabled) {
+        if ((mExpandImmediate || getExpanded()) && !mSplitShadeEnabled) {
             squishiness = 1;
         } else if (mTransitioningToFullShadeProgress > 0.0f) {
             squishiness = mLockscreenShadeTransitionController.getQsSquishTransitionFraction();
@@ -1125,7 +1118,7 @@ public class QuickSettingsController implements Dumpable {
         mMediaHierarchyManager.setCollapsingShadeFromQS(mExpandedWhenExpandingStarted
                 /* We also start expanding when flinging closed Qs. Let's exclude that */
                 && !mAnimating);
-        if (mExpanded) {
+        if (getExpanded()) {
             onExpansionStarted();
         }
         // Since there are QS tiles in the header now, we need to make sure we start listening
@@ -1234,7 +1227,7 @@ public class QuickSettingsController implements Dumpable {
                     Math.min(top / (float) mScrimCornerRadius, 1f));
 
             float bottomRadius = mSplitShadeEnabled ? screenCornerRadius : 0;
-            if (!mExpanded) {
+            if (!getExpanded()) {
                 bottomRadius = calculateBottomCornerRadius(bottomRadius);
             }
             mScrimController.setNotificationBottomRadius(bottomRadius);
@@ -1547,7 +1540,7 @@ public class QuickSettingsController implements Dumpable {
     @VisibleForTesting
     void onHeightChanged() {
         mMaxExpansionHeight = isQsFragmentCreated() ? mQs.getDesiredHeight() : 0;
-        if (mExpanded && mFullyExpanded) {
+        if (getExpanded() && mFullyExpanded) {
             mExpansionHeight = mMaxExpansionHeight;
             if (mExpansionHeightSetToMaxListener != null) {
                 mExpansionHeightSetToMaxListener.onExpansionHeightSetToMax(true);
@@ -2083,7 +2076,7 @@ public class QuickSettingsController implements Dumpable {
         ipw.print("mTrackingPointer=");
         ipw.println(mTrackingPointer);
         ipw.print("mExpanded=");
-        ipw.println(mExpanded);
+        ipw.println(getExpanded());
         ipw.print("mFullyExpanded=");
         ipw.println(mFullyExpanded);
         ipw.print("mExpandImmediate=");

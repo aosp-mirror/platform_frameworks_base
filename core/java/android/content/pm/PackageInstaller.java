@@ -343,7 +343,10 @@ public class PackageInstaller {
      * point at the existing base APK (when adding splits to an existing app).
      *
      * @hide
+     * @deprecated Resolved base path of an install session should not be available to unauthorized
+     * callers. Use {@link SessionInfo#getResolvedBaseApkPath()} instead.
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_RESOLVED_BASE_PATH =
             "android.content.pm.extra.RESOLVED_BASE_PATH";
@@ -1003,7 +1006,7 @@ public class PackageInstaller {
     /**
      * Install package in an archived state.
      *
-     * @param archivedPackage archived package data such as package name, signature etc.
+     * @param archivedPackageInfo archived package data such as package name, signature etc.
      * @param sessionParams used to create an underlying installation session
      * @param statusReceiver Called when the state of the session changes. Intents
      *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
@@ -1013,15 +1016,15 @@ public class PackageInstaller {
      */
     @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
     @FlaggedApi(Flags.FLAG_ARCHIVING)
-    public void installPackageArchived(@NonNull ArchivedPackage archivedPackage,
+    public void installPackageArchived(@NonNull ArchivedPackageInfo archivedPackageInfo,
             @NonNull SessionParams sessionParams,
             @NonNull IntentSender statusReceiver) {
-        Objects.requireNonNull(archivedPackage, "archivedPackage cannot be null");
+        Objects.requireNonNull(archivedPackageInfo, "archivedPackageInfo cannot be null");
         Objects.requireNonNull(sessionParams, "sessionParams cannot be null");
         Objects.requireNonNull(statusReceiver, "statusReceiver cannot be null");
         try {
             mInstaller.installPackageArchived(
-                    archivedPackage.getParcel(),
+                    archivedPackageInfo.getParcel(),
                     sessionParams,
                     statusReceiver,
                     mInstallerPackageName,

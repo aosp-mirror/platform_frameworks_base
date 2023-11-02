@@ -99,7 +99,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteracto
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.ui.view.KeyguardRootView;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
@@ -148,7 +147,6 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator;
@@ -335,7 +333,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     @Mock private JavaAdapter mJavaAdapter;
     @Mock private CastController mCastController;
-    @Mock private KeyguardRootView mKeyguardRootView;
     @Mock private SharedNotificationContainerInteractor mSharedNotificationContainerInteractor;
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
 
@@ -575,14 +572,13 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
                 coordinator,
-                mKeyguardBypassController, mHeadsUpManager,
-                mock(NotificationRoundnessManager.class),
+                mKeyguardBypassController,
+                mHeadsUpManager,
                 mConfigurationController,
                 mStatusBarStateController,
                 mFalsingManager,
-                mShadeExpansionStateManager,
+                mShadeInteractor,
                 mLockscreenShadeTransitionController,
-                new FalsingCollectorFake(),
                 mDumpManager);
         when(mKeyguardStatusViewComponentFactory.build(any(), any()))
                 .thenReturn(mKeyguardStatusViewComponent);

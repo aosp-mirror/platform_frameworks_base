@@ -254,7 +254,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mScreenOffAnimationController,
                 mAuthController,
-                mShadeExpansionStateManager,
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor) {

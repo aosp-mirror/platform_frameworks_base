@@ -61,6 +61,7 @@ import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.admin.SecurityLog;
 import android.app.usage.StorageStatsManager;
+import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -2138,8 +2139,13 @@ class StorageManagerService extends IStorageManager.Stub
                         | MATCH_DIRECT_BOOT_UNAWARE | MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER,
                         userId, Process.myUid())) {
             try {
-                boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE, ai.uid,
-                        ai.packageName) == MODE_ALLOWED;
+                final AttributionSource attributionSource = new AttributionSource.Builder(ai.uid)
+                        .setPackageName(ai.packageName)
+                        .build();
+                boolean hasLegacy =
+                        mIAppOpsService.checkOperationWithState(
+                                        OP_LEGACY_STORAGE, attributionSource.asState())
+                                == MODE_ALLOWED;
                 updateLegacyStorageApps(ai.packageName, ai.uid, hasLegacy);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to check legacy op for package " + ai.packageName, e);
@@ -4540,8 +4546,11 @@ class StorageManagerService extends IStorageManager.Stub
             // sharing the uid and allow same level of storage access for all packages even if
             // one of the packages has the appop granted.
             for (String uidPackageName : packagesForUid) {
-                if (mIAppOpsService.checkOperation(
-                        OP_REQUEST_INSTALL_PACKAGES, uid, uidPackageName) == MODE_ALLOWED) {
+                final AttributionSource attributionSource =
+                        new AttributionSource.Builder(uid).setPackageName(uidPackageName).build();
+                if (mIAppOpsService.checkOperationWithState(
+                                OP_REQUEST_INSTALL_PACKAGES, attributionSource.asState())
+                        == MODE_ALLOWED) {
                     hasInstallOp = true;
                     break;
                 }
@@ -4838,8 +4847,11 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public boolean hasExternalStorageAccess(int uid, String packageName) {
             try {
-                final int opMode = mIAppOpsService.checkOperation(
-                        OP_MANAGE_EXTERNAL_STORAGE, uid, packageName);
+                final AttributionSource attributionSource =
+                        new AttributionSource.Builder(uid).setPackageName(packageName).build();
+                final int opMode =
+                        mIAppOpsService.checkOperationWithState(
+                                OP_MANAGE_EXTERNAL_STORAGE, attributionSource.asState());
                 if (opMode == AppOpsManager.MODE_DEFAULT) {
                     return mIPackageManager.checkUidPermission(
                             MANAGE_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED;

@@ -75,5 +75,8 @@ public interface FalsingCollector {
 
     /** Indicates an a11y action was made. */
     void onA11yAction();
+
+    /** Initialize the class. */
+    void init();
 }
 

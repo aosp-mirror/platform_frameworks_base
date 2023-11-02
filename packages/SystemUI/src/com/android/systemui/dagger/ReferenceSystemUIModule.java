@@ -48,7 +48,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.dagger.StartCentralSurfacesModule;
-import com.android.systemui.statusbar.events.StatusBarEventsModule;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpModule;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -99,7 +98,6 @@ import javax.inject.Named;
         ReferenceScreenshotModule.class,
         RotationLockModule.class,
         SceneContainerFrameworkModule.class,
-        StatusBarEventsModule.class,
         StartCentralSurfacesModule.class,
         VolumeModule.class,
         WallpaperModule.class,

@@ -212,4 +212,9 @@ interface IMediaProjectionManager {
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     oneway void notifyAppSelectorDisplayed(int hostUid);
+
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void notifyWindowingModeChanged(int contentToRecord, int targetUid, int windowingMode);
 }

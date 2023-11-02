@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.interruption;
 
+import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
+import static android.provider.Settings.Global.HEADS_UP_OFF;
+
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA;
@@ -24,12 +27,10 @@ import static com.android.systemui.statusbar.notification.interruption.Notificat
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 
 import androidx.annotation.NonNull;
@@ -48,6 +49,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +69,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final List<NotificationInterruptSuppressor> mSuppressors = new ArrayList<>();
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
-    private final ContentResolver mContentResolver;
     private final PowerManager mPowerManager;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final BatteryController mBatteryController;
@@ -77,6 +79,8 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final UiEventLogger mUiEventLogger;
     private final UserTracker mUserTracker;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final SystemClock mSystemClock;
+    private final GlobalSettings mGlobalSettings;
 
     @VisibleForTesting
     protected boolean mUseHeadsUp = false;
@@ -111,7 +115,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
     @Inject
     public NotificationInterruptStateProviderImpl(
-            ContentResolver contentResolver,
             PowerManager powerManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             BatteryController batteryController,
@@ -124,8 +127,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
             UiEventLogger uiEventLogger,
             UserTracker userTracker,
-            DeviceProvisionedController deviceProvisionedController) {
-        mContentResolver = contentResolver;
+            DeviceProvisionedController deviceProvisionedController,
+            SystemClock systemClock,
+            GlobalSettings globalSettings) {
         mPowerManager = powerManager;
         mBatteryController = batteryController;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
@@ -137,15 +141,16 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
         mUiEventLogger = uiEventLogger;
         mUserTracker = userTracker;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mSystemClock = systemClock;
+        mGlobalSettings = globalSettings;
         ContentObserver headsUpObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange) {
-                boolean wasUsing = mUseHeadsUp;
-                mUseHeadsUp = ENABLE_HEADS_UP
-                        && Settings.Global.HEADS_UP_OFF != Settings.Global.getInt(
-                        mContentResolver,
-                        Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
-                        Settings.Global.HEADS_UP_OFF);
+                final boolean wasUsing = mUseHeadsUp;
+                final boolean settingEnabled = HEADS_UP_OFF
+                        != mGlobalSettings.getInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_OFF);
+                mUseHeadsUp = ENABLE_HEADS_UP && settingEnabled;
                 mLogger.logHeadsUpFeatureChanged(mUseHeadsUp);
                 if (wasUsing != mUseHeadsUp) {
                     if (!mUseHeadsUp) {
@@ -157,16 +162,15 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         };
 
         if (ENABLE_HEADS_UP) {
-            mContentResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED),
+            mGlobalSettings.registerContentObserver(
+                    mGlobalSettings.getUriFor(HEADS_UP_NOTIFICATIONS_ENABLED),
                     true,
                     headsUpObserver);
-            mContentResolver.registerContentObserver(
-                    Settings.Global.getUriFor(SETTING_HEADS_UP_TICKER), true,
+            mGlobalSettings.registerContentObserver(
+                    mGlobalSettings.getUriFor(SETTING_HEADS_UP_TICKER), true,
                     headsUpObserver);
         }
         headsUpObserver.onChange(true); // set up
-        mDeviceProvisionedController = deviceProvisionedController;
     }
 
     @Override
@@ -603,7 +607,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         final long when = notification.when;
-        final long now = System.currentTimeMillis();
+        final long now = mSystemClock.currentTimeMillis();
         final long age = now - when;
 
         if (age < MAX_HUN_WHEN_AGE_MS) {

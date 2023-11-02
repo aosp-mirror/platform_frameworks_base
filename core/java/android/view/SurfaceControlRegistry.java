@@ -337,13 +337,13 @@ public class SurfaceControlRegistry {
     @VisibleForTesting
     public final boolean matchesForCallStackDebugging(@Nullable String name, @NonNull String call) {
         final boolean matchCall = !sCallStackDebuggingMatchCall.isEmpty();
-        if (matchCall && !call.toLowerCase().contains(sCallStackDebuggingMatchCall)) {
+        if (matchCall && !sCallStackDebuggingMatchCall.contains(call.toLowerCase())) {
             // Skip if target call doesn't match requested caller
             return false;
         }
         final boolean matchName = !sCallStackDebuggingMatchName.isEmpty();
         if (matchName && (name == null
-                || !name.toLowerCase().contains(sCallStackDebuggingMatchName))) {
+                || !sCallStackDebuggingMatchName.contains(name.toLowerCase()))) {
             // Skip if target surface doesn't match requested surface
             return false;
         }

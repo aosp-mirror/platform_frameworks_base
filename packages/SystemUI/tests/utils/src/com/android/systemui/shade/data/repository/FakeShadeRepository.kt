@@ -56,6 +56,14 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     override val legacyExpandedOrAwaitingInputTransfer = _legacyExpandedOrAwaitingInputTransfer
 
+    private val _legacyIsQsExpanded = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead") override val legacyIsQsExpanded = _legacyIsQsExpanded
+
+    @Deprecated("Use ShadeInteractor instead")
+    override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {
+        _legacyIsQsExpanded.value = legacyIsQsExpanded
+    }
+
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyExpandedOrAwaitingInputTransfer(
         legacyExpandedOrAwaitingInputTransfer: Boolean

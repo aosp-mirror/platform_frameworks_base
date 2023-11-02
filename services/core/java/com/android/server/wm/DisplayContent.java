@@ -2757,6 +2757,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int lastOrientation = getConfiguration().orientation;
+        final int lastWindowingMode = getWindowingMode();
         super.onConfigurationChanged(newParentConfig);
         if (mDisplayPolicy != null) {
             mDisplayPolicy.onConfigurationChanged();
@@ -2768,7 +2769,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         // Update surface for MediaProjection, if this DisplayContent is being used for recording.
         if (mContentRecorder != null) {
-            mContentRecorder.onConfigurationChanged(lastOrientation);
+            mContentRecorder.onConfigurationChanged(lastOrientation, lastWindowingMode);
         }
 
         if (lastOrientation != getConfiguration().orientation) {

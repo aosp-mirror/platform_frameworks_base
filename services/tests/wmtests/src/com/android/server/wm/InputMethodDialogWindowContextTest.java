@@ -160,6 +160,9 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
         final DisplayAreaGroup firstDaGroup = mSecondaryDisplay.mFirstRoot;
         maxBoundsVerifier.setMaxBounds(firstDaGroup.getMaxBounds());
 
+        // Clear the previous invocation histories in case we may count the previous
+        // onConfigurationChanged invocation into the next verification.
+        clearInvocations(tokenClient, imeContainer);
         firstDaGroup.placeImeContainer(imeContainer);
 
         verify(imeContainer, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(

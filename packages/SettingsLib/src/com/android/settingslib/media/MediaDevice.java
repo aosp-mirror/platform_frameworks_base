@@ -208,6 +208,17 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract String getSummary();
 
     /**
+     * Get summary from MediaDevice for TV with low batter states in a different color if
+     * applicable.
+     *
+     * @param lowBatteryColorRes Color resource for the part of the CharSequence that describes a
+     *                           low battery state.
+     */
+    public CharSequence getSummaryForTv(int lowBatteryColorRes) {
+        return getSummary();
+    }
+
+    /**
      * Get icon of MediaDevice.
      *
      * @return drawable of icon.

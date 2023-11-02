@@ -15,20 +15,29 @@
  */
 
 package com.android.internal.accessibility.util;
+
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
+import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.content.Context;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.ShortcutType;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 
 /**
@@ -178,6 +187,94 @@ public final class ShortcutUtils {
             default:
                 throw new IllegalArgumentException(
                         "Unsupported shortcut type:" + type);
+        }
+    }
+
+    /**
+     * Updates an accessibility state if the accessibility service is a Always-On a11y service,
+     * a.k.a. AccessibilityServices that has FLAG_REQUEST_ACCESSIBILITY_BUTTON
+     * <p>
+     * Turn on the accessibility service when there is any shortcut associated to it.
+     * <p>
+     * Turn off the accessibility service when there is no shortcut associated to it.
+     *
+     * @param componentNames the a11y shortcut target's component names
+     */
+    public static void updateInvisibleToggleAccessibilityServiceEnableState(
+            Context context, Set<String> componentNames, int userId) {
+        final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
+        if (am == null) return;
+
+        final List<AccessibilityServiceInfo> installedServices =
+                am.getInstalledAccessibilityServiceList();
+
+        final Set<String> invisibleToggleServices = new ArraySet<>();
+        for (AccessibilityServiceInfo serviceInfo : installedServices) {
+            if (AccessibilityUtils.getAccessibilityServiceFragmentType(serviceInfo)
+                    == INVISIBLE_TOGGLE) {
+                invisibleToggleServices.add(serviceInfo.getComponentName().flattenToString());
+            }
+        }
+
+        final Set<String> servicesWithShortcuts = new ArraySet<>();
+        for (int shortcutType: USER_SHORTCUT_TYPES) {
+            // The call to update always-on service might modify the shortcut setting right before
+            // calling #updateAccessibilityServiceStateIfNeeded in the same call.
+            // To avoid getting the shortcut target from out-dated value, use values from Settings
+            // instead.
+            servicesWithShortcuts.addAll(
+                    getShortcutTargetsFromSettings(context, shortcutType, userId));
+        }
+
+        for (String componentName : componentNames) {
+            // Only needs to update the Always-On A11yService's state when the shortcut changes.
+            if (invisibleToggleServices.contains(componentName)) {
+
+                boolean enableA11yService = servicesWithShortcuts.contains(componentName);
+                AccessibilityUtils.setAccessibilityServiceState(
+                        context,
+                        ComponentName.unflattenFromString(componentName), enableA11yService);
+            }
+        }
+    }
+
+    /**
+     * Returns the target component names of a given user shortcut type from Settings.
+     *
+     * <p>
+     * Note: grab shortcut targets from Settings is only needed
+     * if you depends on a value being set in the same call.
+     * For example, you disable a single shortcut,
+     * and you're checking if there is any shortcut remaining.
+     *
+     * <p>
+     * If you just want to know the current state, you can use
+     * {@link AccessibilityManager#getAccessibilityShortcutTargets(int)}
+     */
+    public static Set<String> getShortcutTargetsFromSettings(
+            Context context, @UserShortcutType int shortcutType, int userId) {
+        final String targetKey = convertToKey(shortcutType);
+        if (Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED.equals(targetKey)) {
+            boolean magnificationEnabled = Settings.Secure.getIntForUser(
+                    context.getContentResolver(), targetKey, /* def= */ 0, userId) == 1;
+            return magnificationEnabled ? Set.of(MAGNIFICATION_CONTROLLER_NAME)
+                    : Collections.emptySet();
+
+        } else {
+            final String targetString = Settings.Secure.getStringForUser(
+                    context.getContentResolver(), targetKey, userId);
+
+            if (TextUtils.isEmpty(targetString)) {
+                return Collections.emptySet();
+            }
+
+            Set<String> targets = new ArraySet<>();
+            sStringColonSplitter.setString(targetString);
+            while (sStringColonSplitter.hasNext()) {
+                targets.add(sStringColonSplitter.next());
+            }
+            return Collections.unmodifiableSet(targets);
         }
     }
 }
