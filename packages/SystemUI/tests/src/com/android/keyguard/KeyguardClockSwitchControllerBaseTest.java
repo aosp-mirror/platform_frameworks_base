@@ -41,6 +41,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
@@ -191,6 +192,7 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 mClockEventController,
                 mLogBuffer,
                 mock(NotificationIconContainerAlwaysOnDisplayViewModel.class),
+                mock(KeyguardRootViewModel.class),
                 mock(ConfigurationState.class),
                 mock(DozeParameters.class),
                 mock(AlwaysOnDisplayNotificationIconViewStore.class),

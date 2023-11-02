@@ -45,6 +45,8 @@ import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.log.dagger.KeyguardClockLog;
@@ -95,6 +97,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final ClockEventController mClockEventController;
     private final LogBuffer mLogBuffer;
     private final NotificationIconContainerAlwaysOnDisplayViewModel mAodIconsViewModel;
+    private final KeyguardRootViewModel mKeyguardRootViewModel;
     private final ConfigurationState mConfigurationState;
     private final ConfigurationController mConfigurationController;
     private final DozeParameters mDozeParameters;
@@ -127,7 +130,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private KeyguardInteractor mKeyguardInteractor;
     private final DelayableExecutor mUiExecutor;
     private boolean mCanShowDoubleLineClock = true;
-    private DisposableHandle mAodIconsBindJob;
+    private DisposableHandle mAodIconsBindHandle;
     @Nullable private NotificationIconContainer mAodIconContainer;
 
     @VisibleForTesting
@@ -179,6 +182,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             ClockEventController clockEventController,
             @KeyguardClockLog LogBuffer logBuffer,
             NotificationIconContainerAlwaysOnDisplayViewModel aodIconsViewModel,
+            KeyguardRootViewModel keyguardRootViewModel,
             ConfigurationState configurationState,
             DozeParameters dozeParameters,
             AlwaysOnDisplayNotificationIconViewStore aodIconViewStore,
@@ -199,6 +203,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockEventController = clockEventController;
         mLogBuffer = logBuffer;
         mAodIconsViewModel = aodIconsViewModel;
+        mKeyguardRootViewModel = keyguardRootViewModel;
         mConfigurationState = configurationState;
         mDozeParameters = dozeParameters;
         mAodIconViewStore = aodIconViewStore;
@@ -567,21 +572,32 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     mView.findViewById(
                             com.android.systemui.res.R.id.left_aligned_notification_icon_container);
             if (NotificationIconContainerRefactor.isEnabled()) {
-                if (mAodIconsBindJob != null) {
-                    mAodIconsBindJob.dispose();
+                if (mAodIconsBindHandle != null) {
+                    mAodIconsBindHandle.dispose();
                 }
                 if (nic != null) {
                     nic.setOnLockScreen(true);
-                    mAodIconsBindJob = NotificationIconContainerViewBinder.bind(
-                        nic,
-                        mAodIconsViewModel,
-                        mConfigurationState,
-                        mConfigurationController,
-                        mDozeParameters,
-                        mFeatureFlags,
-                        mScreenOffAnimationController,
-                        mAodIconViewStore
-                    );
+                    final DisposableHandle viewHandle = NotificationIconContainerViewBinder.bind(
+                            nic,
+                            mAodIconsViewModel,
+                            mConfigurationState,
+                            mConfigurationController,
+                            mDozeParameters,
+                            mAodIconViewStore);
+                    final DisposableHandle visHandle = KeyguardRootViewBinder.bindAodIconVisibility(
+                            nic,
+                            mKeyguardRootViewModel.isNotifIconContainerVisible(),
+                            mConfigurationState,
+                            mFeatureFlags,
+                            mScreenOffAnimationController);
+                    if (visHandle == null) {
+                        mAodIconsBindHandle = viewHandle;
+                    } else {
+                        mAodIconsBindHandle = () -> {
+                            viewHandle.dispose();
+                            visHandle.dispose();
+                        };
+                    }
                     mAodIconContainer = nic;
                 }
             } else {
