@@ -39,6 +39,7 @@ import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IAuthService;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
@@ -327,6 +328,33 @@ public class AuthService extends SystemService {
                         + ", authenticators: " + authenticators
                         + ", result: " + result);
                 return result;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public long getLastAuthenticationTime(int userId,
+                @Authenticators.Types int authenticators) throws RemoteException {
+            // Only allow internal clients to call getLastAuthenticationTime with a different
+            // userId.
+            final int callingUserId = UserHandle.getCallingUserId();
+
+            if (userId != callingUserId) {
+                checkInternalPermission();
+            } else {
+                checkPermission();
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // We can't do this above because we need the READ_DEVICE_CONFIG permission, which
+                // the calling user may not possess.
+                if (!Flags.lastAuthenticationTime()) {
+                    throw new UnsupportedOperationException();
+                }
+
+                return mBiometricService.getLastAuthenticationTime(userId, authenticators);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
