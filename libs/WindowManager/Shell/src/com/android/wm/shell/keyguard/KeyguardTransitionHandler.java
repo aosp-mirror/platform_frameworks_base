@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.view.WindowManager.TRANSIT_SLEEP;
@@ -134,24 +135,28 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                     "going-away",
                     transition, info, startTransaction, finishTransaction, finishCallback);
         }
-        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0) {
-            if (hasOpeningDream(info)) {
-                return startAnimation(mOccludeByDreamTransition,
-                        "occlude-by-dream",
-                        transition, info, startTransaction, finishTransaction, finishCallback);
-            } else {
-                return startAnimation(mOccludeTransition,
-                        "occlude",
+
+        // Occlude/unocclude animations are only played if the keyguard is locked.
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
+            if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0) {
+                if (hasOpeningDream(info)) {
+                    return startAnimation(mOccludeByDreamTransition,
+                            "occlude-by-dream",
+                            transition, info, startTransaction, finishTransaction, finishCallback);
+                } else {
+                    return startAnimation(mOccludeTransition,
+                            "occlude",
+                            transition, info, startTransaction, finishTransaction, finishCallback);
+                }
+            } else if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0) {
+                return startAnimation(mUnoccludeTransition,
+                        "unocclude",
                         transition, info, startTransaction, finishTransaction, finishCallback);
             }
-        } else if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0) {
-             return startAnimation(mUnoccludeTransition,
-                    "unocclude",
-                    transition, info, startTransaction, finishTransaction, finishCallback);
-        } else {
-            Log.i(TAG, "Refused to play keyguard transition: " + info);
-            return false;
         }
+
+        Log.i(TAG, "Refused to play keyguard transition: " + info);
+        return false;
     }
 
     private boolean startAnimation(IRemoteTransition remoteHandler, String description,
