@@ -61,7 +61,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -166,7 +165,6 @@ final class VibrationSettings {
     final MyUidObserver mUidObserver;
     @VisibleForTesting
     final SettingsBroadcastReceiver mSettingChangeReceiver;
-    final VirtualDeviceListener mVirtualDeviceListener;
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
@@ -180,6 +178,8 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     @Nullable
     private PowerManagerInternal mPowerManagerInternal;
+    @Nullable
+    private VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
 
     @GuardedBy("mLock")
     private boolean mVibrateInputDevices;
@@ -207,8 +207,6 @@ final class VibrationSettings {
         mSettingObserver = new SettingsContentObserver(handler);
         mUidObserver = new MyUidObserver();
         mSettingChangeReceiver = new SettingsBroadcastReceiver();
-        mVirtualDeviceListener = new VirtualDeviceListener();
-
         mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
                 .getSystemUiServiceComponent().getPackageName();
 
@@ -271,13 +269,6 @@ final class VibrationSettings {
                         }
                     }
                 });
-
-        VirtualDeviceManagerInternal vdm = LocalServices.getService(
-                VirtualDeviceManagerInternal.class);
-        if (vdm != null) {
-            vdm.registerVirtualDisplayListener(mVirtualDeviceListener);
-            vdm.registerAppsOnVirtualDeviceListener(mVirtualDeviceListener);
-        }
 
         registerSettingsChangeReceiver(USER_SWITCHED_INTENT_FILTER);
         registerSettingsChangeReceiver(INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER);
@@ -414,8 +405,14 @@ final class VibrationSettings {
                     && !BACKGROUND_PROCESS_USAGE_ALLOWLIST.contains(usage)) {
                 return Vibration.Status.IGNORED_BACKGROUND;
             }
-            if (mVirtualDeviceListener.isAppOrDisplayOnAnyVirtualDevice(callerInfo.uid,
-                    callerInfo.displayId)) {
+
+            if (callerInfo.deviceId != Context.DEVICE_ID_DEFAULT
+                    && callerInfo.deviceId != Context.DEVICE_ID_INVALID) {
+                return Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE;
+            }
+
+            if (callerInfo.deviceId == Context.DEVICE_ID_INVALID
+                    && isAppRunningOnAnyVirtualDevice(callerInfo.uid)) {
                 return Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE;
             }
 
@@ -794,6 +791,15 @@ final class VibrationSettings {
         return out;
     }
 
+    private boolean isAppRunningOnAnyVirtualDevice(int uid) {
+        if (mVirtualDeviceManagerInternal == null) {
+            mVirtualDeviceManagerInternal =
+                    LocalServices.getService(VirtualDeviceManagerInternal.class);
+        }
+        return mVirtualDeviceManagerInternal != null
+                && mVirtualDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(uid);
+    }
+
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
     @VisibleForTesting
     final class SettingsContentObserver extends ContentObserver {
@@ -852,74 +858,5 @@ final class VibrationSettings {
                 mProcStatesCache.put(uid, procState);
             }
         }
-    }
-
-    /**
-     * Implementation of Virtual Device listeners for the changes of virtual displays and of apps
-     * running on any virtual device.
-     */
-    final class VirtualDeviceListener implements
-            VirtualDeviceManagerInternal.VirtualDisplayListener,
-            VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener {
-        @GuardedBy("mLock")
-        private final Set<Integer> mVirtualDisplays = new HashSet<>();
-        @GuardedBy("mLock")
-        private final Set<Integer> mAppsOnVirtualDevice = new HashSet<>();
-
-
-        @Override
-        public void onVirtualDisplayCreated(int displayId) {
-            synchronized (mLock) {
-                mVirtualDisplays.add(displayId);
-            }
-        }
-
-        @Override
-        public void onVirtualDisplayRemoved(int displayId) {
-            synchronized (mLock) {
-                mVirtualDisplays.remove(displayId);
-            }
-        }
-
-
-        @Override
-        public void onAppsOnAnyVirtualDeviceChanged(Set<Integer> allRunningUids) {
-            synchronized (mLock) {
-                mAppsOnVirtualDevice.clear();
-                mAppsOnVirtualDevice.addAll(allRunningUids);
-            }
-        }
-
-        /**
-         * @param uid:       uid of the calling app.
-         * @param displayId: the id of a Display.
-         * @return Returns true if:
-         * <ul>
-         *   <li> the displayId is valid, and it's owned by a virtual device.</li>
-         *   <li> the displayId is invalid, and the calling app (uid) is running on a virtual
-         *        device.</li>
-         * </ul>
-         */
-        public boolean isAppOrDisplayOnAnyVirtualDevice(int uid, int displayId) {
-            if (displayId == Display.DEFAULT_DISPLAY) {
-                // The default display is the primary physical display on the phone.
-                return false;
-            }
-
-            synchronized (mLock) {
-                if (displayId == Display.INVALID_DISPLAY) {
-                    // There is no Display object associated with the Context of calling
-                    // {@link SystemVibratorManager}, checking the calling UID instead.
-                    return mAppsOnVirtualDevice.contains(uid);
-                } else {
-                    // Other valid display IDs representing valid logical displays will be
-                    // checked
-                    // against the active virtual displays set built with the registered
-                    // {@link VirtualDisplayListener}.
-                    return mVirtualDisplays.contains(displayId);
-                }
-            }
-        }
-
     }
 }

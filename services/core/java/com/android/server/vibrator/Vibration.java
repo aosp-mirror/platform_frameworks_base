@@ -117,16 +117,16 @@ abstract class Vibration {
     static final class CallerInfo {
         public final VibrationAttributes attrs;
         public final int uid;
-        public final int displayId;
+        public final int deviceId;
         public final String opPkg;
         public final String reason;
 
-        CallerInfo(@NonNull VibrationAttributes attrs, int uid, int displayId,
-                String opPkg, String reason) {
+        CallerInfo(@NonNull VibrationAttributes attrs, int uid, int deviceId, String opPkg,
+                String reason) {
             Objects.requireNonNull(attrs);
             this.attrs = attrs;
             this.uid = uid;
-            this.displayId = displayId;
+            this.deviceId = deviceId;
             this.opPkg = opPkg;
             this.reason = reason;
         }
@@ -138,14 +138,14 @@ abstract class Vibration {
             CallerInfo that = (CallerInfo) o;
             return Objects.equals(attrs, that.attrs)
                     && uid == that.uid
-                    && displayId == that.displayId
+                    && deviceId == that.deviceId
                     && Objects.equals(opPkg, that.opPkg)
                     && Objects.equals(reason, that.reason);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(attrs, uid, displayId, opPkg, reason);
+            return Objects.hash(attrs, uid, deviceId, opPkg, reason);
         }
 
         @Override
@@ -153,7 +153,7 @@ abstract class Vibration {
             return "CallerInfo{"
                     + " uid=" + uid
                     + ", opPkg=" + opPkg
-                    + ", displayId=" + displayId
+                    + ", deviceId=" + deviceId
                     + ", attrs=" + attrs
                     + ", reason=" + reason
                     + '}';
@@ -267,8 +267,8 @@ abstract class Vibration {
                     mStartTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mStartTime)),
                     mEndTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mEndTime)));
             String callerInfoStr = String.format(Locale.ROOT,
-                    " | %s (uid=%d, displayId=%d) | usage: %s (audio=%s) | flags: %s | reason: %s",
-                    mCallerInfo.opPkg, mCallerInfo.uid, mCallerInfo.displayId,
+                    " | %s (uid=%d, deviceId=%d) | usage: %s (audio=%s) | flags: %s | reason: %s",
+                    mCallerInfo.opPkg, mCallerInfo.uid, mCallerInfo.deviceId,
                     mCallerInfo.attrs.usageToString(),
                     AudioAttributes.usageToString(mCallerInfo.attrs.getAudioUsage()),
                     Long.toBinaryString(mCallerInfo.attrs.getFlags()),

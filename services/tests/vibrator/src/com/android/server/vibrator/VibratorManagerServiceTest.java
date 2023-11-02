@@ -84,10 +84,8 @@ import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
-import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.view.Display;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.flags.Flags;
@@ -129,7 +127,7 @@ public class VibratorManagerServiceTest {
     // be cancelled in the body of the individual test.
     private static final int CLEANUP_TIMEOUT_MILLIS = 100;
     private static final int UID = Process.ROOT_UID;
-    private static final int VIRTUAL_DISPLAY_ID = 1;
+    private static final int VIRTUAL_DEVICE_ID = 1;
     private static final String PACKAGE_NAME = "package";
     private static final PowerSaveState NORMAL_POWER_STATE = new PowerSaveState.Builder().build();
     private static final PowerSaveState LOW_POWER_STATE = new PowerSaveState.Builder()
@@ -190,9 +188,6 @@ public class VibratorManagerServiceTest {
     private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
     private VibratorManagerService.ExternalVibratorService mExternalVibratorService;
     private VibrationConfig mVibrationConfig;
-    private VirtualDeviceManagerInternal.VirtualDisplayListener mRegisteredVirtualDisplayListener;
-    private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener
-            mRegisteredAppsOnVirtualDeviceListener;
     private InputManagerGlobal.TestSession mInputManagerGlobalSession;
     private InputManager mInputManager;
 
@@ -223,14 +218,6 @@ public class VibratorManagerServiceTest {
             mRegisteredPowerModeListener = invocation.getArgument(0);
             return null;
         }).when(mPowerManagerInternalMock).registerLowPowerModeObserver(any());
-        doAnswer(invocation -> {
-            mRegisteredVirtualDisplayListener = invocation.getArgument(0);
-            return null;
-        }).when(mVirtualDeviceManagerInternalMock).registerVirtualDisplayListener(any());
-        doAnswer(invocation -> {
-            mRegisteredAppsOnVirtualDeviceListener = invocation.getArgument(0);
-            return null;
-        }).when(mVirtualDeviceManagerInternalMock).registerAppsOnVirtualDeviceListener(any());
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 1);
@@ -273,6 +260,7 @@ public class VibratorManagerServiceTest {
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
         // Ignore potential exceptions about the looper having never dispatched any messages.
         mTestLooper.stopAutoDispatchAndIgnoreExceptions();
         if (mInputManagerGlobalSession != null) {
@@ -1510,61 +1498,29 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void vibrate_withVirtualDisplayChange_ignoreVibrationFromVirtualDisplay()
-            throws Exception {
+    public void vibrate_ignoreVibrationFromVirtualDevice() throws Exception {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
-        mRegisteredVirtualDisplayListener.onVirtualDisplayCreated(VIRTUAL_DISPLAY_ID);
 
-        vibrateWithDisplay(service,
-                VIRTUAL_DISPLAY_ID,
+        vibrateWithDevice(service,
+                VIRTUAL_DEVICE_ID,
                 CombinedVibration.startParallel()
                         .addVibrator(1, VibrationEffect.createOneShot(1000, 100))
                         .combine(),
                 HAPTIC_FEEDBACK_ATTRS);
 
-        // Haptic feedback ignored when it's from a virtual display.
+        // Haptic feedback ignored when it's from a virtual device.
         assertFalse(waitUntil(s -> s.isVibrating(1), service, /* timeout= */ 50));
 
-        mRegisteredVirtualDisplayListener.onVirtualDisplayRemoved(VIRTUAL_DISPLAY_ID);
-        vibrateWithDisplay(service,
-                VIRTUAL_DISPLAY_ID,
+        vibrateWithDevice(service,
+                Context.DEVICE_ID_DEFAULT,
                 CombinedVibration.startParallel()
                         .addVibrator(1, VibrationEffect.createOneShot(1000, 100))
                         .combine(),
                 HAPTIC_FEEDBACK_ATTRS);
-        // Haptic feedback played normally when the virtual display is removed.
+        // Haptic feedback played normally when it's from the default device.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
-        cancelVibrate(service);  // Clean up long-ish effect.
-    }
-
-    @Test
-    public void vibrate_withAppsOnVirtualDisplayChange_ignoreVibrationFromVirtualDisplay()
-            throws Exception {
-        mockVibrators(1);
-        VibratorManagerService service = createSystemReadyService();
-        mRegisteredAppsOnVirtualDeviceListener.onAppsOnAnyVirtualDeviceChanged(
-                new ArraySet<>(Arrays.asList(UID)));
-        vibrateWithDisplay(service,
-                Display.INVALID_DISPLAY,
-                CombinedVibration.startParallel()
-                        .addVibrator(1, VibrationEffect.createOneShot(1000, 100))
-                        .combine(),
-                HAPTIC_FEEDBACK_ATTRS);
-
-        // Haptic feedback ignored when it's from an app running virtual display.
-        assertFalse(waitUntil(s -> s.isVibrating(1), service, /* timeout= */ 50));
-
-        mRegisteredAppsOnVirtualDeviceListener.onAppsOnAnyVirtualDeviceChanged(new ArraySet<>());
-        vibrateWithDisplay(service,
-                Display.INVALID_DISPLAY,
-                CombinedVibration.startParallel()
-                        .addVibrator(1, VibrationEffect.createOneShot(1000, 100))
-                        .combine(),
-                HAPTIC_FEEDBACK_ATTRS);
-        // Haptic feedback played normally when the same app no long runs on a virtual display.
-        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
         cancelVibrate(service);  // Clean up long-ish effect.
     }
 
@@ -1685,7 +1641,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void onExternalVibration_ignoreVibrationFromVirtualDevices() throws Exception {
+    public void onExternalVibration_ignoreVibrationFromVirtualDevices() {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
         createSystemReadyService();
@@ -1697,8 +1653,8 @@ public class VibratorManagerServiceTest {
         int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
 
-        mRegisteredAppsOnVirtualDeviceListener.onAppsOnAnyVirtualDeviceChanged(
-                new ArraySet<>(Arrays.asList(UID)));
+        when(mVirtualDeviceManagerInternalMock.isAppRunningOnAnyVirtualDevice(UID))
+                .thenReturn(true);
         scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
     }
@@ -2396,7 +2352,7 @@ public class VibratorManagerServiceTest {
     private HalVibration performHapticFeedbackAndWaitUntilFinished(VibratorManagerService service,
                 int constant, boolean always) throws InterruptedException {
         HalVibration vib =
-                service.performHapticFeedbackInternal(UID, Display.DEFAULT_DISPLAY, PACKAGE_NAME,
+                service.performHapticFeedbackInternal(UID, Context.DEVICE_ID_DEFAULT, PACKAGE_NAME,
                         constant, always, "some reason", service);
         if (vib != null) {
             vib.waitForEnd();
@@ -2414,7 +2370,7 @@ public class VibratorManagerServiceTest {
     private HalVibration vibrateAndWaitUntilFinished(VibratorManagerService service,
             CombinedVibration effect, VibrationAttributes attrs) throws InterruptedException {
         HalVibration vib =
-                service.vibrateWithPermissionCheck(UID, Display.DEFAULT_DISPLAY, PACKAGE_NAME,
+                service.vibrateWithPermissionCheck(UID, Context.DEVICE_ID_DEFAULT, PACKAGE_NAME,
                         effect, attrs, "some reason", service);
         if (vib != null) {
             vib.waitForEnd();
@@ -2430,12 +2386,12 @@ public class VibratorManagerServiceTest {
 
     private void vibrate(VibratorManagerService service, CombinedVibration effect,
             VibrationAttributes attrs) {
-        vibrateWithDisplay(service, Display.DEFAULT_DISPLAY, effect, attrs);
+        vibrateWithDevice(service, Context.DEVICE_ID_DEFAULT, effect, attrs);
     }
 
-    private void vibrateWithDisplay(VibratorManagerService service, int displayId,
+    private void vibrateWithDevice(VibratorManagerService service, int deviceId,
             CombinedVibration effect, VibrationAttributes attrs) {
-        service.vibrate(UID, displayId, PACKAGE_NAME, effect, attrs, "some reason", service);
+        service.vibrate(UID, deviceId, PACKAGE_NAME, effect, attrs, "some reason", service);
     }
 
     private boolean waitUntil(Predicate<VibratorManagerService> predicate,

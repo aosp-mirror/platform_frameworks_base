@@ -137,8 +137,8 @@ public class SystemVibratorManager extends VibratorManager {
             return;
         }
         try {
-            mService.vibrate(uid, mContext.getAssociatedDisplayId(), opPkg, effect, attributes,
-                    reason, mToken);
+            mService.vibrate(uid, mContext.getDeviceId(), opPkg, effect, attributes, reason,
+                    mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }
@@ -152,8 +152,8 @@ public class SystemVibratorManager extends VibratorManager {
         }
         try {
             mService.performHapticFeedback(
-                    Process.myUid(), mContext.getAssociatedDisplayId(), mPackageName, constant,
-                    always, reason, mToken);
+                    Process.myUid(), mContext.getDeviceId(), mPackageName, constant, always, reason,
+                    mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to perform haptic feedback.", e);
         }

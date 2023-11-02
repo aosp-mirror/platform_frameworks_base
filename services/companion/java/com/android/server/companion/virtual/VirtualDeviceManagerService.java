@@ -441,10 +441,8 @@ public class VirtualDeviceManagerService extends SystemService {
                                 + " is not the owner of the supplied VirtualDevice");
             }
 
-            int displayId = virtualDeviceImpl.createVirtualDisplay(virtualDisplayConfig, callback,
-                    packageName);
-            mLocalService.onVirtualDisplayCreated(displayId);
-            return displayId;
+            return virtualDeviceImpl.createVirtualDisplay(
+                    virtualDisplayConfig, callback, packageName);
         }
 
         @Override // Binder call
@@ -625,9 +623,6 @@ public class VirtualDeviceManagerService extends SystemService {
 
     private final class LocalService extends VirtualDeviceManagerInternal {
         @GuardedBy("mVirtualDeviceManagerLock")
-        private final ArrayList<VirtualDisplayListener>
-                mVirtualDisplayListeners = new ArrayList<>();
-        @GuardedBy("mVirtualDeviceManagerLock")
         private final ArrayList<AppsOnVirtualDeviceListener>
                 mAppsOnVirtualDeviceListeners = new ArrayList<>();
         @GuardedBy("mVirtualDeviceManagerLock")
@@ -665,35 +660,15 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void onVirtualDisplayCreated(int displayId) {
-            final VirtualDisplayListener[] listeners;
-            synchronized (mVirtualDeviceManagerLock) {
-                listeners = mVirtualDisplayListeners.toArray(new VirtualDisplayListener[0]);
-            }
-            mHandler.post(() -> {
-                for (VirtualDisplayListener listener : listeners) {
-                    listener.onVirtualDisplayCreated(displayId);
-                }
-            });
-        }
-
-        @Override
         public void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId) {
-            final VirtualDisplayListener[] listeners;
             VirtualDeviceImpl virtualDeviceImpl;
             synchronized (mVirtualDeviceManagerLock) {
-                listeners = mVirtualDisplayListeners.toArray(new VirtualDisplayListener[0]);
                 virtualDeviceImpl = mVirtualDevices.get(
                         ((VirtualDeviceImpl) virtualDevice).getDeviceId());
             }
             if (virtualDeviceImpl != null) {
                 virtualDeviceImpl.onVirtualDisplayRemoved(displayId);
             }
-            mHandler.post(() -> {
-                for (VirtualDisplayListener listener : listeners) {
-                    listener.onVirtualDisplayRemoved(displayId);
-                }
-            });
         }
 
         @Override
@@ -796,22 +771,6 @@ public class VirtualDeviceManagerService extends SystemService {
                 virtualDevice = mVirtualDevices.get(deviceId);
             }
             return virtualDevice == null ? null : virtualDevice.getPersistentDeviceId();
-        }
-
-        @Override
-        public void registerVirtualDisplayListener(
-                @NonNull VirtualDisplayListener listener) {
-            synchronized (mVirtualDeviceManagerLock) {
-                mVirtualDisplayListeners.add(listener);
-            }
-        }
-
-        @Override
-        public void unregisterVirtualDisplayListener(
-                @NonNull VirtualDisplayListener listener) {
-            synchronized (mVirtualDeviceManagerLock) {
-                mVirtualDisplayListeners.remove(listener);
-            }
         }
 
         @Override

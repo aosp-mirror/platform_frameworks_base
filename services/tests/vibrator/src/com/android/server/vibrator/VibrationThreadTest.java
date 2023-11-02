@@ -88,7 +88,7 @@ public class VibrationThreadTest {
 
     private static final int TEST_TIMEOUT_MILLIS = 900;
     private static final int UID = Process.ROOT_UID;
-    private static final int DISPLAY_ID = 10;
+    private static final int DEVICE_ID = 10;
     private static final int VIBRATOR_ID = 1;
     private static final String PACKAGE_NAME = "package";
     private static final VibrationAttributes ATTRS = new VibrationAttributes.Builder().build();
@@ -250,7 +250,7 @@ public class VibrationThreadTest {
         Vibration.EndInfo cancelVibrationInfo = new Vibration.EndInfo(
                 Vibration.Status.CANCELLED_SUPERSEDED, new Vibration.CallerInfo(
                 VibrationAttributes.createForUsage(VibrationAttributes.USAGE_ALARM), /* uid= */
-                1, /* displayId= */ -1, /* opPkg= */ null, /* reason= */ null));
+                1, /* deviceId= */ -1, /* opPkg= */ null, /* reason= */ null));
         mVibrationConductor.notifyCancelled(
                 cancelVibrationInfo,
                 /* immediate= */ false);
@@ -1641,7 +1641,7 @@ public class VibrationThreadTest {
 
     private HalVibration createVibration(CombinedVibration effect) {
         return new HalVibration(mVibrationToken, effect,
-                new Vibration.CallerInfo(ATTRS, UID, DISPLAY_ID, PACKAGE_NAME, "reason"));
+                new Vibration.CallerInfo(ATTRS, UID, DEVICE_ID, PACKAGE_NAME, "reason"));
     }
 
     private SparseArray<VibratorController> createVibratorControllers() {
