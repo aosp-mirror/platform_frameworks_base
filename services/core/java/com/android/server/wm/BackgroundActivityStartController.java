@@ -291,6 +291,10 @@ public class BackgroundActivityStartController {
             return name + "[debugOnly]";
         }
 
+        private boolean callerIsRealCaller() {
+            return mCallingUid == mRealCallingUid;
+        }
+
         private String dump(BalVerdict resultIfPiCreatorAllowsBal,
                            BalVerdict resultIfPiSenderAllowsBal) {
             return " [callingPackage: " + getDebugPackageName(mCallingPackage, mCallingUid)
@@ -422,7 +426,7 @@ public class BackgroundActivityStartController {
         }
 
         BalVerdict resultForCaller = checkBackgroundActivityStartAllowedByCaller(state);
-        BalVerdict resultForRealCaller = callingUid == realCallingUid && resultForCaller.allows()
+        BalVerdict resultForRealCaller = state.callerIsRealCaller() && resultForCaller.allows()
                 ? resultForCaller // no need to calculate again
                 // otherwise we might need to recalculate because the logic is not the same
                 : checkBackgroundActivityStartAllowedBySender(state, checkedOptions);
@@ -636,16 +640,14 @@ public class BackgroundActivityStartController {
     BalVerdict checkBackgroundActivityStartAllowedBySender(
             BalState state,
             ActivityOptions checkedOptions) {
-        int realCallingUid = state.mRealCallingUid;
-        BackgroundStartPrivileges backgroundStartPrivileges = state.mBackgroundStartPrivileges;
 
         if (PendingIntentRecord.isPendingIntentBalAllowedByPermission(checkedOptions)
                 && ActivityManager.checkComponentPermission(
                 android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
-                realCallingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
+                state.mRealCallingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
             return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
                     /*background*/ false,
-                    "realCallingUid has BAL permission. realCallingUid: " + realCallingUid);
+                    "realCallingUid has BAL permission.");
         }
 
         // don't abort if the realCallingUid has a visible window
@@ -653,26 +655,23 @@ public class BackgroundActivityStartController {
         if (state.mRealCallingUidHasAnyVisibleWindow) {
             return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
                     /*background*/ false,
-                    "realCallingUid has visible (non-toast) window. realCallingUid: "
-                            + realCallingUid);
+                    "realCallingUid has visible (non-toast) window.");
         }
         // if the realCallingUid is a persistent system process, abort if the IntentSender
         // wasn't allowed to start an activity
         if (state.mIsRealCallingUidPersistentSystemProcess
-                && backgroundStartPrivileges.allowsBackgroundActivityStarts()) {
+                && state.mBackgroundStartPrivileges.allowsBackgroundActivityStarts()) {
             return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
                     /*background*/ false,
                     "realCallingUid is persistent system process AND intent "
-                            + "sender allowed (allowBackgroundActivityStart = true). "
-                            + "realCallingUid: " + realCallingUid);
+                            + "sender allowed (allowBackgroundActivityStart = true).");
         }
         // don't abort if the realCallingUid is an associated companion app
         if (mService.isAssociatedCompanionApp(
-                UserHandle.getUserId(realCallingUid), realCallingUid)) {
+                UserHandle.getUserId(state.mRealCallingUid), state.mRealCallingUid)) {
             return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
                     /*background*/ false,
-                    "realCallingUid is a companion app. "
-                            + "realCallingUid: " + realCallingUid);
+                    "realCallingUid is a companion app.");
         }
 
         // don't abort if the callerApp or other processes of that uid are allowed in any way
