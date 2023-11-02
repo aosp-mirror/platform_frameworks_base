@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetHost
 import android.content.ComponentName
 import com.android.systemui.communal.data.repository.CommunalRepository
@@ -25,10 +26,12 @@ import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -40,6 +43,7 @@ class CommunalInteractor
 constructor(
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
+    smartspaceRepository: SmartspaceRepository,
     tutorialInteractor: CommunalTutorialInteractor,
     private val appWidgetHost: AppWidgetHost,
 ) {
@@ -83,7 +87,9 @@ constructor(
             if (isTutorialMode) {
                 return@flatMapLatest flowOf(tutorialContent)
             }
-            widgetContent
+            combine(smartspaceContent, widgetContent) { smartspace, widgets ->
+                smartspace + widgets
+            }
         }
 
     /** A list of widget content to be displayed in the communal hub. */
@@ -95,6 +101,28 @@ constructor(
                     providerInfo = widget.providerInfo,
                     appWidgetHost = appWidgetHost,
                 )
+            }
+        }
+
+    /** A flow of available smartspace content. Currently only showing timer targets. */
+    private val smartspaceContent: Flow<List<CommunalContentModel.Smartspace>> =
+        if (!smartspaceRepository.isSmartspaceRemoteViewsEnabled) {
+            flowOf(emptyList())
+        } else {
+            smartspaceRepository.lockscreenSmartspaceTargets.map { targets ->
+                targets
+                    .filter { target ->
+                        target.featureType == SmartspaceTarget.FEATURE_TIMER &&
+                            target.remoteViews != null
+                    }
+                    .map Target@{ target ->
+                        return@Target CommunalContentModel.Smartspace(
+                            smartspaceTargetId = target.smartspaceTargetId,
+                            remoteViews = target.remoteViews!!,
+                            // Smartspace always as HALF for now.
+                            size = CommunalContentSize.HALF,
+                        )
+                    }
             }
         }
 

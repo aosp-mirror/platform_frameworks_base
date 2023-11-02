@@ -23,6 +23,7 @@ import com.android.systemui.communal.data.repository.FakeCommunalTutorialReposit
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.test.TestScope
 
@@ -34,6 +35,7 @@ object CommunalInteractorFactory {
         testScope: TestScope = TestScope(),
         communalRepository: FakeCommunalRepository = FakeCommunalRepository(),
         widgetRepository: FakeCommunalWidgetRepository = FakeCommunalWidgetRepository(),
+        smartspaceRepository: FakeSmartspaceRepository = FakeSmartspaceRepository(),
         tutorialRepository: FakeCommunalTutorialRepository = FakeCommunalTutorialRepository(),
         appWidgetHost: AppWidgetHost = mock(),
     ): WithDependencies {
@@ -46,6 +48,7 @@ object CommunalInteractorFactory {
         return WithDependencies(
             communalRepository,
             widgetRepository,
+            smartspaceRepository,
             tutorialRepository,
             withDeps.keyguardRepository,
             withDeps.keyguardInteractor,
@@ -54,6 +57,7 @@ object CommunalInteractorFactory {
             CommunalInteractor(
                 communalRepository,
                 widgetRepository,
+                smartspaceRepository,
                 withDeps.communalTutorialInteractor,
                 appWidgetHost,
             ),
@@ -63,6 +67,7 @@ object CommunalInteractorFactory {
     data class WithDependencies(
         val communalRepository: FakeCommunalRepository,
         val widgetRepository: FakeCommunalWidgetRepository,
+        val smartspaceRepository: FakeSmartspaceRepository,
         val tutorialRepository: FakeCommunalTutorialRepository,
         val keyguardRepository: FakeKeyguardRepository,
         val keyguardInteractor: KeyguardInteractor,

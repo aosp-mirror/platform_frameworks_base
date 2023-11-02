@@ -18,11 +18,14 @@ package com.android.systemui.communal.ui.compose
 
 import android.os.Bundle
 import android.util.SizeF
+import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
@@ -68,6 +71,7 @@ fun CommunalHub(
                 span = { index -> GridItemSpan(communalContent[index].size.span) },
             ) { index ->
                 CommunalContent(
+                    modifier = Modifier.fillMaxHeight().width(Dimensions.CardWidth),
                     model = communalContent[index],
                     deleteOnClick = viewModel::onDeleteWidget,
                     size =
@@ -96,6 +100,7 @@ private fun CommunalContent(
 ) {
     when (model) {
         is CommunalContentModel.Widget -> WidgetContent(model, size, deleteOnClick, modifier)
+        is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
     }
 }
@@ -128,6 +133,21 @@ private fun WidgetContent(
             onReset = {}
         )
     }
+}
+
+@Composable
+private fun SmartspaceContent(
+    model: CommunalContentModel.Smartspace,
+    modifier: Modifier = Modifier,
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            FrameLayout(context).apply { addView(model.remoteViews.apply(context, this)) }
+        },
+        // For reusing composition in lazy lists.
+        onReset = {}
+    )
 }
 
 @Composable

@@ -18,6 +18,7 @@ package com.android.systemui.communal.domain.model
 
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetProviderInfo
+import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
 
 /** Encapsulates data for a communal content. */
@@ -43,5 +44,13 @@ sealed interface CommunalContentModel {
         override val size: CommunalContentSize,
     ) : CommunalContentModel {
         override val key = "tutorial_$id"
+    }
+
+    class Smartspace(
+        smartspaceTargetId: String,
+        val remoteViews: RemoteViews,
+        override val size: CommunalContentSize,
+    ) : CommunalContentModel {
+        override val key = "smartspace_$smartspaceTargetId"
     }
 }
