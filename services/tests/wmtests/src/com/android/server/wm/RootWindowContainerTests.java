@@ -870,7 +870,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 new TestDisplayContent.Builder(mAtm, 1000, 1500)
                         .setSystemDecorations(true).build();
 
-        // Use invalid user id to let StorageManager.isUserKeyUnlocked() return false.
+        // Use invalid user id to let StorageManager.isCeStorageUnlocked() return false.
         final int currentUser = mRootWindowContainer.mCurrentUser;
         mRootWindowContainer.mCurrentUser = -1;
 
