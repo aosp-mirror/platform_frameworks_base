@@ -45,6 +45,7 @@
 #include "io/StringStream.h"
 #include "io/Util.h"
 #include "io/ZipArchive.h"
+#include "process/ProductFilter.h"
 #include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Util.h"
@@ -178,6 +179,15 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
         parser_options);
     if (!res_parser.Parse(&xml_parser)) {
       return false;
+    }
+
+    if (options.product_.has_value()) {
+      if (!ProductFilter({*options.product_}, /* remove_default_config_values = */ true)
+               .Consume(context, &table)) {
+        context->GetDiagnostics()->Error(android::DiagMessage(path_data.source)
+                                         << "failed to filter product");
+        return false;
+      }
     }
   }
 
