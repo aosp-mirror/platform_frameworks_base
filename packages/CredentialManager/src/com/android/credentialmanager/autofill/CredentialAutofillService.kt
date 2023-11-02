@@ -50,6 +50,7 @@ import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.GetFlowUtils
 import com.android.credentialmanager.getflow.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
+import com.android.credentialmanager.getflow.ProviderInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
 import org.json.JSONObject
 import java.util.concurrent.Executors
@@ -155,6 +156,31 @@ class CredentialAutofillService : AutofillService() {
         }
         val entryIconMap: Map<String, Icon> =
                 getEntryToIconMap(getCredResponse.candidateProviderDataList)
+        val autofillIdToProvidersMap: Map<AutofillId, List<ProviderInfo>> =
+                mapAutofillIdToProviders(providerList)
+        val fillResponseBuilder = FillResponse.Builder()
+        var validFillResponse = false
+        autofillIdToProvidersMap.forEach { (autofillId, providers) ->
+            validFillResponse = processProvidersForAutofillId(
+                    filLRequest, autofillId, providers, entryIconMap, fillResponseBuilder)
+                    .or(validFillResponse)
+        }
+        if (!validFillResponse) {
+            return null
+        }
+        return fillResponseBuilder.build()
+    }
+
+    private fun processProvidersForAutofillId(
+            filLRequest: FillRequest,
+            autofillId: AutofillId,
+            providerList: List<ProviderInfo>,
+            entryIconMap: Map<String, Icon>,
+            fillResponseBuilder: FillResponse.Builder
+    ): Boolean {
+        if (providerList.isEmpty()) {
+            return false
+        }
         var totalEntryCount = 0
         providerList.forEach { provider ->
             totalEntryCount += provider.credentialEntryList.size
@@ -169,77 +195,139 @@ class CredentialAutofillService : AutofillService() {
             maxItemCount = maxItemCount.coerceAtMost(inlineMaxSuggestedCount)
         }
         var i = 0
-        val fillResponseBuilder = FillResponse.Builder()
-        var emptyFillResponse = true
+        var datasetAdded = false
 
         providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@ {
             val primaryEntry = it.sortedCredentialEntryList.first()
-            // In regular CredMan bottomsheet, only one primary entry per username is displayed.
-            // But since the credential requests from different fields are allocated into a single
-            // request for autofill, there will be duplicate primary entries, especially for
-            // username/pw autofill fields. These primary entries will be the same entries except
-            // their autofillIds will point to different autofill fields. Process all primary
-            // fields.
-            // TODO(b/307435163): Merge credential options
-            it.sortedCredentialEntryList.forEach entryLoop@ { credentialEntry ->
-                if (!isSameCredentialEntry(primaryEntry, credentialEntry)) {
-                    // Encountering different credential entry means all the duplicate primary
-                    // entries have been processed.
-                    return@usernameLoop
-                }
-                val autofillId: AutofillId? = credentialEntry
-                        .fillInIntent
-                        ?.getParcelableExtra(
-                                CredentialProviderService.EXTRA_AUTOFILL_ID,
-                                AutofillId::class.java)
-                val pendingIntent = credentialEntry.pendingIntent
-                if (autofillId == null || pendingIntent == null) {
-                    Log.e(TAG, "AutofillId or pendingIntent was missing from the entry.")
-                    return@entryLoop
-                }
-                var inlinePresentation: InlinePresentation? = null
-                // Create inline presentation
-                if (inlinePresentationSpecs != null && i < maxItemCount) {
-                    val spec: InlinePresentationSpec
-                    if (i < inlinePresentationSpecsCount) {
-                        spec = inlinePresentationSpecs[i]
-                    } else {
-                        spec = inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
-                    }
-                    val sliceBuilder = InlineSuggestionUi
-                            .newContentBuilder(pendingIntent)
-                            .setTitle(credentialEntry.userName)
-                    val icon: Icon =
-                            entryIconMap[credentialEntry.entryKey + credentialEntry.entrySubkey]
-                                    ?: getDefaultIcon()
-                    sliceBuilder.setStartIcon(icon)
-                    inlinePresentation = InlinePresentation(
-                            sliceBuilder.build().slice, spec, /* pinned= */ false)
-                }
-                i++
+            val pendingIntent = primaryEntry.pendingIntent
+            if (pendingIntent == null || primaryEntry.fillInIntent == null) {
+                // FillInIntent will not be null because autofillId was retrieved from it.
+                Log.e(TAG, "PendingIntent was missing from the entry.")
+                return@usernameLoop
+            }
+            if (inlinePresentationSpecs == null || i >= maxItemCount) {
+                Log.e(TAG, "Skipping because reached the max item count.")
+                return@usernameLoop
+            }
+            // Create inline presentation
+            val spec: InlinePresentationSpec
+            if (i < inlinePresentationSpecsCount) {
+                spec = inlinePresentationSpecs[i]
+            } else {
+                spec = inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
+            }
+            val sliceBuilder = InlineSuggestionUi
+                    .newContentBuilder(pendingIntent)
+                    .setTitle(primaryEntry.userName)
+            val icon: Icon =
+                    entryIconMap[primaryEntry.entryKey + primaryEntry.entrySubkey]
+                            ?: getDefaultIcon()
+            sliceBuilder.setStartIcon(icon)
+            val inlinePresentation = InlinePresentation(
+                    sliceBuilder.build().slice, spec, /* pinned= */ false)
+            i++
 
-                val dataSetBuilder = Dataset.Builder()
-                val presentationBuilder = Presentations.Builder()
-                if (inlinePresentation != null) {
-                    presentationBuilder.setInlinePresentation(inlinePresentation)
-                }
-                fillResponseBuilder.addDataset(
-                        dataSetBuilder
-                                .setField(
-                                        autofillId,
-                                        Field.Builder().setPresentations(
-                                                presentationBuilder.build())
-                                                .build())
-                                .setAuthentication(pendingIntent.intentSender)
-                                .setAuthenticationExtras(credentialEntry.fillInIntent.extras)
-                                .build())
-                emptyFillResponse = false
+            val dataSetBuilder = Dataset.Builder()
+            val presentationBuilder = Presentations.Builder()
+                    .setInlinePresentation(inlinePresentation)
+
+            fillResponseBuilder.addDataset(
+                    dataSetBuilder
+                            .setField(
+                                    autofillId,
+                                    Field.Builder().setPresentations(
+                                            presentationBuilder.build())
+                                            .build())
+                            .setAuthentication(pendingIntent.intentSender)
+                            .setAuthenticationExtras(primaryEntry.fillInIntent.extras)
+                            .build())
+            datasetAdded = true
+        }
+        return datasetAdded
+    }
+
+    /**
+     *  Maps Autofill Id to provider list. For example, passing in a provider info
+     *
+     *     ProviderInfo {
+     *       id1,
+     *       displayName1
+     *       [entry1(autofillId1), entry2(autofillId2), entry3(autofillId3)],
+     *       ...
+     *     }
+     *
+     *     will result in
+     *
+     *     { autofillId1: ProviderInfo {
+     *         id1,
+     *         displayName1,
+     *         [entry1(autofillId1)],
+     *         ...
+     *       }, autofillId2: ProviderInfo {
+     *         id1,
+     *         displayName1,
+     *         [entry2(autofillId2)],
+     *         ...
+     *       }, autofillId3: ProviderInfo {
+     *         id1,
+     *         displayName1,
+     *         [entry3(autofillId3)],
+     *         ...
+     *       }
+     *     }
+     */
+    private fun mapAutofillIdToProviders(
+            providerList: List<ProviderInfo>
+    ): Map<AutofillId, List<ProviderInfo>> {
+        val autofillIdToProviders: MutableMap<AutofillId, MutableList<ProviderInfo>> =
+                mutableMapOf()
+        providerList.forEach { provider ->
+            val autofillIdToCredentialEntries:
+                    MutableMap<AutofillId, MutableList<CredentialEntryInfo>> =
+                    mapAutofillIdToCredentialEntries(provider.credentialEntryList)
+            autofillIdToCredentialEntries.forEach { (autofillId, entries) ->
+                autofillIdToProviders.getOrPut(autofillId) { mutableListOf() }
+                        .add(copyProviderInfo(provider, entries))
             }
         }
-        if (emptyFillResponse) {
-            return null
+        return autofillIdToProviders
+    }
+
+    private fun mapAutofillIdToCredentialEntries(
+            credentialEntryList: List<CredentialEntryInfo>
+    ): MutableMap<AutofillId, MutableList<CredentialEntryInfo>> {
+        val autofillIdToCredentialEntries:
+                MutableMap<AutofillId, MutableList<CredentialEntryInfo>> = mutableMapOf()
+        credentialEntryList.forEach entryLoop@ { credentialEntry ->
+            val autofillId: AutofillId? = credentialEntry
+                    .fillInIntent
+                    ?.getParcelableExtra(
+                            CredentialProviderService.EXTRA_AUTOFILL_ID,
+                            AutofillId::class.java)
+            if (autofillId == null) {
+                Log.e(TAG, "AutofillId is missing from credential entry. Credential" +
+                        " Integration might be disabled.")
+                return@entryLoop
+            }
+            autofillIdToCredentialEntries.getOrPut(autofillId) { mutableListOf() }
+                    .add(credentialEntry)
         }
-        return fillResponseBuilder.build()
+        return autofillIdToCredentialEntries
+    }
+
+    private fun copyProviderInfo(
+            providerInfo: ProviderInfo,
+            credentialList: List<CredentialEntryInfo>
+    ): ProviderInfo {
+        return ProviderInfo(
+                providerInfo.id,
+                providerInfo.icon,
+                providerInfo.displayName,
+                credentialList,
+                providerInfo.authenticationEntryList,
+                providerInfo.remoteEntry,
+                providerInfo.actionEntryList
+        )
     }
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
@@ -352,16 +440,5 @@ class CredentialAutofillService : AutofillService() {
             }
         }
         return result
-    }
-
-    private fun isSameCredentialEntry(
-            info1: CredentialEntryInfo,
-            info2: CredentialEntryInfo
-    ): Boolean {
-        return info1.providerId == info2.providerId &&
-                info1.lastUsedTimeMillis == info2.lastUsedTimeMillis &&
-                info1.credentialType == info2.credentialType &&
-                info1.displayName == info2.displayName &&
-                info1.userName == info2.userName
     }
 }
