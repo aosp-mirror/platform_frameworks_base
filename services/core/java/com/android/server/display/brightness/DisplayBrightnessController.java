@@ -41,7 +41,6 @@ import java.io.PrintWriter;
  * display. Applies the chosen brightness.
  */
 public final class DisplayBrightnessController {
-    private static final int DEFAULT_USER_SERIAL = -1;
 
     // The ID of the display tied to this DisplayBrightnessController
     private final int mDisplayId;
@@ -302,16 +301,8 @@ public final class DisplayBrightnessController {
      * Notifies the brightnessSetting to persist the supplied brightness value.
      */
     public void setBrightness(float brightnessValue) {
-        setBrightness(brightnessValue, DEFAULT_USER_SERIAL);
-    }
-
-    /**
-     * Notifies the brightnessSetting to persist the supplied brightness value for a user.
-     */
-    public void setBrightness(float brightnessValue, int userSerial) {
         // Update the setting, which will eventually call back into DPC to have us actually
         // update the display with the new value.
-        mBrightnessSetting.setUserSerial(userSerial);
         mBrightnessSetting.setBrightness(brightnessValue);
         if (mDisplayId == Display.DEFAULT_DISPLAY && mPersistBrightnessNitsForDefaultDisplay) {
             float nits = convertToNits(brightnessValue);
@@ -319,6 +310,14 @@ public final class DisplayBrightnessController {
                 mBrightnessSetting.setBrightnessNitsForDefaultDisplay(nits);
             }
         }
+    }
+
+    /**
+     * Notifies the brightnessSetting to persist the supplied brightness value for a user.
+     */
+    public void setBrightness(float brightnessValue, int userSerial) {
+        mBrightnessSetting.setUserSerial(userSerial);
+        setBrightness(brightnessValue);
     }
 
     /**
