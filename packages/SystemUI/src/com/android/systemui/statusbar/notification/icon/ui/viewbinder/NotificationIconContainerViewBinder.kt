@@ -28,15 +28,12 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.IconViewStore
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconColors
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData
-import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
@@ -44,7 +41,6 @@ import com.android.systemui.util.children
 import com.android.systemui.util.kotlin.mapValuesNotNullTo
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.kotlin.stateFlow
-import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
@@ -95,7 +91,11 @@ object NotificationIconContainerViewBinder {
                         configurationController,
                         viewStore,
                     ) { _, sbiv ->
-                        iconColors.collect { sbiv.updateTintForIcon(it, contrastColorUtil) }
+                        StatusBarIconViewBinder.bindIconColors(
+                            sbiv,
+                            iconColors,
+                            contrastColorUtil,
+                        )
                     }
                 }
                 launch { viewModel.bindIsolatedIcon(view, viewStore) }
@@ -110,7 +110,6 @@ object NotificationIconContainerViewBinder {
         viewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
-        dozeParameters: DozeParameters,
         viewStore: IconViewStore,
     ): DisposableHandle {
         return view.repeatWhenAttached {
@@ -122,46 +121,35 @@ object NotificationIconContainerViewBinder {
                         configurationController,
                         viewStore,
                     ) { _, sbiv ->
-                        configuration
-                            .getColorAttr(R.attr.wallpaperTextColor, DEFAULT_AOD_ICON_COLOR)
-                            .collect { tint ->
-                                sbiv.staticDrawableColor = tint
-                                sbiv.setDecorColor(tint)
-                            }
+                        viewModel.bindAodStatusBarIconView(sbiv, configuration)
                     }
                 }
-                launch { viewModel.animationsEnabled.bindAnimationsEnabled(view) }
-                launch { viewModel.isDozing.bindIsDozing(view, dozeParameters) }
+                launch { viewModel.areContainerChangesAnimated.bindAnimationsEnabled(view) }
             }
+        }
+    }
+
+    private suspend fun NotificationIconContainerAlwaysOnDisplayViewModel.bindAodStatusBarIconView(
+        sbiv: StatusBarIconView,
+        configuration: ConfigurationState,
+    ) {
+        coroutineScope {
+            launch {
+                val color: Flow<Int> =
+                    configuration.getColorAttr(
+                        R.attr.wallpaperTextColor,
+                        DEFAULT_AOD_ICON_COLOR,
+                    )
+                StatusBarIconViewBinder.bindColor(sbiv, color)
+            }
+            launch { StatusBarIconViewBinder.bindTintAlpha(sbiv, tintAlpha) }
+            launch { StatusBarIconViewBinder.bindAnimationsEnabled(sbiv, areIconAnimationsEnabled) }
         }
     }
 
     /** Binds to [NotificationIconContainer.setAnimationsEnabled] */
     private suspend fun Flow<Boolean>.bindAnimationsEnabled(view: NotificationIconContainer) {
         collect(view::setAnimationsEnabled)
-    }
-
-    private suspend fun Flow<AnimatedValue<Boolean>>.bindIsDozing(
-        view: NotificationIconContainer,
-        dozeParameters: DozeParameters,
-    ) {
-        collect { isDozing ->
-            if (isDozing.isAnimating) {
-                val animate = !dozeParameters.displayNeedsBlanking
-                view.setDozing(
-                    /* dozing = */ isDozing.value,
-                    /* fade = */ animate,
-                    /* delay = */ 0,
-                    /* endRunnable = */ isDozing::stopAnimating,
-                )
-            } else {
-                view.setDozing(
-                    /* dozing = */ isDozing.value,
-                    /* fade= */ false,
-                    /* delay= */ 0,
-                )
-            }
-        }
     }
 
     private suspend fun NotificationIconContainerStatusBarViewModel.bindIsolatedIcon(
@@ -261,6 +249,7 @@ object NotificationIconContainerViewBinder {
                 // and added again
                 view.removeTransientView(sbiv)
                 view.addView(sbiv, i, layoutParams)
+                iconBindings.remove(key)?.cancel()
                 iconBindings[key] = launch { bindIcon(key, sbiv) }
             }
 
@@ -280,18 +269,6 @@ object NotificationIconContainerViewBinder {
 
             view.setReplacingIcons(null)
         }
-    }
-
-    // TODO(b/305739416): Once StatusBarIconView has its own Recommended Architecture stack, this
-    //  can be moved there and cleaned up.
-    private fun StatusBarIconView.updateTintForIcon(
-        iconColors: NotificationIconColors,
-        contrastColorUtil: ContrastColorUtil,
-    ) {
-        val isPreL = java.lang.Boolean.TRUE == getTag(R.id.icon_is_pre_L)
-        val isColorized = !isPreL || NotificationUtils.isGrayscale(this, contrastColorUtil)
-        staticDrawableColor = iconColors.staticDrawableColor(viewBounds, isColorized)
-        setDecorColor(iconColors.tint)
     }
 
     /** External storage for [StatusBarIconView] instances. */

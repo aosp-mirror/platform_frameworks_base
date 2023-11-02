@@ -94,7 +94,6 @@ constructor(
                     nicAodViewModel,
                     configurationState,
                     configurationController,
-                    dozeParameters,
                     nicAodIconViewStore,
                 )
         } else {

@@ -337,7 +337,9 @@ public class NotificationIconContainer extends ViewGroup {
         }
         if (child instanceof StatusBarIconView) {
             ((StatusBarIconView) child).updateIconDimens();
-            ((StatusBarIconView) child).setDozing(mDozing, false, 0);
+            if (!NotificationIconContainerRefactor.isEnabled()) {
+                ((StatusBarIconView) child).setDozing(mDozing, false, 0);
+            }
         }
     }
 
@@ -633,14 +635,16 @@ public class NotificationIconContainer extends ViewGroup {
         mChangingViewPositions = changingViewPositions;
     }
 
-    public void setDozing(boolean dozing, boolean fade, long delay) {
-        setDozing(dozing, fade, delay, /* endRunnable= */ null);
+    public void setDozing(boolean dozing, boolean animate, long delay) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
+        setDozing(dozing, animate, delay, /* endRunnable= */ null);
     }
 
-    public void setDozing(boolean dozing, boolean fade, long delay,
+    private void setDozing(boolean dozing, boolean animate, long delay,
             @Nullable Runnable endRunnable) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         mDozing = dozing;
-        mDisallowNextAnimation |= !fade;
+        mDisallowNextAnimation |= !animate;
         final int childCount = getChildCount();
         // Track all the child invocations of setDozing, invoking the top-level endRunnable once
         // they have all completed.
@@ -657,7 +661,7 @@ public class NotificationIconContainer extends ViewGroup {
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             if (view instanceof StatusBarIconView) {
-                ((StatusBarIconView) view).setDozing(dozing, fade, delay, onChildCompleted);
+                ((StatusBarIconView) view).setDozing(dozing, animate, delay, onChildCompleted);
             } else if (onChildCompleted != null) {
                 onChildCompleted.run();
             }
@@ -780,15 +784,7 @@ public class NotificationIconContainer extends ViewGroup {
                 StatusBarIconView icon = (StatusBarIconView) view;
                 boolean animate = false;
                 AnimationProperties animationProperties = null;
-                final boolean isLowPriorityIconChange =
-                        (visibleState == StatusBarIconView.STATE_HIDDEN
-                                && icon.getVisibleState() == StatusBarIconView.STATE_DOT)
-                        || (visibleState == StatusBarIconView.STATE_DOT
-                            && icon.getVisibleState() == StatusBarIconView.STATE_HIDDEN);
-                final boolean animationsAllowed = areAnimationsEnabled(icon)
-                        && !mDisallowNextAnimation
-                        && !noAnimations
-                        && !isLowPriorityIconChange;
+                final boolean animationsAllowed = animationsAllowed(icon);
                 if (animationsAllowed) {
                     if (justAdded || justReplaced) {
                         super.applyToView(icon);
@@ -877,6 +873,18 @@ public class NotificationIconContainer extends ViewGroup {
             justAdded = false;
             justReplaced = false;
             needsCannedAnimation = false;
+        }
+
+        private boolean animationsAllowed(StatusBarIconView icon) {
+            final boolean isLowPriorityIconChange =
+                    (visibleState == StatusBarIconView.STATE_HIDDEN
+                            && icon.getVisibleState() == StatusBarIconView.STATE_DOT)
+                    || (visibleState == StatusBarIconView.STATE_DOT
+                        && icon.getVisibleState() == StatusBarIconView.STATE_HIDDEN);
+            return areAnimationsEnabled(icon)
+                    && !mDisallowNextAnimation
+                    && !noAnimations
+                    && !isLowPriorityIconChange;
         }
 
         @Nullable

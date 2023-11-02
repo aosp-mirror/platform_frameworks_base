@@ -45,9 +45,6 @@ import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvision
 import com.android.systemui.user.domain.UserDomainLayerModule
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.ui.isAnimating
-import com.android.systemui.util.ui.stopAnimating
-import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -129,7 +126,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                     transitionState = TransitionState.STARTED,
                 )
             )
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
             assertThat(animationsEnabled).isFalse()
         }
@@ -152,7 +149,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                     to = DozeStateModel.DOZE_AOD,
                 )
             )
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
             assertThat(animationsEnabled).isFalse()
         }
@@ -175,7 +172,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                     to = DozeStateModel.DOZE_PULSING,
                 )
             )
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
             assertThat(animationsEnabled).isTrue()
         }
@@ -196,7 +193,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 )
             )
             whenever(dozeParams.shouldControlScreenOff()).thenReturn(false)
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
             assertThat(animationsEnabled).isFalse()
         }
@@ -217,7 +214,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 )
             )
             whenever(dozeParams.shouldControlScreenOff()).thenReturn(true)
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
             assertThat(animationsEnabled).isTrue()
         }
@@ -235,7 +232,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                     transitionState = TransitionState.STARTED,
                 )
             )
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
             assertThat(animationsEnabled).isTrue()
         }
@@ -248,7 +245,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                     transitionState = TransitionState.STARTED,
                 )
             )
-            val animationsEnabled by collectLastValue(underTest.animationsEnabled)
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
 
             keyguardRepository.setKeyguardShowing(true)
@@ -270,91 +267,151 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun isDozing_startAodTransition() =
+    fun tintAlpha_isZero_whenNotOnAodOrDozing() =
         testComponent.runTest {
-            val isDozing by collectLastValue(underTest.isDozing)
+            val tintAlpha by collectLastValue(underTest.tintAlpha)
             runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.GONE,
-                    to = KeyguardState.AOD,
-                    transitionState = TransitionState.STARTED,
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DOZING,
+                to = KeyguardState.GONE,
+                testScope,
             )
             runCurrent()
-            assertThat(isDozing?.value).isTrue()
-            assertThat(isDozing?.isAnimating).isTrue()
+            assertThat(tintAlpha).isZero()
         }
 
     @Test
-    fun isDozing_startDozeTransition() =
+    fun tintAlpha_isOne_whenOnAod() =
         testComponent.runTest {
-            val isDozing by collectLastValue(underTest.isDozing)
+            val tintAlpha by collectLastValue(underTest.tintAlpha)
             runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.AOD,
+                testScope,
+            )
+            runCurrent()
+            assertThat(tintAlpha).isEqualTo(1f)
+        }
+
+    @Test
+    fun tintAlpha_isOne_whenDozing() =
+        testComponent.runTest {
+            val tintAlpha by collectLastValue(underTest.tintAlpha)
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.DOZING,
+                testScope,
+            )
+            assertThat(tintAlpha).isEqualTo(1f)
+        }
+
+    @Test
+    fun tintAlpha_isOne_whenTransitionFromAodToDoze() =
+        testComponent.runTest {
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.AOD,
+                testScope,
+            )
+            val tintAlpha by collectLastValue(underTest.tintAlpha)
+            runCurrent()
+
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.GONE,
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.AOD,
                     to = KeyguardState.DOZING,
-                    transitionState = TransitionState.STARTED,
+                    value = 0f,
                 )
             )
             runCurrent()
-            assertThat(isDozing?.value).isTrue()
-            assertThat(isDozing?.isAnimating).isFalse()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.DOZING,
+                    value = 0.5f,
+                )
+            )
+            runCurrent()
+
+            assertThat(tintAlpha).isEqualTo(1f)
         }
 
     @Test
-    fun isDozing_startDozeToAodTransition() =
+    fun tintAlpha_isFraction_midTransitionToAod() =
         testComponent.runTest {
-            val isDozing by collectLastValue(underTest.isDozing)
+            val tintAlpha by collectLastValue(underTest.tintAlpha)
             runCurrent()
+
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.DOZING,
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
-                    transitionState = TransitionState.STARTED,
+                    value = 0f,
                 )
             )
             runCurrent()
-            assertThat(isDozing?.value).isTrue()
-            assertThat(isDozing?.isAnimating).isTrue()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    value = 0.5f,
+                )
+            )
+            runCurrent()
+
+            assertThat(tintAlpha).isEqualTo(0.5f)
         }
 
     @Test
-    fun isNotDozing_startAodToGoneTransition() =
+    fun iconAnimationsEnabled_whenOnLockScreen() =
         testComponent.runTest {
-            val isDozing by collectLastValue(underTest.isDozing)
+            val iconAnimationsEnabled by collectLastValue(underTest.areIconAnimationsEnabled)
             runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.AOD,
-                    to = KeyguardState.GONE,
-                    transitionState = TransitionState.STARTED,
-                )
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
             )
-            runCurrent()
-            assertThat(isDozing?.value).isFalse()
-            assertThat(isDozing?.isAnimating).isTrue()
+
+            assertThat(iconAnimationsEnabled).isTrue()
         }
 
     @Test
-    fun isDozing_stopAnimation() =
+    fun iconAnimationsDisabled_whenOnAod() =
         testComponent.runTest {
-            val isDozing by collectLastValue(underTest.isDozing)
+            val iconAnimationsEnabled by collectLastValue(underTest.areIconAnimationsEnabled)
             runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.AOD,
-                    to = KeyguardState.GONE,
-                    transitionState = TransitionState.STARTED,
-                )
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.AOD,
+                testScope,
             )
+
+            assertThat(iconAnimationsEnabled).isFalse()
+        }
+
+    @Test
+    fun iconAnimationsDisabled_whenDozing() =
+        testComponent.runTest {
+            val iconAnimationsEnabled by collectLastValue(underTest.areIconAnimationsEnabled)
             runCurrent()
 
-            assertThat(isDozing?.isAnimating).isEqualTo(true)
-            isDozing?.stopAnimating()
-            runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.DOZING,
+                testScope,
+            )
 
-            assertThat(isDozing?.isAnimating).isEqualTo(false)
+            assertThat(iconAnimationsEnabled).isFalse()
         }
 }
