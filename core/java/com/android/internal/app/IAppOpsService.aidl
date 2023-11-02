@@ -140,14 +140,26 @@ interface IAppOpsService {
     void collectNoteOpCallsForValidation(String stackTrace, int op, String packageName, long version);
 
     SyncNotedAppOp noteProxyOperationWithState(int code,
-                in AttributionSourceState attributionSourceStateState,
-                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation);
+            in AttributionSourceState attributionSourceStateState,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            boolean skipProxyOperation);
     SyncNotedAppOp startProxyOperationWithState(IBinder clientId, int code,
-                in AttributionSourceState attributionSourceStateState, boolean startIfModeDefault,
-                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation, int proxyAttributionFlags, int proxiedAttributionFlags,
-                int attributionChainId);
+            in AttributionSourceState attributionSourceStateState, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            boolean skipProxyOperation, int proxyAttributionFlags, int proxiedAttributionFlags,
+            int attributionChainId);
     void finishProxyOperationWithState(IBinder clientId, int code,
-                in AttributionSourceState attributionSourceStateState, boolean skipProxyOperation);
+            in AttributionSourceState attributionSourceStateState, boolean skipProxyOperation);
+    int checkOperationRawForDevice(int code, int uid, String packageName,
+            @nullable String attributionTag, int virtualDeviceId);
+    int checkOperationForDevice(int code, int uid, String packageName, int virtualDeviceId);
+    SyncNotedAppOp noteOperationForDevice(int code, int uid, String packageName,
+            @nullable String attributionTag, int virtualDeviceId,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
+    SyncNotedAppOp startOperationForDevice(IBinder clientId, int code, int uid, String packageName,
+            @nullable String attributionTag,  int virtualDeviceId, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            int attributionFlags, int attributionChainId);
+    void finishOperationForDevice(IBinder clientId, int code, int uid, String packageName,
+            @nullable String attributionTag, int virtualDeviceId);
 }

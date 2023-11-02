@@ -26,11 +26,11 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IAppOpsCallback;
-import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.DodecFunction;
+import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.QuintConsumer;
-import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.UndecFunction;
 
 /**
@@ -48,13 +48,14 @@ public abstract class AppOpsManagerInternal {
          * @param uid The UID for which to check.
          * @param packageName The package for which to check.
          * @param attributionTag The attribution tag for which to check.
+         * @param virtualDeviceId the device for which to check the op
          * @param raw Whether to check the raw op i.e. not interpret the mode based on UID state.
          * @param superImpl The super implementation.
          * @return The app op check result.
          */
         int checkOperation(int code, int uid, String packageName, @Nullable String attributionTag,
-                boolean raw, QuintFunction<Integer, Integer, String, String, Boolean, Integer>
-                superImpl);
+                int virtualDeviceId, boolean raw, HexFunction<Integer, Integer, String, String,
+                Integer, Boolean, Integer> superImpl);
 
         /**
          * Allows overriding check audio operation behavior.
@@ -76,16 +77,17 @@ public abstract class AppOpsManagerInternal {
          * @param uid The UID for which to note.
          * @param packageName The package for which to note. {@code null} for system package.
          * @param featureId Id of the feature in the package
+         * @param virtualDeviceId the device for which to note the op
          * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
          * @param message The message in the async noted op
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
         SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
-                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
+                @Nullable String featureId, int virtualDeviceId, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
-                @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
-                        SyncNotedAppOp> superImpl);
+                @NonNull OctFunction<Integer, Integer, String, String, Integer, Boolean, String,
+                        Boolean, SyncNotedAppOp> superImpl);
 
         /**
          * Allows overriding note proxy operation behavior.
@@ -113,6 +115,7 @@ public abstract class AppOpsManagerInternal {
          * @param uid The UID for which to note.
          * @param packageName The package for which to note. {@code null} for system package.
          * @param attributionTag the attribution tag.
+         * @param virtualDeviceId the device for which to start the op
          * @param startIfModeDefault Whether to start the op of the mode is default.
          * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
          * @param message The message in the async noted op
@@ -123,11 +126,11 @@ public abstract class AppOpsManagerInternal {
          * @return The app op note result.
          */
         SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-                @Nullable String packageName, @Nullable String attributionTag,
+                @Nullable String packageName, @Nullable String attributionTag, int virtualDeviceId,
                 boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @AttributionFlags int attributionFlags, int attributionChainId,
-                @NonNull UndecFunction<IBinder, Integer, Integer, String, String, Boolean,
+                @NonNull DodecFunction<IBinder, Integer, Integer, String, String, Integer, Boolean,
                         Boolean, String, Boolean, Integer, Integer, SyncNotedAppOp> superImpl);
 
         /**
@@ -164,11 +167,13 @@ public abstract class AppOpsManagerInternal {
          * @param uid The UID for which the op was noted.
          * @param packageName The package for which it was noted. {@code null} for system package.
          * @param attributionTag the attribution tag.
+         * @param virtualDeviceId the device for which to finish the op
+         * @param superImpl
          */
         default void finishOperation(IBinder clientId, int code, int uid, String packageName,
-                String attributionTag,
-                @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
-            superImpl.accept(clientId, code, uid, packageName, attributionTag);
+                String attributionTag, int virtualDeviceId, @NonNull HexConsumer<IBinder, Integer,
+                        Integer, String, String, Integer> superImpl) {
+            superImpl.accept(clientId, code, uid, packageName, attributionTag, virtualDeviceId);
         }
 
         /**
