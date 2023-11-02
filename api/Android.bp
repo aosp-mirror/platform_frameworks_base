@@ -315,14 +315,11 @@ stubs_defaults {
         "--error UnhiddenSystemApi",
         "--error UnflaggedApi",
         "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*",
-        "--hide BroadcastBehavior",
+        // Disable CallbackInterface, as Java 8 default interface methods avoid the extensibility
+        // issue interfaces had previously.
         "--hide CallbackInterface",
-        "--hide DeprecationMismatch",
+        // Disable HiddenSuperclass, as Metalava handles this fine (it should be hidden by default)
         "--hide HiddenSuperclass",
-        "--hide MissingPermission",
-        "--hide RequiresPermission",
-        "--hide SdkConstant",
-        "--hide Todo",
         "--hide-package android.audio.policy.configuration.V7_0",
         "--hide-package com.android.server",
         "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
