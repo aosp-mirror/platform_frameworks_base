@@ -199,6 +199,24 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+// Media
+aconfig_declarations {
+    name: "android.media.playback.flags-aconfig",
+    package: "com.android.media.playback.flags",
+    srcs: ["media/jni/playback_flags.aconfig"],
+}
+
+cc_aconfig_library {
+    name: "android.media.playback.flags-aconfig-cc",
+    aconfig_declarations: "android.media.playback.flags-aconfig",
+}
+
+java_aconfig_library {
+    name: "android.media.playback.flags-aconfig-java",
+    aconfig_declarations: "android.media.playback.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // VCN
 aconfig_declarations {
     name: "android.net.vcn.flags-aconfig",
