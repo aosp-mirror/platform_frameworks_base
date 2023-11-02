@@ -59,7 +59,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.res.R;
-import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
+import com.android.systemui.statusbar.notification.NotificationDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.util.drawable.DrawableSize;
 
@@ -174,7 +174,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 animation.getAnimatedFraction());
         setColorInternal(newColor);
     };
-    private final NotificationIconDozeHelper mDozer;
+    private final NotificationDozeHelper mDozer;
     private int mContrastedDrawableColor;
     private int mCachedContrastBackgroundColor = NO_COLOR;
     private float[] mMatrix;
@@ -192,7 +192,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn,
             boolean blocked) {
         super(context);
-        mDozer = new NotificationIconDozeHelper(context);
+        mDozer = new NotificationDozeHelper();
         mBlocked = blocked;
         mSlot = slot;
         mNumberPain = new Paint();
@@ -712,7 +712,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         setColorInternal(color);
         updateContrastedStaticColor();
         mIconColor = color;
-        mDozer.setColor(color);
     }
 
     private void setColorInternal(int color) {
