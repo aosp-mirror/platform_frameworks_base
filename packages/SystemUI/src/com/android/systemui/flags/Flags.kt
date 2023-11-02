@@ -68,9 +68,6 @@ object Flags {
             "notification_drag_to_contents"
         )
 
-    // TODO(b/254512538): Tracking Bug
-    val INSTANT_VOICE_REPLY = unreleasedFlag("instant_voice_reply")
-
     /**
      * This flag controls whether we register a listener for StatsD notification memory reports.
      * For statsd to actually call the listener however, a server-side toggle needs to be
