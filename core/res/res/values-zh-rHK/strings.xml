@@ -1884,7 +1884,7 @@
     <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1 小時}other{# 小時}}"</string>
     <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1 小時}other{# 小時}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"直至<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_until" msgid="2250286190237669079">"完成時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"結束時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"直至<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (下一次響鬧)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"直至你關閉為止"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"直至你關閉「請勿騷擾」功能"</string>
