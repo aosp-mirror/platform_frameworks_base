@@ -23,6 +23,7 @@ import static android.companion.virtual.VirtualDeviceParams.ACTIVITY_POLICY_DEFA
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
@@ -662,6 +663,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                         mVirtualDisplays.valueAt(i).getWindowPolicyController()
                                 .setActivityLaunchDefaultAllowed(
                                         devicePolicy == DEVICE_POLICY_DEFAULT);
+                    }
+                }
+                break;
+            case POLICY_TYPE_CLIPBOARD:
+                if (Flags.crossDeviceClipboard()) {
+                    synchronized (mVirtualDeviceLock) {
+                        mDevicePolicies.put(policyType, devicePolicy);
                     }
                 }
                 break;

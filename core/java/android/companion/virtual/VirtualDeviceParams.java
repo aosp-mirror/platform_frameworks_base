@@ -169,7 +169,8 @@ public final class VirtualDeviceParams implements Parcelable {
      * @see VirtualDeviceManager.VirtualDevice#setDevicePolicy
      * @hide
      */
-    @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY})
+    @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY,
+            POLICY_TYPE_CLIPBOARD})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface DynamicPolicyType {}
@@ -229,6 +230,20 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
     public static final int POLICY_TYPE_ACTIVITY = 3;
+
+    /**
+     * Tells the clipboard manager whether this device's clipboard should be shared or not.
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: By default the device's clipboard is its own and is
+     *     not shared with other devices' clipboards, including the clipboard of the default device.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: The device's clipboard is shared with the default
+     *     device's clipboard. Any clipboard operation on the virtual device is as if it was done on
+     *     the default device.
+     * </ul>
+     */
+    @FlaggedApi(Flags.FLAG_CROSS_DEVICE_CLIPBOARD)
+    public static final int POLICY_TYPE_CLIPBOARD = 4;
 
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
@@ -1084,6 +1099,10 @@ public final class VirtualDeviceParams implements Parcelable {
                         }
                         break;
                 }
+            }
+
+            if (!Flags.crossDeviceClipboard()) {
+                mDevicePolicies.delete(POLICY_TYPE_CLIPBOARD);
             }
 
             if ((mAudioPlaybackSessionId != AUDIO_SESSION_ID_GENERATE
