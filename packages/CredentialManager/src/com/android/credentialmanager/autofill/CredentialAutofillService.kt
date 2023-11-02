@@ -219,9 +219,15 @@ class CredentialAutofillService : AutofillService() {
             val sliceBuilder = InlineSuggestionUi
                     .newContentBuilder(pendingIntent)
                     .setTitle(primaryEntry.userName)
-            val icon: Icon =
-                    entryIconMap[primaryEntry.entryKey + primaryEntry.entrySubkey]
-                            ?: getDefaultIcon()
+            val icon: Icon
+            if (primaryEntry.icon == null) {
+                // The empty entry icon has non-null icon reference but null drawable reference.
+                // If the drawable reference is null, then use the default icon.
+                icon = getDefaultIcon()
+            } else {
+                icon = entryIconMap[primaryEntry.entryKey + primaryEntry.entrySubkey]
+                        ?: getDefaultIcon()
+            }
             sliceBuilder.setStartIcon(icon)
             val inlinePresentation = InlinePresentation(
                     sliceBuilder.build().slice, spec, /* pinned= */ false)
