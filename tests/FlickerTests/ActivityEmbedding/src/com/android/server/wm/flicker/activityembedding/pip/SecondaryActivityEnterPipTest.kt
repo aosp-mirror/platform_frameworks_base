@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.activityembedding.pip
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.TRANSITION_SNAPSHOT
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -149,8 +150,12 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
                 ComponentNameMatcher.PIP_CONTENT_OVERLAY.layerMatchesAnyOf(it) && it.isVisible
             }
             pipLayerList.zipWithNext { previous, current ->
-                // TODO(b/290987990): Add checks for visibleRegion.
-                current.screenBounds.isToTheRightBottom(previous.screenBounds.region, 3)
+                if (startDisplayBounds.width > startDisplayBounds.height) {
+                    // Only verify when the display is landscape, because otherwise the final pip
+                    // window can be to the left of the original secondary activity.
+                    current.screenBounds.isToTheRightBottom(previous.screenBounds.region, 3)
+                }
+                current.screenBounds.overlaps(previous.screenBounds.region)
                 current.screenBounds.notBiggerThan(previous.screenBounds.region)
             }
         }
@@ -158,6 +163,61 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
             val pipRegion = visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
             check { "height" }.that(pipRegion.region.height).isLower(startDisplayBounds.height / 2)
             check { "width" }.that(pipRegion.region.width).isLower(startDisplayBounds.width)
+        }
+    }
+
+    /** The secondary layer should never jump to the left. */
+    @Presubmit
+    @Test
+    fun secondaryLayerNotJumpToLeft() {
+        flicker.assertLayers {
+            invoke("secondaryLayerNotJumpToLeft") {
+                val secondaryVisibleRegion =
+                    it.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                if (secondaryVisibleRegion.region.isNotEmpty) {
+                    check { "left" }
+                        .that(secondaryVisibleRegion.region.bounds.left)
+                        .isGreater(0)
+                }
+            }
+        }
+    }
+
+    /**
+     * The pip overlay layer should cover exactly the secondary activity layer when both are
+     * visible.
+     */
+    @Presubmit
+    @Test
+    fun pipContentOverlayLayerCoversExactlySecondaryLayer() {
+        flicker.assertLayers {
+            isInvisible(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
+                .then()
+                .isVisible(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
+                .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .invoke("pipContentOverlayLayerCoversExactlySecondaryLayer") {
+                    val overlayVisibleRegion =
+                        it.visibleRegion(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
+                    val secondaryVisibleRegion =
+                        it.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                    overlayVisibleRegion.coversExactly(secondaryVisibleRegion.region)
+                }
+                .then()
+                .isInvisible(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
+                .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+        }
+    }
+
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        // Expected for the main activity to become invisible for 1-2 frames because the snapshot
+        // covers it.
+        flicker.assertLayers {
+            visibleLayersShownMoreThanOneConsecutiveEntry(
+                LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS +
+                        listOf(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+            )
         }
     }
 
