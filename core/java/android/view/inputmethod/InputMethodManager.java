@@ -1176,24 +1176,33 @@ public final class InputMethodManager {
                         mActive = interactive;
                         mFullscreenMode = fullscreen;
                         if (interactive) {
+                            // Find the next view focus to start the input connection when the
+                            // device was interactive.
                             final View rootView =
                                     mCurRootView != null ? mCurRootView.getView() : null;
                             if (rootView == null) {
+                                // No window focused or view was removed, ignore request.
                                 return;
                             }
-                            // Find the next view focus to start the input connection when the
-                            // device was interactive.
                             final ViewRootImpl currentViewRootImpl = mCurRootView;
+                            // Post this on UI thread as required for view focus code.
                             rootView.post(() -> {
                                 synchronized (mH) {
                                     if (mCurRootView != currentViewRootImpl) {
+                                        // Focused window changed since posting, ignore request.
                                         return;
                                     }
                                 }
-                                final View focusedView = currentViewRootImpl.getView().findFocus();
+                                final View curRootView = currentViewRootImpl.getView();
+                                if (curRootView == null) {
+                                    // View was removed, ignore request.
+                                    return;
+                                }
+                                final View focusedView = curRootView.findFocus();
                                 onViewFocusChangedInternal(focusedView, focusedView != null);
                             });
                         } else {
+                            // Finish input connection when device becomes non-interactive.
                             finishInputLocked();
                             if (isImeSessionAvailableLocked()) {
                                 mCurBindState.mImeSession.finishInput();
