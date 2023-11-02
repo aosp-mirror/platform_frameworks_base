@@ -4459,6 +4459,10 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean areChannelsBypassingDnd() {
+            if (android.app.Flags.modesApi()) {
+                return mZenModeHelper.getConsolidatedNotificationPolicy().allowPriorityChannels()
+                        && mPreferencesHelper.areChannelsBypassingDnd();
+            }
             return mPreferencesHelper.areChannelsBypassingDnd();
         }
 

@@ -373,6 +373,10 @@ package android.app {
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
   }
 
+  public static class NotificationManager.Policy implements android.os.Parcelable {
+    method @FlaggedApi("android.app.modes_api") public boolean allowPriorityChannels();
+  }
+
   public final class PendingIntent implements android.os.Parcelable {
     method public boolean addCancelListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.PendingIntent.CancelListener);
     method @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public boolean intentFilterEquals(@Nullable android.app.PendingIntent);

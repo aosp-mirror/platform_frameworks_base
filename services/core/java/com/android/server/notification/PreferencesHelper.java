@@ -200,6 +200,10 @@ public class PreferencesHelper implements RankingConfig {
     private SparseBooleanArray mLockScreenShowNotifications;
     private SparseBooleanArray mLockScreenPrivateNotifications;
     private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
+    // When modes_api flag is enabled, this value only tracks whether the current user has any
+    // channels marked as "priority channels", but not necessarily whether they are permitted
+    // to bypass DND by current zen policy.
+    // TODO: b/310620812 - Rename to be more accurate when modes_api flag is inlined.
     private boolean mCurrentUserHasChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
     private final boolean mShowReviewPermissionsNotification;
@@ -1866,6 +1870,7 @@ public class PreferencesHelper implements RankingConfig {
                 policy.priorityConversationSenders), callingUid, fromSystemOrSystemUi);
     }
 
+    // TODO: b/310620812 - rename to hasPriorityChannels() when modes_api is inlined.
     public boolean areChannelsBypassingDnd() {
         return mCurrentUserHasChannelsBypassingDnd;
     }

@@ -2678,6 +2678,56 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testUpdateConsolidatedPolicy_allowChannels() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+        setupZenConfig();
+
+        // one rule, custom policy, allows channels
+        ZenPolicy customPolicy = new ZenPolicy.Builder()
+                .allowChannels(ZenPolicy.CHANNEL_TYPE_PRIORITY)
+                .build();
+
+        AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "ScheduleConditionProvider"),
+                ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                customPolicy,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), zenRule, "test",
+                Process.SYSTEM_UID, true);
+
+        // enable the rule; this will update the consolidated policy
+        mZenModeHelper.setAutomaticZenRuleState(id,
+                new Condition(zenRule.getConditionId(), "", STATE_TRUE),
+                Process.SYSTEM_UID, true);
+
+        // confirm that channels make it through
+        assertTrue(mZenModeHelper.mConsolidatedPolicy.allowPriorityChannels());
+
+        // add new rule with policy that disallows channels
+        ZenPolicy strictPolicy = new ZenPolicy.Builder()
+                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .build();
+
+        AutomaticZenRule zenRule2 = new AutomaticZenRule("name2",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "ScheduleConditionProvider"),
+                ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                strictPolicy,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id2 = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), zenRule2,
+                "test", Process.SYSTEM_UID, true);
+
+        // enable rule 2; this will update the consolidated policy
+        mZenModeHelper.setAutomaticZenRuleState(id2,
+                new Condition(zenRule2.getConditionId(), "", STATE_TRUE),
+                Process.SYSTEM_UID, true);
+
+        // rule 2 should override rule 1
+        assertFalse(mZenModeHelper.mConsolidatedPolicy.allowPriorityChannels());
+    }
+
+    @Test
     public void zenRuleToAutomaticZenRule_allFields() {
         mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
