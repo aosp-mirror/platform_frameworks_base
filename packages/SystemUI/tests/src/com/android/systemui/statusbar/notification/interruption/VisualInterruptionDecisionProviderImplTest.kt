@@ -32,9 +32,11 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         VisualInterruptionDecisionProviderImpl(
             ambientDisplayConfiguration,
             batteryController,
+            deviceProvisionedController,
             globalSettings,
             headsUpManager,
             keyguardNotificationVisibilityProvider,
+            keyguardStateController,
             logger,
             mainHandler,
             powerManager,
@@ -50,6 +52,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPeekNotSuppressed()
             assertPulseNotSuppressed()
             assertBubbleNotSuppressed()
+            assertFsiNotSuppressed()
         }
     }
 
@@ -59,6 +62,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPeekNotSuppressed()
             assertPulseNotSuppressed()
             assertBubbleNotSuppressed()
+            assertFsiNotSuppressed()
         }
     }
 
@@ -68,6 +72,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPeekSuppressed()
             assertPulseNotSuppressed()
             assertBubbleNotSuppressed()
+            assertFsiNotSuppressed()
         }
     }
 
@@ -77,6 +82,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPeekSuppressed()
             assertPulseNotSuppressed()
             assertBubbleNotSuppressed()
+            assertFsiNotSuppressed()
         }
     }
 
@@ -86,6 +92,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPeekNotSuppressed()
             assertPulseSuppressed()
             assertBubbleNotSuppressed()
+            assertFsiNotSuppressed()
         }
     }
 
@@ -95,6 +102,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPeekNotSuppressed()
             assertPulseSuppressed()
             assertBubbleNotSuppressed()
+            assertFsiNotSuppressed()
         }
     }
 
@@ -104,6 +112,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPeekNotSuppressed()
             assertPulseNotSuppressed()
             assertBubbleSuppressed()
+            assertFsiNotSuppressed()
         }
     }
 
@@ -113,6 +122,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             assertPeekNotSuppressed()
             assertPulseNotSuppressed()
             assertBubbleSuppressed()
+            assertFsiNotSuppressed()
         }
     }
 
@@ -191,6 +201,10 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
     private fun assertBubbleNotSuppressed() {
         ensureBubbleState()
         assertShouldBubble(buildBubbleEntry())
+    }
+
+    private fun assertFsiNotSuppressed() {
+        forEachFsiState { assertShouldFsi(buildFsiEntry()) }
     }
 
     private fun withCondition(condition: VisualInterruptionCondition, block: () -> Unit) {

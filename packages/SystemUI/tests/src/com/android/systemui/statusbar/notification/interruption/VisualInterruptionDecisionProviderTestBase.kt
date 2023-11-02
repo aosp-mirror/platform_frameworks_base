@@ -20,6 +20,7 @@ import android.app.ActivityManager
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
 import android.app.Notification.FLAG_BUBBLE
+import android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED
 import android.app.Notification.GROUP_ALERT_ALL
 import android.app.Notification.GROUP_ALERT_CHILDREN
 import android.app.Notification.GROUP_ALERT_SUMMARY
@@ -29,6 +30,7 @@ import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT
+import android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
 import android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK
 import android.app.NotificationManager.VISIBILITY_NO_OVERRIDE
 import android.app.PendingIntent
@@ -56,18 +58,19 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
-import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.FakeDeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.utils.leaks.FakeBatteryController
+import com.android.systemui.utils.leaks.FakeKeyguardStateController
 import com.android.systemui.utils.leaks.LeakCheckedTest
 import com.android.systemui.utils.os.FakeHandler
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.`when` as whenever
@@ -77,13 +80,13 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     protected val ambientDisplayConfiguration = FakeAmbientDisplayConfiguration(context)
     protected val batteryController = FakeBatteryController(leakCheck)
-    protected val deviceProvisionedController: DeviceProvisionedController = mock()
+    protected val deviceProvisionedController = FakeDeviceProvisionedController()
     protected val flags: NotifPipelineFlags = mock()
     protected val globalSettings = FakeGlobalSettings()
     protected val headsUpManager: HeadsUpManager = mock()
     protected val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider =
         mock()
-    protected val keyguardStateController: KeyguardStateController = mock()
+    protected val keyguardStateController = FakeKeyguardStateController(leakCheck)
     protected val logger: NotificationInterruptLogger = mock()
     protected val mainHandler = FakeHandler(Looper.getMainLooper())
     protected val powerManager: PowerManager = mock()
@@ -137,15 +140,18 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
-    fun testShouldNotPeek_packageSnoozed() {
+    fun testShouldNotPeek_packageSnoozed_withoutFsi() {
         ensurePeekState { hunSnoozed = true }
         assertShouldNotHeadsUp(buildPeekEntry())
     }
 
     @Test
-    fun testShouldPeek_packageSnoozedButFsi() {
-        ensurePeekState { hunSnoozed = true }
-        assertShouldHeadsUp(buildFsiEntry())
+    fun testShouldPeek_packageSnoozed_withFsi() {
+        val entry = buildFsiEntry()
+        forEachPeekableFsiState {
+            ensurePeekState { hunSnoozed = true }
+            assertShouldHeadsUp(entry)
+        }
     }
 
     @Test
@@ -483,6 +489,107 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
+    fun testShouldNotFsi_noFullScreenIntent() {
+        forEachFsiState { assertShouldNotFsi(buildFsiEntry { hasFsi = false }) }
+    }
+
+    @Test
+    fun testShouldNotFsi_showStickyHun() {
+        forEachFsiState {
+            assertShouldNotFsi(
+                buildFsiEntry {
+                    hasFsi = false
+                    isStickyAndNotDemoted = true
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testShouldNotFsi_onlyDnd() {
+        forEachFsiState {
+            assertShouldNotFsi(
+                buildFsiEntry { suppressedVisualEffects = SUPPRESSED_EFFECT_FULL_SCREEN_INTENT },
+                expectWouldInterruptWithoutDnd = true
+            )
+        }
+    }
+
+    @Test
+    fun testShouldNotFsi_notImportantEnough() {
+        forEachFsiState { assertShouldNotFsi(buildFsiEntry { importance = IMPORTANCE_DEFAULT }) }
+    }
+
+    @Test
+    fun testShouldNotFsi_notOnlyDnd() {
+        forEachFsiState {
+            assertShouldNotFsi(
+                buildFsiEntry {
+                    suppressedVisualEffects = SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
+                    importance = IMPORTANCE_DEFAULT
+                },
+                expectWouldInterruptWithoutDnd = false
+            )
+        }
+    }
+
+    @Test
+    fun testShouldNotFsi_suppressiveGroupAlertBehavior() {
+        forEachFsiState {
+            assertShouldNotFsi(
+                buildFsiEntry {
+                    isGrouped = true
+                    isGroupSummary = true
+                    groupAlertBehavior = GROUP_ALERT_CHILDREN
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testShouldFsi_suppressiveGroupAlertBehavior_notGrouped() {
+        forEachFsiState {
+            assertShouldFsi(
+                buildFsiEntry {
+                    isGrouped = false
+                    isGroupSummary = true
+                    groupAlertBehavior = GROUP_ALERT_CHILDREN
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testShouldFsi_suppressiveGroupAlertBehavior_notSuppressive() {
+        forEachFsiState {
+            assertShouldFsi(
+                buildFsiEntry {
+                    isGrouped = true
+                    isGroupSummary = true
+                    groupAlertBehavior = GROUP_ALERT_ALL
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testShouldNotFsi_suppressiveBubbleMetadata() {
+        forEachFsiState {
+            assertShouldNotFsi(
+                buildFsiEntry {
+                    hasBubbleMetadata = true
+                    bubbleSuppressesNotification = true
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testShouldNotFsi_packageSuspended() {
+        forEachFsiState { assertShouldNotFsi(buildFsiEntry { packageSuspended = true }) }
+    }
+
+    @Test
     fun testShouldFsi_notInteractive() {
         ensureNotInteractiveFsiState()
         assertShouldFsi(buildFsiEntry())
@@ -500,6 +607,76 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         assertShouldFsi(buildFsiEntry())
     }
 
+    @Test
+    fun testShouldNotFsi_expectedToHun() {
+        forEachPeekableFsiState {
+            ensurePeekState()
+            assertShouldNotFsi(buildFsiEntry())
+        }
+    }
+
+    @Test
+    fun testShouldNotFsi_expectedToHun_hunSnoozed() {
+        forEachPeekableFsiState {
+            ensurePeekState { hunSnoozed = true }
+            assertShouldNotFsi(buildFsiEntry())
+        }
+    }
+
+    @Test
+    fun testShouldFsi_lockedShade() {
+        ensureLockedShadeFsiState()
+        assertShouldFsi(buildFsiEntry())
+    }
+
+    @Test
+    fun testShouldFsi_keyguardOccluded() {
+        ensureKeyguardOccludedFsiState()
+        assertShouldFsi(buildFsiEntry())
+    }
+
+    @Test
+    fun testShouldFsi_deviceNotProvisioned() {
+        ensureDeviceNotProvisionedFsiState()
+        assertShouldFsi(buildFsiEntry())
+    }
+
+    @Test
+    fun testShouldNotFsi_noHunOrKeyguard() {
+        ensureNoHunOrKeyguardFsiState()
+        assertShouldNotFsi(buildFsiEntry())
+    }
+
+    @Test
+    fun testShouldFsi_defaultLegacySuppressor() {
+        forEachFsiState {
+            withLegacySuppressor(neverSuppresses) { assertShouldFsi(buildFsiEntry()) }
+        }
+    }
+
+    @Test
+    fun testShouldFsi_suppressInterruptions() {
+        forEachFsiState {
+            withLegacySuppressor(alwaysSuppressesInterruptions) { assertShouldFsi(buildFsiEntry()) }
+        }
+    }
+
+    @Test
+    fun testShouldFsi_suppressAwakeInterruptions() {
+        forEachFsiState {
+            withLegacySuppressor(alwaysSuppressesAwakeInterruptions) {
+                assertShouldFsi(buildFsiEntry())
+            }
+        }
+    }
+
+    @Test
+    fun testShouldFsi_suppressAwakeHeadsUp() {
+        forEachFsiState {
+            withLegacySuppressor(alwaysSuppressesAwakeHeadsUp) { assertShouldFsi(buildFsiEntry()) }
+        }
+    }
+
     protected data class State(
         var hunSettingEnabled: Boolean? = null,
         var hunSnoozed: Boolean? = null,
@@ -511,6 +688,9 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var keyguardShouldHideNotification: Boolean? = null,
         var pulseOnNotificationsEnabled: Boolean? = null,
         var statusBarState: Int? = null,
+        var keyguardIsShowing: Boolean = false,
+        var keyguardIsOccluded: Boolean = false,
+        var deviceProvisioned: Boolean = true
     )
 
     protected fun setState(state: State): Unit =
@@ -542,6 +722,11 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             }
 
             statusBarState?.let { statusBarStateController.state = it }
+
+            keyguardStateController.isOccluded = keyguardIsOccluded
+            keyguardStateController.isShowing = keyguardIsShowing
+
+            deviceProvisionedController.deviceProvisioned = deviceProvisioned
         }
 
     protected fun ensureState(block: State.() -> Unit) =
@@ -571,24 +756,93 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected fun ensureBubbleState(block: State.() -> Unit = {}) = ensureState(block)
 
     protected fun ensureNotInteractiveFsiState(block: State.() -> Unit = {}) = ensureState {
-        isDreaming = false
         isInteractive = false
-        statusBarState = SHADE
         run(block)
     }
 
     protected fun ensureDreamingFsiState(block: State.() -> Unit = {}) = ensureState {
-        isDreaming = true
         isInteractive = true
-        statusBarState = SHADE
+        isDreaming = true
         run(block)
     }
 
     protected fun ensureKeyguardFsiState(block: State.() -> Unit = {}) = ensureState {
-        isDreaming = false
         isInteractive = true
+        isDreaming = false
         statusBarState = KEYGUARD
         run(block)
+    }
+
+    protected fun ensureLockedShadeFsiState(block: State.() -> Unit = {}) = ensureState {
+        // It is assumed *but not checked in the code* that statusBarState is SHADE_LOCKED.
+        isInteractive = true
+        isDreaming = false
+        statusBarState = SHADE
+        hunSettingEnabled = false
+        keyguardIsShowing = true
+        keyguardIsOccluded = false
+        run(block)
+    }
+
+    protected fun ensureKeyguardOccludedFsiState(block: State.() -> Unit = {}) = ensureState {
+        isInteractive = true
+        isDreaming = false
+        statusBarState = SHADE
+        hunSettingEnabled = false
+        keyguardIsShowing = true
+        keyguardIsOccluded = true
+        run(block)
+    }
+
+    protected fun ensureDeviceNotProvisionedFsiState(block: State.() -> Unit = {}) = ensureState {
+        isInteractive = true
+        isDreaming = false
+        statusBarState = SHADE
+        hunSettingEnabled = false
+        keyguardIsShowing = false
+        deviceProvisioned = false
+        run(block)
+    }
+
+    protected fun ensureNoHunOrKeyguardFsiState(block: State.() -> Unit = {}) = ensureState {
+        isInteractive = true
+        isDreaming = false
+        statusBarState = SHADE
+        hunSettingEnabled = false
+        keyguardIsShowing = false
+        deviceProvisioned = true
+        run(block)
+    }
+
+    protected fun forEachFsiState(block: () -> Unit) {
+        ensureNotInteractiveFsiState()
+        block()
+
+        ensureDreamingFsiState()
+        block()
+
+        ensureKeyguardFsiState()
+        block()
+
+        ensureLockedShadeFsiState()
+        block()
+
+        ensureKeyguardOccludedFsiState()
+        block()
+
+        ensureDeviceNotProvisionedFsiState()
+        block()
+    }
+
+    private fun forEachPeekableFsiState(extendState: State.() -> Unit = {}, block: () -> Unit) {
+        ensureLockedShadeFsiState(extendState)
+        block()
+
+        ensureKeyguardOccludedFsiState(extendState)
+        block()
+
+        ensureDeviceNotProvisionedFsiState(extendState)
+        block()
     }
 
     protected fun withLegacySuppressor(
@@ -625,9 +879,19 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             assertTrue("unexpected suppressed FSI: ${it.logReason}", it.shouldInterrupt)
         }
 
-    protected fun assertShouldNotFsi(entry: NotificationEntry) =
+    protected fun assertShouldNotFsi(
+        entry: NotificationEntry,
+        expectWouldInterruptWithoutDnd: Boolean? = null
+    ) =
         provider.makeUnloggedFullScreenIntentDecision(entry).let {
             assertFalse("unexpected unsuppressed FSI: ${it.logReason}", it.shouldInterrupt)
+            if (expectWouldInterruptWithoutDnd != null) {
+                assertEquals(
+                    "unexpected unsuppressed-without-DND FSI: ${it.logReason}",
+                    expectWouldInterruptWithoutDnd,
+                    it.wouldInterruptWithoutDnd
+                )
+            }
         }
 
     protected class EntryBuilder(val context: Context) {
@@ -645,6 +909,8 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var isGroupSummary: Boolean? = null
         var groupAlertBehavior: Int? = null
         var hasJustLaunchedFsi = false
+        var isStickyAndNotDemoted = false
+        var packageSuspended: Boolean? = null
 
         private fun buildBubbleMetadata(): BubbleMetadata {
             val builder =
@@ -696,6 +962,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     if (isBubble) {
                         flags = flags or FLAG_BUBBLE
                     }
+
+                    if (isStickyAndNotDemoted) {
+                        flags = flags or FLAG_FSI_REQUESTED_BUT_DENIED
+                    }
                 }
                 .let { NotificationEntryBuilder().setNotification(it) }
                 .apply {
@@ -714,10 +984,15 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                         it.notifyFullScreenIntentLaunched()
                     }
 
+                    if (isStickyAndNotDemoted) {
+                        assertFalse(it.isDemoted)
+                    }
+
                     modifyRanking(it)
                         .apply {
                             suppressedVisualEffects?.let { setSuppressedVisualEffects(it) }
                             visibilityOverride?.let { setVisibilityOverride(it) }
+                            packageSuspended?.let { setSuspended(it) }
                         }
                         .build()
                 }
