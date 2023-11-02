@@ -19,10 +19,13 @@ package com.android.systemui.communal.domain.interactor
 import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 
 /** Encapsulates business-logic related to communal mode. */
 @SysUISingleton
@@ -47,4 +50,22 @@ constructor(
      * (have an allocated id).
      */
     val widgetContent: Flow<List<CommunalWidgetContentModel>> = widgetRepository.communalWidgets
+
+    /**
+     * Target scene as requested by the underlying [SceneTransitionLayout] or through
+     * [onSceneChanged].
+     */
+    val desiredScene: StateFlow<CommunalSceneKey> = communalRepository.desiredScene
+
+    /**
+     * Flow that emits a boolean if the communal UI is showing, ie. the [desiredScene] is the
+     * [CommunalSceneKey.Communal].
+     */
+    val isCommunalShowing: Flow<Boolean> =
+        communalRepository.desiredScene.map { it == CommunalSceneKey.Communal }
+
+    /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
+    fun onSceneChanged(newScene: CommunalSceneKey) {
+        communalRepository.setDesiredScene(newScene)
+    }
 }

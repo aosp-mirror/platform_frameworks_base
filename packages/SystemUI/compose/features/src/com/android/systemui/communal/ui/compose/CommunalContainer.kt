@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,12 +30,9 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.transitions
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
-
-object Scenes {
-    val Blank = SceneKey(name = "blank")
-    val Communal = SceneKey(name = "communal")
-}
+import kotlinx.coroutines.flow.transform
 
 object Communal {
     object Elements {
@@ -43,7 +41,7 @@ object Communal {
 }
 
 val sceneTransitions = transitions {
-    from(Scenes.Blank, to = Scenes.Communal) {
+    from(TransitionSceneKey.Blank, to = TransitionSceneKey.Communal) {
         spec = tween(durationMillis = 500)
 
         translate(Communal.Elements.Content, Edge.Right)
@@ -58,8 +56,14 @@ val sceneTransitions = transitions {
  * handling and transitions before the full Flexiglass layout is ready.
  */
 @Composable
-fun CommunalContainer(modifier: Modifier = Modifier, viewModel: CommunalViewModel) {
-    val (currentScene, setCurrentScene) = remember { mutableStateOf(Scenes.Blank) }
+fun CommunalContainer(
+    modifier: Modifier = Modifier,
+    viewModel: CommunalViewModel,
+) {
+    val currentScene: SceneKey by
+        viewModel.currentScene
+            .transform<CommunalSceneKey, SceneKey> { value -> value.toTransitionSceneKey() }
+            .collectAsState(TransitionSceneKey.Blank)
 
     // Failsafe to hide the whole SceneTransitionLayout in case of bugginess.
     var showSceneTransitionLayout by remember { mutableStateOf(true) }
@@ -70,16 +74,19 @@ fun CommunalContainer(modifier: Modifier = Modifier, viewModel: CommunalViewMode
     SceneTransitionLayout(
         modifier = modifier.fillMaxSize(),
         currentScene = currentScene,
-        onChangeScene = setCurrentScene,
+        onChangeScene = { sceneKey -> viewModel.onSceneChanged(sceneKey.toCommunalSceneKey()) },
         transitions = sceneTransitions,
     ) {
-        scene(Scenes.Blank, userActions = mapOf(Swipe.Left to Scenes.Communal)) {
+        scene(
+            TransitionSceneKey.Blank,
+            userActions = mapOf(Swipe.Left to TransitionSceneKey.Communal)
+        ) {
             BlankScene { showSceneTransitionLayout = false }
         }
 
         scene(
-            Scenes.Communal,
-            userActions = mapOf(Swipe.Right to Scenes.Blank),
+            TransitionSceneKey.Communal,
+            userActions = mapOf(Swipe.Right to TransitionSceneKey.Blank),
         ) {
             CommunalScene(viewModel, modifier = modifier)
         }
@@ -120,4 +127,18 @@ private fun SceneScope.CommunalScene(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier.element(Communal.Elements.Content)) { CommunalHub(viewModel = viewModel) }
+}
+
+// TODO(b/293899074): Remove these conversions once Compose can be used throughout SysUI.
+object TransitionSceneKey {
+    val Blank = CommunalSceneKey.Blank.toTransitionSceneKey()
+    val Communal = CommunalSceneKey.Communal.toTransitionSceneKey()
+}
+
+fun CommunalSceneKey.toTransitionSceneKey(): SceneKey {
+    return SceneKey(name = toString(), identity = this)
+}
+
+fun SceneKey.toCommunalSceneKey(): CommunalSceneKey {
+    return this.identity as CommunalSceneKey
 }

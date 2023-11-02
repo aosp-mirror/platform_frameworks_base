@@ -46,6 +46,7 @@ public interface MediaModule {
     String QUICK_QS_PANEL = "media_quick_qs_panel";
     String KEYGUARD = "media_keyguard";
     String DREAM = "dream";
+    String COMMUNAL_HUB = "communal_Hub";
 
     /** */
     @Provides
@@ -82,6 +83,16 @@ public interface MediaModule {
     @SysUISingleton
     @Named(DREAM)
     static MediaHost providesDreamMediaHost(MediaHost.MediaHostStateHolder stateHolder,
+            MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
+            MediaHostStatesManager statesManager) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @Named(COMMUNAL_HUB)
+    static MediaHost providesCommunalMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
             MediaHostStatesManager statesManager) {
         return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
