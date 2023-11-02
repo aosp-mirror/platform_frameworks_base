@@ -17,18 +17,18 @@
 #ifndef ANDROID_GRAPHICS_PAINT_H_
 #define ANDROID_GRAPHICS_PAINT_H_
 
-#include "Typeface.h"
-
-#include <cutils/compiler.h>
-
 #include <SkFont.h>
 #include <SkPaint.h>
 #include <SkSamplingOptions.h>
+#include <cutils/compiler.h>
+#include <minikin/FamilyVariant.h>
+#include <minikin/FontFamily.h>
+#include <minikin/FontFeature.h>
+#include <minikin/Hyphenator.h>
+
 #include <string>
 
-#include <minikin/FontFamily.h>
-#include <minikin/FamilyVariant.h>
-#include <minikin/Hyphenator.h>
+#include "Typeface.h"
 
 namespace android {
 
@@ -82,11 +82,15 @@ public:
 
     float getWordSpacing() const { return mWordSpacing; }
 
-    void setFontFeatureSettings(const std::string& fontFeatureSettings) {
-        mFontFeatureSettings = fontFeatureSettings;
+    void setFontFeatureSettings(std::string_view fontFeatures) {
+        mFontFeatureSettings = minikin::FontFeature::parse(fontFeatures);
     }
 
-    std::string getFontFeatureSettings() const { return mFontFeatureSettings; }
+    void resetFontFeatures() { mFontFeatureSettings.clear(); }
+
+    const std::vector<minikin::FontFeature>& getFontFeatureSettings() const {
+        return mFontFeatureSettings;
+    }
 
     void setMinikinLocaleListId(uint32_t minikinLocaleListId) {
         mMinikinLocaleListId = minikinLocaleListId;
@@ -170,7 +174,7 @@ private:
 
     float mLetterSpacing = 0;
     float mWordSpacing = 0;
-    std::string mFontFeatureSettings;
+    std::vector<minikin::FontFeature> mFontFeatureSettings;
     uint32_t mMinikinLocaleListId;
     std::optional<minikin::FamilyVariant> mFamilyVariant;
     uint32_t mHyphenEdit = 0;
