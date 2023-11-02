@@ -56,6 +56,12 @@ constructor(
         addCondition(PeekDisabledSuppressor(globalSettings, headsUpManager, logger, mainHandler))
         addCondition(PulseDisabledSuppressor(ambientDisplayConfiguration, userTracker))
         addCondition(PulseBatterySaverSuppressor(batteryController))
+        addFilter(PeekPackageSnoozedSuppressor(headsUpManager))
+        addFilter(PeekAlreadyBubbledSuppressor(statusBarStateController))
+        addFilter(PeekDndSuppressor())
+        addFilter(PeekNotImportantSuppressor())
+        addCondition(PeekDeviceNotInUseSuppressor(powerManager, statusBarStateController))
+        addFilter(PeekOldWhenSuppressor(systemClock))
 
         started = true
     }

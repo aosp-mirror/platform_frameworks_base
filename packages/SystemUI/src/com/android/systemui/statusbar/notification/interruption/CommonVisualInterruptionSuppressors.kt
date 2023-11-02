@@ -16,18 +16,25 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.database.ContentObserver
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
+import android.os.PowerManager
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.StatusBarState.SHADE
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.time.SystemClock
 
 class PeekDisabledSuppressor(
     private val globalSettings: GlobalSettings,
@@ -87,4 +94,68 @@ class PulseBatterySaverSuppressor(private val batteryController: BatteryControll
         reason = "pulsing disabled by battery saver"
     ) {
     override fun shouldSuppress() = batteryController.isAodPowerSave()
+}
+
+class PeekPackageSnoozedSuppressor(private val headsUpManager: HeadsUpManager) :
+    VisualInterruptionFilter(types = setOf(PEEK), reason = "package snoozed") {
+    override fun shouldSuppress(entry: NotificationEntry) =
+        when {
+            // Assume any notification with an FSI is time-sensitive (like an alarm or incoming
+            // call) and ignore whether HUNs have been snoozed for the package.
+            entry.sbn.notification.fullScreenIntent != null -> false
+
+            // Otherwise, check if the package is snoozed.
+            else -> headsUpManager.isSnoozed(entry.sbn.packageName)
+        }
+}
+
+class PeekAlreadyBubbledSuppressor(private val statusBarStateController: StatusBarStateController) :
+    VisualInterruptionFilter(types = setOf(PEEK), reason = "already bubbled") {
+    override fun shouldSuppress(entry: NotificationEntry) =
+        when {
+            statusBarStateController.state != SHADE -> false
+            else -> entry.isBubble
+        }
+}
+
+class PeekDndSuppressor() :
+    VisualInterruptionFilter(types = setOf(PEEK), reason = "suppressed by DND") {
+    override fun shouldSuppress(entry: NotificationEntry) = entry.shouldSuppressPeek()
+}
+
+class PeekNotImportantSuppressor() :
+    VisualInterruptionFilter(types = setOf(PEEK), reason = "not important") {
+    override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_HIGH
+}
+
+class PeekDeviceNotInUseSuppressor(
+    private val powerManager: PowerManager,
+    private val statusBarStateController: StatusBarStateController
+) : VisualInterruptionCondition(types = setOf(PEEK), reason = "not in use") {
+    override fun shouldSuppress() =
+        when {
+            !powerManager.isScreenOn || statusBarStateController.isDreaming -> true
+            else -> false
+        }
+}
+
+class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
+    VisualInterruptionFilter(types = setOf(PEEK), reason = "old when") {
+    private fun whenAge(entry: NotificationEntry) =
+        systemClock.currentTimeMillis() - entry.sbn.notification.`when`
+
+    override fun shouldSuppress(entry: NotificationEntry): Boolean =
+        when {
+            // Ignore a "when" of 0, as it is unlikely to be a meaningful timestamp.
+            entry.sbn.notification.`when` <= 0L -> false
+
+            // Assume all HUNs with FSIs, foreground services, or user-initiated jobs are
+            // time-sensitive, regardless of their "when".
+            entry.sbn.notification.fullScreenIntent != null ||
+                entry.sbn.notification.isForegroundService ||
+                entry.sbn.notification.isUserInitiatedJob -> false
+
+            // Otherwise, check if the HUN's "when" is too old.
+            else -> whenAge(entry) >= MAX_HUN_WHEN_AGE_MS
+        }
 }

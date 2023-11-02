@@ -19,9 +19,11 @@ package com.android.systemui.statusbar.notification.interruption
 import android.app.ActivityManager
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
+import android.app.Notification.FLAG_BUBBLE
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
+import android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK
 import android.app.NotificationManager.VISIBILITY_NO_OVERRIDE
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_MUTABLE
@@ -43,9 +45,11 @@ import com.android.systemui.statusbar.FakeStatusBarStateController
 import com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
+import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -124,6 +128,84 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     fun testShouldNotPeek_settingDisabled() {
         ensurePeekState { hunSettingEnabled = false }
         assertShouldNotHeadsUp(buildPeekEntry())
+    }
+
+    @Test
+    fun testShouldNotPeek_packageSnoozed() {
+        ensurePeekState { hunSnoozed = true }
+        assertShouldNotHeadsUp(buildPeekEntry())
+    }
+
+    @Test
+    fun testShouldPeek_packageSnoozedButFsi() {
+        ensurePeekState { hunSnoozed = true }
+        assertShouldHeadsUp(buildFsiEntry())
+    }
+
+    @Test
+    fun testShouldNotPeek_alreadyBubbled() {
+        ensurePeekState { statusBarState = SHADE }
+        assertShouldNotHeadsUp(buildPeekEntry { isBubble = true })
+    }
+
+    @Test
+    fun testShouldPeek_isBubble_shadeLocked() {
+        ensurePeekState { statusBarState = SHADE_LOCKED }
+        assertShouldHeadsUp(buildPeekEntry { isBubble = true })
+    }
+
+    @Test
+    fun testShouldPeek_isBubble_keyguard() {
+        ensurePeekState { statusBarState = KEYGUARD }
+        assertShouldHeadsUp(buildPeekEntry { isBubble = true })
+    }
+
+    @Test
+    fun testShouldNotPeek_dnd() {
+        ensurePeekState()
+        assertShouldNotHeadsUp(buildPeekEntry { suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK })
+    }
+
+    @Test
+    fun testShouldNotPeek_notImportant() {
+        ensurePeekState()
+        assertShouldNotHeadsUp(buildPeekEntry { importance = IMPORTANCE_DEFAULT })
+    }
+
+    @Test
+    fun testShouldNotPeek_screenOff() {
+        ensurePeekState { isScreenOn = false }
+        assertShouldNotHeadsUp(buildPeekEntry())
+    }
+
+    @Test
+    fun testShouldNotPeek_dreaming() {
+        ensurePeekState { isDreaming = true }
+        assertShouldNotHeadsUp(buildPeekEntry())
+    }
+
+    @Test
+    fun testShouldNotPeek_oldWhen() {
+        ensurePeekState()
+        assertShouldNotHeadsUp(buildPeekEntry { whenMs = whenAgo(MAX_HUN_WHEN_AGE_MS) })
+    }
+
+    @Test
+    fun testShouldPeek_notQuiteOldEnoughWhen() {
+        ensurePeekState()
+        assertShouldHeadsUp(buildPeekEntry { whenMs = whenAgo(MAX_HUN_WHEN_AGE_MS - 1) })
+    }
+
+    @Test
+    fun testShouldPeek_zeroWhen() {
+        ensurePeekState()
+        assertShouldHeadsUp(buildPeekEntry { whenMs = 0L })
+    }
+
+    @Test
+    fun testShouldPeek_oldWhenButFsi() {
+        ensurePeekState()
+        assertShouldHeadsUp(buildFsiEntry { whenMs = whenAgo(MAX_HUN_WHEN_AGE_MS) })
     }
 
     @Test
@@ -380,6 +462,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var visibilityOverride: Int? = null
         var hasFsi = false
         var canBubble: Boolean? = null
+        var isBubble = false
         var hasBubbleMetadata = false
         var bubbleSuppressNotification: Boolean? = null
 
@@ -413,6 +496,11 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     }
                 }
                 .build()
+                .apply {
+                    if (isBubble) {
+                        flags = flags or FLAG_BUBBLE
+                    }
+                }
                 .let { NotificationEntryBuilder().setNotification(it) }
                 .apply {
                     setPkg(TEST_PACKAGE)
@@ -449,15 +537,15 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         run(block)
     }
 
-    private fun buildFsiEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
-        importance = IMPORTANCE_HIGH
-        hasFsi = true
-        run(block)
-    }
-
     private fun buildBubbleEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         canBubble = true
         hasBubbleMetadata = true
+        run(block)
+    }
+
+    private fun buildFsiEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+        importance = IMPORTANCE_HIGH
+        hasFsi = true
         run(block)
     }
 
