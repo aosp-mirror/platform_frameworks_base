@@ -27,8 +27,6 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.IntState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.dialog.SettingsDialog
 import com.android.settingslib.spa.widget.ui.SettingsDialogItem
@@ -69,8 +66,8 @@ interface ListPreferenceModel {
      *
      * Disabled [ListPreference] will be displayed in disabled style.
      */
-    val enabled: State<Boolean>
-        get() = stateOf(true)
+    val enabled: () -> Boolean
+        get() = { true }
 
     val options: List<ListPreferenceOption>
 
@@ -89,7 +86,7 @@ fun ListPreference(model: ListPreferenceModel) {
         ) {
             Column(modifier = Modifier.selectableGroup()) {
                 for (option in model.options) {
-                    Radio(option, model.selectedId.intValue, model.enabled.value) {
+                    Radio(option, model.selectedId.intValue, model.enabled()) {
                         dialogOpened = false
                         model.onIdSelected(it)
                     }
@@ -100,7 +97,7 @@ fun ListPreference(model: ListPreferenceModel) {
     Preference(model = remember(model) {
         object : PreferenceModel {
             override val title = model.title
-            override val summary = derivedStateOf {
+            override val summary = {
                 model.options.find { it.id == model.selectedId.intValue }?.text ?: ""
             }
             override val icon = model.icon

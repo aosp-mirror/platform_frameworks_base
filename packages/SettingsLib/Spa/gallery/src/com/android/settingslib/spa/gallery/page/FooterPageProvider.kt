@@ -26,7 +26,6 @@ import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.widget.preference.Preference
@@ -50,7 +49,7 @@ object FooterPageProvider : SettingsPageProvider {
                     Preference(remember {
                         object : PreferenceModel {
                             override val title = "Some Preference"
-                            override val summary = stateOf("Some summary")
+                            override val summary = { "Some summary" }
                         }
                     })
                 }.build()

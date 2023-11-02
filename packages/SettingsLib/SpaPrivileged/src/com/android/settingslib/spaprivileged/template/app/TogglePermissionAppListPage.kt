@@ -20,8 +20,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -149,33 +148,27 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
     override fun getSummary(option: Int, record: T) = getSummary(record)
 
     @Composable
-    fun getSummary(record: T): State<String> {
+    fun getSummary(record: T): () -> String {
         val restrictions = remember(record.app.userId) {
             Restrictions(
                 userId = record.app.userId,
                 keys = listModel.switchRestrictionKeys,
             )
         }
-        val restrictedMode = restrictionsProviderFactory.rememberRestrictedMode(restrictions)
-        val allowed = listModel.isAllowed(record)
-        return remember {
-            derivedStateOf {
-                RestrictedSwitchPreference.getSummary(
-                    context = context,
-                    restrictedMode = restrictedMode.value,
-                    summaryIfNoRestricted = getSummaryIfNoRestricted(allowed),
-                    checked = allowed,
-                ).value
-            }
-        }
+        val restrictedMode by restrictionsProviderFactory.rememberRestrictedMode(restrictions)
+        val allowed by listModel.isAllowed(record)
+        return RestrictedSwitchPreference.getSummary(
+            context = context,
+            restrictedModeSupplier = { restrictedMode },
+            summaryIfNoRestricted = { getSummaryIfNoRestricted(allowed) },
+            checked = { allowed },
+        )
     }
 
-    private fun getSummaryIfNoRestricted(allowed: State<Boolean?>) = derivedStateOf {
-        when (allowed.value) {
-            true -> context.getString(R.string.app_permission_summary_allowed)
-            false -> context.getString(R.string.app_permission_summary_not_allowed)
-            null -> context.getPlaceholder()
-        }
+    private fun getSummaryIfNoRestricted(allowed: Boolean?): String = when (allowed) {
+        true -> context.getString(R.string.app_permission_summary_allowed)
+        false -> context.getString(R.string.app_permission_summary_not_allowed)
+        null -> context.getPlaceholder()
     }
 
     @Composable

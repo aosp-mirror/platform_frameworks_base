@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.screenshot
+package com.android.settingslib.spa.screenshot.widget.chart
 
+import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
 import com.android.settingslib.spa.widget.chart.LineChart
 import com.android.settingslib.spa.widget.chart.LineChartData
 import com.android.settingslib.spa.widget.chart.LineChartModel
@@ -26,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import platform.test.screenshot.DeviceEmulationSpec
+import platform.test.screenshot.PhoneAndTabletMinimal
 
 /** A screenshot test for ExampleFeature. */
 @RunWith(Parameterized::class)
@@ -59,7 +61,7 @@ class LineChartScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                     )
                     override val xValueFormatter =
                         IAxisValueFormatter { value, _ ->
-                            "${WeekDay.values()[value.toInt()]}"
+                            "${WeekDay.entries[value.toInt()]}"
                         }
                     override val yValueFormatter =
                         IAxisValueFormatter { value, _ ->
