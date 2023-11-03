@@ -2671,7 +2671,7 @@ public final class SurfaceControl implements Parcelable {
          *
          * @param minAlpha               The min alpha the {@link SurfaceControl} is required to
          *                               have to be considered inside the threshold.
-         * @param minFractionRendered    The min fraction of the SurfaceControl that was resented
+         * @param minFractionRendered    The min fraction of the SurfaceControl that was presented
          *                               to the user to be considered inside the threshold.
          * @param stabilityRequirementMs The time in milliseconds required for the
          *                               {@link SurfaceControl} to be in the threshold.
