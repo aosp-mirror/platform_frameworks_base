@@ -4,7 +4,7 @@ flag {
   name: "ranking_update_ashmem"
   namespace: "systemui"
   description: "This flag controls moving ranking update contents into ashmem"
-  bug: "284297289"
+  bug: "249848655"
 }
 
 flag {
