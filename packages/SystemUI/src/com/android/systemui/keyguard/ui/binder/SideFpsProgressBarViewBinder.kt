@@ -22,6 +22,8 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.SideFpsController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.view.SideFpsProgressBar
 import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
 import com.android.systemui.log.SideFpsLogger
@@ -31,6 +33,7 @@ import com.android.systemui.util.kotlin.Quint
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -47,15 +50,23 @@ constructor(
     private val sfpsController: dagger.Lazy<SideFpsController>,
     private val logger: SideFpsLogger,
     private val commandRegistry: CommandRegistry,
+    private val featureFlagsClassic: FeatureFlagsClassic,
 ) : CoreStartable {
 
     override fun start() {
+        if (!featureFlagsClassic.isEnabled(Flags.REST_TO_UNLOCK)) {
+            return
+        }
+        // When the rest to unlock feature is disabled by the user, stop any coroutines that are
+        // not required.
+        var layoutJob: Job? = null
+        var progressJob: Job? = null
         commandRegistry.registerCommand(spfsProgressBarCommand) { SfpsProgressBarCommand() }
         applicationScope.launch {
             viewModel.isProlongedTouchRequiredForAuthentication.collectLatest { enabled ->
                 logger.isProlongedTouchRequiredForAuthenticationChanged(enabled)
                 if (enabled) {
-                    launch {
+                    layoutJob = launch {
                         combine(
                                 viewModel.isVisible,
                                 viewModel.progressBarLocation,
@@ -76,9 +87,13 @@ constructor(
                                 )
                             }
                     }
-                    launch { viewModel.progress.collectLatest { view.setProgress(it) } }
+                    progressJob = launch {
+                        viewModel.progress.collectLatest { view.setProgress(it) }
+                    }
                 } else {
                     view.hide()
+                    layoutJob?.cancel()
+                    progressJob?.cancel()
                 }
             }
         }

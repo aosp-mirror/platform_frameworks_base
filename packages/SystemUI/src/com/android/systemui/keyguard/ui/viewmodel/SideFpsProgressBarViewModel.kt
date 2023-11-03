@@ -26,6 +26,8 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
@@ -34,13 +36,17 @@ import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticati
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -52,10 +58,12 @@ constructor(
     private val sfpsSensorInteractor: SideFpsSensorInteractor,
     displayStateInteractor: DisplayStateInteractor,
     @Application private val applicationScope: CoroutineScope,
+    private val featureFlagsClassic: FeatureFlagsClassic,
 ) {
     private val _progress = MutableStateFlow(0.0f)
     private val _visible = MutableStateFlow(false)
     private var _animator: ValueAnimator? = null
+    private var animatorJob: Job? = null
 
     private fun onFingerprintCaptureCompleted() {
         _visible.value = false
@@ -147,26 +155,32 @@ constructor(
         sfpsSensorInteractor.isProlongedTouchRequiredForAuthentication
 
     init {
-        applicationScope.launch {
-            combine(
-                    sfpsSensorInteractor.isProlongedTouchRequiredForAuthentication,
-                    sfpsSensorInteractor.authenticationDuration,
-                    ::Pair
-                )
-                .collectLatest { (enabled, authDuration) ->
-                    if (!enabled) return@collectLatest
+        if (featureFlagsClassic.isEnabled(Flags.REST_TO_UNLOCK)) {
+            launchAnimator()
+        }
+    }
 
-                    launch {
-                        fpAuthRepository.authenticationStatus.collectLatest { authStatus ->
+    private fun launchAnimator() {
+        applicationScope.launch {
+            sfpsSensorInteractor.isProlongedTouchRequiredForAuthentication.collectLatest { enabled
+                ->
+                if (!enabled) {
+                    animatorJob?.cancel()
+                    return@collectLatest
+                }
+                animatorJob =
+                    fpAuthRepository.authenticationStatus
+                        .onEach { authStatus ->
                             when (authStatus) {
                                 is AcquiredFingerprintAuthenticationStatus -> {
                                     if (authStatus.fingerprintCaptureStarted) {
-
                                         _visible.value = true
                                         _animator?.cancel()
                                         _animator =
                                             ValueAnimator.ofFloat(0.0f, 1.0f)
-                                                .setDuration(authDuration)
+                                                .setDuration(
+                                                    sfpsSensorInteractor.authenticationDuration
+                                                )
                                                 .apply {
                                                     addUpdateListener {
                                                         _progress.value = it.animatedValue as Float
@@ -196,8 +210,9 @@ constructor(
                                 else -> Unit
                             }
                         }
-                    }
-                }
+                        .onCompletion { _animator?.cancel() }
+                        .launchIn(applicationScope)
+            }
         }
     }
 }
