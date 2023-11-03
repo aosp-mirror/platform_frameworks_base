@@ -66,7 +66,8 @@ class AnimatedSharedAsStateTest {
             val int by animateSharedIntAsState(targetValues.int, TestValues.Value1, key)
             val float by animateSharedFloatAsState(targetValues.float, TestValues.Value2, key)
             val dp by animateSharedDpAsState(targetValues.dp, TestValues.Value3, key)
-            val color by animateSharedColorAsState(targetValues.color, TestValues.Value4, key)
+            val color by
+                animateSharedColorAsState(targetValues.color, TestValues.Value4, element = null)
 
             // Make sure we read the values during composition, so that we recompose and call
             // onCurrentValueChanged() with the latest values.

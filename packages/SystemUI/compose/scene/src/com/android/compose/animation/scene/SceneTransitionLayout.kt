@@ -142,7 +142,9 @@ interface SceneScope {
      *
      * @param value the value of this shared value in the current scene.
      * @param key the key of this shared value.
-     * @param element the element associated with this value.
+     * @param element the element associated with this value. If `null`, this value will be
+     *   associated at the scene level, which means that [key] should be used maximum once in the
+     *   same scene.
      * @param lerp the *linear* interpolation function that should be used to interpolate between
      *   two different values. Note that it has to be linear because the [fraction] passed to this
      *   interpolator is already interpolated.
@@ -157,7 +159,7 @@ interface SceneScope {
     fun <T> animateSharedValueAsState(
         value: T,
         key: ValueKey,
-        element: ElementKey,
+        element: ElementKey?,
         lerp: (start: T, stop: T, fraction: Float) -> T,
         canOverflow: Boolean,
     ): State<T>
