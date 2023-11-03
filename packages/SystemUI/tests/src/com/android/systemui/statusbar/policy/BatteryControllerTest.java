@@ -294,6 +294,6 @@ public class BatteryControllerTest extends SysuiTestCase {
         when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
         when(mUsbPortStatus.isConnected()).thenReturn(true);
         when(mUsbPortStatus.getComplianceWarnings())
-                .thenReturn(new int[]{UsbPortStatus.COMPLIANCE_WARNING_OTHER});
+                .thenReturn(new int[]{UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY});
     }
 }
