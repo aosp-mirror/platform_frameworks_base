@@ -1935,7 +1935,7 @@ package android.media {
     field public static final int VIBRATION_SOURCE_URI = 2; // 0x2
   }
 
-  public static final class RingtoneSelection.Builder {
+  @FlaggedApi("android.os.vibrator.haptics_customization_enabled") public static final class RingtoneSelection.Builder {
     ctor public RingtoneSelection.Builder();
     ctor public RingtoneSelection.Builder(@NonNull android.media.RingtoneSelection);
     method @NonNull public android.media.RingtoneSelection build();

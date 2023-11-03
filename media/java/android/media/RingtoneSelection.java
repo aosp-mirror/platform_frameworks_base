@@ -642,6 +642,7 @@ public final class RingtoneSelection {
      * allowing the user to configure their selection. Once a selection is stored as a Uri, then
      * the RingtoneSelection can be loaded directly using {@link RingtoneSelection#fromUri}.
      */
+    @FlaggedApi(Flags.FLAG_HAPTICS_CUSTOMIZATION_ENABLED)
     public static final class Builder {
         private Uri mSoundUri;
         private Uri mVibrationUri;
