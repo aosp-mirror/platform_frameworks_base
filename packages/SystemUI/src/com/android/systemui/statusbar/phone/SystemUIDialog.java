@@ -42,13 +42,13 @@ import android.view.WindowManager.LayoutParams;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.util.DialogKt;
 
@@ -60,7 +60,7 @@ import javax.inject.Inject;
 /**
  * Class for dialogs that should appear over panels and keyguard.
  *
- * DO NOT SUBCLASS THIS. See {@link SystemUIDialog.Delegate} for an interface that enables
+ * DO NOT SUBCLASS THIS. See {@link DialogDelegate} for an interface that enables
  * customizing behavior via composition instead of inheritance. Clients should implement the
  * Delegate class and then pass their implementation into the SystemUIDialog constructor.
  *
@@ -79,7 +79,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
 
     private final Context mContext;
     private final FeatureFlags mFeatureFlags;
-    private final Delegate mDelegate;
+    private final DialogDelegate<SystemUIDialog> mDelegate;
     @Nullable private final DismissReceiver mDismissReceiver;
     private final Handler mHandler = new Handler();
     private final SystemUIDialogManager mDialogManager;
@@ -110,7 +110,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 Dependency.get(SysUiState.class),
                 Dependency.get(BroadcastDispatcher.class),
                 Dependency.get(DialogLaunchAnimator.class),
-                new Delegate() {});
+                new DialogDelegate<>() {});
     }
 
     @Inject
@@ -129,7 +129,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 sysUiState,
                 broadcastDispatcher,
                 dialogLaunchAnimator,
-                new Delegate(){});
+                new DialogDelegate<>(){});
     }
 
     public static class Factory {
@@ -156,7 +156,11 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mDialogLaunchAnimator = dialogLaunchAnimator;
         }
 
-        public SystemUIDialog create(Delegate delegate) {
+        /**
+         * Creates a new instance of {@link SystemUIDialog} with {@code delegate} as the {@link
+         * DialogDelegate}.
+         */
+        public SystemUIDialog create(DialogDelegate<SystemUIDialog> delegate) {
             return new SystemUIDialog(
                     mContext,
                     DEFAULT_THEME,
@@ -188,7 +192,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 sysUiState,
                 broadcastDispatcher,
                 dialogLaunchAnimator,
-                new Delegate(){});
+                new DialogDelegate<>(){});
     }
 
     public SystemUIDialog(
@@ -200,7 +204,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             SysUiState sysUiState,
             BroadcastDispatcher broadcastDispatcher,
             DialogLaunchAnimator dialogLaunchAnimator,
-            Delegate delegate) {
+            DialogDelegate<SystemUIDialog> delegate) {
         super(context, theme);
         mContext = context;
         mFeatureFlags = featureFlags;
@@ -309,7 +313,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * should override this method instead.
      */
     protected void start() {
-        mDelegate.start(this);
+        mDelegate.onStart(this);
     }
 
     @Override
@@ -333,7 +337,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * should override this method instead.
      */
     protected void stop() {
-        mDelegate.stop(this);
+        mDelegate.onStop(this);
     }
 
     @Override
@@ -583,44 +587,5 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
             mDialog.dismiss();
         }
-    }
-
-    /**
-     * A delegate class that should be implemented in place of sublcassing {@link SystemUIDialog}.
-     *
-     * Implement this interface and then pass an instance of your implementation to
-     * {@link SystemUIDialog.Factory#create(Delegate)}.
-     */
-    public interface Delegate {
-        /**
-         * Called before {@link AlertDialog#onCreate} is called.
-         */
-        default void beforeCreate(SystemUIDialog dialog, Bundle savedInstanceState) {}
-
-        /**
-         * Called after {@link AlertDialog#onCreate} is called.
-         */
-        default void onCreate(SystemUIDialog dialog, Bundle savedInstanceState) {}
-
-        /**
-         * Called after {@link AlertDialog#onStart} is called.
-         */
-        default void start(SystemUIDialog dialog) {}
-
-        /**
-         * Called after {@link AlertDialog#onStop} is called.
-         */
-        default void stop(SystemUIDialog dialog) {}
-
-        /**
-         * Called after {@link AlertDialog#onWindowFocusChanged(boolean)} is called.
-         */
-        default void onWindowFocusChanged(SystemUIDialog dialog, boolean hasFocus) {}
-
-        /**
-         * Called as part of
-         * {@link ViewRootImpl.ConfigChangedCallback#onConfigurationChanged(Configuration)}.
-         */
-        default void onConfigurationChanged(SystemUIDialog dialog, Configuration configuration) {}
     }
 }
