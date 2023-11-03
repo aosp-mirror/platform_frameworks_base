@@ -16,21 +16,16 @@
 
 package com.android.systemui.qs.tiles.impl.custom.di.bound
 
-import android.os.UserHandle
-import dagger.BindsInstance
-import dagger.Subcomponent
-import kotlinx.coroutines.CoroutineScope
+import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTilePackageUpdatesRepository
+import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTilePackageUpdatesRepositoryImpl
+import dagger.Binds
+import dagger.Module
 
-/** @see CustomTileBoundScope */
-@CustomTileBoundScope
-@Subcomponent(modules = [CustomTileBoundModule::class])
-interface CustomTileBoundComponent {
+@Module
+interface CustomTileBoundModule {
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance fun user(@CustomTileUser user: UserHandle): Builder
-        @BindsInstance fun coroutineScope(@CustomTileBoundScope scope: CoroutineScope): Builder
-
-        fun build(): CustomTileBoundComponent
-    }
+    @Binds
+    fun bindCustomTilePackageUpdatesRepository(
+        impl: CustomTilePackageUpdatesRepositoryImpl
+    ): CustomTilePackageUpdatesRepository
 }
