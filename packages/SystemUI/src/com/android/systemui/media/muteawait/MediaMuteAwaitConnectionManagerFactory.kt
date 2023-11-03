@@ -31,7 +31,7 @@ class MediaMuteAwaitConnectionManagerFactory @Inject constructor(
     private val logger: MediaMuteAwaitLogger,
     @Main private val mainExecutor: Executor
 ) {
-    private val deviceIconUtil = DeviceIconUtil()
+    private val deviceIconUtil = DeviceIconUtil(context)
 
     /** Creates a [MediaMuteAwaitConnectionManager]. */
     fun create(localMediaManager: LocalMediaManager): MediaMuteAwaitConnectionManager {

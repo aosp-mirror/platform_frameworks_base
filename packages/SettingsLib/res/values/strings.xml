@@ -1334,6 +1334,8 @@
     <string name="media_transfer_this_device_name" product="default">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
+    <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name" product="tv">@string/tv_media_transfer_default</string>
     <!-- Name of the dock device. [CHAR LIMIT=30] -->
     <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
     <!-- Default name of the external device. [CHAR LIMIT=30] -->
@@ -1356,6 +1358,26 @@
     <string name="media_output_status_unauthorized">Device not approved to play</string>
     <!-- Sub status indicates the device does not support the current media track. [CHAR LIMIT=NONE] -->
     <string name="media_output_status_track_unsupported">Can\’t play this media here</string>
+
+    <!-- Media output switcher. Default subtitle for any output option that is connected if no more information is known [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_connected">Connected</string>
+
+    <!-- TV media output switcher. Title for devices connected through HDMI ARC if no device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_arc_fallback_title">HDMI ARC</string>
+    <!-- TV media output switcher. Title for devices connected through HDMI EARC if no device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_earc_fallback_title">HDMI eARC</string>
+
+    <!-- TV media output switcher. Subtitle for devices connected through HDMI ARC if a device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_arc_subtitle">Connected via ARC</string>
+    <!-- Media output switcher. Subtitle for devices connected through HDMI EARC if a device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_earc_subtitle">Connected via eARC</string>
+
+    <!-- TV media output switcher. Title for the default audio output of the device [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_default">TV Default</string>
+    <!-- TV media output switcher. Subtitle for default audio output which is HDMI, e.g. TV dongle [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_hdmi">HDMI Output</string>
+    <!-- TV media output switcher. Subtitle for default audio output which is internal speaker, i.e. panel VTs [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_internal_speakers">Internal Speakers</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
