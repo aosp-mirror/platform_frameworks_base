@@ -427,34 +427,30 @@ public final class JobServiceContext implements ServiceConnection {
             boolean binding = false;
             boolean startedWithForegroundFlag = false;
             try {
-                final Context.BindServiceFlags bindFlags;
+                long bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_APP_COMPONENT_USAGE;
                 if (job.shouldTreatAsUserInitiatedJob() && !job.isUserBgRestricted()) {
                     // If the user has bg restricted the app, don't give the job FG privileges
                     // such as bypassing data saver or getting the higher foreground proc state.
                     // If we've gotten to this point, the app is most likely in the foreground,
                     // so the job will run just fine while the user keeps the app in the foreground.
-                    bindFlags = Context.BindServiceFlags.of(
-                            Context.BIND_AUTO_CREATE
-                                    | Context.BIND_ALMOST_PERCEPTIBLE
-                                    | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
-                                    | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS
-                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
+                    bindFlags |= Context.BIND_ALMOST_PERCEPTIBLE;
+                    if (job.hasConnectivityConstraint()) {
+                        // Only add network restriction bypass flags if the job requires network.
+                        bindFlags |= Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
+                                | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS;
+                    }
                     startedWithForegroundFlag = true;
                 } else if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob()) {
-                    bindFlags = Context.BindServiceFlags.of(
-                            Context.BIND_AUTO_CREATE
-                                    | Context.BIND_NOT_FOREGROUND
-                                    | Context.BIND_ALMOST_PERCEPTIBLE
-                                    | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
-                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
+                    bindFlags |= Context.BIND_NOT_FOREGROUND | Context.BIND_ALMOST_PERCEPTIBLE;
+                    if (job.hasConnectivityConstraint()) {
+                        // Only add network restriction bypass flags if the job requires network.
+                        bindFlags |= Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS;
+                    }
                 } else {
-                    bindFlags = Context.BindServiceFlags.of(
-                            Context.BIND_AUTO_CREATE
-                                    | Context.BIND_NOT_FOREGROUND
-                                    | Context.BIND_NOT_PERCEPTIBLE
-                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
+                    bindFlags |= Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_PERCEPTIBLE;
                 }
-                binding = mContext.bindServiceAsUser(intent, this, bindFlags,
+                binding = mContext.bindServiceAsUser(intent, this,
+                        Context.BindServiceFlags.of(bindFlags),
                         UserHandle.of(job.getUserId()));
             } catch (SecurityException e) {
                 // Some permission policy, for example INTERACT_ACROSS_USERS and

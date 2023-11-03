@@ -1791,7 +1791,10 @@ public class JobInfo implements Parcelable {
          * <ol>
          *     <li>Run as soon as possible</li>
          *     <li>Be less restricted during Doze and battery saver</li>
-         *     <li>Bypass Doze, app standby, and battery saver network restrictions</li>
+         *     <li>
+         *         Bypass Doze, app standby, and battery saver network restrictions (if the job
+         *         has a {@link #setRequiredNetwork(NetworkRequest) connectivity constraint})
+         *     </li>
          *     <li>Be less likely to be killed than regular jobs</li>
          *     <li>Be subject to background location throttling</li>
          *     <li>Be exempt from delay to optimize job execution</li>
