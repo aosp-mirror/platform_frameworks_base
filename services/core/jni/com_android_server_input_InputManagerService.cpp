@@ -308,6 +308,8 @@ public:
     void reloadPointerIcons();
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
+    bool setPointerIcon(std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon,
+                        int32_t displayId, DeviceId deviceId);
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
@@ -1345,6 +1347,12 @@ void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
     if (controller != nullptr) {
         controller->setCustomPointerIcon(icon);
     }
+}
+
+bool NativeInputManager::setPointerIcon(
+        std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon, int32_t displayId,
+        DeviceId deviceId) {
+    return mInputManager->getChoreographer().setPointerIcon(std::move(icon), displayId, deviceId);
 }
 
 TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
@@ -2511,6 +2519,33 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jobject nativeImplObj, jobje
     im->setCustomPointerIcon(spriteIcon);
 }
 
+static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject iconObj,
+                                 jint displayId, jint deviceId, jint pointerId,
+                                 jobject inputTokenObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    PointerIcon pointerIcon;
+    status_t result = android_view_PointerIcon_getLoadedIcon(env, iconObj, &pointerIcon);
+    if (result) {
+        jniThrowRuntimeException(env, "Failed to load pointer icon.");
+        return false;
+    }
+
+    std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon;
+    if (pointerIcon.style == PointerIconStyle::TYPE_CUSTOM) {
+        icon = std::make_unique<SpriteIcon>(pointerIcon.bitmap.copy(
+                                                    ANDROID_BITMAP_FORMAT_RGBA_8888),
+                                            pointerIcon.style, pointerIcon.hotSpotX,
+                                            pointerIcon.hotSpotY);
+    } else {
+        icon = pointerIcon.style;
+    }
+    // TODO(b/293587049): Perform hit test to ensure the pointer is dispatched to the channel.
+    sp<IBinder> inputToken = ibinderForJavaObject(env, inputTokenObj);
+
+    return im->setPointerIcon(std::move(icon), displayId, deviceId);
+}
+
 static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jobject nativeImplObj, jint deviceId,
                                            jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -2769,6 +2804,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"reloadPointerIcons", "()V", (void*)nativeReloadPointerIcons},
         {"setCustomPointerIcon", "(Landroid/view/PointerIcon;)V",
          (void*)nativeSetCustomPointerIcon},
+        {"setPointerIcon", "(Landroid/view/PointerIcon;IIILandroid/os/IBinder;)Z",
+         (void*)nativeSetPointerIcon},
         {"canDispatchToDisplay", "(II)Z", (void*)nativeCanDispatchToDisplay},
         {"notifyPortAssociationsChanged", "()V", (void*)nativeNotifyPortAssociationsChanged},
         {"changeUniqueIdAssociation", "()V", (void*)nativeChangeUniqueIdAssociation},

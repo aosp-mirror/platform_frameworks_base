@@ -1286,6 +1286,18 @@ public final class InputManagerGlobal {
     }
 
     /**
+     * @see InputManager#setPointerIcon(PointerIcon, int, int, int, IBinder)
+     */
+    public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken) {
+        try {
+            return mIm.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @see InputManager#requestPointerCapture(IBinder, boolean)
      */
     public void requestPointerCapture(IBinder windowToken, boolean enable) {

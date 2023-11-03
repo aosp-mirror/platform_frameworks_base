@@ -65,9 +65,9 @@ public:
     void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
                   BitSet32 spotIdBits, int32_t displayId) override;
     void clearSpots() override;
+    void updatePointerIcon(PointerIconStyle iconId) override;
+    void setCustomPointerIcon(const SpriteIcon& icon) override;
 
-    void updatePointerIcon(PointerIconStyle iconId);
-    void setCustomPointerIcon(const SpriteIcon& icon);
     virtual void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
     void reloadPointerResources();
@@ -192,10 +192,10 @@ public:
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    void updatePointerIcon(PointerIconStyle) {
+    void updatePointerIcon(PointerIconStyle) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    void setCustomPointerIcon(const SpriteIcon&) {
+    void setCustomPointerIcon(const SpriteIcon&) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     // fade() should not be called by inactivity timeout. Do nothing.
