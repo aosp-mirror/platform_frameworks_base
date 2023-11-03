@@ -2011,6 +2011,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DeviceManagementResourcesProvider getDeviceManagementResourcesProvider() {
             return new DeviceManagementResourcesProvider();
         }
+
+        boolean isAdminInstalledCaCertAutoApproved() {
+            return false;
+        }
     }
 
     /**
@@ -6145,6 +6149,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     .setAdmin(caller.getPackageName())
                     .setBoolean(/* isDelegate */ admin == null)
                     .write();
+
+            if (mInjector.isAdminInstalledCaCertAutoApproved()
+                    && installedAlias != null
+                    && admin != null) {
+                // If device admin called this, approve cert to avoid notifications
+                Slogf.i(LOG_TAG, "Approving admin installed cert");
+                approveCaCert(
+                        installedAlias,
+                        caller.getUserId(),
+                        /* approved */ true);
+            }
+
             return installedAlias;
         });
 
