@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Otključavanje licem nije dostupno"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth povezan."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Ikona Bluetooth uređaja"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Kliknite da biste konfigurirali pojedinosti o uređaju"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Postotak baterije nije poznat."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Spojen na <xliff:g id="BLUETOOTH">%s</xliff:g> ."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Povezani ste sa sljedećim uređajem: <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -250,8 +249,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ne uznemiravaj"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Upareni uređaji nisu dostupni"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Dodirnite da biste povezali uređaj ili prekinuli vezu uređaja"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Upari novi uređaj"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Pogledajte sve"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Uključi"</string>
@@ -508,7 +506,7 @@
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Glasnoća je stišana na sigurniju razinu"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Pojačana je glasnoća u slušalicama dulje nego što se preporučuje"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Glasnoća slušalica premašila je sigurno ograničenje za ovaj tjedan"</string>
-    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Nastavite slušati"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Nastavi slušati"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Stišaj"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikacija je prikvačena"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite i zadržite Natrag i Pregled da biste ga otkvačili."</string>
@@ -1182,8 +1180,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Blokirani su kamera i mikrofon"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon je blokiran"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Uključen je prioritetni način rada"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"Otkrivena je prisutnost korisnika"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Postavite zadanu aplikaciju za bilješke u postavkama"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalacija"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Želite li zrcaliti na vanjski zaslon?"</string>
