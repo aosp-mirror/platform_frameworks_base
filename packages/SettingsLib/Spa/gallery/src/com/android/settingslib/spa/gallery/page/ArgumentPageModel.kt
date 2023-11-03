@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.PageModel
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.util.getIntArg
 import com.android.settingslib.spa.framework.util.getStringArg
 import com.android.settingslib.spa.framework.util.navLink
@@ -110,7 +109,7 @@ class ArgumentPageModel : PageModel() {
     fun genStringParamPreferenceModel(): PreferenceModel {
         return object : PreferenceModel {
             override val title = STRING_PARAM_TITLE
-            override val summary = stateOf(stringParam!!)
+            override val summary = { stringParam!! }
         }
     }
 
@@ -118,7 +117,7 @@ class ArgumentPageModel : PageModel() {
     fun genIntParamPreferenceModel(): PreferenceModel {
         return object : PreferenceModel {
             override val title = INT_PARAM_TITLE
-            override val summary = stateOf(intParam!!.toString())
+            override val summary = { intParam!!.toString() }
         }
     }
 
@@ -130,7 +129,7 @@ class ArgumentPageModel : PageModel() {
         )
         return object : PreferenceModel {
             override val title = PAGE_TITLE
-            override val summary = stateOf(summaryArray.joinToString(", "))
+            override val summary = { summaryArray.joinToString(", ") }
             override val onClick = navigator(
                 SettingsPageProviderEnum.ARGUMENT.name + parameter.navLink(arguments)
             )

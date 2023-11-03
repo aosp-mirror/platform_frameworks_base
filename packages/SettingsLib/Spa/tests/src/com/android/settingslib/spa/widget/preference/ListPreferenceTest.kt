@@ -25,7 +25,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.testutils.onDialogText
 import org.junit.Rule
 import org.junit.Test
@@ -92,7 +91,7 @@ class ListPreferenceTest {
             ListPreference(remember {
                 object : ListPreferenceModel {
                     override val title = TITLE
-                    override val enabled = stateOf(false)
+                    override val enabled = { false }
                     override val options = listOf(ListPreferenceOption(id = 1, text = "A"))
                     override val selectedId = mutableIntStateOf(1)
                     override val onIdSelected: (Int) -> Unit = {}
@@ -154,7 +153,7 @@ class ListPreferenceTest {
             ListPreference(remember {
                 object : ListPreferenceModel {
                     override val title = TITLE
-                    override val enabled = enabledState
+                    override val enabled = { enabledState.value }
                     override val options = listOf(
                         ListPreferenceOption(id = 1, text = "A"),
                         ListPreferenceOption(id = 2, text = "B"),
