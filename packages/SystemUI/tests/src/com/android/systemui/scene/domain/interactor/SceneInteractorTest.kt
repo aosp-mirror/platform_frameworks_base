@@ -83,7 +83,8 @@ class SceneInteractorTest : SysuiTestCase() {
                     fromScene = SceneKey.Lockscreen,
                     toScene = SceneKey.Shade,
                     progress = progress,
-                    isUserInputDriven = false,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
                 )
             assertThat(reflectedTransitionState).isEqualTo(transitionState.value)
 
@@ -121,7 +122,8 @@ class SceneInteractorTest : SysuiTestCase() {
                     fromScene = underTest.desiredScene.value.key,
                     toScene = SceneKey.Shade,
                     progress = progress,
-                    isUserInputDriven = false,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
                 )
             assertThat(transitionTo).isEqualTo(SceneKey.Shade)
 
@@ -158,7 +160,8 @@ class SceneInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Gone,
                         toScene = SceneKey.Lockscreen,
                         progress = flowOf(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             val transitioning by
@@ -177,7 +180,8 @@ class SceneInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Shade,
                         toScene = SceneKey.QuickSettings,
                         progress = flowOf(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             underTest.setTransitionState(transitionState)
@@ -194,7 +198,8 @@ class SceneInteractorTest : SysuiTestCase() {
                         fromScene = SceneKey.Shade,
                         toScene = SceneKey.Lockscreen,
                         progress = flowOf(0.5f),
-                        isUserInputDriven = false,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
                     )
                 )
             val transitioning by
@@ -222,12 +227,102 @@ class SceneInteractorTest : SysuiTestCase() {
                     fromScene = SceneKey.Shade,
                     toScene = SceneKey.Lockscreen,
                     progress = flowOf(0.5f),
-                    isUserInputDriven = false,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
                 )
             assertThat(transitioning).isTrue()
 
             transitionState.value = ObservableTransitionState.Idle(SceneKey.Lockscreen)
             assertThat(transitioning).isFalse()
+        }
+
+    @Test
+    fun isTransitionUserInputOngoing_idle_false() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.Shade)
+                )
+            val isTransitionUserInputOngoing by
+                collectLastValue(underTest.isTransitionUserInputOngoing)
+            underTest.setTransitionState(transitionState)
+
+            assertThat(isTransitionUserInputOngoing).isFalse()
+        }
+
+    @Test
+    fun isTransitionUserInputOngoing_transition_true() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Shade,
+                        toScene = SceneKey.Lockscreen,
+                        progress = flowOf(0.5f),
+                        isInitiatedByUserInput = true,
+                        isUserInputOngoing = flowOf(true),
+                    )
+                )
+            val isTransitionUserInputOngoing by
+                collectLastValue(underTest.isTransitionUserInputOngoing)
+            underTest.setTransitionState(transitionState)
+
+            assertThat(isTransitionUserInputOngoing).isTrue()
+        }
+
+    @Test
+    fun isTransitionUserInputOngoing_updateMidTransition_false() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Shade,
+                        toScene = SceneKey.Lockscreen,
+                        progress = flowOf(0.5f),
+                        isInitiatedByUserInput = true,
+                        isUserInputOngoing = flowOf(true),
+                    )
+                )
+            val isTransitionUserInputOngoing by
+                collectLastValue(underTest.isTransitionUserInputOngoing)
+            underTest.setTransitionState(transitionState)
+
+            assertThat(isTransitionUserInputOngoing).isTrue()
+
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Shade,
+                    toScene = SceneKey.Lockscreen,
+                    progress = flowOf(0.6f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                )
+
+            assertThat(isTransitionUserInputOngoing).isFalse()
+        }
+
+    @Test
+    fun isTransitionUserInputOngoing_updateOnIdle_false() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Shade,
+                        toScene = SceneKey.Lockscreen,
+                        progress = flowOf(0.5f),
+                        isInitiatedByUserInput = true,
+                        isUserInputOngoing = flowOf(true),
+                    )
+                )
+            val isTransitionUserInputOngoing by
+                collectLastValue(underTest.isTransitionUserInputOngoing)
+            underTest.setTransitionState(transitionState)
+
+            assertThat(isTransitionUserInputOngoing).isTrue()
+
+            transitionState.value = ObservableTransitionState.Idle(scene = SceneKey.Lockscreen)
+
+            assertThat(isTransitionUserInputOngoing).isFalse()
         }
 
     @Test

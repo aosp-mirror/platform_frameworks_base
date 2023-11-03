@@ -508,7 +508,7 @@ class SceneGestureHandler(
                 return offset / distance
             }
 
-        override val isUserInputDriven = true
+        override val isInitiatedByUserInput = true
 
         /** The current offset caused by the drag gesture. */
         var dragOffset by mutableFloatStateOf(0f)
@@ -518,6 +518,10 @@ class SceneGestureHandler(
          * gesture.
          */
         var isAnimatingOffset by mutableStateOf(false)
+
+        // If we are not animating offset, it means the offset is being driven by the user's finger.
+        override val isUserInputOngoing: Boolean
+            get() = !isAnimatingOffset
 
         /** The animatable used to animate the offset once the user lifted its finger. */
         val offsetAnimatable = Animatable(0f, OffsetVisibilityThreshold)

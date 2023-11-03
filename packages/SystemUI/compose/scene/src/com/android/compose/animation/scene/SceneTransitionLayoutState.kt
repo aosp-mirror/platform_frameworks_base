@@ -70,6 +70,9 @@ sealed interface TransitionState {
         val progress: Float
 
         /** Whether the transition was triggered by user input rather than being programmatic. */
-        val isUserInputDriven: Boolean
+        val isInitiatedByUserInput: Boolean
+
+        /** Whether user input is currently driving the transition. */
+        val isUserInputOngoing: Boolean
     }
 }
