@@ -90,6 +90,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -5872,7 +5873,7 @@ public interface WindowManager extends ViewManager {
      *
      * @hide
      */
-    @FlaggedApi("REPLACE_CONTENT_WITH_MIRROR")
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
     @TestApi
     @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
     default boolean replaceContentOnDisplayWithMirror(int displayId, @NonNull Window window) {
@@ -5888,7 +5889,7 @@ public interface WindowManager extends ViewManager {
      *
      * @hide
      */
-    @FlaggedApi("REPLACE_CONTENT_WITH_MIRROR")
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
     @TestApi
     @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
     default boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
