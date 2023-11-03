@@ -17048,23 +17048,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Overrides the effective cached value of enable_keep_profiles_running for testing purposes.
-     *
-     * @hide
-     */
-    @TestApi
-    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    public void setOverrideKeepProfilesRunning(boolean enabled) {
-        if (mService != null) {
-            try {
-                mService.setOverrideKeepProfilesRunning(enabled);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
      * Triggers the data migration of device policies for existing DPCs to the Device Policy Engine.
      * If {@code forceMigration} is set to {@code true} it skips the prerequisite checks before
      * triggering the migration.

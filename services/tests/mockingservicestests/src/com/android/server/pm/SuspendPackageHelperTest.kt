@@ -39,7 +39,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 targetPackages, true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)
         testHandler.flush()
 
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
@@ -56,14 +56,14 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 null /* packageNames */, true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)
 
         assertThat(failedNames).isNull()
 
         failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOfNulls(0), true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)
 
         assertThat(failedNames).isEmpty()
     }
@@ -73,7 +73,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, TEST_PACKAGE_1, TEST_USER_ID,
-                Binder.getCallingUid(), false /* forQuietMode */, false /* quarantined */)
+                Binder.getCallingUid(), false /* quarantined */)
 
         assertThat(failedNames).asList().hasSize(1)
         assertThat(failedNames).asList().contains(TEST_PACKAGE_2)
@@ -84,7 +84,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOf(DEVICE_OWNER_PACKAGE), true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)
 
         assertThat(failedNames).asList().hasSize(1)
         assertThat(failedNames).asList().contains(DEVICE_OWNER_PACKAGE)
@@ -95,7 +95,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOf(NONEXISTENT_PACKAGE), true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)
 
         assertThat(failedNames).asList().hasSize(1)
         assertThat(failedNames).asList().contains(NONEXISTENT_PACKAGE)
@@ -108,7 +108,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 knownPackages, true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)!!
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)!!
 
         assertThat(failedNames.size).isEqualTo(knownPackages.size)
         for (pkg in knownPackages) {
@@ -117,33 +117,19 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     }
 
     @Test
-    fun setPackagesSuspended_forQuietMode() {
-        val knownPackages = arrayOf(DEVICE_ADMIN_PACKAGE, DEFAULT_HOME_PACKAGE, DIALER_PACKAGE,
-                INSTALLER_PACKAGE, UNINSTALLER_PACKAGE, VERIFIER_PACKAGE,
-                PERMISSION_CONTROLLER_PACKAGE, MGMT_ROLE_HOLDER_PACKAGE)
-        val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
-                knownPackages, true /* suspended */, null /* appExtras */,
-                null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, true /* forQuietMode */, false /* quarantined */)!!
-
-        assertThat(failedNames.size).isEqualTo(1)
-        assertThat(failedNames[0]).isEqualTo(MGMT_ROLE_HOLDER_PACKAGE)
-    }
-
-    @Test
     fun setPackagesUnsuspended() {
         val targetPackages = arrayOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 targetPackages, true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)
         testHandler.flush()
         Mockito.clearInvocations(broadcastHelper)
         assertThat(failedNames).isEmpty()
         failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 targetPackages, false /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)
         testHandler.flush()
 
         verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
@@ -191,7 +177,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOf(TEST_PACKAGE_1), true /* suspended */, appExtras, null /* launcherExtras */,
                 null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
-                false /* forQuietMode */, false /* quarantined */)
+                false /* quarantined */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -209,7 +195,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 targetPackages, true /* suspended */, appExtras, null /* launcherExtras */,
                 null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
-                false /* forQuietMode */, false /* quarantined */)
+                false /* quarantined */)
         testHandler.flush()
         Mockito.clearInvocations(broadcastHelper)
         assertThat(failedNames).isEmpty()
@@ -250,7 +236,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */, launcherExtras,
                 null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
-                false /* forQuietMode */, false /* quarantined */)
+                false /* quarantined */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -265,7 +251,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOf(TEST_PACKAGE_1), true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
-                TEST_USER_ID, deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                TEST_USER_ID, deviceOwnerUid, false /* quarantined */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -280,7 +266,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOf(TEST_PACKAGE_2), true /* suspended */, null /* appExtras */, launcherExtras,
                 null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
-                false /* forQuietMode */, false /* quarantined */)
+                false /* quarantined */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 
@@ -295,7 +281,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 arrayOf(TEST_PACKAGE_1), true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, dialogInfo, DEVICE_OWNER_PACKAGE, TEST_USER_ID,
-                deviceOwnerUid, false /* forQuietMode */, false /* quarantined */)
+                deviceOwnerUid, false /* quarantined */)
         testHandler.flush()
         assertThat(failedNames).isEmpty()
 

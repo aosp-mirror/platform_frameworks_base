@@ -285,10 +285,6 @@ class ActivityStartInterceptor {
             return false;
         }
 
-        if (isKeepProfilesRunningEnabled() && !isPackageSuspended()) {
-            return false;
-        }
-
         IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT);
 
@@ -519,12 +515,6 @@ class ActivityStartInterceptor {
     private boolean isPackageSuspended() {
         return mAInfo != null && mAInfo.applicationInfo != null
                 && (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) != 0;
-    }
-
-    private static boolean isKeepProfilesRunningEnabled() {
-        DevicePolicyManagerInternal dpmi =
-                LocalServices.getService(DevicePolicyManagerInternal.class);
-        return dpmi == null || dpmi.isKeepProfilesRunningEnabled();
     }
 
     /**
