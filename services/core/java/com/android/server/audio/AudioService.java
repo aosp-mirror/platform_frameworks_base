@@ -37,6 +37,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
+import static com.android.media.audio.Flags.bluetoothMacAddressAnonymization;
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
 import static com.android.server.utils.EventLogger.Event.ALOGE;
 import static com.android.server.utils.EventLogger.Event.ALOGI;
@@ -203,7 +204,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
-import com.android.media.audio.flags.Flags;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -10509,7 +10509,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private boolean isBluetoothPrividged() {
-        if (!Flags.bluetoothMacAddressAnonymization()) {
+        if (!bluetoothMacAddressAnonymization()) {
             return true;
         }
         return PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
