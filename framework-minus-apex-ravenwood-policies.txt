@@ -40,6 +40,12 @@ class android.util.JsonReader stubclass
 class android.util.JsonWriter stubclass
 class android.util.MalformedJsonException stubclass
 
+# Base64
+class android.util.Base64 stubclass
+class android.util.Base64DataException stubclass
+class android.util.Base64InputStream stubclass
+class android.util.Base64OutputStream stubclass
+
 # Data Holders
 class android.util.MutableFloat stubclass
 class android.util.MutableShort stubclass
@@ -47,6 +53,7 @@ class android.util.MutableBoolean stubclass
 class android.util.MutableByte stubclass
 class android.util.MutableChar stubclass
 class android.util.MutableDouble stubclass
+class android.util.Pair stubclass
 class android.util.Range stubclass
 class android.util.Rational stubclass
 class android.util.Size stubclass

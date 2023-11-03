@@ -21,10 +21,9 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.util.ArraySet;
+import android.util.EmptyArray;
 
 import dalvik.system.VMRuntime;
-
-import libcore.util.EmptyArray;
 
 import java.io.File;
 import java.lang.reflect.Array;
