@@ -33,7 +33,6 @@ import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_OK;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_SECURITY_EXCEPTION;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_TRUE;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
-import static android.view.contentprotection.flags.Flags.parseGroupsConfigEnabled;
 
 import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ACCEPT_DATA_SHARE_REQUEST;
 import static com.android.internal.util.FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL;
@@ -1036,9 +1035,6 @@ public class ContentCaptureManagerService extends
     protected List<List<String>> parseContentProtectionGroupsConfig(@Nullable String config) {
         if (verbose) {
             Slog.v(TAG, "parseContentProtectionGroupsConfig: " + config);
-        }
-        if (!parseGroupsConfigEnabled()) {
-            return Collections.emptyList();
         }
         if (config == null) {
             return Collections.emptyList();

@@ -16,8 +16,6 @@
 
 package com.android.server.contentprotection;
 
-import static android.view.contentprotection.flags.Flags.FLAG_BLOCKLIST_UPDATE_ENABLED;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -107,9 +105,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void start_updateEnabled_firstTime_beforeDelay() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-
+    public void start_firstTime_beforeDelay() {
         mContentProtectionAllowlistManager.start(DELAY_MS);
         mTestLooper.dispatchAll();
 
@@ -121,9 +117,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void start_updateEnabled_firstTime_afterDelay() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-
+    public void start_firstTime_afterDelay() {
         mContentProtectionAllowlistManager.start(DELAY_MS);
         mTestLooper.moveTimeForward(DELAY_MS);
         mTestLooper.dispatchNext();
@@ -137,8 +131,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void start_updateEnabled_secondTime() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
+    public void start_secondTime() {
         mContentProtectionAllowlistManager.start(DELAY_MS);
         mTestLooper.moveTimeForward(DELAY_MS);
         mTestLooper.dispatchNext();
@@ -154,55 +147,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void start_updateDisabled_firstTime_beforeDelay() {
-        mSetFlagsRule.disableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-
-        mContentProtectionAllowlistManager.start(DELAY_MS);
-        mTestLooper.dispatchAll();
-
-        assertThat(mHandler.hasMessagesOrCallbacks()).isTrue();
-        verifyZeroInteractions(mMockContentCaptureManagerService);
-        verifyZeroInteractions(mMockPackageMonitor);
-        verifyZeroInteractions(mMockRemoteContentProtectionService);
-        verifyZeroInteractions(mMockAllowlistCallback);
-    }
-
-    @Test
-    public void start_updateDisabled_firstTime_afterDelay() {
-        mSetFlagsRule.disableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-
-        mContentProtectionAllowlistManager.start(DELAY_MS);
-        mTestLooper.moveTimeForward(DELAY_MS);
-        mTestLooper.dispatchNext();
-
-        assertThat(mHandler.hasMessagesOrCallbacks()).isFalse();
-        verifyZeroInteractions(mMockContentCaptureManagerService);
-        verify(mMockPackageMonitor).register(any(), eq(UserHandle.ALL), eq(mHandler));
-        verify(mMockPackageMonitor, never()).unregister();
-        verifyZeroInteractions(mMockRemoteContentProtectionService);
-        verifyZeroInteractions(mMockAllowlistCallback);
-    }
-
-    @Test
-    public void start_updateDisabled_secondTime() {
-        mSetFlagsRule.disableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-        mContentProtectionAllowlistManager.start(DELAY_MS);
-        mTestLooper.moveTimeForward(DELAY_MS);
-        mTestLooper.dispatchNext();
-
-        mContentProtectionAllowlistManager.start(DELAY_MS);
-
-        assertThat(mHandler.hasMessagesOrCallbacks()).isFalse();
-        verifyZeroInteractions(mMockContentCaptureManagerService);
-        verify(mMockPackageMonitor).register(any(), eq(UserHandle.ALL), eq(mHandler));
-        verify(mMockPackageMonitor, never()).unregister();
-        verifyZeroInteractions(mMockRemoteContentProtectionService);
-        verifyZeroInteractions(mMockAllowlistCallback);
-    }
-
-    @Test
-    public void stop_updateEnabled_notStarted() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
+    public void stop_notStarted() {
         doThrow(new IllegalStateException("NOT REGISTERED")).when(mMockPackageMonitor).unregister();
 
         mContentProtectionAllowlistManager.stop();
@@ -216,8 +161,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void stop_updateEnabled_started_beforeDelay() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
+    public void stop_started_beforeDelay() {
         doThrow(new IllegalStateException("NOT REGISTERED")).when(mMockPackageMonitor).unregister();
         mContentProtectionAllowlistManager.start(DELAY_MS);
         mTestLooper.dispatchAll();
@@ -233,8 +177,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void stop_updateEnabled_started_afterDelay() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
+    public void stop_started_afterDelay() {
         mContentProtectionAllowlistManager.start(DELAY_MS);
         mTestLooper.moveTimeForward(DELAY_MS);
         mTestLooper.dispatchNext();
@@ -243,55 +186,6 @@ public class ContentProtectionAllowlistManagerTest {
 
         assertThat(mHandler.hasMessagesOrCallbacks()).isFalse();
         verify(mMockContentCaptureManagerService).createRemoteContentProtectionService();
-        verify(mMockPackageMonitor).register(any(), eq(UserHandle.ALL), eq(mHandler));
-        verify(mMockPackageMonitor).unregister();
-        verifyZeroInteractions(mMockRemoteContentProtectionService);
-        verifyZeroInteractions(mMockAllowlistCallback);
-    }
-
-    @Test
-    public void stop_updateDisabled_notStarted() {
-        mSetFlagsRule.disableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-        doThrow(new IllegalStateException("NOT REGISTERED")).when(mMockPackageMonitor).unregister();
-
-        mContentProtectionAllowlistManager.stop();
-
-        assertThat(mHandler.hasMessagesOrCallbacks()).isFalse();
-        verifyZeroInteractions(mMockContentCaptureManagerService);
-        verify(mMockPackageMonitor, never()).register(any(), any(), any());
-        verify(mMockPackageMonitor).unregister();
-        verifyZeroInteractions(mMockRemoteContentProtectionService);
-        verifyZeroInteractions(mMockAllowlistCallback);
-    }
-
-    @Test
-    public void stop_updateDisabled_started_beforeDelay() {
-        mSetFlagsRule.disableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-        doThrow(new IllegalStateException("NOT REGISTERED")).when(mMockPackageMonitor).unregister();
-        mContentProtectionAllowlistManager.start(DELAY_MS);
-        mTestLooper.dispatchAll();
-
-        mContentProtectionAllowlistManager.stop();
-
-        assertThat(mHandler.hasMessagesOrCallbacks()).isFalse();
-        verifyZeroInteractions(mMockContentCaptureManagerService);
-        verify(mMockPackageMonitor, never()).register(any(), any(), any());
-        verify(mMockPackageMonitor).unregister();
-        verifyZeroInteractions(mMockRemoteContentProtectionService);
-        verifyZeroInteractions(mMockAllowlistCallback);
-    }
-
-    @Test
-    public void stop_updateDisabled_started_afterDelay() {
-        mSetFlagsRule.disableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-        mContentProtectionAllowlistManager.start(DELAY_MS);
-        mTestLooper.moveTimeForward(DELAY_MS);
-        mTestLooper.dispatchNext();
-
-        mContentProtectionAllowlistManager.stop();
-
-        assertThat(mHandler.hasMessagesOrCallbacks()).isFalse();
-        verifyZeroInteractions(mMockContentCaptureManagerService);
         verify(mMockPackageMonitor).register(any(), eq(UserHandle.ALL), eq(mHandler));
         verify(mMockPackageMonitor).unregister();
         verifyZeroInteractions(mMockRemoteContentProtectionService);
@@ -375,21 +269,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void handlePackagesChanged_updateDisabled() {
-        mSetFlagsRule.disableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
-        mUseMockPackageMonitor = false;
-        ContentProtectionAllowlistManager manager = new TestContentProtectionAllowlistManager();
-
-        manager.mPackageMonitor.onSomePackagesChanged();
-
-        verifyZeroInteractions(mMockContentCaptureManagerService);
-        verifyZeroInteractions(mMockRemoteContentProtectionService);
-        verifyZeroInteractions(mMockAllowlistCallback);
-    }
-
-    @Test
-    public void handlePackagesChanged_updateEnabled_noService() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
+    public void handlePackagesChanged_noService() {
         mUseMockPackageMonitor = false;
         ContentProtectionAllowlistManager manager = new TestContentProtectionAllowlistManager();
 
@@ -401,8 +281,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void handlePackagesChanged_updateEnabled_withService() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
+    public void handlePackagesChanged_withService() {
         mUseMockPackageMonitor = false;
         ContentProtectionAllowlistManager manager = new TestContentProtectionAllowlistManager();
         when(mMockContentCaptureManagerService.createRemoteContentProtectionService())
@@ -416,8 +295,7 @@ public class ContentProtectionAllowlistManagerTest {
     }
 
     @Test
-    public void handlePackagesChanged_updateEnabled_withServiceException() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
+    public void handlePackagesChanged_withServiceException() {
         mUseMockPackageMonitor = false;
         ContentProtectionAllowlistManager manager = new TestContentProtectionAllowlistManager();
         when(mMockContentCaptureManagerService.createRemoteContentProtectionService())
@@ -436,7 +314,6 @@ public class ContentProtectionAllowlistManagerTest {
 
     @Test
     public void handlePackagesChanged_rateLimit_noService() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
         mUseMockPackageMonitor = false;
         ContentProtectionAllowlistManager manager = new TestContentProtectionAllowlistManager();
 
@@ -450,7 +327,6 @@ public class ContentProtectionAllowlistManagerTest {
 
     @Test
     public void handlePackagesChanged_rateLimit_beforeTimeout() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
         mUseMockPackageMonitor = false;
         ContentProtectionAllowlistManager manager = new TestContentProtectionAllowlistManager();
         when(mMockContentCaptureManagerService.createRemoteContentProtectionService())
@@ -467,7 +343,6 @@ public class ContentProtectionAllowlistManagerTest {
 
     @Test
     public void handlePackagesChanged_rateLimit_afterTimeout() {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
         mUseMockPackageMonitor = false;
         ContentProtectionAllowlistManager manager =
                 new TestContentProtectionAllowlistManager(/* timeoutMs= */ 0L);
@@ -485,7 +360,6 @@ public class ContentProtectionAllowlistManagerTest {
 
     @Test
     public void handlePackagesChanged_rateLimit_afterUpdate() throws Exception {
-        mSetFlagsRule.enableFlags(FLAG_BLOCKLIST_UPDATE_ENABLED);
         mUseMockPackageMonitor = false;
         mUseMockAllowlistCallback = false;
         ContentProtectionAllowlistManager manager = new TestContentProtectionAllowlistManager();

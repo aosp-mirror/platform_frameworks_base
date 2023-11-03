@@ -16,8 +16,6 @@
 
 package com.android.server.contentcapture;
 
-import static android.view.contentprotection.flags.Flags.FLAG_PARSE_GROUPS_CONFIG_ENABLED;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -548,48 +546,21 @@ public class ContentCaptureManagerServiceTest {
     }
 
     @Test
-    public void parseContentProtectionGroupsConfig_disabled_null() {
-        mSetFlagsRule.disableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
+    public void parseContentProtectionGroupsConfig_null() {
         ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
 
         assertThat(service.parseContentProtectionGroupsConfig(null)).isEmpty();
     }
 
     @Test
-    public void parseContentProtectionGroupsConfig_disabled_empty() {
-        mSetFlagsRule.disableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
+    public void parseContentProtectionGroupsConfig_empty() {
         ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
 
         assertThat(service.parseContentProtectionGroupsConfig("")).isEmpty();
     }
 
     @Test
-    public void parseContentProtectionGroupsConfig_disabled_notEmpty() {
-        mSetFlagsRule.disableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
-        ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
-
-        assertThat(service.parseContentProtectionGroupsConfig("a")).isEmpty();
-    }
-
-    @Test
-    public void parseContentProtectionGroupsConfig_enabled_null() {
-        mSetFlagsRule.enableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
-        ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
-
-        assertThat(service.parseContentProtectionGroupsConfig(null)).isEmpty();
-    }
-
-    @Test
-    public void parseContentProtectionGroupsConfig_enabled_empty() {
-        mSetFlagsRule.enableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
-        ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
-
-        assertThat(service.parseContentProtectionGroupsConfig("")).isEmpty();
-    }
-
-    @Test
-    public void parseContentProtectionGroupsConfig_enabled_singleValue() {
-        mSetFlagsRule.enableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
+    public void parseContentProtectionGroupsConfig_singleValue() {
         ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
 
         assertThat(service.parseContentProtectionGroupsConfig("a"))
@@ -597,8 +568,7 @@ public class ContentCaptureManagerServiceTest {
     }
 
     @Test
-    public void parseContentProtectionGroupsConfig_enabled_multipleValues() {
-        mSetFlagsRule.enableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
+    public void parseContentProtectionGroupsConfig_multipleValues() {
         ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
 
         assertThat(service.parseContentProtectionGroupsConfig("a,b"))
@@ -606,8 +576,7 @@ public class ContentCaptureManagerServiceTest {
     }
 
     @Test
-    public void parseContentProtectionGroupsConfig_enabled_multipleGroups() {
-        mSetFlagsRule.enableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
+    public void parseContentProtectionGroupsConfig_multipleGroups() {
         ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
 
         assertThat(service.parseContentProtectionGroupsConfig("a,b;c;d,e"))
@@ -615,8 +584,7 @@ public class ContentCaptureManagerServiceTest {
     }
 
     @Test
-    public void parseContentProtectionGroupsConfig_enabled_emptyValues() {
-        mSetFlagsRule.enableFlags(FLAG_PARSE_GROUPS_CONFIG_ENABLED);
+    public void parseContentProtectionGroupsConfig_emptyValues() {
         ContentCaptureManagerService service = new ContentCaptureManagerService(sContext);
 
         assertThat(service.parseContentProtectionGroupsConfig("a;b;;;c;,d,,e,;,;"))
