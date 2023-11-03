@@ -552,6 +552,44 @@ public class BiometricManager {
     }
 
     /**
+     * Registers listener for changes to biometric authentication state.
+     * Only sends callbacks for events that occur after the callback has been registered.
+     * @param listener Listener for changes to biometric authentication state
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void registerAuthenticationStateListener(AuthenticationStateListener listener) {
+        if (mService != null) {
+            try {
+                mService.registerAuthenticationStateListener(listener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "registerAuthenticationStateListener(): Service not connected");
+        }
+    }
+
+    /**
+     * Unregisters listener for changes to biometric authentication state.
+     * @param listener Listener for changes to biometric authentication state
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void unregisterAuthenticationStateListener(AuthenticationStateListener listener) {
+        if (mService != null) {
+            try {
+                mService.unregisterAuthenticationStateListener(listener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "unregisterAuthenticationStateListener(): Service not connected");
+        }
+    }
+
+
+    /**
      * Requests all {@link Authenticators.Types#BIOMETRIC_STRONG} sensors to have their
      * authenticatorId invalidated for the specified user. This happens when enrollments have been
      * added on devices with multiple biometric sensors.

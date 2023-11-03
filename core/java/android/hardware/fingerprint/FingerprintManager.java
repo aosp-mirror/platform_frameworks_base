@@ -983,6 +983,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /**
      * @hide
      */

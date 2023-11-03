@@ -70,6 +70,7 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
@@ -88,6 +89,8 @@ import com.android.systemui.util.concurrency.Execution;
 
 import dagger.Lazy;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,7 +104,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import kotlin.Unit;
 import kotlinx.coroutines.CoroutineScope;
 
 /**
@@ -317,7 +319,9 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
 
         mSidefpsProps = !sidefpsProps.isEmpty() ? sidefpsProps : null;
         if (mSidefpsProps != null) {
-            mSideFpsController = mSidefpsControllerFactory.get();
+            if (!SideFpsControllerRefactor.isEnabled()) {
+                mSideFpsController = mSidefpsControllerFactory.get();
+            }
         }
 
         mFingerprintManager.registerBiometricStateListener(new BiometricStateListener() {
@@ -1194,7 +1198,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
      * Whether the passed userId has enrolled SFPS.
      */
     public boolean isSfpsEnrolled(int userId) {
-        if (mSideFpsController == null) {
+        if (mSidefpsProps == null) {
             return false;
         }
 

@@ -27,6 +27,7 @@ import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityView
 import com.android.keyguard.dagger.KeyguardBouncerComponent
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.bouncer.ui.BouncerViewDelegate
@@ -233,15 +234,21 @@ object KeyguardBouncerViewBinder {
                             .collect { view.systemUiVisibility = it }
                     }
 
-                    launch {
-                        viewModel.shouldUpdateSideFps.collect {
-                            viewModel.updateSideFpsVisibility()
+                    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
+                    if (!SideFpsControllerRefactor.isEnabled) {
+                        launch {
+                            viewModel.shouldUpdateSideFps.collect {
+                                viewModel.updateSideFpsVisibility()
+                            }
                         }
                     }
 
-                    launch {
-                        viewModel.sideFpsShowing.collect {
-                            securityContainerController.updateSideFpsVisibility(it)
+                    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
+                    if (!SideFpsControllerRefactor.isEnabled) {
+                        launch {
+                            viewModel.sideFpsShowing.collect {
+                                securityContainerController.updateSideFpsVisibility(it)
+                            }
                         }
                     }
                     awaitCancellation()

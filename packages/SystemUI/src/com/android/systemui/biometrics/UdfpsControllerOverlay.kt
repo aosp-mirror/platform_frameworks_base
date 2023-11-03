@@ -21,13 +21,13 @@ import android.annotation.UiThread
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.Rect
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
-import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_OTHER
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
+import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
+import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR
+import android.hardware.biometrics.BiometricRequestConstants.RequestReason
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.os.Build
 import android.os.RemoteException
@@ -96,7 +96,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
     private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
     val requestId: Long,
-    @ShowReason val requestReason: Int,
+    @RequestReason val requestReason: Int,
     private val controllerCallback: IUdfpsOverlayControllerCallback,
     private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
@@ -461,7 +461,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     }
 }
 
-@ShowReason
+@RequestReason
 private fun Int.isImportantForAccessibility() =
     this == REASON_ENROLL_FIND_SENSOR ||
             this == REASON_ENROLL_ENROLLING ||

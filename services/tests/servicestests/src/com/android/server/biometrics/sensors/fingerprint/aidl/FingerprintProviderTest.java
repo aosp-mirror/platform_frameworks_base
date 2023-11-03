@@ -43,6 +43,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
@@ -73,6 +74,8 @@ public class FingerprintProviderTest {
     private IFingerprint mDaemon;
     @Mock
     private GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
+    @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
     @Mock
     private BiometricStateCallback mBiometricStateCallback;
     @Mock
@@ -110,8 +113,9 @@ public class FingerprintProviderTest {
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
         mFingerprintProvider = new FingerprintProvider(mContext,
-                mBiometricStateCallback, mSensorProps, TAG, mLockoutResetDispatcher,
-                mGestureAvailabilityDispatcher, mBiometricContext, mDaemon);
+                mBiometricStateCallback, mAuthenticationStateListeners, mSensorProps, TAG,
+                mLockoutResetDispatcher, mGestureAvailabilityDispatcher, mBiometricContext,
+                mDaemon);
     }
 
     @Test

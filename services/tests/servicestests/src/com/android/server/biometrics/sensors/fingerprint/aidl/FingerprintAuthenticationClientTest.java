@@ -18,6 +18,8 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 
+import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -56,6 +58,7 @@ import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableContext;
 
 import androidx.test.filters.SmallTest;
@@ -68,6 +71,7 @@ import com.android.server.biometrics.log.CallbackWithProbe;
 import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -90,6 +94,8 @@ import java.util.function.Consumer;
 @Presubmit
 @SmallTest
 public class FingerprintAuthenticationClientTest {
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final int SENSOR_ID = 4;
     private static final int USER_ID = 8;
@@ -127,6 +133,8 @@ public class FingerprintAuthenticationClientTest {
     private IUdfpsOverlayController mUdfpsOverlayController;
     @Mock
     private ISidefpsController mSideFpsController;
+    @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
     @Mock
     private FingerprintSensorPropertiesInternal mSensorProps;
     @Mock
@@ -384,6 +392,7 @@ public class FingerprintAuthenticationClientTest {
 
     private void showHideOverlay(Consumer<FingerprintAuthenticationClient> block)
             throws RemoteException {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         final FingerprintAuthenticationClient client = createClient();
 
         client.start(mCallback);
@@ -395,6 +404,49 @@ public class FingerprintAuthenticationClientTest {
 
         verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
         verify(mSideFpsController).hide(anyInt());
+    }
+
+    @Test
+    public void showHideOverlay_cancel_sidefpsControllerRemovalRefactor() throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.cancel());
+    }
+
+    @Test
+    public void showHideOverlay_stop_sidefpsControllerRemovalRefactor() throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.stopHalOperation());
+    }
+
+    @Test
+    public void showHideOverlay_error_sidefpsControllerRemovalRefactor() throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.onError(0, 0));
+        verify(mCallback).onClientFinished(any(), eq(false));
+    }
+
+    @Test
+    public void showHideOverlay_lockout_sidefpsControllerRemovalRefactor() throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.onLockoutTimed(5000));
+    }
+
+    @Test
+    public void showHideOverlay_lockoutPerm_sidefpsControllerRemovalRefactor()
+            throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.onLockoutPermanent());
+    }
+
+    private void showHideOverlay_sidefpsControllerRemovalRefactor(
+            Consumer<FingerprintAuthenticationClient> block) throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
+        final FingerprintAuthenticationClient client = createClient();
+
+        client.start(mCallback);
+
+        verify(mUdfpsOverlayController).showUdfpsOverlay(eq(REQUEST_ID), anyInt(), anyInt(), any());
+        verify(mAuthenticationStateListeners).onAuthenticationStarted(anyInt());
+
+        block.accept(client);
+
+        verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
+        verify(mAuthenticationStateListeners).onAuthenticationStopped();
     }
 
     @Test
@@ -502,7 +554,8 @@ public class FingerprintAuthenticationClientTest {
                 mBiometricLogger, mBiometricContext,
                 true /* isStrongBiometric */,
                 null /* taskStackListener */,
-                mUdfpsOverlayController, mSideFpsController, allowBackgroundAuthentication,
+                mUdfpsOverlayController, mSideFpsController, mAuthenticationStateListeners,
+                allowBackgroundAuthentication,
                 mSensorProps,
                 new Handler(mLooper.getLooper()), 0 /* biometricStrength */, mClock,
                 lockoutTracker) {

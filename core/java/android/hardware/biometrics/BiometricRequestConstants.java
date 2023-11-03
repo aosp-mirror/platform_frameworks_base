@@ -22,24 +22,27 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Common constants for biometric overlays.
+ * Common constants for biometric requests.
  * @hide
  */
-public interface BiometricOverlayConstants {
+public class BiometricRequestConstants {
+
+    private BiometricRequestConstants() {}
+
     /** Unknown usage. */
-    int REASON_UNKNOWN = 0;
+    public static final int REASON_UNKNOWN = 0;
     /** User is about to enroll. */
-    int REASON_ENROLL_FIND_SENSOR = 1;
+    public static final int REASON_ENROLL_FIND_SENSOR = 1;
     /** User is enrolling. */
-    int REASON_ENROLL_ENROLLING = 2;
+    public static final int REASON_ENROLL_ENROLLING = 2;
     /** Usage from BiometricPrompt. */
-    int REASON_AUTH_BP = 3;
-    /** Usage from Keyguard. */
-    int REASON_AUTH_KEYGUARD = 4;
+    public static final int REASON_AUTH_BP = 3;
+    /** Usage from Device Entry. */
+    public static final int REASON_AUTH_KEYGUARD = 4;
     /** Non-specific usage (from FingerprintManager). */
-    int REASON_AUTH_OTHER = 5;
+    public static final int REASON_AUTH_OTHER = 5;
     /** Usage from Settings. */
-    int REASON_AUTH_SETTINGS = 6;
+    public static final int REASON_AUTH_SETTINGS = 6;
 
     @IntDef({REASON_UNKNOWN,
             REASON_ENROLL_FIND_SENSOR,
@@ -49,5 +52,5 @@ public interface BiometricOverlayConstants {
             REASON_AUTH_OTHER,
             REASON_AUTH_SETTINGS})
     @Retention(RetentionPolicy.SOURCE)
-    @interface ShowReason {}
+    public @interface RequestReason {}
 }

@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
@@ -342,6 +343,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         assertThat(underTest.willDismissWithAction()).isFalse()
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility() {
         updateSideFpsVisibilityParameters(
@@ -355,6 +357,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(true)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_notVisible() {
         updateSideFpsVisibilityParameters(
@@ -368,6 +371,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_sfpsNotEnabled() {
         updateSideFpsVisibilityParameters(
@@ -381,6 +385,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_fpsDetectionNotRunning() {
         updateSideFpsVisibilityParameters(
@@ -394,6 +399,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_UnlockingWithFpNotAllowed() {
         updateSideFpsVisibilityParameters(
@@ -407,6 +413,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_AnimatingAway() {
         updateSideFpsVisibilityParameters(
@@ -492,6 +499,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         isUnlockingWithFpAllowed: Boolean,
         isAnimatingAway: Boolean
     ) {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         whenever(repository.primaryBouncerShow.value).thenReturn(isVisible)
         resources.addOverride(R.bool.config_show_sidefps_hint_on_bouncer, sfpsEnabled)
         whenever(keyguardUpdateMonitor.isFingerprintDetectionRunning)

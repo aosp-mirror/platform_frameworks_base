@@ -54,6 +54,11 @@ class FakeDeviceEntryFingerprintAuthRepository @Inject constructor() :
     private var _authenticationStatus = MutableStateFlow<FingerprintAuthenticationStatus?>(null)
     override val authenticationStatus: Flow<FingerprintAuthenticationStatus>
         get() = _authenticationStatus.filterNotNull()
+
+    private var _shouldUpdateIndicatorVisibility = MutableStateFlow(false)
+    override val shouldUpdateIndicatorVisibility: Flow<Boolean>
+        get() = _shouldUpdateIndicatorVisibility
+
     fun setAuthenticationStatus(status: FingerprintAuthenticationStatus) {
         _authenticationStatus.value = status
     }

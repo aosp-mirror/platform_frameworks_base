@@ -19,10 +19,10 @@ package com.android.systemui.biometrics;
 import static android.app.StatusBarManager.SESSION_BIOMETRIC_PROMPT;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
-import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP;
-import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
-import static android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING;
-import static android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR;
+import static android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP;
+import static android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD;
+import static android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING;
+import static android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR;
 
 import static com.android.internal.util.LatencyTracker.ACTION_UDFPS_ILLUMINATE;
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -106,6 +106,8 @@ import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -114,8 +116,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlin.Unit;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 

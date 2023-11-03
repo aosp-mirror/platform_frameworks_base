@@ -15,6 +15,7 @@
  */
 package android.hardware.fingerprint;
 
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricStateListener;
@@ -202,6 +203,14 @@ interface IFingerprintService {
     // Sets the controller for managing the SideFPS overlay.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void setSidefpsController(in ISidefpsController controller);
+
+    // Registers AuthenticationStateListener.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void registerAuthenticationStateListener(AuthenticationStateListener listener);
+
+    // Unregisters AuthenticationStateListener.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void unregisterAuthenticationStateListener(AuthenticationStateListener listener);
 
     // Registers BiometricStateListener.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
