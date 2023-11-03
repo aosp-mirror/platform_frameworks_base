@@ -27,12 +27,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -127,17 +123,6 @@ public class TaskFragmentTest extends WindowTestsBase {
         mTaskFragment.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         // Inherit parent's sw in fullscreen mode.
         assertEquals(parentSw, mTaskFragment.getConfiguration().smallestScreenWidthDp);
-    }
-
-    @Test
-    public void testUpdateOrganizedTaskFragmentSurface_noSurfaceUpdateWhenOrganizedBySystem() {
-        clearInvocations(mTransaction);
-        mTaskFragment.mIsSurfaceManagedBySystemOrganizer = true;
-
-        mTaskFragment.updateOrganizedTaskFragmentSurface();
-
-        verify(mTransaction, never()).setPosition(eq(mLeash), anyFloat(), anyFloat());
-        verify(mTransaction, never()).setWindowCrop(eq(mLeash), anyInt(), anyInt());
     }
 
     @Test
