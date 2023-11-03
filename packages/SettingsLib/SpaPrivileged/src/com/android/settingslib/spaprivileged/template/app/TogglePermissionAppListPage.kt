@@ -156,12 +156,12 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
             )
         }
         val restrictedMode by restrictionsProviderFactory.rememberRestrictedMode(restrictions)
-        val allowed by listModel.isAllowed(record)
+        val allowed = listModel.isAllowed(record)
         return RestrictedSwitchPreference.getSummary(
             context = context,
             restrictedModeSupplier = { restrictedMode },
-            summaryIfNoRestricted = { getSummaryIfNoRestricted(allowed) },
-            checked = { allowed },
+            summaryIfNoRestricted = { getSummaryIfNoRestricted(allowed()) },
+            checked = allowed,
         )
     }
 

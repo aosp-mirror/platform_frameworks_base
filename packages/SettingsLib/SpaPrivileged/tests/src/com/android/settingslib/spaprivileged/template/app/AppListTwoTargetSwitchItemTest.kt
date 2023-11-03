@@ -27,7 +27,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -44,8 +43,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = {},
-                checked = stateOf(null),
-                changeable = stateOf(false),
+                checked = { null },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -58,8 +57,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = {},
-                checked = stateOf(null),
-                changeable = stateOf(false),
+                checked = { null },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -73,8 +72,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = { titleClicked = true },
-                checked = stateOf(false),
-                changeable = stateOf(false),
+                checked = { false },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -89,8 +88,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = {},
-                checked = stateOf(null),
-                changeable = stateOf(false),
+                checked = { null },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -103,8 +102,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = {},
-                checked = stateOf(true),
-                changeable = stateOf(false),
+                checked = { true },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -117,8 +116,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = {},
-                checked = stateOf(false),
-                changeable = stateOf(false),
+                checked = { false },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -131,8 +130,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = {},
-                checked = stateOf(false),
-                changeable = stateOf(true),
+                checked = { false },
+                changeable = { true },
                 onCheckedChange = {},
             )
         }
@@ -145,8 +144,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = {},
-                checked = stateOf(false),
-                changeable = stateOf(false),
+                checked = { false },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -160,8 +159,8 @@ class AppListTwoTargetSwitchItemTest {
         composeTestRule.setContent {
             ITEM_MODEL.AppListTwoTargetSwitchItem(
                 onClick = {},
-                checked = stateOf(false),
-                changeable = stateOf(true),
+                checked = { false },
+                changeable = { true },
                 onCheckedChange = { switchClicked = true },
             )
         }

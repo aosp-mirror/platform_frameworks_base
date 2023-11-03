@@ -27,7 +27,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -43,8 +42,8 @@ class AppListSwitchItemTest {
     fun appLabel_displayed() {
         composeTestRule.setContent {
             ITEM_MODEL.AppListSwitchItem(
-                checked = stateOf(null),
-                changeable = stateOf(false),
+                checked = { null },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -56,8 +55,8 @@ class AppListSwitchItemTest {
     fun summary_displayed() {
         composeTestRule.setContent {
             ITEM_MODEL.AppListSwitchItem(
-                checked = stateOf(null),
-                changeable = stateOf(false),
+                checked = { null },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -69,8 +68,8 @@ class AppListSwitchItemTest {
     fun switch_checkIsNull() {
         composeTestRule.setContent {
             ITEM_MODEL.AppListSwitchItem(
-                checked = stateOf(null),
-                changeable = stateOf(false),
+                checked = { null },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -82,8 +81,8 @@ class AppListSwitchItemTest {
     fun switch_checked() {
         composeTestRule.setContent {
             ITEM_MODEL.AppListSwitchItem(
-                checked = stateOf(true),
-                changeable = stateOf(false),
+                checked = { true },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -95,8 +94,8 @@ class AppListSwitchItemTest {
     fun switch_notChecked() {
         composeTestRule.setContent {
             ITEM_MODEL.AppListSwitchItem(
-                checked = stateOf(false),
-                changeable = stateOf(false),
+                checked = { false },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -108,8 +107,8 @@ class AppListSwitchItemTest {
     fun switch_changeable() {
         composeTestRule.setContent {
             ITEM_MODEL.AppListSwitchItem(
-                checked = stateOf(false),
-                changeable = stateOf(true),
+                checked = { false },
+                changeable = { true },
                 onCheckedChange = {},
             )
         }
@@ -121,8 +120,8 @@ class AppListSwitchItemTest {
     fun switch_notChangeable() {
         composeTestRule.setContent {
             ITEM_MODEL.AppListSwitchItem(
-                checked = stateOf(false),
-                changeable = stateOf(false),
+                checked = { false },
+                changeable = { false },
                 onCheckedChange = {},
             )
         }
@@ -135,8 +134,8 @@ class AppListSwitchItemTest {
         var switchClicked = false
         composeTestRule.setContent {
             ITEM_MODEL.AppListSwitchItem(
-                checked = stateOf(false),
-                changeable = stateOf(true),
+                checked = { false },
+                changeable = { true },
                 onCheckedChange = { switchClicked = true },
             )
         }

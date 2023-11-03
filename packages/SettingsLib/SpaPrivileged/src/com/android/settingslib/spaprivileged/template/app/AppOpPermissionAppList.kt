@@ -22,11 +22,7 @@ import android.app.AppOpsManager.MODE_ERRORED
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.util.asyncMapItem
 import com.android.settingslib.spa.framework.util.filterItem
 import com.android.settingslib.spaprivileged.model.app.AppOpsController
@@ -97,8 +93,9 @@ abstract class AppOpPermissionListModel(
         with(packageManagers) {
             AppOpPermissionRecord(
                 app = app,
-                hasRequestBroaderPermission =
-                    broaderPermission?.let { app.hasRequestPermission(it) } ?: false,
+                hasRequestBroaderPermission = broaderPermission?.let {
+                    app.hasRequestPermission(it)
+                } ?: false,
                 hasRequestPermission = hasRequestPermission,
                 appOpsController = createAppOpsController(app),
             )
@@ -138,22 +135,19 @@ abstract class AppOpPermissionListModel(
      * (This means pre-M gets approval during install time; M apps gets approval during runtime).
      */
     @Composable
-    override fun isAllowed(record: AppOpPermissionRecord): State<Boolean?> {
+    override fun isAllowed(record: AppOpPermissionRecord): () -> Boolean? {
         if (record.hasRequestBroaderPermission) {
             // Broader permission trumps the specific permission.
-            return stateOf(true)
+            return { true }
         }
 
         val mode = record.appOpsController.mode.observeAsState()
-        return remember {
-            derivedStateOf {
-                when (mode.value) {
-                    null -> null
-                    MODE_ALLOWED -> true
-                    MODE_DEFAULT ->
-                        with(packageManagers) { record.app.hasGrantPermission(permission) }
-                    else -> false
-                }
+        return {
+            when (mode.value) {
+                null -> null
+                MODE_ALLOWED -> true
+                MODE_DEFAULT -> with(packageManagers) { record.app.hasGrantPermission(permission) }
+                else -> false
             }
         }
     }
