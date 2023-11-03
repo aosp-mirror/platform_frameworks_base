@@ -37,7 +37,7 @@ import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import com.android.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.channels.Channel
 
 @VisibleForTesting
