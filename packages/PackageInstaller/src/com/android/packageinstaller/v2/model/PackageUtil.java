@@ -24,17 +24,23 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class PackageUtil {
 
     private static final String TAG = InstallRepository.class.getSimpleName();
     private static final String DOWNLOADS_AUTHORITY = "downloads";
+    private static final String SPLIT_BASE_APK_END_WITH = "base.apk";
 
     /**
      * Determines if the UID belongs to the system downloads provider and returns the
@@ -211,5 +217,195 @@ public class PackageUtil {
         }
         int installerUid = sessionInfo.getInstallerUid();
         return originatingUid == installerUid;
+    }
+
+    /**
+     * Generates a stub {@link PackageInfo} object for the given packageName
+     */
+    public static PackageInfo generateStubPackageInfo(String packageName) {
+        final PackageInfo info = new PackageInfo();
+        final ApplicationInfo aInfo = new ApplicationInfo();
+        info.applicationInfo = aInfo;
+        info.packageName = info.applicationInfo.packageName = packageName;
+        return info;
+    }
+
+    /**
+     * Generates an {@link AppSnippet} containing an appIcon and appLabel from the
+     * {@link SessionInfo} object
+     */
+    public static AppSnippet getAppSnippet(Context context, SessionInfo info) {
+        PackageManager pm = context.getPackageManager();
+        CharSequence label = info.getAppLabel();
+        Drawable icon = info.getAppIcon() != null ?
+            new BitmapDrawable(context.getResources(), info.getAppIcon())
+            : pm.getDefaultActivityIcon();
+        return new AppSnippet(label, icon);
+    }
+
+    /**
+     * Generates an {@link AppSnippet} containing an appIcon and appLabel from the
+     * {@link PackageInfo} object
+     */
+    public static AppSnippet getAppSnippet(Context context, PackageInfo pkgInfo) {
+        return getAppSnippet(context, pkgInfo.applicationInfo);
+    }
+
+    /**
+     * Generates an {@link AppSnippet} containing an appIcon and appLabel from the
+     * {@link ApplicationInfo} object
+     */
+    public static AppSnippet getAppSnippet(Context context, ApplicationInfo appInfo) {
+        PackageManager pm = context.getPackageManager();
+        CharSequence label = pm.getApplicationLabel(appInfo);
+        Drawable icon = pm.getApplicationIcon(appInfo);
+        return new AppSnippet(label, icon);
+    }
+
+    /**
+     * Generates an {@link AppSnippet} containing an appIcon and appLabel from the
+     * supplied APK file
+     */
+    public static AppSnippet getAppSnippet(Context context, ApplicationInfo appInfo,
+        File sourceFile) {
+        ApplicationInfo appInfoFromFile = processAppInfoForFile(appInfo, sourceFile);
+        CharSequence label = getAppLabelFromFile(context, appInfoFromFile);
+        Drawable icon = getAppIconFromFile(context, appInfoFromFile);
+        return new AppSnippet(label, icon);
+    }
+
+    /**
+     * Utility method to load application label
+     *
+     * @param context context of package that can load the resources
+     * @param appInfo ApplicationInfo object of package whose resources are to be loaded
+     */
+    public static CharSequence getAppLabelFromFile(Context context, ApplicationInfo appInfo) {
+        PackageManager pm = context.getPackageManager();
+        CharSequence label = null;
+        // Try to load the label from the package's resources. If an app has not explicitly
+        // specified any label, just use the package name.
+        if (appInfo.labelRes != 0) {
+            try {
+                label = appInfo.loadLabel(pm);
+            } catch (Resources.NotFoundException e) {
+            }
+        }
+        if (label == null) {
+            label = (appInfo.nonLocalizedLabel != null) ?
+                appInfo.nonLocalizedLabel : appInfo.packageName;
+        }
+        return label;
+    }
+
+    /**
+     * Utility method to load application icon
+     *
+     * @param context context of package that can load the resources
+     * @param appInfo ApplicationInfo object of package whose resources are to be loaded
+     */
+    public static Drawable getAppIconFromFile(Context context, ApplicationInfo appInfo) {
+        PackageManager pm = context.getPackageManager();
+        Drawable icon = null;
+        // Try to load the icon from the package's resources. If an app has not explicitly
+        // specified any resource, just use the default icon for now.
+        try {
+            if (appInfo.icon != 0) {
+                try {
+                    icon = appInfo.loadIcon(pm);
+                } catch (Resources.NotFoundException e) {
+                }
+            }
+            if (icon == null) {
+                icon = context.getPackageManager().getDefaultActivityIcon();
+            }
+        } catch (OutOfMemoryError e) {
+            Log.i(TAG, "Could not load app icon", e);
+        }
+        return icon;
+    }
+
+    private static ApplicationInfo processAppInfoForFile(ApplicationInfo appInfo, File sourceFile) {
+        final String archiveFilePath = sourceFile.getAbsolutePath();
+        appInfo.publicSourceDir = archiveFilePath;
+
+        if (appInfo.splitNames != null && appInfo.splitSourceDirs == null) {
+            final File[] files = sourceFile.getParentFile().listFiles();
+            final String[] splits = Arrays.stream(appInfo.splitNames)
+                .map(i -> findFilePath(files, i + ".apk"))
+                .filter(Objects::nonNull)
+                .toArray(String[]::new);
+
+            appInfo.splitSourceDirs = splits;
+            appInfo.splitPublicSourceDirs = splits;
+        }
+        return appInfo;
+    }
+
+    private static String findFilePath(File[] files, String postfix) {
+        for (File file : files) {
+            final String path = file.getAbsolutePath();
+            if (path.endsWith(postfix)) {
+                return path;
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Utility method to get package information for a given {@link File}
+     */
+    public static PackageInfo getPackageInfo(Context context, File sourceFile, int flags) {
+        String filePath = sourceFile.getAbsolutePath();
+        if (filePath.endsWith(SPLIT_BASE_APK_END_WITH)) {
+            File dir = sourceFile.getParentFile();
+            if (dir.listFiles().length > 1) {
+                // split apks, use file directory to get archive info
+                filePath = dir.getPath();
+            }
+        }
+        try {
+            return context.getPackageManager().getPackageArchiveInfo(filePath, flags);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * The class to hold an incoming package's icon and label.
+     * See {@link #getAppSnippet(Context, SessionInfo)},
+     * {@link #getAppSnippet(Context, PackageInfo)},
+     * {@link #getAppSnippet(Context, ApplicationInfo)},
+     * {@link #getAppSnippet(Context, ApplicationInfo, File)}
+     */
+    public static class AppSnippet {
+
+        private CharSequence mLabel;
+        private Drawable mIcon;
+
+        public AppSnippet(CharSequence label, Drawable icon) {
+            mLabel = label;
+            mIcon = icon;
+        }
+
+        public AppSnippet() {
+        }
+
+        public CharSequence getLabel() {
+            return mLabel;
+        }
+
+        public void setLabel(CharSequence mLabel) {
+            this.mLabel = mLabel;
+        }
+
+        public Drawable getIcon() {
+            return mIcon;
+        }
+
+        public void setIcon(Drawable mIcon) {
+            this.mIcon = mIcon;
+        }
     }
 }

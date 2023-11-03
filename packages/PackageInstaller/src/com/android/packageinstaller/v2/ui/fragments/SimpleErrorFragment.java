@@ -16,22 +16,31 @@
 
 package com.android.packageinstaller.v2.ui.fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
+import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
+import com.android.packageinstaller.v2.ui.InstallActionListener;
 
 public class SimpleErrorFragment extends DialogFragment {
 
     private static final String TAG = SimpleErrorFragment.class.getSimpleName();
     private final int mMessageResId;
+    private InstallActionListener mInstallActionListener;
 
     public SimpleErrorFragment(int messageResId) {
         mMessageResId = messageResId;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mInstallActionListener = (InstallActionListener) context;
     }
 
     @NonNull
@@ -39,13 +48,15 @@ public class SimpleErrorFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
             .setMessage(mMessageResId)
-            .setPositiveButton(R.string.ok, (dialog, which) -> getActivity().finish())
+            .setPositiveButton(R.string.ok,
+                (dialog, which) ->
+                    mInstallActionListener.onNegativeResponse(InstallStage.STAGE_ABORTED))
             .create();
     }
 
     @Override
     public void onCancel(DialogInterface dialog) {
-        getActivity().setResult(Activity.RESULT_CANCELED);
-        getActivity().finish();
+        super.onCancel(dialog);
+        mInstallActionListener.onNegativeResponse(InstallStage.STAGE_ABORTED);
     }
 }

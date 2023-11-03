@@ -26,6 +26,7 @@ public class InstallAborted extends InstallStage {
 
     public static final int ABORT_REASON_INTERNAL_ERROR = 0;
     public static final int ABORT_REASON_POLICY = 1;
+    public static final int DLG_PACKAGE_ERROR = 1;
     private final int mStage = InstallStage.STAGE_ABORTED;
     private final int mAbortReason;
 
@@ -46,13 +47,15 @@ public class InstallAborted extends InstallStage {
      */
     @Nullable
     private final Intent mIntent;
+    private final int mErrorDialogType;
     private final int mActivityResultCode;
 
     private InstallAborted(int reason, @NonNull String message, @Nullable Intent intent,
-        int activityResultCode) {
+        int activityResultCode, int errorDialogType) {
         mAbortReason = reason;
         mMessage = message;
         mIntent = intent;
+        mErrorDialogType = errorDialogType;
         mActivityResultCode = activityResultCode;
     }
 
@@ -70,6 +73,10 @@ public class InstallAborted extends InstallStage {
         return mIntent;
     }
 
+    public int getErrorDialogType() {
+        return mErrorDialogType;
+    }
+
     public int getActivityResultCode() {
         return mActivityResultCode;
     }
@@ -85,6 +92,7 @@ public class InstallAborted extends InstallStage {
         private String mMessage = "";
         private Intent mIntent = null;
         private int mActivityResultCode = Activity.RESULT_CANCELED;
+        private int mErrorDialogType;
 
         public Builder(int reason) {
             mAbortReason = reason;
@@ -100,13 +108,19 @@ public class InstallAborted extends InstallStage {
             return this;
         }
 
+        public Builder setErrorDialogType(int dialogType) {
+            mErrorDialogType = dialogType;
+            return this;
+        }
+
         public Builder setActivityResultCode(int resultCode) {
             mActivityResultCode = resultCode;
             return this;
         }
 
         public InstallAborted build() {
-            return new InstallAborted(mAbortReason, mMessage, mIntent, mActivityResultCode);
+            return new InstallAborted(mAbortReason, mMessage, mIntent, mActivityResultCode,
+                mErrorDialogType);
         }
     }
 }

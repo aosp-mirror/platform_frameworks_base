@@ -35,12 +35,14 @@ import com.android.packageinstaller.v2.model.InstallRepository;
 import com.android.packageinstaller.v2.model.InstallRepository.CallerInfo;
 import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
+import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired;
+import com.android.packageinstaller.v2.ui.fragments.InstallConfirmationFragment;
 import com.android.packageinstaller.v2.ui.fragments.InstallStagingFragment;
 import com.android.packageinstaller.v2.ui.fragments.SimpleErrorFragment;
 import com.android.packageinstaller.v2.viewmodel.InstallViewModel;
 import com.android.packageinstaller.v2.viewmodel.InstallViewModelFactory;
 
-public class InstallLaunch extends FragmentActivity {
+public class InstallLaunch extends FragmentActivity implements InstallActionListener {
 
     public static final String EXTRA_CALLING_PKG_UID =
             InstallLaunch.class.getPackageName() + ".callingPkgUid";
@@ -91,6 +93,10 @@ public class InstallLaunch extends FragmentActivity {
                 case ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted);
                 default -> setResult(RESULT_CANCELED, true);
             }
+        } else if (installStage.getStageCode() == InstallStage.STAGE_USER_ACTION_REQUIRED) {
+            InstallUserActionRequired uar = (InstallUserActionRequired) installStage;
+            InstallConfirmationFragment actionDialog = new InstallConfirmationFragment(uar);
+            showDialogInner(actionDialog);
         } else {
             Log.d(TAG, "Unimplemented stage: " + installStage.getStageCode());
             showDialogInner(null);
@@ -168,5 +174,15 @@ public class InstallLaunch extends FragmentActivity {
         if (shouldFinish) {
             finish();
         }
+    }
+
+    @Override
+    public void onPositiveResponse(int reasonCode) {
+        // TODO: Implement this
+    }
+
+    @Override
+    public void onNegativeResponse(int stageCode) {
+        // TODO: Implement this
     }
 }

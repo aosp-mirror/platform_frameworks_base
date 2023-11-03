@@ -58,7 +58,7 @@ public class InstallViewModel extends AndroidViewModel {
                 if (installStage.getStageCode() != InstallStage.STAGE_READY) {
                     mCurrentInstallStage.setValue(installStage);
                 } else {
-                    // Proceed with user confirmation here.
+                    checkIfAllowedAndInitiateInstall();
                 }
             });
         }
@@ -66,5 +66,10 @@ public class InstallViewModel extends AndroidViewModel {
 
     public MutableLiveData<Integer> getStagingProgress() {
         return mRepository.getStagingProgress();
+    }
+
+    private void checkIfAllowedAndInitiateInstall() {
+        InstallStage stage = mRepository.requestUserConfirmation();
+        mCurrentInstallStage.setValue(stage);
     }
 }
