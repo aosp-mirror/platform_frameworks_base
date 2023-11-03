@@ -10303,6 +10303,7 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public int getUid();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean hasCategory(@NonNull String);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isOnHost();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isOtherServiceEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public CharSequence loadAppLabel(@NonNull android.content.pm.PackageManager);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadBanner(@NonNull android.content.pm.PackageManager);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
@@ -10313,6 +10314,7 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void resetOffHostSecureElement();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setDynamicAidGroup(@NonNull android.nfc.cardemulation.AidGroup);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOffHostSecureElement(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOtherServiceEnabled(boolean);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
   }
