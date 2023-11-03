@@ -24,6 +24,7 @@
 #include <SkColor.h>
 #include <android-base/stringprintf.h>
 #include <android-base/thread_annotations.h>
+#include <com_android_input_flags.h>
 #include <ftl/enum.h>
 
 #include <mutex>
@@ -33,6 +34,8 @@
 #define INDENT "  "
 #define INDENT2 "    "
 #define INDENT3 "      "
+
+namespace input_flags = com::android::input::flags;
 
 namespace android {
 
@@ -63,10 +66,20 @@ void PointerController::DisplayInfoListener::onPointerControllerDestroyed() {
 
 std::shared_ptr<PointerController> PointerController::create(
         const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-        SpriteController& spriteController, bool enabled) {
+        SpriteController& spriteController, bool enabled, ControllerType type) {
     // using 'new' to access non-public constructor
-    std::shared_ptr<PointerController> controller = std::shared_ptr<PointerController>(
-            new PointerController(policy, looper, spriteController, enabled));
+    std::shared_ptr<PointerController> controller;
+    switch (type) {
+        case ControllerType::MOUSE:
+            controller = std::shared_ptr<PointerController>(
+                    new MousePointerController(policy, looper, spriteController, enabled));
+            break;
+        case ControllerType::LEGACY:
+        default:
+            controller = std::shared_ptr<PointerController>(
+                    new PointerController(policy, looper, spriteController, enabled));
+            break;
+    }
 
     /*
      * Now we need to hook up the constructed PointerController object to its callbacks.
@@ -373,6 +386,15 @@ std::string PointerController::dump() {
         spotController.dump(dump, INDENT3);
     }
     return dump;
+}
+
+// --- MousePointerController ---
+
+MousePointerController::MousePointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                               const sp<Looper>& looper,
+                                               SpriteController& spriteController, bool enabled)
+      : PointerController(policy, looper, spriteController, enabled) {
+    PointerController::setPresentation(Presentation::POINTER);
 }
 
 } // namespace android
