@@ -262,7 +262,7 @@ public class DisplayModeDirector {
         mVotesStorage.setLoggingEnabled(loggingEnabled);
     }
 
-    private static final class VoteSummary {
+    static final class VoteSummary {
         public float minPhysicalRefreshRate;
         public float maxPhysicalRefreshRate;
         public float minRenderFrameRate;
@@ -274,7 +274,12 @@ public class DisplayModeDirector {
         public boolean disableRefreshRateSwitching;
         public float appRequestBaseModeRefreshRate;
 
-        VoteSummary() {
+        public List<SupportedModesVote.SupportedMode> supportedModes;
+
+        final boolean mIsDisplayResolutionRangeVotingEnabled;
+
+        VoteSummary(boolean isDisplayResolutionRangeVotingEnabled) {
+            mIsDisplayResolutionRangeVotingEnabled = isDisplayResolutionRangeVotingEnabled;
             reset();
         }
 
@@ -322,46 +327,7 @@ public class DisplayModeDirector {
                 continue;
             }
 
-            // For physical refresh rates, just use the tightest bounds of all the votes.
-            // The refresh rate cannot be lower than the minimal render frame rate.
-            final float minPhysicalRefreshRate = Math.max(vote.refreshRateRanges.physical.min,
-                    vote.refreshRateRanges.render.min);
-            summary.minPhysicalRefreshRate = Math.max(summary.minPhysicalRefreshRate,
-                    minPhysicalRefreshRate);
-            summary.maxPhysicalRefreshRate = Math.min(summary.maxPhysicalRefreshRate,
-                    vote.refreshRateRanges.physical.max);
-
-            // Same goes to render frame rate, but frame rate cannot exceed the max physical
-            // refresh rate
-            final float maxRenderFrameRate = Math.min(vote.refreshRateRanges.render.max,
-                    vote.refreshRateRanges.physical.max);
-            summary.minRenderFrameRate = Math.max(summary.minRenderFrameRate,
-                    vote.refreshRateRanges.render.min);
-            summary.maxRenderFrameRate = Math.min(summary.maxRenderFrameRate, maxRenderFrameRate);
-
-            // For display size, disable refresh rate switching and base mode refresh rate use only
-            // the first vote we come across (i.e. the highest priority vote that includes the
-            // attribute).
-            if (vote.height > 0 && vote.width > 0) {
-                if (summary.width == Vote.INVALID_SIZE && summary.height == Vote.INVALID_SIZE) {
-                    summary.width = vote.width;
-                    summary.height = vote.height;
-                    summary.minWidth = vote.minWidth;
-                    summary.minHeight = vote.minHeight;
-                } else if (mIsDisplayResolutionRangeVotingEnabled) {
-                    summary.width = Math.min(summary.width, vote.width);
-                    summary.height = Math.min(summary.height, vote.height);
-                    summary.minWidth = Math.max(summary.minWidth, vote.minWidth);
-                    summary.minHeight = Math.max(summary.minHeight, vote.minHeight);
-                }
-            }
-            if (!summary.disableRefreshRateSwitching && vote.disableRefreshRateSwitching) {
-                summary.disableRefreshRateSwitching = true;
-            }
-            if (summary.appRequestBaseModeRefreshRate == 0f
-                    && vote.appRequestBaseModeRefreshRate > 0f) {
-                summary.appRequestBaseModeRefreshRate = vote.appRequestBaseModeRefreshRate;
-            }
+            vote.updateSummary(summary);
 
             if (mLoggingEnabled) {
                 Slog.w(TAG, "Vote summary for priority " + Vote.priorityToString(priority)
@@ -443,7 +409,7 @@ public class DisplayModeDirector {
 
             ArrayList<Display.Mode> availableModes = new ArrayList<>();
             availableModes.add(defaultMode);
-            VoteSummary primarySummary = new VoteSummary();
+            VoteSummary primarySummary = new VoteSummary(mIsDisplayResolutionRangeVotingEnabled);
             int lowestConsideredPriority = Vote.MIN_PRIORITY;
             int highestConsideredPriority = Vote.MAX_PRIORITY;
 
@@ -526,7 +492,7 @@ public class DisplayModeDirector {
                                 + "]");
             }
 
-            VoteSummary appRequestSummary = new VoteSummary();
+            VoteSummary appRequestSummary = new VoteSummary(mIsDisplayResolutionRangeVotingEnabled);
             summarizeVotes(
                     votes,
                     Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF,
