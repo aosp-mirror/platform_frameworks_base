@@ -577,8 +577,14 @@ public class JobSchedulerServiceTest {
         JobStatus jobUIDT = createJobStatus("testGetMaxJobExecutionTimeMs",
                 createJobInfo(10)
                         .setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        JobStatus jobEj = createJobStatus("testGetMaxJobExecutionTimeMs",
+                createJobInfo(2).setExpedited(true));
+        JobStatus jobReg = createJobStatus("testGetMaxJobExecutionTimeMs",
+                createJobInfo(3));
         spyOn(jobUIDT);
         when(jobUIDT.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        spyOn(jobEj);
+        when(jobEj.shouldTreatAsExpeditedJob()).thenReturn(true);
 
         QuotaController quotaController = mService.getQuotaController();
         spyOn(quotaController);
@@ -595,6 +601,11 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUIDT));
+
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
     }
 
     @Test
@@ -636,7 +647,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -649,7 +660,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -664,7 +675,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -677,7 +688,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -692,7 +703,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -705,7 +716,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -720,7 +731,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -765,7 +776,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -778,7 +789,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -792,7 +803,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -807,7 +818,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -820,7 +831,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
@@ -834,7 +845,7 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUij));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMaxJobExecutionTimeMs(jobEj));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobReg));
