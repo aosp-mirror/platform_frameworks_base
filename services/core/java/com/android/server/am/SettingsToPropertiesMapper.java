@@ -128,6 +128,7 @@ public class SettingsToPropertiesMapper {
         "biometrics",
         "biometrics_framework",
         "biometrics_integration",
+        "camera_hal",
         "camera_platform",
         "car_framework",
         "car_perception",
