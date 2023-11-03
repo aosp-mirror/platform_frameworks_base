@@ -28,6 +28,8 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESE
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.server.display.DisplayManagerService.ENABLE_ON_CONNECT;
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -90,12 +92,14 @@ import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.ContentRecordingSession;
 import android.view.Display;
@@ -113,6 +117,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
@@ -130,6 +135,7 @@ import com.google.common.truth.Expect;
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -141,6 +147,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -322,6 +330,12 @@ public class DisplayManagerServiceTest {
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
     @Mock DisplayManagerFlags mMockFlags;
 
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule =
+            new ExtendedMockitoRule.Builder(this)
+                    .setStrictness(Strictness.LENIENT)
+                    .spyStatic(SystemProperties.class)
+                    .build();
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -2403,6 +2417,39 @@ public class DisplayManagerServiceTest {
         assertThat(display.isEnabledLocked()).isFalse();
         assertThat(callback.receivedEvents()).containsExactly(DISPLAY_GROUP_EVENT_ADDED,
                 EVENT_DISPLAY_CONNECTED).inOrder();
+    }
+
+    @Test
+    public void testConnectExternalDisplay_withDisplayManagementAndSysprop_shouldEnableDisplay() {
+        Assume.assumeTrue(Build.IS_ENG || Build.IS_USERDEBUG);
+        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
+        doAnswer((Answer<Boolean>) invocationOnMock -> true)
+                .when(() -> SystemProperties.getBoolean(ENABLE_ON_CONNECT, false));
+        manageDisplaysPermission(/* granted= */ true);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
+        localService.registerDisplayGroupListener(callback);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
+
+        // Create default display device
+        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        callback.waitForExpectedEvent();
+        callback.clear();
+
+        callback.expectsEvent(EVENT_DISPLAY_CONNECTED);
+        FakeDisplayDevice displayDevice =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
+        callback.waitForExpectedEvent();
+
+        LogicalDisplay display =
+                logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ false);
+        assertThat(display.isEnabledLocked()).isTrue();
+        assertThat(callback.receivedEvents()).containsExactly(DISPLAY_GROUP_EVENT_ADDED,
+                EVENT_DISPLAY_CONNECTED, EVENT_DISPLAY_ADDED).inOrder();
     }
 
     @Test
