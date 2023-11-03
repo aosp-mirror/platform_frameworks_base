@@ -1689,7 +1689,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Հեռացնել"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ձայնը բարձրացնե՞լ խորհուրդ տրվող մակարդակից ավել:\n\nԵրկարատև բարձրաձայն լսելը կարող է վնասել ձեր լսողությունը:"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Պահե՞լ ձայնը բարձրացրած\n\nԱկանջակալների ձայնի ուժգնությունը տևական ժամանակ ավելի բարձր է եղել առաջարկվող մակարդակից, ինչը կարող է վնասել ձեր լսողությունը"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Բարձր պահե՞լ ձայնը\n\nԱկանջակալների ձայնի ուժգնությունը տևական ժամանակ ավելի բարձր է եղել առաջարկվող մակարդակից, ինչը կարող է վնասել ձեր լսողությունը"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Հայտնաբերվել է ձայնի բարձր ուժգնություն\n\nԱկանջակալների ձայնի ուժգնությունը բարձր է առաջարկվող մակարդակից, ինչը կարող է վնասել ձեր լսողությունը"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Օգտագործե՞լ Մատչելիության դյուրանցումը։"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Հատուկ գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է:"</string>
