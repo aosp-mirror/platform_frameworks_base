@@ -1765,6 +1765,14 @@ public class AudioDeviceBroker {
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
                             final BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
+                            if (btInfo.mState == BluetoothProfile.STATE_CONNECTED
+                                    && !mBtHelper.isProfilePoxyConnected(btInfo.mProfile)) {
+                                AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
+                                        "msg: MSG_L_SET_BT_ACTIVE_DEVICE "
+                                            + "received with null profile proxy: "
+                                            + btInfo)).printLog(TAG));
+                                return;
+                            }
                             @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
                                     mBtHelper.getA2dpCodecWithFallbackToSBC(
                                             btInfo.mDevice, "MSG_L_SET_BT_ACTIVE_DEVICE");
@@ -1909,7 +1917,7 @@ public class AudioDeviceBroker {
                     final BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
                     if (btInfo.mDevice == null) break;
                     AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
-                            "msg: onBluetoothActiveDeviceChange " + btInfo)).printLog(TAG));
+                            "msg: MSG_L_BT_ACTIVE_DEVICE_CHANGE_EXT " + btInfo)).printLog(TAG));
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.setBluetoothActiveDevice(btInfo);
                     }

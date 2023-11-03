@@ -870,6 +870,23 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void whenDetectFingerprint_detectError() {
+        ArgumentCaptor<FingerprintManager.FingerprintDetectionCallback> fpDetectCallbackCaptor =
+                ArgumentCaptor.forClass(FingerprintManager.FingerprintDetectionCallback.class);
+
+        givenDetectFingerprintWithClearingFingerprintManagerInvocations();
+        verify(mFingerprintManager).detectFingerprint(
+                any(), fpDetectCallbackCaptor.capture(), any());
+        fpDetectCallbackCaptor.getValue().onDetectionError(/* msgId */ 10);
+
+        // THEN verify keyguardUpdateMonitorCallback receives a biometric error
+        verify(mTestCallback).onBiometricError(
+                eq(10), eq(""), eq(BiometricSourceType.FINGERPRINT));
+        verify(mTestCallback, never()).onBiometricAuthenticated(
+                anyInt(), any(), anyBoolean());
+    }
+
+    @Test
     public void whenDetectFace_biometricDetectCallback() throws RemoteException {
         ArgumentCaptor<FaceManager.FaceDetectionCallback> faceDetectCallbackCaptor =
                 ArgumentCaptor.forClass(FaceManager.FaceDetectionCallback.class);
@@ -1209,6 +1226,34 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // THEN make sure FP listening begins
         verifyFingerprintAuthenticateCall();
+    }
+
+    @Test
+    public void fpStopsListeningWhenBiometricPromptShows_resumesOnBpHidden() {
+        // verify AuthController.Callback is added:
+        ArgumentCaptor<AuthController.Callback> captor = ArgumentCaptor.forClass(
+                AuthController.Callback.class);
+        verify(mAuthController).addCallback(captor.capture());
+        AuthController.Callback callback = captor.getValue();
+
+        // GIVEN keyguard showing
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, false);
+
+        // THEN fingerprint should listen
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
+
+        // WHEN biometric prompt is shown
+        callback.onBiometricPromptShown();
+
+        // THEN shouldn't listen for fingerprint
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isFalse();
+
+        // WHEN biometric prompt is dismissed
+        callback.onBiometricPromptDismissed();
+
+        // THEN we should listen for fingerprint
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
     }
 
     @Test

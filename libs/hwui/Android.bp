@@ -144,6 +144,7 @@ cc_defaults {
                 "libsync",
                 "libui",
                 "aconfig_text_flags_c_lib",
+                "server_configurable_flags",
             ],
             static_libs: [
                 "libEGL_blobCache",

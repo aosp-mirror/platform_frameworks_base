@@ -938,15 +938,6 @@ public final class JobStore {
             if (job.isRequireStorageNotLow()) {
                 out.attribute(null, "storage-not-low", Boolean.toString(true));
             }
-            if (job.isPreferBatteryNotLow()) {
-                out.attributeBoolean(null, "prefer-battery-not-low", true);
-            }
-            if (job.isPreferCharging()) {
-                out.attributeBoolean(null, "prefer-charging", true);
-            }
-            if (job.isPreferDeviceIdle()) {
-                out.attributeBoolean(null, "prefer-idle", true);
-            }
             out.endTag(null, XML_TAG_PARAMS_CONSTRAINTS);
         }
 
@@ -1638,13 +1629,6 @@ public final class JobStore {
             if (val != null) {
                 jobBuilder.setRequiresStorageNotLow(true);
             }
-
-            jobBuilder.setPrefersBatteryNotLow(
-                    parser.getAttributeBoolean(null, "prefer-battery-not-low", false));
-            jobBuilder.setPrefersCharging(
-                    parser.getAttributeBoolean(null, "prefer-charging", false));
-            jobBuilder.setPrefersDeviceIdle(
-                    parser.getAttributeBoolean(null, "prefer-idle", false));
         }
 
         /**

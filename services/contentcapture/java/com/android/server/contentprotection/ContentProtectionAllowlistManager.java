@@ -22,6 +22,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.service.contentcapture.IContentProtectionAllowlistCallback;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -52,6 +54,10 @@ public class ContentProtectionAllowlistManager {
     @NonNull
     final PackageMonitor mPackageMonitor;
 
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @NonNull
+    final IContentProtectionAllowlistCallback mAllowlistCallback;
+
     private final Object mHandlerToken = new Object();
 
     private final Object mLock = new Object();
@@ -74,6 +80,7 @@ public class ContentProtectionAllowlistManager {
         mHandler = handler;
         mTimeoutMs = timeoutMs;
         mPackageMonitor = createPackageMonitor();
+        mAllowlistCallback = createAllowlistCallback();
     }
 
     /** Starts the manager. */
@@ -107,7 +114,7 @@ public class ContentProtectionAllowlistManager {
         return allowedPackages.contains(packageName);
     }
 
-    private void setAllowlist(@NonNull List<String> packages) {
+    private void handleUpdateAllowlistResponse(@NonNull List<String> packages) {
         synchronized (mLock) {
             mAllowedPackages = packages.stream().collect(Collectors.toUnmodifiableSet());
         }
@@ -115,14 +122,14 @@ public class ContentProtectionAllowlistManager {
     }
 
     private void handleInitialUpdate() {
-        handleUpdate();
+        handlePackagesChanged();
 
         // Initial update done, start listening to package updates now
         mPackageMonitor.register(
                 mContentCaptureManagerService.getContext(), UserHandle.ALL, mHandler);
     }
 
-    private void handleUpdate() {
+    private void handlePackagesChanged() {
         if (!blocklistUpdateEnabled()) {
             return;
         }
@@ -145,6 +152,12 @@ public class ContentProtectionAllowlistManager {
         // If there are any pending updates queued already, they can be removed immediately
         mHandler.removeCallbacksAndMessages(mHandlerToken);
         mUpdatePendingUntil = Instant.now().plusMillis(mTimeoutMs);
+
+        try {
+            remoteContentProtectionService.onUpdateAllowlistRequest(mAllowlistCallback);
+        } catch (Exception ex) {
+            Slog.e(TAG, "Failed to call remote service", ex);
+        }
     }
 
     /** @hide */
@@ -154,12 +167,28 @@ public class ContentProtectionAllowlistManager {
         return new ContentProtectionPackageMonitor();
     }
 
+    /** @hide */
+    @NonNull
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    protected IContentProtectionAllowlistCallback createAllowlistCallback() {
+        return new ContentProtectionAllowlistCallback();
+    }
+
     private final class ContentProtectionPackageMonitor extends PackageMonitor {
 
         // This callback might be invoked multiple times, for more info refer to the comment above
         @Override
         public void onSomePackagesChanged() {
-            handleUpdate();
+            handlePackagesChanged();
+        }
+    }
+
+    private final class ContentProtectionAllowlistCallback
+            extends IContentProtectionAllowlistCallback.Stub {
+
+        @Override
+        public void setAllowlist(List<String> packages) {
+            mHandler.post(() -> handleUpdateAllowlistResponse(packages));
         }
     }
 }

@@ -75,3 +75,10 @@ flag {
   description: "A feature flag that implements line break word style auto."
   bug: "280005585"
 }
+
+flag {
+  name: "inter_character_justification"
+  namespace: "text"
+  description: "A feature flag that implement inter character justification."
+  bug: "283193133"
+}

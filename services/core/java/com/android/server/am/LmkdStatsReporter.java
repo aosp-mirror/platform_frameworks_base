@@ -44,6 +44,7 @@ public final class LmkdStatsReporter {
     private static final int DIRECT_RECL_AND_THRASHING = 5;
     private static final int LOW_MEM_AND_SWAP_UTIL = 6;
     private static final int LOW_FILECACHE_AFTER_THRASHING = 7;
+    private static final int LOW_MEM = 8;
 
     /**
      * Processes the LMK_KILL_OCCURRED packet data

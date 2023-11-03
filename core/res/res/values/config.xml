@@ -2213,7 +2213,10 @@
     <bool name="config_single_volume">false</bool>
 
     <!-- Volume policy -->
+    <!-- Strongly consider keeping these 2 values in sync - otherwise vol up/vol down have confusing
+    asymmetric behavior, as in b/279645379 -->
     <bool name="config_volume_down_to_enter_silent">false</bool>
+    <bool name="config_volume_up_to_exit_silent">false</bool>
 
     <!-- The number of volume steps for the notification stream -->
     <integer name="config_audio_notif_vol_steps">7</integer>
@@ -4368,6 +4371,15 @@
     <!-- Flag specifying whether user-switch operations have custom UI. When false, user-switch
          UI is handled by ActivityManagerService -->
     <bool name="config_customUserSwitchUi">false</bool>
+
+    <!-- Flag specifying whether the first account added can be removed or renamed. By default,
+    this ability is enabled. When false, user will not be able to remove the first account. -->
+    <bool name="config_canRemoveFirstAccount">true</bool>
+
+    <!-- Used together with config_canRemoveOrRenameFirstAccount when set to false. By default, this
+    is blank. Check if the first account is of this account type. If it is, then disable
+    remove/rename. -->
+    <string name="config_accountTypeToKeepFirstAccount"></string>
 
     <!-- A array of regex to treat a SMS as VVM SMS if the message body matches.
          Each item represents an entry, which consists of two parts:

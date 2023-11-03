@@ -1240,9 +1240,7 @@ public class JobStatusTest {
     @Test
     public void testReadinessStatusWithConstraint_FlexibilityConstraint() {
         final JobStatus job = createJobStatus(
-                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
-                        .setPrefersCharging(true)
-                        .build());
+                new JobInfo.Builder(101, new ComponentName("foo", "bar")).build());
         job.setConstraintSatisfied(CONSTRAINT_FLEXIBLE, sElapsedRealtimeClock.millis(), false);
         markImplicitConstraintsSatisfied(job, true);
         assertTrue(job.readinessStatusWithConstraint(CONSTRAINT_FLEXIBLE, true));

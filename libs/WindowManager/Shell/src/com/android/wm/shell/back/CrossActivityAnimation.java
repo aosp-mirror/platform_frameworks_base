@@ -353,7 +353,6 @@ public class CrossActivityAnimation extends ShellBackAnimation {
         closingLeft += mapRange(interpolatedProgress, deltaXMin, deltaXMax);
 
         // Move the window along the Y axis.
-        final float deltaYRatio = (touchY - mInitialTouchPos.y) / height;
         final float closingTop = (height - closingHeight) * 0.5f;
         targetRect.set(
                 closingLeft, closingTop, closingLeft + closingWidth, closingTop + closingHeight);

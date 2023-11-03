@@ -1144,16 +1144,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (pipTask == null) {
                     break;
                 }
-                ActivityRecord[] pipActivity = new ActivityRecord[1];
-                pipTask.forAllActivities((activity) -> {
-                    if (activity.pictureInPictureArgs != null) {
-                        pipActivity[0] = activity;
-                    }
-                });
+                ActivityRecord pipActivity = pipTask.getActivity(
+                        (activity) -> activity.pictureInPictureArgs != null);
 
                 Rect entryBounds = hop.getBounds();
                 mService.mRootWindowContainer.moveActivityToPinnedRootTask(
-                        pipActivity[0], null /* launchIntoPipHostActivity */,
+                        pipActivity, null /* launchIntoPipHostActivity */,
                         "moveActivityToPinnedRootTask", null /* transition */, entryBounds);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;

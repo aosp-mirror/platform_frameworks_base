@@ -1585,7 +1585,7 @@ class ActivityClientController extends IActivityClientController.Stub {
      * the Activities in the Task should be finished when it finishes. Otherwise, return {@code
      * false}.
      */
-    private boolean isRelativeTaskRootActivity(ActivityRecord r, ActivityRecord taskRoot) {
+    private static boolean isRelativeTaskRootActivity(ActivityRecord r, ActivityRecord taskRoot) {
         // Not a relative root if the given Activity is not the root Activity of its TaskFragment.
         final TaskFragment taskFragment = r.getTaskFragment();
         if (r != taskFragment.getActivity(ar -> !ar.finishing || ar == r,
@@ -1598,7 +1598,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         return taskRoot.getTaskFragment().getCompanionTaskFragment() == taskFragment;
     }
 
-    private boolean isTopActivityInTaskFragment(ActivityRecord activity) {
+    private static boolean isTopActivityInTaskFragment(ActivityRecord activity) {
         return activity.getTaskFragment().topRunningActivity() == activity;
     }
 
@@ -1614,9 +1614,6 @@ class ActivityClientController extends IActivityClientController.Stub {
     public void onBackPressed(IBinder token, IRequestFinishCallback callback) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            final Intent baseActivityIntent;
-            final boolean launchedFromHome;
-            final boolean isLastRunningActivity;
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r == null) return;
@@ -1624,39 +1621,16 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final Task task = r.getTask();
                 final ActivityRecord root = task.getRootActivity(false /*ignoreRelinquishIdentity*/,
                         true /*setToBottomIfNone*/);
-                final boolean isTaskRoot = r == root;
-                if (isTaskRoot) {
-                    if (mService.mWindowOrganizerController.mTaskOrganizerController
+                if (r == root && mService.mWindowOrganizerController.mTaskOrganizerController
                         .handleInterceptBackPressedOnTaskRoot(r.getRootTask())) {
-                        // This task is handled by a task organizer that has requested the back
-                        // pressed callback.
-                        return;
-                    }
-                } else if (!isRelativeTaskRootActivity(r, root)) {
-                    // Finish the Activity if the activity is not the task root or relative root.
-                    requestCallbackFinish(callback);
+                    // This task is handled by a task organizer that has requested the back
+                    // pressed callback.
                     return;
                 }
-
-                isLastRunningActivity = isTopActivityInTaskFragment(isTaskRoot ? root : r);
-
-                final boolean isBaseActivity = root.mActivityComponent.equals(task.realActivity);
-                baseActivityIntent = isBaseActivity ? root.intent : null;
-
-                launchedFromHome = root.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
-            }
-
-            // If the activity was launched directly from the home screen, then we should
-            // refrain from finishing the activity and instead move it to the back to keep it in
-            // memory. The requirements for this are:
-            //   1. The activity is the last running activity in the task.
-            //   2. The current activity is the base activity for the task.
-            //   3. The activity was launched by the home process, and is one of the main entry
-            //      points for the application.
-            if (baseActivityIntent != null && isLastRunningActivity
-                    && launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent)) {
-                moveActivityTaskToBack(token, true /* nonRoot */);
-                return;
+                if (shouldMoveTaskToBack(r, root)) {
+                    moveActivityTaskToBack(token, true /* nonRoot */);
+                    return;
+                }
             }
 
             // The default option for handling the back button is to finish the Activity.
@@ -1664,6 +1638,27 @@ class ActivityClientController extends IActivityClientController.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    static boolean shouldMoveTaskToBack(ActivityRecord r, ActivityRecord rootActivity) {
+        if (r != rootActivity && !isRelativeTaskRootActivity(r, rootActivity)) {
+            return false;
+        }
+        final boolean isBaseActivity = rootActivity.mActivityComponent.equals(
+                r.getTask().realActivity);
+        final Intent baseActivityIntent = isBaseActivity ? rootActivity.intent : null;
+
+        // If the activity was launched directly from the home screen, then we should
+        // refrain from finishing the activity and instead move it to the back to keep it in
+        // memory. The requirements for this are:
+        //   1. The activity is the last running activity in the task.
+        //   2. The current activity is the base activity for the task.
+        //   3. The activity was launched by the home process, and is one of the main entry
+        //      points for the application.
+        return baseActivityIntent != null
+                && isTopActivityInTaskFragment(r)
+                && rootActivity.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME)
+                && ActivityRecord.isMainIntent(baseActivityIntent);
     }
 
     @Override

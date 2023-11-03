@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -43,7 +43,7 @@ fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState { titles.size }
 
-        PrimaryTabRow(
+        TabRow(
             selectedTabIndex = pagerState.currentPage,
             modifier = Modifier.padding(horizontal = SettingsDimension.itemPaddingEnd),
             containerColor = Color.Transparent,

@@ -1628,11 +1628,6 @@ public class AudioDeviceInventory {
                 Log.i(TAG, "setBluetoothActiveDevice " + info.toString() + " delay(ms): " + delay);
             }
             mDeviceBroker.postBluetoothActiveDevice(info, delay);
-            if (info.mProfile == BluetoothProfile.HEARING_AID
-                    && info.mState == BluetoothProfile.STATE_CONNECTED) {
-                mDeviceBroker.setForceUse_Async(AudioSystem.FOR_MEDIA, AudioSystem.FORCE_NONE,
-                                "HEARING_AID set to CONNECTED");
-            }
         }
         return delay;
     }
@@ -2013,6 +2008,9 @@ public class AudioDeviceInventory {
         final int hearingAidVolIndex = mDeviceBroker.getVssVolumeForDevice(streamType,
                 AudioSystem.DEVICE_OUT_HEARING_AID);
         mDeviceBroker.postSetHearingAidVolumeIndex(hearingAidVolIndex, streamType);
+
+        mDeviceBroker.setBluetoothA2dpOnInt(true, false /*fromA2dp*/, eventSource);
+
         AudioDeviceAttributes ada = new AudioDeviceAttributes(
                 AudioSystem.DEVICE_OUT_HEARING_AID, address, name);
         mAudioSystem.setDeviceConnectionState(ada,

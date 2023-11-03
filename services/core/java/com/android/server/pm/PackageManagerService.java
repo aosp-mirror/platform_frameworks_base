@@ -6310,6 +6310,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return mInstallerService.mPackageArchiver.getArchivedAppIcon(packageName, user);
         }
 
+        @Override
+        public boolean isAppArchivable(@NonNull String packageName, @NonNull UserHandle user) {
+            return mInstallerService.mPackageArchiver.isAppArchivable(packageName, user);
+        }
+
         /**
          * Wait for the handler to finish handling all pending messages.
          * @param timeoutMillis Maximum time in milliseconds to wait.

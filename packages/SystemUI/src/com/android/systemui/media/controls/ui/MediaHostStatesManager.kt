@@ -16,8 +16,8 @@
 
 package com.android.systemui.media.controls.ui
 
+import com.android.app.tracing.traceSection
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.tracing.traceSection
 import com.android.systemui.util.animation.MeasurementOutput
 import javax.inject.Inject
 

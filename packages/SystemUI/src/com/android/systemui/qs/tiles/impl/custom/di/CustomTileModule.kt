@@ -23,6 +23,8 @@ import com.android.systemui.qs.tiles.impl.custom.CustomTileData
 import com.android.systemui.qs.tiles.impl.custom.CustomTileInteractor
 import com.android.systemui.qs.tiles.impl.custom.CustomTileMapper
 import com.android.systemui.qs.tiles.impl.custom.CustomTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepository
+import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepositoryImpl
 import com.android.systemui.qs.tiles.impl.custom.di.bound.CustomTileBoundComponent
 import dagger.Binds
 import dagger.Module
@@ -43,4 +45,9 @@ interface CustomTileModule {
 
     @Binds
     fun bindMapper(customTileMapper: CustomTileMapper): QSTileDataToStateMapper<CustomTileData>
+
+    @Binds
+    fun bindCustomTileDefaultsRepository(
+        impl: CustomTileDefaultsRepositoryImpl
+    ): CustomTileDefaultsRepository
 }

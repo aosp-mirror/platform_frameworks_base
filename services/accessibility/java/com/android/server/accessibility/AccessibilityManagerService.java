@@ -3406,7 +3406,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // displays in one display. It's not a real display and there's no input events for it.
         final ArrayList<Display> displays = getValidDisplayList();
         if (userState.isMagnificationSingleFingerTripleTapEnabledLocked()
-                || userState.isMagnificationTwoFingerTripleTapEnabledLocked()
+                || (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
+                && userState.isMagnificationTwoFingerTripleTapEnabledLocked())
                 || userState.isShortcutMagnificationEnabledLocked()) {
             for (int i = 0; i < displays.size(); i++) {
                 final Display display = displays.get(i);
@@ -3435,7 +3436,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
         final boolean connect = (userState.isShortcutMagnificationEnabledLocked()
-                || userState.isMagnificationSingleFingerTripleTapEnabledLocked())
+                || userState.isMagnificationSingleFingerTripleTapEnabledLocked()
+                || (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
+                && userState.isMagnificationTwoFingerTripleTapEnabledLocked()))
                 && (userState.getMagnificationCapabilitiesLocked()
                 != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
                 || userHasMagnificationServicesLocked(userState);
@@ -5133,6 +5136,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // Remove magnification button UI when the magnification capability is not all mode or
         // magnification is disabled.
         if (!(userState.isMagnificationSingleFingerTripleTapEnabledLocked()
+                || (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
+                && userState.isMagnificationTwoFingerTripleTapEnabledLocked())
                 || userState.isShortcutMagnificationEnabledLocked())
                 || userState.getMagnificationCapabilitiesLocked()
                 != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {

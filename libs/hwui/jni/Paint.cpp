@@ -33,6 +33,7 @@
 #include <cassert>
 #include <cstring>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #include "ColorFilter.h"
@@ -690,10 +691,11 @@ namespace PaintGlue {
                                        jstring settings) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         if (!settings) {
-            paint->setFontFeatureSettings(std::string());
+            paint->resetFontFeatures();
         } else {
             ScopedUtfChars settingsChars(env, settings);
-            paint->setFontFeatureSettings(std::string(settingsChars.c_str(), settingsChars.size()));
+            paint->setFontFeatureSettings(
+                    std::string_view(settingsChars.c_str(), settingsChars.size()));
         }
     }
 

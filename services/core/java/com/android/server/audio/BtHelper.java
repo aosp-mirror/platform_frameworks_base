@@ -43,7 +43,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -288,6 +287,13 @@ public class BtHelper {
         if (action.equals(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)) {
             BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE,
                     android.bluetooth.BluetoothDevice.class);
+            if (btDevice != null && !isProfilePoxyConnected(BluetoothProfile.HEADSET)) {
+                AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
+                        "onReceiveBtEvent ACTION_ACTIVE_DEVICE_CHANGED "
+                                + "received with null profile proxy for device: "
+                                + btDevice)).printLog(TAG));
+                return;
+            }
             onSetBtScoActiveDevice(btDevice);
         } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
             int btState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
@@ -465,7 +471,8 @@ public class BtHelper {
     @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
     /*package*/ synchronized void onBtProfileDisconnected(int profile) {
         AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                "BT profile " + BluetoothProfile.getProfileName(profile) + " disconnected"));
+                "BT profile " + BluetoothProfile.getProfileName(profile)
+                + " disconnected").printLog(TAG));
         switch (profile) {
             case BluetoothProfile.HEADSET:
                 mBluetoothHeadset = null;
@@ -496,7 +503,11 @@ public class BtHelper {
     /*package*/ synchronized void onBtProfileConnected(int profile, BluetoothProfile proxy) {
         AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                 "BT profile " + BluetoothProfile.getProfileName(profile) + " connected to proxy "
-                + proxy));
+                + proxy).printLog(TAG));
+        if (proxy == null) {
+            Log.e(TAG, "onBtProfileConnected: null proxy for profile: " + profile);
+            return;
+        }
         switch (profile) {
             case BluetoothProfile.HEADSET:
                 onHeadsetProfileConnected((BluetoothHeadset) proxy);
@@ -522,36 +533,64 @@ public class BtHelper {
         }
 
         // this part is only for A2DP, LE Audio unicast and Hearing aid
-        final List<BluetoothDevice> deviceList = proxy.getConnectedDevices();
-        if (deviceList.isEmpty()) {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            Log.e(TAG, "onBtProfileConnected: Null BluetoothAdapter when connecting profile: "
+                    + BluetoothProfile.getProfileName(profile));
             return;
         }
-        final BluetoothDevice btDevice = deviceList.get(0);
-        if (proxy.getConnectionState(btDevice) == BluetoothProfile.STATE_CONNECTED) {
-            mDeviceBroker.queueOnBluetoothActiveDeviceChanged(
-                    new AudioDeviceBroker.BtDeviceChangedData(btDevice, null,
-                        new BluetoothProfileConnectionInfo(profile),
-                        "mBluetoothProfileServiceListener"));
-        } else {
-            mDeviceBroker.queueOnBluetoothActiveDeviceChanged(
-                    new AudioDeviceBroker.BtDeviceChangedData(null, btDevice,
-                        new BluetoothProfileConnectionInfo(profile),
-                        "mBluetoothProfileServiceListener"));
+        List<BluetoothDevice> activeDevices = adapter.getActiveDevices(profile);
+        if (activeDevices.isEmpty() || activeDevices.get(0) == null) {
+            return;
+        }
+        AudioDeviceBroker.BtDeviceChangedData data = new AudioDeviceBroker.BtDeviceChangedData(
+                activeDevices.get(0), null, new BluetoothProfileConnectionInfo(profile),
+                "mBluetoothProfileServiceListener");
+        AudioDeviceBroker.BtDeviceInfo info =
+                mDeviceBroker.createBtDeviceInfo(data, activeDevices.get(0),
+                        BluetoothProfile.STATE_CONNECTED);
+        mDeviceBroker.postBluetoothActiveDevice(info, 0 /* delay */);
+    }
+
+    // @GuardedBy("mDeviceBroker.mSetModeLock")
+    @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
+    /*package*/ synchronized boolean isProfilePoxyConnected(int profile) {
+        switch (profile) {
+            case BluetoothProfile.HEADSET:
+                return mBluetoothHeadset != null;
+            case BluetoothProfile.A2DP:
+                return mA2dp != null;
+            case BluetoothProfile.HEARING_AID:
+                return mHearingAid != null;
+            case BluetoothProfile.LE_AUDIO:
+                return mLeAudio != null;
+            case BluetoothProfile.A2DP_SINK:
+            case BluetoothProfile.LE_AUDIO_BROADCAST:
+            default:
+                // return true for profiles that are not managed by the BtHelper because
+                // the fact that the profile proxy is not connected does not affect
+                // the device connection handling.
+                return true;
         }
     }
 
     // @GuardedBy("mDeviceBroker.mSetModeLock")
     @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
-    private void onHeadsetProfileConnected(BluetoothHeadset headset) {
+    private void onHeadsetProfileConnected(@NonNull BluetoothHeadset headset) {
         // Discard timeout message
         mDeviceBroker.handleCancelFailureToConnectToBtHeadsetService();
         mBluetoothHeadset = headset;
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        List<BluetoothDevice> activeDevices = Collections.emptyList();
         if (adapter != null) {
-            activeDevices = adapter.getActiveDevices(BluetoothProfile.HEADSET);
+            List<BluetoothDevice> activeDevices =
+                    adapter.getActiveDevices(BluetoothProfile.HEADSET);
+            if (activeDevices.size() > 0 && activeDevices.get(0) != null) {
+                onSetBtScoActiveDevice(activeDevices.get(0));
+            }
+        } else {
+            Log.e(TAG, "onHeadsetProfileConnected: Null BluetoothAdapter");
         }
-        onSetBtScoActiveDevice((activeDevices.size() > 0) ? activeDevices.get(0) : null);
+
         // Refresh SCO audio state
         checkScoAudioState();
         if (mScoAudioState != SCO_STATE_ACTIVATE_REQ
@@ -559,7 +598,7 @@ public class BtHelper {
             return;
         }
         boolean status = false;
-        if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
+        if (mBluetoothHeadsetDevice != null) {
             switch (mScoAudioState) {
                 case SCO_STATE_ACTIVATE_REQ:
                     status = connectBluetoothScoAudioHelper(
@@ -715,7 +754,8 @@ public class BtHelper {
                         case BluetoothProfile.LE_AUDIO_BROADCAST:
                             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                                     "BT profile service: connecting "
-                                    + BluetoothProfile.getProfileName(profile) + " profile"));
+                                    + BluetoothProfile.getProfileName(profile)
+                                    + " profile").printLog(TAG));
                             mDeviceBroker.postBtProfileConnected(profile, proxy);
                             break;
 
@@ -734,7 +774,8 @@ public class BtHelper {
                         case BluetoothProfile.LE_AUDIO_BROADCAST:
                             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                                     "BT profile service: disconnecting "
-                                        + BluetoothProfile.getProfileName(profile) + " profile"));
+                                        + BluetoothProfile.getProfileName(profile)
+                                        + " profile").printLog(TAG));
                             mDeviceBroker.postBtProfileDisconnected(profile);
                             break;
 

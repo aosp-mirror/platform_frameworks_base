@@ -145,7 +145,7 @@ public class SafeActivityOptionsTest {
             verifySecureExceptionThrown(activityOptions, taskSupervisor);
 
             activityOptions = ActivityOptions.makeBasic();
-            activityOptions.setDismissKeyguard();
+            activityOptions.setDismissKeyguardIfInsecure();
             verifySecureExceptionThrown(activityOptions, taskSupervisor);
 
             activityOptions = ActivityOptions.makeBasic();

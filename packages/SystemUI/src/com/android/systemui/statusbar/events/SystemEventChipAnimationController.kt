@@ -32,8 +32,6 @@ import androidx.core.animation.AnimatorSet
 import androidx.core.animation.ValueAnimator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.res.R
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
@@ -47,8 +45,7 @@ import kotlin.math.roundToInt
 class SystemEventChipAnimationController @Inject constructor(
     private val context: Context,
     private val statusBarWindowController: StatusBarWindowController,
-    private val contentInsetsProvider: StatusBarContentInsetsProvider,
-    private val featureFlags: FeatureFlags,
+    private val contentInsetsProvider: StatusBarContentInsetsProvider
 ) : SystemStatusAnimationCallback {
 
     private lateinit var animationWindowView: FrameLayout
@@ -317,15 +314,8 @@ class SystemEventChipAnimationController @Inject constructor(
                 it.marginEnd = marginEnd
             }
 
-    private fun initializeAnimRect() = if (featureFlags.isEnabled(Flags.PLUG_IN_STATUS_BAR_CHIP)) {
-        animRect.set(chipBounds)
-    } else {
-        animRect.set(
-                chipLeft,
-                currentAnimatedView!!.view.top,
-                chipRight,
-                currentAnimatedView!!.view.bottom)
-    }
+    private fun initializeAnimRect() = animRect.set(chipBounds)
+
 
     /**
      * To be called during an animation, sets the width and updates the current animated chip view

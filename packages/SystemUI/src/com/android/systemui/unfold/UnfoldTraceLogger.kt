@@ -17,10 +17,10 @@ package com.android.systemui.unfold
 
 import android.content.Context
 import android.os.Trace
+import com.android.app.tracing.TraceStateLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.tracing.TraceStateLogger
 import com.android.systemui.unfold.system.DeviceStateRepository
 import com.android.systemui.unfold.updates.FoldStateRepository
 import javax.inject.Inject

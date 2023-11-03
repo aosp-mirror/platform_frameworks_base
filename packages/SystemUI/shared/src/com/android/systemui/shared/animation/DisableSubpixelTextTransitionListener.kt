@@ -19,7 +19,7 @@ import android.graphics.Paint
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.forEach
-import com.android.systemui.tracing.traceSection
+import com.android.app.tracing.traceSection
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import java.lang.ref.WeakReference
 

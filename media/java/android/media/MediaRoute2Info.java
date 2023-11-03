@@ -19,6 +19,7 @@ package android.media;
 import static android.media.MediaRouter2Utils.toUniqueId;
 
 import static com.android.media.flags.Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER;
+import static com.android.media.flags.Flags.FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -306,6 +307,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getType
      */
+    @FlaggedApi(FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_REMOTE_TABLET = 1004;
 
     /**
@@ -316,6 +318,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getType
      */
+    @FlaggedApi(FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_REMOTE_TABLET_DOCKED = 1005;
 
     /**
@@ -326,6 +329,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getType
      */
+    @FlaggedApi(FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_REMOTE_COMPUTER = 1006;
 
     /**
@@ -336,6 +340,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getType
      */
+    @FlaggedApi(FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_REMOTE_GAME_CONSOLE = 1007;
 
     /**
@@ -346,6 +351,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getType
      */
+    @FlaggedApi(FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_REMOTE_CAR = 1008;
 
     /**
@@ -356,6 +362,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getType
      */
+    @FlaggedApi(FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_REMOTE_SMARTWATCH = 1009;
 
     /**
@@ -366,6 +373,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @see #getType
      */
+    @FlaggedApi(FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_REMOTE_SMARTPHONE = 1010;
 
     /**

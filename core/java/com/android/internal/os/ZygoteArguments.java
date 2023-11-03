@@ -243,6 +243,11 @@ class ZygoteArguments {
     boolean mBindMountAppDataDirs;
 
     /**
+     * @see Zygote#BIND_MOUNT_SYSPROP_OVERRIDES
+     */
+    boolean mBindMountSyspropOverrides;
+
+    /**
      * Constructs instance and parses args
      *
      * @param args zygote command-line args as ZygoteCommandBuffer, positioned after argument count.
@@ -481,6 +486,8 @@ class ZygoteArguments {
                 mBindMountAppStorageDirs = true;
             } else if (arg.equals(Zygote.BIND_MOUNT_APP_DATA_DIRS)) {
                 mBindMountAppDataDirs = true;
+            } else if (arg.equals(Zygote.BIND_MOUNT_SYSPROP_OVERRIDES)) {
+                mBindMountSyspropOverrides = true;
             } else {
                 unprocessedArg = arg;
                 break;

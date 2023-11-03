@@ -838,4 +838,6 @@ interface IPackageManager {
     ArchivedPackageParcel getArchivedPackage(in String packageName, int userId);
 
     Bitmap getArchivedAppIcon(String packageName, in UserHandle user);
+
+    boolean isAppArchivable(String packageName, in UserHandle user);
 }

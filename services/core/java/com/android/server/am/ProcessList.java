@@ -36,6 +36,7 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
 import static android.system.OsConstants.*;
 
+import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxAudit;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
@@ -183,6 +184,7 @@ public final class ProcessList {
     static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
 
+    private static final String APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS = ":isSdkSandboxAudit";
     private static final String APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = ":isSdkSandboxNext";
 
     // OOM adjustments for processes in various states:
@@ -549,6 +551,10 @@ public final class ProcessList {
 
     ActivityManagerGlobalLock mProcLock;
 
+    private static final String PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS =
+            "apply_sdk_sandbox_audit_restrictions";
+    private static final boolean DEFAULT_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS = false;
+
     private static final String PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS =
             "apply_sdk_sandbox_next_restrictions";
     private static final boolean DEFAULT_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = false;
@@ -573,6 +579,13 @@ public final class ProcessList {
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
+        private boolean mSdkSandboxApplyRestrictionsAudit =
+                DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ADSERVICES,
+                PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS,
+                DEFAULT_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS);
+
+        @GuardedBy("mLock")
         private boolean mSdkSandboxApplyRestrictionsNext =
                 DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ADSERVICES,
@@ -593,6 +606,12 @@ public final class ProcessList {
             DeviceConfig.removeOnPropertiesChangedListener(this);
         }
 
+        boolean applySdkSandboxRestrictionsAudit() {
+            synchronized (mLock) {
+                return mSdkSandboxApplyRestrictionsAudit;
+            }
+        }
+
         boolean applySdkSandboxRestrictionsNext() {
             synchronized (mLock) {
                 return mSdkSandboxApplyRestrictionsNext;
@@ -608,6 +627,12 @@ public final class ProcessList {
                     }
 
                     switch (name) {
+                        case PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS:
+                            mSdkSandboxApplyRestrictionsAudit =
+                                properties.getBoolean(
+                                    PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS,
+                                    DEFAULT_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS);
+                            break;
                         case PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS:
                             mSdkSandboxApplyRestrictionsNext =
                                 properties.getBoolean(
@@ -2025,10 +2050,14 @@ public final class ProcessList {
     String updateSeInfo(ProcessRecord app) {
         String extraInfo = "";
         // By the time the first the SDK sandbox process is started, device config service
-        // should be available.
-        if (app.isSdkSandbox
-                && getProcessListSettingsListener().applySdkSandboxRestrictionsNext()) {
-            extraInfo = APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS;
+        // should be available. If both Next and Audit are enabled, Next takes precedence.
+        if (app.isSdkSandbox) {
+            if (getProcessListSettingsListener().applySdkSandboxRestrictionsNext()) {
+                extraInfo = APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS;
+            } else if (selinuxSdkSandboxAudit()
+                    && getProcessListSettingsListener().applySdkSandboxRestrictionsAudit()) {
+                extraInfo = APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS;
+            }
         }
 
         return app.info.seInfo
@@ -2414,6 +2443,18 @@ public final class ProcessList {
                 allowlistedAppDataInfoMap = null;
             }
 
+            boolean bindOverrideSysprops = false;
+            String[] syspropOverridePkgNames = DeviceConfig.getString(
+                    DeviceConfig.NAMESPACE_APP_COMPAT,
+                            "appcompat_sysprop_override_pkgs", "").split(",");
+            String[] pkgs = app.getPackageList();
+            for (int i = 0; i < pkgs.length; i++) {
+                if (ArrayUtils.contains(syspropOverridePkgNames, pkgs[i])) {
+                    bindOverrideSysprops = true;
+                    break;
+                }
+            }
+
             AppStateTracker ast = mService.mServices.mAppStateTracker;
             if (ast != null) {
                 final boolean inBgRestricted = ast.isAppBackgroundRestricted(
@@ -2436,6 +2477,7 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         app.getDisabledCompatChanges(),
+                        bindOverrideSysprops,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
             } else if (hostingRecord.usesAppZygote()) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
@@ -2447,7 +2489,7 @@ public final class ProcessList {
                         app.info.dataDir, null, app.info.packageName,
                         /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, isTopApp,
                         app.getDisabledCompatChanges(), pkgDataInfoMap, allowlistedAppDataInfoMap,
-                        false, false,
+                        false, false, bindOverrideSysprops,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
             } else {
                 regularZygote = true;
@@ -2457,6 +2499,7 @@ public final class ProcessList {
                         app.info.dataDir, invokeWith, app.info.packageName, zygotePolicyFlags,
                         isTopApp, app.getDisabledCompatChanges(), pkgDataInfoMap,
                         allowlistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
+                        bindOverrideSysprops,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
                 // By now the process group should have been created by zygote.
                 app.mProcessGroupCreated = true;
@@ -3265,12 +3308,17 @@ public final class ProcessList {
 
         // Check if we should mark the processrecord for first launch after force-stopping
         if ((r.getApplicationInfo().flags & ApplicationInfo.FLAG_STOPPED) != 0) {
-            final boolean wasPackageEverLaunched = mService.getPackageManagerInternal()
-                    .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
-            // If the package was launched in the past but is currently stopped, only then it
-            // should be considered as stopped after use. Do not mark it if it's the first launch.
-            if (wasPackageEverLaunched) {
-                r.setWasForceStopped(true);
+            try {
+                final boolean wasPackageEverLaunched = mService.getPackageManagerInternal()
+                        .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
+                // If the package was launched in the past but is currently stopped, only then it
+                // should be considered as stopped after use. Do not mark it if it's the
+                // first launch.
+                if (wasPackageEverLaunched) {
+                    r.setWasForceStopped(true);
+                }
+            } catch (IllegalArgumentException e) {
+                // App doesn't have state yet, so wasn't forcestopped
             }
         }
 
