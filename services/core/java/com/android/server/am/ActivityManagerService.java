@@ -3484,6 +3484,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceNotIsolatedCaller("clearApplicationUserData");
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
+        EventLog.writeEvent(EventLogTags.AM_CLEAR_APP_DATA_CALLER, pid, uid, packageName);
         final int resolvedUserId = mUserController.handleIncomingUser(pid, uid, userId, false,
                 ALLOW_FULL_ONLY, "clearApplicationUserData", null);
 
