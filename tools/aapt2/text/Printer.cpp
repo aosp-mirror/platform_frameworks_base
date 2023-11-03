@@ -20,7 +20,7 @@
 
 #include "io/Util.h"
 
-using ::aapt::io::OutputStream;
+using ::android::OutputStream;
 using ::android::StringPiece;
 
 namespace aapt {

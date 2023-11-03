@@ -21,7 +21,7 @@
 #include "xml/XmlPullParser.h"
 #include "xml/XmlUtil.h"
 
-using ::aapt::io::InputStream;
+using ::android::InputStream;
 using ::android::StringPiece;
 
 namespace aapt {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "io/FileStream.h"
+#include "androidfw/FileStream.h"
 
 #include <errno.h>   // for errno
 #include <fcntl.h>   // for O_RDONLY
@@ -34,8 +34,7 @@
 using ::android::base::SystemErrorCodeToString;
 using ::android::base::unique_fd;
 
-namespace aapt {
-namespace io {
+namespace android {
 
 FileInputStream::FileInputStream(const std::string& path, size_t buffer_capacity)
     : buffer_capacity_(buffer_capacity) {
@@ -106,6 +105,10 @@ bool FileInputStream::HadError() const {
 
 std::string FileInputStream::GetError() const {
   return error_;
+}
+
+bool FileInputStream::ReadFullyAtOffset(void* data, size_t byte_count, off64_t offset) {
+  return base::ReadFullyAtOffset(fd_, data, byte_count, offset);
 }
 
 FileOutputStream::FileOutputStream(const std::string& path, size_t buffer_capacity)
@@ -199,5 +202,4 @@ std::string FileOutputStream::GetError() const {
   return error_;
 }
 
-}  // namespace io
-}  // namespace aapt
+}  // namespace android
