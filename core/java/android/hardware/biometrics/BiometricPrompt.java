@@ -21,6 +21,7 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
+import static android.hardware.biometrics.Flags.FLAG_GET_OP_ID_CRYPTO_OBJECT;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -850,6 +851,14 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
         public @Nullable KeyAgreement getKeyAgreement() {
             return super.getKeyAgreement();
+        }
+
+        /**
+         * Get the operation handle associated with this object or 0 if none.
+         */
+        @FlaggedApi(FLAG_GET_OP_ID_CRYPTO_OBJECT)
+        public long getOpId() {
+            return super.getOpId();
         }
     }
 
