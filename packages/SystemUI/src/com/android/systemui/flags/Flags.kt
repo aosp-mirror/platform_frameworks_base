@@ -532,10 +532,9 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES =
-        unreleasedFlag(
-            name = "screen_record_enterprise_policies",
+        releasedFlag(
+            name = "enable_screen_record_enterprise_policies",
             namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-            teamfood = false
         )
 
     // TODO(b/293252410) : Tracking Bug
