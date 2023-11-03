@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene
 
+import android.content.Context
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -81,8 +82,10 @@ import kotlinx.coroutines.test.currentTime
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SceneTestUtils(
-    test: SysuiTestCase,
+    private val context: Context,
 ) {
+    constructor(test: SysuiTestCase) : this(context = test.context)
+
     val kosmos = Kosmos()
     val testDispatcher = kosmos.testDispatcher
     val testScope = kosmos.testScope
@@ -114,8 +117,6 @@ class SceneTestUtils(
             runBlocking { setSelectedUserInfo(users.first()) }
         }
     }
-
-    private val context = test.context
 
     private val falsingCollectorFake: FalsingCollector by lazy { FalsingCollectorFake() }
     private var falsingInteractor: FalsingInteractor? = null
