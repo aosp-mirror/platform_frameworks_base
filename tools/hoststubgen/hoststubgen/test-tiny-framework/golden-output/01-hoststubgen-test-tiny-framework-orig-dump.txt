@@ -1759,3 +1759,138 @@ InnerClasses:
   public static #x= #x of #x;          // StaticNestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
   public #x= #x of #x;                 // InnerClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
   #x;                                    // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$1
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkPackageRedirect.class
+  Compiled from "TinyFrameworkPackageRedirect.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPackageRedirect
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkPackageRedirect
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 2, attributes: 2
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkPackageRedirect();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkPackageRedirect;
+
+  public static int foo(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                  // class com/unsupported/UnsupportedClass
+         x: dup
+         x: iload_0
+         x: invokespecial #x                  // Method com/unsupported/UnsupportedClass."<init>":(I)V
+         x: invokevirtual #x                 // Method com/unsupported/UnsupportedClass.getValue:()I
+        x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      12     0 value   I
+}
+SourceFile: "TinyFrameworkPackageRedirect.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/supported/UnsupportedClass.class
+  Compiled from "UnsupportedClass.java"
+public class com.supported.UnsupportedClass
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/supported/UnsupportedClass
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 2, attributes: 2
+  private final int mValue;
+    descriptor: I
+    flags: (0x0012) ACC_PRIVATE, ACC_FINAL
+
+  public com.supported.UnsupportedClass(int);
+    descriptor: (I)V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=2, locals=2, args_size=2
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: aload_0
+         x: iload_1
+         x: putfield      #x                  // Field mValue:I
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      10     0  this   Lcom/supported/UnsupportedClass;
+            0      10     1 value   I
+
+  public int getValue();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: getfield      #x                  // Field mValue:I
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/supported/UnsupportedClass;
+}
+SourceFile: "UnsupportedClass.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassKeep
+## Class: com/unsupported/UnsupportedClass.class
+  Compiled from "UnsupportedClass.java"
+public class com.unsupported.UnsupportedClass
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                         // com/unsupported/UnsupportedClass
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 2, attributes: 2
+  public com.unsupported.UnsupportedClass(int);
+    descriptor: (I)V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=2, args_size=2
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: new           #x                  // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                  // String This class is not supported
+        x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+        x: athrow
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      14     0  this   Lcom/unsupported/UnsupportedClass;
+            0      14     1 value   I
+
+  public int getValue();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                  // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                  // String This class is not supported
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      10     0  this   Lcom/unsupported/UnsupportedClass;
+}
+SourceFile: "UnsupportedClass.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassStub

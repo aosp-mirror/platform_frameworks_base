@@ -200,7 +200,7 @@ class ImplGeneratingAdapter(
                                 access, name, descriptor, signature, exceptions, innerVisitor)
                     }
                     else -> {
-                        throw RuntimeException("Ignored policy only allowed for void methods");
+                        throw RuntimeException("Ignored policy only allowed for void methods")
                     }
                 }
             }
