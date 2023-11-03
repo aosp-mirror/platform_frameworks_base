@@ -222,7 +222,7 @@
     <string name="development_settings_not_available" msgid="355070198089140951">"Параметры распрацоўшчыка недаступныя для гэтага карыстальніка"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Налады VPN недаступныя для гэтага карыстальніка"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Налады мадэма недаступныя для гэтага карыстальніка"</string>
-    <string name="apn_settings_not_available" msgid="1147111671403342300">"Налады Імя пункту доступу недаступныя для гэтага карыстальніка"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"Налады пункту доступу недаступныя для гэтага карыстальніка"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Адладка па USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Рэжым адладкі, калі USB падключаны"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Скасаваць дазвол да адладкі па USB"</string>
