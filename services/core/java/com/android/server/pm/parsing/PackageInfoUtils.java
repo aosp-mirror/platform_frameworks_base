@@ -379,10 +379,7 @@ public class PackageInfoUtils {
         ai.privateFlags |= flag(state.isInstantApp(), ApplicationInfo.PRIVATE_FLAG_INSTANT)
                 | flag(state.isVirtualPreload(), ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD)
                 | flag(state.isHidden(), ApplicationInfo.PRIVATE_FLAG_HIDDEN);
-        if ((flags & PackageManager.MATCH_QUARANTINED_COMPONENTS) == 0
-                && state.isQuarantined()) {
-            ai.enabled = false;
-        } else  if (state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+        if (state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;
         } else if (state.getEnabledState()
                 == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
