@@ -81,6 +81,7 @@ import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.data.repository.BiometricType;
+import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -158,7 +159,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     @Nullable private UdfpsOverlayParams mUdfpsOverlayParams;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
     @Nullable private SideFpsController mSideFpsController;
-    @Nullable private UdfpsLogger mUdfpsLogger;
+    @NonNull private UdfpsLogger mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
@@ -928,6 +929,23 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
      */
     @Nullable public IUdfpsRefreshRateRequestCallback getUdfpsRefreshRateCallback() {
         return mUdfpsRefreshRateRequestCallback;
+    }
+
+    /**
+     * Requests (or stops requesting) the max refresh rate. This can override user settings
+     * for the max refresh rate.
+     */
+    public void requestMaxRefreshRate(boolean request) throws RemoteException {
+        if (mUdfpsRefreshRateRequestCallback == null) {
+            mUdfpsLogger.log(
+                    "PreAuthRefreshRate",
+                    "skip request - refreshRateCallback is null",
+                    LogLevel.DEBUG
+            );
+            return;
+        }
+        mUdfpsLogger.requestMaxRefreshRate(request);
+        mUdfpsRefreshRateRequestCallback.onAuthenticationPossible(mContext.getDisplayId(), request);
     }
 
     @Override
