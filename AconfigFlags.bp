@@ -34,6 +34,7 @@ aconfig_srcjars = [
     ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
     ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
+    ":aconfig_input_flags-java{.generated_srcjars}",
     ":com.android.text.flags-aconfig-java{.generated_srcjars}",
     ":telecom_flags_core_java_lib{.generated_srcjars}",
     ":telephony_flags_core_java_lib{.generated_srcjars}",
@@ -126,6 +127,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.hardware.input-aconfig-java",
     aconfig_declarations: "com.android.hardware.input.input-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "aconfig_input_flags-java",
+    aconfig_declarations: "aconfig_input_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
