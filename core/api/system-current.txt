@@ -14055,6 +14055,73 @@ package android.telephony {
     method @NonNull public android.telephony.DataThrottlingRequest.Builder setDataThrottlingAction(int);
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public class DomainSelectionService extends android.app.Service {
+    ctor public DomainSelectionService();
+    method public void onBarringInfoUpdated(int, int, @NonNull android.telephony.BarringInfo);
+    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @NonNull public java.util.concurrent.Executor onCreateExecutor();
+    method public void onDomainSelection(@NonNull android.telephony.DomainSelectionService.SelectionAttributes, @NonNull android.telephony.TransportSelectorCallback);
+    method public void onServiceStateUpdated(int, int, @NonNull android.telephony.ServiceState);
+    field public static final int SCAN_TYPE_FULL_SERVICE = 2; // 0x2
+    field public static final int SCAN_TYPE_LIMITED_SERVICE = 1; // 0x1
+    field public static final int SCAN_TYPE_NO_PREFERENCE = 0; // 0x0
+    field public static final int SELECTOR_TYPE_CALLING = 1; // 0x1
+    field public static final int SELECTOR_TYPE_SMS = 2; // 0x2
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final class DomainSelectionService.SelectionAttributes implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.net.Uri getAddress();
+    method @Nullable public String getCallId();
+    method public int getCsDisconnectCause();
+    method @Nullable public android.telephony.EmergencyRegResult getEmergencyRegResult();
+    method @Nullable public android.telephony.ims.ImsReasonInfo getPsDisconnectCause();
+    method public int getSelectorType();
+    method public int getSlotIndex();
+    method public int getSubscriptionId();
+    method public boolean isEmergency();
+    method public boolean isExitedFromAirplaneMode();
+    method public boolean isTestEmergencyNumber();
+    method public boolean isVideoCall();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DomainSelectionService.SelectionAttributes> CREATOR;
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final class DomainSelectionService.SelectionAttributes.Builder {
+    ctor public DomainSelectionService.SelectionAttributes.Builder(int, int, int);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes build();
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setAddress(@NonNull android.net.Uri);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setCallId(@NonNull String);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setCsDisconnectCause(int);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setEmergency(boolean);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setEmergencyRegResult(@NonNull android.telephony.EmergencyRegResult);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setExitedFromAirplaneMode(boolean);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setPsDisconnectCause(@NonNull android.telephony.ims.ImsReasonInfo);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setTestEmergencyNumber(boolean);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setVideoCall(boolean);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public interface DomainSelector {
+    method public void finishSelection();
+    method public void reselectDomain(@NonNull android.telephony.DomainSelectionService.SelectionAttributes);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public final class EmergencyRegResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAccessNetwork();
+    method @NonNull public String getCountryIso();
+    method public int getDomain();
+    method @NonNull public String getMcc();
+    method @NonNull public String getMnc();
+    method public int getNwProvidedEmc();
+    method public int getNwProvidedEmf();
+    method public int getRegState();
+    method public boolean isEmcBearerSupported();
+    method public boolean isVopsSupported();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.EmergencyRegResult> CREATOR;
+  }
+
   public final class ImsiEncryptionInfo implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getKeyIdentifier();
@@ -14325,6 +14392,8 @@ package android.telephony {
     field public static final int CHANNEL_UNACCEPTABLE = 6; // 0x6
     field public static final int CONDITIONAL_IE_ERROR = 100; // 0x64
     field public static final int DESTINATION_OUT_OF_ORDER = 27; // 0x1b
+    field @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final int EMERGENCY_PERM_FAILURE = 326; // 0x146
+    field @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final int EMERGENCY_TEMP_FAILURE = 325; // 0x145
     field public static final int ERROR_UNSPECIFIED = 65535; // 0xffff
     field public static final int FACILITY_REJECTED = 29; // 0x1d
     field public static final int FDN_BLOCKED = 241; // 0xf1
@@ -14807,6 +14876,7 @@ package android.telephony {
     method @FlaggedApi("com.android.internal.telephony.flags.enable_identifier_disclosure_transparency") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCellularIdentifierDisclosureNotificationsEnabled();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
+    method @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDomainSelectionSupported();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean isIccLockEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
@@ -15052,6 +15122,13 @@ package android.telephony {
     method @NonNull public android.telephony.ThermalMitigationRequest.Builder setThermalMitigationAction(int);
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public interface TransportSelectorCallback {
+    method public void onCreated(@NonNull android.telephony.DomainSelector);
+    method public void onSelectionTerminated(int);
+    method public void onWlanSelected(boolean);
+    method public void onWwanSelected(@NonNull java.util.function.Consumer<android.telephony.WwanSelectorCallback>);
+  }
+
   public final class UiccAccessRule implements android.os.Parcelable {
     ctor public UiccAccessRule(byte[], @Nullable String, long);
     method public int describeContents();
@@ -15105,6 +15182,11 @@ package android.telephony {
     method public abstract boolean isEmergencyServiceSupported();
     method public abstract boolean isVopsSupported();
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.VopsSupportInfo> CREATOR;
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public interface WwanSelectorCallback {
+    method public void onDomainSelected(int, boolean);
+    method public void onRequestEmergencyNetworkScan(@NonNull java.util.List<java.lang.Integer>, int, boolean, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.telephony.EmergencyRegResult>);
   }
 
 }

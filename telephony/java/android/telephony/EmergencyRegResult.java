@@ -16,17 +16,25 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.internal.telephony.flags.Flags;
+
 import java.util.Objects;
 
 /**
- * Contains attributes required to determine the domain for a telephony service
+ * Contains attributes required to determine the domain for a telephony service, including
+ * the network registration state.
+ *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
 public final class EmergencyRegResult implements Parcelable {
 
     /**
@@ -77,7 +85,7 @@ public final class EmergencyRegResult implements Parcelable {
      * The ISO-3166-1 alpha-2 country code equivalent for the network's country code,
      * empty string if unknown.
      */
-    private @NonNull String mIso;
+    private @NonNull String mCountryIso;
 
     /**
      * Constructor
@@ -108,7 +116,7 @@ public final class EmergencyRegResult implements Parcelable {
         mNwProvidedEmf = emf;
         mMcc = mcc;
         mMnc = mnc;
-        mIso = iso;
+        mCountryIso = iso;
     }
 
     /**
@@ -127,7 +135,7 @@ public final class EmergencyRegResult implements Parcelable {
         mNwProvidedEmf = s.mNwProvidedEmf;
         mMcc = s.mMcc;
         mMnc = s.mMnc;
-        mIso = s.mIso;
+        mCountryIso = s.mCountryIso;
     }
 
     /**
@@ -226,8 +234,8 @@ public final class EmergencyRegResult implements Parcelable {
      *
      * @return Country code.
      */
-    public @NonNull String getIso() {
-        return mIso;
+    public @NonNull String getCountryIso() {
+        return mCountryIso;
     }
 
     @Override
@@ -242,7 +250,7 @@ public final class EmergencyRegResult implements Parcelable {
                 + ", emf=" + mNwProvidedEmf
                 + ", mcc=" + mMcc
                 + ", mnc=" + mMnc
-                + ", iso=" + mIso
+                + ", iso=" + mCountryIso
                 + " }";
     }
 
@@ -260,7 +268,7 @@ public final class EmergencyRegResult implements Parcelable {
                 && mNwProvidedEmf == that.mNwProvidedEmf
                 && TextUtils.equals(mMcc, that.mMcc)
                 && TextUtils.equals(mMnc, that.mMnc)
-                && TextUtils.equals(mIso, that.mIso);
+                && TextUtils.equals(mCountryIso, that.mCountryIso);
     }
 
     @Override
@@ -268,7 +276,7 @@ public final class EmergencyRegResult implements Parcelable {
         return Objects.hash(mAccessNetworkType, mRegState, mDomain,
                 mIsVopsSupported, mIsEmcBearerSupported,
                 mNwProvidedEmc, mNwProvidedEmf,
-                mMcc, mMnc, mIso);
+                mMcc, mMnc, mCountryIso);
     }
 
     @Override
@@ -287,7 +295,7 @@ public final class EmergencyRegResult implements Parcelable {
         out.writeInt(mNwProvidedEmf);
         out.writeString8(mMcc);
         out.writeString8(mMnc);
-        out.writeString8(mIso);
+        out.writeString8(mCountryIso);
     }
 
     private void readFromParcel(@NonNull Parcel in) {
@@ -300,7 +308,7 @@ public final class EmergencyRegResult implements Parcelable {
         mNwProvidedEmf = in.readInt();
         mMcc = in.readString8();
         mMnc = in.readString8();
-        mIso = in.readString8();
+        mCountryIso = in.readString8();
     }
 
     public static final @NonNull Creator<EmergencyRegResult> CREATOR =
