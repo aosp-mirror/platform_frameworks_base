@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.IMediaRoute2ProviderService;
 import android.media.IMediaRoute2ProviderServiceCallback;
+import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.media.RouteDiscoveryPreference;
@@ -641,6 +642,15 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
         @Override
         public void notifyProviderUpdated(MediaRoute2ProviderInfo providerInfo) {
+            for (MediaRoute2Info route : providerInfo.getRoutes()) {
+                if (route.isSystemRoute()) {
+                    throw new SecurityException(
+                            "Only the system is allowed to publish system routes. "
+                                    + "Disallowed route: "
+                                    + route);
+                }
+            }
+
             Connection connection = mConnectionRef.get();
             if (connection != null) {
                 connection.postProviderUpdated(providerInfo);
