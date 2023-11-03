@@ -69,8 +69,15 @@ bool SkiaHostPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehav
         int width, height;
         surface->query(surface, NATIVE_WINDOW_WIDTH, &width);
         surface->query(surface, NATIVE_WINDOW_HEIGHT, &height);
+        // The image must have color type BGRA for all platforms.
+        // Robolectric note:
+        // This forces Skia to render ARGB even though we fill an ImageReader
+        // Surface declared as RGBA_8888.
+        // Doing this allows us to directly match an Android Bitmap which also
+        // as the ARGB_8888 format (BGRA and ARGB are essentially the same data
+        // seen from a different endianness perspective).
         SkImageInfo imageInfo =
-                SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType,
+                SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
                                   SkAlphaType::kPremul_SkAlphaType);
         size_t widthBytes = width * 4;
         void* pixels = buffer->reserved[0];
