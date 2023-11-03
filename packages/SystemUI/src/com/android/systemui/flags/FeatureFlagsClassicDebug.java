@@ -16,12 +16,14 @@
 
 package com.android.systemui.flags;
 
+import static com.android.systemui.Flags.exampleFlag;
 import static com.android.systemui.flags.FlagManager.ACTION_GET_FLAGS;
 import static com.android.systemui.flags.FlagManager.ACTION_SET_FLAG;
 import static com.android.systemui.flags.FlagManager.EXTRA_FLAGS;
 import static com.android.systemui.flags.FlagManager.EXTRA_NAME;
 import static com.android.systemui.flags.FlagManager.EXTRA_VALUE;
 import static com.android.systemui.flags.FlagsCommonModule.ALL_FLAGS;
+import static com.android.systemui.shared.Flags.exampleSharedFlag;
 
 import static java.util.Objects.requireNonNull;
 
@@ -539,6 +541,8 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
         pw.println("can override: true");
         pw.println("teamfood: " + mGantryFlags.sysuiTeamfood());
         pw.println("booleans: " + mBooleanFlagCache.size());
+        pw.println("example_flag: " + exampleFlag());
+        pw.println("example_shared_flag: " + exampleSharedFlag());
         // Sort our flags for dumping
         TreeMap<String, Boolean> dumpBooleanMap = new TreeMap<>(mBooleanFlagCache);
         dumpBooleanMap.forEach((key, value) -> pw.println("  sysui_flag_" + key + ": " + value));

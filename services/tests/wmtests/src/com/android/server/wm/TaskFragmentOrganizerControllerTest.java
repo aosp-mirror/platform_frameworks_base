@@ -86,7 +86,9 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
+import android.window.IRemoteTransition;
 import android.window.ITaskFragmentOrganizer;
+import android.window.RemoteTransition;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentInfo;
@@ -543,6 +545,35 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.unregisterRemoteAnimations(mIOrganizer);
 
         assertNull(mController.getRemoteAnimationDefinition(mIOrganizer));
+    }
+
+    @Test
+    public void testApplyTransaction_disallowRemoteTransitionForNonSystemOrganizer() {
+        mTransaction.setRelativeBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        // Throw exception if the transaction has remote transition and is not requested by system
+        // organizer
+        assertThrows(SecurityException.class, () ->
+                mController.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                        true /* shouldApplyIndependently */,
+                        new RemoteTransition(mock(IRemoteTransition.class))));
+    }
+
+    @Test
+    public void testApplyTransaction_allowRemoteTransitionForSystemOrganizer() {
+        mController.unregisterOrganizer(mIOrganizer);
+        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+
+        mTransaction.setRelativeBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        // Remote transition is allowed for system organizer
+        mController.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                true /* shouldApplyIndependently */,
+                new RemoteTransition(mock(IRemoteTransition.class)));
     }
 
     @Test
@@ -1801,13 +1832,13 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private void assertApplyTransactionDisallowed(WindowContainerTransaction t) {
         assertThrows(SecurityException.class, () ->
                 mController.applyTransaction(t, TASK_FRAGMENT_TRANSIT_CHANGE,
-                        false /* shouldApplyIndependently */));
+                        false /* shouldApplyIndependently */, null /* remoteTransition */));
     }
 
     /** Asserts that applying the given transaction will not throw any exception. */
     private void assertApplyTransactionAllowed(WindowContainerTransaction t) {
         mController.applyTransaction(t, TASK_FRAGMENT_TRANSIT_CHANGE,
-                false /* shouldApplyIndependently */);
+                false /* shouldApplyIndependently */, null /* remoteTransition */);
     }
 
     /** Asserts that there will be a transaction for TaskFragment appeared. */

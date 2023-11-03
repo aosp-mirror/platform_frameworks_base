@@ -30,6 +30,7 @@ data class KeyguardFingerprintListenModel(
     var allowOnCurrentOccludingActivity: Boolean = false,
     var alternateBouncerShowing: Boolean = false,
     var biometricEnabledForUser: Boolean = false,
+    var biometricPromptShowing: Boolean = false,
     var bouncerIsOrWillShow: Boolean = false,
     var canSkipBouncer: Boolean = false,
     var credentialAttempted: Boolean = false,
@@ -61,6 +62,7 @@ data class KeyguardFingerprintListenModel(
             allowOnCurrentOccludingActivity.toString(),
             alternateBouncerShowing.toString(),
             biometricEnabledForUser.toString(),
+            biometricPromptShowing.toString(),
             bouncerIsOrWillShow.toString(),
             canSkipBouncer.toString(),
             credentialAttempted.toString(),
@@ -101,6 +103,7 @@ data class KeyguardFingerprintListenModel(
                 allowOnCurrentOccludingActivity = model.allowOnCurrentOccludingActivity
                 alternateBouncerShowing = model.alternateBouncerShowing
                 biometricEnabledForUser = model.biometricEnabledForUser
+                biometricPromptShowing = model.biometricPromptShowing
                 bouncerIsOrWillShow = model.bouncerIsOrWillShow
                 canSkipBouncer = model.canSkipBouncer
                 credentialAttempted = model.credentialAttempted
@@ -147,6 +150,7 @@ data class KeyguardFingerprintListenModel(
                 "allowOnCurrentOccludingActivity",
                 "alternateBouncerShowing",
                 "biometricAllowedForUser",
+                "biometricPromptShowing",
                 "bouncerIsOrWillShow",
                 "canSkipBouncer",
                 "credentialAttempted",

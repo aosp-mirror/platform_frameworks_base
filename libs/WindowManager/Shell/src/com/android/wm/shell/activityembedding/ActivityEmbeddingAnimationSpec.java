@@ -22,6 +22,8 @@ import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.animation.AlphaAnimation;
@@ -33,8 +35,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.window.TransitionInfo;
-
-import androidx.annotation.NonNull;
 
 import com.android.internal.policy.TransitionAnimation;
 import com.android.wm.shell.util.TransitionUtil;
@@ -201,11 +201,10 @@ class ActivityEmbeddingAnimationSpec {
     Animation loadOpenAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
-        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        final Animation customAnimation = loadCustomAnimation(info, isEnter);
         final Animation animation;
-        if (options != null && options.getType() == ANIM_CUSTOM) {
-            animation = mTransitionAnimation.loadAnimationRes(options.getPackageName(),
-                    isEnter ? options.getEnterResId() : options.getExitResId());
+        if (customAnimation != null) {
+            animation = customAnimation;
         } else if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                     ? com.android.internal.R.anim.task_fragment_clear_top_open_enter
@@ -229,11 +228,10 @@ class ActivityEmbeddingAnimationSpec {
     Animation loadCloseAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
-        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        final Animation customAnimation = loadCustomAnimation(info, isEnter);
         final Animation animation;
-        if (options != null && options.getType() == ANIM_CUSTOM) {
-            animation = mTransitionAnimation.loadAnimationRes(options.getPackageName(),
-                    isEnter ? options.getEnterResId() : options.getExitResId());
+        if (customAnimation != null) {
+            animation = customAnimation;
         } else if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                     ? com.android.internal.R.anim.task_fragment_clear_top_close_enter
@@ -258,5 +256,22 @@ class ActivityEmbeddingAnimationSpec {
         final Animation a = loadAttributeAnimation(info, change, WALLPAPER_TRANSITION_NONE,
                 mTransitionAnimation, false);
         return a != null && a.getShowBackdrop();
+    }
+
+    @Nullable
+    private Animation loadCustomAnimation(@NonNull TransitionInfo info, boolean isEnter) {
+        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        if (options == null || options.getType() != ANIM_CUSTOM) {
+            return null;
+        }
+        final Animation anim = mTransitionAnimation.loadAnimationRes(options.getPackageName(),
+                isEnter ? options.getEnterResId() : options.getExitResId());
+        if (anim != null) {
+            return anim;
+        }
+        // The app may be intentional to use an invalid resource as a no-op animation.
+        // ActivityEmbeddingAnimationRunner#createOpenCloseAnimationAdapters will skip the
+        // animation with duration 0. Then it will use prepareForJumpCut for empty adapters.
+        return new AlphaAnimation(1f, 1f);
     }
 }

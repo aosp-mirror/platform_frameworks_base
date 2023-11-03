@@ -19,6 +19,7 @@ package android.window;
 import android.os.IBinder;
 import android.view.RemoteAnimationDefinition;
 import android.window.ITaskFragmentOrganizer;
+import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
 /** @hide */
@@ -65,7 +66,10 @@ interface ITaskFragmentOrganizerController {
 
     /**
      * Requests the server to apply the given {@link WindowContainerTransaction}.
+     *
+     * {@link RemoteTransition} can only be used by a system organizer and
+     * {@code shouldApplyIndependently} must be {@code true}. See {@link registerOrganizer}.
      */
     void applyTransaction(in WindowContainerTransaction wct, int transitionType,
-        boolean shouldApplyIndependently);
+        boolean shouldApplyIndependently, in RemoteTransition remoteTransition);
 }

@@ -28,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
+import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -203,12 +204,6 @@ public class Transitions implements RemoteCallable<Transitions>,
      * however it can't be too small since there is some potential IPC involved.
      */
     private static final int SYNC_ALLOWANCE_MS = 120;
-
-    /**
-     * Keyguard gets a more generous timeout to finish its animations, because we are always holding
-     * a sleep token during occlude/unocclude transitions and we want them to finish playing cleanly
-     */
-    private static final int SYNC_ALLOWANCE_KEYGUARD_MS = 2000;
 
     /** For testing only. Disables the force-finish timeout on sync. */
     private boolean mDisableForceSync = false;
@@ -743,6 +738,11 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (!change.hasFlags(FLAG_IS_OCCLUDED)) {
                 allOccluded = false;
             }
+            // The change has already animated by back gesture, don't need to play transition
+            // animation on it.
+            if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
+                info.getChanges().remove(i);
+            }
         }
         // There does not need animation when:
         // A. Transfer starting window. Apply transfer starting window directly if there is no other
@@ -1203,11 +1203,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (track.mActiveTransition == playing) {
                 if (!mDisableForceSync) {
                     // Give it a short amount of time to process it before forcing.
-                    final int tolerance = KeyguardTransitionHandler.handles(playing.mInfo)
-                            ? SYNC_ALLOWANCE_KEYGUARD_MS
-                            : SYNC_ALLOWANCE_MS;
                     mMainExecutor.executeDelayed(
-                            () -> finishForSync(reason, trackIdx, playing), tolerance);
+                            () -> finishForSync(reason, trackIdx, playing), SYNC_ALLOWANCE_MS);
                 }
                 break;
             }

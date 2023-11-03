@@ -22,6 +22,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.android.app.tracing.TraceUtils.Companion.withContext
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
@@ -48,7 +49,6 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.tracing.TraceUtils.Companion.withContext
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

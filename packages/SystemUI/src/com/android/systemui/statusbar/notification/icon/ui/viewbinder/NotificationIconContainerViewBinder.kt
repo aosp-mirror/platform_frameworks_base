@@ -15,26 +15,19 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.graphics.Color
 import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewPropertyAnimator
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.collection.ArrayMap
 import androidx.lifecycle.lifecycleScope
-import com.android.app.animation.Interpolators
 import com.android.internal.policy.SystemBarUtils
 import com.android.internal.util.ContrastColorUtil
 import com.android.systemui.common.ui.ConfigurationState
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.collection.NotifCollection
@@ -47,7 +40,6 @@ import com.android.systemui.statusbar.notification.icon.ui.viewmodel.Notificatio
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
 import com.android.systemui.util.children
@@ -65,7 +57,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Binds a view-model to a [NotificationIconContainer]. */
@@ -118,8 +109,6 @@ object NotificationIconContainerViewBinder {
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
         dozeParameters: DozeParameters,
-        featureFlags: FeatureFlagsClassic,
-        screenOffAnimationController: ScreenOffAnimationController,
         viewStore: IconViewStore,
     ): DisposableHandle {
         return view.repeatWhenAttached {
@@ -134,16 +123,6 @@ object NotificationIconContainerViewBinder {
                 }
                 launch { viewModel.animationsEnabled.bindAnimationsEnabled(view) }
                 launch { viewModel.isDozing.bindIsDozing(view, dozeParameters) }
-                // TODO(b/278765923): this should live where AOD is bound, not inside of the NIC
-                //  view-binder
-                launch {
-                    viewModel.isVisible.bindIsVisible(
-                        view,
-                        configuration,
-                        featureFlags,
-                        screenOffAnimationController,
-                    )
-                }
                 launch {
                     configuration
                         .getColorAttr(R.attr.wallpaperTextColor, DEFAULT_AOD_ICON_COLOR)
@@ -333,106 +312,11 @@ object NotificationIconContainerViewBinder {
         setDecorColor(iconColors.tint)
     }
 
-    private suspend fun Flow<AnimatedValue<Boolean>>.bindIsVisible(
-        view: NotificationIconContainer,
-        configuration: ConfigurationState,
-        featureFlags: FeatureFlagsClassic,
-        screenOffAnimationController: ScreenOffAnimationController,
-    ): Unit = coroutineScope {
-        val iconAppearTranslation =
-            configuration.getDimensionPixelSize(R.dimen.shelf_appear_translation).stateIn(this)
-        val statusViewMigrated = featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)
-        collect { isVisible ->
-            view.animate().cancel()
-            val animatorListener =
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        isVisible.stopAnimating()
-                    }
-                }
-            when {
-                !isVisible.isAnimating -> {
-                    view.alpha = 1f
-                    if (!statusViewMigrated) {
-                        view.translationY = 0f
-                    }
-                    view.visibility = if (isVisible.value) View.VISIBLE else View.INVISIBLE
-                }
-                featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION) -> {
-                    view.animateInIconTranslation(statusViewMigrated)
-                    if (isVisible.value) {
-                        CrossFadeHelper.fadeIn(view, animatorListener)
-                    } else {
-                        CrossFadeHelper.fadeOut(view, animatorListener)
-                    }
-                }
-                !isVisible.value -> {
-                    // Let's make sure the icon are translated to 0, since we cancelled it above
-                    view.animateInIconTranslation(statusViewMigrated)
-                    CrossFadeHelper.fadeOut(view, animatorListener)
-                }
-                view.visibility != View.VISIBLE -> {
-                    // No fading here, let's just appear the icons instead!
-                    view.visibility = View.VISIBLE
-                    view.alpha = 1f
-                    view.appearIcons(
-                        animate = screenOffAnimationController.shouldAnimateAodIcons(),
-                        iconAppearTranslation.value,
-                        statusViewMigrated,
-                        animatorListener,
-                    )
-                }
-                else -> {
-                    // Let's make sure the icons are translated to 0, since we cancelled it above
-                    view.animateInIconTranslation(statusViewMigrated)
-                    // We were fading out, let's fade in instead
-                    CrossFadeHelper.fadeIn(view, animatorListener)
-                }
-            }
-        }
-    }
-
-    private fun View.appearIcons(
-        animate: Boolean,
-        iconAppearTranslation: Int,
-        statusViewMigrated: Boolean,
-        animatorListener: Animator.AnimatorListener,
-    ) {
-        if (animate) {
-            if (!statusViewMigrated) {
-                translationY = -iconAppearTranslation.toFloat()
-            }
-            alpha = 0f
-            animate()
-                .alpha(1f)
-                .setInterpolator(Interpolators.LINEAR)
-                .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .apply { if (statusViewMigrated) animateInIconTranslation() }
-                .setListener(animatorListener)
-                .start()
-        } else {
-            alpha = 1.0f
-            if (!statusViewMigrated) {
-                translationY = 0f
-            }
-        }
-    }
-
-    private fun View.animateInIconTranslation(statusViewMigrated: Boolean) {
-        if (!statusViewMigrated) {
-            animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
-        }
-    }
-
-    private fun ViewPropertyAnimator.animateInIconTranslation(): ViewPropertyAnimator =
-        setInterpolator(Interpolators.DECELERATE_QUINT).translationY(0f)
-
     /** External storage for [StatusBarIconView] instances. */
     fun interface IconViewStore {
         fun iconView(key: String): StatusBarIconView?
     }
 
-    private const val AOD_ICONS_APPEAR_DURATION: Long = 200
     @ColorInt private val DEFAULT_AOD_ICON_COLOR = Color.WHITE
 }
 

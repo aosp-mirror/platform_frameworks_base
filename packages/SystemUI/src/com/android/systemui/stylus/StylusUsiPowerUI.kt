@@ -162,6 +162,7 @@ constructor(
                 .setContentText(context.getString(R.string.stylus_battery_low_subtitle))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setLocalOnly(true)
+                .setOnlyAlertOnce(true)
                 .setAutoCancel(true)
                 .build()
 

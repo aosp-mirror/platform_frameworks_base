@@ -16,7 +16,7 @@
 
 package com.android.systemui.util
 
-import com.android.systemui.tracing.traceSection
+import com.android.app.tracing.traceSection
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.function.Consumer
 

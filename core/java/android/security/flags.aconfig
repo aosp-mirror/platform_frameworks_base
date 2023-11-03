@@ -29,3 +29,10 @@ flag {
     bug: "277916185"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "binary_transparency_sepolicy_hash"
+    namespace: "hardware_backed_security"
+    description: "Collect sepolicy hash from sysfs"
+    bug: "308471499"
+}

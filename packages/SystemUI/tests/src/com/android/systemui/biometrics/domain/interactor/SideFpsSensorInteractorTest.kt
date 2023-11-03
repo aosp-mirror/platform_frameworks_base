@@ -26,6 +26,7 @@ import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.DisplayRotation.ROTATION_0
@@ -35,11 +36,14 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation.ROTATION_90
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags.REST_TO_UNLOCK
+import com.android.systemui.log.SideFpsLogger
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -62,7 +66,7 @@ import org.mockito.junit.MockitoJUnit
 class SideFpsSensorInteractorTest : SysuiTestCase() {
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
-    private lateinit var testScope: TestScope
+    private val testScope = TestScope(StandardTestDispatcher())
 
     private val fingerprintRepository = FakeFingerprintPropertyRepository()
 
@@ -70,32 +74,38 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var displayStateInteractor: DisplayStateInteractor
-
+    @Mock
+    private lateinit var fingerprintInteractiveToAuthProvider: FingerprintInteractiveToAuthProvider
+    private val isRestToUnlockEnabled = MutableStateFlow(false)
     private val contextDisplayInfo = DisplayInfo()
     private val displayChangeEvent = MutableStateFlow(0)
     private val currentRotation = MutableStateFlow(ROTATION_0)
 
     @Before
     fun setup() {
-        testScope = TestScope(StandardTestDispatcher())
         mContext = spy(mContext)
 
-        val displayManager = mock(DisplayManagerGlobal::class.java)
         val resources = mContext.resources
         whenever(mContext.display)
-            .thenReturn(Display(displayManager, 1, contextDisplayInfo, resources))
+            .thenReturn(
+                Display(mock(DisplayManagerGlobal::class.java), 1, contextDisplayInfo, resources)
+            )
         whenever(displayStateInteractor.displayChanges).thenReturn(displayChangeEvent)
         whenever(displayStateInteractor.currentRotation).thenReturn(currentRotation)
 
         contextDisplayInfo.uniqueId = "current-display"
-
+        val featureFlags = FakeFeatureFlagsClassic().apply { set(REST_TO_UNLOCK, true) }
+        whenever(fingerprintInteractiveToAuthProvider.enabledForCurrentUser)
+            .thenReturn(isRestToUnlockEnabled)
         underTest =
             SideFpsSensorInteractor(
                 mContext,
                 fingerprintRepository,
                 windowManager,
                 displayStateInteractor,
-                FakeFeatureFlagsClassic().apply { set(REST_TO_UNLOCK, true) }
+                featureFlags,
+                Optional.of(fingerprintInteractiveToAuthProvider),
+                SideFpsLogger(logcatLogBuffer("SfpsLogger"))
             )
     }
 
@@ -346,6 +356,21 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(sensorLocation!!.top).isEqualTo(500)
             assertThat(sensorLocation!!.isSensorVerticalInDefaultOrientation).isEqualTo(false)
             assertThat(sensorLocation!!.width).isEqualTo(100)
+        }
+
+    @Test
+    fun isProlongedTouchRequiredForAuthentication_dependsOnSettingsToggle() =
+        testScope.runTest {
+            val isEnabled by collectLastValue(underTest.isProlongedTouchRequiredForAuthentication)
+            setupFingerprint(FingerprintSensorType.POWER_BUTTON)
+
+            isRestToUnlockEnabled.value = true
+            runCurrent()
+            assertThat(isEnabled).isTrue()
+
+            isRestToUnlockEnabled.value = false
+            runCurrent()
+            assertThat(isEnabled).isFalse()
         }
 
     private suspend fun TestScope.setupFPLocationAndDisplaySize(

@@ -38,23 +38,22 @@ class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecision
     override val provider by lazy {
         NotificationInterruptStateProviderWrapper(
             NotificationInterruptStateProviderImpl(
-                    powerManager,
-                    ambientDisplayConfiguration,
-                    batteryController,
-                    statusBarStateController,
-                    keyguardStateController,
-                    headsUpManager,
-                    logger,
-                    mainHandler,
-                    flags,
-                    keyguardNotificationVisibilityProvider,
-                    uiEventLogger,
-                    userTracker,
-                    deviceProvisionedController,
-                    systemClock,
-                    globalSettings,
-                )
-                .also { it.mUseHeadsUp = true }
+                powerManager,
+                ambientDisplayConfiguration,
+                batteryController,
+                statusBarStateController,
+                keyguardStateController,
+                headsUpManager,
+                logger,
+                mainHandler,
+                flags,
+                keyguardNotificationVisibilityProvider,
+                uiEventLogger,
+                userTracker,
+                deviceProvisionedController,
+                systemClock,
+                globalSettings,
+            )
         )
     }
 

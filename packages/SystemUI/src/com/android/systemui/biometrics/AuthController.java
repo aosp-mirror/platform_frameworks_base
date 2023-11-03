@@ -78,7 +78,6 @@ import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.data.repository.BiometricType;
 import com.android.systemui.statusbar.CommandQueue;
@@ -120,7 +119,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
 
     private final Handler mHandler;
     private final Context mContext;
-    private final FeatureFlags mFeatureFlags;
     private final Execution mExecution;
     private final CommandQueue mCommandQueue;
     private final ActivityTaskManager mActivityTaskManager;
@@ -743,7 +741,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     }
     @Inject
     public AuthController(Context context,
-            @NonNull FeatureFlags featureFlags,
             @Application CoroutineScope applicationCoroutineScope,
             Execution execution,
             CommandQueue commandQueue,
@@ -770,7 +767,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             @NonNull UdfpsUtils udfpsUtils,
             @NonNull VibratorHelper vibratorHelper) {
         mContext = context;
-        mFeatureFlags = featureFlags;
         mExecution = execution;
         mUserManager = userManager;
         mLockPatternUtils = lockPatternUtils;
@@ -1316,7 +1312,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         config.mRequestId = requestId;
         config.mSensorIds = sensorIds;
         config.mScaleProvider = this::getScaleFactor;
-        return new AuthContainerView(config, mFeatureFlags, mApplicationCoroutineScope, mFpProps, mFaceProps,
+        return new AuthContainerView(config, mApplicationCoroutineScope, mFpProps, mFaceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
                 mInteractionJankMonitor, mPromptCredentialInteractor, mPromptSelectorInteractor,
                 viewModel, mCredentialViewModelProvider, bgExecutor, mVibratorHelper);

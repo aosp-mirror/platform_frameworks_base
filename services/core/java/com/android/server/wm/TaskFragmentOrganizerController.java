@@ -49,6 +49,7 @@ import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
+import android.window.RemoteTransition;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOperation;
 import android.window.TaskFragmentParentInfo;
@@ -566,7 +567,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
             if (isValidTransaction(wct)) {
-                applyTransaction(wct, transitionType, shouldApplyIndependently);
+                applyTransaction(
+                        wct, transitionType, shouldApplyIndependently, null /* remoteTransition */);
             }
             // Even if the transaction is empty, we still need to invoke #onTransactionFinished
             // unless the organizer has been unregistered.
@@ -587,14 +589,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     @Override
     public void applyTransaction(@NonNull WindowContainerTransaction wct,
-            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
+            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently,
+            @Nullable RemoteTransition remoteTransition) {
         // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
             if (!isValidTransaction(wct)) {
                 return;
             }
             mWindowOrganizerController.applyTaskFragmentTransactionLocked(wct, transitionType,
-                    shouldApplyIndependently);
+                    shouldApplyIndependently, remoteTransition);
         }
     }
 
@@ -839,6 +842,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             Slog.e(TAG, "Caller organizer=" + organizer + " is no longer registered");
             return false;
         }
+
         return true;
     }
 

@@ -1,0 +1,8 @@
+package: "android.media.tv.flags"
+
+flag {
+    name: "broadcast_visibility_types"
+    namespace: "media_tv"
+    description: "Constants for standardizing broadcast visibility types."
+    bug: "222402395"
+}

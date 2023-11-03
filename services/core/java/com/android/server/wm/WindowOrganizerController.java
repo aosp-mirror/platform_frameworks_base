@@ -103,6 +103,7 @@ import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
+import android.window.RemoteTransition;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentOperation;
@@ -464,12 +465,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      *                                  transition, which will be queued until the sync engine is
      *                                  free if there is any other active sync. If {@code false},
      *                                  the {@code wct} will be directly applied to the active sync.
+     * @param remoteTransition {@link RemoteTransition} to apply for the transaction. Only available
+     *                                                 for system organizers.
      */
     void applyTaskFragmentTransactionLocked(@NonNull WindowContainerTransaction wct,
-            @WindowManager.TransitionType int type, boolean shouldApplyIndependently) {
+            @WindowManager.TransitionType int type, boolean shouldApplyIndependently,
+            @Nullable RemoteTransition remoteTransition) {
         enforceTaskFragmentOrganizerPermission("applyTaskFragmentTransaction()",
                 Objects.requireNonNull(wct.getTaskFragmentOrganizer()),
                 Objects.requireNonNull(wct));
+        if (remoteTransition != null && !mTaskFragmentOrganizerController.isSystemOrganizer(
+                wct.getTaskFragmentOrganizer().asBinder())) {
+            throw new SecurityException(
+                    "Only a system organizer is allowed to use remote transition!");
+        }
         final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -512,7 +521,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     return;
                 }
                 mTransitionController.requestStartTransition(transition, null /* startTask */,
-                        null /* remoteTransition */, null /* displayChange */);
+                        remoteTransition, null /* displayChange */);
                 transition.setAllReady();
             };
             mTransitionController.startCollectOrQueue(transition, doApply);
@@ -1135,16 +1144,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (pipTask == null) {
                     break;
                 }
-                ActivityRecord[] pipActivity = new ActivityRecord[1];
-                pipTask.forAllActivities((activity) -> {
-                    if (activity.pictureInPictureArgs != null) {
-                        pipActivity[0] = activity;
-                    }
-                });
+                ActivityRecord pipActivity = pipTask.getActivity(
+                        (activity) -> activity.pictureInPictureArgs != null);
 
                 Rect entryBounds = hop.getBounds();
                 mService.mRootWindowContainer.moveActivityToPinnedRootTask(
-                        pipActivity[0], null /* launchIntoPipHostActivity */,
+                        pipActivity, null /* launchIntoPipHostActivity */,
                         "moveActivityToPinnedRootTask", null /* transition */, entryBounds);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;

@@ -252,15 +252,15 @@ public final class FlexibilityController extends StateController {
     boolean isFlexibilitySatisfiedLocked(JobStatus js) {
         return !mFlexibilityEnabled
                 || mService.getUidBias(js.getSourceUid()) == JobInfo.BIAS_TOP_APP
-                || getNumSatisfiedFlexibleConstraintsLocked(js)
+                || getNumSatisfiedRequiredConstraintsLocked(js)
                         >= js.getNumRequiredFlexibleConstraints()
                 || mService.isCurrentlyRunningLocked(js);
     }
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    int getNumSatisfiedFlexibleConstraintsLocked(JobStatus js) {
-        return Integer.bitCount(mSatisfiedFlexibleConstraints & js.getPreferredConstraintFlags())
+    int getNumSatisfiedRequiredConstraintsLocked(JobStatus js) {
+        return Integer.bitCount(mSatisfiedFlexibleConstraints)
                 // Connectivity is job-specific, so must be handled separately.
                 + (js.getHasAccessToUnmetered() ? 1 : 0);
     }

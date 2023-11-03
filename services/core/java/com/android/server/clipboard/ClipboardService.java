@@ -19,6 +19,8 @@ package com.android.server.clipboard;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.content.Context.DEVICE_ID_INVALID;
 
@@ -409,7 +411,7 @@ public class ClipboardService extends SystemService {
 
     /**
      * Determines which deviceId to use for selecting a Clipboard, depending on where a given app
-     * is running.
+     * is running and the device's clipboard policy.
      *
      * @param requestedDeviceId the requested deviceId passed in from the client side
      * @param uid the intended app uid
@@ -431,28 +433,47 @@ public class ClipboardService extends SystemService {
             }
         }
 
-        if (requestedDeviceId != DEVICE_ID_DEFAULT) {
-            // Privileged apps that own the VirtualDevices, or regular apps running on it, can
-            // request it by id.
-            if (mVdmInternal.getDeviceOwnerUid(requestedDeviceId) == uid
-                    || virtualDeviceIds.contains(requestedDeviceId)) {
-                return requestedDeviceId;
+        // If an app is running on any VirtualDevice, it isn't clear which clipboard they
+        // should use, unless all of the devices share the default device's clipboard.
+        boolean allDevicesHaveDefaultClipboard = true;
+        for (int deviceId : virtualDeviceIds) {
+            if (!deviceUsesDefaultClipboard(deviceId)) {
+                allDevicesHaveDefaultClipboard = false;
+                break;
             }
-            return DEVICE_ID_INVALID;
         }
 
-        // The common case is apps running normally (not on a VirtualDevice).
-        if (virtualDeviceIds.isEmpty()) {
-            return DEVICE_ID_DEFAULT;
+        // Apps running on a virtual device may get the default clipboard if all the devices the app
+        // runs on share that clipboard. Otherwise it's not clear which clipboard to use.
+        if (requestedDeviceId == DEVICE_ID_DEFAULT) {
+            return allDevicesHaveDefaultClipboard ? DEVICE_ID_DEFAULT : DEVICE_ID_INVALID;
         }
 
-        // If an app is running on more than one VirtualDevice, it isn't clear which clipboard they
-        // should use.
-        if (virtualDeviceIds.size() > 1) {
-            return DEVICE_ID_INVALID;
+        // At this point the app wants to access a virtual device clipboard. It may do so if:
+        //  1. The app owns the VirtualDevice
+        //  2. The app is present on the VirtualDevice
+        //  3. The VirtualDevice shares the default device clipboard and all virtual devices that
+        //     the app is running on do the same.
+        int clipboardDeviceId = deviceUsesDefaultClipboard(requestedDeviceId)
+                ? DEVICE_ID_DEFAULT
+                : requestedDeviceId;
+
+        if (mVdmInternal.getDeviceOwnerUid(requestedDeviceId) == uid
+                || virtualDeviceIds.contains(requestedDeviceId)
+                || (clipboardDeviceId == DEVICE_ID_DEFAULT && allDevicesHaveDefaultClipboard)) {
+            return clipboardDeviceId;
         }
 
-        return virtualDeviceIds.valueAt(0);
+        // Fallback to the device where the app is running, unless it uses the default clipboard.
+        int fallbackDeviceId = virtualDeviceIds.valueAt(0);
+        return deviceUsesDefaultClipboard(fallbackDeviceId) ? DEVICE_ID_DEFAULT : fallbackDeviceId;
+    }
+
+    private boolean deviceUsesDefaultClipboard(int deviceId) {
+        if (deviceId == DEVICE_ID_DEFAULT || mVdm == null) {
+            return true;
+        }
+        return mVdm.getDevicePolicy(deviceId, POLICY_TYPE_CLIPBOARD) == DEVICE_POLICY_CUSTOM;
     }
 
     /**

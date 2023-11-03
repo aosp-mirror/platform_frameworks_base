@@ -15,29 +15,36 @@ flag {
 }
 
 flag {
-    namespace: "media_solutions"
     name: "enable_audio_policies_device_and_bluetooth_controller"
+    namespace: "media_solutions"
     description: "Use Audio Policies implementation for device and Bluetooth route controllers."
     bug: "280576228"
 }
 
 flag {
-    namespace: "media_solutions"
     name: "disable_screen_off_broadcast_receiver"
+    namespace: "media_solutions"
     description: "Disables the broadcast receiver that prevents scanning when the screen is off."
     bug: "304234628"
 }
 
 flag {
-    namespace: "media_solutions"
     name: "fallback_to_default_handling_when_media_session_has_fixed_volume_handling"
+    namespace: "media_solutions"
     description: "Fallbacks to the default handling for volume adjustment when media session has fixed volume handling and its app is in the foreground and setting a media controller."
     bug: "293743975"
 }
 
 flag {
-    namespace: "media_solutions"
     name: "enable_waiting_state_for_system_session_creation_request"
+    namespace: "media_solutions"
     description: "Introduces a waiting state for the session creation request and prevents it from early failing when the selectedRoute from the bluetooth stack doesn't match the pending request route id."
     bug: "307723189"
+}
+
+flag {
+    name: "enable_new_media_route_2_info_types"
+    namespace: "media_solutions"
+    description: "Enables the following type constants in MediaRoute2Info: CAR, COMPUTER, GAME_CONSOLE, SMARTPHONE, SMARTWATCH, TABLET, TABLET_DOCKED. Note that this doesn't gate any behavior. It only guards some API int symbols."
+    bug: "301713440"
 }

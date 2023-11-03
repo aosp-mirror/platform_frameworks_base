@@ -6,7 +6,7 @@ flag {
     name: "floating_menu_animated_tuck"
     namespace: "accessibility"
     description: "Sets up animations for tucking/untucking and adjusts clipbounds."
-    bug: "24592044"
+    bug: "297556899"
 }
 
 flag {

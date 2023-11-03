@@ -343,14 +343,14 @@ public class SafeActivityOptions {
         }
 
         // Check if the caller is allowed to dismiss keyguard.
-        final boolean dismissKeyguard = options.getDismissKeyguard();
-        if (aInfo != null && dismissKeyguard) {
+        final boolean dismissKeyguardIfInsecure = options.getDismissKeyguardIfInsecure();
+        if (aInfo != null && dismissKeyguardIfInsecure) {
             final int controlKeyguardPerm = ActivityTaskManagerService.checkPermission(
                     CONTROL_KEYGUARD, callingPid, callingUid);
             if (controlKeyguardPerm != PERMISSION_GRANTED) {
                 final String msg = "Permission Denial: starting " + getIntentString(intent)
                         + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ") with dismissKeyguard=true";
+                        + ", uid=" + callingUid + ") with dismissKeyguardIfInsecure=true";
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }

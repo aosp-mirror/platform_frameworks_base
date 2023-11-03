@@ -22,6 +22,8 @@ import android.content.Context;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
@@ -29,6 +31,7 @@ import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip2.phone.PipController;
+import com.android.wm.shell.pip2.phone.PipScheduler;
 import com.android.wm.shell.pip2.phone.PipTransition;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -52,9 +55,10 @@ public abstract class Pip2Module {
             @NonNull Transitions transitions,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
-            Optional<PipController> pipController) {
+            Optional<PipController> pipController,
+            @NonNull PipScheduler pipScheduler) {
         return new PipTransition(shellInit, shellTaskOrganizer, transitions, pipBoundsState, null,
-                pipBoundsAlgorithm);
+                pipBoundsAlgorithm, pipScheduler);
     }
 
     @WMSingleton
@@ -72,5 +76,13 @@ public abstract class Pip2Module {
                     context, shellInit, shellController, displayController, displayInsetsController,
                     pipDisplayLayoutState));
         }
+    }
+
+    @WMSingleton
+    @Provides
+    static PipScheduler providePipScheduler(Context context,
+            PipBoundsState pipBoundsState,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipScheduler(context, pipBoundsState, mainExecutor);
     }
 }

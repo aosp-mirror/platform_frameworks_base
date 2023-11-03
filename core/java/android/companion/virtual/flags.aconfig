@@ -16,6 +16,13 @@ flag {
 }
 
 flag {
+  name: "cross_device_clipboard"
+  namespace: "virtual_devices"
+  description: "Enable cross-device clipboard API"
+  bug: "306622082"
+}
+
+flag {
   name: "vdm_custom_home"
   namespace: "virtual_devices"
   description: "Enable custom home API"
