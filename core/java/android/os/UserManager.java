@@ -204,6 +204,8 @@ public class UserManager {
      * the user in locked state so that a direct boot aware DPC could reset the password.
      * Should not be used together with
      * {@link #QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED} or an exception will be thrown.
+     * This flag is currently only allowed for {@link #isManagedProfile() managed profiles};
+     * usage on other profiles may result in an Exception.
      * @hide
      */
     public static final int QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL = 0x2;

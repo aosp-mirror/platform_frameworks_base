@@ -89,6 +89,7 @@ public class UserManagerServiceUserTypeTest {
                 .setCrossProfileIntentResolutionStrategy(1)
                 .setMediaSharedWithParent(true)
                 .setCredentialShareableWithParent(false)
+                .setAuthAlwaysRequiredToDisableQuietMode(true)
                 .setShowInSettings(900)
                 .setHideInSettingsInQuietMode(true)
                 .setInheritDevicePolicy(340)
@@ -160,6 +161,8 @@ public class UserManagerServiceUserTypeTest {
                 .getCrossProfileIntentResolutionStrategy());
         assertTrue(type.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertFalse(type.getDefaultUserPropertiesReference().isCredentialShareableWithParent());
+        assertTrue(type.getDefaultUserPropertiesReference()
+                .isAuthAlwaysRequiredToDisableQuietMode());
         assertEquals(900, type.getDefaultUserPropertiesReference().getShowInSettings());
         assertTrue(type.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
         assertEquals(340, type.getDefaultUserPropertiesReference()
@@ -306,6 +309,7 @@ public class UserManagerServiceUserTypeTest {
                 .setCrossProfileIntentResolutionStrategy(1)
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
+                .setAuthAlwaysRequiredToDisableQuietMode(false)
                 .setShowInSettings(20)
                 .setHideInSettingsInQuietMode(false)
                 .setInheritDevicePolicy(21)
@@ -347,6 +351,8 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(aospType.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertTrue(aospType.getDefaultUserPropertiesReference()
                 .isCredentialShareableWithParent());
+        assertFalse(aospType.getDefaultUserPropertiesReference()
+                .isAuthAlwaysRequiredToDisableQuietMode());
         assertEquals(20, aospType.getDefaultUserPropertiesReference().getShowInSettings());
         assertFalse(aospType.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
         assertEquals(21, aospType.getDefaultUserPropertiesReference()
@@ -394,6 +400,8 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(aospType.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference()
                 .isCredentialShareableWithParent());
+        assertTrue(aospType.getDefaultUserPropertiesReference()
+                .isAuthAlwaysRequiredToDisableQuietMode());
         assertEquals(23, aospType.getDefaultUserPropertiesReference().getShowInSettings());
         assertTrue(aospType.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
         assertEquals(450, aospType.getDefaultUserPropertiesReference()

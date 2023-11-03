@@ -39,6 +39,7 @@
             crossProfileIntentResolutionStrategy='0'
             mediaSharedWithParent='true'
             credentialShareableWithParent='false'
+            authAlwaysRequiredToDisableQuietMode='true'
             showInSettings='23'
             hideInSettingsInQuietMode='true'
             inheritDevicePolicy='450'
