@@ -1685,8 +1685,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ukloni"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Želite li pojačati zvuk iznad preporučenog nivoa?\n\nDužim slušanjem glasnog zvuka možete oštetiti sluh."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Nastaviti slušati pri visokoj jačini zvuka?\n\nJačina zvuka slušalica je bila visoka duže od preporučenog, što može oštetiti sluh"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Otkriven je glasan zvuk\n\nJačina zvuka slušalica je bila viša od preporučenog, što može oštetiti sluh"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Nastaviti slušati pri visokoj jačini zvuka?\n\nJačina zvuka slušalica je bila visoka duže nego što se preporučuje, što može oštetiti sluh"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Otkriven je glasan zvuk\n\nJačina zvuka slušalica je bila viša od preporučene, što može oštetiti sluh"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite li koristiti Prečicu za pristupačnost?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kada je prečica uključena, pritiskom i držanjem oba dugmeta za jačinu zvuka u trajanju od 3 sekunde pokrenut će se funkcija pristupačnosti."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Uključiti prečicu za funkcije pristupačnosti?"</string>
