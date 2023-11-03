@@ -53,6 +53,14 @@ flag {
 }
 
 flag {
+    name: "keyguard_bottom_area_refactor"
+    namespace: "systemui"
+    description: "Bottom area of keyguard refactor move into KeyguardRootView. Includes "
+        "lock icon and others."
+    bug: "290652751"
+}
+
+flag {
     name: "visual_interruptions_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the code to decide when notifications "
