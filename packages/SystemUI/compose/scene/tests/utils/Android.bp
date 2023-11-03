@@ -21,12 +21,9 @@ package {
     default_applicable_licenses: ["frameworks_base_packages_SystemUI_license"],
 }
 
-android_test {
-    name: "PlatformComposeSceneTransitionLayoutTests",
+android_library {
+    name: "PlatformComposeSceneTransitionLayoutTestsUtils",
     manifest: "AndroidManifest.xml",
-    test_suites: ["device-tests"],
-    sdk_version: "current",
-    certificate: "platform",
 
     srcs: [
         "src/**/*.kt",
@@ -34,16 +31,8 @@ android_test {
 
     static_libs: [
         "PlatformComposeSceneTransitionLayout",
-        "PlatformComposeSceneTransitionLayoutTestsUtils",
-
-        "androidx.test.runner",
-        "androidx.test.ext.junit",
-
         "androidx.compose.runtime_runtime",
         "androidx.compose.ui_ui-test-junit4",
-        "androidx.compose.ui_ui-test-manifest",
-
-        "truth",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],
