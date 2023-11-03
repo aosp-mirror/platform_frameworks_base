@@ -51,6 +51,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
                     SceneKey.Lockscreen,
                     SceneKey.Bouncer,
                     SceneKey.Gone,
+                    SceneKey.Communal,
                 )
             )
     }

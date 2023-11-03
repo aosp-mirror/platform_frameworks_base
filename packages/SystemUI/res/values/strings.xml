@@ -1045,8 +1045,8 @@
     <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
     <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
-    <!-- Indicator shown to start the communal tutorial. [CHAR LIMIT=100] -->
-    <string name="communal_tutorial_indicator_text">Click on the arrow button to start the communal tutorial</string>
+    <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
+    <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
 
     <!-- Related to user switcher --><skip/>
 

@@ -44,6 +44,8 @@ object CommunalTutorialIndicatorViewBinder {
                             )
                         }
                     }
+
+                    launch { viewModel.alpha.collect { view.alpha = it } }
                 }
             }
 
