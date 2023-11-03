@@ -489,6 +489,10 @@ public class AuthContainerView extends LinearLayout
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        if (mContainerState == STATE_ANIMATING_OUT) {
+            return;
+        }
+
         mWakefulnessLifecycle.addObserver(this);
         mPanelInteractionDetector.enable(
                 () -> animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED));
