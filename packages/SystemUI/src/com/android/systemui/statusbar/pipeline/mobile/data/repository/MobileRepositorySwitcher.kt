@@ -187,4 +187,11 @@ constructor(
         }
         return realRepository.getRepoForSubId(subId)
     }
+
+    override suspend fun isInEcmMode(): Boolean =
+        if (isDemoMode.value) {
+            demoMobileConnectionsRepository.isInEcmMode()
+        } else {
+            realRepository.isInEcmMode()
+        }
 }

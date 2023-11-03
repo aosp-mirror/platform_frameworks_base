@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
@@ -75,6 +76,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 FakeAirplaneModeRepository(),
                 FakeConnectivityRepository(),
+                FakeMobileConnectionsRepository(),
             )
 
         underTest =

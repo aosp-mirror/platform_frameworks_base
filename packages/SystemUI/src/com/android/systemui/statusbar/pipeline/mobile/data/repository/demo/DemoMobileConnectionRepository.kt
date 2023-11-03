@@ -193,6 +193,8 @@ class DemoMobileConnectionRepository(
 
     override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false)
 
+    override suspend fun isInEcmMode(): Boolean = false
+
     /**
      * Process a new demo mobile event. Note that [resolvedNetworkType] must be passed in separately
      * from the event, due to the requirement to reverse the mobile mappings lookup in the top-level

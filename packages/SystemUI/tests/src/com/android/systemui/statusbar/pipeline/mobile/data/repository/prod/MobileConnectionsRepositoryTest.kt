@@ -123,7 +123,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         // Set up so the individual connection repositories
         whenever(telephonyManager.createForSubscriptionId(anyInt())).thenAnswer { invocation ->
             telephonyManager.also {
-                whenever(telephonyManager.subscriptionId).thenReturn(invocation.getArgument(0))
+                whenever(it.subscriptionId).thenReturn(invocation.getArgument(0))
             }
         }
 
@@ -192,6 +192,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         carrierMergedFactory =
             CarrierMergedConnectionRepository.Factory(
                 telephonyManager,
+                testScope.backgroundScope.coroutineContext,
                 testScope.backgroundScope,
                 wifiRepository,
             )
@@ -1175,6 +1176,26 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             updateMonitorCallback.value.onSimStateChanged(0, 0, 0)
 
             assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun noSubscriptionsInEcmMode_notInEcmMode() =
+        testScope.runTest {
+            whenever(telephonyManager.emergencyCallbackMode).thenReturn(false)
+
+            runCurrent()
+
+            assertThat(underTest.isInEcmMode()).isFalse()
+        }
+
+    @Test
+    fun someSubscriptionsInEcmMode_inEcmMode() =
+        testScope.runTest {
+            whenever(telephonyManager.emergencyCallbackMode).thenReturn(true)
+
+            runCurrent()
+
+            assertThat(underTest.isInEcmMode()).isTrue()
         }
 
     private fun TestScope.getDefaultNetworkCallback(): ConnectivityManager.NetworkCallback {

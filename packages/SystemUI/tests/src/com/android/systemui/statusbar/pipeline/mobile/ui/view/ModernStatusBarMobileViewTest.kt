@@ -33,6 +33,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
@@ -45,6 +46,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -86,6 +88,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 airplaneModeRepository,
                 FakeConnectivityRepository(),
+                FakeMobileConnectionsRepository(),
             )
 
         interactor = FakeMobileIconInteractor(tableLogBuffer)
@@ -198,7 +201,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun isIconVisible_notAirplaneMode_outputsTrue() {
+    fun isIconVisible_notAirplaneMode_outputsTrue() = runTest {
         airplaneModeRepository.setIsAirplaneMode(false)
 
         val view =
@@ -217,7 +220,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun isIconVisible_airplaneMode_outputsTrue() {
+    fun isIconVisible_airplaneMode_outputsTrue() = runTest {
         airplaneModeRepository.setIsAirplaneMode(true)
 
         val view =
