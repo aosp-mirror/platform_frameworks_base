@@ -17,10 +17,12 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.animation.ValueAnimator
+import android.content.Context
 import android.graphics.Point
 import androidx.core.animation.doOnEnd
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -29,6 +31,7 @@ import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticat
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -43,6 +47,7 @@ import kotlinx.coroutines.launch
 class SideFpsProgressBarViewModel
 @Inject
 constructor(
+    private val context: Context,
     private val fpAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val sfpsSensorInteractor: SideFpsSensorInteractor,
     displayStateInteractor: DisplayStateInteractor,
@@ -57,24 +62,84 @@ constructor(
         _progress.value = 0.0f
     }
 
+    private val additionalSensorLengthPadding =
+        context.resources.getDimension(R.dimen.sfps_progress_bar_length_extra_padding).toInt()
+
     val isVisible: Flow<Boolean> = _visible.asStateFlow()
 
     val progress: Flow<Float> = _progress.asStateFlow()
 
-    val sensorWidth: Flow<Int> = sfpsSensorInteractor.sensorLocation.map { it.width }
+    val progressBarLength: Flow<Int> =
+        sfpsSensorInteractor.sensorLocation
+            .map { it.length + additionalSensorLengthPadding }
+            .distinctUntilChanged()
 
-    val sensorLocation: Flow<Point> =
-        sfpsSensorInteractor.sensorLocation.map { Point(it.left, it.top) }
+    val progressBarThickness =
+        context.resources.getDimension(R.dimen.sfps_progress_bar_thickness).toInt()
+
+    val progressBarLocation =
+        combine(displayStateInteractor.currentRotation, sfpsSensorInteractor.sensorLocation, ::Pair)
+            .map { (rotation, sensorLocation) ->
+                val paddingFromEdge =
+                    context.resources
+                        .getDimension(R.dimen.sfps_progress_bar_padding_from_edge)
+                        .toInt()
+                val lengthOfTheProgressBar = sensorLocation.length + additionalSensorLengthPadding
+                val viewLeftTop = Point(sensorLocation.left, sensorLocation.top)
+                val totalDistanceFromTheEdge = paddingFromEdge + progressBarThickness
+
+                val isSensorVerticalNow =
+                    sensorLocation.isSensorVerticalInDefaultOrientation ==
+                        rotation.isDefaultOrientation()
+                if (isSensorVerticalNow) {
+                    // Sensor is vertical to the current orientation, we rotate it 270 deg
+                    // around the (left,top) point as the pivot. We need to push it down the
+                    // length of the progress bar so that it is still aligned to the sensor
+                    viewLeftTop.y += lengthOfTheProgressBar
+                    val isSensorOnTheNearEdge =
+                        rotation == DisplayRotation.ROTATION_180 ||
+                            rotation == DisplayRotation.ROTATION_90
+                    if (isSensorOnTheNearEdge) {
+                        // Add just the padding from the edge to push the progress bar right
+                        viewLeftTop.x += paddingFromEdge
+                    } else {
+                        // View left top is pushed left from the edge by the progress bar thickness
+                        // and the padding.
+                        viewLeftTop.x -= totalDistanceFromTheEdge
+                    }
+                } else {
+                    // Sensor is horizontal to the current orientation.
+                    val isSensorOnTheNearEdge =
+                        rotation == DisplayRotation.ROTATION_0 ||
+                            rotation == DisplayRotation.ROTATION_90
+                    if (isSensorOnTheNearEdge) {
+                        // Add just the padding from the edge to push the progress bar down
+                        viewLeftTop.y += paddingFromEdge
+                    } else {
+                        // Sensor is now at the bottom edge of the device in the current rotation.
+                        // We want to push it up from the bottom edge by the padding and
+                        // the thickness of the progressbar.
+                        viewLeftTop.y -= totalDistanceFromTheEdge
+                        viewLeftTop.x -= additionalSensorLengthPadding
+                    }
+                }
+                viewLeftTop
+            }
 
     val isFingerprintAuthRunning: Flow<Boolean> = fpAuthRepository.isRunning
 
-    val shouldRotate90Degrees: Flow<Boolean> =
+    val rotation: Flow<Float> =
         combine(displayStateInteractor.currentRotation, sfpsSensorInteractor.sensorLocation, ::Pair)
             .map { (rotation, sensorLocation) ->
-                if (rotation.isDefaultOrientation()) {
-                    sensorLocation.isSensorVerticalInDefaultOrientation
+                if (
+                    rotation.isDefaultOrientation() ==
+                        sensorLocation.isSensorVerticalInDefaultOrientation
+                ) {
+                    // We should rotate the progress bar 270 degrees in the clockwise direction with
+                    // the left top point as the pivot so that it fills up from bottom to top
+                    270.0f
                 } else {
-                    !sensorLocation.isSensorVerticalInDefaultOrientation
+                    0.0f
                 }
             }
 

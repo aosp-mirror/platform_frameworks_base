@@ -15,18 +15,18 @@
   ~
   -->
 
-<LinearLayout android:layout_height="match_parent"
+<RelativeLayout
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:layoutDirection="ltr"
-    android:gravity="center"
+    android:layout_height="match_parent"
+    android:gravity="left|top"
+    android:background="@android:color/transparent"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <ProgressBar
         android:id="@+id/side_fps_progress_bar"
-        android:layout_width="55dp"
-        android:layout_height="10dp"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/sfps_progress_bar_thickness"
         android:indeterminateOnly="false"
         android:min="0"
         android:max="100"
         android:progressDrawable="@drawable/progress_bar" />
-</LinearLayout>
+</RelativeLayout>

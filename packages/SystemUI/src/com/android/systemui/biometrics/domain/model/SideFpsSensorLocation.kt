@@ -21,8 +21,8 @@ data class SideFpsSensorLocation(
     val left: Int,
     /** Pixel offset from the top of the screen */
     val top: Int,
-    /** Width in pixels of the SFPS sensor */
-    val width: Int,
+    /** Length of the SFPS sensor in pixels in current display density */
+    val length: Int,
     /**
      * Whether the sensor is vertical when the device is in its default orientation (Rotation_0 or
      * Rotation_180)

@@ -165,7 +165,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(sensorLocation!!.left).isEqualTo(1000)
             assertThat(sensorLocation!!.top).isEqualTo(200)
             assertThat(sensorLocation!!.isSensorVerticalInDefaultOrientation).isEqualTo(true)
-            assertThat(sensorLocation!!.width).isEqualTo(100)
+            assertThat(sensorLocation!!.length).isEqualTo(100)
         }
 
     @Test
@@ -193,7 +193,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(sensorLocation!!.left).isEqualTo(500)
             assertThat(sensorLocation!!.top).isEqualTo(1000)
             assertThat(sensorLocation!!.isSensorVerticalInDefaultOrientation).isEqualTo(true)
-            assertThat(sensorLocation!!.width).isEqualTo(100)
+            assertThat(sensorLocation!!.length).isEqualTo(100)
         }
 
     @Test
@@ -221,7 +221,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(sensorLocation!!.left).isEqualTo(200)
             assertThat(sensorLocation!!.top).isEqualTo(0)
             assertThat(sensorLocation!!.isSensorVerticalInDefaultOrientation).isEqualTo(true)
-            assertThat(sensorLocation!!.width).isEqualTo(100)
+            assertThat(sensorLocation!!.length).isEqualTo(100)
         }
 
     @Test
@@ -274,7 +274,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(sensorLocation!!.left).isEqualTo(500)
             assertThat(sensorLocation!!.top).isEqualTo(0)
             assertThat(sensorLocation!!.isSensorVerticalInDefaultOrientation).isEqualTo(false)
-            assertThat(sensorLocation!!.width).isEqualTo(100)
+            assertThat(sensorLocation!!.length).isEqualTo(100)
         }
 
     @Test
@@ -301,7 +301,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(sensorLocation!!.left).isEqualTo(0)
             assertThat(sensorLocation!!.top).isEqualTo(400)
             assertThat(sensorLocation!!.isSensorVerticalInDefaultOrientation).isEqualTo(false)
-            assertThat(sensorLocation!!.width).isEqualTo(100)
+            assertThat(sensorLocation!!.length).isEqualTo(100)
         }
 
     @Test
@@ -328,7 +328,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(sensorLocation!!.left).isEqualTo(400)
             assertThat(sensorLocation!!.top).isEqualTo(800)
             assertThat(sensorLocation!!.isSensorVerticalInDefaultOrientation).isEqualTo(false)
-            assertThat(sensorLocation!!.width).isEqualTo(100)
+            assertThat(sensorLocation!!.length).isEqualTo(100)
         }
 
     @Test
@@ -355,7 +355,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(sensorLocation!!.left).isEqualTo(800)
             assertThat(sensorLocation!!.top).isEqualTo(500)
             assertThat(sensorLocation!!.isSensorVerticalInDefaultOrientation).isEqualTo(false)
-            assertThat(sensorLocation!!.width).isEqualTo(100)
+            assertThat(sensorLocation!!.length).isEqualTo(100)
         }
 
     @Test
@@ -381,10 +381,14 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
         rotation: DisplayRotation,
         sensorWidth: Int
     ) {
-        overrideResource(R.integer.config_sfpsSensorWidth, sensorWidth)
         setupDisplayDimensions(width, height)
         currentRotation.value = rotation
-        setupFingerprint(x = sensorLocationX, y = sensorLocationY, displayId = "expanded_display")
+        setupFingerprint(
+            x = sensorLocationX,
+            y = sensorLocationY,
+            displayId = "expanded_display",
+            sensorRadius = sensorWidth / 2
+        )
     }
 
     private fun setupDisplayDimensions(displayWidth: Int, displayHeight: Int) {
@@ -392,7 +396,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             .thenReturn(
                 WindowMetrics(
                     Rect(0, 0, displayWidth, displayHeight),
-                    mock(WindowInsets::class.java)
+                    mock(WindowInsets::class.java),
                 )
             )
     }
@@ -401,7 +405,8 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
         fingerprintSensorType: FingerprintSensorType = FingerprintSensorType.POWER_BUTTON,
         x: Int = 0,
         y: Int = 0,
-        displayId: String = "display_id_1"
+        displayId: String = "display_id_1",
+        sensorRadius: Int = 150
     ) {
         contextDisplayInfo.uniqueId = displayId
         fingerprintRepository.setProperties(
@@ -415,14 +420,14 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
                             "someOtherDisplayId",
                             x + 100,
                             y + 100,
-                            0,
+                            sensorRadius,
                         ),
                     displayId to
                         SensorLocationInternal(
                             displayId,
                             x,
                             y,
-                            0,
+                            sensorRadius,
                         )
                 )
         )
