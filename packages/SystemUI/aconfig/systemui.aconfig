@@ -66,3 +66,11 @@ flag {
     description: "Adds haptic feedback to the brightness slider."
     bug: "296467915"
 }
+
+flag {
+    name: "keyguard_shade_migration_nssl"
+    namespace: "systemui"
+    description: "Moves NSSL into a shared element between the notification_panel and "
+        "keyguard_root_view."
+    bug: "278054201"
+}
