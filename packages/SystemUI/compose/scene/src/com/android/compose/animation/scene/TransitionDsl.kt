@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
@@ -224,10 +225,20 @@ interface PropertyTransformationBuilder {
     /**
      * Scale the [width] and [height] of the element(s) matching [matcher]. Note that this scaling
      * is done during layout, so it will potentially impact the size and position of other elements.
-     *
-     * TODO(b/290184746): Also provide a scaleDrawing() to scale an element at drawing time.
      */
     fun scaleSize(matcher: ElementMatcher, width: Float = 1f, height: Float = 1f)
+
+    /**
+     * Scale the drawing with [scaleX] and [scaleY] of the element(s) matching [matcher]. Note this
+     * will only scale the draw inside of an element, therefore it won't impact layout of elements
+     * around it.
+     */
+    fun scaleDraw(
+        matcher: ElementMatcher,
+        scaleX: Float = 1f,
+        scaleY: Float = 1f,
+        pivot: Offset = Offset.Unspecified
+    )
 
     /**
      * Scale the element(s) matching [matcher] so that it grows/shrinks to the same size as [anchor]

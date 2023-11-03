@@ -25,6 +25,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
+import com.android.compose.animation.scene.transformation.DrawScale
 import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
 import com.android.compose.animation.scene.transformation.ModifierTransformation
@@ -126,6 +127,7 @@ data class TransitionSpec(
         val modifier = mutableListOf<ModifierTransformation>()
         var offset: PropertyTransformation<Offset>? = null
         var size: PropertyTransformation<IntSize>? = null
+        var drawScale: PropertyTransformation<Scale>? = null
         var alpha: PropertyTransformation<Float>? = null
 
         fun <T> onPropertyTransformation(
@@ -143,6 +145,10 @@ data class TransitionSpec(
                 is AnchoredSize -> {
                     throwIfNotNull(size, element, name = "size")
                     size = root as PropertyTransformation<IntSize>
+                }
+                is DrawScale -> {
+                    throwIfNotNull(drawScale, element, name = "drawScale")
+                    drawScale = root as PropertyTransformation<Scale>
                 }
                 is Fade -> {
                     throwIfNotNull(alpha, element, name = "alpha")
@@ -167,7 +173,7 @@ data class TransitionSpec(
             }
         }
 
-        return ElementTransformations(shared, modifier, offset, size, alpha)
+        return ElementTransformations(shared, modifier, offset, size, drawScale, alpha)
     }
 
     private fun throwIfNotNull(
@@ -187,5 +193,6 @@ internal class ElementTransformations(
     val modifier: List<ModifierTransformation>,
     val offset: PropertyTransformation<Offset>?,
     val size: PropertyTransformation<IntSize>?,
+    val drawScale: PropertyTransformation<Scale>?,
     val alpha: PropertyTransformation<Float>?,
 )
