@@ -405,7 +405,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.updateFooterView(true, false, true);
 
         verify(view).setVisible(eq(true), anyBoolean());
-        verify(view).setSecondaryVisible(eq(false), anyBoolean());
+        verify(view).setClearAllButtonVisible(eq(false), anyBoolean());
     }
 
     @Test
@@ -417,7 +417,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.updateFooterView(true, true, true);
 
         verify(view).setVisible(eq(true), anyBoolean());
-        verify(view).setSecondaryVisible(eq(true), anyBoolean());
+        verify(view).setClearAllButtonVisible(eq(true), anyBoolean());
     }
 
     @Test
