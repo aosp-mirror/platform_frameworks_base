@@ -293,7 +293,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mDecorationContainerSurface,
                     mDragPositioningCallback,
                     mSurfaceControlBuilderSupplier,
-                    mSurfaceControlTransactionSupplier);
+                    mSurfaceControlTransactionSupplier,
+                    mDisplayController);
         }
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
