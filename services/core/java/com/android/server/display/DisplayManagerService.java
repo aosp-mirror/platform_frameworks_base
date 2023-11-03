@@ -1535,8 +1535,8 @@ public final class DisplayManagerService extends SystemService {
                 throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
                         + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
                         + "MediaProjection token in order to create a screen sharing virtual "
-                        + "display. In order to create a virtual display that does not perform"
-                        + "screen sharing (mirroring), please use the flag"
+                        + "display. In order to create a virtual display that does not perform "
+                        + "screen sharing (mirroring), please use the flag "
                         + "VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY.");
             }
         }
