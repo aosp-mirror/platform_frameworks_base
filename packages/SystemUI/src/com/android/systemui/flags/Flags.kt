@@ -296,11 +296,6 @@ object Flags {
     @JvmField val MIGRATE_CLOCKS_TO_BLUEPRINT =
             unreleasedFlag("migrate_clocks_to_blueprint")
 
-    /** Migrate KeyguardRootView to use composables. */
-    // TODO(b/301969856): Tracking Bug.
-    @JvmField val KEYGUARD_ROOT_VIEW_USE_COMPOSE =
-        unreleasedFlag("keyguard_root_view_use_compose")
-
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField
