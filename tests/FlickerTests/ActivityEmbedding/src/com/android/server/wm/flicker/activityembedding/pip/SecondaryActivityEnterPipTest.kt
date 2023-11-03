@@ -36,9 +36,8 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a secondary Activity into Picture-In-Picture mode.
  *
- * Setup: Start from a split A|B.
- * Transition: B enters PIP, observe the window first goes fullscreen then shrink to the bottom
- * right corner on screen.
+ * Setup: Start from a split A|B. Transition: B enters PIP, observe the window first goes fullscreen
+ * then shrink to the bottom right corner on screen.
  *
  * To run this test: `atest FlickerTestsOther:SecondaryActivityEnterPipTest`
  */
@@ -64,16 +63,10 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
         }
     }
 
-    /**
-     * We expect the background layer to be visible during this transition.
-     */
-    @Presubmit
-    @Test
-    override fun backgroundLayerNeverVisible(): Unit {}
+    /** We expect the background layer to be visible during this transition. */
+    @Presubmit @Test override fun backgroundLayerNeverVisible() {}
 
-    /**
-     * Main and secondary activity start from a split each taking half of the screen.
-     */
+    /** Main and secondary activity start from a split each taking half of the screen. */
     @Presubmit
     @Test
     fun layersStartFromEqualSplit() {

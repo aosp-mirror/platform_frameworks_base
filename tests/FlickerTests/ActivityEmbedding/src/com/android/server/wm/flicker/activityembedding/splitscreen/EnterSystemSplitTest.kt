@@ -24,8 +24,8 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.traces.parsers.toFlickerComponent
-import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
+import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.wm.shell.flicker.utils.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
@@ -39,11 +39,11 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/***
+/**
  * Test entering System SplitScreen with Activity Embedding Split and another app.
  *
- * Setup: Launch A|B in split and secondaryApp, return to home.
- * Transitions: Let AE Split A|B enter splitscreen with secondaryApp. Resulting in A|B|secondaryApp.
+ * Setup: Launch A|B in split and secondaryApp, return to home. Transitions: Let AE Split A|B enter
+ * splitscreen with secondaryApp. Resulting in A|B|secondaryApp.
  *
  * To run this test: `atest FlickerTestsOther:EnterSystemSplitTest`
  */
@@ -51,8 +51,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSystemSplitTest(flicker: LegacyFlickerTest) :
-        ActivityEmbeddingTestBase(flicker) {
+class EnterSystemSplitTest(flicker: LegacyFlickerTest) : ActivityEmbeddingTestBase(flicker) {
 
     private val secondaryApp = SplitScreenUtils.getPrimary(instrumentation)
     override val transition: FlickerBuilder.() -> Unit = {
@@ -62,17 +61,22 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) :
             secondaryApp.launchViaIntent(wmHelper)
             tapl.goHome()
             wmHelper
-                    .StateSyncBuilder()
-                    .withAppTransitionIdle()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
+                .StateSyncBuilder()
+                .withAppTransitionIdle()
+                .withHomeActivityVisible()
+                .waitForAndVerify()
             startDisplayBounds =
-                    wmHelper.currentState.layerState.physicalDisplayBounds
-                        ?: error("Display not found")
+                wmHelper.currentState.layerState.physicalDisplayBounds ?: error("Display not found")
         }
         transitions {
-            SplitScreenUtils.enterSplit(wmHelper, tapl, device, testApp, secondaryApp,
-                flicker.scenario.startRotation)
+            SplitScreenUtils.enterSplit(
+                wmHelper,
+                tapl,
+                device,
+                testApp,
+                secondaryApp,
+                flicker.scenario.startRotation
+            )
             SplitScreenUtils.waitForSplitComplete(wmHelper, testApp, secondaryApp)
         }
     }
@@ -85,7 +89,10 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) :
     @Test
     fun activityEmbeddingSplitLayerBecomesVisible() {
         flicker.splitAppLayerBoundsIsVisibleAtEnd(
-                testApp, landscapePosLeft = tapl.isTablet, portraitPosTop = false)
+            testApp,
+            landscapePosLeft = tapl.isTablet,
+            portraitPosTop = false
+        )
     }
 
     @Presubmit
@@ -96,7 +103,10 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) :
     @Test
     fun secondaryLayerBecomesVisible() {
         flicker.splitAppLayerBoundsIsVisibleAtEnd(
-                secondaryApp, landscapePosLeft = !tapl.isTablet, portraitPosTop = true)
+            secondaryApp,
+            landscapePosLeft = !tapl.isTablet,
+            portraitPosTop = true
+        )
     }
 
     @Presubmit
@@ -105,73 +115,73 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) :
 
     /**
      * After the transition there should be both ActivityEmbedding activities,
-     * SplitScreenPrimaryActivity and the system split divider on screen.
-     * Verify the layers are in expected sizes.
+     * SplitScreenPrimaryActivity and the system split divider on screen. Verify the layers are in
+     * expected sizes.
      */
     @Presubmit
     @Test
     fun activityEmbeddingSplitSurfaceAreEven() {
         flicker.assertLayersEnd {
             val leftAELayerRegion =
-                    visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
             val rightAELayerRegion =
-                    visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
             val secondaryAppLayerRegion =
-                    visibleRegion(
-                            ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent())
+                visibleRegion(ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent())
             val systemDivider = visibleRegion(SPLIT_SCREEN_DIVIDER_COMPONENT)
             leftAELayerRegion
-                    .plus(rightAELayerRegion.region)
-                    .plus(secondaryAppLayerRegion.region)
-                    .plus(systemDivider.region)
-                    .coversExactly(startDisplayBounds)
+                .plus(rightAELayerRegion.region)
+                .plus(secondaryAppLayerRegion.region)
+                .plus(systemDivider.region)
+                .coversExactly(startDisplayBounds)
             check { "ActivityEmbeddingSplitHeight" }
-                    .that(leftAELayerRegion.region.height)
-                    .isEqual(rightAELayerRegion.region.height)
+                .that(leftAELayerRegion.region.height)
+                .isEqual(rightAELayerRegion.region.height)
             check { "SystemSplitHeight" }
-                    .that(rightAELayerRegion.region.height)
-                    .isEqual(secondaryAppLayerRegion.region.height)
+                .that(rightAELayerRegion.region.height)
+                .isEqual(secondaryAppLayerRegion.region.height)
             // TODO(b/292283182): Remove this special case handling.
             check { "ActivityEmbeddingSplitWidth" }
-                    .that(Math.abs(
-                            leftAELayerRegion.region.width - rightAELayerRegion.region.width))
-                    .isLower(2)
+                .that(Math.abs(leftAELayerRegion.region.width - rightAELayerRegion.region.width))
+                .isLower(2)
             check { "SystemSplitWidth" }
-                    .that(Math.abs(secondaryAppLayerRegion.region.width -
-                            2 * rightAELayerRegion.region.width))
-                    .isLower(2)
+                .that(
+                    Math.abs(
+                        secondaryAppLayerRegion.region.width - 2 * rightAELayerRegion.region.width
+                    )
+                )
+                .isLower(2)
         }
     }
 
-    /**
-     * Verify the windows are in expected sizes.
-     */
+    /** Verify the windows are in expected sizes. */
     @Presubmit
     @Test
     fun activityEmbeddingSplitWindowsAreEven() {
         flicker.assertWmEnd {
             val leftAEWindowRegion =
-                    visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
             val rightAEWindowRegion =
-                    visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
             // There's no window for the divider bar.
             val secondaryAppLayerRegion =
-                    visibleRegion(
-                            ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent())
+                visibleRegion(ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent())
             check { "ActivityEmbeddingSplitHeight" }
-                    .that(leftAEWindowRegion.region.height)
-                    .isEqual(rightAEWindowRegion.region.height)
+                .that(leftAEWindowRegion.region.height)
+                .isEqual(rightAEWindowRegion.region.height)
             check { "SystemSplitHeight" }
-                    .that(rightAEWindowRegion.region.height)
-                    .isEqual(secondaryAppLayerRegion.region.height)
+                .that(rightAEWindowRegion.region.height)
+                .isEqual(secondaryAppLayerRegion.region.height)
             check { "ActivityEmbeddingSplitWidth" }
-                    .that(Math.abs(
-                            leftAEWindowRegion.region.width - rightAEWindowRegion.region.width))
-                    .isLower(2)
+                .that(Math.abs(leftAEWindowRegion.region.width - rightAEWindowRegion.region.width))
+                .isLower(2)
             check { "SystemSplitWidth" }
-                    .that(Math.abs(secondaryAppLayerRegion.region.width -
-                            2 * rightAEWindowRegion.region.width))
-                    .isLower(2)
+                .that(
+                    Math.abs(
+                        secondaryAppLayerRegion.region.width - 2 * rightAEWindowRegion.region.width
+                    )
+                )
+                .isLower(2)
         }
     }
 

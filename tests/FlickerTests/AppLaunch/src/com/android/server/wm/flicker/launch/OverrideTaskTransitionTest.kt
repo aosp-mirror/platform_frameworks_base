@@ -31,7 +31,6 @@ import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.launch.R
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder

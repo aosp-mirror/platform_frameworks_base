@@ -250,11 +250,12 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             launchedAppComponentMatcherOverride,
             action,
             stringExtras,
-            waitConditionsBuilder = wmHelper
-                .StateSyncBuilder()
-                .add(ConditionsFactory.isWMStateComplete())
-                .withAppTransitionIdle()
-                .add(ConditionsFactory.hasPipWindow())
+            waitConditionsBuilder =
+                wmHelper
+                    .StateSyncBuilder()
+                    .add(ConditionsFactory.isWMStateComplete())
+                    .withAppTransitionIdle()
+                    .add(ConditionsFactory.hasPipWindow())
         )
 
         wmHelper
@@ -265,8 +266,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     }
 
     /** Expand the PIP window back to full screen via intent and wait until the app is visible */
-    fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) =
-        launchViaIntent(wmHelper)
+    fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) = launchViaIntent(wmHelper)
 
     fun changeAspectRatio() {
         val intent = Intent("com.android.wm.shell.flicker.testapp.ASPECT_RATIO")
