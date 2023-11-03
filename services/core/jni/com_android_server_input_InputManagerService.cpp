@@ -329,7 +329,7 @@ public:
     TouchAffineTransformation getTouchAffineTransformation(JNIEnv* env, jfloatArray matrixArr);
     void notifyStylusGestureStarted(int32_t deviceId, nsecs_t eventTime) override;
     bool isInputMethodConnectionActive() override;
-    std::optional<DisplayViewport> getViewportForPointerDevice(
+    std::optional<DisplayViewport> getPointerViewportForAssociatedDisplay(
             int32_t associatedDisplayId) override;
 
     /* --- InputDispatcherPolicyInterface implementation --- */
@@ -1395,7 +1395,7 @@ bool NativeInputManager::isInputMethodConnectionActive() {
     return result;
 }
 
-std::optional<DisplayViewport> NativeInputManager::getViewportForPointerDevice(
+std::optional<DisplayViewport> NativeInputManager::getPointerViewportForAssociatedDisplay(
         int32_t associatedDisplayId) {
     return mInputManager->getChoreographer().getViewportForPointerDevice(associatedDisplayId);
 }
