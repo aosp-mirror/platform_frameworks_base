@@ -82,6 +82,7 @@ public class InstallLaunch extends FragmentActivity {
         if (installStage.getStageCode() == InstallStage.STAGE_STAGING) {
             InstallStagingFragment stagingDialog = new InstallStagingFragment();
             showDialogInner(stagingDialog);
+            mInstallViewModel.getStagingProgress().observe(this, stagingDialog::setProgress);
         } else if (installStage.getStageCode() == InstallStage.STAGE_ABORTED) {
             InstallAborted aborted = (InstallAborted) installStage;
             switch (aborted.getAbortReason()) {

@@ -24,6 +24,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
 import android.util.Log;
@@ -79,6 +80,31 @@ public class PackageUtil {
             }
         }
         return targetSdkVersion;
+    }
+
+    public static boolean canPackageQuery(Context context, int callingUid, Uri packageUri) {
+        PackageManager pm = context.getPackageManager();
+        ProviderInfo info = pm.resolveContentProvider(packageUri.getAuthority(),
+            PackageManager.ComponentInfoFlags.of(0));
+        if (info == null) {
+            return false;
+        }
+        String targetPackage = info.packageName;
+
+        String[] callingPackages = pm.getPackagesForUid(callingUid);
+        if (callingPackages == null) {
+            return false;
+        }
+        for (String callingPackage : callingPackages) {
+            try {
+                if (pm.canPackageQuery(callingPackage, targetPackage)) {
+                    return true;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // no-op
+            }
+        }
+        return false;
     }
 
     /**

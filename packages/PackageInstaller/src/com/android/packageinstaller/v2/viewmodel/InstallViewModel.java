@@ -20,6 +20,7 @@ import android.app.Application;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.v2.model.InstallRepository;
 import com.android.packageinstaller.v2.model.InstallRepository.CallerInfo;
@@ -31,7 +32,7 @@ public class InstallViewModel extends AndroidViewModel {
 
     private static final String TAG = InstallViewModel.class.getSimpleName();
     private final InstallRepository mRepository;
-    private final MutableLiveData<InstallStage> mCurrentInstallStage = new MutableLiveData<>(
+    private final MediatorLiveData<InstallStage> mCurrentInstallStage = new MediatorLiveData<>(
             new InstallStaging());
 
     public InstallViewModel(@NonNull Application application, InstallRepository repository) {
@@ -45,6 +46,25 @@ public class InstallViewModel extends AndroidViewModel {
 
     public void preprocessIntent(Intent intent, CallerInfo callerInfo) {
         InstallStage stage = mRepository.performPreInstallChecks(intent, callerInfo);
-        mCurrentInstallStage.setValue(stage);
+        if (stage.getStageCode() == InstallStage.STAGE_ABORTED) {
+            mCurrentInstallStage.setValue(stage);
+        } else {
+            // Since staging is an async operation, we will get the staging result later in time.
+            // Result of the file staging will be set in InstallRepository#mStagingResult.
+            // As such, mCurrentInstallStage will need to add another MutableLiveData
+            // as a data source
+            mRepository.stageForInstall();
+            mCurrentInstallStage.addSource(mRepository.getStagingResult(), installStage -> {
+                if (installStage.getStageCode() != InstallStage.STAGE_READY) {
+                    mCurrentInstallStage.setValue(installStage);
+                } else {
+                    // Proceed with user confirmation here.
+                }
+            });
+        }
+    }
+
+    public MutableLiveData<Integer> getStagingProgress() {
+        return mRepository.getStagingProgress();
     }
 }

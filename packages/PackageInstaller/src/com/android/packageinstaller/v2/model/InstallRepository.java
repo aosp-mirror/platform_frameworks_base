@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller.v2.model;
 
+import static com.android.packageinstaller.v2.model.PackageUtil.canPackageQuery;
 import static com.android.packageinstaller.v2.model.PackageUtil.isCallerSessionOwner;
 import static com.android.packageinstaller.v2.model.PackageUtil.isInstallPermissionGrantedOrRequested;
 import static com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted;
@@ -23,31 +24,42 @@ import static com.android.packageinstaller.v2.model.installstagedata.InstallAbor
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_POLICY;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
+import com.android.packageinstaller.v2.model.installstagedata.InstallReady;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStaging;
+import java.io.IOException;
 
 public class InstallRepository {
 
+    private static final String SCHEME_PACKAGE = "package";
     private static final String TAG = InstallRepository.class.getSimpleName();
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final PackageInstaller mPackageInstaller;
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final MutableLiveData<InstallStage> mStagingResult = new MutableLiveData<>();
     private final boolean mLocalLOGV = false;
     private Intent mIntent;
     private boolean mIsSessionInstall;
@@ -56,8 +68,13 @@ public class InstallRepository {
      * Session ID for a session created when caller uses PackageInstaller APIs
      */
     private int mSessionId;
+    /**
+     * Session ID for a session created by this app
+     */
+    private int mStagedSessionId = SessionInfo.INVALID_ID;
     private int mCallingUid;
     private String mCallingPackage;
+    private SessionStager mSessionStager;
 
     public InstallRepository(Context context) {
         mContext = context;
@@ -71,11 +88,11 @@ public class InstallRepository {
      * Extracts information from the incoming install intent, checks caller's permission to install
      * packages, verifies that the caller is the install session owner (in case of a session based
      * install) and checks if the current user has restrictions set that prevent app installation,
+     *
      * @param intent the incoming {@link Intent} object for installing a package
      * @param callerInfo {@link CallerInfo} that holds the callingUid and callingPackageName
-     * @return
-     * <p>{@link InstallAborted} if there are errors while performing the checks</p>
-     * <p>{@link InstallStaging} after successfully performing the checks</p>
+     * @return <p>{@link InstallAborted} if there are errors while performing the checks</p>
+     *     <p>{@link InstallStaging} after successfully performing the checks</p>
      */
     public InstallStage performPreInstallChecks(Intent intent, CallerInfo callerInfo) {
         mIntent = intent;
@@ -195,6 +212,140 @@ public class InstallRepository {
                 "Invalid EXTRA_INSTALLER_PACKAGE_NAME");
             mIntent.removeExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME);
         }
+    }
+
+    public void stageForInstall() {
+        Uri uri = mIntent.getData();
+        if (mIsSessionInstall || (uri != null && SCHEME_PACKAGE.equals(uri.getScheme()))) {
+            // For a session based install or installing with a package:// URI, there is no file
+            // for us to stage. Setting the mStagingResult as null will signal InstallViewModel to
+            // proceed with user confirmation stage.
+            mStagingResult.setValue(new InstallReady());
+            return;
+        }
+        if (uri != null
+            && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
+            && canPackageQuery(mContext, mCallingUid, uri)) {
+
+            if (mStagedSessionId > 0) {
+                final PackageInstaller.SessionInfo info =
+                    mPackageInstaller.getSessionInfo(mStagedSessionId);
+                if (info == null || !info.isActive() || info.getResolvedBaseApkPath() == null) {
+                    Log.w(TAG, "Session " + mStagedSessionId + " in funky state; ignoring");
+                    if (info != null) {
+                        cleanupStagingSession();
+                    }
+                    mStagedSessionId = 0;
+                }
+            }
+
+            // Session does not exist, or became invalid.
+            if (mStagedSessionId <= 0) {
+                // Create session here to be able to show error.
+                try (final AssetFileDescriptor afd =
+                    mContext.getContentResolver().openAssetFileDescriptor(uri, "r")) {
+                    ParcelFileDescriptor pfd = afd != null ? afd.getParcelFileDescriptor() : null;
+                    PackageInstaller.SessionParams params =
+                        createSessionParams(mIntent, pfd, uri.toString());
+                    mStagedSessionId = mPackageInstaller.createSession(params);
+                } catch (IOException e) {
+                    Log.w(TAG, "Failed to create a staging session", e);
+                    mStagingResult.setValue(
+                        new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR)
+                            .setResultIntent(new Intent().putExtra(Intent.EXTRA_INSTALL_RESULT,
+                                PackageManager.INSTALL_FAILED_INVALID_APK))
+                            .setActivityResultCode(Activity.RESULT_FIRST_USER)
+                            .build());
+                    return;
+                }
+            }
+
+            SessionStageListener listener = new SessionStageListener() {
+                @Override
+                public void onStagingSuccess(SessionInfo info) {
+                    //TODO: Verify if the returned sessionInfo should be used anywhere
+                    mStagingResult.setValue(new InstallReady());
+                }
+
+                @Override
+                public void onStagingFailure() {
+                    cleanupStagingSession();
+                    mStagingResult.setValue(
+                        new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR)
+                            .setResultIntent(new Intent().putExtra(Intent.EXTRA_INSTALL_RESULT,
+                                PackageManager.INSTALL_FAILED_INVALID_APK))
+                            .setActivityResultCode(Activity.RESULT_FIRST_USER)
+                            .build());
+                }
+            };
+            if (mSessionStager != null) {
+                mSessionStager.cancel(true);
+            }
+            mSessionStager = new SessionStager(mContext, uri, mStagedSessionId, listener);
+            mSessionStager.execute();
+        }
+    }
+
+    private void cleanupStagingSession() {
+        if (mStagedSessionId > 0) {
+            try {
+                mPackageInstaller.abandonSession(mStagedSessionId);
+            } catch (SecurityException ignored) {
+            }
+            mStagedSessionId = 0;
+        }
+    }
+
+    private PackageInstaller.SessionParams createSessionParams(@NonNull Intent intent,
+        @Nullable ParcelFileDescriptor pfd, @NonNull String debugPathName) {
+        PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+            PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+        final Uri referrerUri = intent.getParcelableExtra(Intent.EXTRA_REFERRER, Uri.class);
+        params.setPackageSource(
+            referrerUri != null ? PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE
+                : PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE);
+        params.setInstallAsInstantApp(false);
+        params.setReferrerUri(referrerUri);
+        params.setOriginatingUri(
+            intent.getParcelableExtra(Intent.EXTRA_ORIGINATING_URI, Uri.class));
+        params.setOriginatingUid(intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID,
+            Process.INVALID_UID));
+        params.setInstallerPackageName(intent.getStringExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME));
+        params.setInstallReason(PackageManager.INSTALL_REASON_USER);
+        // Disable full screen intent usage by for sideloads.
+        params.setPermissionState(Manifest.permission.USE_FULL_SCREEN_INTENT,
+            PackageInstaller.SessionParams.PERMISSION_STATE_DENIED);
+
+        if (pfd != null) {
+            try {
+                final PackageInstaller.InstallInfo result = mPackageInstaller.readInstallInfo(pfd,
+                    debugPathName, 0);
+                params.setAppPackageName(result.getPackageName());
+                params.setInstallLocation(result.getInstallLocation());
+                params.setSize(result.calculateInstalledSize(params, pfd));
+            } catch (PackageInstaller.PackageParsingException e) {
+                Log.e(TAG, "Cannot parse package " + debugPathName + ". Assuming defaults.", e);
+                params.setSize(pfd.getStatSize());
+            } catch (IOException e) {
+                Log.e(TAG,
+                    "Cannot calculate installed size " + debugPathName
+                        + ". Try only apk size.", e);
+            }
+        } else {
+            Log.e(TAG, "Cannot parse package " + debugPathName + ". Assuming defaults.");
+        }
+        return params;
+    }
+
+    public MutableLiveData<Integer> getStagingProgress() {
+        if (mSessionStager != null) {
+            return mSessionStager.getProgress();
+        }
+        return new MutableLiveData<>(0);
+    }
+
+    public MutableLiveData<InstallStage> getStagingResult() {
+        return mStagingResult;
     }
 
     public interface SessionStageListener {

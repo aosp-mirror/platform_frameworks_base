@@ -17,6 +17,7 @@
 package com.android.packageinstaller.v2.model.installstagedata;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,11 +46,14 @@ public class InstallAborted extends InstallStage {
      */
     @Nullable
     private final Intent mIntent;
+    private final int mActivityResultCode;
 
-    private InstallAborted(int reason, @NonNull String message, @Nullable Intent intent) {
+    private InstallAborted(int reason, @NonNull String message, @Nullable Intent intent,
+        int activityResultCode) {
         mAbortReason = reason;
         mMessage = message;
         mIntent = intent;
+        mActivityResultCode = activityResultCode;
     }
 
     public int getAbortReason() {
@@ -66,6 +70,10 @@ public class InstallAborted extends InstallStage {
         return mIntent;
     }
 
+    public int getActivityResultCode() {
+        return mActivityResultCode;
+    }
+
     @Override
     public int getStageCode() {
         return mStage;
@@ -76,6 +84,7 @@ public class InstallAborted extends InstallStage {
         private final int mAbortReason;
         private String mMessage = "";
         private Intent mIntent = null;
+        private int mActivityResultCode = Activity.RESULT_CANCELED;
 
         public Builder(int reason) {
             mAbortReason = reason;
@@ -91,8 +100,13 @@ public class InstallAborted extends InstallStage {
             return this;
         }
 
+        public Builder setActivityResultCode(int resultCode) {
+            mActivityResultCode = resultCode;
+            return this;
+        }
+
         public InstallAborted build() {
-            return new InstallAborted(mAbortReason, mMessage, mIntent);
+            return new InstallAborted(mAbortReason, mMessage, mIntent, mActivityResultCode);
         }
     }
 }
