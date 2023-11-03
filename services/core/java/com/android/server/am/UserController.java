@@ -3629,7 +3629,7 @@ class UserController implements Handler.Callback {
 
         void activityManagerForceStopPackage(@UserIdInt int userId, String reason) {
             synchronized (mService) {
-                mService.forceStopPackageLocked(null, -1, false, false, true, false, false,
+                mService.forceStopPackageLocked(null, -1, false, false, true, false, false, false,
                         userId, reason);
             }
         };
