@@ -20,6 +20,8 @@ import android.platform.test.annotations.Postsubmit
 import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.flicker.junit.FlickerBuilderProvider
+import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import com.android.wm.shell.flicker.pip.common.EnterPipTransition
@@ -28,6 +30,15 @@ import org.junit.runners.Parameterized
 
 abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTransition(flicker) {
     protected abstract val standardAppHelper: StandardAppHelper
+
+    @FlickerBuilderProvider
+    override fun buildFlicker(): FlickerBuilder {
+        return FlickerBuilder(instrumentation).apply {
+            withoutScreenRecorder()
+            setup { flicker.scenario.setIsTablet(tapl.isTablet) }
+            transition()
+        }
+    }
 
     /** Checks [standardAppHelper] window remains visible throughout the animation */
     @Postsubmit

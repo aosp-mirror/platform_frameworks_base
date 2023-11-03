@@ -38,7 +38,7 @@ constructor(
      * executions
      */
     @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
+    open fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup { flicker.scenario.setIsTablet(tapl.isTablet) }
             transition()
