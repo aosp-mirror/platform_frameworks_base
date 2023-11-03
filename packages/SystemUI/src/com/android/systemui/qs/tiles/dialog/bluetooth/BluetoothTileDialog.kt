@@ -32,13 +32,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.time.SystemClock
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 
 /** Dialog for showing active, connected and saved bluetooth devices. */
 @SysUISingleton
@@ -47,6 +52,7 @@ constructor(
     private val bluetoothToggleInitialValue: Boolean,
     private val subtitleResIdInitialValue: Int,
     private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger,
     private val logger: BluetoothTileDialogLogger,
@@ -64,6 +70,10 @@ constructor(
         get() = mutableDeviceItemClick.asSharedFlow()
 
     private val deviceItemAdapter: Adapter = Adapter(bluetoothTileDialogCallback)
+
+    private var lastUiUpdateMs: Long = -1
+
+    private var lastItemRow: Int = -1
 
     private lateinit var toggleView: Switch
     private lateinit var subtitleTextView: TextView
@@ -103,16 +113,31 @@ constructor(
         }
     }
 
-    internal fun onDeviceItemUpdated(
+    override fun start() {
+        lastUiUpdateMs = systemClock.elapsedRealtime()
+    }
+
+    internal suspend fun onDeviceItemUpdated(
         deviceItem: List<DeviceItem>,
         showSeeAll: Boolean,
         showPairNewDevice: Boolean
     ) {
-        val start = systemClock.elapsedRealtime()
-        deviceItemAdapter.refreshDeviceItemList(deviceItem) {
-            seeAllViewGroup.visibility = if (showSeeAll) VISIBLE else GONE
-            pairNewDeviceViewGroup.visibility = if (showPairNewDevice) VISIBLE else GONE
-            logger.logDeviceUiUpdate(systemClock.elapsedRealtime() - start)
+        withContext(mainDispatcher) {
+            val start = systemClock.elapsedRealtime()
+            val itemRow = deviceItem.size + showSeeAll.toInt() + showPairNewDevice.toInt()
+            // Add a slight delay for smoother dialog height change
+            if (itemRow != lastItemRow) {
+                delay(MIN_HEIGHT_CHANGE_INTERVAL_MS - (start - lastUiUpdateMs))
+            }
+            if (isActive) {
+                deviceItemAdapter.refreshDeviceItemList(deviceItem) {
+                    seeAllViewGroup.visibility = if (showSeeAll) VISIBLE else GONE
+                    pairNewDeviceViewGroup.visibility = if (showPairNewDevice) VISIBLE else GONE
+                    lastUiUpdateMs = systemClock.elapsedRealtime()
+                    lastItemRow = itemRow
+                    logger.logDeviceUiUpdate(lastUiUpdateMs - start)
+                }
+            }
         }
     }
 
@@ -230,6 +255,7 @@ constructor(
     }
 
     internal companion object {
+        const val MIN_HEIGHT_CHANGE_INTERVAL_MS = 800L
         const val MAX_DEVICE_ITEM_ENTRY = 3
         const val ACTION_BLUETOOTH_DEVICE_DETAILS =
             "com.android.settings.BLUETOOTH_DEVICE_DETAIL_SETTINGS"
@@ -238,5 +264,9 @@ constructor(
         const val ACTION_PAIR_NEW_DEVICE = "android.settings.BLUETOOTH_PAIRING_SETTINGS"
         const val DISABLED_ALPHA = 0.3f
         const val ENABLED_ALPHA = 1f
+
+        private fun Boolean.toInt(): Int {
+            return if (this) 1 else 0
+        }
     }
 }
