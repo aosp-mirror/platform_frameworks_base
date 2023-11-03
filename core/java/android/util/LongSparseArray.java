@@ -24,8 +24,6 @@ import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.LongObjPredicate;
 
-import libcore.util.EmptyArray;
-
 import java.util.Arrays;
 import java.util.Objects;
 

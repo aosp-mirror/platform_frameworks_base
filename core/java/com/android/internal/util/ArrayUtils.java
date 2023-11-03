@@ -84,6 +84,38 @@ public class ArrayUtils {
         return (T[])VMRuntime.getRuntime().newUnpaddedArray(clazz, minLen);
     }
 
+    public static byte[] newUnpaddedByteArray$ravenwood(int minLen) {
+        return new byte[minLen];
+    }
+
+    public static char[] newUnpaddedCharArray$ravenwood(int minLen) {
+        return new char[minLen];
+    }
+
+    public static int[] newUnpaddedIntArray$ravenwood(int minLen) {
+        return new int[minLen];
+    }
+
+    public static boolean[] newUnpaddedBooleanArray$ravenwood(int minLen) {
+        return new boolean[minLen];
+    }
+
+    public static long[] newUnpaddedLongArray$ravenwood(int minLen) {
+        return new long[minLen];
+    }
+
+    public static float[] newUnpaddedFloatArray$ravenwood(int minLen) {
+        return new float[minLen];
+    }
+
+    public static Object[] newUnpaddedObjectArray$ravenwood(int minLen) {
+        return new Object[minLen];
+    }
+
+    public static <T> T[] newUnpaddedArray$ravenwood(Class<T> clazz, int minLen) {
+        return (T[]) Array.newInstance(clazz, minLen);
+    }
+
     /**
      * Checks if the beginnings of two byte arrays are equal.
      *

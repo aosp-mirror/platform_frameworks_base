@@ -21,8 +21,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
-import libcore.util.EmptyArray;
-
 import java.util.Arrays;
 
 /**
