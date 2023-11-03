@@ -258,7 +258,7 @@ object Flags {
     // TODO(b/290652751): Tracking bug.
     @JvmField
     val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
-        unreleasedFlag("migrate_split_keyguard_bottom_area", teamfood = true)
+        unreleasedFlag("migrate_split_keyguard_bottom_area")
 
     // TODO(b/297037052): Tracking bug.
     @JvmField
@@ -273,7 +273,7 @@ object Flags {
 
     /** Migrate the lock icon view to the new keyguard root view. */
     // TODO(b/286552209): Tracking bug.
-    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag("migrate_lock_icon", teamfood = true)
+    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag("migrate_lock_icon")
 
     // TODO(b/288276738): Tracking bug.
     @JvmField val WIDGET_ON_KEYGUARD = unreleasedFlag("widget_on_keyguard")
