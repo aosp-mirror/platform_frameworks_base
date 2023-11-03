@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles.di
 
+import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
+import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerImpl
 import com.android.systemui.qs.tiles.impl.custom.di.CustomTileComponent
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
@@ -45,4 +47,9 @@ interface QSTilesModule {
     @Multibinds fun tileViewModelMap(): Map<String, QSTileViewModel>
 
     @Binds fun bindQSTileConfigProvider(impl: QSTileConfigProviderImpl): QSTileConfigProvider
+
+    @Binds
+    fun bindQSTileIntentUserInputHandler(
+        impl: QSTileIntentUserInputHandlerImpl
+    ): QSTileIntentUserInputHandler
 }
