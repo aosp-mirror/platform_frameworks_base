@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.shade.data.repository
+package com.android.systemui.shade.domain.interactor
 
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
@@ -46,9 +46,7 @@ import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -62,14 +60,12 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 
 @SmallTest
-class ShadeInteractorTest : SysuiTestCase() {
+class ShadeInteractorImplTest : SysuiTestCase() {
 
     @SysUISingleton
     @Component(
@@ -79,7 +75,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                 UserDomainLayerModule::class,
             ]
     )
-    interface TestComponent : SysUITestComponent<ShadeInteractor> {
+    interface TestComponent : SysUITestComponent<ShadeInteractorImpl> {
 
         val configurationRepository: FakeConfigurationRepository
         val deviceProvisioningRepository: FakeDeviceProvisioningRepository
@@ -105,7 +101,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     private val dozeParameters: DozeParameters = mock()
 
     private val testComponent: TestComponent =
-        DaggerShadeInteractorTest_TestComponent.factory()
+        DaggerShadeInteractorImplTest_TestComponent.factory()
             .create(
                 test = this,
                 featureFlags =
@@ -446,154 +442,6 @@ class ShadeInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun lockscreenShadeExpansion_idle_onScene() =
-        testComponent.runTest() {
-            // GIVEN an expansion flow based on transitions to and from a scene
-            val key = SceneKey.Shade
-            val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
-            val expansionAmount by collectLastValue(expansion)
-
-            // WHEN transition state is idle on the scene
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN expansion is 1
-            assertThat(expansionAmount).isEqualTo(1f)
-        }
-
-    @Test
-    fun lockscreenShadeExpansion_idle_onDifferentScene() =
-        testComponent.runTest() {
-            // GIVEN an expansion flow based on transitions to and from a scene
-            val expansion = underTest.sceneBasedExpansion(sceneInteractor, SceneKey.Shade)
-            val expansionAmount by collectLastValue(expansion)
-
-            // WHEN transition state is idle on a different scene
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(SceneKey.Lockscreen)
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN expansion is 0
-            assertThat(expansionAmount).isEqualTo(0f)
-        }
-
-    @Test
-    fun lockscreenShadeExpansion_transitioning_toScene() =
-        testComponent.runTest() {
-            // GIVEN an expansion flow based on transitions to and from a scene
-            val key = SceneKey.QuickSettings
-            val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
-            val expansionAmount by collectLastValue(expansion)
-
-            // WHEN transition state is starting to move to the scene
-            val progress = MutableStateFlow(0f)
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Transition(
-                        fromScene = SceneKey.Lockscreen,
-                        toScene = key,
-                        progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN expansion is 0
-            assertThat(expansionAmount).isEqualTo(0f)
-
-            // WHEN transition state is partially to the scene
-            progress.value = .4f
-
-            // THEN expansion matches the progress
-            assertThat(expansionAmount).isEqualTo(.4f)
-
-            // WHEN transition completes
-            progress.value = 1f
-
-            // THEN expansion is 1
-            assertThat(expansionAmount).isEqualTo(1f)
-        }
-
-    @Test
-    fun lockscreenShadeExpansion_transitioning_fromScene() =
-        testComponent.runTest() {
-            // GIVEN an expansion flow based on transitions to and from a scene
-            val key = SceneKey.QuickSettings
-            val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
-            val expansionAmount by collectLastValue(expansion)
-
-            // WHEN transition state is starting to move to the scene
-            val progress = MutableStateFlow(0f)
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Transition(
-                        fromScene = key,
-                        toScene = SceneKey.Lockscreen,
-                        progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN expansion is 1
-            assertThat(expansionAmount).isEqualTo(1f)
-
-            // WHEN transition state is partially to the scene
-            progress.value = .4f
-
-            // THEN expansion reflects the progress
-            assertThat(expansionAmount).isEqualTo(.6f)
-
-            // WHEN transition completes
-            progress.value = 1f
-
-            // THEN expansion is 0
-            assertThat(expansionAmount).isEqualTo(0f)
-        }
-
-    @Test
-    fun lockscreenShadeExpansion_transitioning_toAndFromDifferentScenes() =
-        testComponent.runTest() {
-            // GIVEN an expansion flow based on transitions to and from a scene
-            val expansion = underTest.sceneBasedExpansion(sceneInteractor, SceneKey.QuickSettings)
-            val expansionAmount by collectLastValue(expansion)
-
-            // WHEN transition state is starting to between different scenes
-            val progress = MutableStateFlow(0f)
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Transition(
-                        fromScene = SceneKey.Lockscreen,
-                        toScene = SceneKey.Shade,
-                        progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN expansion is 0
-            assertThat(expansionAmount).isEqualTo(0f)
-
-            // WHEN transition state is partially complete
-            progress.value = .4f
-
-            // THEN expansion is still 0
-            assertThat(expansionAmount).isEqualTo(0f)
-
-            // WHEN transition completes
-            progress.value = 1f
-
-            // THEN expansion is still 0
-            assertThat(expansionAmount).isEqualTo(0f)
-        }
-
-    @Test
     fun userInteractingWithShade_shadeDraggedUpAndDown() =
         testComponent.runTest() {
             val actual by collectLastValue(underTest.isUserInteractingWithShade)
@@ -814,199 +662,6 @@ class ShadeInteractorTest : SysuiTestCase() {
 
             // THEN user is not interacting
             assertThat(actual).isFalse()
-        }
-    @Test
-    fun userInteracting_idle() =
-        testComponent.runTest() {
-            // GIVEN an interacting flow based on transitions to and from a scene
-            val key = SceneKey.Shade
-            val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
-            val interacting by collectLastValue(interactingFlow)
-
-            // WHEN transition state is idle
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN interacting is false
-            assertThat(interacting).isFalse()
-        }
-
-    @Test
-    fun userInteracting_transitioning_toScene_programmatic() =
-        testComponent.runTest() {
-            // GIVEN an interacting flow based on transitions to and from a scene
-            val key = SceneKey.QuickSettings
-            val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
-            val interacting by collectLastValue(interactingFlow)
-
-            // WHEN transition state is starting to move to the scene
-            val progress = MutableStateFlow(0f)
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Transition(
-                        fromScene = SceneKey.Lockscreen,
-                        toScene = key,
-                        progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN interacting is false
-            assertThat(interacting).isFalse()
-
-            // WHEN transition state is partially to the scene
-            progress.value = .4f
-
-            // THEN interacting is false
-            assertThat(interacting).isFalse()
-
-            // WHEN transition completes
-            progress.value = 1f
-
-            // THEN interacting is false
-            assertThat(interacting).isFalse()
-        }
-
-    @Test
-    fun userInteracting_transitioning_toScene_userInputDriven() =
-        testComponent.runTest() {
-            // GIVEN an interacting flow based on transitions to and from a scene
-            val key = SceneKey.QuickSettings
-            val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
-            val interacting by collectLastValue(interactingFlow)
-
-            // WHEN transition state is starting to move to the scene
-            val progress = MutableStateFlow(0f)
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Transition(
-                        fromScene = SceneKey.Lockscreen,
-                        toScene = key,
-                        progress = progress,
-                        isInitiatedByUserInput = true,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN interacting is true
-            assertThat(interacting).isTrue()
-
-            // WHEN transition state is partially to the scene
-            progress.value = .4f
-
-            // THEN interacting is true
-            assertThat(interacting).isTrue()
-
-            // WHEN transition completes
-            progress.value = 1f
-
-            // THEN interacting is true
-            assertThat(interacting).isTrue()
-        }
-
-    @Test
-    fun userInteracting_transitioning_fromScene_programmatic() =
-        testComponent.runTest() {
-            // GIVEN an interacting flow based on transitions to and from a scene
-            val key = SceneKey.QuickSettings
-            val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
-            val interacting by collectLastValue(interactingFlow)
-
-            // WHEN transition state is starting to move to the scene
-            val progress = MutableStateFlow(0f)
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Transition(
-                        fromScene = key,
-                        toScene = SceneKey.Lockscreen,
-                        progress = progress,
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN interacting is false
-            assertThat(interacting).isFalse()
-
-            // WHEN transition state is partially to the scene
-            progress.value = .4f
-
-            // THEN interacting is false
-            assertThat(interacting).isFalse()
-
-            // WHEN transition completes
-            progress.value = 1f
-
-            // THEN interacting is false
-            assertThat(interacting).isFalse()
-        }
-
-    @Test
-    fun userInteracting_transitioning_fromScene_userInputDriven() =
-        testComponent.runTest() {
-            // GIVEN an interacting flow based on transitions to and from a scene
-            val key = SceneKey.QuickSettings
-            val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
-            val interacting by collectLastValue(interactingFlow)
-
-            // WHEN transition state is starting to move to the scene
-            val progress = MutableStateFlow(0f)
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Transition(
-                        fromScene = key,
-                        toScene = SceneKey.Lockscreen,
-                        progress = progress,
-                        isInitiatedByUserInput = true,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN interacting is true
-            assertThat(interacting).isTrue()
-
-            // WHEN transition state is partially to the scene
-            progress.value = .4f
-
-            // THEN interacting is true
-            assertThat(interacting).isTrue()
-
-            // WHEN transition completes
-            progress.value = 1f
-
-            // THEN interacting is true
-            assertThat(interacting).isTrue()
-        }
-
-    @Test
-    fun userInteracting_transitioning_toAndFromDifferentScenes() =
-        testComponent.runTest() {
-            // GIVEN an interacting flow based on transitions to and from a scene
-            val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, SceneKey.Shade)
-            val interacting by collectLastValue(interactingFlow)
-
-            // WHEN transition state is starting to between different scenes
-            val progress = MutableStateFlow(0f)
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Transition(
-                        fromScene = SceneKey.Lockscreen,
-                        toScene = SceneKey.QuickSettings,
-                        progress = MutableStateFlow(0f),
-                        isInitiatedByUserInput = true,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            sceneInteractor.setTransitionState(transitionState)
-
-            // THEN interacting is false
-            assertThat(interacting).isFalse()
         }
 
     @Test

@@ -78,6 +78,8 @@ import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -231,25 +233,26 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mKeyguardSecurityModel,
                 mSelectedUserInteractor,
                 powerInteractor);
-
-        mShadeInteractor =
-                new ShadeInteractor(
+        mShadeInteractor = new ShadeInteractorImpl(
+                mTestScope.getBackgroundScope(),
+                new FakeDeviceProvisioningRepository(),
+                new FakeDisableFlagsRepository(),
+                mock(DozeParameters.class),
+                keyguardRepository,
+                keyguardTransitionInteractor,
+                powerInteractor,
+                new FakeUserSetupRepository(),
+                mock(UserSwitcherInteractor.class),
+                new ShadeInteractorLegacyImpl(
                         mTestScope.getBackgroundScope(),
-                        new FakeDeviceProvisioningRepository(),
-                        new FakeDisableFlagsRepository(),
-                        mock(DozeParameters.class),
-                        sceneContainerFlags,
-                        () -> sceneInteractor,
                         keyguardRepository,
-                        keyguardTransitionInteractor,
-                        powerInteractor,
-                        new FakeUserSetupRepository(),
-                        mock(UserSwitcherInteractor.class),
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
                                 new ResourcesSplitShadeStateController()),
-                        shadeRepository);
+                        shadeRepository
+                )
+        );
 
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
                 mContext,

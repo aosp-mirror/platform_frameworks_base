@@ -44,6 +44,8 @@ import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
@@ -153,23 +155,25 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
             mock(),
             mock(),
             powerInteractor)
-        shadeInteractor = ShadeInteractor(
+        shadeInteractor = ShadeInteractorImpl(
             testScope.backgroundScope,
             FakeDeviceProvisioningRepository(),
             FakeDisableFlagsRepository(),
             mock(),
-            sceneContainerFlags,
-            utils::sceneInteractor,
             keyguardRepository,
             keyguardTransitionInteractor,
             powerInteractor,
             FakeUserSetupRepository(),
             mock(),
-            SharedNotificationContainerInteractor(
-                configurationRepository,
-                mContext,
-                ResourcesSplitShadeStateController()),
-            shadeRepository,
+            ShadeInteractorLegacyImpl(
+                testScope.backgroundScope,
+                keyguardRepository,
+                SharedNotificationContainerInteractor(
+                    configurationRepository,
+                    mContext,
+                    ResourcesSplitShadeStateController()),
+                shadeRepository,
+            )
         )
     }
 

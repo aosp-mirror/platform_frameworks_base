@@ -26,11 +26,19 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractorSceneContainerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineStart
@@ -56,6 +64,7 @@ interface SysUITestModule {
     @Binds @Application fun bindAppResources(resources: Resources): Resources
     @Binds @Main fun bindMainResources(resources: Resources): Resources
     @Binds fun bindBroadcastDispatcher(fake: FakeBroadcastDispatcher): BroadcastDispatcher
+    @Binds @SysUISingleton fun bindsShadeInteractor(sii: ShadeInteractorImpl): ShadeInteractor
 
     companion object {
         @Provides
@@ -72,6 +81,19 @@ interface SysUITestModule {
         @Provides
         fun provideFakeBroadcastDispatcher(test: SysuiTestCase): FakeBroadcastDispatcher =
             test.fakeBroadcastDispatcher
+
+        @Provides
+        fun provideBaseShadeInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeInteractorSceneContainerImpl>,
+            sceneContainerOff: Provider<ShadeInteractorLegacyImpl>
+        ): BaseShadeInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
     }
 }
 
