@@ -137,14 +137,12 @@ public class ActivityManagerWrapper {
     }
 
     /**
-     * @return a {@link ThumbnailData} with {@link TaskSnapshot} for the given {@param taskId}.
-     *         The snapshot will be triggered if no cached {@link TaskSnapshot} exists.
+     * @return the task snapshot for the given {@param taskId}.
      */
     public @NonNull ThumbnailData getTaskThumbnail(int taskId, boolean isLowResolution) {
         TaskSnapshot snapshot = null;
         try {
-            snapshot = getService().getTaskSnapshot(taskId, isLowResolution,
-                    true /* takeSnapshotIfNeeded */);
+            snapshot = getService().getTaskSnapshot(taskId, isLowResolution);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to retrieve task snapshot", e);
         }
