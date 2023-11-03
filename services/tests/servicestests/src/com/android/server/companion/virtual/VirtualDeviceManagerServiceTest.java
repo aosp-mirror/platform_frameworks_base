@@ -347,6 +347,8 @@ public class VirtualDeviceManagerServiceTest {
         final DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.uniqueId = UNIQUE_ID;
         doReturn(displayInfo).when(mDisplayManagerInternalMock).getDisplayInfo(anyInt());
+        doReturn(Display.INVALID_DISPLAY).when(mDisplayManagerInternalMock)
+                .getDisplayIdToMirror(anyInt());
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
@@ -1627,6 +1629,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void openNonBlockedAppOnMirrorDisplay_flagDisabled_launchesActivity() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
         when(mDisplayManagerInternalMock.getDisplayIdToMirror(anyInt()))
                 .thenReturn(Display.DEFAULT_DISPLAY);
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
