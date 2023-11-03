@@ -55,7 +55,8 @@ class SceneGestureHandlerTest {
                             builder = scenesBuilder,
                             transitions = EmptyTestTransitions,
                             state = layoutState,
-                            density = Density(1f)
+                            density = Density(1f),
+                            edgeDetector = DefaultEdgeDetector,
                         )
                         .also { it.size = IntSize(SCREEN_SIZE.toInt(), SCREEN_SIZE.toInt()) },
                 orientation = Orientation.Vertical,
@@ -104,13 +105,13 @@ class SceneGestureHandlerTest {
 
     @Test
     fun onDragStarted_shouldStartATransition() = runGestureTest {
-        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        draggable.onDragStarted(startedPosition = Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
     }
 
     @Test
     fun afterSceneTransitionIsStarted_interceptDragEvents() = runGestureTest {
-        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        draggable.onDragStarted(startedPosition = Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
         val transition = transitionState as Transition
 
@@ -123,14 +124,13 @@ class SceneGestureHandlerTest {
 
     @Test
     fun onDragStoppedAfterDrag_velocityLowerThanThreshold_remainSameScene() = runGestureTest {
-        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        draggable.onDragStarted(startedPosition = Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDelta(pixels = deltaInPixels10)
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDragStopped(
-            coroutineScope = coroutineScope,
             velocity = velocityThreshold - 0.01f,
         )
         assertScene(currentScene = SceneA, isIdle = false)
@@ -142,14 +142,13 @@ class SceneGestureHandlerTest {
 
     @Test
     fun onDragStoppedAfterDrag_velocityAtLeastThreshold_goToNextScene() = runGestureTest {
-        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        draggable.onDragStarted(startedPosition = Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDelta(pixels = deltaInPixels10)
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDragStopped(
-            coroutineScope = coroutineScope,
             velocity = velocityThreshold,
         )
         assertScene(currentScene = SceneC, isIdle = false)
@@ -161,23 +160,22 @@ class SceneGestureHandlerTest {
 
     @Test
     fun onDragStoppedAfterStarted_returnImmediatelyToIdle() = runGestureTest {
-        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        draggable.onDragStarted(startedPosition = Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
 
-        draggable.onDragStopped(coroutineScope = coroutineScope, velocity = 0f)
+        draggable.onDragStopped(velocity = 0f)
         assertScene(currentScene = SceneA, isIdle = true)
     }
 
     @Test
     fun startGestureDuringAnimatingOffset_shouldImmediatelyStopTheAnimation() = runGestureTest {
-        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        draggable.onDragStarted(startedPosition = Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDelta(pixels = deltaInPixels10)
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDragStopped(
-            coroutineScope = coroutineScope,
             velocity = velocityThreshold,
         )
 
@@ -191,7 +189,7 @@ class SceneGestureHandlerTest {
         assertScene(currentScene = SceneC, isIdle = false)
 
         // Start a new gesture while the offset is animating
-        draggable.onDragStarted(coroutineScope = coroutineScope, startedPosition = Offset.Zero)
+        draggable.onDragStarted(startedPosition = Offset.Zero)
         assertThat(sceneGestureHandler.isAnimatingOffset).isFalse()
     }
 
@@ -320,7 +318,7 @@ class SceneGestureHandlerTest {
     }
     @Test
     fun beforeDraggableStart_stop_shouldBeIgnored() = runGestureTest {
-        draggable.onDragStopped(coroutineScope, velocityThreshold)
+        draggable.onDragStopped(velocityThreshold)
         assertScene(currentScene = SceneA, isIdle = true)
     }
 
@@ -332,7 +330,7 @@ class SceneGestureHandlerTest {
 
     @Test
     fun startNestedScrollWhileDragging() = runGestureTest {
-        draggable.onDragStarted(coroutineScope, Offset.Zero)
+        draggable.onDragStarted(Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
         val transition = transitionState as Transition
 
@@ -344,7 +342,7 @@ class SceneGestureHandlerTest {
         assertThat(transition.progress).isEqualTo(0.2f)
 
         // this should be ignored, we are scrolling now!
-        draggable.onDragStopped(coroutineScope, velocityThreshold)
+        draggable.onDragStopped(velocityThreshold)
         assertScene(currentScene = SceneA, isIdle = false)
 
         nestedScrollEvents(available = offsetY10)
