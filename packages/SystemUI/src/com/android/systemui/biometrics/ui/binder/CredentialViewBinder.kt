@@ -2,6 +2,7 @@ package com.android.systemui.biometrics.ui.binder
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
@@ -46,7 +47,7 @@ object CredentialViewBinder {
         val descriptionView: TextView = view.requireViewById(R.id.description)
         val iconView: ImageView? = view.findViewById(R.id.icon)
         val errorView: TextView = view.requireViewById(R.id.error)
-
+        val cancelButton: Button? = view.findViewById(R.id.cancel_button)
         var errorTimer: Job? = null
 
         // bind common elements
@@ -58,7 +59,7 @@ object CredentialViewBinder {
                     updateForContentDimensions(
                         containerWidth,
                         containerHeight,
-                        0 /* animateDurationMs */
+                        0 // animateDurationMs
                     )
                 }
             }
@@ -94,7 +95,18 @@ object CredentialViewBinder {
                                 }
                             }
                         }
-                        .collect { errorView.textOrHide = it }
+                        .collect { it ->
+                            val hasError = !it.isNullOrBlank()
+                            errorView.visibility =
+                                if (hasError) {
+                                    View.VISIBLE
+                                } else if (cancelButton != null) {
+                                    View.INVISIBLE
+                                } else {
+                                    View.GONE
+                                }
+                            errorView.text = if (hasError) it else ""
+                        }
                 }
 
                 // show an extra dialog if the remaining attempts becomes low
@@ -107,6 +119,8 @@ object CredentialViewBinder {
                 }
             }
         }
+
+        cancelButton?.setOnClickListener { host.onCredentialAborted() }
 
         // bind the auth widget
         when (view) {
