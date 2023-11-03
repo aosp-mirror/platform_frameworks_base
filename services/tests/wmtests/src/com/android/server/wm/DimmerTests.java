@@ -122,7 +122,8 @@ public class DimmerTests extends WindowTestsBase {
         }
     }
 
-    static class MockAnimationAdapterFactory extends SmoothDimmer.AnimationAdapterFactory {
+    static class MockAnimationAdapterFactory extends DimmerAnimationHelper.AnimationAdapterFactory {
+        @Override
         public AnimationAdapter get(LocalAnimationAdapter.AnimationSpec alphaAnimationSpec,
                 SurfaceAnimationRunner runner) {
             return sTestAnimation;
