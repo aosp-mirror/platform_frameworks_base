@@ -16,8 +16,6 @@
 
 package android.media.midi;
 
-import static com.android.media.midi.flags.Flags.FLAG_VIRTUAL_UMP;
-
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -57,11 +55,11 @@ import java.util.List;
  *             android:resource="@xml/device_info" />
  * &lt;/service></pre>
  */
-@FlaggedApi(FLAG_VIRTUAL_UMP)
+@FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
 public abstract class MidiUmpDeviceService extends Service {
     private static final String TAG = "MidiUmpDeviceService";
 
-    @FlaggedApi(FLAG_VIRTUAL_UMP)
+    @FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
     public static final String SERVICE_INTERFACE = "android.media.midi.MidiUmpDeviceService";
 
     private IMidiManager mMidiManager;
@@ -80,7 +78,7 @@ public abstract class MidiUmpDeviceService extends Service {
         }
     };
 
-    @FlaggedApi(FLAG_VIRTUAL_UMP)
+    @FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
     @Override
     public void onCreate() {
         mMidiManager = IMidiManager.Stub.asInterface(
@@ -118,7 +116,7 @@ public abstract class MidiUmpDeviceService extends Service {
      * The number of input and output ports must be equal and non-zero.
      * @return list of MidiReceivers
      */
-    @FlaggedApi(FLAG_VIRTUAL_UMP)
+    @FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
     public abstract @NonNull List<MidiReceiver> onGetInputPortReceivers();
 
     /**
@@ -127,7 +125,7 @@ public abstract class MidiUmpDeviceService extends Service {
      * The number of input and output ports must be equal and non-zero.
      * @return the list of MidiReceivers
      */
-    @FlaggedApi(FLAG_VIRTUAL_UMP)
+    @FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
     public final @NonNull List<MidiReceiver> getOutputPortReceivers() {
         if (mServer == null) {
             return new ArrayList<MidiReceiver>();
@@ -140,7 +138,7 @@ public abstract class MidiUmpDeviceService extends Service {
      * Returns the {@link MidiDeviceInfo} instance for this service
      * @return the MidiDeviceInfo of the virtual MIDI device if it was successfully created
      */
-    @FlaggedApi(FLAG_VIRTUAL_UMP)
+    @FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
     public final @Nullable MidiDeviceInfo getDeviceInfo() {
         return mDeviceInfo;
     }
@@ -149,7 +147,7 @@ public abstract class MidiUmpDeviceService extends Service {
      * Called to notify when the {@link MidiDeviceStatus} has changed
      * @param status the current status of the MIDI device
      */
-    @FlaggedApi(FLAG_VIRTUAL_UMP)
+    @FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
     public void onDeviceStatusChanged(@NonNull MidiDeviceStatus status) {
     }
 
@@ -157,11 +155,11 @@ public abstract class MidiUmpDeviceService extends Service {
      * Called to notify when the virtual MIDI device running in this service has been closed by
      * all its clients
      */
-    @FlaggedApi(FLAG_VIRTUAL_UMP)
+    @FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
     public void onClose() {
     }
 
-    @FlaggedApi(FLAG_VIRTUAL_UMP)
+    @FlaggedApi(Flags.FLAG_VIRTUAL_UMP)
     @Override
     public @Nullable IBinder onBind(@NonNull Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction()) && mServer != null) {

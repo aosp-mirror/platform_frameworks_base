@@ -18,6 +18,7 @@ package android.app.usage;
 
 import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -571,6 +572,29 @@ public final class UsageStatsManager {
         try {
             UsageEvents iter = mService.queryEvents(beginTime, endTime,
                     mContext.getOpPackageName());
+            if (iter != null) {
+                return iter;
+            }
+        } catch (RemoteException e) {
+            // fallthrough and return empty result.
+        }
+        return sEmptyResults;
+    }
+
+    /**
+     * Query for events with specific UsageEventsQuery object.
+     * <em>Note: if the user's device is not in an unlocked state (as defined by
+     * {@link UserManager#isUserUnlocked()}), then {@code null} will be returned.</em>
+     *
+     * @param query The query object used to specify the query parameters.
+     * @return A {@link UsageEvents}.
+     */
+    @FlaggedApi(Flags.FLAG_FILTER_BASED_EVENT_QUERY_API)
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public UsageEvents queryEvents(@NonNull UsageEventsQuery query) {
+        try {
+            UsageEvents iter = mService.queryEventsWithFilter(query, mContext.getOpPackageName());
             if (iter != null) {
                 return iter;
             }

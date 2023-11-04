@@ -17,15 +17,21 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /** View model for communal tutorial indicator on keyguard */
 class CommunalTutorialIndicatorViewModel
 @Inject
 constructor(
     communalTutorialInteractor: CommunalTutorialInteractor,
+    bottomAreaInteractor: KeyguardBottomAreaInteractor,
 ) {
     /** An observable for whether the tutorial indicator view should be visible. */
     val showIndicator: Flow<Boolean> = communalTutorialInteractor.isTutorialAvailable
+
+    /** An observable for the alpha level for the tutorial indicator. */
+    val alpha: Flow<Float> = bottomAreaInteractor.alpha.distinctUntilChanged()
 }

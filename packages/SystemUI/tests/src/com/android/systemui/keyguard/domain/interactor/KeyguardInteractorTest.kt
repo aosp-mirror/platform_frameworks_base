@@ -203,7 +203,8 @@ class KeyguardInteractorTest : SysuiTestCase() {
                     fromScene = SceneKey.Gone,
                     toScene = SceneKey.Lockscreen,
                     progress = flowOf(0f),
-                    isUserInputDriven = false,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
             assertThat(isAnimate).isFalse()

@@ -113,6 +113,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final SysUIKeyEventHandler mSysUIKeyEventHandler;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
+    private final QuickSettingsController mQuickSettingsController;
     private GestureDetector mPulsingWakeupGestureHandler;
     private GestureDetector mDreamingWakeupGestureHandler;
     private View mBrightnessMirror;
@@ -188,6 +189,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             BouncerMessageInteractor bouncerMessageInteractor,
             BouncerLogger bouncerLogger,
             SysUIKeyEventHandler sysUIKeyEventHandler,
+            QuickSettingsController quickSettingsController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
             SelectedUserInteractor selectedUserInteractor) {
@@ -220,6 +222,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mSysUIKeyEventHandler = sysUIKeyEventHandler;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
+        mQuickSettingsController = quickSettingsController;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -454,6 +457,16 @@ public class NotificationShadeWindowViewController implements Dumpable {
                         && !bouncerShowing
                         && !mStatusBarStateController.isDozing()) {
                     if (mDragDownHelper.isDragDownEnabled()) {
+                        if (mFeatureFlagsClassic.isEnabled(Flags.MIGRATE_NSSL)) {
+                            // When on lockscreen, if the touch originates at the top of the screen
+                            // go directly to QS and not the shade
+                            if (mQuickSettingsController.shouldQuickSettingsIntercept(
+                                    ev.getX(), ev.getY(), 0)) {
+                                mShadeLogger.d("NSWVC: QS intercepted");
+                                return true;
+                            }
+                        }
+
                         // This handles drag down over lockscreen
                         boolean result = mDragDownHelper.onInterceptTouchEvent(ev);
                         if (mFeatureFlagsClassic.isEnabled(Flags.MIGRATE_NSSL)) {

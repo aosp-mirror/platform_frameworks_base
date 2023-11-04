@@ -17,6 +17,7 @@
 package com.android.systemui.flags;
 
 import static com.android.systemui.Flags.exampleFlag;
+import static com.android.systemui.Flags.sysuiTeamfood;
 import static com.android.systemui.flags.FlagManager.ACTION_GET_FLAGS;
 import static com.android.systemui.flags.FlagManager.ACTION_SET_FLAG;
 import static com.android.systemui.flags.FlagManager.EXTRA_FLAGS;
@@ -38,12 +39,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.systemui.FeatureFlags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.settings.GlobalSettings;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -83,7 +81,6 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
     private final Map<String, Boolean> mBooleanFlagCache = new ConcurrentHashMap<>();
     private final Map<String, String> mStringFlagCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> mIntFlagCache = new ConcurrentHashMap<>();
-    private final FeatureFlags mGantryFlags;
     private final Restarter mRestarter;
 
     private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
@@ -128,7 +125,6 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
             @Main Resources resources,
             ServerFlagReader serverFlagReader,
             @Named(ALL_FLAGS) Map<String, Flag<?>> allFlags,
-            FeatureFlags gantryFlags,
             Restarter restarter) {
         mFlagManager = flagManager;
         mContext = context;
@@ -137,7 +133,6 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
         mSystemProperties = systemProperties;
         mServerFlagReader = serverFlagReader;
         mAllFlags = allFlags;
-        mGantryFlags = gantryFlags;
         mRestarter = restarter;
     }
 
@@ -155,16 +150,16 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
     }
 
     @Override
-    public boolean isEnabled(@NotNull UnreleasedFlag flag) {
+    public boolean isEnabled(@NonNull UnreleasedFlag flag) {
         return isEnabledInternal(flag);
     }
 
     @Override
-    public boolean isEnabled(@NotNull ReleasedFlag flag) {
+    public boolean isEnabled(@NonNull ReleasedFlag flag) {
         return isEnabledInternal(flag);
     }
 
-    private boolean isEnabledInternal(@NotNull BooleanFlag flag) {
+    private boolean isEnabledInternal(@NonNull BooleanFlag flag) {
         String name = flag.getName();
 
         Boolean value = mBooleanFlagCache.get(name);
@@ -266,7 +261,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
                 && !defaultValue
                 && result == null
                 && flag.getTeamfood()) {
-            return mGantryFlags.sysuiTeamfood();
+            return sysuiTeamfood();
         }
 
         return result == null ? mServerFlagReader.readServerOverride(
@@ -539,7 +534,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: true");
-        pw.println("teamfood: " + mGantryFlags.sysuiTeamfood());
+        pw.println("teamfood: " + sysuiTeamfood());
         pw.println("booleans: " + mBooleanFlagCache.size());
         pw.println("example_flag: " + exampleFlag());
         pw.println("example_shared_flag: " + exampleSharedFlag());

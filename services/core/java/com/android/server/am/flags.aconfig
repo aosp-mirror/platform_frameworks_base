@@ -22,3 +22,10 @@ flag {
     description: "Detect abusive FGS behavior for certain types (camera, mic, media, location)."
     bug: "295545575"
 }
+
+flag {
+    name: "fgs_boot_completed"
+    namespace: "backstage_power"
+    description: "Disable BOOT_COMPLETED broadcast FGS start for certain types"
+    bug: "296558535"
+}

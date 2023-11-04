@@ -57,6 +57,17 @@
         <option name="test-file-name" value="WMShellFlickerTestsPipAppsCSuite.apk"/>
         <option name="test-file-name" value="FlickerTestApp.apk"/>
     </target_preparer>
+
+    <!-- Needed for installing apk's from Play Store -->
+    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+        <option name="aapt-version" value="AAPT2"/>
+        <option name="throw-if-not-found" value="false"/>
+        <option name="install-arg" value="-d"/>
+        <option name="install-arg" value="-g"/>
+        <option name="install-arg" value="-r"/>
+        <option name="test-file-name" value="pstash://com.netflix.mediaclient"/>
+    </target_preparer>
+
     <!-- Enable mocking GPS location by the test app -->
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command"
@@ -94,28 +105,8 @@
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="pull-pattern-keys" value="perfetto_file_path"/>
         <option name="directory-keys"
-                value="/data/user/0/com.android.wm.shell.flicker/files"/>
-        <option name="directory-keys"
-                value="/data/user/0/com.android.wm.shell.flicker.bubbles/files"/>
-        <option name="directory-keys"
-                value="/data/user/0/com.android.wm.shell.flicker.pip/files"/>
-        <option name="directory-keys"
                 value="/data/user/0/com.android.wm.shell.flicker.pip.apps/files"/>
-        <option name="directory-keys"
-                value="/data/user/0/com.android.wm.shell.flicker.splitscreen/files"/>
-        <option name="directory-keys"
-                value="/data/user/0/com.android.wm.shell.flicker.service/files"/>
         <option name="collect-on-run-ended-only" value="true"/>
         <option name="clean-up" value="true"/>
     </metrics_collector>
-
-    <!-- Needed for installing apk's from Play Store -->
-    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
-        <option name="aapt-version" value="AAPT2"/>
-        <option name="throw-if-not-found" value="false"/>
-        <option name="install-arg" value="-d"/>
-        <option name="install-arg" value="-g"/>
-        <option name="install-arg" value="-r"/>
-        <option name="test-file-name" value="pstash://com.netflix.mediaclient"/>
-    </target_preparer>
 </configuration>

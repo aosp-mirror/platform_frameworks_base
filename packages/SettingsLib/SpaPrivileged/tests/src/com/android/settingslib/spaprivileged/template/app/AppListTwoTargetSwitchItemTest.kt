@@ -183,7 +183,7 @@ class AppListTwoTargetSwitchItemTest {
                 override val app = APP
             },
             label = LABEL,
-            summary = stateOf(SUMMARY),
+            summary = { SUMMARY },
         )
     }
 }

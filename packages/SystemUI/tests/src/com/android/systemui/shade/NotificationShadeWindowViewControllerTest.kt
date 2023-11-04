@@ -97,6 +97,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
@@ -111,9 +112,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -140,6 +140,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var statusBarWindowStateController: StatusBarWindowStateController
+    @Mock private lateinit var quickSettingsController: QuickSettingsController
     @Mock
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
     @Mock private lateinit var lockIconViewController: LockIconViewController
@@ -166,7 +167,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     private val notificationLaunchAnimationRepository = NotificationLaunchAnimationRepository()
     private val notificationLaunchAnimationInteractor =
-            NotificationLaunchAnimationInteractor(notificationLaunchAnimationRepository)
+        NotificationLaunchAnimationInteractor(notificationLaunchAnimationRepository)
 
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
@@ -274,6 +275,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 ),
                 BouncerLogger(logcatLogBuffer("BouncerLog")),
                 sysUIKeyEventHandler,
+                quickSettingsController,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 mSelectedUserInteractor,
@@ -460,9 +462,11 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         // AND alternate bouncer doesn't want the touch
         whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
             .thenReturn(false)
+        // AND quick settings controller doesn't want it
+        whenever(quickSettingsController.shouldQuickSettingsIntercept(any(), any(), any()))
+            .thenReturn(false)
         // AND the lock icon wants the touch
-        whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT))
-                .thenReturn(true)
+        whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT)).thenReturn(true)
 
         featureFlagsClassic.set(MIGRATE_NSSL, true)
 
@@ -476,10 +480,31 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
         // AND alternate bouncer doesn't want the touch
         whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
-                .thenReturn(false)
+            .thenReturn(false)
         // AND the lock icon does NOT want the touch
-        whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT))
-                .thenReturn(false)
+        whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT)).thenReturn(false)
+        // AND quick settings controller doesn't want it
+        whenever(quickSettingsController.shouldQuickSettingsIntercept(any(), any(), any()))
+            .thenReturn(false)
+
+        featureFlagsClassic.set(MIGRATE_NSSL, true)
+
+        // THEN touch should NOT be intercepted by NotificationShade
+        assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
+    }
+
+    @Test
+    fun shouldInterceptTouchEvent_dozing_touchInStatusBar_touchIntercepted() {
+        // GIVEN dozing
+        whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
+        // AND alternate bouncer doesn't want the touch
+        whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
+            .thenReturn(false)
+        // AND the lock icon does NOT want the touch
+        whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT)).thenReturn(false)
+        // AND quick settings controller DOES want it
+        whenever(quickSettingsController.shouldQuickSettingsIntercept(any(), any(), any()))
+            .thenReturn(true)
 
         featureFlagsClassic.set(MIGRATE_NSSL, true)
 

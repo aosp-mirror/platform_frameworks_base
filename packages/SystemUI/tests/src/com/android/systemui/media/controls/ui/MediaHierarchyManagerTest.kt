@@ -25,6 +25,10 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -46,6 +50,11 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
@@ -63,6 +72,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
@@ -71,6 +81,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var lockHost: MediaHost
     @Mock private lateinit var qsHost: MediaHost
     @Mock private lateinit var qqsHost: MediaHost
+    @Mock private lateinit var hubModeHost: MediaHost
     @Mock private lateinit var bypassController: KeyguardBypassController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
@@ -93,10 +104,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
+    private val communalRepository = FakeCommunalRepository(isCommunalEnabled = true)
+    private val communalInteractor =
+        CommunalInteractor(communalRepository, FakeCommunalWidgetRepository())
     private val notifPanelEvents = ShadeExpansionStateManager()
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setup() {
@@ -117,11 +133,13 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 mediaDataManager,
                 keyguardViewController,
                 dreamOverlayStateController,
+                communalInteractor,
                 configurationController,
                 wakefulnessLifecycle,
                 notifPanelEvents,
                 settings,
                 fakeHandler,
+                testScope.backgroundScope,
                 ResourcesSplitShadeStateController(),
                 logger,
             )
@@ -131,6 +149,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN, LOCKSCREEN_TOP)
         setupHost(qsHost, MediaHierarchyManager.LOCATION_QS, QS_TOP)
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
+        setupHost(hubModeHost, MediaHierarchyManager.LOCATION_COMMUNAL_HUB, COMMUNAL_TOP)
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
         whenever(mediaDataManager.hasActiveMedia()).thenReturn(true)
         whenever(mediaCarouselController.mediaCarouselScrollHandler)
@@ -475,6 +494,33 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testCommunalLocation() =
+        testScope.runTest {
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    nullable(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+            clearInvocations(mediaCarouselController)
+
+            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_QQS),
+                    any(MediaHostState::class.java),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+        }
+
+    @Test
     fun testQsExpandedChanged_noQqsMedia() {
         // When we are looking at QQS with active media
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
@@ -538,5 +584,6 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         private const val QQS_TOP = 123
         private const val QS_TOP = 456
         private const val LOCKSCREEN_TOP = 789
+        private const val COMMUNAL_TOP = 111
     }
 }

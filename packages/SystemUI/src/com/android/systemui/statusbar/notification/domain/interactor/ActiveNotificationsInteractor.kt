@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +28,16 @@ constructor(
     repository: ActiveNotificationListRepository,
 ) {
     /** Notifications actively presented to the user in the notification stack, in order. */
-    val notifications: Flow<Collection<ActiveNotificationModel>> =
-        repository.activeNotifications.map { it.values }
+    val topLevelRepresentativeNotifications: Flow<List<ActiveNotificationModel>> =
+        repository.activeNotifications.map { store ->
+            store.renderList.map { key ->
+                val entry =
+                    store[key]
+                        ?: error("Could not find notification with key $key in active notif store.")
+                when (entry) {
+                    is ActiveNotificationGroupModel -> entry.summary
+                    is ActiveNotificationModel -> entry
+                }
+            }
+        }
 }

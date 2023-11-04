@@ -76,7 +76,6 @@ import android.app.BroadcastOptions;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
-import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageEvents;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.Context;
@@ -1497,10 +1496,8 @@ class UserController implements Handler.Callback {
 
     private boolean shouldStartWithParent(UserInfo user) {
         final UserProperties properties = getUserProperties(user.id);
-        DevicePolicyManagerInternal dpmi =
-                LocalServices.getService(DevicePolicyManagerInternal.class);
         return (properties != null && properties.getStartWithParent())
-                && (!user.isQuietModeEnabled() || dpmi.isKeepProfilesRunningEnabled());
+                && !user.isQuietModeEnabled();
     }
 
     /**
@@ -3629,7 +3626,7 @@ class UserController implements Handler.Callback {
 
         void activityManagerForceStopPackage(@UserIdInt int userId, String reason) {
             synchronized (mService) {
-                mService.forceStopPackageLocked(null, -1, false, false, true, false, false,
+                mService.forceStopPackageLocked(null, -1, false, false, true, false, false, false,
                         userId, reason);
             }
         };

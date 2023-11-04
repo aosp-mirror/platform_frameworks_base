@@ -349,6 +349,47 @@ public final class UsageEvents implements Parcelable {
          */
         public static final int MAX_EVENT_TYPE = 31;
 
+        /**
+         * Keep in sync with the event types defined above.
+         * @hide
+         */
+        @IntDef(flag = false, value = {
+                NONE,
+                ACTIVITY_RESUMED,
+                ACTIVITY_PAUSED,
+                END_OF_DAY,
+                CONTINUE_PREVIOUS_DAY,
+                CONFIGURATION_CHANGE,
+                SYSTEM_INTERACTION,
+                USER_INTERACTION,
+                SHORTCUT_INVOCATION,
+                CHOOSER_ACTION,
+                NOTIFICATION_SEEN,
+                STANDBY_BUCKET_CHANGED,
+                NOTIFICATION_INTERRUPTION,
+                SLICE_PINNED_PRIV,
+                SLICE_PINNED,
+                SCREEN_INTERACTIVE,
+                SCREEN_NON_INTERACTIVE,
+                KEYGUARD_SHOWN,
+                KEYGUARD_HIDDEN,
+                FOREGROUND_SERVICE_START,
+                FOREGROUND_SERVICE_STOP,
+                CONTINUING_FOREGROUND_SERVICE,
+                ROLLOVER_FOREGROUND_SERVICE,
+                ACTIVITY_STOPPED,
+                ACTIVITY_DESTROYED,
+                FLUSH_TO_DISK,
+                DEVICE_SHUTDOWN,
+                DEVICE_STARTUP,
+                USER_UNLOCKED,
+                USER_STOPPED,
+                LOCUS_ID_SET,
+                APP_COMPONENT_USED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface EventType {}
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 

@@ -15,7 +15,7 @@
  */
 package com.android.server.audio;
 
-import static com.android.media.audio.flags.Flags.autoPublicVolumeApiHardening;
+import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 
 import android.Manifest;
 import android.content.Context;

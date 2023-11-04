@@ -16,6 +16,9 @@
 package com.android.systemui.statusbar.notification.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore.Key
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationEntryModel
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,13 +32,64 @@ import kotlinx.coroutines.flow.MutableStateFlow
  */
 @SysUISingleton
 class ActiveNotificationListRepository @Inject constructor() {
-    /**
-     * Notifications actively presented to the user in the notification stack.
-     *
-     * @see com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
-     */
-    val activeNotifications = MutableStateFlow(emptyMap<String, ActiveNotificationModel>())
+    /** Notifications actively presented to the user in the notification list. */
+    val activeNotifications = MutableStateFlow(ActiveNotificationsStore())
 
     /** Are any already-seen notifications currently filtered out of the active list? */
     val hasFilteredOutSeenNotifications = MutableStateFlow(false)
+}
+
+/** Represents the notification list, comprised of groups and individual notifications. */
+data class ActiveNotificationsStore(
+    /** Notification groups, stored by key. */
+    val groups: Map<String, ActiveNotificationGroupModel> = emptyMap(),
+    /** All individual notifications, including top-level and group children, stored by key. */
+    val individuals: Map<String, ActiveNotificationModel> = emptyMap(),
+    /**
+     * Ordered top-level list of entries in the notification list (either groups or individual),
+     * represented as [Key]s. The associated [ActiveNotificationEntryModel] can be retrieved by
+     * invoking [get].
+     */
+    val renderList: List<Key> = emptyList(),
+) {
+    operator fun get(key: Key): ActiveNotificationEntryModel? {
+        return when (key) {
+            is Key.Group -> groups[key.key]
+            is Key.Individual -> individuals[key.key]
+        }
+    }
+
+    /** Unique key identifying an [ActiveNotificationEntryModel] in the store. */
+    sealed class Key {
+        data class Individual(val key: String) : Key()
+        data class Group(val key: String) : Key()
+    }
+
+    /** Mutable builder for an [ActiveNotificationsStore]. */
+    class Builder {
+        private val groups = mutableMapOf<String, ActiveNotificationGroupModel>()
+        private val individuals = mutableMapOf<String, ActiveNotificationModel>()
+        private val renderList = mutableListOf<Key>()
+
+        fun build() = ActiveNotificationsStore(groups, individuals, renderList)
+
+        fun addEntry(entry: ActiveNotificationEntryModel) {
+            when (entry) {
+                is ActiveNotificationModel -> addIndividualNotif(entry)
+                is ActiveNotificationGroupModel -> addNotifGroup(entry)
+            }
+        }
+
+        fun addIndividualNotif(notif: ActiveNotificationModel) {
+            renderList.add(Key.Individual(notif.key))
+            individuals[notif.key] = notif
+        }
+
+        fun addNotifGroup(group: ActiveNotificationGroupModel) {
+            renderList.add(Key.Group(group.key))
+            groups[group.key] = group
+            individuals[group.summary.key] = group.summary
+            group.children.forEach { individuals[it.key] = it }
+        }
+    }
 }

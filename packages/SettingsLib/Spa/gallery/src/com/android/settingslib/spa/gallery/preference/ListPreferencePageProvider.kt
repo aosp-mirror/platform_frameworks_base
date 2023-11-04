@@ -99,7 +99,7 @@ private fun SampleNotChangeableListPreference() {
     ListPreference(remember {
         object : ListPreferenceModel {
             override val title = "Preferred network type"
-            override val enabled = enabled
+            override val enabled = { enabled.value }
             override val options = listOf(
                 ListPreferenceOption(id = 1, text = "5G (recommended)"),
                 ListPreferenceOption(id = 2, text = "LTE"),

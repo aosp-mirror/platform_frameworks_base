@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ interface SwitchPreferenceModel {
     /**
      * The summary of this [SwitchPreference].
      */
-    val summary: State<String>
-        get() = stateOf("")
+    val summary: () -> String
+        get() = { "" }
 
     /**
      * The icon of this [Preference].
@@ -95,7 +95,7 @@ fun SwitchPreference(model: SwitchPreferenceModel) {
     EntryHighlight {
         InternalSwitchPreference(
             title = model.title,
-            summary = { model.summary.value },
+            summary = model.summary,
             icon = model.icon,
             checked = model.checked.value,
             changeable = model.changeable.value,

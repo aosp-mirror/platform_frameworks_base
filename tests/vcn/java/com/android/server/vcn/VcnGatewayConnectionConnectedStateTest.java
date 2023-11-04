@@ -661,7 +661,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
             throws Exception {
         final VcnGatewayConnectionConfig config =
                 VcnGatewayConnectionConfigTest.newTestBuilderMinimal()
-                        .enableSafeMode(safeModeEnabledByCaller)
+                        .setSafeModeEnabled(safeModeEnabledByCaller)
                         .build();
         final VcnGatewayConnection.Dependencies deps =
                 mock(VcnGatewayConnection.Dependencies.class);

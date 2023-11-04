@@ -20,6 +20,9 @@ import android.app.ActivityManager
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
 import android.app.Notification.FLAG_BUBBLE
+import android.app.Notification.GROUP_ALERT_ALL
+import android.app.Notification.GROUP_ALERT_CHILDREN
+import android.app.Notification.GROUP_ALERT_SUMMARY
 import android.app.Notification.VISIBILITY_PRIVATE
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
@@ -305,10 +308,132 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         assertShouldNotHeadsUp(buildPulseEntry { importance = IMPORTANCE_LOW })
     }
 
+    private fun withPeekAndPulseEntry(
+        extendEntry: EntryBuilder.() -> Unit,
+        block: (NotificationEntry) -> Unit
+    ) {
+        ensurePeekState()
+        block(buildPeekEntry(extendEntry))
+
+        ensurePulseState()
+        block(buildPulseEntry(extendEntry))
+    }
+
     @Test
-    fun testShouldBubble() {
+    fun testShouldHeadsUp_groupedSummaryNotif_groupAlertAll() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_ALL
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_groupedSummaryNotif_groupAlertSummary() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_SUMMARY
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldNotHeadsUp_groupedSummaryNotif_groupAlertChildren() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_CHILDREN
+        }) {
+            assertShouldNotHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_ungroupedSummaryNotif_groupAlertChildren() {
+        withPeekAndPulseEntry({
+            isGrouped = false
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_CHILDREN
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_groupedChildNotif_groupAlertAll() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = false
+            groupAlertBehavior = GROUP_ALERT_ALL
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_groupedChildNotif_groupAlertChildren() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = false
+            groupAlertBehavior = GROUP_ALERT_CHILDREN
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldNotHeadsUp_groupedChildNotif_groupAlertSummary() {
+        withPeekAndPulseEntry({
+            isGrouped = true
+            isGroupSummary = false
+            groupAlertBehavior = GROUP_ALERT_SUMMARY
+        }) {
+            assertShouldNotHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldHeadsUp_ungroupedChildNotif_groupAlertSummary() {
+        withPeekAndPulseEntry({
+            isGrouped = false
+            isGroupSummary = false
+            groupAlertBehavior = GROUP_ALERT_SUMMARY
+        }) {
+            assertShouldHeadsUp(it)
+        }
+    }
+
+    @Test
+    fun testShouldNotHeadsUp_justLaunchedFsi() {
+        withPeekAndPulseEntry({ hasJustLaunchedFsi = true }) { assertShouldNotHeadsUp(it) }
+    }
+
+    @Test
+    fun testShouldBubble_withIntentAndIcon() {
         ensureBubbleState()
-        assertShouldBubble(buildBubbleEntry())
+        assertShouldBubble(buildBubbleEntry { bubbleIsShortcut = false })
+    }
+
+    @Test
+    fun testShouldBubble_withShortcut() {
+        ensureBubbleState()
+        assertShouldBubble(buildBubbleEntry { bubbleIsShortcut = true })
+    }
+
+    @Test
+    fun testShouldNotBubble_notAllowed() {
+        ensureBubbleState()
+        assertShouldNotBubble(buildBubbleEntry { canBubble = false })
+    }
+
+    @Test
+    fun testShouldNotBubble_noBubbleMetadata() {
+        ensureBubbleState()
+        assertShouldNotBubble(buildBubbleEntry { hasBubbleMetadata = false })
     }
 
     @Test
@@ -340,6 +465,18 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
+    fun testShouldNotAlert_hiddenOnKeyguard() {
+        ensurePeekState({ keyguardShouldHideNotification = true })
+        assertShouldNotHeadsUp(buildPeekEntry())
+
+        ensurePulseState({ keyguardShouldHideNotification = true })
+        assertShouldNotHeadsUp(buildPulseEntry())
+
+        ensureBubbleState({ keyguardShouldHideNotification = true })
+        assertShouldNotBubble(buildBubbleEntry())
+    }
+
+    @Test
     fun testShouldFsi_notInteractive() {
         ensureNotInteractiveFsiState()
         assertShouldFsi(buildFsiEntry())
@@ -357,7 +494,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         assertShouldFsi(buildFsiEntry())
     }
 
-    private data class State(
+    protected data class State(
         var hunSettingEnabled: Boolean? = null,
         var hunSnoozed: Boolean? = null,
         var isAodPowerSave: Boolean? = null,
@@ -370,7 +507,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var statusBarState: Int? = null,
     )
 
-    private fun setState(state: State): Unit =
+    protected fun setState(state: State): Unit =
         state.run {
             hunSettingEnabled?.let {
                 val newSetting = if (it) HEADS_UP_ON else HEADS_UP_OFF
@@ -401,7 +538,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             statusBarState?.let { statusBarStateController.state = it }
         }
 
-    private fun ensureState(block: State.() -> Unit) =
+    protected fun ensureState(block: State.() -> Unit) =
         State()
             .apply {
                 keyguardShouldHideNotification = false
@@ -409,7 +546,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             }
             .run(this::setState)
 
-    private fun ensurePeekState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensurePeekState(block: State.() -> Unit = {}) = ensureState {
         hunSettingEnabled = true
         hunSnoozed = false
         isDozing = false
@@ -418,67 +555,67 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         run(block)
     }
 
-    private fun ensurePulseState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensurePulseState(block: State.() -> Unit = {}) = ensureState {
         isAodPowerSave = false
         isDozing = true
         pulseOnNotificationsEnabled = true
         run(block)
     }
 
-    private fun ensureBubbleState(block: State.() -> Unit = {}) = ensureState(block)
+    protected fun ensureBubbleState(block: State.() -> Unit = {}) = ensureState(block)
 
-    private fun ensureNotInteractiveFsiState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensureNotInteractiveFsiState(block: State.() -> Unit = {}) = ensureState {
         isDreaming = false
         isInteractive = false
         statusBarState = SHADE
         run(block)
     }
 
-    private fun ensureDreamingFsiState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensureDreamingFsiState(block: State.() -> Unit = {}) = ensureState {
         isDreaming = true
         isInteractive = true
         statusBarState = SHADE
         run(block)
     }
 
-    private fun ensureKeyguardFsiState(block: State.() -> Unit = {}) = ensureState {
+    protected fun ensureKeyguardFsiState(block: State.() -> Unit = {}) = ensureState {
         isDreaming = false
         isInteractive = true
         statusBarState = KEYGUARD
         run(block)
     }
 
-    private fun assertShouldHeadsUp(entry: NotificationEntry) =
+    protected fun assertShouldHeadsUp(entry: NotificationEntry) =
         provider.makeUnloggedHeadsUpDecision(entry).let {
             assertTrue("unexpected suppressed HUN: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldNotHeadsUp(entry: NotificationEntry) =
+    protected fun assertShouldNotHeadsUp(entry: NotificationEntry) =
         provider.makeUnloggedHeadsUpDecision(entry).let {
             assertFalse("unexpected unsuppressed HUN: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldBubble(entry: NotificationEntry) =
+    protected fun assertShouldBubble(entry: NotificationEntry) =
         provider.makeAndLogBubbleDecision(entry).let {
             assertTrue("unexpected suppressed bubble: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldNotBubble(entry: NotificationEntry) =
+    protected fun assertShouldNotBubble(entry: NotificationEntry) =
         provider.makeAndLogBubbleDecision(entry).let {
             assertFalse("unexpected unsuppressed bubble: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldFsi(entry: NotificationEntry) =
+    protected fun assertShouldFsi(entry: NotificationEntry) =
         provider.makeUnloggedFullScreenIntentDecision(entry).let {
             assertTrue("unexpected suppressed FSI: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private fun assertShouldNotFsi(entry: NotificationEntry) =
+    protected fun assertShouldNotFsi(entry: NotificationEntry) =
         provider.makeUnloggedFullScreenIntentDecision(entry).let {
             assertFalse("unexpected unsuppressed FSI: ${it.logReason}", it.shouldInterrupt)
         }
 
-    private class EntryBuilder(val context: Context) {
+    protected class EntryBuilder(val context: Context) {
         var importance = IMPORTANCE_DEFAULT
         var suppressedVisualEffects: Int? = null
         var whenMs: Long? = null
@@ -487,20 +624,33 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var canBubble: Boolean? = null
         var isBubble = false
         var hasBubbleMetadata = false
-        var bubbleSuppressNotification: Boolean? = null
+        var bubbleIsShortcut = false
+        var bubbleSuppressesNotification: Boolean? = null
+        var isGrouped = false
+        var isGroupSummary: Boolean? = null
+        var groupAlertBehavior: Int? = null
+        var hasJustLaunchedFsi = false
 
-        private fun buildBubbleMetadata() =
-            BubbleMetadata.Builder(
-                    PendingIntent.getActivity(
-                        context,
-                        /* requestCode = */ 0,
-                        Intent().setPackage(context.packageName),
-                        FLAG_MUTABLE
-                    ),
-                    Icon.createWithResource(context.resources, R.drawable.android)
-                )
-                .apply { bubbleSuppressNotification?.let { setSuppressNotification(it) } }
-                .build()
+        private fun buildBubbleMetadata(): BubbleMetadata {
+            val builder =
+                if (bubbleIsShortcut) {
+                    BubbleMetadata.Builder(context.packageName + ":test_shortcut_id")
+                } else {
+                    BubbleMetadata.Builder(
+                        PendingIntent.getActivity(
+                            context,
+                            /* requestCode = */ 0,
+                            Intent().setPackage(context.packageName),
+                            FLAG_MUTABLE
+                        ),
+                        Icon.createWithResource(context.resources, R.drawable.android)
+                    )
+                }
+
+            bubbleSuppressesNotification?.let { builder.setSuppressNotification(it) }
+
+            return builder.build()
+        }
 
         fun build() =
             Notification.Builder(context, TEST_CHANNEL_ID)
@@ -517,6 +667,14 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     if (hasBubbleMetadata) {
                         setBubbleMetadata(buildBubbleMetadata())
                     }
+
+                    if (isGrouped) {
+                        setGroup(TEST_GROUP_KEY)
+                    }
+
+                    isGroupSummary?.let { setGroupSummary(it) }
+
+                    groupAlertBehavior?.let { setGroupAlertBehavior(it) }
                 }
                 .build()
                 .apply {
@@ -537,6 +695,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 }
                 .build()!!
                 .also {
+                    if (hasJustLaunchedFsi) {
+                        it.notifyFullScreenIntentLaunched()
+                    }
+
                     modifyRanking(it)
                         .apply {
                             suppressedVisualEffects?.let { setSuppressedVisualEffects(it) }
@@ -546,27 +708,27 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 }
     }
 
-    private fun buildEntry(block: EntryBuilder.() -> Unit) =
+    protected fun buildEntry(block: EntryBuilder.() -> Unit) =
         EntryBuilder(context).also(block).build()
 
-    private fun buildPeekEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+    protected fun buildPeekEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         importance = IMPORTANCE_HIGH
         run(block)
     }
 
-    private fun buildPulseEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+    protected fun buildPulseEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         importance = IMPORTANCE_DEFAULT
         visibilityOverride = VISIBILITY_NO_OVERRIDE
         run(block)
     }
 
-    private fun buildBubbleEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+    protected fun buildBubbleEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         canBubble = true
         hasBubbleMetadata = true
         run(block)
     }
 
-    private fun buildFsiEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
+    protected fun buildFsiEntry(block: EntryBuilder.() -> Unit = {}) = buildEntry {
         importance = IMPORTANCE_HIGH
         hasFsi = true
         run(block)
@@ -581,3 +743,4 @@ private const val TEST_CHANNEL_ID = "test_channel"
 private const val TEST_CHANNEL_NAME = "Test Channel"
 private const val TEST_PACKAGE = "test_package"
 private const val TEST_TAG = "test_tag"
+private const val TEST_GROUP_KEY = "test_group_key"

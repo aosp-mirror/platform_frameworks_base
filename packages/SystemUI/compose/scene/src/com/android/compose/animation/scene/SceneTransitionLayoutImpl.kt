@@ -37,7 +37,7 @@ import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import com.android.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.channels.Channel
 
 @VisibleForTesting
@@ -47,6 +47,7 @@ class SceneTransitionLayoutImpl(
     transitions: SceneTransitions,
     internal val state: SceneTransitionLayoutState,
     density: Density,
+    edgeDetector: EdgeDetector,
 ) {
     internal val scenes = SnapshotStateMap<SceneKey, Scene>()
     internal val elements = SnapshotStateMap<ElementKey, Element>()
@@ -57,6 +58,7 @@ class SceneTransitionLayoutImpl(
     internal var onChangeScene by mutableStateOf(onChangeScene)
     internal var transitions by mutableStateOf(transitions)
     internal var density: Density by mutableStateOf(density)
+    internal var edgeDetector by mutableStateOf(edgeDetector)
 
     /**
      * The size of this layout. Note that this could be [IntSize.Zero] if this layour does not have

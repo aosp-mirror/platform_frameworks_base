@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AirplanemodeActive
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -34,47 +32,40 @@ import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
-import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
-import com.android.settingslib.spa.widget.ui.SettingsIcon
+import com.android.settingslib.spa.widget.preference.TwoTargetSwitchPreference
 import kotlinx.coroutines.delay
 
-private const val TITLE = "Sample SwitchPreference"
+private const val TITLE = "Sample TwoTargetSwitchPreference"
 
-object SwitchPreferencePageProvider : SettingsPageProvider {
-    override val name = "SwitchPreference"
+object TwoTargetSwitchPreferencePageProvider : SettingsPageProvider {
+    override val name = "TwoTargetSwitchPreference"
     private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
-            SettingsEntryBuilder.create( "SwitchPreference", owner)
+            SettingsEntryBuilder.create( "TwoTargetSwitchPreference", owner)
                 .setUiLayoutFn {
-                    SampleSwitchPreference()
+                    SampleTwoTargetSwitchPreference()
                 }.build()
         )
         entryList.add(
-            SettingsEntryBuilder.create( "SwitchPreference with summary", owner)
+            SettingsEntryBuilder.create( "TwoTargetSwitchPreference with summary", owner)
                 .setUiLayoutFn {
-                    SampleSwitchPreferenceWithSummary()
+                    SampleTwoTargetSwitchPreferenceWithSummary()
                 }.build()
         )
         entryList.add(
-            SettingsEntryBuilder.create( "SwitchPreference with async summary", owner)
+            SettingsEntryBuilder.create( "TwoTargetSwitchPreference with async summary", owner)
                 .setUiLayoutFn {
-                    SampleSwitchPreferenceWithAsyncSummary()
+                    SampleTwoTargetSwitchPreferenceWithAsyncSummary()
                 }.build()
         )
         entryList.add(
-            SettingsEntryBuilder.create( "SwitchPreference not changeable", owner)
+            SettingsEntryBuilder.create( "TwoTargetSwitchPreference not changeable", owner)
                 .setUiLayoutFn {
-                    SampleNotChangeableSwitchPreference()
-                }.build()
-        )
-        entryList.add(
-            SettingsEntryBuilder.create( "SwitchPreference with icon", owner)
-                .setUiLayoutFn {
-                    SampleSwitchPreferenceWithIcon()
+                    SampleNotChangeableTwoTargetSwitchPreference()
                 }.build()
         )
 
@@ -97,80 +88,65 @@ object SwitchPreferencePageProvider : SettingsPageProvider {
 }
 
 @Composable
-private fun SampleSwitchPreference() {
+private fun SampleTwoTargetSwitchPreference() {
     val checked = rememberSaveable { mutableStateOf(false) }
-    SwitchPreference(remember {
+    TwoTargetSwitchPreference(remember {
         object : SwitchPreferenceModel {
-            override val title = "SwitchPreference"
+            override val title = "TwoTargetSwitchPreference"
             override val checked = checked
             override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
         }
-    })
+    }) {}
 }
 
 @Composable
-private fun SampleSwitchPreferenceWithSummary() {
+private fun SampleTwoTargetSwitchPreferenceWithSummary() {
     val checked = rememberSaveable { mutableStateOf(true) }
-    SwitchPreference(remember {
+    TwoTargetSwitchPreference(remember {
         object : SwitchPreferenceModel {
-            override val title = "SwitchPreference"
-            override val summary = stateOf("With summary")
+            override val title = "TwoTargetSwitchPreference"
+            override val summary = { "With summary" }
             override val checked = checked
             override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
         }
-    })
+    }) {}
 }
 
 @Composable
-private fun SampleSwitchPreferenceWithAsyncSummary() {
+private fun SampleTwoTargetSwitchPreferenceWithAsyncSummary() {
     val checked = rememberSaveable { mutableStateOf(true) }
     val summary = produceState(initialValue = " ") {
         delay(1000L)
         value = "Async summary"
     }
-    SwitchPreference(remember {
+    TwoTargetSwitchPreference(remember {
         object : SwitchPreferenceModel {
-            override val title = "SwitchPreference"
-            override val summary = summary
+            override val title = "TwoTargetSwitchPreference"
+            override val summary = { summary.value }
             override val checked = checked
             override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
         }
-    })
+    }) {}
 }
 
 @Composable
-private fun SampleNotChangeableSwitchPreference() {
+private fun SampleNotChangeableTwoTargetSwitchPreference() {
     val checked = rememberSaveable { mutableStateOf(true) }
-    SwitchPreference(remember {
+    TwoTargetSwitchPreference(remember {
         object : SwitchPreferenceModel {
-            override val title = "SwitchPreference"
-            override val summary = stateOf("Not changeable")
+            override val title = "TwoTargetSwitchPreference"
+            override val summary = { "Not changeable" }
             override val changeable = stateOf(false)
             override val checked = checked
             override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
         }
-    })
-}
-
-@Composable
-private fun SampleSwitchPreferenceWithIcon() {
-    val checked = rememberSaveable { mutableStateOf(true) }
-    SwitchPreference(remember {
-        object : SwitchPreferenceModel {
-            override val title = "SwitchPreference"
-            override val checked = checked
-            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
-            override val icon = @Composable {
-                SettingsIcon(imageVector = Icons.Outlined.AirplanemodeActive)
-            }
-        }
-    })
+    }) {}
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SwitchPreferencePagePreview() {
+private fun TwoTargetSwitchPreferencePagePreview() {
     SettingsTheme {
-        SwitchPreferencePageProvider.Page(null)
+        TwoTargetSwitchPreferencePageProvider.Page(null)
     }
 }

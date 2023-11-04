@@ -258,7 +258,7 @@ object Flags {
     // TODO(b/290652751): Tracking bug.
     @JvmField
     val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
-        unreleasedFlag("migrate_split_keyguard_bottom_area", teamfood = true)
+        unreleasedFlag("migrate_split_keyguard_bottom_area")
 
     // TODO(b/297037052): Tracking bug.
     @JvmField
@@ -273,7 +273,7 @@ object Flags {
 
     /** Migrate the lock icon view to the new keyguard root view. */
     // TODO(b/286552209): Tracking bug.
-    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag("migrate_lock_icon", teamfood = true)
+    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag("migrate_lock_icon")
 
     // TODO(b/288276738): Tracking bug.
     @JvmField val WIDGET_ON_KEYGUARD = unreleasedFlag("widget_on_keyguard")
@@ -295,11 +295,6 @@ object Flags {
     // TODO(b/301502635): Tracking Bug.
     @JvmField val MIGRATE_CLOCKS_TO_BLUEPRINT =
             unreleasedFlag("migrate_clocks_to_blueprint")
-
-    /** Migrate KeyguardRootView to use composables. */
-    // TODO(b/301969856): Tracking Bug.
-    @JvmField val KEYGUARD_ROOT_VIEW_USE_COMPOSE =
-        unreleasedFlag("keyguard_root_view_use_compose")
 
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
@@ -532,10 +527,9 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES =
-        unreleasedFlag(
-            name = "screen_record_enterprise_policies",
+        releasedFlag(
+            name = "enable_screen_record_enterprise_policies",
             namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-            teamfood = false
         )
 
     // TODO(b/293252410) : Tracking Bug

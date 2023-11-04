@@ -11893,4 +11893,17 @@ public final class ViewRootImpl implements ViewParent,
         }
         Log.d(mTag, msg);
     }
+
+    @Override
+    public boolean transferHostTouchGestureToEmbedded(
+            @NonNull SurfaceControlViewHost.SurfacePackage surfacePackage) {
+        final IWindowSession realWm = WindowManagerGlobal.getWindowSession();
+        try {
+            return realWm.transferHostTouchGestureToEmbedded(mWindow,
+                    surfacePackage.getInputToken());
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return false;
+    }
 }

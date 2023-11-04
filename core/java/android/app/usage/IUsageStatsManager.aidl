@@ -20,9 +20,8 @@ import android.app.PendingIntent;
 import android.app.usage.BroadcastResponseStats;
 import android.app.usage.BroadcastResponseStatsList;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageEventsQuery;
 import android.content.pm.ParceledListSlice;
-
-import java.util.Map;
 
 /**
  * System private API for talking with the UsageStatsManagerService.
@@ -42,6 +41,8 @@ interface IUsageStatsManager {
     UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
     UsageEvents queryEventsForUser(long beginTime, long endTime, int userId, String callingPackage);
     UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    UsageEvents queryEventsWithFilter(in UsageEventsQuery query, String callingPackage);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setAppInactive(String packageName, boolean inactive, int userId);
     boolean isAppStandbyEnabled();

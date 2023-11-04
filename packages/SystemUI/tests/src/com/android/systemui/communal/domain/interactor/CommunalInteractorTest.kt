@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -85,5 +86,49 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val interactor = CommunalInteractor(communalRepository, widgetRepository)
             assertThat(interactor.isCommunalEnabled).isFalse()
+        }
+
+    @Test
+    fun listensToSceneChange() =
+        testScope.runTest {
+            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            var desiredScene = collectLastValue(interactor.desiredScene)
+            runCurrent()
+            assertThat(desiredScene()).isEqualTo(CommunalSceneKey.Blank)
+
+            val targetScene = CommunalSceneKey.Communal
+            communalRepository.setDesiredScene(targetScene)
+            desiredScene = collectLastValue(interactor.desiredScene)
+            runCurrent()
+            assertThat(desiredScene()).isEqualTo(targetScene)
+        }
+
+    @Test
+    fun updatesScene() =
+        testScope.runTest {
+            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            val targetScene = CommunalSceneKey.Communal
+
+            interactor.onSceneChanged(targetScene)
+
+            val desiredScene = collectLastValue(communalRepository.desiredScene)
+            runCurrent()
+            assertThat(desiredScene()).isEqualTo(targetScene)
+        }
+
+    @Test
+    fun isCommunalShowing() =
+        testScope.runTest {
+            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+
+            var isCommunalShowing = collectLastValue(interactor.isCommunalShowing)
+            runCurrent()
+            assertThat(isCommunalShowing()).isEqualTo(false)
+
+            interactor.onSceneChanged(CommunalSceneKey.Communal)
+
+            isCommunalShowing = collectLastValue(interactor.isCommunalShowing)
+            runCurrent()
+            assertThat(isCommunalShowing()).isEqualTo(true)
         }
 }

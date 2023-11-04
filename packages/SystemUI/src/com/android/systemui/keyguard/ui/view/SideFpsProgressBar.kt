@@ -22,16 +22,15 @@ import android.graphics.Point
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager
 import android.widget.ProgressBar
-import com.android.systemui.biometrics.Utils
+import androidx.core.view.isGone
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import javax.inject.Inject
 
 private const val TAG = "SideFpsProgressBar"
-
-const val progressBarHeight = 100
 
 @SysUISingleton
 class SideFpsProgressBar
@@ -40,31 +39,36 @@ constructor(
     private val layoutInflater: LayoutInflater,
     private val windowManager: WindowManager,
 ) {
-    private var progressBarWidth = 200
+    private var overlayView: View? = null
+
     fun updateView(
         visible: Boolean,
-        location: Point,
-        shouldRotate90Degrees: Boolean,
-        progressBarWidth: Int
+        viewLeftTopLocation: Point,
+        progressBarWidth: Int,
+        progressBarHeight: Int,
+        rotation: Float,
     ) {
         if (visible) {
-            this.progressBarWidth = progressBarWidth
-            createAndShowOverlay(location, shouldRotate90Degrees)
+            createAndShowOverlay(viewLeftTopLocation, rotation, progressBarWidth, progressBarHeight)
         } else {
-            hideOverlay()
+            hide()
         }
     }
 
-    fun hideOverlay() {
-        overlayView = null
+    fun hide() {
+        progressBar?.isGone = true
     }
 
     private val overlayViewParams =
         WindowManager.LayoutParams(
-                progressBarHeight,
-                progressBarWidth,
+                // overlay is always full screen
+                MATCH_PARENT,
+                MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSPARENT
             )
             .apply {
@@ -78,37 +82,31 @@ constructor(
                         WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
             }
 
-    private var overlayView: View? = null
-        set(value) {
-            field?.let { oldView -> windowManager.removeView(oldView) }
-            field = value
-            field?.let { newView -> windowManager.addView(newView, overlayViewParams) }
-        }
-
     private fun createAndShowOverlay(
-        fingerprintSensorLocation: Point,
-        shouldRotate90Degrees: Boolean
+        viewLeftTop: Point,
+        rotation: Float,
+        progressBarLength: Int,
+        progressBarThickness: Int,
     ) {
         if (overlayView == null) {
             overlayView = layoutInflater.inflate(R.layout.sidefps_progress_bar, null, false)
+            windowManager.addView(overlayView, overlayViewParams)
+            progressBar?.pivotX = 0.0f
+            progressBar?.pivotY = 0.0f
         }
-        overlayViewParams.x = fingerprintSensorLocation.x
-        overlayViewParams.y = fingerprintSensorLocation.y
-        if (shouldRotate90Degrees) {
-            overlayView?.rotation = 270.0f
-            overlayViewParams.width = progressBarHeight
-            overlayViewParams.height = progressBarWidth
-        } else {
-            overlayView?.rotation = 0.0f
-            overlayViewParams.width = progressBarWidth
-            overlayViewParams.height = progressBarHeight
-        }
-        windowManager.updateViewLayout(overlayView, overlayViewParams)
+        progressBar?.layoutParams?.width = progressBarLength
+        progressBar?.layoutParams?.height = progressBarThickness
+        progressBar?.translationX = viewLeftTop.x.toFloat()
+        progressBar?.translationY = viewLeftTop.y.toFloat()
+        progressBar?.rotation = rotation
+        progressBar?.isGone = false
+        overlayView?.requestLayout()
     }
 
     fun setProgress(value: Float) {
-        overlayView
-            ?.findViewById<ProgressBar?>(R.id.side_fps_progress_bar)
-            ?.setProgress((value * 100).toInt(), false)
+        progressBar?.setProgress((value * 100).toInt(), false)
     }
+
+    private val progressBar: ProgressBar?
+        get() = overlayView?.findViewById(R.id.side_fps_progress_bar)
 }

@@ -3832,6 +3832,7 @@ public class PackageInstaller {
          */
         @SystemApi
         @RequiresPermission(Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+        @FlaggedApi(Flags.FLAG_GET_RESOLVED_APK_PATH)
         public @Nullable String getResolvedBaseApkPath() {
             return resolvedBaseCodePath;
         }

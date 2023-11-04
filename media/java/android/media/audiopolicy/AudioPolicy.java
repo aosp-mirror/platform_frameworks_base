@@ -49,7 +49,6 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.media.audio.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

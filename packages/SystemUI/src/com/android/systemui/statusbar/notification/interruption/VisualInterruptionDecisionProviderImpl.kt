@@ -19,6 +19,7 @@ import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
 import android.util.Log
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
@@ -41,6 +42,7 @@ constructor(
     private val batteryController: BatteryController,
     private val globalSettings: GlobalSettings,
     private val headsUpManager: HeadsUpManager,
+    private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
     private val logger: NotificationInterruptLogger,
     @Main private val mainHandler: Handler,
     private val powerManager: PowerManager,
@@ -65,6 +67,11 @@ constructor(
         addFilter(PulseEffectSuppressor())
         addFilter(PulseLockscreenVisibilityPrivateSuppressor())
         addFilter(PulseLowImportanceSuppressor())
+        addFilter(BubbleNotAllowedSuppressor())
+        addFilter(BubbleNoMetadataSuppressor())
+        addFilter(HunGroupAlertBehaviorSuppressor())
+        addFilter(HunJustLaunchedFsiSuppressor())
+        addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))
 
         started = true
     }
@@ -100,9 +107,19 @@ constructor(
         condition.start()
     }
 
+    @VisibleForTesting
+    fun removeCondition(condition: VisualInterruptionCondition) {
+        conditions.remove(condition)
+    }
+
     fun addFilter(filter: VisualInterruptionFilter) {
         filters.add(filter)
         filter.start()
+    }
+
+    @VisibleForTesting
+    fun removeFilter(filter: VisualInterruptionFilter) {
+        filters.remove(filter)
     }
 
     override fun makeUnloggedHeadsUpDecision(entry: NotificationEntry): Decision {

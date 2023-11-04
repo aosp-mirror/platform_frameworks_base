@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.screenshot
+package com.android.settingslib.spa.screenshot.widget.button
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Launch
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Launch
 import androidx.compose.material.icons.outlined.WarningAmber
+import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
 import com.android.settingslib.spa.widget.button.ActionButton
 import com.android.settingslib.spa.widget.button.ActionButtons
 import org.junit.Rule
@@ -27,6 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import platform.test.screenshot.DeviceEmulationSpec
+import platform.test.screenshot.PhoneAndTabletMinimal
 
 /** A screenshot test for ExampleFeature. */
 @RunWith(Parameterized::class)
@@ -48,7 +50,7 @@ class ActionButtonsScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     fun test() {
         screenshotRule.screenshotTest("actionButtons") {
             val actionButtons = listOf(
-                ActionButton(text = "Open", imageVector = Icons.Outlined.Launch) {},
+                ActionButton(text = "Open", imageVector = Icons.AutoMirrored.Outlined.Launch) {},
                 ActionButton(text = "Uninstall", imageVector = Icons.Outlined.Delete) {},
                 ActionButton(text = "Force stop", imageVector = Icons.Outlined.WarningAmber) {},
             )

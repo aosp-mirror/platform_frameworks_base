@@ -14575,9 +14575,10 @@ public class BatteryStatsImpl extends BatteryStats {
                     mModStepMode = 0;
                 }
             } else {
-                if (level >= 90) {
-                    // If the battery level is at least 90%, always consider the device to be
-                    // charging even if it happens to go down a level.
+                if (level >= mConstants.BATTERY_CHARGING_ENFORCE_LEVEL) {
+                    // If the battery level is at least Constants.BATTERY_CHARGING_ENFORCE_LEVEL,
+                    // always consider the device to be charging even if it happens to go down a
+                    // level.
                     changed |= setChargingLocked(true);
                 } else if (!mCharging) {
                     if (mLastChargeStepLevel < level) {
@@ -15313,6 +15314,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public static final String KEY_MAX_HISTORY_BUFFER_KB = "max_history_buffer_kb";
         public static final String KEY_BATTERY_CHARGED_DELAY_MS =
                 "battery_charged_delay_ms";
+        public static final String KEY_BATTERY_CHARGING_ENFORCE_LEVEL =
+                "battery_charging_enforce_level";
         public static final String KEY_PER_UID_MODEM_POWER_MODEL =
                 "per_uid_modem_power_model";
         public static final String KEY_PHONE_ON_EXTERNAL_STATS_COLLECTION =
@@ -15363,6 +15366,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private static final int DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE = 64;
         private static final int DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB = 64; /*Kilo Bytes*/
         private static final int DEFAULT_BATTERY_CHARGED_DELAY_MS = 900000; /* 15 min */
+        private static final int DEFAULT_BATTERY_CHARGING_ENFORCE_LEVEL = 90;
         @PerUidModemPowerModel
         private static final int DEFAULT_PER_UID_MODEM_MODEL =
                 PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX;
@@ -15384,6 +15388,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public int MAX_HISTORY_FILES;
         public int MAX_HISTORY_BUFFER; /*Bytes*/
         public int BATTERY_CHARGED_DELAY_MS = DEFAULT_BATTERY_CHARGED_DELAY_MS;
+        public int BATTERY_CHARGING_ENFORCE_LEVEL = DEFAULT_BATTERY_CHARGING_ENFORCE_LEVEL;
         public int PER_UID_MODEM_MODEL = DEFAULT_PER_UID_MODEM_MODEL;
         public boolean PHONE_ON_EXTERNAL_STATS_COLLECTION =
                 DEFAULT_PHONE_ON_EXTERNAL_STATS_COLLECTION;
@@ -15412,6 +15417,9 @@ public class BatteryStatsImpl extends BatteryStats {
             mResolver.registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY),
                     false /* notifyForDescendants */, this);
+            mResolver.registerContentObserver(Settings.Global.getUriFor(
+                            Settings.Global.BATTERY_CHARGING_STATE_ENFORCE_LEVEL),
+                    false /* notifyForDescendants */, this);
             updateConstants();
         }
 
@@ -15422,6 +15430,12 @@ public class BatteryStatsImpl extends BatteryStats {
                             Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY))) {
                 synchronized (BatteryStatsImpl.this) {
                     updateBatteryChargedDelayMsLocked();
+                }
+                return;
+            } else if (uri.equals(Settings.Global.getUriFor(
+                    Settings.Global.BATTERY_CHARGING_STATE_ENFORCE_LEVEL))) {
+                synchronized (BatteryStatsImpl.this) {
+                    updateBatteryChargingEnforceLevelLocked();
                 }
                 return;
             }
@@ -15477,6 +15491,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         DEFAULT_RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS);
 
                 updateBatteryChargedDelayMsLocked();
+                updateBatteryChargingEnforceLevelLocked();
 
                 onChange();
             }
@@ -15504,6 +15519,21 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mHandler.hasCallbacks(mDeferSetCharging)) {
                 mHandler.removeCallbacks(mDeferSetCharging);
                 mHandler.postDelayed(mDeferSetCharging, BATTERY_CHARGED_DELAY_MS);
+            }
+        }
+
+        private void updateBatteryChargingEnforceLevelLocked() {
+            int lastChargingEnforceLevel = BATTERY_CHARGING_ENFORCE_LEVEL;
+            final int level = Settings.Global.getInt(mResolver,
+                    Settings.Global.BATTERY_CHARGING_STATE_ENFORCE_LEVEL,
+                    -1);
+
+            BATTERY_CHARGING_ENFORCE_LEVEL = level >= 0 ? level : mParser.getInt(
+                    KEY_BATTERY_CHARGING_ENFORCE_LEVEL, DEFAULT_BATTERY_CHARGING_ENFORCE_LEVEL);
+
+            if (BATTERY_CHARGING_ENFORCE_LEVEL <= mLastChargeStepLevel
+                    && mLastChargeStepLevel < lastChargingEnforceLevel) {
+                setChargingLocked(true);
             }
         }
 
@@ -15541,6 +15571,8 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(MAX_HISTORY_BUFFER/1024);
             pw.print(KEY_BATTERY_CHARGED_DELAY_MS); pw.print("=");
             pw.println(BATTERY_CHARGED_DELAY_MS);
+            pw.print(KEY_BATTERY_CHARGING_ENFORCE_LEVEL); pw.print("=");
+            pw.println(BATTERY_CHARGING_ENFORCE_LEVEL);
             pw.print(KEY_PER_UID_MODEM_POWER_MODEL); pw.print("=");
             pw.println(getPerUidModemModelName(PER_UID_MODEM_MODEL));
             pw.print(KEY_PHONE_ON_EXTERNAL_STATS_COLLECTION); pw.print("=");

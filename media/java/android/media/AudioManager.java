@@ -20,8 +20,8 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 
-import static com.android.media.audio.flags.Flags.autoPublicVolumeApiHardening;
-import static com.android.media.audio.flags.Flags.FLAG_FOCUS_FREEZE_TEST_API;
+import static android.media.audio.Flags.autoPublicVolumeApiHardening;
+import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -686,6 +686,7 @@ public class AudioManager {
             FLAG_ABSOLUTE_VOLUME,
     })
     @Retention(RetentionPolicy.SOURCE)
+    // TODO(308698465) remove due to potential conflict with the new flags class
     public @interface Flags {}
 
     /**

@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
@@ -73,7 +72,7 @@ private class RestrictedPreferenceModel(
 
     override val enabled = when (restrictedMode) {
         NoRestricted -> model.enabled
-        else -> stateOf(false)
+        else -> ({ false })
     }
 
     override val onClick = when (restrictedMode) {

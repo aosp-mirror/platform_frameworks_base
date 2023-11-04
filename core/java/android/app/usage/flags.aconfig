@@ -28,3 +28,10 @@ flag {
     description: "Flag for parcelable usage event list"
     bug: "301254110"
 }
+
+flag {
+    name: "filter_based_event_query_api"
+    namespace: "backstage_power"
+    description: " Feature flag to support filter based event query API"
+    bug: "194321117"
+}

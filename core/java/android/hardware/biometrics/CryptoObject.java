@@ -154,7 +154,7 @@ public class CryptoObject {
      * @hide
      * @return the opId associated with this object or 0 if none
      */
-    public final long getOpId() {
+    public long getOpId() {
         if (mCrypto == null) {
             return 0;
         } else if (mCrypto instanceof IdentityCredential) {

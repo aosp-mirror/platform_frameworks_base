@@ -16,10 +16,13 @@
 
 package com.android.server.job.controllers.idle;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.provider.DeviceConfig;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -73,7 +76,8 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
     }
 
     @Override
-    public void startTracking(Context context, IdlenessListener listener) {
+    public void startTracking(Context context, JobSchedulerService service,
+            IdlenessListener listener) {
         mIdleListener = listener;
 
         IntentFilter filter = new IntentFilter();
@@ -92,6 +96,15 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         filter.addAction(ActivityManagerService.ACTION_TRIGGER_IDLE);
 
         context.registerReceiver(this, filter, null, AppSchedulingModuleThread.getHandler());
+    }
+
+    /** Process the specified constant and update internal constants if relevant. */
+    public void processConstant(@NonNull DeviceConfig.Properties properties,
+            @NonNull String key) {
+    }
+
+    @Override
+    public void onBatteryStateChanged(boolean isCharging, boolean isBatteryNotLow) {
     }
 
     @Override
@@ -116,6 +129,10 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
 
         proto.end(ciToken);
         proto.end(token);
+    }
+
+    @Override
+    public void dumpConstants(IndentingPrintWriter pw) {
     }
 
     @Override

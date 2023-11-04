@@ -87,8 +87,8 @@ open class PackageHelperTestBase {
                 TEST_PACKAGE_1, TEST_PACKAGE_2, DEVICE_OWNER_PACKAGE, DEVICE_ADMIN_PACKAGE,
                 DEFAULT_HOME_PACKAGE, DIALER_PACKAGE, INSTALLER_PACKAGE, UNINSTALLER_PACKAGE,
                 VERIFIER_PACKAGE, PERMISSION_CONTROLLER_PACKAGE))
-        suspendPackageHelper = SuspendPackageHelper(pms, rule.mocks().injector,
-                rule.mocks().userManagerService, broadcastHelper, protectedPackages)
+        suspendPackageHelper = SuspendPackageHelper(
+                pms, rule.mocks().injector, broadcastHelper, protectedPackages)
         defaultAppProvider = rule.mocks().defaultAppProvider
         testHandler = rule.mocks().handler
         packageSetting1 = pms.snapshotComputer().getPackageStateInternal(TEST_PACKAGE_1)!!

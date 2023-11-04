@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.createIntent
 import com.android.settingslib.spa.gallery.R
@@ -136,8 +135,8 @@ object PreferencePageProvider : SettingsPageProvider {
                     Preference(
                         object : PreferenceModel {
                             override val title = ASYNC_PREFERENCE_TITLE
-                            override val summary = model.asyncSummary
-                            override val enabled = model.asyncEnable
+                            override val summary = { model.asyncSummary.value }
+                            override val enabled = { model.asyncEnable.value }
                         }
                     )
                 }
@@ -170,7 +169,7 @@ object PreferencePageProvider : SettingsPageProvider {
                     Preference(
                         object : PreferenceModel {
                             override val title = MANUAL_UPDATE_PREFERENCE_TITLE
-                            override val summary = manualUpdaterSummary
+                            override val summary = { manualUpdaterSummary.value }
                             override val onClick = { model.manualUpdaterOnClick() }
                             override val icon = @Composable {
                                 SettingsIcon(imageVector = Icons.Outlined.TouchApp)
@@ -205,11 +204,13 @@ object PreferencePageProvider : SettingsPageProvider {
             createEntry(EntryEnum.AUTO_UPDATE_PREFERENCE)
                 .setUiLayoutFn {
                     val model = PreferencePageModel.create()
-                    val autoUpdaterSummary = remember { model.getAutoUpdaterSummary() }
+                    val autoUpdaterSummary = remember {
+                        model.getAutoUpdaterSummary()
+                    }.observeAsState(" ")
                     Preference(
                         object : PreferenceModel {
                             override val title = AUTO_UPDATE_PREFERENCE_TITLE
-                            override val summary = autoUpdaterSummary.observeAsState(" ")
+                            override val summary = { autoUpdaterSummary.value }
                             override val icon = @Composable {
                                 SettingsIcon(imageVector = Icons.Outlined.Autorenew)
                             }
@@ -250,12 +251,12 @@ object PreferencePageProvider : SettingsPageProvider {
 
     private fun singleLineSummaryEntry() = createEntry(EntryEnum.SINGLE_LINE_SUMMARY_PREFERENCE)
         .setUiLayoutFn {
+            val summary = stringResource(R.string.single_line_summary_preference_summary)
             Preference(
                 model = object : PreferenceModel {
                     override val title: String =
                         stringResource(R.string.single_line_summary_preference_title)
-                    override val summary =
-                        stringResource(R.string.single_line_summary_preference_summary).toState()
+                    override val summary = { summary }
                 },
                 singleLineSummary = true,
             )

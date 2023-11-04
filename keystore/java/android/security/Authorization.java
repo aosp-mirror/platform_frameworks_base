@@ -18,7 +18,9 @@ package android.security;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.security.keymint.HardwareAuthToken;
+import android.hardware.security.keymint.HardwareAuthenticatorType;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
@@ -37,7 +39,10 @@ public class Authorization {
 
     public static final int SYSTEM_ERROR = ResponseCode.SYSTEM_ERROR;
 
-    private static IKeystoreAuthorization getService() {
+    /**
+     * @return an instance of IKeystoreAuthorization
+     */
+    public static IKeystoreAuthorization getService() {
         return IKeystoreAuthorization.Stub.asInterface(
                     ServiceManager.checkService("android.security.authorization"));
     }
@@ -97,6 +102,26 @@ public class Authorization {
             return SYSTEM_ERROR;
         } catch (ServiceSpecificException e) {
             return e.errorCode;
+        }
+    }
+
+    /**
+     * Gets the last authentication time of the given user and authenticators.
+     *
+     * @param userId user id
+     * @param authenticatorTypes an array of {@link HardwareAuthenticatorType}.
+     * @return the last authentication time or
+     * {@link BiometricConstants#BIOMETRIC_NO_AUTHENTICATION}.
+     */
+    public static long getLastAuthenticationTime(
+            long userId, @HardwareAuthenticatorType int[] authenticatorTypes) {
+        try {
+            return getService().getLastAuthTime(userId, authenticatorTypes);
+        } catch (RemoteException | NullPointerException e) {
+            Log.w(TAG, "Can not connect to keystore", e);
+            return BiometricConstants.BIOMETRIC_NO_AUTHENTICATION;
+        } catch (ServiceSpecificException e) {
+            return BiometricConstants.BIOMETRIC_NO_AUTHENTICATION;
         }
     }
 

@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.aconfig
+package com.android.systemui.communal.shared.model
 
-import com.android.systemui.FeatureFlags
-import com.android.systemui.FeatureFlagsImpl
-import com.android.systemui.dagger.SysUISingleton
-import dagger.Module
-import dagger.Provides
+/** Definition of the possible scenes for the communal UI. */
+sealed class CommunalSceneKey(
+    private val loggingName: String,
+) {
+    /** The communal scene containing the hub UI. */
+    object Communal : CommunalSceneKey("communal")
 
-@Module
-abstract class AConfigModule {
-    @Module
-    companion object {
-        @Provides
-        @SysUISingleton
-        fun providesImpl(): FeatureFlags {
-            return FeatureFlagsImpl()
-        }
+    /** The default scene, shows nothing and is only there to allow swiping to communal. */
+    object Blank : CommunalSceneKey("blank")
+
+    override fun toString(): String {
+        return loggingName
     }
 }

@@ -21,6 +21,8 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastMap
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
 import com.android.compose.animation.scene.transformation.EdgeTranslate
@@ -32,8 +34,6 @@ import com.android.compose.animation.scene.transformation.ScaleSize
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.Translate
-import com.android.compose.ui.util.fastForEach
-import com.android.compose.ui.util.fastMap
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
 class SceneTransitions(

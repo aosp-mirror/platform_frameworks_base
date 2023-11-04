@@ -53,6 +53,10 @@ interface IBiometricService {
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     int canAuthenticate(String opPackageName, int userId, int callingUserId, int authenticators);
 
+    // Gets the time of last authentication for the given user and authenticators.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    long getLastAuthenticationTime(int userId, int authenticators);
+
     // Checks if any biometrics are enrolled.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     boolean hasEnrolledBiometrics(int userId, String opPackageName);

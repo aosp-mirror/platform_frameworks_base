@@ -42,11 +42,11 @@ internal class DesktopModeFocusedWindowDecorationViewHolder(
     }
 
     override fun onHandleMenuOpened() {
-        animateCaptionHandleAlpha(startValue = 0f, endValue = 1f)
+        animateCaptionHandleAlpha(startValue = 1f, endValue = 0f)
     }
 
     override fun onHandleMenuClosed() {
-        animateCaptionHandleAlpha(startValue = 1f, endValue = 0f)
+        animateCaptionHandleAlpha(startValue = 0f, endValue = 1f)
     }
 
     private fun getCaptionHandleBarColor(taskInfo: RunningTaskInfo): Int {

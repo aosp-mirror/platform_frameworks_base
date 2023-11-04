@@ -17,8 +17,8 @@
 package com.android.systemui.scene.shared.flag
 
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.FeatureFlags
 import com.android.systemui.Flags as AConfigFlags
+import com.android.systemui.Flags.sceneContainer
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -50,7 +50,6 @@ class SceneContainerFlagsImpl
 @AssistedInject
 constructor(
     private val featureFlagsClassic: FeatureFlagsClassic,
-    featureFlags: FeatureFlags,
     @Assisted private val isComposeAvailable: Boolean,
 ) : SceneContainerFlags {
 
@@ -72,7 +71,7 @@ constructor(
         listOf(
             AconfigFlagMustBeEnabled(
                 flagName = AConfigFlags.FLAG_SCENE_CONTAINER,
-                flagValue = featureFlags.sceneContainer(),
+                flagValue = sceneContainer(),
             ),
         ) +
             classicFlagTokens.map { flagToken -> FlagMustBeEnabled(flagToken) } +
