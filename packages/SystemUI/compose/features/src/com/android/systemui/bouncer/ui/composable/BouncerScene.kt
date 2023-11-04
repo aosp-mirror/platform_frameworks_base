@@ -154,7 +154,7 @@ private fun SceneScope.BouncerScene(
                 Bouncer(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
-                    isUserInputAreaVisible = true,
+                    userInputAreaVisibility = UserInputAreaVisibility.FULL,
                     modifier = childModifier,
                 )
             Layout.SIDE_BY_SIDE ->
@@ -189,7 +189,7 @@ private fun SceneScope.BouncerScene(
 private fun Bouncer(
     viewModel: BouncerViewModel,
     dialogFactory: BouncerSceneDialogFactory,
-    isUserInputAreaVisible: Boolean,
+    userInputAreaVisibility: UserInputAreaVisibility,
     modifier: Modifier = Modifier,
 ) {
     val message: BouncerViewModel.MessageViewModel by viewModel.message.collectAsState()
@@ -214,12 +214,11 @@ private fun Bouncer(
         }
 
         Box(Modifier.weight(1f)) {
-            if (isUserInputAreaVisible) {
-                UserInputArea(
-                    viewModel = viewModel,
-                    modifier = Modifier.align(Alignment.Center),
-                )
-            }
+            UserInputArea(
+                viewModel = viewModel,
+                visibility = userInputAreaVisibility,
+                modifier = Modifier.align(Alignment.Center),
+            )
         }
 
         if (viewModel.isEmergencyButtonVisible) {
@@ -269,6 +268,7 @@ private fun Bouncer(
 @Composable
 private fun UserInputArea(
     viewModel: BouncerViewModel,
+    visibility: UserInputAreaVisibility,
     modifier: Modifier = Modifier,
 ) {
     val authMethodViewModel: AuthMethodBouncerViewModel? by
@@ -276,21 +276,46 @@ private fun UserInputArea(
 
     when (val nonNullViewModel = authMethodViewModel) {
         is PinBouncerViewModel ->
-            PinBouncer(
-                viewModel = nonNullViewModel,
-                modifier = modifier,
-            )
+            when (visibility) {
+                UserInputAreaVisibility.FULL ->
+                    PinBouncer(
+                        viewModel = nonNullViewModel,
+                        modifier = modifier,
+                    )
+                UserInputAreaVisibility.INPUT_ONLY ->
+                    PinPad(
+                        viewModel = nonNullViewModel,
+                        modifier = modifier,
+                    )
+                UserInputAreaVisibility.OUTPUT_ONLY ->
+                    PinInputDisplay(
+                        viewModel = nonNullViewModel,
+                        modifier = modifier,
+                    )
+                UserInputAreaVisibility.NONE -> {}
+            }
         is PasswordBouncerViewModel ->
-            PasswordBouncer(
-                viewModel = nonNullViewModel,
-                modifier = modifier,
-            )
+            when (visibility) {
+                UserInputAreaVisibility.FULL,
+                UserInputAreaVisibility.INPUT_ONLY ->
+                    PasswordBouncer(
+                        viewModel = nonNullViewModel,
+                        modifier = modifier,
+                    )
+                else -> {}
+            }
         is PatternBouncerViewModel ->
-            PatternBouncer(
-                viewModel = nonNullViewModel,
-                modifier =
-                    Modifier.aspectRatio(1f, matchHeightConstraintsFirst = false).then(modifier)
-            )
+            when (visibility) {
+                UserInputAreaVisibility.FULL,
+                UserInputAreaVisibility.INPUT_ONLY ->
+                    PatternBouncer(
+                        viewModel = nonNullViewModel,
+                        modifier =
+                            Modifier.aspectRatio(1f, matchHeightConstraintsFirst = false)
+                                .then(modifier)
+                    )
+                else -> {}
+            }
         else -> Unit
     }
 }
@@ -435,13 +460,14 @@ private fun Split(
             Bouncer(
                 viewModel = viewModel,
                 dialogFactory = dialogFactory,
-                isUserInputAreaVisible = false,
+                userInputAreaVisibility = UserInputAreaVisibility.OUTPUT_ONLY,
                 modifier = startContentModifier,
             )
         },
         endContent = { endContentModifier ->
             UserInputArea(
                 viewModel = viewModel,
+                visibility = UserInputAreaVisibility.INPUT_ONLY,
                 modifier = endContentModifier,
             )
         },
@@ -545,7 +571,7 @@ private fun SideBySide(
             Bouncer(
                 viewModel = viewModel,
                 dialogFactory = dialogFactory,
-                isUserInputAreaVisible = true,
+                userInputAreaVisibility = UserInputAreaVisibility.FULL,
                 modifier = endContentModifier,
             )
         },
@@ -574,7 +600,7 @@ private fun Stacked(
         Bouncer(
             viewModel = viewModel,
             dialogFactory = dialogFactory,
-            isUserInputAreaVisible = true,
+            userInputAreaVisibility = UserInputAreaVisibility.FULL,
             modifier = Modifier.fillMaxWidth().weight(1f),
         )
     }
@@ -628,6 +654,27 @@ private enum class Layout {
     SIDE_BY_SIDE,
     /** The bouncer is split in two with both sides shown side-by-side. */
     SPLIT,
+}
+
+/** Enumerates all supported user-input area visibilities. */
+private enum class UserInputAreaVisibility {
+    /**
+     * The entire user input area is shown, including where the user enters input and where it's
+     * reflected to the user.
+     */
+    FULL,
+    /**
+     * Only the area where the user enters the input is shown; the area where the input is reflected
+     * back to the user is not shown.
+     */
+    INPUT_ONLY,
+    /**
+     * Only the area where the input is reflected back to the user is shown; the area where the
+     * input is entered by the user is not shown.
+     */
+    OUTPUT_ONLY,
+    /** The entire user input area is hidden. */
+    NONE,
 }
 
 /**

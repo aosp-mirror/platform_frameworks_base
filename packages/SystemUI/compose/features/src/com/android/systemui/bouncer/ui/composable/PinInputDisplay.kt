@@ -51,10 +51,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
 import com.android.keyguard.PinShapeAdapter
-import com.android.systemui.res.R
 import com.android.systemui.bouncer.ui.viewmodel.EntryToken.Digit
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinInputViewModel
+import com.android.systemui.res.R
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -65,7 +65,10 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
 @Composable
-fun PinInputDisplay(viewModel: PinBouncerViewModel) {
+fun PinInputDisplay(
+    viewModel: PinBouncerViewModel,
+    modifier: Modifier = Modifier,
+) {
     val hintedPinLength: Int? by viewModel.hintedPinLength.collectAsState()
     val shapeAnimations = rememberShapeAnimations(viewModel.pinShapes)
 
@@ -81,8 +84,8 @@ fun PinInputDisplay(viewModel: PinBouncerViewModel) {
     // unifying into a single, more complex implementation.
 
     when (val length = hintedPinLength) {
-        null -> RegularPinInputDisplay(viewModel, shapeAnimations)
-        else -> HintingPinInputDisplay(viewModel, shapeAnimations, length)
+        null -> RegularPinInputDisplay(viewModel, shapeAnimations, modifier)
+        else -> HintingPinInputDisplay(viewModel, shapeAnimations, length, modifier)
     }
 }
 
@@ -97,6 +100,7 @@ private fun HintingPinInputDisplay(
     viewModel: PinBouncerViewModel,
     shapeAnimations: ShapeAnimations,
     hintedPinLength: Int,
+    modifier: Modifier = Modifier,
 ) {
     val pinInput: PinInputViewModel by viewModel.pinInput.collectAsState()
     // [ClearAll] marker pointing at the beginning of the current pin input.
@@ -151,7 +155,7 @@ private fun HintingPinInputDisplay(
     LaunchedEffect(Unit) { playAnimation = true }
 
     val dotColor = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(modifier = Modifier.heightIn(min = shapeAnimations.shapeSize)) {
+    Row(modifier = modifier.heightIn(min = shapeAnimations.shapeSize)) {
         pinEntryDrawable.forEachIndexed { index, drawable ->
             // Key the loop by [index] and [drawable], so that updating a shape drawable at the same
             // index will play the new animation (by remembering a new [atEnd]).
@@ -183,6 +187,7 @@ private fun HintingPinInputDisplay(
 private fun RegularPinInputDisplay(
     viewModel: PinBouncerViewModel,
     shapeAnimations: ShapeAnimations,
+    modifier: Modifier = Modifier,
 ) {
     // Holds all currently [VisiblePinEntry] composables. This cannot be simply derived from
     // `viewModel.pinInput` at composition, since deleting a pin entry needs to play a remove
@@ -226,7 +231,7 @@ private fun RegularPinInputDisplay(
             }
     }
 
-    pinInputRow.Content()
+    pinInputRow.Content(modifier)
 }
 
 private class PinInputRow(
@@ -235,10 +240,11 @@ private class PinInputRow(
     private val entries = mutableStateListOf<PinInputEntry>()
 
     @Composable
-    fun Content() {
+    fun Content(modifier: Modifier) {
         Row(
             modifier =
-                Modifier.heightIn(min = shapeAnimations.shapeSize)
+                modifier
+                    .heightIn(min = shapeAnimations.shapeSize)
                     // Pins overflowing horizontally should still be shown as scrolling.
                     .wrapContentSize(unbounded = true),
         ) {
