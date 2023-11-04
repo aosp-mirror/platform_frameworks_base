@@ -144,5 +144,15 @@ interface ISystemUiProxy {
      */
     oneway void onStatusBarTrackpadEvent(in MotionEvent event) = 52;
 
-    // Next id = 54
+    /**
+     * Animate the nav bar being long-pressed.
+     *
+     * @param isTouchDown {@code true} if the button is starting to be pressed ({@code false} if
+     *                                released or canceled)
+     * @param durationMs how long the animation should take (for the {@code isTouchDown} case, this
+     *                   should be the same as the amount of time to trigger a long-press)
+     */
+    oneway void animateNavBarLongPress(boolean isTouchDown, long durationMs) = 54;
+
+    // Next id = 55
 }
