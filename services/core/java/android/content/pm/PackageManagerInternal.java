@@ -300,14 +300,6 @@ public abstract class PackageManagerInternal {
             @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended);
 
     /**
-     * Suspend or unsuspend packages in a profile when quiet mode is toggled.
-     *
-     * @param userId The target user.
-     * @param suspended Whether the packages should be suspended or unsuspended.
-     */
-    public abstract void setPackagesSuspendedForQuietMode(@UserIdInt int userId, boolean suspended);
-
-    /**
      * Get the information describing the dialog to be shown to the user when they try to launch a
      * suspended application.
      *

@@ -36,7 +36,6 @@ import com.android.settingslib.spa.framework.compose.LifecycleEffect
 import com.android.settingslib.spa.framework.compose.LogCompositions
 import com.android.settingslib.spa.framework.compose.TimeMeasurer.Companion.rememberTimeMeasurer
 import com.android.settingslib.spa.framework.compose.rememberLazyListStateAndHideKeyboardWhenStartScroll
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.widget.ui.CategoryTitle
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
 import com.android.settingslib.spa.widget.ui.Spinner
@@ -150,7 +149,7 @@ private fun <T : AppRecord> AppListModel<T>.AppListWidget(
                     ?.let { group -> CategoryTitle(title = group) }
 
                 val appEntry = list[it]
-                val summary = getSummary(option, appEntry.record) ?: "".toState()
+                val summary = getSummary(option, appEntry.record) ?: { "" }
                 remember(appEntry) {
                     AppListItemModel(appEntry.record, appEntry.label, summary)
                 }.AppItem()

@@ -37,6 +37,7 @@ import android.net.MacAddress;
 import android.os.Binder;
 import android.testing.TestableContext;
 import android.util.ArraySet;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
 
@@ -137,6 +138,8 @@ public class VirtualDeviceRule implements TestRule {
         final DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.uniqueId = "uniqueId";
         doReturn(displayInfo).when(mDisplayManagerInternalMock).getDisplayInfo(anyInt());
+        doReturn(Display.INVALID_DISPLAY).when(mDisplayManagerInternalMock)
+                .getDisplayIdToMirror(anyInt());
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 

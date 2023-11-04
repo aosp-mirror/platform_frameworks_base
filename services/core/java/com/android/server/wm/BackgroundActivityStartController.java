@@ -28,6 +28,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
+import static com.android.window.flags.Flags.balShowToasts;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -459,6 +460,7 @@ public class BackgroundActivityStartController {
                     "With Android 15 BAL hardening this activity start would be blocked"
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
+            showBalToast("BAL would be blocked", state);
             // return the realCaller result for backwards compatibility
             return statsLog(resultForRealCaller, state);
         }
@@ -470,6 +472,7 @@ public class BackgroundActivityStartController {
                     "With Android 15 BAL hardening this activity start would be blocked"
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
+            showBalToast("BAL would be blocked", state);
             return statsLog(resultForCaller, state);
         }
         if (resultForRealCaller.allows()
@@ -481,6 +484,7 @@ public class BackgroundActivityStartController {
                         "With Android 14 BAL hardening this activity start would be blocked"
                                 + " (missing opt in by PI sender)! "
                                 + state.dump(resultForCaller, resultForRealCaller));
+                showBalToast("BAL would be blocked", state);
                 return statsLog(resultForRealCaller, state);
             }
             Slog.wtf(TAG, "Without Android 14 BAL hardening this activity start would be allowed"
@@ -488,6 +492,7 @@ public class BackgroundActivityStartController {
                     + state.dump(resultForCaller, resultForRealCaller));
             // fall through
         }
+        showBalToast("BAL blocked", state);
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity launch blocked"
                 + state.dump(resultForCaller, resultForRealCaller));
@@ -862,8 +867,7 @@ public class BackgroundActivityStartController {
                     + (blockActivityStartAndFeatureEnabled ? " blocked " : " would block ")
                     + getApplicationLabel(mService.mContext.getPackageManager(),
                     launchedFromPackageName);
-            UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
-                    toastText, Toast.LENGTH_LONG).show());
+            showToast(toastText);
 
             Slog.i(TAG, asmDebugInfo);
         }
@@ -880,6 +884,19 @@ public class BackgroundActivityStartController {
         }
 
         return true;
+    }
+
+    private void showBalToast(String toastText, BalState state) {
+        if (balShowToasts()) {
+            showToast(toastText
+                    + " caller:" + state.mCallingPackage
+                    + " realCaller:" + state.mRealCallingPackage);
+        }
+    }
+
+    private void showToast(String toastText) {
+        UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
+                toastText, Toast.LENGTH_LONG).show());
     }
 
     /**
@@ -930,12 +947,10 @@ public class BackgroundActivityStartController {
 
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(callingUid)
                 && (!shouldBlockActivityStart || finishCount[0] > 0)) {
-            UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
-                    (shouldBlockActivityStart
-                            ? "Top activities cleared by "
-                            : "Top activities would be cleared by ")
-                            + ActivitySecurityModelFeatureFlags.DOC_LINK,
-                    Toast.LENGTH_LONG).show());
+            showToast((shouldBlockActivityStart
+                    ? "Top activities cleared by "
+                    : "Top activities would be cleared by ")
+                    + ActivitySecurityModelFeatureFlags.DOC_LINK);
 
             Slog.i(TAG, getDebugInfoForActivitySecurity("Clear Top", sourceRecord, targetRecord,
                     targetTask, targetTaskTop, realCallingUid, balCode, shouldBlockActivityStart,
@@ -1013,11 +1028,10 @@ public class BackgroundActivityStartController {
         }
 
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(callingUid)) {
-            UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
-                    (ActivitySecurityModelFeatureFlags.DOC_LINK
-                            + (restrictActivitySwitch ? " returned home due to "
-                            : " would return home due to ")
-                            + callingLabel), Toast.LENGTH_LONG).show());
+            showToast((ActivitySecurityModelFeatureFlags.DOC_LINK
+                    + (restrictActivitySwitch ? " returned home due to "
+                    : " would return home due to ")
+                    + callingLabel));
         }
 
         // If the activity switch should be restricted, return home rather than the

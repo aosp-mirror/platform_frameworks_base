@@ -88,7 +88,7 @@ public final class FactoryResetterTest {
             Log.d(TAG, "Mocking " + inv);
             return null;
         }).when(() -> RecoverySystem.rebootWipeUserData(any(), anyBoolean(), any(),
-                anyBoolean(), anyBoolean()));
+                anyBoolean(), anyBoolean(), anyBoolean()));
     }
 
     @After
@@ -270,17 +270,20 @@ public final class FactoryResetterTest {
 
     private void verifyRebootWipeUserDataMinimumArgsCalled() {
         verify(() -> RecoverySystem.rebootWipeUserData(mContext, /* shutdown= */ false,
-                /* reason= */ null, /* force= */ false, /* wipeEuicc= */ false));
+                /* reason= */ null, /* force= */ false, /* wipeEuicc= */ false,
+                /* keepMemtagMode= */ false));
     }
 
     private void verifyRebootWipeUserDataMinimumArgsButForceCalled() {
         verify(() -> RecoverySystem.rebootWipeUserData(mContext, /* shutdown= */ false,
-                /* reason= */ null, /* force= */ true, /* wipeEuicc= */ false));
+                /* reason= */ null, /* force= */ true, /* wipeEuicc= */ false,
+                /* keepMemtagMode= */ false));
     }
 
     private void verifyRebootWipeUserDataAllArgsCalled() {
         verify(() -> RecoverySystem.rebootWipeUserData(mContext, /* shutdown= */ true,
-                /* reason= */ REASON, /* force= */ true, /* wipeEuicc= */ true));
+                /* reason= */ REASON, /* force= */ true, /* wipeEuicc= */ true,
+                /* keepMemtagMode= */ false));
     }
 
     private void verifyWipeAdoptableStorageNotCalled() {

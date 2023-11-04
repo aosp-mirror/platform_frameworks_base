@@ -259,12 +259,10 @@ interface IActivityTaskManager {
      * @param taskId the id of the task to retrieve the sAutoapshots for
      * @param isLowResolution if set, if the snapshot needs to be loaded from disk, this will load
      *                          a reduced resolution of it, which is much faster
-     * @param takeSnapshotIfNeeded if set, call {@link #takeTaskSnapshot} to trigger the snapshot
-                                   if no cache exists.
      * @return a graphic buffer representing a screenshot of a task
      */
     android.window.TaskSnapshot getTaskSnapshot(
-            int taskId, boolean isLowResolution, boolean takeSnapshotIfNeeded);
+            int taskId, boolean isLowResolution);
 
     /**
      * Requests for a new snapshot to be taken for the task with the given id, storing it in the

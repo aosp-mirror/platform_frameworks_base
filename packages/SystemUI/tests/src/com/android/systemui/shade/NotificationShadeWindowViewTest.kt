@@ -121,6 +121,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var notificationStackScrollLayout: NotificationStackScrollLayout
     @Mock private lateinit var notificationShadeDepthController: NotificationShadeDepthController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
+    @Mock private lateinit var quickSettingsController: QuickSettingsController
     @Mock
     private lateinit var notificationStackScrollLayoutController:
         NotificationStackScrollLayoutController
@@ -264,6 +265,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 ),
                 BouncerLogger(logcatLogBuffer("BouncerLog")),
                 Mockito.mock(SysUIKeyEventHandler::class.java),
+                quickSettingsController,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 mSelectedUserInteractor,

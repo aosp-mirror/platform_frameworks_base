@@ -262,17 +262,8 @@ private constructor(
         forEachSchemePolicy { with(it) { onPackageUninstalled(packageName, appId, userId) } }
     }
 
-    fun MutateStateScope.onSystemReady(
-        packageStates: Map<String, PackageState>,
-        disabledSystemPackageStates: Map<String, PackageState>,
-        knownPackages: IntMap<Array<String>>
-    ) {
-        newState.mutateExternalState().apply {
-            setPackageStates(packageStates)
-            setDisabledSystemPackageStates(disabledSystemPackageStates)
-            setKnownPackages(knownPackages)
-            setSystemReady(true)
-        }
+    fun MutateStateScope.onSystemReady() {
+        newState.mutateExternalState().setSystemReady(true)
         forEachSchemePolicy { with(it) { onSystemReady() } }
     }
 

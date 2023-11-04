@@ -71,6 +71,7 @@ import java.util.Set;
 public class TestHarnessModeService extends SystemService {
     public static final String TEST_HARNESS_MODE_PROPERTY = "persist.sys.test_harness";
     private static final String TAG = TestHarnessModeService.class.getSimpleName();
+    private boolean mEnableKeepMemtagMode = false;
 
     private PersistentDataBlockManagerInternal mPersistentDataBlockManagerInternal;
 
@@ -298,6 +299,18 @@ public class TestHarnessModeService extends SystemService {
             switch (cmd) {
                 case "enable":
                 case "restore":
+                    String opt;
+                    while ((opt = getNextOption()) != null) {
+                        switch (opt) {
+                        case "--keep-memtag":
+                            mEnableKeepMemtagMode = true;
+                            break;
+                        default:
+                            getErrPrintWriter().println("Invalid option: " + opt);
+                            return 1;
+                        }
+                    }
+
                     checkPermissions();
                     final long originalId = Binder.clearCallingIdentity();
                     try {
@@ -357,6 +370,7 @@ public class TestHarnessModeService extends SystemService {
             i.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             i.putExtra(Intent.EXTRA_REASON, TAG);
             i.putExtra(Intent.EXTRA_WIPE_EXTERNAL_STORAGE, true);
+            i.putExtra("keep_memtag_mode", mEnableKeepMemtagMode);
             getContext().sendBroadcastAsUser(i, UserHandle.SYSTEM);
             return 0;
         }

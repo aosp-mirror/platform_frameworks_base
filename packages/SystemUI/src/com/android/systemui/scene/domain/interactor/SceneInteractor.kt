@@ -26,9 +26,12 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -103,6 +106,26 @@ constructor(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = null,
+            )
+
+    /**
+     * Whether user input is ongoing for the current transition. For example, if the user is swiping
+     * their finger to transition between scenes, this value will be true while their finger is on
+     * the screen, then false for the rest of the transition.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val isTransitionUserInputOngoing: StateFlow<Boolean> =
+        transitionState
+            .flatMapLatest {
+                when (it) {
+                    is ObservableTransitionState.Transition -> it.isUserInputOngoing
+                    is ObservableTransitionState.Idle -> flowOf(false)
+                }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false
             )
 
     /** Whether the scene container is visible. */

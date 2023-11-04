@@ -25,3 +25,10 @@ flag {
     is_fixed_read_only: true
     bug: "304508760"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "transfer_gesture_to_embedded"
+    description: "Enable public API for Window Surfaces"
+    bug: "287076178"
+}

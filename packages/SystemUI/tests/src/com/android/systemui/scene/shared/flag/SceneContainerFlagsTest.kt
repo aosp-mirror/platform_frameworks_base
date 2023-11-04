@@ -76,7 +76,6 @@ internal class SceneContainerFlagsTest(
         underTest =
             SceneContainerFlagsImpl(
                 featureFlagsClassic = featureFlags,
-                featureFlags = aconfigFlags,
                 isComposeAvailable = testCase.isComposeAvailable,
             )
     }

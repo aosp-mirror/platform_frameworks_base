@@ -70,7 +70,7 @@ import java.util.Set;
  * in UsageStatsService.
  */
 class UserUsageStatsService {
-    private static final String TAG = "UsageStatsService";
+    private static final String TAG = UsageStatsService.TAG;
     private static final boolean DEBUG = UsageStatsService.DEBUG;
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final int sDateFormatFlags =
@@ -535,9 +535,22 @@ class UserUsageStatsService {
         return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner, true);
     }
 
-    UsageEvents queryEvents(final long beginTime, final long endTime, int flags) {
+    UsageEvents queryEvents(final long beginTime, final long endTime, int flags,
+            int[] eventTypeFilter) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
+        }
+
+        // Ensure valid event type filter.
+        final boolean isQueryForAllEvents = ArrayUtils.isEmpty(eventTypeFilter);
+        final boolean[] queryEventFilter = new boolean[Event.MAX_EVENT_TYPE + 1];
+        if (!isQueryForAllEvents) {
+            for (int eventType : eventTypeFilter) {
+                if (eventType < Event.NONE || eventType > Event.MAX_EVENT_TYPE) {
+                    throw new IllegalArgumentException("invalid event type: " + eventType);
+                }
+                queryEventFilter[eventType] = true;
+            }
         }
         final ArraySet<String> names = new ArraySet<>();
         List<Event> results = queryStats(INTERVAL_DAILY,
@@ -547,6 +560,7 @@ class UserUsageStatsService {
                             List<Event> accumulatedResult) {
                         final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
+
                         for (int i = startIndex; i < size; i++) {
                             Event event = stats.events.get(i);
                             if (event.mTimeStamp >= endTime) {
@@ -554,6 +568,10 @@ class UserUsageStatsService {
                             }
 
                             final int eventType = event.mEventType;
+                            if (!isQueryForAllEvents && !queryEventFilter[eventType]) {
+                                continue;
+                            }
+
                             if (eventType == Event.SHORTCUT_INVOCATION
                                     && (flags & HIDE_SHORTCUT_EVENTS) == HIDE_SHORTCUT_EVENTS) {
                                 continue;

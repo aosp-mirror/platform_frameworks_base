@@ -60,7 +60,6 @@ flag {
 }
 
 flag {
-
     name: "rollback_lifetime"
     namespace: "package_manager_service"
     description: "Feature flag to enable custom rollback lifetime during install."
@@ -73,4 +72,11 @@ flag {
     namespace: "package_manager_service"
     description: "Feature flag to improve install freeze time."
     bug: "307561242"
+}
+
+flag {
+    name: "get_resolved_apk_path"
+    namespace: "package_manager_service"
+    description: "Feature flag to retrieve resolved path of the base APK during an app install."
+    bug: "269728874"
 }

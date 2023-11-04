@@ -380,6 +380,32 @@ class DisplayRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun pendingDisplay_afterConfigChanged_doesNotChange() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1, TYPE_EXTERNAL)
+            val initialPendingDisplay: DisplayRepository.PendingDisplay? = pendingDisplay
+            assertThat(pendingDisplay).isNotNull()
+            sendOnDisplayChanged(1)
+
+            assertThat(initialPendingDisplay).isEqualTo(pendingDisplay)
+        }
+
+    @Test
+    fun pendingDisplay_afterNewHigherDisplayConnected_changes() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1, TYPE_EXTERNAL)
+            val initialPendingDisplay: DisplayRepository.PendingDisplay? = pendingDisplay
+            assertThat(pendingDisplay).isNotNull()
+            sendOnDisplayConnected(2, TYPE_EXTERNAL)
+
+            assertThat(initialPendingDisplay).isNotEqualTo(pendingDisplay)
+        }
+
+    @Test
     fun onPendingDisplay_OneInternalAndOneExternalDisplay_internalIgnored() =
         testScope.runTest {
             val pendingDisplay by lastPendingDisplay()
@@ -464,6 +490,10 @@ class DisplayRepositoryTest : SysuiTestCase() {
         val mockDisplay = display(id = id, type = displayType)
         whenever(displayManager.getDisplay(eq(id))).thenReturn(mockDisplay)
         connectedDisplayListener.value.onDisplayConnected(id)
+    }
+
+    private fun sendOnDisplayChanged(id: Int) {
+        connectedDisplayListener.value.onDisplayChanged(id)
     }
 
     private fun setDisplays(displays: List<Display>) {

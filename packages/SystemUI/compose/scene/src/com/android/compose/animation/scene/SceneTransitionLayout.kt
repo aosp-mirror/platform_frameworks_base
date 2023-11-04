@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import androidx.compose.ui.platform.LocalDensity
  *   instance by triggering back navigation or by swiping to a new scene.
  * @param transitions the definition of the transitions used to animate a change of scene.
  * @param state the observable state of this layout.
+ * @param edgeDetector the edge detector used to detect which edge a swipe is started from, if any.
  * @param scenes the configuration of the different scenes of this layout.
  */
 @Composable
@@ -46,6 +48,7 @@ fun SceneTransitionLayout(
     transitions: SceneTransitions,
     modifier: Modifier = Modifier,
     state: SceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) },
+    edgeDetector: EdgeDetector = DefaultEdgeDetector,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
@@ -56,15 +59,17 @@ fun SceneTransitionLayout(
             transitions,
             state,
             density,
+            edgeDetector,
         )
     }
 
     layoutImpl.onChangeScene = onChangeScene
     layoutImpl.transitions = transitions
     layoutImpl.density = density
+    layoutImpl.edgeDetector = edgeDetector
+
     layoutImpl.setScenes(scenes)
     layoutImpl.setCurrentScene(currentScene)
-
     layoutImpl.Content(modifier)
 }
 
@@ -191,9 +196,9 @@ data class Swipe(
     }
 }
 
-enum class SwipeDirection {
-    Up,
-    Down,
-    Left,
-    Right,
+enum class SwipeDirection(val orientation: Orientation) {
+    Up(Orientation.Vertical),
+    Down(Orientation.Vertical),
+    Left(Orientation.Horizontal),
+    Right(Orientation.Horizontal),
 }

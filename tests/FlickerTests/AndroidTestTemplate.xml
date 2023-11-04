@@ -28,7 +28,13 @@
         <option name="run-command" value="su root service call SurfaceFlinger 1029 i32 81920"/>
         <!-- b/307664397 - Ensure camera has the correct permissions and doesn't show a dialog -->
         <option name="run-command"
+                value="pm grant com.google.android.GoogleCamera android.permission.CAMERA"/>
+        <option name="run-command"
+                value="pm grant com.google.android.GoogleCamera android.permission.RECORD_AUDIO"/>
+        <option name="run-command"
                 value="pm grant com.google.android.GoogleCamera android.permission.ACCESS_FINE_LOCATION"/>
+        <option name="run-command"
+                value="pm grant com.google.android.GoogleCamera android.permission.ACCESS_COARSE_LOCATION"/>
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="test-user-token" value="%TEST_USER%"/>

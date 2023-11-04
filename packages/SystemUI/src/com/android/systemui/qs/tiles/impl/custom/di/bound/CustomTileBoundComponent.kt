@@ -23,7 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 
 /** @see CustomTileBoundScope */
 @CustomTileBoundScope
-@Subcomponent
+@Subcomponent(modules = [CustomTileBoundModule::class])
 interface CustomTileBoundComponent {
 
     @Subcomponent.Builder

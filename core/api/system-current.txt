@@ -261,6 +261,7 @@ package android {
     field public static final String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final String PROVISION_DEMO_DEVICE = "android.permission.PROVISION_DEMO_DEVICE";
+    field @FlaggedApi("android.content.pm.quarantined_enabled") public static final String QUARANTINE_APPS = "android.permission.QUARANTINE_APPS";
     field public static final String QUERY_ADMIN_POLICY = "android.permission.QUERY_ADMIN_POLICY";
     field public static final String QUERY_CLONED_APPS = "android.permission.QUERY_CLONED_APPS";
     field @Deprecated public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
@@ -3861,7 +3862,7 @@ package android.content.pm {
     method public boolean getInstallAsVirtualPreload();
     method public int getPendingUserActionReason();
     method public boolean getRequestDowngrade();
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_INSTALLED_SESSION_PATHS) public String getResolvedBaseApkPath();
+    method @FlaggedApi("android.content.pm.get_resolved_apk_path") @Nullable @RequiresPermission(android.Manifest.permission.READ_INSTALLED_SESSION_PATHS) public String getResolvedBaseApkPath();
     method public int getRollbackDataPolicy();
     method @NonNull public java.util.Set<java.lang.String> getWhitelistedRestrictedPermissions();
   }
@@ -4089,7 +4090,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_MODULE = 4194304; // 0x400000
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
     field public static final int PROTECTION_FLAG_RECENTS = 33554432; // 0x2000000
-    field public static final int PROTECTION_FLAG_RETAIL_DEMO = 16777216; // 0x1000000
+    field @Deprecated public static final int PROTECTION_FLAG_RETAIL_DEMO = 16777216; // 0x1000000
     field public static final int PROTECTION_FLAG_ROLE = 67108864; // 0x4000000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
@@ -6750,7 +6751,7 @@ package android.media.audiopolicy {
     method public boolean setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public boolean setUserIdDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public String toLogFriendlyString();
-    method @FlaggedApi("com.android.media.audio.flags.audio_policy_update_mixing_rules_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int updateMixingRules(@NonNull java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>);
+    method @FlaggedApi("android.media.audiopolicy.audio_policy_update_mixing_rules_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int updateMixingRules(@NonNull java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>);
     field public static final int FOCUS_POLICY_DUCKING_DEFAULT = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_APP = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_POLICY = 1; // 0x1

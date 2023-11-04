@@ -28,15 +28,24 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
+import com.android.settingslib.media.flags.Flags;
+
+import java.util.List;
 
 /**
  * PhoneMediaDevice extends MediaDevice to represents Phone device.
@@ -58,6 +67,7 @@ public class PhoneMediaDevice extends MediaDevice {
     public static String getSystemRouteNameFromType(
             @NonNull Context context, @NonNull MediaRoute2Info routeInfo) {
         CharSequence name;
+        boolean isTv = isTv(context);
         switch (routeInfo.getType()) {
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
@@ -73,9 +83,32 @@ public class PhoneMediaDevice extends MediaDevice {
                 name = context.getString(R.string.media_transfer_this_device_name);
                 break;
             case TYPE_HDMI:
+                name = context.getString(isTv ? R.string.tv_media_transfer_default :
+                        R.string.media_transfer_external_device_name);
+                break;
             case TYPE_HDMI_ARC:
+                if (isTv) {
+                    String deviceName = getHdmiOutDeviceName(context);
+                    if (deviceName != null) {
+                        name = deviceName;
+                    } else {
+                        name = context.getString(R.string.tv_media_transfer_arc_fallback_title);
+                    }
+                } else {
+                    name = context.getString(R.string.media_transfer_external_device_name);
+                }
+                break;
             case TYPE_HDMI_EARC:
-                name = context.getString(R.string.media_transfer_external_device_name);
+                if (isTv) {
+                    String deviceName = getHdmiOutDeviceName(context);
+                    if (deviceName != null) {
+                        name = deviceName;
+                    } else {
+                        name = context.getString(R.string.tv_media_transfer_arc_fallback_title);
+                    }
+                } else {
+                    name = context.getString(R.string.media_transfer_external_device_name);
+                }
                 break;
             default:
                 name = context.getString(R.string.media_transfer_default_device_name);
@@ -94,8 +127,13 @@ public class PhoneMediaDevice extends MediaDevice {
             String packageName,
             RouteListingPreference.Item item) {
         super(context, info, packageName, item);
-        mDeviceIconUtil = new DeviceIconUtil();
+        mDeviceIconUtil = new DeviceIconUtil(mContext);
         initDeviceRecord();
+    }
+
+    static boolean isTv(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                && Flags.enableTvMediaOutputDialog();
     }
 
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
@@ -111,9 +149,64 @@ public class PhoneMediaDevice extends MediaDevice {
         return SELECTION_BEHAVIOR_TRANSFER;
     }
 
+    private static String getHdmiOutDeviceName(Context context) {
+        HdmiControlManager hdmiControlManager;
+        if (context.checkCallingOrSelfPermission(Manifest.permission.HDMI_CEC)
+                == PackageManager.PERMISSION_GRANTED) {
+            hdmiControlManager = context.getSystemService(HdmiControlManager.class);
+        } else {
+            Log.w(TAG, "Could not get HDMI device name, android.permission.HDMI_CEC denied");
+            return null;
+        }
+
+        HdmiPortInfo hdmiOutputPortInfo = null;
+        for (HdmiPortInfo hdmiPortInfo : hdmiControlManager.getPortInfo()) {
+            if (hdmiPortInfo.getType() == HdmiPortInfo.PORT_OUTPUT) {
+                hdmiOutputPortInfo = hdmiPortInfo;
+                break;
+            }
+        }
+        if (hdmiOutputPortInfo == null) {
+            return null;
+        }
+        List<HdmiDeviceInfo> connectedDevices = hdmiControlManager.getConnectedDevices();
+        for (HdmiDeviceInfo deviceInfo : connectedDevices) {
+            if (deviceInfo.getPortId() == hdmiOutputPortInfo.getId()) {
+                String deviceName = deviceInfo.getDisplayName();
+                if (deviceName != null && !deviceName.isEmpty()) {
+                    return deviceName;
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public String getSummary() {
-        return mSummary;
+        if (!isTv(mContext)) {
+            return mSummary;
+        }
+        switch (mRouteInfo.getType()) {
+            case TYPE_BUILTIN_SPEAKER:
+                return mContext.getString(R.string.tv_media_transfer_internal_speakers);
+            case TYPE_HDMI:
+                return mContext.getString(R.string.tv_media_transfer_hdmi);
+            case TYPE_HDMI_ARC:
+                if (getHdmiOutDeviceName(mContext) == null) {
+                    // Connection type is already part of the title.
+                    return mContext.getString(R.string.tv_media_transfer_connected);
+                }
+                return mContext.getString(R.string.tv_media_transfer_arc_subtitle);
+            case TYPE_HDMI_EARC:
+                if (getHdmiOutDeviceName(mContext) == null) {
+                    // Connection type is already part of the title.
+                    return mContext.getString(R.string.tv_media_transfer_connected);
+                }
+                return mContext.getString(R.string.tv_media_transfer_earc_subtitle);
+            default:
+                return null;
+        }
+
     }
 
     @Override

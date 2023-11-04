@@ -48,7 +48,7 @@ constructor(
         showPulsing: Boolean = true,
     ): Flow<Set<ActiveNotificationModel>> {
         return combine(
-            activeNotificationsInteractor.notifications,
+            activeNotificationsInteractor.topLevelRepresentativeNotifications,
             keyguardViewStateRepository.areNotificationsFullyHidden,
         ) { notifications, notifsFullyHidden ->
             notifications

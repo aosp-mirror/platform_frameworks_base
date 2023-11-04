@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.PackageStats;
+import android.os.Binder;
 import android.os.Build;
 import android.os.CreateAppDataArgs;
 import android.os.CreateAppDataResult;
@@ -35,9 +36,11 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.CrateMetadata;
 import android.text.format.DateUtils;
+import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 
 import dalvik.system.BlockGuard;
@@ -441,6 +444,26 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.clearAppData(uuid, packageName, userId, flags, ceDataInode);
+
+            final StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+            String className;
+            String methodName;
+            String fileName;
+            int lineNumber;
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            EventLog.writeEvent(EventLogTags.INSTALLER_CLEAR_APP_DATA_CALLER, pid, uid, packageName,
+                    flags);
+            // Skip the first two elements since they are always the same, ie
+            // Thread#getStackTrace() and VMStack#getThreadStackTrace()
+            for (int i = 2; i < elements.length; i++) {
+                className = elements[i].getClassName();
+                methodName = elements[i].getMethodName();
+                fileName = elements[i].getFileName();
+                lineNumber = elements[i].getLineNumber();
+                EventLog.writeEvent(EventLogTags.INSTALLER_CLEAR_APP_DATA_CALL_STACK, methodName,
+                        className, fileName, lineNumber);
+            }
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

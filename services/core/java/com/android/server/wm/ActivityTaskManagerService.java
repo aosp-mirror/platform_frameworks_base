@@ -69,6 +69,7 @@ import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DREAM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -3825,8 +3826,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution,
-            boolean takeSnapshotIfNeeded) {
+    public TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution) {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -3840,12 +3840,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
             }
             // Don't call this while holding the lock as this operation might hit the disk.
-            TaskSnapshot taskSnapshot = mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
+            return mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
                     task.mUserId, true /* restoreFromDisk */, isLowResolution);
-            if (taskSnapshot == null && takeSnapshotIfNeeded) {
-                taskSnapshot = takeTaskSnapshot(taskId, false /* updateCache */);
-            }
-            return taskSnapshot;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -7064,8 +7060,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
                 int taskId, boolean isLowResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution,
-                    false /* takeSnapshotIfNeeded */);
+            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution);
         }
 
         @Override

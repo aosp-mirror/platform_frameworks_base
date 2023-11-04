@@ -231,4 +231,19 @@ public interface AttachedSurfaceControl {
     default void removeTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
             @NonNull Consumer<Boolean> listener) {
     }
+
+    /**
+     * Transfer the currently in progress touch gesture from the host to the requested
+     * {@link SurfaceControlViewHost.SurfacePackage}. This requires that the
+     * SurfaceControlViewHost was created with the current host's inputToken.
+     *
+     * @param surfacePackage The SurfacePackage to transfer the gesture to.
+     * @return Whether the touch stream was transferred.
+     */
+    @FlaggedApi(Flags.FLAG_TRANSFER_GESTURE_TO_EMBEDDED)
+    default boolean transferHostTouchGestureToEmbedded(
+            @NonNull SurfaceControlViewHost.SurfacePackage surfacePackage) {
+        throw new UnsupportedOperationException(
+                "transferHostTouchGestureToEmbedded is unimplemented");
+    }
 }

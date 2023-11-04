@@ -964,6 +964,23 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
+            IBinder inputTransferToken) {
+        if (hostWindow == null) {
+            return false;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        boolean didTransfer;
+        try {
+            didTransfer = mService.transferHostTouchGestureToEmbedded(this, hostWindow,
+                    inputTransferToken);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return didTransfer;
+    }
+    @Override
     public void generateDisplayHash(IWindow window, Rect boundsInWindow, String hashAlgorithm,
             RemoteCallback callback) {
         final long origId = Binder.clearCallingIdentity();

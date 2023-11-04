@@ -183,6 +183,7 @@ java_library_static {
         "android.hardware.power.stats-V2-java",
         "android.hidl.manager-V1.2-java",
         "cbor-java",
+        "com.android.media.audio-aconfig-java",
         "dropbox_flags_lib",
         "icu4j_calendar_astronomer",
         "android.security.aaid_aidl-java",

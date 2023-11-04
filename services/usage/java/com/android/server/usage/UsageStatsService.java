@@ -57,6 +57,7 @@ import android.app.usage.Flags;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
+import android.app.usage.UsageEventsQuery;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
@@ -112,6 +113,8 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import com.android.server.utils.AlarmQueue;
+
+import libcore.util.EmptyArray;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -1478,6 +1481,14 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     UsageEvents queryEvents(int userId, long beginTime, long endTime, int flags) {
+        return queryEventsWithTypes(userId, beginTime, endTime, flags, EmptyArray.INT);
+    }
+
+    /**
+     * Called by the Binder stub.
+     */
+    UsageEvents queryEventsWithTypes(int userId, long beginTime, long endTime, int flags,
+            int[] eventTypeFilter) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query events for locked user " + userId);
@@ -1488,7 +1499,7 @@ public class UsageStatsService extends SystemService implements
             if (service == null) {
                 return null; // user was stopped or removed
             }
-            return service.queryEvents(beginTime, endTime, flags);
+            return service.queryEvents(beginTime, endTime, flags, eventTypeFilter);
         }
     }
 
@@ -2123,7 +2134,7 @@ public class UsageStatsService extends SystemService implements
 
     private final class BinderService extends IUsageStatsManager.Stub {
 
-        private boolean hasPermission(String callingPackage) {
+        private boolean hasQueryPermission(String callingPackage) {
             final int callingUid = Binder.getCallingUid();
             if (callingUid == Process.SYSTEM_UID) {
                 return true;
@@ -2203,10 +2214,37 @@ public class UsageStatsService extends SystemService implements
             return uid == Process.SYSTEM_UID;
         }
 
+        private UsageEvents queryEventsHelper(int userId, long beginTime, long endTime,
+                String callingPackage, int[] eventTypeFilter) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
+                    callingUid, userId);
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
+                        userId, callingPackage, callingPid, callingUid);
+                final boolean hideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
+                final boolean obfuscateNotificationEvents = shouldObfuscateNotificationEvents(
+                        callingPid, callingUid);
+                int flags = UsageEvents.SHOW_ALL_EVENT_DATA;
+                if (obfuscateInstantApps) flags |= UsageEvents.OBFUSCATE_INSTANT_APPS;
+                if (hideShortcutInvocationEvents) flags |= UsageEvents.HIDE_SHORTCUT_EVENTS;
+                if (hideLocusIdEvents) flags |= UsageEvents.HIDE_LOCUS_EVENTS;
+                if (obfuscateNotificationEvents) flags |= UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
+
+                return UsageStatsService.this.queryEventsWithTypes(userId, beginTime, endTime,
+                        flags, eventTypeFilter);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         @Override
         public ParceledListSlice<UsageStats> queryUsageStats(int bucketType, long beginTime,
                 long endTime, String callingPackage, int userId) {
-            if (!hasPermission(callingPackage)) {
+            if (!hasQueryPermission(callingPackage)) {
                 return null;
             }
 
@@ -2234,7 +2272,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public ParceledListSlice<ConfigurationStats> queryConfigurationStats(int bucketType,
                 long beginTime, long endTime, String callingPackage) throws RemoteException {
-            if (!hasPermission(callingPackage)) {
+            if (!hasQueryPermission(callingPackage)) {
                 return null;
             }
 
@@ -2256,7 +2294,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public ParceledListSlice<EventStats> queryEventStats(int bucketType,
                 long beginTime, long endTime, String callingPackage) throws RemoteException {
-            if (!hasPermission(callingPackage)) {
+            if (!hasQueryPermission(callingPackage)) {
                 return null;
             }
 
@@ -2277,32 +2315,25 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public UsageEvents queryEvents(long beginTime, long endTime, String callingPackage) {
-            if (!hasPermission(callingPackage)) {
+            if (!hasQueryPermission(callingPackage)) {
                 return null;
             }
 
-            final int userId = UserHandle.getCallingUserId();
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    callingUid, userId);
+            return queryEventsHelper(UserHandle.getCallingUserId(), beginTime, endTime,
+                    callingPackage, /* eventTypeFilter= */ EmptyArray.INT);
+        }
 
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
-                        userId, callingPackage, callingPid, callingUid);
-                final boolean hideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
-                final boolean obfuscateNotificationEvents = shouldObfuscateNotificationEvents(
-                        callingPid, callingUid);
-                int flags = UsageEvents.SHOW_ALL_EVENT_DATA;
-                if (obfuscateInstantApps) flags |= UsageEvents.OBFUSCATE_INSTANT_APPS;
-                if (hideShortcutInvocationEvents) flags |= UsageEvents.HIDE_SHORTCUT_EVENTS;
-                if (hideLocusIdEvents) flags |= UsageEvents.HIDE_LOCUS_EVENTS;
-                if (obfuscateNotificationEvents) flags |= UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
-                return UsageStatsService.this.queryEvents(userId, beginTime, endTime, flags);
-            } finally {
-                Binder.restoreCallingIdentity(token);
+        @Override
+        public UsageEvents queryEventsWithFilter(@NonNull UsageEventsQuery query,
+                @NonNull String callingPackage) {
+            Objects.requireNonNull(query);
+            Objects.requireNonNull(callingPackage);
+
+            if (!hasQueryPermission(callingPackage)) {
+                return null;
             }
+            return queryEventsHelper(UserHandle.getCallingUserId(), query.getBeginTimeMillis(),
+                    query.getEndTimeMillis(), callingPackage, query.getEventTypeFilter());
         }
 
         @Override
@@ -2312,7 +2343,7 @@ public class UsageStatsService extends SystemService implements
             final int callingUserId = UserHandle.getUserId(callingUid);
 
             checkCallerIsSameApp(callingPackage);
-            final boolean includeTaskRoot = hasPermission(callingPackage);
+            final boolean includeTaskRoot = hasQueryPermission(callingPackage);
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -2326,7 +2357,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public UsageEvents queryEventsForUser(long beginTime, long endTime, int userId,
                 String callingPackage) {
-            if (!hasPermission(callingPackage)) {
+            if (!hasQueryPermission(callingPackage)) {
                 return null;
             }
 
@@ -2337,33 +2368,14 @@ public class UsageStatsService extends SystemService implements
                         "No permission to query usage stats for this user");
             }
 
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    callingUid, callingUserId);
-
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
-                        userId, callingPackage, callingPid, callingUid);
-                final boolean obfuscateNotificationEvents = shouldObfuscateNotificationEvents(
-                        callingPid, callingUid);
-                boolean hideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
-                int flags = UsageEvents.SHOW_ALL_EVENT_DATA;
-                if (obfuscateInstantApps) flags |= UsageEvents.OBFUSCATE_INSTANT_APPS;
-                if (hideShortcutInvocationEvents) flags |= UsageEvents.HIDE_SHORTCUT_EVENTS;
-                if (hideLocusIdEvents) flags |= UsageEvents.HIDE_LOCUS_EVENTS;
-                if (obfuscateNotificationEvents) flags |= UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
-                return UsageStatsService.this.queryEvents(userId, beginTime, endTime, flags);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            return queryEventsHelper(userId, beginTime, endTime, callingPackage,
+                    /* eventTypeFilter= */ EmptyArray.INT);
         }
 
         @Override
         public UsageEvents queryEventsForPackageForUser(long beginTime, long endTime,
                 int userId, String pkg, String callingPackage) {
-            if (!hasPermission(callingPackage)) {
+            if (!hasQueryPermission(callingPackage)) {
                 return null;
             }
             if (userId != UserHandle.getCallingUserId()) {
@@ -2404,7 +2416,7 @@ public class UsageStatsService extends SystemService implements
                 if (actualCallingUid != callingUid) {
                     return false;
                 }
-            } else if (!hasPermission(callingPackage)) {
+            } else if (!hasQueryPermission(callingPackage)) {
                 return false;
             }
             final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
@@ -2454,7 +2466,7 @@ public class UsageStatsService extends SystemService implements
             final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
             // If the calling app is asking about itself, continue, else check for permission.
             final boolean sameApp = packageUid == callingUid;
-            if (!sameApp && !hasPermission(callingPackage)) {
+            if (!sameApp && !hasQueryPermission(callingPackage)) {
                 throw new SecurityException("Don't have permission to query app standby bucket");
             }
 
@@ -2502,7 +2514,7 @@ public class UsageStatsService extends SystemService implements
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
-            if (!hasPermission(callingPackageName)) {
+            if (!hasQueryPermission(callingPackageName)) {
                 throw new SecurityException(
                         "Don't have permission to query app standby bucket");
             }
@@ -2556,7 +2568,7 @@ public class UsageStatsService extends SystemService implements
             final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
             // If the calling app is asking about itself, continue, else check for permission.
             if (packageUid != callingUid) {
-                if (!hasPermission(callingPackage)) {
+                if (!hasQueryPermission(callingPackage)) {
                     throw new SecurityException(
                             "Don't have permission to query min app standby bucket");
                 }
@@ -2900,7 +2912,7 @@ public class UsageStatsService extends SystemService implements
             if (!hasPermissions(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
                 throw new SecurityException("Caller doesn't have INTERACT_ACROSS_USERS permission");
             }
-            if (!hasPermission(callingPackage)) {
+            if (!hasQueryPermission(callingPackage)) {
                 throw new SecurityException("Don't have permission to query usage stats");
             }
             synchronized (mLock) {

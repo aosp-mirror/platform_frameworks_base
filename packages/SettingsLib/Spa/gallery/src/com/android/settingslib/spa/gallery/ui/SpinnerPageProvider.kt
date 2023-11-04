@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package com.android.settingslib.spa.gallery.ui
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,7 +56,7 @@ object SpinnerPageProvider : SettingsPageProvider {
     @Composable
     override fun Page(arguments: Bundle?) {
         RegularScaffold(title = getTitle(arguments)) {
-            var selectedId by rememberSaveable { mutableStateOf(1) }
+            var selectedId by rememberSaveable { mutableIntStateOf(1) }
             Spinner(
                 options = (1..3).map { SpinnerOption(id = it, text = "Option $it") },
                 selectedId = selectedId,
@@ -66,9 +64,7 @@ object SpinnerPageProvider : SettingsPageProvider {
             )
             Preference(object : PreferenceModel {
                 override val title = "Selected id"
-                override val summary = remember {
-                    derivedStateOf { selectedId.toString() }
-                }
+                override val summary = { selectedId.toString() }
             })
         }
     }

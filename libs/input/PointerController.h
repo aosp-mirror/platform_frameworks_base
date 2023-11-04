@@ -47,7 +47,8 @@ class PointerController : public PointerControllerInterface {
 public:
     static std::shared_ptr<PointerController> create(
             const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-            SpriteController& spriteController, bool enabled);
+            SpriteController& spriteController, bool enabled,
+            ControllerType type = ControllerType::LEGACY);
 
     ~PointerController() override;
 
@@ -75,7 +76,7 @@ public:
     void onDisplayInfosChangedLocked(const std::vector<gui::DisplayInfo>& displayInfos)
             REQUIRES(getLock());
 
-    std::string dump();
+    std::string dump() override;
 
 protected:
     using WindowListenerConsumer =
@@ -87,10 +88,10 @@ protected:
                       WindowListenerConsumer registerListener,
                       WindowListenerConsumer unregisterListener);
 
-private:
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
                       SpriteController& spriteController, bool enabled);
 
+private:
     friend PointerControllerContext::LooperCallback;
     friend PointerControllerContext::MessageHandler;
 
@@ -133,6 +134,24 @@ private:
     const ui::Transform& getTransformForDisplayLocked(int displayId) const REQUIRES(getLock());
 
     void clearSpotsLocked() REQUIRES(getLock());
+};
+
+class MousePointerController : public PointerController {
+public:
+    /** A version of PointerController that controls one mouse pointer. */
+    MousePointerController(const sp<PointerControllerPolicyInterface>& policy,
+                           const sp<Looper>& looper, SpriteController& spriteController,
+                           bool enabled);
+
+    void setPresentation(Presentation) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, int32_t) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void clearSpots() override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
 };
 
 } // namespace android

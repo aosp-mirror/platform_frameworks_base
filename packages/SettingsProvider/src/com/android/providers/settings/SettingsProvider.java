@@ -3792,7 +3792,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 223;
+            private static final int SETTINGS_VERSION = 224;
 
             private final int mUserId;
 
@@ -5965,8 +5965,23 @@ public class SettingsProvider extends ContentProvider {
                             // Do nothing. Leave the value as is.
                         }
                     }
+                }
 
-                    currentVersion = 223;
+                currentVersion = 223;
+
+                // Version 223: make charging constraint update criteria customizable.
+                if (currentVersion == 223) {
+                    initGlobalSettingsDefaultValLocked(
+                            Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
+                            getContext().getResources().getInteger(
+                                    R.integer.def_battery_charging_state_update_delay_ms));
+
+                    initGlobalSettingsDefaultValLocked(
+                            Global.BATTERY_CHARGING_STATE_ENFORCE_LEVEL,
+                            getContext().getResources().getInteger(
+                                    R.integer.def_battery_charging_state_enforce_level)
+                    );
+                    currentVersion = 224;
                 }
 
                 // vXXX: Add new settings above this point.

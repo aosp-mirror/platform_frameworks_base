@@ -131,6 +131,7 @@ class SceneTestUtils(
             SceneKey.Lockscreen,
             SceneKey.Bouncer,
             SceneKey.Gone,
+            SceneKey.Communal,
         )
     }
 

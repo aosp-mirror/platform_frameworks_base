@@ -17,11 +17,9 @@
 package com.android.settingslib.spaprivileged.template.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
@@ -31,7 +29,7 @@ import com.android.settingslib.spaprivileged.model.app.AppRecord
 data class AppListItemModel<T : AppRecord>(
     val record: T,
     val label: String,
-    val summary: State<String>,
+    val summary: () -> String,
 )
 
 @Composable
@@ -55,6 +53,6 @@ private fun AppListItemPreview() {
         val record = object : AppRecord {
             override val app = LocalContext.current.applicationInfo
         }
-        AppListItemModel<AppRecord>(record, "Chrome", "Allowed".toState()).AppListItem {}
+        AppListItemModel<AppRecord>(record, "Chrome", { "Allowed" }).AppListItem {}
     }
 }

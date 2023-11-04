@@ -129,9 +129,7 @@ object PipUtils {
     @JvmStatic
     fun getTaskSnapshot(taskId: Int, isLowResolution: Boolean): TaskSnapshot? {
         return if (taskId <= 0) null else try {
-            ActivityTaskManager.getService().getTaskSnapshot(
-                taskId, isLowResolution, false /* takeSnapshotIfNeeded */
-            )
+            ActivityTaskManager.getService().getTaskSnapshot(taskId, isLowResolution)
         } catch (e: RemoteException) {
             Log.e(TAG, "Failed to get task snapshot, taskId=$taskId", e)
             null

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Launch
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.automirrored.outlined.Launch
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.SemanticsProperties.ProgressBarRangeInfo
 import androidx.compose.ui.test.SemanticsMatcher
@@ -49,11 +48,14 @@ class ProgressBarPreferenceTest {
     @Test
     fun data_displayed() {
         composeTestRule.setContent {
-            ProgressBarWithDataPreference(model = object : ProgressBarPreferenceModel {
-                override val title = "Title"
-                override val progress = 0.2f
-                override val icon: ImageVector = Icons.Outlined.Launch
-            }, data = "Data")
+            ProgressBarWithDataPreference(
+                model = object : ProgressBarPreferenceModel {
+                    override val title = "Title"
+                    override val progress = 0.2f
+                    override val icon = Icons.AutoMirrored.Outlined.Launch
+                },
+                data = "Data",
+            )
         }
         composeTestRule.onNodeWithText("Title").assertIsDisplayed()
         composeTestRule.onNodeWithText("Data").assertIsDisplayed()

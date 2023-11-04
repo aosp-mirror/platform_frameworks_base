@@ -59,6 +59,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.util.TransitionUtil;
 
@@ -85,11 +86,15 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
      */
     private final ArrayList<RecentsMixedHandler> mMixers = new ArrayList<>();
 
+    private final HomeTransitionObserver mHomeTransitionObserver;
+
     public RecentsTransitionHandler(ShellInit shellInit, Transitions transitions,
-            @Nullable RecentTasksController recentTasksController) {
+            @Nullable RecentTasksController recentTasksController,
+            HomeTransitionObserver homeTransitionObserver) {
         mTransitions = transitions;
         mExecutor = transitions.getMainExecutor();
         mRecentTasksController = recentTasksController;
+        mHomeTransitionObserver = homeTransitionObserver;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) return;
         if (recentTasksController == null) return;
         shellInit.addInitCallback(() -> {
@@ -910,6 +915,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             if (mFinishCB == null) {
                 Slog.e(TAG, "Duplicate call to finish");
                 return;
+            }
+            if (!toHome) {
+                // For some transitions, we may have notified home activity that it became visible.
+                // We need to notify the observer that we are no longer going home.
+                mHomeTransitionObserver.notifyHomeVisibilityChanged(false);
             }
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "[%d] RecentsController.finishInner: toHome=%b userLeave=%b "
