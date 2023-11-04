@@ -3105,7 +3105,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     private void enforceCanSetPackagesSuspendedAsUser(@NonNull Computer snapshot,
-            String callingPackage, int callingUid, int userId, String callingMethod) {
+            boolean quarantined, String callingPackage, int callingUid, int userId,
+            String callingMethod) {
         if (callingUid == Process.ROOT_UID
                 // Need to compare app-id to allow system dialogs access on secondary users
                 || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
@@ -3120,8 +3121,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
         }
 
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
-                callingMethod);
+        if (quarantined) {
+            final boolean hasQuarantineAppsPerm = mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.QUARANTINE_APPS) == PERMISSION_GRANTED;
+            // TODO: b/305256093 - In order to facilitate testing, temporarily allowing apps
+            // with SUSPEND_APPS permission to quarantine apps. Remove this once the testing
+            // is done and this is no longer needed.
+            if (!hasQuarantineAppsPerm) {
+                mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
+                        callingMethod);
+            }
+        } else {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
+                    callingMethod);
+        }
 
         final int packageUid = snapshot.getPackageUid(callingPackage, 0, userId);
         final boolean allowedPackageUid = packageUid == callingUid;
@@ -6136,9 +6149,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 PersistableBundle appExtras, PersistableBundle launcherExtras,
                 SuspendDialogInfo dialogInfo, int flags, String callingPackage, int userId) {
             final int callingUid = Binder.getCallingUid();
-            final Computer snapshot = snapshotComputer();
-            enforceCanSetPackagesSuspendedAsUser(snapshot, callingPackage, callingUid, userId,
-                    "setPackagesSuspendedAsUser");
             boolean quarantined = false;
             if (Flags.quarantinedEnabled()) {
                 if ((flags & PackageManager.FLAG_SUSPEND_QUARANTINED) != 0) {
@@ -6149,6 +6159,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     quarantined = callingPackage.equals(wellbeingPkg);
                 }
             }
+            final Computer snapshot = snapshotComputer();
+            enforceCanSetPackagesSuspendedAsUser(snapshot, quarantined, callingPackage, callingUid,
+                    userId, "setPackagesSuspendedAsUser");
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
                     appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid,
                     quarantined);
