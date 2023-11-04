@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 
 import android.annotation.UserIdInt;
@@ -34,6 +35,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -264,6 +266,34 @@ public final class UserManagerTest {
         assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
         switchUser(originalCurrent);
         assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    public void testGetProfilesIncludingCommunal() throws Exception {
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
+        final UserInfo otherUser = createUser("TestUser", /* flags= */ 0);
+        final UserInfo profile = createProfileForUser("Profile",
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
+
+        final UserHandle communalProfile = mUserManager.getCommunalProfile();
+
+        final List<UserInfo> mainsActual = mUserManager.getProfilesIncludingCommunal(mainUserId);
+        final List<UserInfo> othersActual = mUserManager.getProfilesIncludingCommunal(otherUser.id);
+
+        final List<Integer> mainsExpected = new ArrayList<>();
+        mainsExpected.add(mainUserId);
+        if (profile != null) mainsExpected.add(profile.id);
+        if (communalProfile != null) mainsExpected.add(communalProfile.getIdentifier());
+        assertEquals(mainsExpected.stream().sorted().toList(),
+                mainsActual.stream().map(ui -> ui.id).sorted().toList());
+
+
+        final List<Integer> othersExpected = new ArrayList<>();
+        othersExpected.add(otherUser.id);
+        if (communalProfile != null) othersExpected.add(communalProfile.getIdentifier());
+        assertEquals(othersExpected.stream().sorted().toList(),
+                othersActual.stream().map(ui -> ui.id).sorted().toList());
     }
 
     @Test

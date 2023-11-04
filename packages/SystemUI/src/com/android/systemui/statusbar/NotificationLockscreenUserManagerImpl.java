@@ -250,6 +250,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private final Handler mMainHandler;
     private final Handler mBackgroundHandler;
     private final Executor mBackgroundExecutor;
+    /** The current user and its profiles (possibly including a communal profile). */
     protected final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
     protected final SparseArray<UserInfo> mCurrentManagedProfiles = new SparseArray<>();
 
@@ -689,12 +690,16 @@ public class NotificationLockscreenUserManagerImpl implements
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void updateCurrentProfilesCache() {
         synchronized (mLock) {
             mCurrentProfiles.clear();
             mCurrentManagedProfiles.clear();
             if (mUserManager != null) {
-                for (UserInfo user : mUserManager.getProfiles(mCurrentUserId)) {
+                List<UserInfo> profiles = android.multiuser.Flags.supportCommunalProfile()
+                        ? mUserManager.getProfilesIncludingCommunal(mCurrentUserId)
+                        : mUserManager.getProfiles(mCurrentUserId);
+                for (UserInfo user : profiles) {
                     mCurrentProfiles.put(user.id, user);
                     if (UserManager.USER_TYPE_PROFILE_MANAGED.equals(user.userType)) {
                         mCurrentManagedProfiles.put(user.id, user);
