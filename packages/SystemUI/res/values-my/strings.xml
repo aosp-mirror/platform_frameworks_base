@@ -99,7 +99,7 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"ဖန်သားပြင်ရိုက်ကူးစက်"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"စတင် ရိုက်သံဖမ်းမလား။"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ရိုက်သံဖမ်းခြင်း စတင်မလား။"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ရုပ်သံဖမ်းနေစဉ် Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"အက်ပ်တစ်ခုကို ရုပ်သံဖမ်းနေစဉ် Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ရုပ်သံ စဖမ်းရန်"</string>
@@ -654,8 +654,8 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"နောက်သို့- ယခင်အခြေအနေသို့ ပြန်သွားရန် (နောက်သို့ ခလုတ်)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"ပင်မစာမျက်နှာ ဝင်ကြည့်ရန်"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"ဖွင့်ထားသောအက်ပ်များ အနှစ်ချုပ်"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"လတ်တလောအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (ရှေ့သို့)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"လတ်တလောအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (နောက်သို့)"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"မကြာသေးမီကအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (ရှေ့သို့)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"မကြာသေးမီကအက်ပ်များ ရှာဖွေကြည့်ရှုရန် (နောက်သို့)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"အက်ပ်အားလုံးစာရင်းကို ဝင်ကြည့်ပြီး ရှာပါ (ဥပမာ- Search/Launcher)"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"လုပ်ဆောင်စရာဘားကို ဖျောက်ထားပြီး ပြန်ပြရန်"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"စက်စနစ်ဆက်တင်များ ဝင်ကြည့်ရန်"</string>

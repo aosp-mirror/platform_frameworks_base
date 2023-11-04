@@ -5374,7 +5374,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent = new Intent(Intent.ACTION_MAIN);
             }
             try {
-                target.send(code, intent, resolvedType, allowlistToken, null,
+                if (allowlistToken != null) {
+                    final int callingUid = Binder.getCallingUid();
+                    final String packageName;
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        packageName = AppGlobals.getPackageManager().getNameForUid(callingUid);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                    Slog.wtf(TAG, "Send a non-null allowlistToken to a non-PI target."
+                            + " Calling package: " + packageName + "; intent: " + intent
+                            + "; options: " + options);
+                }
+                target.send(code, intent, resolvedType, null, null,
                         requiredPermission, options);
             } catch (RemoteException e) {
             }
@@ -9694,6 +9707,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != ROOT_UID && callingUid != Process.SHELL_UID) {
+            if (resultReceiver != null) {
+                resultReceiver.send(-1, null);
+            }
+            throw new SecurityException("Shell commands are only callable by root or shell");
+        }
         (new ActivityManagerShellCommand(this, false)).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
