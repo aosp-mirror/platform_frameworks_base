@@ -849,29 +849,14 @@ static const JNINativeMethod gMethods[] = {
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {
-    int robolectricApiLevel = GetRobolectricApiLevel(env);
-    const char* const kClassPathName =
-            robolectricApiLevel >= 29 ? "android/graphics/RenderNode" : "android/view/RenderNode";
-
-    if (robolectricApiLevel >= 29) {
-        const char* const classPathPositionUpdater =
-                "android/graphics/RenderNode$PositionUpdateListener";
-        jclass clazz = FindClassOrDie(env, classPathPositionUpdater);
-        gPositionListener_PositionChangedMethod =
-                GetMethodIDOrDie(env, clazz, "positionChanged", "(JIIII)V");
-        gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz, "positionLost", "(J)V");
-        if (robolectricApiLevel >= 31) {
-            // applyStretch was added in Android S
-            gPositionListener_ApplyStretchMethod =
-                    GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFFFFF)V");
-        }
-    } else {
-        jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
-        gPositionListener_PositionChangedMethod =
-                GetMethodIDOrDie(env, clazz, "updateSurfacePosition_renderWorker", "(JIIII)V");
-        gPositionListener_PositionLostMethod =
-                GetMethodIDOrDie(env, clazz, "surfacePositionLost_uiRtSync", "(J)V");
-    }
+#ifdef __ANDROID__  // PositionUpdateListener is never invoked on host
+    jclass clazz = FindClassOrDie(env, "android/graphics/RenderNode$PositionUpdateListener");
+    gPositionListener_PositionChangedMethod =
+            GetMethodIDOrDie(env, clazz, "positionChanged", "(JIIII)V");
+    gPositionListener_ApplyStretchMethod =
+            GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFFFFF)V");
+    gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz, "positionLost", "(J)V");
+#endif
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
