@@ -165,6 +165,13 @@ public final class StartingWindowInfo implements Parcelable {
     public static final int TYPE_PARAMETER_WINDOWLESS = 0x00000100;
 
     /**
+     * Application has set Window_windowSplashScreenBehavior to
+     * SPLASH_SCREEN_BEHAVIOR_ICON_PREFERRED.
+     * @hide
+     */
+    public static final int TYPE_PARAMETER_APP_PREFERS_ICON = 0x00000200;
+
+    /**
      * Application is allowed to use the legacy splash screen
      * @hide
      */

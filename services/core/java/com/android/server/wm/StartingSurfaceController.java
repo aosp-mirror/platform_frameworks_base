@@ -20,6 +20,7 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_APP_PREFERS_ICON;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
@@ -103,7 +104,7 @@ public class StartingSurfaceController {
     static int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
             boolean isSolidColor, boolean useLegacy, boolean activityDrawn, int startingWindowType,
-            String packageName, int userId) {
+            boolean appPrefersIcon, String packageName, int userId) {
         int parameter = 0;
         if (newTask) {
             parameter |= TYPE_PARAMETER_NEW_TASK;
@@ -133,6 +134,9 @@ public class StartingSurfaceController {
                 && CompatChanges.isChangeEnabled(ALLOW_COPY_SOLID_COLOR_VIEW, packageName,
                 UserHandle.of(userId))) {
             parameter |= TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN;
+        }
+        if (appPrefersIcon) {
+            parameter |= TYPE_PARAMETER_APP_PREFERS_ICON;
         }
         return parameter;
     }
