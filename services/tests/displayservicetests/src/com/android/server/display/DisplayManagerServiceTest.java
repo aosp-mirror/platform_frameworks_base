@@ -123,6 +123,7 @@ import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayManagerService.DeviceStateListener;
 import com.android.server.display.DisplayManagerService.SyncRoot;
+import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.input.InputManagerInternal;
@@ -2317,11 +2318,8 @@ public class DisplayManagerServiceTest {
         String testSensorType = "testType";
         Sensor testSensor = TestUtils.createSensor(testSensorType, testSensorName);
 
-        DisplayDeviceConfig.SensorData sensorData = new DisplayDeviceConfig.SensorData();
-        sensorData.type = testSensorType;
-        sensorData.name = testSensorName;
-        sensorData.minRefreshRate = 10f;
-        sensorData.maxRefreshRate = 100f;
+        SensorData sensorData = new SensorData(testSensorType, testSensorName,
+                /* minRefreshRate= */ 10f, /* maxRefreshRate= */ 100f);
 
         when(mMockDisplayDeviceConfig.getProximitySensor()).thenReturn(sensorData);
         when(mSensorManager.getSensorList(Sensor.TYPE_ALL)).thenReturn(Collections.singletonList(
@@ -2351,12 +2349,6 @@ public class DisplayManagerServiceTest {
         String testSensorName = "testName";
         String testSensorType = "testType";
         Sensor testSensor = TestUtils.createSensor(testSensorType, testSensorName);
-
-        DisplayDeviceConfig.SensorData sensorData = new DisplayDeviceConfig.SensorData();
-        sensorData.type = testSensorType;
-        sensorData.name = testSensorName;
-        sensorData.minRefreshRate = 10f;
-        sensorData.maxRefreshRate = 100f;
 
         when(mMockDisplayDeviceConfig.getProximitySensor()).thenReturn(null);
         when(mSensorManager.getSensorList(Sensor.TYPE_ALL)).thenReturn(Collections.singletonList(

@@ -17,8 +17,11 @@
 package com.android.server.display;
 
 
+import static com.android.server.display.config.SensorData.SupportedMode;
 import static com.android.server.display.utils.DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat;
 import static com.android.server.display.utils.DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -526,6 +529,26 @@ public final class DisplayDeviceConfigTest {
     }
 
     @Test
+    public void testProximitySensorWithRefreshRatesFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile(
+                getContent(getValidLuxThrottling(), getValidProxSensorWithRefreshRateAndVsyncRate(),
+                        /* includeIdleMode= */ true));
+        assertEquals("test_proximity_sensor",
+                mDisplayDeviceConfig.getProximitySensor().type);
+        assertEquals("Test Proximity Sensor",
+                mDisplayDeviceConfig.getProximitySensor().name);
+        assertEquals(mDisplayDeviceConfig.getProximitySensor().minRefreshRate, 60, SMALL_DELTA);
+        assertEquals(mDisplayDeviceConfig.getProximitySensor().maxRefreshRate, 90, SMALL_DELTA);
+        assertThat(mDisplayDeviceConfig.getProximitySensor().supportedModes).hasSize(2);
+        SupportedMode mode = mDisplayDeviceConfig.getProximitySensor().supportedModes.get(0);
+        assertEquals(mode.refreshRate, 60, SMALL_DELTA);
+        assertEquals(mode.vsyncRate, 65, SMALL_DELTA);
+        mode = mDisplayDeviceConfig.getProximitySensor().supportedModes.get(1);
+        assertEquals(mode.refreshRate, 120, SMALL_DELTA);
+        assertEquals(mode.vsyncRate, 125, SMALL_DELTA);
+    }
+
+    @Test
     public void testBlockingZoneThresholdsFromDisplayConfig() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile();
 
@@ -818,6 +841,27 @@ public final class DisplayDeviceConfigTest {
         return "<proxSensor>\n"
                 +   "<type>test_proximity_sensor</type>\n"
                 +   "<name>Test Proximity Sensor</name>\n"
+                + "</proxSensor>\n";
+    }
+
+    private String getValidProxSensorWithRefreshRateAndVsyncRate() {
+        return "<proxSensor>\n"
+                +   "<type>test_proximity_sensor</type>\n"
+                +   "<name>Test Proximity Sensor</name>\n"
+                +   "<refreshRate>\n"
+                +       "<minimum>60</minimum>\n"
+                +       "<maximum>90</maximum>\n"
+                +   "</refreshRate>\n"
+                +   "<supportedModes>\n"
+                +       "<point>\n"
+                +           "<first>60</first>\n"   // refreshRate
+                +           "<second>65</second>\n" //vsyncRate
+                +       "</point>\n"
+                +       "<point>\n"
+                +           "<first>120</first>\n"   // refreshRate
+                +           "<second>125</second>\n" //vsyncRate
+                +       "</point>\n"
+                +   "</supportedModes>"
                 + "</proxSensor>\n";
     }
 

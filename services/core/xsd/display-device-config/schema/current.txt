@@ -349,9 +349,11 @@ package com.android.server.display.config {
     ctor public SensorDetails();
     method @Nullable public final String getName();
     method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate();
+    method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getSupportedModes();
     method @Nullable public final String getType();
     method public final void setName(@Nullable String);
     method public final void setRefreshRate(@Nullable com.android.server.display.config.RefreshRateRange);
+    method public final void setSupportedModes(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);
     method public final void setType(@Nullable String);
   }
 
