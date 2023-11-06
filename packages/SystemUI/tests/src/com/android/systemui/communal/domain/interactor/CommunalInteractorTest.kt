@@ -20,6 +20,7 @@ package com.android.systemui.communal.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
@@ -46,6 +47,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
     private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
+    private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var interactor: CommunalInteractor
 
     @Before
@@ -55,7 +57,8 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope = TestScope()
         communalRepository = FakeCommunalRepository()
         widgetRepository = FakeCommunalWidgetRepository()
-        interactor = CommunalInteractor(communalRepository, widgetRepository)
+        mediaRepository = FakeCommunalMediaRepository()
+        interactor = CommunalInteractor(communalRepository, widgetRepository, mediaRepository)
     }
 
     @Test
@@ -75,7 +78,8 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             communalRepository.setIsCommunalEnabled(true)
 
-            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            val interactor =
+                CommunalInteractor(communalRepository, widgetRepository, mediaRepository)
             assertThat(interactor.isCommunalEnabled).isTrue()
         }
 
@@ -84,14 +88,16 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             communalRepository.setIsCommunalEnabled(false)
 
-            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            val interactor =
+                CommunalInteractor(communalRepository, widgetRepository, mediaRepository)
             assertThat(interactor.isCommunalEnabled).isFalse()
         }
 
     @Test
     fun listensToSceneChange() =
         testScope.runTest {
-            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            val interactor =
+                CommunalInteractor(communalRepository, widgetRepository, mediaRepository)
             var desiredScene = collectLastValue(interactor.desiredScene)
             runCurrent()
             assertThat(desiredScene()).isEqualTo(CommunalSceneKey.Blank)
@@ -106,7 +112,8 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun updatesScene() =
         testScope.runTest {
-            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            val interactor =
+                CommunalInteractor(communalRepository, widgetRepository, mediaRepository)
             val targetScene = CommunalSceneKey.Communal
 
             interactor.onSceneChanged(targetScene)
@@ -119,7 +126,8 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun isCommunalShowing() =
         testScope.runTest {
-            val interactor = CommunalInteractor(communalRepository, widgetRepository)
+            val interactor =
+                CommunalInteractor(communalRepository, widgetRepository, mediaRepository)
 
             var isCommunalShowing = collectLastValue(interactor.isCommunalShowing)
             runCurrent()
