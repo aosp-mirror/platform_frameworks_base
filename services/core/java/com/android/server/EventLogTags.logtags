@@ -180,14 +180,7 @@ option java_package com.android.server
 # Snapshot rebuild instance
 3131 pm_snapshot_rebuild (build_time|1|3),(lifetime|1|3)
 # Caller information to clear application data
-1003160 pm_clear_app_data_caller (pid|1),(uid|1),(package|3)
-# ---------------------------
-# Installer.java
-# ---------------------------
-# Caller Information to clear application data
-1003200 installer_clear_app_data_caller (pid|1),(uid|1),(package|3),(flags|1)
-# Call stack to clear application data
-1003201 installer_clear_app_data_call_stack (method|3),(class|3),(file|3),(line|1)
+3132 pm_clear_app_data_caller (pid|1),(uid|1),(package|3)
 
 # ---------------------------
 # InputMethodManagerService.java
@@ -225,6 +218,14 @@ option java_package com.android.server
 # ---------------------------
 # Auto-brightness adjustments by the user.
 35000 auto_brightness_adj (old_lux|5),(old_brightness|5),(new_lux|5),(new_brightness|5)
+
+# ---------------------------
+# Installer.java
+# ---------------------------
+# Caller Information to clear application data
+39000 installer_clear_app_data_caller (pid|1),(uid|1),(package|3),(flags|1)
+# Call stack to clear application data
+39001 installer_clear_app_data_call_stack (method|3),(class|3),(file|3),(line|1)
 
 # ---------------------------
 # ConnectivityService.java
