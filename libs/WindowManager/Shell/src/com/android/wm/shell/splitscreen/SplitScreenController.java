@@ -366,6 +366,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator.getStageOfTask(taskId);
     }
 
+    /**
+     * @return {@code true} if we should create a left-right split, {@code false} if we should
+     * create a top-bottom split.
+     */
+    public boolean isLeftRightSplit() {
+        return mStageCoordinator.isLeftRightSplit();
+    }
+
     /** Check split is foreground and task is under split or not by taskId. */
     public boolean isTaskInSplitScreenForeground(int taskId) {
         return isTaskInSplitScreen(taskId) && isSplitScreenVisible();

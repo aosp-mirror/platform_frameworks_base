@@ -204,6 +204,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
 
     @Test
     public void testDragAppOverFullscreenHome_expectOnlyFullscreenTarget() {
+        doReturn(true).when(mSplitScreenStarter).isLeftRightSplit();
         setRunningTask(mHomeTask);
         DragSession dragSession = new DragSession(mContext, mActivityTaskManager,
                 mLandscapeDisplayLayout, mActivityClipData);
@@ -219,6 +220,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
 
     @Test
     public void testDragAppOverFullscreenApp_expectSplitScreenTargets() {
+        doReturn(true).when(mSplitScreenStarter).isLeftRightSplit();
         setRunningTask(mFullscreenAppTask);
         DragSession dragSession = new DragSession(mContext, mActivityTaskManager,
                 mLandscapeDisplayLayout, mActivityClipData);
@@ -239,6 +241,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
 
     @Test
     public void testDragAppOverFullscreenAppPhone_expectVerticalSplitScreenTargets() {
+        doReturn(false).when(mSplitScreenStarter).isLeftRightSplit();
         setRunningTask(mFullscreenAppTask);
         DragSession dragSession = new DragSession(mContext, mActivityTaskManager,
                 mPortraitDisplayLayout, mActivityClipData);

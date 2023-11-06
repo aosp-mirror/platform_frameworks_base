@@ -138,7 +138,7 @@ public class DragAndDropPolicy {
         final Rect displayRegion = new Rect(l, t, l + iw, t + ih);
         final Rect fullscreenDrawRegion = new Rect(displayRegion);
         final Rect fullscreenHitRegion = new Rect(displayRegion);
-        final boolean inLandscape = mSession.displayLayout.isLandscape();
+        final boolean isLeftRightSplit = mSplitScreen != null && mSplitScreen.isLeftRightSplit();
         final boolean inSplitScreen = mSplitScreen != null && mSplitScreen.isSplitScreenVisible();
         final float dividerWidth = mContext.getResources().getDimensionPixelSize(
                 R.dimen.split_divider_bar_width);
@@ -155,7 +155,7 @@ public class DragAndDropPolicy {
             topOrLeftBounds.intersect(displayRegion);
             bottomOrRightBounds.intersect(displayRegion);
 
-            if (inLandscape) {
+            if (isLeftRightSplit) {
                 final Rect leftHitRegion = new Rect();
                 final Rect rightHitRegion = new Rect();
 
