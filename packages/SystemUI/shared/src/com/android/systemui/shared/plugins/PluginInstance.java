@@ -269,6 +269,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
         private ClassLoader getParentClassLoader(ClassLoader baseClassLoader) {
             return new PluginManagerImpl.ClassLoaderFilter(
                     baseClassLoader,
+                    "androidx.constraintlayout.widget",
                     "com.android.systemui.common",
                     "com.android.systemui.log",
                     "com.android.systemui.plugin");

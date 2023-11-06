@@ -30,6 +30,7 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
@@ -53,6 +54,7 @@ constructor(
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val notificationIconAreaController: NotificationIconAreaController,
+    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
 ) : KeyguardSection() {
 
     private var nicBindingDisposable: DisposableHandle? = null
@@ -115,9 +117,19 @@ constructor(
             } else {
                 BOTTOM
             }
-
         constraintSet.apply {
-            connect(nicId, TOP, R.id.keyguard_status_view, topAlignment, bottomMargin)
+            if (featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+                connect(
+                    nicId,
+                    TOP,
+                    smartspaceViewModel.smartspaceViewId,
+                    topAlignment,
+                    bottomMargin
+                )
+                setGoneMargin(nicId, topAlignment, bottomMargin)
+            } else {
+                connect(nicId, TOP, R.id.keyguard_status_view, topAlignment, bottomMargin)
+            }
             connect(nicId, START, PARENT_ID, START)
             connect(nicId, END, PARENT_ID, END)
             constrainHeight(

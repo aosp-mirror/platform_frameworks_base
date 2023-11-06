@@ -44,6 +44,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel;
@@ -128,6 +129,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private boolean mIsActiveDreamLockscreenHosted = false;
     private final FeatureFlagsClassic mFeatureFlags;
     private KeyguardInteractor mKeyguardInteractor;
+    private KeyguardClockInteractor mKeyguardClockInteractor;
     private final DelayableExecutor mUiExecutor;
     private boolean mCanShowDoubleLineClock = true;
     private DisposableHandle mAodIconsBindHandle;
@@ -187,6 +189,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             DozeParameters dozeParameters,
             AlwaysOnDisplayNotificationIconViewStore aodIconViewStore,
             KeyguardInteractor keyguardInteractor,
+            KeyguardClockInteractor keyguardClockInteractor,
             FeatureFlagsClassic featureFlags) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
@@ -210,11 +213,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.setLogBuffer(mLogBuffer);
         mFeatureFlags = featureFlags;
         mKeyguardInteractor = keyguardInteractor;
+        mKeyguardClockInteractor = keyguardClockInteractor;
 
         mClockChangedListener = new ClockRegistry.ClockChangeListener() {
             @Override
             public void onCurrentClockChanged() {
-                setClock(mClockRegistry.createCurrentClock());
+                if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+                    setClock(mClockRegistry.createCurrentClock());
+                }
             }
             @Override
             public void onAvailableClocksChanged() { }
@@ -344,9 +350,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 addDateWeatherView();
             }
         }
+        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            setDateWeatherVisibility();
+            setWeatherVisibility();
+        }
 
-        setDateWeatherVisibility();
-        setWeatherVisibility();
     }
 
     int getNotificationIconAreaHeight() {
@@ -386,6 +394,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addDateWeatherView() {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            return;
+        }
         mDateWeatherView = (ViewGroup) mSmartspaceController.buildAndConnectDateView(mView);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 MATCH_PARENT, WRAP_CONTENT);
@@ -395,11 +406,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         int endPadding = getContext().getResources().getDimensionPixelSize(
                 R.dimen.below_clock_padding_end);
         mDateWeatherView.setPaddingRelative(startPadding, 0, endPadding, 0);
-
         addWeatherView();
     }
 
     private void addWeatherView() {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            return;
+        }
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 WRAP_CONTENT, WRAP_CONTENT);
         mWeatherView = mSmartspaceController.buildAndConnectWeatherView(mView);
@@ -410,6 +423,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addSmartspaceView() {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            return;
+        }
+
         mSmartspaceView = mSmartspaceController.buildAndConnectView(mView);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 MATCH_PARENT, WRAP_CONTENT);
@@ -607,6 +624,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void setClock(ClockController clock) {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            return;
+        }
         if (clock != null && mLogBuffer != null) {
             mLogBuffer.log(TAG, LogLevel.INFO, "New Clock");
         }
@@ -618,7 +638,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     @Nullable
     public ClockController getClock() {
-        return mClockEventController.getClock();
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            return mKeyguardClockInteractor.getClock();
+        } else {
+            return mClockEventController.getClock();
+        }
     }
 
     private int getCurrentLayoutDirection() {
@@ -626,13 +650,17 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateDoubleLineClock() {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            return;
+        }
         mCanShowDoubleLineClock = mSecureSettings.getIntForUser(
             Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, mView.getResources()
-                .getInteger(com.android.internal.R.integer.config_doublelineClockDefault),
-                UserHandle.USER_CURRENT) != 0;
+                    .getInteger(com.android.internal.R.integer.config_doublelineClockDefault),
+            UserHandle.USER_CURRENT) != 0;
 
         if (!mCanShowDoubleLineClock) {
-            mUiExecutor.execute(() -> displayClock(KeyguardClockSwitch.SMALL, /* animate */ true));
+            mUiExecutor.execute(() -> displayClock(KeyguardClockSwitch.SMALL,
+                    /* animate */ true));
         }
     }
 

@@ -38,6 +38,7 @@ java_library {
     // of the library which are used by the plugins but not by systemui itself.
     static_libs: [
         "androidx.annotation_annotation",
+        "androidx-constraintlayout_constraintlayout",
         "PluginCoreLib",
         "SystemUIAnimationLib",
         "SystemUICommon",

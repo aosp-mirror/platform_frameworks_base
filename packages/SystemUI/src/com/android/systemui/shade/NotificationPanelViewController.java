@@ -1598,8 +1598,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         boolean shouldAnimateClockChange = mScreenOffAnimationController.shouldAnimateClockChange();
-        mKeyguardStatusViewController.displayClock(computeDesiredClockSize(),
-                shouldAnimateClockChange);
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            mKeyguardInteractor.setClockSize(computeDesiredClockSize());
+        } else {
+            mKeyguardStatusViewController.displayClock(computeDesiredClockSize(),
+                    shouldAnimateClockChange);
+        }
         updateKeyguardStatusViewAlignment(/* animate= */shouldAnimateKeyguardStatusViewAlignment());
         int userSwitcherHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
@@ -1727,9 +1731,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         } else {
             layout = mNotificationContainerParent;
         }
-        mKeyguardStatusViewController.updateAlignment(
-                layout, mSplitShadeEnabled, shouldBeCentered, animate);
-        mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            mKeyguardInteractor.setClockShouldBeCentered(shouldBeCentered);
+        } else {
+            mKeyguardStatusViewController.updateAlignment(
+                    layout, mSplitShadeEnabled, shouldBeCentered, animate);
+            mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
+        }
     }
 
     private boolean shouldKeyguardStatusViewBeCentered() {

@@ -18,6 +18,8 @@ package com.android.systemui.keyguard.data.repository
 
 import android.os.UserHandle
 import android.provider.Settings
+import androidx.annotation.VisibleForTesting
+import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
@@ -71,7 +73,10 @@ constructor(
             }
             .mapNotNull { it }
 
-    private suspend fun getClockSize(): SettingsClockSize {
+    val currentClock = currentClockId.map { clockRegistry.createCurrentClock() }
+
+    @VisibleForTesting
+    suspend fun getClockSize(): SettingsClockSize {
         return withContext(backgroundDispatcher) {
             if (
                 secureSettings.getIntForUser(
