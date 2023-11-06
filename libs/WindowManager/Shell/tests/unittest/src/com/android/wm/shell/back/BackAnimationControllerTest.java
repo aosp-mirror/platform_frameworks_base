@@ -132,8 +132,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 new ShellBackAnimationRegistry(
                         new CrossActivityAnimation(mContext, mAnimationBackground),
                         new CrossTaskBackAnimation(mContext, mAnimationBackground),
+                        /* dialogCloseAnimation= */ null,
                         new CustomizeActivityAnimation(mContext, mAnimationBackground),
-                        null);
+                        /* defaultBackToHomeAnimation= */ null);
         mController =
                 new BackAnimationController(
                         mShellInit,
