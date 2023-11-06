@@ -46,6 +46,14 @@ flag {
 }
 
 flag {
+    name: "notifications_live_data_store_refactor"
+    namespace: "systemui"
+    description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
+        "Should not bring any behavior changes."
+    bug: "308623704"
+}
+
+flag {
     name: "scene_container"
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
