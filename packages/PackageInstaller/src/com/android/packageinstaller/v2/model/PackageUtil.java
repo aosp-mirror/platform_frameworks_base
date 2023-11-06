@@ -205,9 +205,6 @@ public class PackageUtil {
      */
     public static boolean isCallerSessionOwner(PackageInstaller pi, int originatingUid,
         int sessionId) {
-        if (sessionId == SessionInfo.INVALID_ID) {
-            return false;
-        }
         if (originatingUid == Process.ROOT_UID) {
             return true;
         }

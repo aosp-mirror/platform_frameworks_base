@@ -168,7 +168,8 @@ public class InstallRepository {
             return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
         }
 
-        if (!isCallerSessionOwner(mPackageInstaller, originatingUid, mSessionId)) {
+        if (mSessionId != SessionInfo.INVALID_ID &&
+            !isCallerSessionOwner(mPackageInstaller, originatingUid, mSessionId)) {
             return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
         }
 
@@ -256,8 +257,7 @@ public class InstallRepository {
         Uri uri = mIntent.getData();
         if (mIsSessionInstall || (uri != null && SCHEME_PACKAGE.equals(uri.getScheme()))) {
             // For a session based install or installing with a package:// URI, there is no file
-            // for us to stage. Setting the mStagingResult as null will signal InstallViewModel to
-            // proceed with user confirmation stage.
+            // for us to stage.
             mStagingResult.setValue(new InstallReady());
             return;
         }

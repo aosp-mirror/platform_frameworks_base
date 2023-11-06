@@ -19,8 +19,6 @@ package com.android.packageinstaller.v2.ui;
 import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 import static android.os.Process.INVALID_UID;
-import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_INTERNAL_ERROR;
-import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_POLICY;
 
 import android.app.Activity;
 import android.app.AppOpsManager;
@@ -108,55 +106,68 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
      * Main controller of the UI. This method shows relevant dialogs based on the install stage
      */
     private void onInstallStageChange(InstallStage installStage) {
-        if (installStage.getStageCode() == InstallStage.STAGE_STAGING) {
-            InstallStagingFragment stagingDialog = new InstallStagingFragment();
-            showDialogInner(stagingDialog);
-            mInstallViewModel.getStagingProgress().observe(this, stagingDialog::setProgress);
-        } else if (installStage.getStageCode() == InstallStage.STAGE_ABORTED) {
-            InstallAborted aborted = (InstallAborted) installStage;
-            switch (aborted.getAbortReason()) {
-                // TODO: check if any dialog is to be shown for ABORT_REASON_INTERNAL_ERROR
-                case InstallAborted.ABORT_REASON_DONE, InstallAborted.ABORT_REASON_INTERNAL_ERROR ->
-                    setResult(aborted.getActivityResultCode(), aborted.getResultIntent(), true);
-                case InstallAborted.ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted);
-                default -> setResult(RESULT_CANCELED, null, true);
+        switch (installStage.getStageCode()) {
+            case InstallStage.STAGE_STAGING -> {
+                InstallStagingFragment stagingDialog = new InstallStagingFragment();
+                showDialogInner(stagingDialog);
+                mInstallViewModel.getStagingProgress().observe(this, stagingDialog::setProgress);
             }
-        } else if (installStage.getStageCode() == InstallStage.STAGE_USER_ACTION_REQUIRED) {
-            InstallUserActionRequired uar = (InstallUserActionRequired) installStage;
-            switch (uar.getActionReason()) {
-                case InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION:
-                    InstallConfirmationFragment actionDialog = new InstallConfirmationFragment(uar);
-                    showDialogInner(actionDialog);
-                    break;
-                case InstallUserActionRequired.USER_ACTION_REASON_UNKNOWN_SOURCE:
-                    ExternalSourcesBlockedFragment externalSourceDialog =
-                        new ExternalSourcesBlockedFragment(uar);
-                    showDialogInner(externalSourceDialog);
-                    break;
-                case InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE:
-                    AnonymousSourceFragment anonymousSourceDialog = new AnonymousSourceFragment();
-                    showDialogInner(anonymousSourceDialog);
+            case InstallStage.STAGE_ABORTED -> {
+                InstallAborted aborted = (InstallAborted) installStage;
+                switch (aborted.getAbortReason()) {
+                    // TODO: check if any dialog is to be shown for ABORT_REASON_INTERNAL_ERROR
+                    case InstallAborted.ABORT_REASON_DONE,
+                        InstallAborted.ABORT_REASON_INTERNAL_ERROR ->
+                        setResult(aborted.getActivityResultCode(), aborted.getResultIntent(), true);
+                    case InstallAborted.ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted);
+                    default -> setResult(RESULT_CANCELED, null, true);
+                }
             }
-        } else if (installStage.getStageCode() == InstallStage.STAGE_INSTALLING) {
-            InstallInstalling installing = (InstallInstalling) installStage;
-            InstallInstallingFragment installingDialog = new InstallInstallingFragment(installing);
-            showDialogInner(installingDialog);
-        } else if (installStage.getStageCode() == InstallStage.STAGE_SUCCESS) {
-            InstallSuccess success = (InstallSuccess) installStage;
-            if (success.shouldReturnResult()) {
-                Intent successIntent = success.getResultIntent();
-                setResult(Activity.RESULT_OK, successIntent, true);
-            } else {
-                InstallSuccessFragment successFragment = new InstallSuccessFragment(success);
-                showDialogInner(successFragment);
+            case InstallStage.STAGE_USER_ACTION_REQUIRED -> {
+                InstallUserActionRequired uar = (InstallUserActionRequired) installStage;
+                switch (uar.getActionReason()) {
+                    case InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION -> {
+                        InstallConfirmationFragment actionDialog =
+                            new InstallConfirmationFragment(uar);
+                        showDialogInner(actionDialog);
+                    }
+                    case InstallUserActionRequired.USER_ACTION_REASON_UNKNOWN_SOURCE -> {
+                        ExternalSourcesBlockedFragment externalSourceDialog =
+                            new ExternalSourcesBlockedFragment(uar);
+                        showDialogInner(externalSourceDialog);
+                    }
+                    case InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE -> {
+                        AnonymousSourceFragment anonymousSourceDialog =
+                            new AnonymousSourceFragment();
+                        showDialogInner(anonymousSourceDialog);
+                    }
+                }
             }
-        } else if (installStage.getStageCode() == InstallStage.STAGE_FAILED) {
-            InstallFailed failed = (InstallFailed) installStage;
-            InstallFailedFragment failedDialog = new InstallFailedFragment(failed);
-            showDialogInner(failedDialog);
-        } else {
-            Log.d(TAG, "Unimplemented stage: " + installStage.getStageCode());
-            showDialogInner(null);
+            case InstallStage.STAGE_INSTALLING -> {
+                InstallInstalling installing = (InstallInstalling) installStage;
+                InstallInstallingFragment installingDialog =
+                    new InstallInstallingFragment(installing);
+                showDialogInner(installingDialog);
+            }
+            case InstallStage.STAGE_SUCCESS -> {
+                InstallSuccess success = (InstallSuccess) installStage;
+                if (success.shouldReturnResult()) {
+                    Intent successIntent = success.getResultIntent();
+                    setResult(Activity.RESULT_OK, successIntent, true);
+                } else {
+                    InstallSuccessFragment successFragment = new InstallSuccessFragment(success);
+                    showDialogInner(successFragment);
+                }
+            }
+            case InstallStage.STAGE_FAILED -> {
+                InstallFailed failed = (InstallFailed) installStage;
+                InstallFailedFragment failedDialog = new InstallFailedFragment(failed);
+                showDialogInner(failedDialog);
+            }
+            default -> {
+                Log.d(TAG, "Unimplemented stage: " + installStage.getStageCode());
+                showDialogInner(null);
+            }
         }
     }
 
