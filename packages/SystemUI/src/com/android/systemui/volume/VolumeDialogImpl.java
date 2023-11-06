@@ -1636,6 +1636,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                         || activeRow.stream == STREAM_ACCESSIBILITY
                         || mDynamic.get(activeRow.stream);
             }
+
+            // Continue to display row if it is visible to user.
+            if (row.view != null && mShowing) {
+                return row.view.getVisibility() == VISIBLE;
+            }
         }
 
         return false;
