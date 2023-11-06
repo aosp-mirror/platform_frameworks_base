@@ -97,7 +97,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             val v1 = ConstantEvaluator.evaluate(context, value1)
             val v2 = ConstantEvaluator.evaluate(context, value2)
             if (v1 != null && v2 != null) {
-                if (v1 != v2) {
+                if (v1 != v2 && !isOneShortPermissionOfOther(v1, v2)) {
                     return false
                 }
             } else {
@@ -109,7 +109,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
                 for (j in children1.indices) {
                     val c1 = ConstantEvaluator.evaluate(context, children1[j])
                     val c2 = ConstantEvaluator.evaluate(context, children2[j])
-                    if (c1 != c2) {
+                    if (c1 != c2 && !isOneShortPermissionOfOther(c1, c2)) {
                         return false
                     }
                 }
@@ -117,6 +117,12 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         }
         return true
     }
+
+    private fun isOneShortPermissionOfOther(
+        permission1: Any?,
+        permission2: Any?
+    ): Boolean = permission1 == (permission2 as? String)?.removePrefix(PERMISSION_PREFIX_LITERAL) ||
+            permission2 == (permission1 as? String)?.removePrefix(PERMISSION_PREFIX_LITERAL)
 
     private fun compareMethods(
         context: JavaContext,
