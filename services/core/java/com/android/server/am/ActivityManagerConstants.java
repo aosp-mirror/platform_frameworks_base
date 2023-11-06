@@ -16,6 +16,12 @@
 
 package com.android.server.am;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 
@@ -73,6 +79,9 @@ final class ActivityManagerConstants extends ContentObserver {
             = "fgservice_screen_on_before_time";
     private static final String KEY_FGSERVICE_SCREEN_ON_AFTER_TIME
             = "fgservice_screen_on_after_time";
+
+    private static final String KEY_FGS_BOOT_COMPLETED_ALLOWLIST = "fgs_boot_completed_allowlist";
+
     private static final String KEY_CONTENT_PROVIDER_RETAIN_TIME = "content_provider_retain_time";
     private static final String KEY_GC_TIMEOUT = "gc_timeout";
     private static final String KEY_GC_MIN_INTERVAL = "gc_min_interval";
@@ -166,6 +175,15 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME = 5*1000;
+
+    private static final int DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST =
+            FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                | FOREGROUND_SERVICE_TYPE_HEALTH
+                | FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING
+                | FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED
+                | FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                | FOREGROUND_SERVICE_TYPE_LOCATION;
+
     private static final long DEFAULT_CONTENT_PROVIDER_RETAIN_TIME = 20*1000;
     private static final long DEFAULT_GC_TIMEOUT = 5*1000;
     private static final long DEFAULT_GC_MIN_INTERVAL = 60*1000;
@@ -445,6 +463,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // it is stopped when the screen turns on.  This is the time from when the screen turns
     // on until we will stop reporting it.
     public long FGSERVICE_SCREEN_ON_AFTER_TIME = DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME;
+
+    // Allow-list for FGS types that are allowed to start from BOOT_COMPLETED.
+    public int FGS_BOOT_COMPLETED_ALLOWLIST = DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST;
 
     // How long we will retain processes hosting content providers in the "last activity"
     // state before allowing them to drop down to the regular cached LRU list.  This is
@@ -1450,6 +1471,8 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME);
             FGSERVICE_SCREEN_ON_AFTER_TIME = mParser.getLong(KEY_FGSERVICE_SCREEN_ON_AFTER_TIME,
                     DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME);
+            FGS_BOOT_COMPLETED_ALLOWLIST = mParser.getInt(KEY_FGS_BOOT_COMPLETED_ALLOWLIST,
+                    DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST);
             CONTENT_PROVIDER_RETAIN_TIME = mParser.getLong(KEY_CONTENT_PROVIDER_RETAIN_TIME,
                     DEFAULT_CONTENT_PROVIDER_RETAIN_TIME);
             GC_TIMEOUT = mParser.getLong(KEY_GC_TIMEOUT,
@@ -2091,6 +2114,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(FGSERVICE_SCREEN_ON_BEFORE_TIME);
         pw.print("  "); pw.print(KEY_FGSERVICE_SCREEN_ON_AFTER_TIME); pw.print("=");
         pw.println(FGSERVICE_SCREEN_ON_AFTER_TIME);
+        pw.print("  "); pw.print(KEY_FGS_BOOT_COMPLETED_ALLOWLIST); pw.print("=");
+        pw.println(FGS_BOOT_COMPLETED_ALLOWLIST);
         pw.print("  "); pw.print(KEY_CONTENT_PROVIDER_RETAIN_TIME); pw.print("=");
         pw.println(CONTENT_PROVIDER_RETAIN_TIME);
         pw.print("  "); pw.print(KEY_GC_TIMEOUT); pw.print("=");

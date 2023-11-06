@@ -303,6 +303,23 @@ public final class ActiveServices {
     @Retention(RetentionPolicy.SOURCE)
     @interface FgsStopReason {}
 
+    /**
+     * Disables foreground service background starts from BOOT_COMPLETED broadcasts for all types
+     * except:
+     * <ul>
+     *     <li>{@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_LOCATION}</li>
+     *     <li>{@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE}</li>
+     *     <li>{@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING}</li>
+     *     <li>{@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_HEALTH}</li>
+     *     <li>{@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED}</li>
+     *     <li>{@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE}</li>
+     * </ul>
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = VERSION_CODES.VANILLA_ICE_CREAM)
+    @Overridable
+    public static final long FGS_BOOT_COMPLETED_RESTRICTIONS = 296558535L;
+
     final ActivityManagerService mAm;
 
     // Maximum number of services that we allow to start in the background
@@ -1051,6 +1068,20 @@ public final class ActiveServices {
         } else {
             return realResult;
         }
+    }
+
+    private boolean shouldAllowBootCompletedStart(ServiceRecord r, int foregroundServiceType) {
+        @PowerExemptionManager.ReasonCode final int fgsStartReasonCode =
+                r.mInfoTempFgsAllowListReason != null ? r.mInfoTempFgsAllowListReason.mReasonCode
+                                                      : REASON_DENIED;
+        if (Flags.fgsBootCompleted()
+                && CompatChanges.isChangeEnabled(FGS_BOOT_COMPLETED_RESTRICTIONS, r.appInfo.uid)
+                && fgsStartReasonCode == PowerExemptionManager.REASON_BOOT_COMPLETED) {
+            // Filter through types
+            return ((foregroundServiceType & mAm.mConstants.FGS_BOOT_COMPLETED_ALLOWLIST) != 0);
+        }
+        // Not BOOT_COMPLETED
+        return true;
     }
 
     private ComponentName startServiceInnerLocked(ServiceRecord r, Intent service,
@@ -2086,6 +2117,11 @@ public final class ActiveServices {
                 // In this case, the service will be handled as a non-short, regular FGS
                 // anyway, so we just remove the SHORT_SERVICE type.
                 foregroundServiceType &= ~FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+            }
+            if (!shouldAllowBootCompletedStart(r, foregroundServiceType)) {
+                throw new ForegroundServiceStartNotAllowedException("FGS type "
+                        + ServiceInfo.foregroundServiceTypeToLabel(foregroundServiceType)
+                        + " not allowed to start from BOOT_COMPLETED!");
             }
 
             boolean alreadyStartedOp = false;
