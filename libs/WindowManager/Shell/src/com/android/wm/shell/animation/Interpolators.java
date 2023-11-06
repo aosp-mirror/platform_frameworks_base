@@ -88,8 +88,6 @@ public class Interpolators {
     public static final PathInterpolator DIM_INTERPOLATOR =
             new PathInterpolator(.23f, .87f, .52f, -0.11f);
 
-    public static final Interpolator DECELERATE = new PathInterpolator(0f, 0f, 0.5f, 1f);
-
     // Create the default emphasized interpolator
     private static PathInterpolator createEmphasizedInterpolator() {
         Path path = new Path();
