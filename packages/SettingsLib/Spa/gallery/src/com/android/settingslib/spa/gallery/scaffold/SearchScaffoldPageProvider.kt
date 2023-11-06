@@ -50,7 +50,7 @@ object SearchScaffoldPageProvider : SettingsPageProvider {
 
 @Composable
 private fun Page() {
-    SearchScaffold(title = TITLE) { bottomPadding, searchQuery ->
-        PlaceholderTitle("Search query: ${searchQuery.value}")
+    SearchScaffold(title = TITLE) { _, searchQuery ->
+        PlaceholderTitle("Search query: ${searchQuery()}")
     }
 }
