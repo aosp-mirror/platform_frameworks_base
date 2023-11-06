@@ -137,6 +137,7 @@ import android.app.ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.AppCompatTaskInfo;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.PictureInPictureParams;
@@ -3462,20 +3463,21 @@ class Task extends TaskFragment {
                 && top.getOrganizedTask() == this && top.isState(RESUMED);
         final boolean isTopActivityVisible = top != null
                 && top.getOrganizedTask() == this && top.isVisible();
+        final AppCompatTaskInfo appCompatTaskInfo = info.appCompatTaskInfo;
         // Whether the direct top activity is in size compat mode
-        info.topActivityInSizeCompat = isTopActivityVisible && top.inSizeCompatMode();
-        if (info.topActivityInSizeCompat
+        appCompatTaskInfo.topActivityInSizeCompat = isTopActivityVisible && top.inSizeCompatMode();
+        if (appCompatTaskInfo.topActivityInSizeCompat
                 && mWmService.mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
             // We hide the restart button in case of transparent activities.
-            info.topActivityInSizeCompat = top.fillsParent();
+            appCompatTaskInfo.topActivityInSizeCompat = top.fillsParent();
         }
         // Whether the direct top activity is eligible for letterbox education.
-        info.topActivityEligibleForLetterboxEducation = isTopActivityResumed
+        appCompatTaskInfo.topActivityEligibleForLetterboxEducation = isTopActivityResumed
                 && top.isEligibleForLetterboxEducation();
         // Whether the direct top activity requested showing camera compat control.
-        info.cameraCompatControlState = isTopActivityResumed
+        appCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
                 ? top.getCameraCompatControlState()
-                : TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+                : AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
@@ -3485,34 +3487,34 @@ class Task extends TaskFragment {
         info.isVisible = hasVisibleChildren();
         info.isVisibleRequested = isVisibleRequested();
         info.isSleeping = shouldSleepActivities();
-        info.isLetterboxDoubleTapEnabled = top != null
-                && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();
-        info.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
-        info.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
-        info.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
-        info.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
-        info.isUserFullscreenOverrideEnabled = top != null
-                && top.mLetterboxUiController.shouldApplyUserFullscreenOverride();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
-        info.isFromLetterboxDoubleTap = top != null && top.mLetterboxUiController.isFromDoubleTap();
-        if (info.isLetterboxDoubleTapEnabled) {
-            info.topActivityLetterboxWidth = top.getBounds().width();
-            info.topActivityLetterboxHeight = top.getBounds().height();
-            if (info.topActivityLetterboxWidth < info.topActivityLetterboxHeight) {
+        appCompatTaskInfo.isLetterboxDoubleTapEnabled = top != null
+                && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();
+        appCompatTaskInfo.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
+        appCompatTaskInfo.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
+        appCompatTaskInfo.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
+        appCompatTaskInfo.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
+        appCompatTaskInfo.isUserFullscreenOverrideEnabled = top != null
+                && top.mLetterboxUiController.shouldApplyUserFullscreenOverride();
+        appCompatTaskInfo.isFromLetterboxDoubleTap = top != null
+                && top.mLetterboxUiController.isFromDoubleTap();
+        if (appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
+            appCompatTaskInfo.topActivityLetterboxWidth = top.getBounds().width();
+            appCompatTaskInfo.topActivityLetterboxHeight = top.getBounds().height();
+            if (appCompatTaskInfo.isTopActivityPillarboxed()) {
                 // Pillarboxed
-                info.topActivityLetterboxHorizontalPosition =
+                appCompatTaskInfo.topActivityLetterboxHorizontalPosition =
                         top.mLetterboxUiController.getLetterboxPositionForHorizontalReachability();
             } else {
                 // Letterboxed
-                info.topActivityLetterboxVerticalPosition =
+                appCompatTaskInfo.topActivityLetterboxVerticalPosition =
                         top.mLetterboxUiController.getLetterboxPositionForVerticalReachability();
             }
         }
-        // User Aspect Ratio Settings is enabled if the app is not in SCM
-        info.topActivityEligibleForUserAspectRatioButton = top != null
-                && !info.topActivityInSizeCompat
+        appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton = top != null
+                && !appCompatTaskInfo.topActivityInSizeCompat
                 && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings();
-        info.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
+        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null  && top.areBoundsLetterboxed();
     }
 
     /**
