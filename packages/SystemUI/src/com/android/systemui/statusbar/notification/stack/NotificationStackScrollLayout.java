@@ -4553,7 +4553,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mFooterClearAllListener.onClearAll();
             }
             clearNotifications(ROWS_ALL, true /* closeShade */);
-            footerView.setSecondaryVisible(false /* visible */, true /* animate */);
+            footerView.setClearAllButtonVisible(false /* visible */, true /* animate */);
         });
         if (FooterViewRefactor.isEnabled()) {
             updateFooter();
@@ -4618,7 +4618,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         boolean animate = mIsExpanded && mAnimationsEnabled;
         mFooterView.setVisible(visible, animate);
-        mFooterView.setSecondaryVisible(showDismissView, animate);
+        mFooterView.setClearAllButtonVisible(showDismissView, animate);
         mFooterView.showHistory(showHistory);
         if (!FooterViewRefactor.isEnabled()) {
             mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
