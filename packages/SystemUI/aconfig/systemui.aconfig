@@ -15,6 +15,13 @@ flag {
 }
 
 flag {
+    name: "notification_async_hybrid_view_inflation"
+    namespace: "systemui"
+    description: "Inflates hybrid (single-line) notification views from the background thread."
+    bug: "217799515"
+}
+
+flag {
     name: "notifications_footer_view_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the footer view in the notification shade "
@@ -36,13 +43,6 @@ flag {
     description: "Enables moving notification lifetime extension management from SystemUI to "
         "Notification Manager Service"
     bug: "299448097"
-}
-
-flag {
-    name: "notification_async_hybrid_view_inflation"
-    namespace: "systemui"
-    description: "Inflates the hybrid (single-line) notification views form the background thread."
-    bug: "217799515"
 }
 
 flag {
