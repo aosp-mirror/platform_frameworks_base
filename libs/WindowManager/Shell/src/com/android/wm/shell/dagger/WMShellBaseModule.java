@@ -646,11 +646,12 @@ public abstract class WMShellBaseModule {
     @Provides
     static KeyguardTransitionHandler provideKeyguardTransitionHandler(
             ShellInit shellInit,
+            ShellController shellController,
             Transitions transitions,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new KeyguardTransitionHandler(
-                    shellInit, transitions, mainHandler, mainExecutor);
+                    shellInit, shellController, transitions, mainHandler, mainExecutor);
     }
 
     @WMSingleton

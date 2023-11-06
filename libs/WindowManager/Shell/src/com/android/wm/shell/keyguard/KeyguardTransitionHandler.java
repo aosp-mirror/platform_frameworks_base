@@ -49,6 +49,8 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.KeyguardChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
@@ -58,10 +60,12 @@ import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
  *
  * <p>This takes the highest priority.
  */
-public class KeyguardTransitionHandler implements Transitions.TransitionHandler {
+public class KeyguardTransitionHandler
+        implements Transitions.TransitionHandler, KeyguardChangeListener {
     private static final String TAG = "KeyguardTransition";
 
     private final Transitions mTransitions;
+    private final ShellController mShellController;
     private final Handler mMainHandler;
     private final ShellExecutor mMainExecutor;
 
@@ -80,6 +84,9 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
     // transition.
     private boolean mIsLaunchingActivityOverLockscreen;
 
+    // Last value reported by {@link KeyguardChangeListener}.
+    private boolean mKeyguardShowing = true;
+
     private final class StartedTransition {
         final TransitionInfo mInfo;
         final SurfaceControl.Transaction mFinishT;
@@ -92,12 +99,15 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
             mPlayer = player;
         }
     }
+
     public KeyguardTransitionHandler(
             @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
             @NonNull Transitions transitions,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor mainExecutor) {
         mTransitions = transitions;
+        mShellController = shellController;
         mMainHandler = mainHandler;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
@@ -105,6 +115,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
 
     private void onInit() {
         mTransitions.addHandler(this);
+        mShellController.addKeyguardChangeListener(this);
     }
 
     /**
@@ -117,6 +128,16 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
 
     public static boolean handles(TransitionInfo info) {
         return (info.getFlags() & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0;
+    }
+
+    @Override
+    public void onKeyguardVisibilityChanged(
+            boolean visible, boolean occluded, boolean animatingDismiss) {
+        mKeyguardShowing = visible;
+    }
+
+    public boolean isKeyguardShowing() {
+        return mKeyguardShowing;
     }
 
     @Override
