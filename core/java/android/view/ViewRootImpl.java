@@ -981,6 +981,9 @@ public final class ViewRootImpl implements ViewParent,
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
     private float mPreferredFrameRate = 0;
+    // The last preferred frame rate of the view that is mainly used to
+    // track the difference between the current preferred frame rate and the previous value.
+    private float mLastPreferredFrameRate = 0;
     // Used to check if there were any view invalidations in
     // the previous time frame (FRAME_RATE_IDLENESS_REEVALUATE_TIME).
     private boolean mHasInvalidation = false;
@@ -3990,10 +3993,14 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         // For the variable refresh rate project.
+        // We set the preferred frame rate and frame rate category at the end of performTraversals
+        // when the values are applicable.
         setPreferredFrameRate(mPreferredFrameRate);
         setPreferredFrameRateCategory(mPreferredFrameRateCategory);
         mLastPreferredFrameRateCategory = mPreferredFrameRateCategory;
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+        mLastPreferredFrameRate = mPreferredFrameRate;
+        mPreferredFrameRate = 0;
     }
 
     private void createSyncIfNeeded() {
@@ -7369,7 +7376,9 @@ public final class ViewRootImpl implements ViewParent,
              */
             if (mIsFrameRateBoosting && (action == MotionEvent.ACTION_UP
                     || action == MotionEvent.ACTION_CANCEL)) {
-                sendDelayedEmptyMessage(MSG_TOUCH_BOOST_TIMEOUT, FRAME_RATE_TOUCH_BOOST_TIME);
+                mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
+                mHandler.sendEmptyMessageDelayed(MSG_TOUCH_BOOST_TIMEOUT,
+                        FRAME_RATE_TOUCH_BOOST_TIME);
             }
             return handled ? FINISH_HANDLED : FORWARD;
         }
@@ -12057,6 +12066,35 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     public void votePreferredFrameRateCategory(int frameRateCategory) {
         mPreferredFrameRateCategory = Math.max(mPreferredFrameRateCategory, frameRateCategory);
+        mHasInvalidation = true;
+    }
+
+    /**
+     * Allow Views to vote for the preferred frame rate
+     * When determining the preferred frame rate value,
+     * we follow this logic: If no preferred frame rate has been set yet,
+     * we assign the value of frameRate as the preferred frame rate.
+     * If either the current or the new preferred frame rate exceeds 60 Hz,
+     * we select the higher value between them.
+     * However, if both values are 60 Hz or lower, we set the preferred frame rate
+     * to 60 Hz to maintain optimal performance.
+     *
+     * @param frameRate the preferred frame rate of a View
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
+    public void votePreferredFrameRate(float frameRate) {
+        if (frameRate <= 0) {
+            return;
+        }
+
+        if (mPreferredFrameRate == 0) {
+            mPreferredFrameRate = frameRate;
+        } else if (frameRate > 60 || mPreferredFrameRate > 60) {
+            mPreferredFrameRate = Math.max(mPreferredFrameRate, frameRate);
+        } else if (mPreferredFrameRate != frameRate) {
+            mPreferredFrameRate = 60;
+        }
+
         mHasInvalidation = true;
     }
 
