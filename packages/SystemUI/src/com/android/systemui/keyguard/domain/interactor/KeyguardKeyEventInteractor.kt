@@ -60,7 +60,6 @@ constructor(
                     return collapseShadeLockedOrShowPrimaryBouncer()
                 }
             }
-
             when (event.keyCode) {
                 KeyEvent.KEYCODE_MENU -> return dispatchMenuKeyEvent()
             }
@@ -98,7 +97,8 @@ constructor(
                 (statusBarStateController.state != StatusBarState.SHADE) &&
                 statusBarKeyguardViewManager.shouldDismissOnMenuPressed()
         if (shouldUnlockOnMenuPressed) {
-            return collapseShadeLockedOrShowPrimaryBouncer()
+            shadeController.animateCollapseShadeForced()
+            return true
         }
         return false
     }
