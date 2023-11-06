@@ -1684,8 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Verwijderen"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls je langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Wil je blijven luisteren op hoog volume?\n\nHet hoofdtelefoonvolume is langer dan de aanbevolen tijd hoog geweest, wat je gehoor kan beschadigen"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Hard geluid gedetecteerd\n\nHet hoofdtelefoonvolume is hoger dan aanbevolen, wat je gehoor kan beschadigen"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Wil je blijven luisteren op hoog volume?\n\nHet hoofdtelefoonvolume is langer dan de aanbevolen tijd hoog geweest. Dit kan je gehoor beschadigen."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Hard geluid gedetecteerd\n\nHet hoofdtelefoonvolume is hoger dan aanbevolen. Dit kan je gehoor beschadigen."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Snelkoppeling toegankelijkheid gebruiken?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Als de snelkoppeling aanstaat, houd je beide volumeknoppen 3 seconden ingedrukt om een toegankelijkheidsfunctie te starten."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Snelkoppeling voor toegankelijkheidsfuncties aanzetten?"</string>

@@ -1686,7 +1686,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Rimuovi"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vuoi continuare ad ascoltare a un volume alto?\n\nIl volume delle cuffie è rimasto alto per un periodo superiore a quello raccomandato, con il rischio di danneggiare l\'udito"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Rilevato un suono forte\n\nIl volume delle cuffie è più alto di quello raccomandato, con il rischio di danneggiare l\'udito"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Rilevato suono forte\n\nIl volume delle cuffie è più alto di quello raccomandato e potrebbe danneggiare il tuo udito"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vuoi attivare la scorciatoia per le funzioni di accessibilità?"</string>
