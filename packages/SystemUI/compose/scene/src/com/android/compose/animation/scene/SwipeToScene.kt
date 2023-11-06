@@ -45,18 +45,13 @@ import kotlinx.coroutines.launch
 /**
  * Configures the swipeable behavior of a [SceneTransitionLayout] depending on the current state.
  */
-@Composable
-internal fun Modifier.swipeToScene(
-    layoutImpl: SceneTransitionLayoutImpl,
-    orientation: Orientation,
-): Modifier {
-    val gestureHandler = rememberSceneGestureHandler(layoutImpl, orientation)
-
+internal fun Modifier.swipeToScene(gestureHandler: SceneGestureHandler): Modifier {
     /** Whether swipe should be enabled in the given [orientation]. */
     fun Scene.shouldEnableSwipes(orientation: Orientation): Boolean =
         userActions.keys.any { it is Swipe && it.direction.orientation == orientation }
 
     val currentScene = gestureHandler.currentScene
+    val orientation = gestureHandler.orientation
     val canSwipe = currentScene.shouldEnableSwipes(orientation)
     val canOppositeSwipe =
         currentScene.shouldEnableSwipes(
@@ -84,7 +79,7 @@ internal fun Modifier.swipeToScene(
 }
 
 @Composable
-private fun rememberSceneGestureHandler(
+internal fun rememberSceneGestureHandler(
     layoutImpl: SceneTransitionLayoutImpl,
     orientation: Orientation,
 ): SceneGestureHandler {
