@@ -5258,10 +5258,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mSurfacePosition.offset(mXOffset, mYOffset);
         }
 
-        // Freeze position while we're unrotated, so the surface remains at the position it was
-        // prior to the rotation.
-        if (!mSurfaceAnimator.hasLeash() && mPendingSeamlessRotate == null
-                && !mLastSurfacePosition.equals(mSurfacePosition)) {
+        final AsyncRotationController asyncRotationController =
+                mDisplayContent.getAsyncRotationController();
+        if ((asyncRotationController != null
+                && asyncRotationController.hasSeamlessOperation(mToken))
+                || mPendingSeamlessRotate != null) {
+            // Freeze position while un-rotating the window, so its surface remains at the position
+            // corresponding to the original rotation.
+            return;
+        }
+
+        if (!mSurfaceAnimator.hasLeash() && !mLastSurfacePosition.equals(mSurfacePosition)) {
             final boolean frameSizeChanged = mWindowFrames.isFrameSizeChangeReported();
             final boolean surfaceInsetsChanged = surfaceInsetsChanging();
             final boolean surfaceSizeChanged = frameSizeChanged || surfaceInsetsChanged;
