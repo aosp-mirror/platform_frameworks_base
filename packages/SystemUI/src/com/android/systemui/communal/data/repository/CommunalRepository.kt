@@ -21,15 +21,23 @@ import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.scene.data.repository.SceneContainerRepository
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 
 /** Encapsulates the state of communal mode. */
 interface CommunalRepository {
     /** Whether communal features are enabled. */
     val isCommunalEnabled: Boolean
+
+    /** Whether the communal hub is showing. */
+    val isCommunalHubShowing: Flow<Boolean>
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
@@ -46,6 +54,8 @@ class CommunalRepositoryImpl
 @Inject
 constructor(
     private val featureFlagsClassic: FeatureFlagsClassic,
+    sceneContainerFlags: SceneContainerFlags,
+    sceneContainerRepository: SceneContainerRepository,
 ) : CommunalRepository {
     override val isCommunalEnabled: Boolean
         get() = featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
@@ -57,4 +67,11 @@ constructor(
     override fun setDesiredScene(desiredScene: CommunalSceneKey) {
         _desiredScene.value = desiredScene
     }
+
+    override val isCommunalHubShowing: Flow<Boolean> =
+        if (sceneContainerFlags.isEnabled()) {
+            sceneContainerRepository.desiredScene.map { scene -> scene.key == SceneKey.Communal }
+        } else {
+            desiredScene.map { sceneKey -> sceneKey == CommunalSceneKey.Communal }
+        }
 }

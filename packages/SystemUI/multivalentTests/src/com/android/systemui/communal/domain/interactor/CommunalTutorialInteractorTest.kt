@@ -24,17 +24,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
-import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -56,39 +47,21 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     private lateinit var testScope: TestScope
     private lateinit var underTest: CommunalTutorialInteractor
     private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var keyguardInteractor: KeyguardInteractor
     private lateinit var communalTutorialRepository: FakeCommunalTutorialRepository
-    private lateinit var sceneContainerFlags: FakeSceneContainerFlags
-    private lateinit var communalInteractor: CommunalInteractor
     private lateinit var communalRepository: FakeCommunalRepository
-
-    private val utils = SceneTestUtils(this)
-    private lateinit var sceneInteractor: SceneInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        sceneInteractor = utils.sceneInteractor()
-        testScope = utils.testScope
-        sceneContainerFlags = utils.sceneContainerFlags.apply { enabled = false }
-        communalRepository = FakeCommunalRepository(isCommunalEnabled = true)
-        communalInteractor = CommunalInteractor(communalRepository, FakeCommunalWidgetRepository())
+        testScope = TestScope()
 
-        val withDeps = KeyguardInteractorFactory.create()
-        keyguardInteractor = withDeps.keyguardInteractor
-        keyguardRepository = withDeps.repository
-        communalTutorialRepository = FakeCommunalTutorialRepository()
+        val withDeps = CommunalTutorialInteractorFactory.create(testScope)
+        keyguardRepository = withDeps.keyguardRepository
+        communalTutorialRepository = withDeps.communalTutorialRepository
+        communalRepository = withDeps.communalRepository
 
-        underTest =
-            CommunalTutorialInteractor(
-                scope = testScope.backgroundScope,
-                communalTutorialRepository = communalTutorialRepository,
-                keyguardInteractor = keyguardInteractor,
-                communalInteractor = communalInteractor,
-                sceneContainerFlags = sceneContainerFlags,
-                sceneInteractor = sceneInteractor,
-            )
+        underTest = withDeps.communalTutorialInteractor
 
         whenever(userTracker.userHandle).thenReturn(mock())
     }
@@ -108,7 +81,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             val isTutorialAvailable by collectLastValue(underTest.isTutorialAvailable)
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalRepository.setIsCommunalHubShowing(false)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
             assertThat(isTutorialAvailable).isFalse()
         }
@@ -119,7 +92,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             val isTutorialAvailable by collectLastValue(underTest.isTutorialAvailable)
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalRepository.setIsCommunalHubShowing(false)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
             assertThat(isTutorialAvailable).isTrue()
         }
@@ -130,23 +103,20 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             val isTutorialAvailable by collectLastValue(underTest.isTutorialAvailable)
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalRepository.setIsCommunalHubShowing(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
             assertThat(isTutorialAvailable).isTrue()
         }
 
-    /* Testing tutorial states with transitions when flexiglass off */
     @Test
     fun tutorialState_notStartedAndCommunalSceneShowing_tutorialStarted() =
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(communalInteractor.desiredScene)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalRepository.setIsCommunalHubShowing(true)
 
-            assertThat(currentScene).isEqualTo(CommunalSceneKey.Communal)
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_STARTED)
         }
 
@@ -155,12 +125,10 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(communalInteractor.desiredScene)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalRepository.setIsCommunalHubShowing(true)
 
-            assertThat(currentScene).isEqualTo(CommunalSceneKey.Communal)
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_STARTED)
         }
 
@@ -169,12 +137,10 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(communalInteractor.desiredScene)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalRepository.setIsCommunalHubShowing(true)
 
-            assertThat(currentScene).isEqualTo(CommunalSceneKey.Communal)
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
 
@@ -183,12 +149,10 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(communalInteractor.desiredScene)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalRepository.setIsCommunalHubShowing(false)
 
-            assertThat(currentScene).isEqualTo(CommunalSceneKey.Blank)
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_NOT_STARTED)
         }
 
@@ -197,13 +161,11 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(communalInteractor.desiredScene)
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalRepository.setIsCommunalHubShowing(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalRepository.setIsCommunalHubShowing(false)
 
-            assertThat(currentScene).isEqualTo(CommunalSceneKey.Blank)
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
 
@@ -212,106 +174,11 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(communalInteractor.desiredScene)
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalRepository.setIsCommunalHubShowing(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalRepository.setIsCommunalHubShowing(false)
 
-            assertThat(currentScene).isEqualTo(CommunalSceneKey.Blank)
-            assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
-        }
-
-    /* Testing tutorial states with transitions when flexiglass on */
-    @Test
-    fun tutorialState_notStartedCommunalSceneShowingAndFlexiglassOn_tutorialStarted() =
-        testScope.runTest {
-            sceneContainerFlags.enabled = true
-            val tutorialSettingState by
-                collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
-
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Communal), "reason")
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Communal))
-            assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_STARTED)
-        }
-
-    @Test
-    fun tutorialState_startedCommunalSceneShowingAndFlexiglassOn_stateWillNotUpdate() =
-        testScope.runTest {
-            sceneContainerFlags.enabled = true
-            val tutorialSettingState by
-                collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
-
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Communal), "reason")
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Communal))
-            assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_STARTED)
-        }
-
-    @Test
-    fun tutorialState_completedCommunalSceneShowingAndFlexiglassOn_stateWillNotUpdate() =
-        testScope.runTest {
-            sceneContainerFlags.enabled = true
-            val tutorialSettingState by
-                collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Communal), "reason")
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Communal))
-            assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
-        }
-
-    @Test
-    fun tutorialState_notStartedCommunalSceneNotShowingAndFlexiglassOn_stateWillNotUpdate() =
-        testScope.runTest {
-            sceneContainerFlags.enabled = true
-            val tutorialSettingState by
-                collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
-
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
-            assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_NOT_STARTED)
-        }
-
-    @Test
-    fun tutorialState_startedCommunalSceneNotShowingAndFlexiglassOn_tutorialCompleted() =
-        testScope.runTest {
-            sceneContainerFlags.enabled = true
-            val tutorialSettingState by
-                collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Communal), "reason")
-            communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
-
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
-            assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
-        }
-
-    @Test
-    fun tutorialState_completedCommunalSceneNotShowingAndFlexiglassOn_stateWillNotUpdate() =
-        testScope.runTest {
-            sceneContainerFlags.enabled = true
-            val tutorialSettingState by
-                collectLastValue(communalTutorialRepository.tutorialSettingState)
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Communal), "reason")
-            communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
 }
