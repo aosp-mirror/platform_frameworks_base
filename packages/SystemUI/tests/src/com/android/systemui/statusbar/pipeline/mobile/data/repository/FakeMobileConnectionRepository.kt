@@ -62,6 +62,10 @@ class FakeMobileConnectionRepository(
 
     override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false)
 
+    private var isInEcmMode: Boolean = false
+
+    override suspend fun isInEcmMode(): Boolean = isInEcmMode
+
     fun setDataEnabled(enabled: Boolean) {
         _dataEnabled.value = enabled
     }
@@ -86,6 +90,10 @@ class FakeMobileConnectionRepository(
     /** Set the correct [resolvedNetworkType] for the given group via its lookup key */
     fun setNetworkTypeKey(key: String) {
         resolvedNetworkType.value = ResolvedNetworkType.DefaultNetworkType(key)
+    }
+
+    fun setIsInEcmMode(isInEcmMode: Boolean) {
+        this.isInEcmMode = isInEcmMode
     }
 
     companion object {

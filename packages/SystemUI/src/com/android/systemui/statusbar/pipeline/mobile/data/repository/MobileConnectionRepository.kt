@@ -137,6 +137,13 @@ interface MobileConnectionRepository {
      */
     val hasPrioritizedNetworkCapabilities: StateFlow<Boolean>
 
+    /**
+     * True if this connection is in emergency callback mode.
+     *
+     * @see [TelephonyManager.getEmergencyCallbackMode]
+     */
+    suspend fun isInEcmMode(): Boolean
+
     companion object {
         /** The default number of levels to use for [numberOfLevels]. */
         const val DEFAULT_NUM_LEVELS = 4

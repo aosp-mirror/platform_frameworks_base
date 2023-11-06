@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirp
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
@@ -82,6 +83,7 @@ class WifiViewModelTest : SysuiTestCase() {
                 AirplaneModeInteractor(
                     airplaneModeRepository,
                     connectivityRepository,
+                    FakeMobileConnectionsRepository(),
                 ),
                 tableLogBuffer,
                 testScope.backgroundScope,
