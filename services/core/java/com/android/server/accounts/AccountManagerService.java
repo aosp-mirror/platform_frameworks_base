@@ -191,7 +191,7 @@ public class AccountManagerService
 
     final MessageHandler mHandler;
 
-    private static final int TIMEOUT_DELAY_MS = 1000 * 60;
+    private static final int TIMEOUT_DELAY_MS = 1000 * 60 * 15;
     // Messages that can be sent on mHandler
     private static final int MESSAGE_TIMED_OUT = 3;
     private static final int MESSAGE_COPY_SHARED_ACCOUNT = 4;
