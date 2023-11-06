@@ -568,7 +568,6 @@ public class ApnSetting implements Parcelable {
     private final int mSkip464Xlat;
     private final boolean mAlwaysOn;
     private final @InfrastructureBitmask int mInfrastructureBitmask;
-    private final boolean mEsimBootstrapProvisioning;
 
     /**
      * Returns the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
@@ -980,18 +979,6 @@ public class ApnSetting implements Parcelable {
         return mInfrastructureBitmask;
     }
 
-    /**
-     * Returns esim bootstrap provisioning flag for which the APN can be used on. For example,
-     * some APNs are only allowed to bring up network, when the device esim bootstrap provisioning
-     * is being activated.
-     *
-     * {@code true} if the APN is used for eSIM bootstrap provisioning, {@code false} otherwise.
-     * @hide
-     */
-    public boolean isEsimBootstrapProvisioning() {
-        return mEsimBootstrapProvisioning;
-    }
-
     private ApnSetting(Builder builder) {
         this.mEntryName = builder.mEntryName;
         this.mApnName = builder.mApnName;
@@ -1029,7 +1016,6 @@ public class ApnSetting implements Parcelable {
         this.mSkip464Xlat = builder.mSkip464Xlat;
         this.mAlwaysOn = builder.mAlwaysOn;
         this.mInfrastructureBitmask = builder.mInfrastructureBitmask;
-        this.mEsimBootstrapProvisioning = builder.mEsimBootstrapProvisioning;
     }
 
     /**
@@ -1111,8 +1097,6 @@ public class ApnSetting implements Parcelable {
                 .setAlwaysOn(cursor.getInt(cursor.getColumnIndexOrThrow(Carriers.ALWAYS_ON)) == 1)
                 .setInfrastructureBitmask(cursor.getInt(cursor.getColumnIndexOrThrow(
                         Telephony.Carriers.INFRASTRUCTURE_BITMASK)))
-                .setEsimBootstrapProvisioning(cursor.getInt(
-                        cursor.getColumnIndexOrThrow(Carriers.ESIM_BOOTSTRAP_PROVISIONING)) == 1)
                 .buildWithoutCheck();
     }
 
@@ -1153,7 +1137,6 @@ public class ApnSetting implements Parcelable {
                 .setSkip464Xlat(apn.mSkip464Xlat)
                 .setAlwaysOn(apn.mAlwaysOn)
                 .setInfrastructureBitmask(apn.mInfrastructureBitmask)
-                .setEsimBootstrapProvisioning(apn.mEsimBootstrapProvisioning)
                 .buildWithoutCheck();
     }
 
@@ -1201,7 +1184,6 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(mAlwaysOn);
         sb.append(", ").append(mInfrastructureBitmask);
         sb.append(", ").append(Objects.hash(mUser, mPassword));
-        sb.append(", ").append(mEsimBootstrapProvisioning);
         return sb.toString();
     }
 
@@ -1265,7 +1247,7 @@ public class ApnSetting implements Parcelable {
                 mProtocol, mRoamingProtocol, mMtuV4, mMtuV6, mCarrierEnabled, mNetworkTypeBitmask,
                 mLingeringNetworkTypeBitmask, mProfileId, mPersistent, mMaxConns, mWaitTime,
                 mMaxConnsTime, mMvnoType, mMvnoMatchData, mApnSetId, mCarrierId, mSkip464Xlat,
-                mAlwaysOn, mInfrastructureBitmask, mEsimBootstrapProvisioning);
+                mAlwaysOn, mInfrastructureBitmask);
     }
 
     @Override
@@ -1307,8 +1289,7 @@ public class ApnSetting implements Parcelable {
                 && mCarrierId == other.mCarrierId
                 && mSkip464Xlat == other.mSkip464Xlat
                 && mAlwaysOn == other.mAlwaysOn
-                && mInfrastructureBitmask == other.mInfrastructureBitmask
-                && Objects.equals(mEsimBootstrapProvisioning, other.mEsimBootstrapProvisioning);
+                && mInfrastructureBitmask == other.mInfrastructureBitmask;
     }
 
     /**
@@ -1359,8 +1340,7 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(mCarrierId, other.mCarrierId)
                 && Objects.equals(mSkip464Xlat, other.mSkip464Xlat)
                 && Objects.equals(mAlwaysOn, other.mAlwaysOn)
-                && Objects.equals(mInfrastructureBitmask, other.mInfrastructureBitmask)
-                && Objects.equals(mEsimBootstrapProvisioning, other.mEsimBootstrapProvisioning);
+                && Objects.equals(mInfrastructureBitmask, other.mInfrastructureBitmask);
     }
 
     /**
@@ -1398,9 +1378,7 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(this.mCarrierId, other.mCarrierId)
                 && Objects.equals(this.mSkip464Xlat, other.mSkip464Xlat)
                 && Objects.equals(this.mAlwaysOn, other.mAlwaysOn)
-                && Objects.equals(this.mInfrastructureBitmask, other.mInfrastructureBitmask)
-                && Objects.equals(this.mEsimBootstrapProvisioning,
-                other.mEsimBootstrapProvisioning);
+                && Objects.equals(this.mInfrastructureBitmask, other.mInfrastructureBitmask);
     }
 
     // Equal or one is null.
@@ -1473,7 +1451,6 @@ public class ApnSetting implements Parcelable {
         apnValue.put(Telephony.Carriers.SKIP_464XLAT, mSkip464Xlat);
         apnValue.put(Telephony.Carriers.ALWAYS_ON, mAlwaysOn);
         apnValue.put(Telephony.Carriers.INFRASTRUCTURE_BITMASK, mInfrastructureBitmask);
-        apnValue.put(Carriers.ESIM_BOOTSTRAP_PROVISIONING, mEsimBootstrapProvisioning);
         return apnValue;
     }
 
@@ -1747,7 +1724,6 @@ public class ApnSetting implements Parcelable {
         dest.writeInt(mSkip464Xlat);
         dest.writeBoolean(mAlwaysOn);
         dest.writeInt(mInfrastructureBitmask);
-        dest.writeBoolean(mEsimBootstrapProvisioning);
     }
 
     private static ApnSetting readFromParcel(Parcel in) {
@@ -1784,7 +1760,6 @@ public class ApnSetting implements Parcelable {
                 .setSkip464Xlat(in.readInt())
                 .setAlwaysOn(in.readBoolean())
                 .setInfrastructureBitmask(in.readInt())
-                .setEsimBootstrapProvisioning(in.readBoolean())
                 .buildWithoutCheck();
     }
 
@@ -1867,7 +1842,6 @@ public class ApnSetting implements Parcelable {
         private int mSkip464Xlat = Carriers.SKIP_464XLAT_DEFAULT;
         private boolean mAlwaysOn;
         private int mInfrastructureBitmask = INFRASTRUCTURE_CELLULAR;
-        private boolean mEsimBootstrapProvisioning;
 
         /**
          * Default constructor for Builder.
@@ -2302,19 +2276,6 @@ public class ApnSetting implements Parcelable {
         @NonNull
         public Builder setInfrastructureBitmask(@InfrastructureBitmask int infrastructureBitmask) {
             this.mInfrastructureBitmask = infrastructureBitmask;
-            return this;
-        }
-
-        /**
-         * Sets esim bootstrap provisioning flag
-         *
-         * @param esimBootstrapProvisioning {@code true} if the APN is used for eSIM bootstrap
-         * provisioning, {@code false} otherwise.
-         * @hide
-         */
-        @NonNull
-        public Builder setEsimBootstrapProvisioning(boolean esimBootstrapProvisioning) {
-            this.mEsimBootstrapProvisioning = esimBootstrapProvisioning;
             return this;
         }
 
