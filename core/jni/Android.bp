@@ -269,6 +269,9 @@ cc_library_shared_for_libandroid_runtime {
                 "android_window_WindowInfosListener.cpp",
                 "android_window_ScreenCapture.cpp",
                 "jni_common.cpp",
+                "android_tracing_PerfettoDataSource.cpp",
+                "android_tracing_PerfettoDataSourceInstance.cpp",
+                "android_tracing_PerfettoProducer.cpp",
             ],
 
             static_libs: [
@@ -282,6 +285,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libscrypt_static",
                 "libstatssocket_lazy",
                 "libskia",
+                "libperfetto_client_experimental",
             ],
 
             shared_libs: [
@@ -355,6 +359,7 @@ cc_library_shared_for_libandroid_runtime {
                 "server_configurable_flags",
                 "libimage_io",
                 "libultrahdr",
+                "libperfetto_c",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers
