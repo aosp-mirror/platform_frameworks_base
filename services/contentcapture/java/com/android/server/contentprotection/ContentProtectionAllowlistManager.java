@@ -16,8 +16,6 @@
 
 package com.android.server.contentprotection;
 
-import static android.view.contentprotection.flags.Flags.blocklistUpdateEnabled;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
@@ -130,10 +128,6 @@ public class ContentProtectionAllowlistManager {
     }
 
     private void handlePackagesChanged() {
-        if (!blocklistUpdateEnabled()) {
-            return;
-        }
-
         /**
          * PackageMonitor callback can be invoked more than once in a matter of milliseconds on the
          * same monitor instance for the same package (eg: b/295969873). This check acts both as a
