@@ -91,6 +91,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -112,8 +113,6 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 /**
  * Tests for {@link NotificationStackScrollLayoutController}.
@@ -143,7 +142,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private DumpManager mDumpManager;
-    @Mock private Resources mResources;
     @Mock(answer = Answers.RETURNS_SELF)
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
@@ -151,7 +149,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private GroupExpansionManager mGroupExpansionManager;
     @Mock private SectionHeaderController mSilentHeaderController;
     @Mock private NotifPipeline mNotifPipeline;
-    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifCollection mNotifCollection;
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
@@ -166,9 +163,9 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
     @Mock private SecureSettings mSecureSettings;
-    @Mock private NotificationIconAreaController mIconAreaController;
     @Mock private ActivityStarter mActivityStarter;
     @Mock private KeyguardTransitionRepository mKeyguardTransitionRepo;
+    @Mock private NotificationListViewBinder mViewBinder;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -669,6 +666,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
         when(mNotificationStackScrollLayout.getViewTreeObserver())
                 .thenReturn(viewTreeObserver);
+        when(mNotificationStackScrollLayout.getContext()).thenReturn(getContext());
         mController = new NotificationStackScrollLayoutController(
                 mNotificationStackScrollLayout,
                 true,
@@ -689,38 +687,33 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mKeyguardTransitionRepo,
                 mZenModeController,
                 mNotificationLockscreenUserManager,
-                Optional.<NotificationListViewModel>empty(),
                 mMetricsLogger,
                 mDumpManager,
                 new FalsingCollectorFake(),
                 new FalsingManagerFake(),
-                mResources,
                 mNotificationSwipeHelperBuilder,
                 mScrimController,
                 mGroupExpansionManager,
                 mSilentHeaderController,
                 mNotifPipeline,
-                mNotifPipelineFlags,
                 mNotifCollection,
                 mLockscreenShadeTransitionController,
                 mUiEventLogger,
                 mRemoteInputManager,
                 mVisibilityLocationProviderDelegator,
                 mSeenNotificationsInteractor,
+                mViewBinder,
                 mShadeController,
                 mJankMonitor,
                 mStackLogger,
                 mLogger,
                 mNotificationStackSizeCalculator,
-                mIconAreaController,
                 mFeatureFlags,
                 mNotificationTargetsHelper,
                 mSecureSettings,
                 mock(NotificationDismissibilityProvider.class),
                 mActivityStarter,
-                new ResourcesSplitShadeStateController(),
-                mock(ConfigurationState.class),
-                mock(ShelfNotificationIconViewStore.class));
+                new ResourcesSplitShadeStateController());
     }
 
     static class LogMatcher implements ArgumentMatcher<LogMaker> {

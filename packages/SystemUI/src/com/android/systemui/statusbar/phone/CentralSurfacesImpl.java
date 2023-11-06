@@ -190,7 +190,6 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PowerButtonReveal;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -643,7 +642,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
             Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewControllerLazy,
-            NotificationShelfController notificationShelfController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             // Lazys due to b/298099682.
             Lazy<NotificationPresenter> notificationPresenterLazy,
@@ -750,7 +748,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mConfigurationController = configurationController;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationShadeWindowViewControllerLazy = notificationShadeWindowViewControllerLazy;
-        mNotificationShelfController = notificationShelfController;
         mStackScrollerController = notificationStackScrollLayoutController;
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mStackScrollerController.getNotificationListContainer();
@@ -1152,9 +1149,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         // TODO: Deal with the ugliness that comes from having some of the status bar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
-        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
-            mNotificationIconAreaController.setupShelf(mNotificationShelfController);
-        }
         ShadeExpansionChangeEvent currentState =
                 mShadeExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
         mWakeUpCoordinator.onPanelExpansionChanged(currentState);
@@ -1249,7 +1243,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 this,
                 mGestureRec,
                 mShadeController::makeExpandedInvisible,
-                mNotificationShelfController,
                 mHeadsUpManager);
 
         // Set up the quick settings tile panel
@@ -2868,8 +2861,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     protected Display mDisplay;
     private int mDisplayId;
-
-    private final NotificationShelfController mNotificationShelfController;
 
     private final Lazy<AssistManager> mAssistManagerLazy;
 

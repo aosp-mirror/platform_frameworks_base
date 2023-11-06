@@ -41,7 +41,6 @@ import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -49,7 +48,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -109,8 +107,6 @@ public class LegacyNotificationIconAreaControllerImpl implements
     private final ArrayList<Rect> mTintAreas = new ArrayList<>();
     private final Context mContext;
 
-    private final RefactorFlag mShelfRefactor;
-
     private final boolean mNewAodTransition;
 
     private int mAodIconAppearTranslation;
@@ -150,7 +146,6 @@ public class LegacyNotificationIconAreaControllerImpl implements
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mStatusBarStateController = statusBarStateController;
-        mShelfRefactor = new RefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
         mNewAodTransition = featureFlags.isEnabled(NEW_AOD_TRANSITION);
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
@@ -204,13 +199,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
         updateIconLayoutParams(mContext);
     }
 
-    public void setupShelf(NotificationShelfController notificationShelfController) {
-        mShelfRefactor.assertInLegacyMode();
-        mShelfIcons = notificationShelfController.getShelfIcons();
-    }
-
     public void setShelfIcons(NotificationIconContainer icons) {
-        if (mShelfRefactor.isUnexpectedlyInLegacyMode()) return;
         mShelfIcons = icons;
     }
 

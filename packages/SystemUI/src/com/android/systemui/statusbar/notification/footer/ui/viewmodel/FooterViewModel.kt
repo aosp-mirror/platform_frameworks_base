@@ -21,15 +21,15 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
-import javax.inject.Inject
+import dagger.Module
+import dagger.Provides
+import java.util.Optional
+import javax.inject.Provider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /** ViewModel for [FooterView]. */
-@SysUISingleton
-class FooterViewModel
-@Inject
-constructor(seenNotificationsInteractor: SeenNotificationsInteractor) {
+class FooterViewModel(seenNotificationsInteractor: SeenNotificationsInteractor) {
     init {
         /* Check if */ FooterViewRefactor.isUnexpectedlyInLegacyMode()
     }
@@ -42,4 +42,19 @@ constructor(seenNotificationsInteractor: SeenNotificationsInteractor) {
                 visible = hasFilteredOutNotifs,
             )
         }
+}
+
+@Module
+object FooterViewModelModule {
+    @Provides
+    @SysUISingleton
+    fun provideOptional(
+        seenNotificationsInteractor: Provider<SeenNotificationsInteractor>,
+    ): Optional<FooterViewModel> {
+        return if (FooterViewRefactor.isEnabled) {
+            Optional.of(FooterViewModel(seenNotificationsInteractor.get()))
+        } else {
+            Optional.empty()
+        }
+    }
 }

@@ -133,7 +133,6 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
@@ -218,7 +217,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ViewPropertyAnimator mViewPropertyAnimator;
     @Mock protected KeyguardBottomAreaView mQsFrame;
     @Mock protected HeadsUpManager mHeadsUpManager;
-    @Mock protected NotificationShelfController mNotificationShelfController;
     @Mock protected NotificationGutsManager mGutsManager;
     @Mock protected KeyguardStatusBarView mKeyguardStatusBar;
     @Mock protected KeyguardUserSwitcherView mUserSwitcherView;
@@ -705,7 +703,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mCentralSurfaces,
                 null,
                 () -> {},
-                mNotificationShelfController,
                 mHeadsUpManager);
         mNotificationPanelViewController.setTrackingStartedListener(() -> {});
         mNotificationPanelViewController.setOpenCloseListener(

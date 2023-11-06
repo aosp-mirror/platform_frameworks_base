@@ -202,7 +202,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* indicationPadding= */ 0,
                 /* ambientPadding= */ 0);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(5);
     }
@@ -215,7 +215,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* indicationPadding= */ 30,
                 /* ambientPadding= */ 0);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
@@ -228,7 +228,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* indicationPadding= */ 0,
                 /* ambientPadding= */ 40);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
@@ -241,7 +241,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* indicationPadding= */ 8,
                 /* ambientPadding= */ 0);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(2);
     }
@@ -254,7 +254,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* indicationPadding= */ 8,
                 /* ambientPadding= */ 0);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }

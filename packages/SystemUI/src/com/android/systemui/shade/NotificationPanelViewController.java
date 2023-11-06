@@ -173,7 +173,6 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -520,7 +519,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** Are we currently in gesture navigation. */
     private boolean mIsGestureNavigation;
     private int mOldLayoutDirection;
-    private NotificationShelfController mNotificationShelfController;
 
     private final ContentResolver mContentResolver;
     private float mMinFraction;
@@ -1886,11 +1884,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private int getShelfHeight() {
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
-            return mNotificationStackScrollLayoutController.getShelfHeight();
-        } else {
-            return mNotificationShelfController.getIntrinsicHeight();
-        }
+        return mNotificationStackScrollLayoutController.getShelfHeight();
     }
 
     private void updateClock() {
@@ -3498,7 +3492,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             CentralSurfaces centralSurfaces,
             GestureRecorder recorder,
             Runnable hideExpandedRunnable,
-            NotificationShelfController notificationShelfController,
             HeadsUpManager headsUpManager) {
         setHeadsUpManager(headsUpManager);
         // TODO(b/254859580): this can be injected.
@@ -3506,12 +3499,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         mGestureRecorder = recorder;
         mHideExpandedRunnable = hideExpandedRunnable;
-        mNotificationShelfController = notificationShelfController;
-        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
-            mNotificationStackScrollLayoutController.setShelfController(
-                    notificationShelfController);
-            mLockscreenShadeTransitionController.bindController(notificationShelfController);
-        }
         updateMaxDisplayedNotifications(true);
     }
 

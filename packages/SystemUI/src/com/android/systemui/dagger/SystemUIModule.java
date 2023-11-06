@@ -109,7 +109,6 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LetterboxModule;
 import com.android.systemui.statusbar.phone.NotificationIconAreaControllerModule;
@@ -232,7 +231,6 @@ import javax.inject.Named;
             KeyguardBouncerComponent.class,
             NavigationBarComponent.class,
             NotificationRowComponent.class,
-            NotificationShelfComponent.class,
             WindowRootViewComponent.class,
         })
 public abstract class SystemUIModule {
