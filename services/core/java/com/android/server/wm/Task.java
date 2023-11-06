@@ -3508,13 +3508,10 @@ class Task extends TaskFragment {
                         top.mLetterboxUiController.getLetterboxPositionForVerticalReachability();
             }
         }
-        // User Aspect Ratio Settings button is enabled if the app is not in SCM and has
-        // launchable activities
+        // User Aspect Ratio Settings is enabled if the app is not in SCM
         info.topActivityEligibleForUserAspectRatioButton = top != null
                 && !info.topActivityInSizeCompat
-                && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings()
-                && mAtmService.mContext.getPackageManager()
-                    .getLaunchIntentForPackage(getBasePackageName()) != null;
+                && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings();
         info.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
     }
 
