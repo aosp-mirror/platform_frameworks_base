@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ଫେସ ଅନଲକ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ବ୍ଲୁଟୂଥ୍‍‌ ସଂଯୋଗ କରାଯାଇଛି।"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ବ୍ଲୁଟୁଥ ଡିଭାଇସ ଆଇକନ"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"ଡିଭାଇସ ବିବରଣୀକୁ କନଫିଗର କରିବା ପାଇଁ କ୍ଲିକ କରନ୍ତୁ"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ବ୍ୟାଟେରୀ ଶତକଡ଼ା ଅଜଣା ଅଟେ।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> ସହ ସଂଯୁକ୍ତ"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> ସହିତ ସଂଯୁକ୍ତ।"</string>
@@ -250,8 +249,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ବ୍ଲୁଟୁଥ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ପେୟାର୍‍ ହୋଇଥିବା କୌଣସି ଡିଭାଇସ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"ଏକ ଡିଭାଇସ କନେକ୍ଟ କିମ୍ବା ଡିସକନେକ୍ଟ କରିବାକୁ ଟାପ କରନ୍ତୁ"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"ନୂଆ ଡିଭାଇସକୁ ପେୟାର କରନ୍ତୁ"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"ସବୁ ଦେଖନ୍ତୁ"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ବ୍ଲୁଟୁଥ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -1182,8 +1180,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"କେମେରା ଏବଂ ମାଇକ୍ରୋଫୋନକୁ ବ୍ଲକ କରାଯାଇଛି"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ମାଇକ୍ରୋଫୋନକୁ ବ୍ଲକ କରାଯାଇଛି"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ପ୍ରାୟୋରିଟି ମୋଡ ଚାଲୁ ଅଛି"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"ୟୁଜରଙ୍କ ଉପସ୍ଥିତି ଚିହ୍ନଟ କରାଯାଇଛି"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ସେଟିଂସରେ ଡିଫଲ୍ଟ ନୋଟ୍ସ ଆପ ସେଟ କରନ୍ତୁ"</string>
     <string name="install_app" msgid="5066668100199613936">"ଆପ ଇନଷ୍ଟଲ କରନ୍ତୁ"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ଏକ୍ସଟର୍ନଲ ଡିସପ୍ଲେକୁ ମିରର କରିବେ?"</string>

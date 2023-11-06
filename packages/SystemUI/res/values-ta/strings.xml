@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"முகம் காட்டித் திறத்தல் அம்சம் கிடைக்கவில்லை"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"புளூடூத் இணைக்கப்பட்டது."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"புளூடூத் சாதன ஐகான்"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"சாதன விவரத்தை உள்ளமைக்க கிளிக் செய்யலாம்"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"பேட்டரி சதவீதம் தெரியவில்லை."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>க்கு இணைக்கப்பட்டது."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது."</string>
@@ -250,8 +249,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"புளூடூத்"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"இணைக்கப்பட்ட சாதனங்கள் இல்லை"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"சாதனத்தை இணைக்க/துண்டிக்க தட்டவும்"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"புதிய சாதனத்தை இணைத்தல்"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"அனைத்தையும் காட்டு"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"புளூடூத்தைப் பயன்படுத்துதல்"</string>
@@ -1182,8 +1180,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"கேமராவும் மைக்ரோஃபோனும் தடுக்கப்பட்டுள்ளன"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"மைக்ரோஃபோன் தடுக்கப்பட்டுள்ளது"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"முன்னுரிமைப் பயன்முறை இயக்கத்தில் உள்ளது"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"பயனர் கண்டறியப்பட்டுள்ளார்"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"குறிப்பு எடுப்பதற்கான இயல்புநிலை ஆப்ஸை அமைப்புகளில் அமையுங்கள்"</string>
     <string name="install_app" msgid="5066668100199613936">"ஆப்ஸை நிறுவுங்கள்"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"வெளிப்புறக் காட்சிக்கு மிரர் செய்யவா?"</string>

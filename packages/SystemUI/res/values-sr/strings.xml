@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Откључавање лицем није доступно"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth је прикључен."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Икона Bluetooth уређаја"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Кликните да бисте конфигурисали детаље о уређају"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Проценат напуњености батерије није познат."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Повезани сте са <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Повезани смо са уређајем <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -250,8 +249,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не узнемиравај"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Није доступан ниједан упарени уређај"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Додирните да бисте повезали уређај или прекинули везу"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Упари нови уређај"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Прикажи све"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Користи Bluetooth"</string>
@@ -1182,8 +1180,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера и микрофон су блокирани"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон је блокиран"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Приоритетни режим је укључен"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"Присуство корисника може да се открије"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Подесите подразумевану апликацију за белешке у Подешавањима"</string>
     <string name="install_app" msgid="5066668100199613936">"Инсталирај апликацију"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Желите ли да пресликате на спољњи екран?"</string>

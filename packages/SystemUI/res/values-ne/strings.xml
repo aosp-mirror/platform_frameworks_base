@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"फेस अनलक उपलब्ध छैन"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लुटुथ जडान भयो।"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ब्लुटुथ डिभाइस जनाउने आइकन"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"डिभाइसको विवरण कन्फिगर गर्न क्लिक गर्नुहोस्"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ब्याट्रीमा कति प्रतिशत चार्ज छ भन्ने कुराको जानाकरी छैन।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> मा जडित।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> मा कनेक्ट गरियो।"</string>
@@ -250,8 +249,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"बाधा नपुऱ्याउनुहोस्"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ब्लुटुथ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"जोडी उपकरणहरू उपलब्ध छैन"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"कुनै डिभाइस कनेक्ट गर्न वा डिस्कनेक्ट गर्न ट्याप गर्नुहोस्"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"नयाँ डिभाइस कनेक्ट गर्नुहोस्"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"सबै डिभाइसहरू हेर्नुहोस्"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्लुटुथ प्रयोग गर्नुहोस्"</string>
@@ -1182,8 +1180,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"क्यामेरा र माइक्रोफोन ब्लक गरिएको छ"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"माइक्रोफोन ब्लक गरिएको छ"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"प्राथमिकता मोड अन छ"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"प्रयोगकर्ता उपस्थित भएको कुरा पत्ता लागेको छ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"सेटिङमा गई नोट बनाउने डिफल्ट एप तोक्नुहोस्"</string>
     <string name="install_app" msgid="5066668100199613936">"एप इन्स्टल गर्नुहोस्"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"बाह्य डिस्प्लेमा मिरर गर्ने हो?"</string>
