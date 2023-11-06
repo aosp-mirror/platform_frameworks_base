@@ -59,6 +59,15 @@ class android.util.Rational stubclass
 class android.util.Size stubclass
 class android.util.SizeF stubclass
 
+# Proto
+class android.util.proto.EncodedBuffer stubclass
+class android.util.proto.ProtoInputStream stubclass
+class android.util.proto.ProtoOutputStream stubclass
+class android.util.proto.ProtoParseException stubclass
+class android.util.proto.ProtoStream stubclass
+class android.util.proto.ProtoUtils stubclass
+class android.util.proto.WireTypeMismatchException stubclass
+
 # Misc
 class android.util.Dumpable stubclass
 class android.util.DebugUtils stubclass
