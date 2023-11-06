@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.testutils
+package com.android.settingslib.spaprivileged.settingsprovider
 
+import android.content.Context
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.withTimeoutOrNull
 
-suspend fun <T> Flow<T>.firstWithTimeoutOrNull(timeMillis: Long = 500): T? =
-    withTimeoutOrNull(timeMillis) {
-        first()
-    }
-
-suspend fun <T> Flow<T>.toListWithTimeout(timeMillis: Long = 500): List<T> {
-    val list = mutableListOf<T>()
-    return withTimeoutOrNull(timeMillis) {
-        toList(list)
-    } ?: list
-}
+fun Context.settingsGlobalChangeFlow(name: String, sendInitialValue: Boolean = true): Flow<Unit> =
+    settingsGlobalFlow(name, sendInitialValue) { }
