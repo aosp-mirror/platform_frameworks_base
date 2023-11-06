@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -70,10 +71,8 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
     @Test(expected = IllegalStateException::class)
     fun setDesiredScene_noSuchSceneInContainer_throws() {
-        val underTest =
-            utils.fakeSceneContainerRepository(
-                utils.fakeSceneContainerConfig(listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)),
-            )
+        utils.kosmos.sceneKeys = listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
+        val underTest = utils.fakeSceneContainerRepository(utils.fakeSceneContainerConfig())
         underTest.setDesiredScene(SceneModel(SceneKey.Shade))
     }
 
