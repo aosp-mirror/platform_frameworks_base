@@ -17,48 +17,62 @@
 
 package com.android.systemui.telephony.data.repository
 
+import android.telecom.TelecomManager
 import android.telephony.TelephonyCallback
+import android.telephony.TelephonyManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class TelephonyRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var manager: TelephonyListenerManager
+    @Mock private lateinit var telecomManager: TelecomManager
+
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
 
     private lateinit var underTest: TelephonyRepositoryImpl
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(telecomManager.isInCall).thenReturn(false)
 
         underTest =
             TelephonyRepositoryImpl(
+                applicationScope = testScope.backgroundScope,
                 applicationContext = context,
+                backgroundDispatcher = utils.testDispatcher,
                 manager = manager,
+                telecomManager = telecomManager,
             )
     }
 
     @Test
     fun callState() =
-        runBlocking(IMMEDIATE) {
-            var callState: Int? = null
-            val job = underTest.callState.onEach { callState = it }.launchIn(this)
+        testScope.runTest {
+            val callState by collectLastValue(underTest.callState)
+            runCurrent()
+
             val listenerCaptor = kotlinArgumentCaptor<TelephonyCallback.CallStateListener>()
             verify(manager).addCallStateListener(listenerCaptor.capture())
             val listener = listenerCaptor.value
@@ -71,13 +85,25 @@ class TelephonyRepositoryImplTest : SysuiTestCase() {
 
             listener.onCallStateChanged(2)
             assertThat(callState).isEqualTo(2)
-
-            job.cancel()
-
-            verify(manager).removeCallStateListener(listener)
         }
 
-    companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
-    }
+    @Test
+    fun isInCall() =
+        testScope.runTest {
+            val isInCall by collectLastValue(underTest.isInCall)
+            runCurrent()
+
+            val listenerCaptor = kotlinArgumentCaptor<TelephonyCallback.CallStateListener>()
+            verify(manager).addCallStateListener(listenerCaptor.capture())
+            val listener = listenerCaptor.value
+            whenever(telecomManager.isInCall).thenReturn(true)
+            listener.onCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK)
+
+            assertThat(isInCall).isTrue()
+
+            whenever(telecomManager.isInCall).thenReturn(false)
+            listener.onCallStateChanged(TelephonyManager.CALL_STATE_IDLE)
+
+            assertThat(isInCall).isFalse()
+        }
 }

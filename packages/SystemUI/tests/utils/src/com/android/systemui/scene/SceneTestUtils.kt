@@ -16,10 +16,15 @@
 
 package com.android.systemui.scene
 
+import android.app.ActivityTaskManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.telecom.TelecomManager
+import com.android.internal.logging.MetricsLogger
+import com.android.internal.util.EmergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
@@ -27,8 +32,11 @@ import com.android.systemui.authentication.data.repository.FakeAuthenticationRep
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
+import com.android.systemui.bouncer.data.repository.EmergencyServicesRepository
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.EmergencyDialerIntentFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
@@ -41,6 +49,7 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.doze.DozeLogger
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
@@ -62,10 +71,13 @@ import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
+import com.android.systemui.telephony.data.repository.TelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserViewModel
 import com.android.systemui.util.mockito.mock
@@ -102,12 +114,23 @@ class SceneTestUtils(
             currentTime = { testScope.currentTime },
         )
     }
+    val configurationRepository: FakeConfigurationRepository by lazy {
+        FakeConfigurationRepository()
+    }
+    private val emergencyServicesRepository: EmergencyServicesRepository by lazy {
+        EmergencyServicesRepository(
+            applicationScope = applicationScope(),
+            resources = context.resources,
+            configurationRepository = configurationRepository,
+        )
+    }
+    val telephonyRepository: FakeTelephonyRepository by lazy { FakeTelephonyRepository() }
 
     val communalRepository: FakeCommunalRepository by lazy { FakeCommunalRepository() }
     val keyguardRepository: FakeKeyguardRepository by lazy { FakeKeyguardRepository() }
     val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
 
-    private val userRepository: UserRepository by lazy {
+    val userRepository: UserRepository by lazy {
         FakeUserRepository().apply {
             val users = listOf(UserInfo(/* id=  */ 0, "name", /* flags= */ 0))
             setUserInfos(users)
@@ -183,7 +206,7 @@ class SceneTestUtils(
             featureFlags = featureFlags,
             sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = FakeKeyguardBouncerRepository(),
-            configurationRepository = FakeConfigurationRepository(),
+            configurationRepository = configurationRepository,
             shadeRepository = FakeShadeRepository(),
             sceneInteractorProvider = { sceneInteractor() },
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
@@ -217,6 +240,7 @@ class SceneTestUtils(
     fun bouncerViewModel(
         bouncerInteractor: BouncerInteractor,
         authenticationInteractor: AuthenticationInteractor,
+        actionButtonInteractor: BouncerActionButtonInteractor,
         users: List<UserViewModel> = createUsers(),
     ): BouncerViewModel {
         return BouncerViewModel(
@@ -229,11 +253,14 @@ class SceneTestUtils(
             selectedUser = flowOf(users.first { it.isSelectionMarkerVisible }),
             users = flowOf(users),
             userSwitcherMenu = flowOf(createMenuActions()),
-            telephonyInteractor =
-                TelephonyInteractor(
-                    repository = FakeTelephonyRepository(),
-                ),
+            actionButtonInteractor = actionButtonInteractor,
         )
+    }
+
+    fun telephonyInteractor(
+        repository: TelephonyRepository = telephonyRepository,
+    ): TelephonyInteractor {
+        return TelephonyInteractor(repository = repository)
     }
 
     fun falsingInteractor(collector: FalsingCollector = falsingCollector()): FalsingInteractor {
@@ -283,6 +310,40 @@ class SceneTestUtils(
                 )
             }
         }
+    }
+
+    fun selectedUserInteractor(): SelectedUserInteractor {
+        return SelectedUserInteractor(userRepository, featureFlags)
+    }
+
+    fun bouncerActionButtonInteractor(
+        mobileConnectionsRepository: MobileConnectionsRepository = mock(),
+        activityTaskManager: ActivityTaskManager = mock(),
+        telecomManager: TelecomManager? = null,
+        emergencyAffordanceManager: EmergencyAffordanceManager =
+            EmergencyAffordanceManager(context),
+        emergencyDialerIntentFactory: EmergencyDialerIntentFactory =
+            object : EmergencyDialerIntentFactory {
+                override fun invoke(): Intent = Intent()
+            },
+        metricsLogger: MetricsLogger = mock(),
+        dozeLogger: DozeLogger = mock(),
+    ): BouncerActionButtonInteractor {
+        return BouncerActionButtonInteractor(
+            applicationContext = context,
+            backgroundDispatcher = testDispatcher,
+            repository = emergencyServicesRepository,
+            mobileConnectionsRepository = mobileConnectionsRepository,
+            telephonyInteractor = telephonyInteractor(),
+            authenticationInteractor = authenticationInteractor(),
+            selectedUserInteractor = selectedUserInteractor(),
+            activityTaskManager = activityTaskManager,
+            telecomManager = telecomManager,
+            emergencyAffordanceManager = emergencyAffordanceManager,
+            emergencyDialerIntentFactory = emergencyDialerIntentFactory,
+            metricsLogger = metricsLogger,
+            dozeLogger = dozeLogger,
+        )
     }
 
     companion object {

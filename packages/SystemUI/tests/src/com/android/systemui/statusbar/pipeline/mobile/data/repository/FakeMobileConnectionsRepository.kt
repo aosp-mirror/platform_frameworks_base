@@ -94,6 +94,7 @@ class FakeMobileConnectionsRepository(
     override val defaultMobileIconGroup = _defaultMobileIconGroup
 
     override val isAnySimSecure = MutableStateFlow(false)
+    override fun getIsAnySimSecure(): Boolean = isAnySimSecure.value
 
     private var isInEcmMode: Boolean = false
 

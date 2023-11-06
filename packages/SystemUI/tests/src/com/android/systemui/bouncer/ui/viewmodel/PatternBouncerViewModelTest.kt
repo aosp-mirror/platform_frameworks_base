@@ -64,6 +64,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
         utils.bouncerViewModel(
             bouncerInteractor = bouncerInteractor,
             authenticationInteractor = authenticationInteractor,
+            actionButtonInteractor = utils.bouncerActionButtonInteractor(),
         )
     private val underTest =
         PatternBouncerViewModel(
