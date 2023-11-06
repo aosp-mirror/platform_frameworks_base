@@ -21,9 +21,8 @@ import android.content.Context
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.res.R
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
@@ -40,27 +39,25 @@ constructor(
     private val keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
     private val indicationController: KeyguardIndicationController,
-    private val featureFlags: FeatureFlags,
 ) : KeyguardSection() {
     private val indicationAreaViewId = R.id.keyguard_indication_area
     private var indicationAreaHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             val view = KeyguardIndicationArea(context, null)
             constraintLayout.addView(view)
         }
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             indicationAreaHandle =
                 KeyguardIndicationAreaBinder.bind(
                     constraintLayout,
                     keyguardIndicationAreaViewModel,
                     keyguardRootViewModel,
                     indicationController,
-                    featureFlags,
                 )
         }
     }

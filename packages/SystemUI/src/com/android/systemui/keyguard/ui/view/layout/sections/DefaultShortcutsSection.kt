@@ -24,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
@@ -40,7 +41,6 @@ class DefaultShortcutsSection
 @Inject
 constructor(
     @Main private val resources: Resources,
-    private val featureFlags: FeatureFlags,
     private val keyguardQuickAffordancesCombinedViewModel:
         KeyguardQuickAffordancesCombinedViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
@@ -49,14 +49,14 @@ constructor(
     private val vibratorHelper: VibratorHelper,
 ) : BaseShortcutSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             addLeftShortcut(constraintLayout)
             addRightShortcut(constraintLayout)
         }
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             leftShortcutHandle =
                 KeyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.start_button),

@@ -29,9 +29,8 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.res.R
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardAmbientIndicationAreaViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardAmbientIndicationViewModel
@@ -42,14 +41,13 @@ class DefaultAmbientIndicationAreaSection
 @Inject
 constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val featureFlags: FeatureFlags,
     private val keyguardAmbientIndicationViewModel: KeyguardAmbientIndicationViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
 ) : KeyguardSection() {
     private var ambientIndicationAreaHandle: KeyguardAmbientIndicationAreaViewBinder.Binding? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             val view =
                 LayoutInflater.from(constraintLayout.context)
                     .inflate(R.layout.ambient_indication, constraintLayout, false)
@@ -59,7 +57,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             ambientIndicationAreaHandle =
                 KeyguardAmbientIndicationAreaViewBinder.bind(
                     constraintLayout,

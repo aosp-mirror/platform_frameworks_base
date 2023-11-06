@@ -33,6 +33,7 @@ import com.android.app.animation.Interpolators
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.keyguard.KeyguardClockSwitch.MISSING_CLOCK_ID
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
@@ -111,7 +112,7 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+                    if (keyguardBottomAreaRefactor()) {
                         launch { viewModel.alpha.collect { alpha -> view.alpha = alpha } }
                     }
 

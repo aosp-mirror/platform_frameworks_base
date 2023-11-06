@@ -24,6 +24,7 @@ import static com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE;
 import static com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.Flags.keyguardBottomAreaRefactor;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
@@ -1070,7 +1071,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mQsController.init();
         mShadeHeadsUpTracker.addTrackingHeadsUpListener(
                 mNotificationStackScrollLayoutController::setTrackingHeadsUp);
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (!keyguardBottomAreaRefactor()) {
             setKeyguardBottomArea(mView.findViewById(R.id.keyguard_bottom_area));
         }
 
@@ -1409,7 +1410,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         updateViewControllers(userAvatarView, keyguardUserSwitcherView);
 
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (!keyguardBottomAreaRefactor()) {
             // Update keyguard bottom area
             int index = mView.indexOfChild(mKeyguardBottomArea);
             mView.removeView(mKeyguardBottomArea);
@@ -1443,7 +1444,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mBarState);
         }
 
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (!keyguardBottomAreaRefactor()) {
             setKeyguardBottomAreaVisibility(mBarState, false);
         }
 
@@ -1456,7 +1457,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void initBottomArea() {
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (!keyguardBottomAreaRefactor()) {
             mKeyguardBottomArea.init(
                 mKeyguardBottomAreaViewModel,
                 mFalsingManager,
@@ -1643,7 +1644,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mKeyguardStatusViewController.setLockscreenClockY(
                     mClockPositionAlgorithm.getExpandedPreferredClockY());
         }
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             mKeyguardInteractor.setClockPosition(
                 mClockPositionResult.clockX, mClockPositionResult.clockY);
         } else {
@@ -2710,7 +2711,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         float alpha = Math.min(expansionAlpha, 1 - mQsController.computeExpansionFraction());
         alpha *= mBottomAreaShadeAlpha;
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             mKeyguardInteractor.setAlpha(alpha);
         } else {
             mKeyguardBottomAreaInteractor.setAlpha(alpha);
@@ -2936,7 +2937,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void updateDozingVisibilities(boolean animate) {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             mKeyguardInteractor.setAnimateDozingTransitions(animate);
         } else {
             mKeyguardBottomAreaInteractor.setAnimateDozingTransitions(animate);
@@ -3144,7 +3145,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mDozing = dozing;
         // TODO (b/) make listeners for this
         mNotificationStackScrollLayoutController.setDozing(mDozing, animate);
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             mKeyguardInteractor.setAnimateDozingTransitions(animate);
         } else {
             mKeyguardBottomAreaInteractor.setAnimateDozingTransitions(animate);
@@ -4441,7 +4442,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     goingToFullShade,
                     mBarState);
 
-            if (!mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            if (!keyguardBottomAreaRefactor()) {
                 setKeyguardBottomAreaVisibility(statusBarState, goingToFullShade);
             }
 
@@ -4698,7 +4699,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mKeyguardStatusViewController.setAlpha(alpha);
             stackScroller.setAlpha(alpha);
 
-            if (mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            if (keyguardBottomAreaRefactor()) {
                 mKeyguardInteractor.setAlpha(alpha);
             } else {
                 mKeyguardBottomAreaInteractor.setAlpha(alpha);

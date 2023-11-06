@@ -67,6 +67,7 @@ internal class SceneContainerFlagsTest(
 
         listOf(
                 AconfigFlags.FLAG_SCENE_CONTAINER,
+                AconfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
             )
             .forEach { flagToken ->
                 setFlagsRule.enableFlags(flagToken)
