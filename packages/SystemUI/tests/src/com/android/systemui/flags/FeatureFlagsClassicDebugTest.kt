@@ -22,6 +22,7 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.test.suitebuilder.annotation.SmallTest
+import com.android.systemui.Flags.FLAG_SYSUI_TEAMFOOD
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -72,6 +73,8 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        mSetFlagsRule.disableFlags(FLAG_SYSUI_TEAMFOOD)
+
         flagMap.put(teamfoodableFlagA.name, teamfoodableFlagA)
         flagMap.put(teamfoodableFlagB.name, teamfoodableFlagB)
         mFeatureFlagsClassicDebug =
@@ -130,7 +133,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
 
     @Test
     fun teamFoodFlag_True() {
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_SYSUI_TEAMFOOD)
+        mSetFlagsRule.enableFlags(FLAG_SYSUI_TEAMFOOD)
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)).isTrue()
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagB)).isTrue()
 
@@ -145,7 +148,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
             .thenReturn(true)
         whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagB.name), any()))
             .thenReturn(false)
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_SYSUI_TEAMFOOD)
+        mSetFlagsRule.enableFlags(FLAG_SYSUI_TEAMFOOD)
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)).isTrue()
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagB)).isFalse()
 
