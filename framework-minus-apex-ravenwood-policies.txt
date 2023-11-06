@@ -1,1 +1,11 @@
 # Ravenwood "policy" file for framework-minus-apex.
+
+class android.util.ArrayMap stubclass
+class android.util.ContainerHelpers stubclass
+class android.util.EmptyArray stubclass
+class android.util.MapCollections stubclass
+
+class android.util.Log stubclass
+class android.util.Log !com.android.hoststubgen.nativesubstitution.Log_host
+
+class com.android.internal.util.LineBreakBufferedWriter stubclass

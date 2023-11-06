@@ -192,6 +192,18 @@ class ImplGeneratingAdapter(
                 return ThrowingMethodAdapter(
                         access, name, descriptor, signature, exceptions, innerVisitor)
             }
+            if (policy.policy == FilterPolicy.Ignore) {
+                when (Type.getReturnType(descriptor)) {
+                    Type.VOID_TYPE -> {
+                        log.v("Making method ignored...")
+                        return IgnoreMethodAdapter(
+                                access, name, descriptor, signature, exceptions, innerVisitor)
+                    }
+                    else -> {
+                        throw RuntimeException("Ignored policy only allowed for void methods");
+                    }
+                }
+            }
         }
 
         return innerVisitor
@@ -247,6 +259,23 @@ class ImplGeneratingAdapter(
             visitInsn(Opcodes.ATHROW)
 
             // visitMaxs(3, if (isStatic) 0 else 1)
+            visitMaxs(0, 0) // We let ASM figure them out.
+        }
+    }
+
+    /**
+     * A method adapter that replaces the method body with a no-op return.
+     */
+    private inner class IgnoreMethodAdapter(
+            access: Int,
+            val name: String,
+            descriptor: String,
+            signature: String?,
+            exceptions: Array<String>?,
+            next: MethodVisitor?
+    ) : BodyReplacingMethodVisitor(access, name, descriptor, signature, exceptions, next) {
+        override fun emitNewCode() {
+            visitInsn(Opcodes.RETURN)
             visitMaxs(0, 0) // We let ASM figure them out.
         }
     }

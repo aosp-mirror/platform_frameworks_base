@@ -16,19 +16,17 @@
 package com.android.hoststubgen.test.tinyframework;
 
 import android.hosttest.annotation.HostSideTestClassLoadHook;
+import android.hosttest.annotation.HostSideTestStub;
 import android.hosttest.annotation.HostSideTestWholeClassStub;
 
-
-// Note, policy-override-tiny-framework.txt hss an override on this class.
-@HostSideTestClassLoadHook(
-        "com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded")
-@HostSideTestWholeClassStub
-public class TinyFrameworkClassWithInitializer {
-    // Note, this method has a 'throw' in the policy file, which is handled as a 'keep' (because
-    // it's a static initializer), so this won't show up in the stub jar.
+@HostSideTestStub
+public class TinyFrameworkClassWithInitializerDefault {
     static {
         sInitialized = true;
     }
 
+    @HostSideTestStub
     public static boolean sInitialized;
+    @HostSideTestStub
+    public static Object sObject = new Object();
 }
