@@ -3,15 +3,12 @@ package com.android.systemui.communal.ui.compose
 import android.appwidget.AppWidgetHostView
 import android.os.Bundle
 import android.util.SizeF
-import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
@@ -28,8 +25,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.ui.model.CommunalContentUiModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.media.controls.ui.MediaHostState
 
 @Composable
 fun CommunalHub(
@@ -38,7 +33,6 @@ fun CommunalHub(
 ) {
     val showTutorial by viewModel.showTutorialContent.collectAsState(initial = false)
     val widgetContent by viewModel.widgetContent.collectAsState(initial = emptyList())
-    val isMediaPlaying by viewModel.isMediaPlaying.collectAsState(initial = false)
     Box(
         modifier = modifier.fillMaxSize().background(Color.White),
     ) {
@@ -72,33 +66,6 @@ fun CommunalHub(
                         model = widget,
                     )
                 }
-            }
-        }
-
-        if (isMediaPlaying) {
-            Box(
-                modifier =
-                    Modifier.width(Dimensions.CardWidth)
-                        .height(Dimensions.CardHeightThird)
-                        .padding(Dimensions.Spacing)
-            ) {
-                AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = {
-                        viewModel.mediaHost.expansion = MediaHostState.EXPANDED
-                        viewModel.mediaHost.showsOnlyActiveMedia = false
-                        viewModel.mediaHost.falsingProtectionNeeded = false
-                        viewModel.mediaHost.init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
-                        viewModel.mediaHost.hostView.layoutParams =
-                            FrameLayout.LayoutParams(
-                                FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.MATCH_PARENT
-                            )
-                        viewModel.mediaHost.hostView
-                    },
-                    // For reusing composition in lazy lists.
-                    onReset = {},
-                )
             }
         }
     }

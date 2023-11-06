@@ -24,10 +24,7 @@ import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.model.CommunalContentUiModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.media.dagger.MediaModule.COMMUNAL_HUB
 import javax.inject.Inject
-import javax.inject.Named
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -39,7 +36,6 @@ constructor(
     @Application private val context: Context,
     private val appWidgetHost: AppWidgetHost,
     private val communalInteractor: CommunalInteractor,
-    @Named(COMMUNAL_HUB) val mediaHost: MediaHost,
     tutorialInteractor: CommunalTutorialInteractor,
 ) {
     /** Whether communal hub should show tutorial content. */
@@ -60,8 +56,6 @@ constructor(
                 )
             }
         }
-
-    val isMediaPlaying = communalInteractor.mediaPlaying
 
     val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
     fun onSceneChanged(scene: CommunalSceneKey) {

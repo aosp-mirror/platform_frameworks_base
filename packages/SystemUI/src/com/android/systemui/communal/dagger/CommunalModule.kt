@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.dagger
 
-import com.android.systemui.communal.data.repository.CommunalMediaRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
@@ -25,7 +24,6 @@ import dagger.Module
 @Module(
     includes =
         [
-            CommunalMediaRepositoryModule::class,
             CommunalRepositoryModule::class,
             CommunalTutorialRepositoryModule::class,
             CommunalWidgetRepositoryModule::class,
