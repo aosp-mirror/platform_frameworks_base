@@ -18,7 +18,6 @@ package com.android.wm.shell.back;
 
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-import static android.window.BackEvent.EDGE_RIGHT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_CROSS_TASK;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
@@ -37,7 +36,7 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
@@ -46,6 +45,8 @@ import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.R;
+import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
 import javax.inject.Inject;
@@ -68,32 +69,18 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private static final int BACKGROUNDCOLOR = 0x43433A;
 
     /**
-     * Minimum scale of the entering window.
+     * Minimum scale of the entering and closing window.
      */
-    private static final float ENTERING_MIN_WINDOW_SCALE = 0.85f;
+    private static final float MIN_WINDOW_SCALE = 0.8f;
 
-    /**
-     * Minimum scale of the closing window.
-     */
-    private static final float CLOSING_MIN_WINDOW_SCALE = 0.75f;
-
-    /**
-     * Minimum color scale of the closing window.
-     */
-    private static final float CLOSING_MIN_WINDOW_COLOR_SCALE = 0.1f;
-
-    /**
-     * The margin between the entering window and the closing window
-     */
-    private static final int WINDOW_MARGIN = 35;
-
-    /** Max window translation in the Y axis. */
-    private static final int WINDOW_MAX_DELTA_Y = 160;
+    /** Duration of post animation after gesture committed. */
+    private static final int POST_ANIMATION_DURATION_MS = 500;
 
     private final Rect mStartTaskRect = new Rect();
     private final float mCornerRadius;
 
     // The closing window properties.
+    private final Rect mClosingStartRect = new Rect();
     private final RectF mClosingCurrentRect = new RectF();
 
     // The entering window properties.
@@ -101,44 +88,32 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private final RectF mEnteringCurrentRect = new RectF();
 
     private final PointF mInitialTouchPos = new PointF();
-    private final Interpolator mInterpolator = new AccelerateDecelerateInterpolator();
-
+    private final Interpolator mPostAnimationInterpolator = Interpolators.EMPHASIZED;
+    private final Interpolator mYMovementInterpolator = Interpolators.DECELERATE;
+    private final Interpolator mProgressInterpolator = new DecelerateInterpolator();
     private final Matrix mTransformMatrix = new Matrix();
 
     private final float[] mTmpFloat9 = new float[9];
-    private final float[] mTmpTranslate = {0, 0, 0};
     private final BackAnimationRunner mBackAnimationRunner;
     private final BackAnimationBackground mBackground;
     private final Context mContext;
     private RemoteAnimationTarget mEnteringTarget;
     private RemoteAnimationTarget mClosingTarget;
-    private SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
     private boolean mBackInProgress = false;
-    private boolean mIsRightEdge;
-    private float mProgress = 0;
-    private PointF mTouchPos = new PointF();
+    private final PointF mTouchPos = new PointF();
     private IRemoteAnimationFinishedCallback mFinishCallback;
-    private BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
+    private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
+    private float mInterWindowMargin;
+    private float mVerticalMargin;
 
     @Inject
     public CrossTaskBackAnimation(Context context, BackAnimationBackground background) {
-        mContext = context;
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mBackAnimationRunner = new BackAnimationRunner(
                 new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_TASK);
         mBackground = background;
-    }
-
-    private static void computeScaleTransformMatrix(float scale, float[] matrix) {
-        matrix[0] = scale;
-        matrix[1] = 0;
-        matrix[2] = 0;
-        matrix[3] = 0;
-        matrix[4] = scale;
-        matrix[5] = 0;
-        matrix[6] = 0;
-        matrix[7] = 0;
-        matrix[8] = scale;
+        mContext = context;
     }
 
     private static float mapRange(float value, float min, float max) {
@@ -146,7 +121,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     }
 
     private float getInterpolatedProgress(float backProgress) {
-        return 1 - (1 - backProgress) * (1 - backProgress) * (1 - backProgress);
+        return mProgressInterpolator.getInterpolation(backProgress);
     }
 
     private void startBackAnimation() {
@@ -162,6 +137,10 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         // Draw background.
         mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
                 BACKGROUNDCOLOR, mTransaction);
+        mInterWindowMargin = mContext.getResources()
+                .getDimension(R.dimen.cross_task_back_inter_window_margin);
+        mVerticalMargin = mContext.getResources()
+                .getDimension(R.dimen.cross_task_back_vertical_margin);
     }
 
     private void updateGestureBackProgress(float progress, BackEvent event) {
@@ -169,44 +148,38 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
             return;
         }
 
-        float touchX = event.getTouchX();
         float touchY = event.getTouchY();
-        float dX = Math.abs(touchX - mInitialTouchPos.x);
 
         // The 'follow width' is the width of the window if it completely matches
         // the gesture displacement.
         final int width = mStartTaskRect.width();
         final int height = mStartTaskRect.height();
 
-        // The 'progress width' is the width of the window if it strictly linearly interpolates
-        // to minimum scale base on progress.
-        float enteringScale = mapRange(progress, 1, ENTERING_MIN_WINDOW_SCALE);
-        float closingScale = mapRange(progress, 1, CLOSING_MIN_WINDOW_SCALE);
-        float closingColorScale = mapRange(progress, 1, CLOSING_MIN_WINDOW_COLOR_SCALE);
+        float scale = mapRange(progress, 1, MIN_WINDOW_SCALE);
+        float scaledWidth = scale * width;
+        float scaledHeight = scale * height;
 
-        // The final width is derived from interpolating between the follow with and progress width
-        // using gesture progress.
-        float enteringWidth = enteringScale * width;
-        float closingWidth = closingScale * width;
-        float enteringHeight = (float) height / width * enteringWidth;
-        float closingHeight = (float) height / width * closingWidth;
-
-        float deltaYRatio = (touchY - mInitialTouchPos.y) / height;
         // Base the window movement in the Y axis on the touch movement in the Y axis.
-        float deltaY = (float) Math.sin(deltaYRatio * Math.PI * 0.5f) * WINDOW_MAX_DELTA_Y;
-        // Move the window along the Y axis.
-        float closingTop = (height - closingHeight) * 0.5f + deltaY;
-        float enteringTop = (height - enteringHeight) * 0.5f + deltaY;
-        // Move the window along the X axis.
-        float right = width - (progress * WINDOW_MARGIN);
-        float left = right - closingWidth;
+        float rawYDelta = touchY - mInitialTouchPos.y;
+        float yDirection = rawYDelta < 0 ? -1 : 1;
+        // limit yDelta interpretation to 1/2 of screen height in either direction
+        float deltaYRatio = Math.min(height / 2f, Math.abs(rawYDelta)) / (height / 2f);
+        float interpolatedYRatio = mYMovementInterpolator.getInterpolation(deltaYRatio);
+        // limit y-shift so surface never passes 8dp screen margin
+        float deltaY = yDirection * interpolatedYRatio * Math.max(0f,
+                (height - scaledHeight) / 2f - mVerticalMargin);
 
-        mClosingCurrentRect.set(left, closingTop, right, closingTop + closingHeight);
-        mEnteringCurrentRect.set(left - enteringWidth - WINDOW_MARGIN, enteringTop,
-                left - WINDOW_MARGIN, enteringTop + enteringHeight);
+        // Move the window along the Y axis.
+        float scaledTop = (height - scaledHeight) * 0.5f + deltaY;
+        // Move the window along the X axis.
+        float right = width - (progress * mVerticalMargin);
+        float left = right - scaledWidth;
+
+        mClosingCurrentRect.set(left, scaledTop, right, scaledTop + scaledHeight);
+        mEnteringCurrentRect.set(left - scaledWidth - mInterWindowMargin, scaledTop,
+                left - mInterWindowMargin, scaledTop + scaledHeight);
 
         applyTransform(mClosingTarget.leash, mClosingCurrentRect, mCornerRadius);
-        applyColorTransform(mClosingTarget.leash, closingColorScale);
         applyTransform(mEnteringTarget.leash, mEnteringCurrentRect, mCornerRadius);
         mTransaction.apply();
 
@@ -214,9 +187,21 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     }
 
     private void updatePostCommitClosingAnimation(float progress) {
+        float targetLeft =
+                mStartTaskRect.left + (1 - MIN_WINDOW_SCALE) * mStartTaskRect.width() / 2;
+        float targetTop =
+                mStartTaskRect.top + (1 - MIN_WINDOW_SCALE) * mStartTaskRect.height() / 2;
+        float targetWidth = mStartTaskRect.width() * MIN_WINDOW_SCALE;
+        float targetHeight = mStartTaskRect.height() * MIN_WINDOW_SCALE;
+
+        float left = mapRange(progress, mClosingStartRect.left, targetLeft);
+        float top = mapRange(progress, mClosingStartRect.top, targetTop);
+        float width = mapRange(progress, mClosingStartRect.width(), targetWidth);
+        float height = mapRange(progress, mClosingStartRect.height(), targetHeight);
         mTransaction.setLayer(mClosingTarget.leash, 0);
-        float alpha = mapRange(progress, 1, 0);
-        mTransaction.setAlpha(mClosingTarget.leash, alpha);
+
+        mClosingCurrentRect.set(left, top, left + width, top + height);
+        applyTransform(mClosingTarget.leash, mClosingCurrentRect, mCornerRadius);
     }
 
     private void updatePostCommitEnteringAnimation(float progress) {
@@ -244,14 +229,6 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
                 .setCornerRadius(leash, cornerRadius);
     }
 
-    private void applyColorTransform(SurfaceControl leash, float colorScale) {
-        if (leash == null) {
-            return;
-        }
-        computeScaleTransformMatrix(colorScale, mTmpFloat9);
-        mTransaction.setColorTransform(leash, mTmpFloat9, mTmpTranslate);
-    }
-
     private void finishAnimation() {
         if (mEnteringTarget != null) {
             mEnteringTarget.leash.release();
@@ -276,7 +253,8 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
             try {
                 mFinishCallback.onAnimationFinished();
             } catch (RemoteException e) {
-                e.printStackTrace();
+                ProtoLog.e(WM_SHELL_BACK_PREVIEW,
+                        "RemoteException when invoking onAnimationFinished callback");
             }
             mFinishCallback = null;
         }
@@ -285,12 +263,11 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private void onGestureProgress(@NonNull BackEvent backEvent) {
         if (!mBackInProgress) {
             mInitialTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
-            mIsRightEdge = backEvent.getSwipeEdge() == EDGE_RIGHT;
             mBackInProgress = true;
         }
-        mProgress = backEvent.getProgress();
+        float progress = backEvent.getProgress();
         mTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
-        updateGestureBackProgress(getInterpolatedProgress(mProgress), backEvent);
+        updateGestureBackProgress(getInterpolatedProgress(progress), backEvent);
     }
 
     private void onGestureCommitted() {
@@ -302,9 +279,11 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         // We enter phase 2 of the animation, the starting coordinates for phase 2 are the current
         // coordinate of the gesture driven phase.
         mEnteringCurrentRect.round(mEnteringStartRect);
+        mClosingCurrentRect.round(mClosingStartRect);
 
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0f).setDuration(300);
-        valueAnimator.setInterpolator(mInterpolator);
+        ValueAnimator valueAnimator =
+                ValueAnimator.ofFloat(1f, 0f).setDuration(POST_ANIMATION_DURATION_MS);
+        valueAnimator.setInterpolator(mPostAnimationInterpolator);
         valueAnimator.addUpdateListener(animation -> {
             float progress = animation.getAnimatedFraction();
             updatePostCommitEnteringAnimation(progress);
