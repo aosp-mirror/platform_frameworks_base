@@ -29,22 +29,28 @@ import static org.mockito.Mockito.when;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.model.SysUiState;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -58,6 +64,8 @@ public class SystemUIDialogTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private DialogDelegate<SystemUIDialog> mDelegate;
 
     @Before
     public void setup() {
@@ -142,5 +150,36 @@ public class SystemUIDialogTest extends SysuiTestCase {
         dialog.dismiss();
         assertThat(calledStart.get()).isTrue();
         assertThat(calledStop.get()).isTrue();
+    }
+
+    @Test
+    public void delegateIsCalled_inCorrectOrder() {
+        Configuration configuration = new Configuration();
+        InOrder inOrder = Mockito.inOrder(mDelegate);
+        SystemUIDialog dialog = createDialogWithDelegate();
+
+        dialog.show();
+        dialog.onWindowFocusChanged(/* hasFocus= */ true);
+        dialog.onConfigurationChanged(configuration);
+        dialog.dismiss();
+
+        inOrder.verify(mDelegate).beforeCreate(dialog, /* savedInstanceState= */ null);
+        inOrder.verify(mDelegate).onCreate(dialog, /* savedInstanceState= */ null);
+        inOrder.verify(mDelegate).onStart(dialog);
+        inOrder.verify(mDelegate).onWindowFocusChanged(dialog, /* hasFocus= */ true);
+        inOrder.verify(mDelegate).onConfigurationChanged(dialog, configuration);
+        inOrder.verify(mDelegate).onStop(dialog);
+    }
+
+    private SystemUIDialog createDialogWithDelegate() {
+        SystemUIDialog.Factory factory = new SystemUIDialog.Factory(
+                getContext(),
+                mFeatureFlags,
+                Dependency.get(SystemUIDialogManager.class),
+                Dependency.get(SysUiState.class),
+                Dependency.get(BroadcastDispatcher.class),
+                Dependency.get(DialogLaunchAnimator.class)
+        );
+        return factory.create(mDelegate);
     }
 }
