@@ -60,6 +60,7 @@ import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelect
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.phone.AlertDialogWithDelegate;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.Utils;
 
@@ -222,27 +223,30 @@ public class MediaProjectionPermissionActivity extends Activity
         // the correct screen width when in split screen.
         Context dialogContext = getApplicationContext();
         if (isPartialScreenSharingEnabled()) {
-            mDialog = new MediaProjectionPermissionDialog(
-                    dialogContext,
-                    getMediaProjectionConfig(),
-                    () -> {
-                        MediaProjectionPermissionDialog dialog =
-                                (MediaProjectionPermissionDialog) mDialog;
-                        ScreenShareOption selectedOption = dialog.getSelectedScreenShareOption();
-                        grantMediaProjectionPermission(selectedOption.getMode());
-                    },
-                    () -> finish(RECORD_CANCEL, /* projection= */ null),
-                    appName,
-                    mUid,
-                    mMediaProjectionMetricsLogger);
+            MediaProjectionPermissionDialogDelegate delegate =
+                    new MediaProjectionPermissionDialogDelegate(
+                            dialogContext,
+                            getMediaProjectionConfig(),
+                            dialog -> {
+                                ScreenShareOption selectedOption =
+                                        dialog.getSelectedScreenShareOption();
+                                grantMediaProjectionPermission(selectedOption.getMode());
+                            },
+                            () -> finish(RECORD_CANCEL, /* projection= */ null),
+                            appName,
+                            mUid,
+                            mMediaProjectionMetricsLogger);
+            mDialog =
+                    new AlertDialogWithDelegate(
+                            dialogContext, R.style.Theme_SystemUI_Dialog, delegate);
         } else {
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(dialogContext,
-                    R.style.Theme_SystemUI_Dialog)
-                    .setTitle(dialogTitle)
-                    .setIcon(R.drawable.ic_media_projection_permission)
-                    .setMessage(dialogText)
-                    .setPositiveButton(R.string.media_projection_action_text, this)
-                    .setNeutralButton(android.R.string.cancel, this);
+            AlertDialog.Builder dialogBuilder =
+                    new AlertDialog.Builder(dialogContext, R.style.Theme_SystemUI_Dialog)
+                            .setTitle(dialogTitle)
+                            .setIcon(R.drawable.ic_media_projection_permission)
+                            .setMessage(dialogText)
+                            .setPositiveButton(R.string.media_projection_action_text, this)
+                            .setNeutralButton(android.R.string.cancel, this);
             mDialog = dialogBuilder.create();
         }
 

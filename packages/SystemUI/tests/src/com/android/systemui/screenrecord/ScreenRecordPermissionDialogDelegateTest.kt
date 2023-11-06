@@ -23,16 +23,22 @@ import android.testing.TestableLooper
 import android.view.View
 import android.widget.Spinner
 import androidx.test.filters.SmallTest
+import com.android.systemui.Dependency
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
 import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
 import com.android.systemui.mediaprojection.permission.SINGLE_APP
+import com.android.systemui.model.SysUiState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
+import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -50,7 +56,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class ScreenRecordPermissionDialogTest : SysuiTestCase() {
+class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
 
     @Mock private lateinit var starter: ActivityStarter
     @Mock private lateinit var controller: RecordingController
@@ -59,15 +65,23 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
     @Mock private lateinit var onStartRecordingClicked: Runnable
     @Mock private lateinit var mediaProjectionMetricsLogger: MediaProjectionMetricsLogger
 
-    private lateinit var dialog: ScreenRecordPermissionDialog
+    private lateinit var dialog: SystemUIDialog
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dialog =
-            ScreenRecordPermissionDialog(
+        val systemUIDialogFactory =
+            SystemUIDialog.Factory(
                 context,
+                Dependency.get(FeatureFlags::class.java),
+                Dependency.get(SystemUIDialogManager::class.java),
+                Dependency.get(SysUiState::class.java),
+                Dependency.get(BroadcastDispatcher::class.java),
+                Dependency.get(DialogLaunchAnimator::class.java),
+            )
+        val delegate =
+            ScreenRecordPermissionDialogDelegate(
                 UserHandle.of(0),
                 TEST_HOST_UID,
                 controller,
@@ -76,20 +90,21 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
                 onStartRecordingClicked,
                 mediaProjectionMetricsLogger,
             )
-        dialog.onCreate(null)
+        dialog = systemUIDialogFactory.create(delegate)
+        delegate.onCreate(dialog, savedInstanceState = null)
         whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
     }
 
     @After
     fun teardown() {
         if (::dialog.isInitialized) {
-            dialog.dismiss()
+            dismissDialog()
         }
     }
 
     @Test
     fun testShowDialog_partialScreenSharingEnabled_optionsSpinnerIsVisible() {
-        dialog.show()
+        showDialog()
 
         val visibility = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner).visibility
         assertThat(visibility).isEqualTo(View.VISIBLE)
@@ -97,7 +112,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
 
     @Test
     fun testShowDialog_singleAppSelected_showTapsIsGone() {
-        dialog.show()
+        showDialog()
         onSpinnerItemSelected(SINGLE_APP)
 
         val visibility = dialog.requireViewById<View>(R.id.show_taps).visibility
@@ -106,7 +121,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
 
     @Test
     fun testShowDialog_entireScreenSelected_showTapsIsVisible() {
-        dialog.show()
+        showDialog()
         onSpinnerItemSelected(ENTIRE_SCREEN)
 
         val visibility = dialog.requireViewById<View>(R.id.show_taps).visibility
@@ -115,7 +130,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
 
     @Test
     fun startClicked_singleAppSelected_passesHostUidToAppSelector() {
-        dialog.show()
+        showDialog()
         onSpinnerItemSelected(SINGLE_APP)
 
         clickOnStart()
@@ -128,14 +143,14 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
 
     @Test
     fun showDialog_dialogIsShowing() {
-        dialog.show()
+        showDialog()
 
         assertThat(dialog.isShowing).isTrue()
     }
 
     @Test
     fun showDialog_singleAppIsDefault() {
-        dialog.show()
+        showDialog()
 
         val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
         val singleApp = context.getString(R.string.screen_share_permission_dialog_option_single_app)
@@ -144,7 +159,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
 
     @Test
     fun showDialog_cancelClicked_dialogIsDismissed() {
-        dialog.show()
+        showDialog()
 
         clickOnCancel()
 
@@ -153,7 +168,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
 
     @Test
     fun showDialog_cancelClickedMultipleTimes_projectionRequestCancelledIsLoggedOnce() {
-        dialog.show()
+        showDialog()
 
         clickOnCancel()
         clickOnCancel()
@@ -163,14 +178,20 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
 
     @Test
     fun dismissDialog_dismissCalledMultipleTimes_projectionRequestCancelledIsLoggedOnce() {
-        dialog.show()
+        showDialog()
 
-        TestableLooper.get(this).runWithLooper {
-            dialog.dismiss()
-            dialog.dismiss()
-        }
+        dismissDialog()
+        dismissDialog()
 
         verify(mediaProjectionMetricsLogger).notifyProjectionRequestCancelled(TEST_HOST_UID)
+    }
+
+    private fun showDialog() {
+        dialog.show()
+    }
+
+    private fun dismissDialog() {
+        dialog.dismiss()
     }
 
     private fun clickOnCancel() {

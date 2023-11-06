@@ -17,7 +17,6 @@ package com.android.systemui.screenrecord
 
 import android.app.Activity
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -35,17 +34,17 @@ import androidx.annotation.LayoutRes
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
-import com.android.systemui.mediaprojection.permission.BaseScreenSharePermissionDialog
+import com.android.systemui.mediaprojection.permission.BaseMediaProjectionPermissionDialogDelegate
 import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
 import com.android.systemui.mediaprojection.permission.SINGLE_APP
 import com.android.systemui.mediaprojection.permission.ScreenShareOption
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
+import com.android.systemui.statusbar.phone.SystemUIDialog
 
 /** Dialog to select screen recording options */
-class ScreenRecordPermissionDialog(
-    context: Context,
+class ScreenRecordPermissionDialogDelegate(
     private val hostUserHandle: UserHandle,
     private val hostUid: Int,
     private val controller: RecordingController,
@@ -54,8 +53,7 @@ class ScreenRecordPermissionDialog(
     private val onStartRecordingClicked: Runnable?,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
 ) :
-    BaseScreenSharePermissionDialog(
-        context,
+    BaseMediaProjectionPermissionDialogDelegate<SystemUIDialog>(
         createOptionList(),
         appName = null,
         hostUid = hostUid,
@@ -68,10 +66,10 @@ class ScreenRecordPermissionDialog(
     private lateinit var audioSwitch: Switch
     private lateinit var options: Spinner
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+        super.onCreate(dialog, savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
-        setTitle(R.string.screenrecord_title)
+        dialog.setTitle(R.string.screenrecord_title)
         setStartButtonText(R.string.screenrecord_permission_dialog_continue)
         setStartButtonOnClickListener { v: View? ->
             onStartRecordingClicked?.run()
@@ -79,7 +77,7 @@ class ScreenRecordPermissionDialog(
                 requestScreenCapture(/* captureTarget= */ null)
             }
             if (selectedScreenShareOption.mode == SINGLE_APP) {
-                val intent = Intent(context, MediaProjectionAppSelectorActivity::class.java)
+                val intent = Intent(dialog.context, MediaProjectionAppSelectorActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
                 // We can't start activity for result here so we use result receiver to get
@@ -96,22 +94,26 @@ class ScreenRecordPermissionDialog(
                 intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID, hostUid)
                 activityStarter.startActivity(intent, /* dismissShade= */ true)
             }
-            dismiss()
+            dialog.dismiss()
         }
-        setCancelButtonOnClickListener { dismiss() }
+        setCancelButtonOnClickListener { dialog.dismiss() }
         initRecordOptionsView()
     }
 
     @LayoutRes override fun getOptionsViewLayoutId(): Int = R.layout.screen_record_options
 
     private fun initRecordOptionsView() {
-        audioSwitch = requireViewById(R.id.screenrecord_audio_switch)
-        tapsSwitch = requireViewById(R.id.screenrecord_taps_switch)
-        tapsView = requireViewById(R.id.show_taps)
+        audioSwitch = dialog.requireViewById(R.id.screenrecord_audio_switch)
+        tapsSwitch = dialog.requireViewById(R.id.screenrecord_taps_switch)
+        tapsView = dialog.requireViewById(R.id.show_taps)
         updateTapsViewVisibility()
-        options = requireViewById(R.id.screen_recording_options)
+        options = dialog.requireViewById(R.id.screen_recording_options)
         val a: ArrayAdapter<*> =
-            ScreenRecordingAdapter(context, android.R.layout.simple_spinner_dropdown_item, MODES)
+            ScreenRecordingAdapter(
+                dialog.context,
+                android.R.layout.simple_spinner_dropdown_item,
+                MODES
+            )
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         options.adapter = a
         options.setOnItemClickListenerInt { _: AdapterView<*>?, _: View?, _: Int, _: Long ->

@@ -46,6 +46,7 @@ import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDi
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import dagger.Lazy;
@@ -75,6 +76,7 @@ public class RecordingController
     private final UserContextProvider mUserContextProvider;
     private final UserTracker mUserTracker;
     private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
+    private final SystemUIDialog.Factory mDialogFactory;
 
     protected static final String INTENT_UPDATE_STATE =
             "com.android.systemui.screenrecord.UPDATE_STATE";
@@ -120,7 +122,8 @@ public class RecordingController
             UserContextProvider userContextProvider,
             Lazy<ScreenCaptureDevicePolicyResolver> devicePolicyResolver,
             UserTracker userTracker,
-            MediaProjectionMetricsLogger mediaProjectionMetricsLogger) {
+            MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
+            SystemUIDialog.Factory dialogFactory) {
         mMainExecutor = mainExecutor;
         mContext = context;
         mFlags = flags;
@@ -129,6 +132,7 @@ public class RecordingController
         mUserContextProvider = userContextProvider;
         mUserTracker = userTracker;
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
+        mDialogFactory = dialogFactory;
 
         BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setInteractive(true);
@@ -166,15 +170,14 @@ public class RecordingController
                 getHostUid(), SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
 
         return flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
-                ? new ScreenRecordPermissionDialog(
-                        context,
-                        getHostUserHandle(),
-                        getHostUid(),
-                        /* controller= */ this,
-                        activityStarter,
-                        mUserContextProvider,
-                        onStartRecordingClicked,
-                        mMediaProjectionMetricsLogger)
+                ? mDialogFactory.create(new ScreenRecordPermissionDialogDelegate(
+                getHostUserHandle(),
+                getHostUid(),
+                /* controller= */ this,
+                activityStarter,
+                mUserContextProvider,
+                onStartRecordingClicked,
+                mMediaProjectionMetricsLogger))
                 : new ScreenRecordDialog(
                         context,
                         /* controller= */ this,

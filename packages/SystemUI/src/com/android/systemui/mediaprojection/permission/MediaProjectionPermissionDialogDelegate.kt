@@ -15,31 +15,32 @@
  */
 package com.android.systemui.mediaprojection.permission
 
+import android.app.AlertDialog
 import android.content.Context
 import android.media.projection.MediaProjectionConfig
 import android.os.Bundle
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
+import java.util.function.Consumer
 
 /** Dialog to select screen recording options */
-class MediaProjectionPermissionDialog(
+class MediaProjectionPermissionDialogDelegate(
     context: Context,
     mediaProjectionConfig: MediaProjectionConfig?,
-    private val onStartRecordingClicked: Runnable,
+    private val onStartRecordingClicked: Consumer<MediaProjectionPermissionDialogDelegate>,
     private val onCancelClicked: Runnable,
     private val appName: String?,
     hostUid: Int,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
 ) :
-    BaseScreenSharePermissionDialog(
-        context,
+    BaseMediaProjectionPermissionDialogDelegate<AlertDialog>(
         createOptionList(context, appName, mediaProjectionConfig),
         appName,
         hostUid,
         mediaProjectionMetricsLogger
     ) {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(dialog: AlertDialog, savedInstanceState: Bundle?) {
+        super.onCreate(dialog, savedInstanceState)
         // TODO(b/270018943): Handle the case of System sharing (not recording nor casting)
         if (appName == null) {
             setDialogTitle(R.string.media_projection_entry_cast_permission_dialog_title)
@@ -51,12 +52,12 @@ class MediaProjectionPermissionDialog(
         setStartButtonOnClickListener {
             // Note that it is important to run this callback before dismissing, so that the
             // callback can disable the dialog exit animation if it wants to.
-            onStartRecordingClicked.run()
-            dismiss()
+            onStartRecordingClicked.accept(this)
+            dialog.dismiss()
         }
         setCancelButtonOnClickListener {
             onCancelClicked.run()
-            dismiss()
+            dialog.dismiss()
         }
     }
 

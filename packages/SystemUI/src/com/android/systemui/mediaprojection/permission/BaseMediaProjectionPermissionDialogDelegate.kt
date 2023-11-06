@@ -15,6 +15,7 @@
  */
 package com.android.systemui.mediaprojection.permission
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.Gravity
@@ -28,36 +29,36 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.annotation.CallSuper
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.phone.DialogDelegate
 
 /** Base permission dialog for screen share and recording */
-open class BaseScreenSharePermissionDialog(
-    context: Context,
+abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     private val screenShareOptions: List<ScreenShareOption>,
     private val appName: String?,
     private val hostUid: Int,
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     @DrawableRes private val dialogIconDrawable: Int? = null,
     @ColorRes private val dialogIconTint: Int? = null,
-) : SystemUIDialog(context), AdapterView.OnItemSelectedListener {
+) : DialogDelegate<T>, AdapterView.OnItemSelectedListener {
     private lateinit var dialogTitle: TextView
     private lateinit var startButton: TextView
     private lateinit var cancelButton: TextView
     private lateinit var warning: TextView
     private lateinit var screenShareModeSpinner: Spinner
     private var hasCancelBeenLogged: Boolean = false
+    protected lateinit var dialog: AlertDialog
     var selectedScreenShareOption: ScreenShareOption = screenShareOptions.first()
 
-    override fun dismiss() {
-        super.dismiss()
-
-        // Dismiss can be called multiple times and we only want to log once.
+    @CallSuper
+    override fun onStop(dialog: T) {
+        // onStop can be called multiple times and we only want to log once.
         if (hasCancelBeenLogged) {
             return
         }
@@ -66,42 +67,43 @@ open class BaseScreenSharePermissionDialog(
         hasCancelBeenLogged = true
     }
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        window?.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
-        window?.setGravity(Gravity.CENTER)
-        setContentView(R.layout.screen_share_dialog)
-        dialogTitle = requireViewById(R.id.screen_share_dialog_title)
-        warning = requireViewById(R.id.text_warning)
-        startButton = requireViewById(android.R.id.button1)
-        cancelButton = requireViewById(android.R.id.button2)
+    @CallSuper
+    override fun onCreate(dialog: T, savedInstanceState: Bundle?) {
+        this.dialog = dialog
+        dialog.window?.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
+        dialog.window?.setGravity(Gravity.CENTER)
+        dialog.setContentView(R.layout.screen_share_dialog)
+        dialogTitle = dialog.requireViewById(R.id.screen_share_dialog_title)
+        warning = dialog.requireViewById(R.id.text_warning)
+        startButton = dialog.requireViewById(android.R.id.button1)
+        cancelButton = dialog.requireViewById(android.R.id.button2)
         updateIcon()
         initScreenShareOptions()
         createOptionsView(getOptionsViewLayoutId())
     }
 
     private fun updateIcon() {
-        val icon = requireViewById<ImageView>(R.id.screen_share_dialog_icon)
+        val icon = dialog.requireViewById<ImageView>(R.id.screen_share_dialog_icon)
         if (dialogIconTint != null) {
-            icon.setColorFilter(context.getColor(dialogIconTint))
+            icon.setColorFilter(dialog.context.getColor(dialogIconTint))
         }
         if (dialogIconDrawable != null) {
-            icon.setImageDrawable(context.getDrawable(dialogIconDrawable))
+            icon.setImageDrawable(dialog.context.getDrawable(dialogIconDrawable))
         }
     }
 
-    protected fun initScreenShareOptions() {
+    private fun initScreenShareOptions() {
         selectedScreenShareOption = screenShareOptions.first()
         warning.text = warningText
         initScreenShareSpinner()
     }
 
     private val warningText: String
-        get() = context.getString(selectedScreenShareOption.warningText, appName)
+        get() = dialog.context.getString(selectedScreenShareOption.warningText, appName)
 
     private fun initScreenShareSpinner() {
-        val adapter = OptionsAdapter(context.applicationContext, screenShareOptions)
-        screenShareModeSpinner = requireViewById(R.id.screen_share_mode_spinner)
+        val adapter = OptionsAdapter(dialog.context.applicationContext, screenShareOptions)
+        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_spinner)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
     }
@@ -115,7 +117,7 @@ open class BaseScreenSharePermissionDialog(
 
     /** Protected methods for the text updates & functionality */
     protected fun setDialogTitle(@StringRes stringId: Int) {
-        val title = context.getString(stringId, appName)
+        val title = dialog.context.getString(stringId, appName)
         dialogTitle.text = title
     }
 
@@ -137,7 +139,7 @@ open class BaseScreenSharePermissionDialog(
 
     private fun createOptionsView(@LayoutRes layoutId: Int?) {
         if (layoutId == null) return
-        val stub = requireViewById<View>(R.id.options_stub) as ViewStub
+        val stub = dialog.requireViewById<View>(R.id.options_stub) as ViewStub
         stub.layoutResource = layoutId
         stub.inflate()
     }
