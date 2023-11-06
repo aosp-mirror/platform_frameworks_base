@@ -796,10 +796,6 @@ object Flags {
     @JvmField
     val SHARE_WIFI_QS_BUTTON = unreleasedFlag("share_wifi_qs_button", teamfood = true)
 
-    /** Enable haptic slider component in the brightness slider */
-    @JvmField
-    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider", teamfood = true)
-
     // TODO(b/287205379): Tracking bug
     @JvmField
     val QS_CONTAINER_GRAPH_OPTIMIZER = releasedFlag( "qs_container_graph_optimizer")
