@@ -19,12 +19,15 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.SysUITestComponent
 import com.android.SysUITestModule
 import com.android.TestMocksModule
+import com.android.collectLastValue
+import com.android.runCurrent
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
@@ -47,70 +50,64 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
-    private lateinit var testComponent: TestComponent
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                UserDomainLayerModule::class,
+            ]
+    )
+    interface TestComponent : SysUITestComponent<SharedNotificationContainerViewModel> {
 
-    private val shadeRepository
-        get() = testComponent.shadeRepository
-    private val keyguardRepository
-        get() = testComponent.keyguardRepository
-    private val configurationRepository
-        get() = testComponent.configurationRepository
-    private val sharedNotificationContainerInteractor: SharedNotificationContainerInteractor
-        get() = testComponent.sharedNotificationContainerInteractor
-    private val underTest: SharedNotificationContainerViewModel
-        get() = testComponent.underTest
-    private val keyguardInteractor: KeyguardInteractor
-        get() = testComponent.keyguardInteractor
-    private val keyguardTransitionRepository
-        get() = testComponent.keyguardTransitionRepository
-    private val testScope
-        get() = testComponent.testScope
+        val configurationRepository: FakeConfigurationRepository
+        val keyguardRepository: FakeKeyguardRepository
+        val keyguardInteractor: KeyguardInteractor
+        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
+        val shadeRepository: FakeShadeRepository
+        val sharedNotificationContainerInteractor: SharedNotificationContainerInteractor
 
-    @Mock private lateinit var notificationStackSizeCalculator: NotificationStackSizeCalculator
-    @Mock
-    private lateinit var notificationStackScrollLayoutController:
-        NotificationStackScrollLayoutController
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        whenever(notificationStackScrollLayoutController.getView()).thenReturn(mock())
-        whenever(notificationStackScrollLayoutController.getShelfHeight()).thenReturn(0)
-
-        testComponent =
-            DaggerSharedNotificationContainerViewModelTest_TestComponent.factory()
-                .create(
-                    test = this,
-                    featureFlags =
-                        FakeFeatureFlagsClassicModule {
-                            set(Flags.FULL_SCREEN_USER_SWITCHER, true)
-                        },
-                    mocks =
-                        TestMocksModule(
-                            notificationStackSizeCalculator = notificationStackSizeCalculator,
-                            notificationStackScrollLayoutController =
-                                notificationStackScrollLayoutController,
-                        )
-                )
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                featureFlags: FakeFeatureFlagsClassicModule,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
     }
+
+    private val notificationStackSizeCalculator: NotificationStackSizeCalculator = mock()
+    private val notificationStackScrollLayoutController: NotificationStackScrollLayoutController =
+        mock {
+            whenever(view).thenReturn(mock())
+            whenever(shelfHeight).thenReturn(0)
+        }
+
+    private val testComponent: TestComponent =
+        DaggerSharedNotificationContainerViewModelTest_TestComponent.factory()
+            .create(
+                test = this,
+                featureFlags =
+                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
+                mocks =
+                    TestMocksModule(
+                        notificationStackSizeCalculator = notificationStackSizeCalculator,
+                        notificationStackScrollLayoutController =
+                            notificationStackScrollLayoutController,
+                    )
+            )
 
     @Test
     fun validateMarginStartInSplitShade() =
-        testScope.runTest {
+        testComponent.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
 
@@ -123,7 +120,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginStart() =
-        testScope.runTest {
+        testComponent.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
 
@@ -136,7 +133,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginEnd() =
-        testScope.runTest {
+        testComponent.runTest {
             overrideResource(R.dimen.notification_panel_margin_horizontal, 50)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -148,7 +145,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginBottom() =
-        testScope.runTest {
+        testComponent.runTest {
             overrideResource(R.dimen.notification_panel_margin_bottom, 50)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -160,7 +157,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginTopWithLargeScreenHeader() =
-        testScope.runTest {
+        testComponent.runTest {
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 50)
             overrideResource(R.dimen.notification_panel_margin_top, 0)
@@ -174,7 +171,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginTop() =
-        testScope.runTest {
+        testComponent.runTest {
             overrideResource(R.bool.config_use_large_screen_shade_header, false)
             overrideResource(R.dimen.large_screen_shade_header_height, 50)
             overrideResource(R.dimen.notification_panel_margin_top, 0)
@@ -188,7 +185,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun isOnLockscreen() =
-        testScope.runTest {
+        testComponent.runTest {
             val isOnLockscreen by collectLastValue(underTest.isOnLockscreen)
 
             keyguardTransitionRepository.sendTransitionSteps(
@@ -212,7 +209,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GONE,
                 to = KeyguardState.LOCKSCREEN,
-                this,
+                testScope,
             )
             assertThat(isOnLockscreen).isTrue()
 
@@ -226,7 +223,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun isOnLockscreenWithoutShade() =
-        testScope.runTest {
+        testComponent.runTest {
             val isOnLockscreenWithoutShade by collectLastValue(underTest.isOnLockscreenWithoutShade)
 
             // First on AOD
@@ -262,7 +259,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun positionOnLockscreenNotInSplitShade() =
-        testScope.runTest {
+        testComponent.runTest {
             val position by collectLastValue(underTest.position)
 
             // When not in split shade
@@ -282,7 +279,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun positionOnLockscreenInSplitShade() =
-        testScope.runTest {
+        testComponent.runTest {
             val position by collectLastValue(underTest.position)
 
             // When in split shade
@@ -304,7 +301,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun positionOnShade() =
-        testScope.runTest {
+        testComponent.runTest {
             val position by collectLastValue(underTest.position)
 
             // Start on lockscreen with shade expanded
@@ -321,7 +318,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun positionOnQS() =
-        testScope.runTest {
+        testComponent.runTest {
             val position by collectLastValue(underTest.position)
 
             // Start on lockscreen with shade expanded
@@ -338,7 +335,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun maxNotificationsOnLockscreen() =
-        testScope.runTest {
+        testComponent.runTest {
             whenever(
                     notificationStackSizeCalculator.computeMaxKeyguardNotifications(
                         any(),
@@ -363,7 +360,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun maxNotificationsOnShade() =
-        testScope.runTest {
+        testComponent.runTest {
             whenever(
                     notificationStackSizeCalculator.computeMaxKeyguardNotifications(
                         any(),
@@ -387,66 +384,36 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             assertThat(maxNotifications).isEqualTo(-1)
         }
 
-    private suspend fun TestScope.showLockscreen() {
+    private suspend fun TestComponent.showLockscreen() {
         shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(0f)
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
-            this,
+            testScope,
         )
     }
 
-    private suspend fun TestScope.showLockscreenWithShadeExpanded() {
+    private suspend fun TestComponent.showLockscreenWithShadeExpanded() {
         shadeRepository.setLockscreenShadeExpansion(1f)
         shadeRepository.setQsExpansion(0f)
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
-            this,
+            testScope,
         )
     }
 
-    private suspend fun TestScope.showLockscreenWithQSExpanded() {
+    private suspend fun TestComponent.showLockscreenWithQSExpanded() {
         shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(1f)
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
-            this,
+            testScope,
         )
-    }
-
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent {
-
-        val underTest: SharedNotificationContainerViewModel
-
-        val configurationRepository: FakeConfigurationRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val keyguardInteractor: KeyguardInteractor
-        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
-        val shadeRepository: FakeShadeRepository
-        val sharedNotificationContainerInteractor: SharedNotificationContainerInteractor
-        val testScope: TestScope
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
     }
 }

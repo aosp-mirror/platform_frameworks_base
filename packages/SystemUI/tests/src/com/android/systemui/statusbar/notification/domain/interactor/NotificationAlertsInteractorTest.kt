@@ -16,6 +16,7 @@ package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.app.StatusBarManager
 import androidx.test.filters.SmallTest
+import com.android.SysUITestComponent
 import com.android.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.SysUISingleton
@@ -31,8 +32,7 @@ class NotificationAlertsInteractorTest : SysuiTestCase() {
 
     @Component(modules = [SysUITestModule::class])
     @SysUISingleton
-    interface TestComponent {
-        val underTest: NotificationAlertsInteractor
+    interface TestComponent : SysUITestComponent<NotificationAlertsInteractor> {
         val disableFlags: FakeDisableFlagsRepository
 
         @Component.Factory

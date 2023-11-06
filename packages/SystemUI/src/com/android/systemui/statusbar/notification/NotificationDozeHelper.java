@@ -36,26 +36,6 @@ public class NotificationDozeHelper {
     private static final int DOZE_ANIMATOR_TAG = R.id.doze_intensity_tag;
     private final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
 
-    public void fadeGrayscale(final ImageView target, final boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                updateGrayscale(target, (float) animation.getAnimatedValue());
-            }
-        }, dark, delay, new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (!dark) {
-                    target.setColorFilter(null);
-                }
-            }
-        });
-    }
-
-    public void updateGrayscale(ImageView target, boolean dark) {
-        updateGrayscale(target, dark ? 1 : 0);
-    }
-
     public void updateGrayscale(ImageView target, float darkAmount) {
         if (darkAmount > 0) {
             updateGrayscaleMatrix(darkAmount);
@@ -66,7 +46,7 @@ public class NotificationDozeHelper {
     }
 
     // TODO: this should be using StatusBarStateController#getDozeAmount
-    public void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
+    private void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
             boolean dark, long delay, Animator.AnimatorListener listener) {
         float startIntensity = dark ? 0f : 1f;
         float endIntensity = dark ? 1f : 0f;
@@ -79,11 +59,6 @@ public class NotificationDozeHelper {
             animator.addListener(listener);
         }
         animator.start();
-    }
-
-    public void setDozing(Consumer<Float> listener, boolean dozing,
-            boolean animate, long delay, View view) {
-        setDozing(listener, dozing, animate, delay, view, /* endRunnable= */ null);
     }
 
     public void setDozing(Consumer<Float> listener, boolean dozing,
@@ -118,11 +93,7 @@ public class NotificationDozeHelper {
         }
     }
 
-    public void updateGrayscaleMatrix(float intensity) {
+    private void updateGrayscaleMatrix(float intensity) {
         mGrayscaleColorMatrix.setSaturation(1 - intensity);
-    }
-
-    public ColorMatrix getGrayscaleColorMatrix() {
-        return mGrayscaleColorMatrix;
     }
 }
