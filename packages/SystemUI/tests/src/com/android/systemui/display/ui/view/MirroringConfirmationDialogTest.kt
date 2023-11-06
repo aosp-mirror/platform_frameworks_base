@@ -20,8 +20,8 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import org.junit.After
@@ -45,7 +45,13 @@ class MirroringConfirmationDialogTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dialog = MirroringConfirmationDialog(context, onStartMirroringCallback, onCancelCallback)
+        dialog =
+            MirroringConfirmationDialog(
+                context,
+                onStartMirroringCallback,
+                onCancelCallback,
+                navbarBottomInsetsProvider = { 0 },
+            )
     }
 
     @Test
