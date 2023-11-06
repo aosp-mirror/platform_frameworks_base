@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef ANDROIDFW_MUTEXGUARD_H
-#define ANDROIDFW_MUTEXGUARD_H
+#pragma once
 
 #include <mutex>
 #include <optional>
 #include <type_traits>
+#include <utility>
 
 #include "android-base/macros.h"
 
@@ -45,20 +45,25 @@ class ScopedLock;
 //
 template <typename T>
 class Guarded {
-  static_assert(!std::is_pointer<T>::value, "T must not be a raw pointer");
+  static_assert(!std::is_pointer_v<T>, "T must not be a raw pointer");
 
  public:
-  Guarded() : guarded_(std::in_place, T()) {
+  Guarded() : guarded_(std::in_place) {
   }
 
   explicit Guarded(const T& guarded) : guarded_(std::in_place, guarded) {
   }
 
-  explicit Guarded(T&& guarded) : guarded_(std::in_place, std::forward<T>(guarded)) {
+  explicit Guarded(T&& guarded) : guarded_(std::in_place, std::move(guarded)) {
   }
 
-  ~Guarded() {
-    std::lock_guard<std::mutex> scoped_lock(lock_);
+  // Unfortunately, some legacy designs make even class deletion race-prone, where some other
+  // thread may have not finished working with the same object. For those cases one may destroy the
+  // object under a lock (but please fix your code, at least eventually!).
+  template <class Func>
+  void safeDelete(Func f) {
+    std::lock_guard scoped_lock(lock_);
+    f(guarded_ ? &guarded_.value() : nullptr);
     guarded_.reset();
   }
 
@@ -96,5 +101,3 @@ class ScopedLock {
 };
 
 }  // namespace android
-
-#endif  // ANDROIDFW_MUTEXGUARD_H

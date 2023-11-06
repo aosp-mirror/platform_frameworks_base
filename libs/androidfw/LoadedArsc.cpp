@@ -323,7 +323,7 @@ LoadedPackage::GetEntryFromOffset(incfs::verified_map_ptr<ResTable_type> type_ch
 }
 
 base::expected<std::monostate, IOError> LoadedPackage::CollectConfigurations(
-    bool exclude_mipmap, std::set<ResTable_config>* out_configs) const {\
+    bool exclude_mipmap, std::set<ResTable_config>* out_configs) const {
   for (const auto& type_spec : type_specs_) {
     if (exclude_mipmap) {
       const int type_idx = type_spec.first - 1;
