@@ -640,6 +640,7 @@ package android.app {
     field public static final String OPSTR_MANAGE_EXTERNAL_STORAGE = "android:manage_external_storage";
     field public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
+    field @FlaggedApi("com.android.media.flags.enable_privileged_routing_for_media_routing_control") public static final String OPSTR_MEDIA_ROUTING_CONTROL = "android:media_routing_control";
     field public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
     field public static final String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
     field public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";

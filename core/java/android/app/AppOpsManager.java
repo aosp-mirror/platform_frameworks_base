@@ -48,6 +48,7 @@ import android.content.pm.ParceledListSlice;
 import android.database.DatabaseUtils;
 import android.health.connect.HealthConnectManager;
 import android.media.AudioAttributes.AttributeUsage;
+import android.media.MediaRouter2;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -89,6 +90,7 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.Preconditions;
+import com.android.media.flags.Flags;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -1506,9 +1508,15 @@ public class AppOpsManager {
     public static final int OP_CREATE_ACCESSIBILITY_OVERLAY =
             AppProtoEnums.APP_OP_CREATE_ACCESSIBILITY_OVERLAY;
 
+    /**
+     * See {@link #OPSTR_MEDIA_ROUTING_CONTROL}.
+     * @hide
+     */
+    public static final int OP_MEDIA_ROUTING_CONTROL = AppProtoEnums.APP_OP_MEDIA_ROUTING_CONTROL;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 139;
+    public static final int _NUM_OP = 140;
 
     /**
      * All app ops represented as strings.
@@ -1654,6 +1662,7 @@ public class AppOpsManager {
             OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
             OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
+            OPSTR_MEDIA_ROUTING_CONTROL,
     })
     public @interface AppOpString {}
 
@@ -1979,6 +1988,19 @@ public class AppOpsManager {
     @SystemApi
     @TestApi
     public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
+
+    /**
+     * Allows apps holding this permission to control the routing of other apps via {@link
+     * MediaRouter2}.
+     *
+     * <p>For example, holding this permission allows watches (via companion apps) to control the
+     * routing of applications running on the phone.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL)
+    public static final String OPSTR_MEDIA_ROUTING_CONTROL = "android:media_routing_control";
 
     /**
      * AppOp granted to apps that we are started via {@code am instrument -e --no-isolated-storage}
@@ -2404,7 +2426,8 @@ public class AppOpsManager {
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
             OP_USE_FULL_SCREEN_INTENT,
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA
+            OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
+            OP_MEDIA_ROUTING_CONTROL,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2846,6 +2869,9 @@ public class AppOpsManager {
                 OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
                 "CREATE_ACCESSIBILITY_OVERLAY")
                 .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_MEDIA_ROUTING_CONTROL, OPSTR_MEDIA_ROUTING_CONTROL,
+                "MEDIA_ROUTING_CONTROL")
+                .setPermission(Manifest.permission.MEDIA_ROUTING_CONTROL).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
