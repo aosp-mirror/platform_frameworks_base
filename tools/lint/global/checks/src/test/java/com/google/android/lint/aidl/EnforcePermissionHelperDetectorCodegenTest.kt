@@ -28,7 +28,8 @@ class EnforcePermissionHelperDetectorCodegenTest : LintDetectorTest() {
     override fun getDetector(): Detector = EnforcePermissionDetector()
 
     override fun getIssues(): List<Issue> = listOf(
-            EnforcePermissionDetector.ISSUE_ENFORCE_PERMISSION_HELPER
+            EnforcePermissionDetector.ISSUE_ENFORCE_PERMISSION_HELPER,
+            EnforcePermissionDetector.ISSUE_MISUSING_ENFORCE_PERMISSION
     )
 
     override fun lint(): TestLintTask = super.lint().allowMissingSdk(true)
