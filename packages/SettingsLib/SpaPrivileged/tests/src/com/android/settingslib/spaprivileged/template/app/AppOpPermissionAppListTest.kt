@@ -20,7 +20,6 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import androidx.compose.runtime.State
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
@@ -307,9 +306,9 @@ class AppOpPermissionAppListTest {
     }
 
     private fun getIsAllowed(record: AppOpPermissionRecord): Boolean? {
-        lateinit var isAllowedState: State<Boolean?>
+        lateinit var isAllowedState: () -> Boolean?
         composeTestRule.setContent { isAllowedState = listModel.isAllowed(record) }
-        return isAllowedState.value
+        return isAllowedState()
     }
 
     private inner class TestAppOpPermissionAppListModel :

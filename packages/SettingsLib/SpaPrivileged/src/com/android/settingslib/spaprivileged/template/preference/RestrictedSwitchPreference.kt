@@ -28,7 +28,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
@@ -97,21 +96,21 @@ private class RestrictedSwitchPreferenceModel(
         context = context,
         restrictedModeSupplier = { restrictedMode },
         summaryIfNoRestricted = model.summary,
-        checked = { model.checked.value },
+        checked = model.checked,
     )
 
     override val checked = when (restrictedMode) {
-        null -> stateOf(null)
+        null -> ({ null })
         is NoRestricted -> model.checked
-        is BaseUserRestricted -> stateOf(false)
+        is BaseUserRestricted -> ({ false })
         is BlockedByAdmin -> model.checked
     }
 
     override val changeable = when (restrictedMode) {
-        null -> stateOf(false)
+        null -> ({ false })
         is NoRestricted -> model.changeable
-        is BaseUserRestricted -> stateOf(false)
-        is BlockedByAdmin -> stateOf(false)
+        is BaseUserRestricted -> ({ false })
+        is BlockedByAdmin -> ({ false })
     }
 
     override val onCheckedChange = when (restrictedMode) {
@@ -137,7 +136,7 @@ private class RestrictedSwitchPreferenceModel(
                     onClick = { restrictedMode.sendShowAdminSupportDetailsIntent() },
                 )
                 .semantics {
-                    this.toggleableState = ToggleableState(checked.value)
+                    this.toggleableState = ToggleableState(checked())
                 },
         ) { content() }
     }

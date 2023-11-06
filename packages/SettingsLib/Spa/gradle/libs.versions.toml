@@ -18,6 +18,7 @@
 agp = "8.1.2"
 compose-compiler = "1.5.1"
 dexmaker-mockito = "2.28.3"
+jvm = "17"
 kotlin = "1.9.0"
 truth = "1.1.5"
 

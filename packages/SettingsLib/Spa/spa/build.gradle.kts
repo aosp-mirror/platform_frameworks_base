@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ dependencies {
     api("androidx.compose.ui:ui-tooling-preview:$jetpackComposeVersion")
     api("androidx.lifecycle:lifecycle-livedata-ktx")
     api("androidx.lifecycle:lifecycle-runtime-compose")
-    api("androidx.navigation:navigation-compose:2.7.4")
+    api("androidx.navigation:navigation-compose:2.7.5")
     api("com.github.PhilJay:MPAndroidChart:v3.1.0-alpha")
     api("com.google.android.material:material:1.7.0-alpha03")
     debugApi("androidx.compose.ui:ui-tooling:$jetpackComposeVersion")

@@ -19,7 +19,6 @@ package com.android.settingslib.spaprivileged.template.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.rememberContext
@@ -64,7 +63,7 @@ interface TogglePermissionAppListModel<T : AppRecord> {
      * Gets whether the permission is allowed for the given app.
      */
     @Composable
-    fun isAllowed(record: T): State<Boolean?>
+    fun isAllowed(record: T): () -> Boolean?
 
     /**
      * Gets whether the permission on / off is changeable for the given app.

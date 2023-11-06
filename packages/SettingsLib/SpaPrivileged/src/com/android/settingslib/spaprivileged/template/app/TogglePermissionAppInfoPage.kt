@@ -22,9 +22,10 @@ import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.bundleOf
@@ -165,14 +166,16 @@ private class TogglePermissionSwitchModel<T : AppRecord>(
     context: Context,
     private val listModel: TogglePermissionAppListModel<T>,
     private val record: T,
-    isAllowed: State<Boolean?>,
+    isAllowed: () -> Boolean?,
 ) : SwitchPreferenceModel {
+    private var appChangeable by mutableStateOf(true)
+
     override val title: String = context.getString(listModel.switchTitleResId)
     override val checked = isAllowed
-    override val changeable = mutableStateOf(true)
+    override val changeable = { appChangeable }
 
     fun initState() {
-        changeable.value = listModel.isChangeable(record)
+        appChangeable = listModel.isChangeable(record)
     }
 
     override val onCheckedChange: (Boolean) -> Unit = { newChecked ->
