@@ -82,7 +82,10 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
@@ -109,6 +112,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import com.android.server.wm.WindowManagerService.WindowContainerInfo;
+import com.android.window.flags.Flags;
 
 import com.google.common.truth.Expect;
 
@@ -139,6 +143,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Rule
     public Expect mExpect = Expect.create();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @After
     public void tearDown() {
@@ -1106,6 +1113,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
     }
 
+    @RequiresFlagsDisabled(Flags.FLAG_MAGNIFICATION_ALWAYS_DRAW_FULLSCREEN_BORDER)
     @Test
     public void testDrawMagnifiedViewport() {
         final int displayId = mDisplayContent.mDisplayId;
