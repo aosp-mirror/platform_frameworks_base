@@ -58,10 +58,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -838,7 +838,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ false);
         mNotificationPanelViewController.setDozing(false, false);
-        when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)).thenReturn(true);
+        mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, true);
         when(mResources.getBoolean(R.bool.force_small_clock_on_lockscreen)).thenReturn(true);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
@@ -856,7 +856,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ false);
         mNotificationPanelViewController.setDozing(false, false);
-        when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)).thenReturn(false);
+        mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
         when(mResources.getBoolean(R.bool.force_small_clock_on_lockscreen)).thenReturn(true);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
@@ -1105,7 +1105,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void nsslFlagEnabled_allowOnlyExternalTouches() {
-        when(mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)).thenReturn(true);
+        mFeatureFlags.set(Flags.MIGRATE_NSSL, true);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);

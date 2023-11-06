@@ -25,9 +25,9 @@ import android.view.ViewStub
 import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.systemui.res.R
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
@@ -160,7 +160,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     @Test
     fun doubleTapRequired_onKeyguard_oneWayHapticsDisabled_usesOldVibrate() = runTest {
         launch(Dispatchers.Main.immediate) {
-            whenever(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(false)
+            mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
             val listener = getFalsingTapListener()
             mStatusBarStateController.setState(KEYGUARD)
 
@@ -182,7 +182,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     @Test
     fun doubleTapRequired_onKeyguard_oneWayHapticsEnabled_usesPerformHapticFeedback() = runTest {
         launch(Dispatchers.Main.immediate) {
-            whenever(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(true)
+            mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
             val listener = getFalsingTapListener()
             mStatusBarStateController.setState(KEYGUARD)
 
@@ -210,7 +210,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     @Test
     fun doubleTapRequired_shadeLocked_oneWayHapticsDisabled_usesOldVibrate() = runTest {
         launch(Dispatchers.Main.immediate) {
-            whenever(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(false)
+            mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
             val listener = getFalsingTapListener()
             val packageName = mView.context.packageName
             mStatusBarStateController.setState(SHADE_LOCKED)
@@ -233,7 +233,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     @Test
     fun doubleTapRequired_shadeLocked_oneWayHapticsEnabled_usesPerformHapticFeedback() = runTest {
         launch(Dispatchers.Main.immediate) {
-            whenever(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(true)
+            mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
             val listener = getFalsingTapListener()
             mStatusBarStateController.setState(SHADE_LOCKED)
 
