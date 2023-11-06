@@ -197,6 +197,15 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             /* Check that we are connected to the super class */
             val overridingMethod = node as PsiMethod
             val parents = overridingMethod.findSuperMethods()
+            if (parents.isEmpty()) {
+                context.report(
+                    ISSUE_MISUSING_ENFORCE_PERMISSION,
+                    node,
+                    context.getLocation(node),
+                    "The method ${node.name} does not override an AIDL generated method"
+                )
+                return
+            }
             for (overriddenMethod in parents) {
                 // The equivalence check can be skipped, if both methods are
                 // annotated, it will be verified by visitAnnotationUsage.
