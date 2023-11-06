@@ -69,7 +69,6 @@ import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
 import android.app.SyncNotedAppOp;
-import android.content.AttributionSourceState;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -224,16 +223,12 @@ public class ActivityManagerServiceTest {
         assertThat(sProcessListSettingsListener).isNotNull();
     }
 
-    private void mockNoteOp() {
+    private void mockNoteOperation() {
         SyncNotedAppOp allowed = new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED,
                 AppOpsManager.OP_GET_USAGE_STATS, null, mContext.getPackageName());
-        when(mAppOpsService.noteOperationWithState(
-                        eq(AppOpsManager.OP_GET_USAGE_STATS),
-                        any(AttributionSourceState.class),
-                        any(Boolean.class),
-                        nullable(String.class),
-                        any(Boolean.class)))
-                .thenReturn(allowed);
+        when(mAppOpsService.noteOperation(eq(AppOpsManager.OP_GET_USAGE_STATS), eq(Process.myUid()),
+                nullable(String.class), nullable(String.class), any(Boolean.class),
+                nullable(String.class), any(Boolean.class))).thenReturn(allowed);
     }
 
     @After
@@ -614,7 +609,7 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUids_dispatchNeededChanges() throws RemoteException {
-        mockNoteOp();
+        mockNoteOperation();
 
         final int[] changesToObserve = {
             ActivityManager.UID_OBSERVER_PROCSTATE,
@@ -823,7 +818,7 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUidChanges_procStateCutpoint() throws RemoteException {
-        mockNoteOp();
+        mockNoteOperation();
 
         final IUidObserver observer = mock(IUidObserver.Stub.class);
 
@@ -893,7 +888,7 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUidChanges_validateUidsUpdated() {
-        mockNoteOp();
+        mockNoteOperation();
 
         final int[] changesForPendingItems = UID_RECORD_CHANGES;
 

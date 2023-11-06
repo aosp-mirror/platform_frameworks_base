@@ -44,7 +44,6 @@ import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManager;
-import android.content.AttributionSourceState;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -230,20 +229,12 @@ public class AppStateTrackerTest {
     private AppStateTrackerTestable newInstance() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockIAppOpsService.checkOperationWithState(eq(TARGET_OP), any()))
-                .thenAnswer(
-                        (Answer<Integer>)
-                                invocation -> {
-                                    AttributionSourceState attribution =
-                                            (AttributionSourceState) invocation.getArguments()[1];
-                                    return mRestrictedPackages.indexOf(
-                                                            Pair.create(
-                                                                    attribution.uid,
-                                                                    attribution.packageName))
-                                                    >= 0
-                                            ? AppOpsManager.MODE_IGNORED
-                                            : AppOpsManager.MODE_ALLOWED;
-                                });
+        when(mMockIAppOpsService.checkOperation(eq(TARGET_OP), anyInt(), anyString()))
+                .thenAnswer(inv -> {
+                    return mRestrictedPackages.indexOf(
+                            Pair.create(inv.getArgument(1), inv.getArgument(2))) >= 0 ?
+                            AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED;
+                });
 
         final AppStateTrackerTestable instance = new AppStateTrackerTestable();
 
