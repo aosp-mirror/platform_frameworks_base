@@ -149,6 +149,19 @@ public final class VirtualDeviceManager {
     @SystemApi
     public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2;
 
+    /**
+     * Persistent device identifier corresponding to the default device.
+     *
+     * @see Context#DEVICE_ID_DEFAULT
+     * @see VirtualDevice#getPersistentDeviceId()
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
+    public static final String PERSISTENT_DEVICE_ID_DEFAULT =
+            "default:" + Context.DEVICE_ID_DEFAULT;
+
     private final IVirtualDeviceManager mService;
     private final Context mContext;
 

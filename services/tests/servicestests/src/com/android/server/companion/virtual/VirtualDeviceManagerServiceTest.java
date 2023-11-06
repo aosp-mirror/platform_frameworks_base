@@ -52,9 +52,11 @@ import android.Manifest;
 import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
+import android.companion.AssociationRequest;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.IVirtualDeviceSoundEffectListener;
+import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
@@ -134,6 +136,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -261,6 +265,8 @@ public class VirtualDeviceManagerServiceTest {
     @Mock
     private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener mAppsOnVirtualDeviceListener;
     @Mock
+    private Consumer<String> mPersistentDeviceIdRemovedListener;
+    @Mock
     IPowerManager mIPowerManagerMock;
     @Mock
     IThermalService mIThermalServiceMock;
@@ -372,9 +378,8 @@ public class VirtualDeviceManagerServiceTest {
         mCameraAccessController =
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 
-        mAssociationInfo = new AssociationInfo(/* associationId= */ 1, 0, null,
-                null, MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false,
-                0, 0, -1);
+        mAssociationInfo = createAssociationInfo(
+                /* associationId= */ 1, AssociationRequest.DEVICE_PROFILE_APP_STREAMING);
 
         mVdms = new VirtualDeviceManagerService(mContext);
         mLocalService = mVdms.getLocalServiceInstance();
@@ -719,6 +724,39 @@ public class VirtualDeviceManagerServiceTest {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         // This call should not throw any exceptions.
         mDeviceImpl.onVirtualDisplayRemoved(DISPLAY_ID_1);
+    }
+
+    @Test
+    public void onPersistentDeviceIdsRemoved_listenersNotified() {
+        mLocalService.registerPersistentDeviceIdRemovedListener(mPersistentDeviceIdRemovedListener);
+        mLocalService.onPersistentDeviceIdsRemoved(Set.of(mDeviceImpl.getPersistentDeviceId()));
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mPersistentDeviceIdRemovedListener).accept(mDeviceImpl.getPersistentDeviceId());
+    }
+
+    @Test
+    public void onCdmAssociationsChanged_persistentDeviceIdRemovedListenersNotified() {
+        mLocalService.registerPersistentDeviceIdRemovedListener(mPersistentDeviceIdRemovedListener);
+        mVdms.onCdmAssociationsChanged(List.of(mAssociationInfo));
+        TestableLooper.get(this).processAllMessages();
+
+        mVdms.onCdmAssociationsChanged(List.of(
+                createAssociationInfo(2, AssociationRequest.DEVICE_PROFILE_APP_STREAMING),
+                createAssociationInfo(3, AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION),
+                createAssociationInfo(4, AssociationRequest.DEVICE_PROFILE_WATCH)));
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mPersistentDeviceIdRemovedListener).accept(mDeviceImpl.getPersistentDeviceId());
+
+        mVdms.onCdmAssociationsChanged(Collections.emptyList());
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mPersistentDeviceIdRemovedListener)
+                .accept(VirtualDeviceImpl.createPersistentDeviceId(2));
+        verify(mPersistentDeviceIdRemovedListener)
+                .accept(VirtualDeviceImpl.createPersistentDeviceId(3));
+        verifyNoMoreInteractions(mPersistentDeviceIdRemovedListener);
     }
 
     @Test
@@ -1860,8 +1898,13 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void getPersistentIdForDevice_invalidDeviceId_returnsNull() {
         assertThat(mLocalService.getPersistentIdForDevice(DEVICE_ID_INVALID)).isNull();
-        assertThat(mLocalService.getPersistentIdForDevice(DEVICE_ID_DEFAULT)).isNull();
         assertThat(mLocalService.getPersistentIdForDevice(VIRTUAL_DEVICE_ID_2)).isNull();
+    }
+
+    @Test
+    public void getPersistentIdForDevice_defaultDeviceId() {
+        assertThat(mLocalService.getPersistentIdForDevice(DEVICE_ID_DEFAULT)).isEqualTo(
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
     }
 
     @Test
@@ -1917,6 +1960,14 @@ public class VirtualDeviceManagerServiceTest {
         PackageManager packageManager = mContext.getPackageManager();
         intent.setPackage(packageManager.getPermissionControllerPackageName());
         return intent.resolveActivity(packageManager);
+    }
+
+    private AssociationInfo createAssociationInfo(int associationId, String deviceProfile) {
+        return new AssociationInfo(associationId, /* userId= */ 0, /* packageName=*/ null,
+                /* tag= */ null, MacAddress.BROADCAST_ADDRESS, /* displayName= */ "", deviceProfile,
+                /* associatedDevice= */ null, /* selfManaged= */ true,
+                /* notifyOnDeviceNearby= */ false, /* revoked= */false,  /* timeApprovedMs= */0,
+                /* lastTimeConnectedMs= */0, /* systemDataSyncFlags= */ -1);
     }
 
     /** Helper class to drop permissions temporarily and restore them at the end of a test. */
