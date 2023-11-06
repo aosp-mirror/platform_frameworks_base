@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
+import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
-import android.view.IWindow;
 
 /**
  * Common interface between focusable objects.
@@ -33,7 +33,7 @@ interface InputTarget {
     int getDisplayId();
 
     /* Client IWindow for the target. */
-    IWindow getIWindow();
+    IBinder getWindowToken();
 
     /* Owning pid of the target. */
     int getPid();

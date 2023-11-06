@@ -228,14 +228,14 @@ public class WindowlessWindowManager implements IWindowSession {
                 if (mRealWm instanceof IWindowSession.Stub) {
                     mRealWm.grantInputChannel(displayId,
                             new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
-                            window, mHostInputToken, attrs.flags, attrs.privateFlags,
+                            window.asBinder(), mHostInputToken, attrs.flags, attrs.privateFlags,
                             attrs.inputFeatures, attrs.type,
                             attrs.token, state.mInputTransferToken, attrs.getTitle().toString(),
                             outInputChannel);
                 } else {
-                    mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
-                            attrs.privateFlags, attrs.inputFeatures, attrs.type, attrs.token,
-                            state.mInputTransferToken, attrs.getTitle().toString(),
+                    mRealWm.grantInputChannel(displayId, sc, window.asBinder(), mHostInputToken,
+                            attrs.flags, attrs.privateFlags, attrs.inputFeatures, attrs.type,
+                            attrs.token, state.mInputTransferToken, attrs.getTitle().toString(),
                             outInputChannel);
                 }
                 state.mInputChannelToken =
@@ -593,7 +593,7 @@ public class WindowlessWindowManager implements IWindowSession {
             List<Rect> unrestrictedRects) {}
 
     @Override
-    public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
+    public void grantInputChannel(int displayId, SurfaceControl surface, IBinder clientToken,
             IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
             IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
             InputChannel outInputChannel) {

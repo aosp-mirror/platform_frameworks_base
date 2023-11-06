@@ -82,15 +82,11 @@ public final class InputWindowHandle {
     public IBinder token;
 
     /**
-     * The {@link IWindow} handle if InputWindowHandle is associated with a window, null otherwise.
+     * The {@link IBinder} handle if InputWindowHandle is associated with a client token,
+     * normally the IWindow token, null otherwise.
      */
     @Nullable
     private IBinder windowToken;
-    /**
-     * Used to cache IWindow from the windowToken so we don't need to convert every time getWindow
-     * is called.
-     */
-    private IWindow window;
 
     // The window name.
     public String name;
@@ -177,7 +173,6 @@ public final class InputWindowHandle {
         inputApplicationHandle = new InputApplicationHandle(other.inputApplicationHandle);
         token = other.token;
         windowToken = other.windowToken;
-        window = other.window;
         name = other.name;
         layoutParamsFlags = other.layoutParamsFlags;
         layoutParamsType = other.layoutParamsType;
@@ -243,21 +238,12 @@ public final class InputWindowHandle {
         touchableRegionSurfaceControl = new WeakReference<>(bounds);
     }
 
-    public void setWindowToken(IWindow iwindow) {
-        windowToken = iwindow.asBinder();
-        window = iwindow;
+    public void setWindowToken(IBinder iwindow) {
+        windowToken = iwindow;
     }
 
     public @Nullable IBinder getWindowToken() {
         return windowToken;
-    }
-
-    public IWindow getWindow() {
-        if (window != null) {
-            return window;
-        }
-        window = IWindow.Stub.asInterface(windowToken);
-        return window;
     }
 
     /**

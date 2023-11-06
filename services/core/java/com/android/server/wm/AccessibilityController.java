@@ -558,7 +558,7 @@ final class AccessibilityController {
         }
         if (newTarget != null) {
             int displayId = newTarget.getDisplayId();
-            IBinder clientBinder = newTarget.getIWindow().asBinder();
+            IBinder clientBinder = newTarget.getWindowToken();
             mFocusedWindow.put(displayId, clientBinder);
         }
     }

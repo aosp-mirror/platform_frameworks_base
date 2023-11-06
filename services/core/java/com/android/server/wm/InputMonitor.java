@@ -57,7 +57,6 @@ import android.os.InputConfig;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.InputChannel;
@@ -74,7 +73,6 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.function.Consumer;
 
 final class InputMonitor {
@@ -258,7 +256,7 @@ final class InputMonitor {
         inputWindowHandle.setDispatchingTimeoutMillis(w.getInputDispatchingTimeoutMillis());
         inputWindowHandle.setTouchOcclusionMode(w.getTouchOcclusionMode());
         inputWindowHandle.setPaused(w.mActivityRecord != null && w.mActivityRecord.paused);
-        inputWindowHandle.setWindowToken(w.mClient);
+        inputWindowHandle.setWindowToken(w.mClient.asBinder());
 
         inputWindowHandle.setName(w.getName());
 
