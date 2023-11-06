@@ -19,6 +19,9 @@ package com.android.server.job.controllers;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
@@ -29,6 +32,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.job.JobInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.INetworkPolicyListener;
@@ -40,6 +44,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.telephony.CellSignalStrength;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyCallback;
@@ -53,6 +58,7 @@ import android.util.Pools;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -117,6 +123,26 @@ public final class ConnectivityController extends RestrictingController implemen
                     | ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER
                     | ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED);
 
+    @VisibleForTesting
+    static final int TRANSPORT_AFFINITY_UNDEFINED = 0;
+    @VisibleForTesting
+    static final int TRANSPORT_AFFINITY_PREFER = 1;
+    @VisibleForTesting
+    static final int TRANSPORT_AFFINITY_AVOID = 2;
+    /**
+     * Set of affinities to different network transports. If a given network has multiple
+     * transports, the avoided ones take priority --- a network with an avoided transport
+     * should be avoided if possible, even if the network has preferred transports as well.
+     */
+    @VisibleForTesting
+    static final SparseIntArray sNetworkTransportAffinities = new SparseIntArray();
+    static {
+        sNetworkTransportAffinities.put(TRANSPORT_CELLULAR, TRANSPORT_AFFINITY_AVOID);
+        sNetworkTransportAffinities.put(TRANSPORT_WIFI, TRANSPORT_AFFINITY_PREFER);
+        sNetworkTransportAffinities.put(TRANSPORT_ETHERNET, TRANSPORT_AFFINITY_PREFER);
+    }
+
+    private final CcConfig mCcConfig;
     private final ConnectivityManager mConnManager;
     private final NetworkPolicyManager mNetPolicyManager;
     private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
@@ -138,7 +164,7 @@ public final class ConnectivityController extends RestrictingController implemen
      * latest capabilities to avoid unnecessary calls into ConnectivityManager.
      */
     @GuardedBy("mLock")
-    private final ArrayMap<Network, NetworkCapabilities> mAvailableNetworks = new ArrayMap<>();
+    private final ArrayMap<Network, CachedNetworkMetadata> mAvailableNetworks = new ArrayMap<>();
 
     private final SparseArray<UidDefaultNetworkCallback> mCurrentDefaultNetworkCallbacks =
             new SparseArray<>();
@@ -267,6 +293,7 @@ public final class ConnectivityController extends RestrictingController implemen
             @NonNull FlexibilityController flexibilityController) {
         super(service);
         mHandler = new CcHandler(AppSchedulingModuleThread.get().getLooper());
+        mCcConfig = new CcConfig();
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
         mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
@@ -279,6 +306,11 @@ public final class ConnectivityController extends RestrictingController implemen
         mConnManager.registerNetworkCallback(request, mNetworkCallback);
 
         mNetPolicyManager.registerListener(mNetPolicyListener);
+
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            // For now, we don't have network affinities on watches.
+            sNetworkTransportAffinities.clear();
+        }
     }
 
     @GuardedBy("mLock")
@@ -386,7 +418,9 @@ public final class ConnectivityController extends RestrictingController implemen
         synchronized (mLock) {
             for (int i = 0; i < mAvailableNetworks.size(); ++i) {
                 final Network network = mAvailableNetworks.keyAt(i);
-                final NetworkCapabilities capabilities = mAvailableNetworks.valueAt(i);
+                final CachedNetworkMetadata metadata = mAvailableNetworks.valueAt(i);
+                final NetworkCapabilities capabilities =
+                        metadata == null ? null : metadata.networkCapabilities;
                 final boolean satisfied = isSatisfied(job, network, capabilities, mConstants);
                 if (DEBUG) {
                     Slog.v(TAG, "isNetworkAvailable(" + job + ") with network " + network
@@ -587,6 +621,43 @@ public final class ConnectivityController extends RestrictingController implemen
     public void onBatteryStateChangedLocked() {
         // Update job bookkeeping out of band to avoid blocking broadcast progress.
         mHandler.sendEmptyMessage(MSG_UPDATE_ALL_TRACKED_JOBS);
+    }
+
+    @Override
+    public void prepareForUpdatedConstantsLocked() {
+        mCcConfig.mShouldReprocessNetworkCapabilities = false;
+        mCcConfig.mFlexIsEnabled = mFlexibilityController.isEnabled();
+    }
+
+    @Override
+    public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
+            @NonNull String key) {
+        mCcConfig.processConstantLocked(properties, key);
+    }
+
+    @Override
+    public void onConstantsUpdatedLocked() {
+        if (mCcConfig.mShouldReprocessNetworkCapabilities
+                || (mFlexibilityController.isEnabled() != mCcConfig.mFlexIsEnabled)) {
+            AppSchedulingModuleThread.getHandler().post(() -> {
+                boolean shouldUpdateJobs = false;
+                for (int i = 0; i < mAvailableNetworks.size(); ++i) {
+                    CachedNetworkMetadata metadata = mAvailableNetworks.valueAt(i);
+                    if (metadata == null || metadata.networkCapabilities == null) {
+                        continue;
+                    }
+                    boolean satisfies = satisfiesTransportAffinities(metadata.networkCapabilities);
+                    if (metadata.satisfiesTransportAffinities != satisfies) {
+                        metadata.satisfiesTransportAffinities = satisfies;
+                        // Something changed. Update jobs.
+                        shouldUpdateJobs = true;
+                    }
+                }
+                if (shouldUpdateJobs) {
+                    updateAllTrackedJobsLocked(false);
+                }
+            });
+        }
     }
 
     private boolean isUsable(NetworkCapabilities capabilities) {
@@ -831,7 +902,7 @@ public final class ConnectivityController extends RestrictingController implemen
         if (!constants.CONN_USE_CELL_SIGNAL_STRENGTH) {
             return true;
         }
-        if (!capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+        if (!capabilities.hasTransport(TRANSPORT_CELLULAR)) {
             return true;
         }
         if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
@@ -986,6 +1057,52 @@ public final class ConnectivityController extends RestrictingController implemen
         if (isRelaxedSatisfied(jobStatus, network, capabilities, constants)) return true;
 
         return false;
+    }
+
+    private boolean satisfiesTransportAffinities(@Nullable NetworkCapabilities capabilities) {
+        if (!mFlexibilityController.isEnabled()) {
+            return true;
+        }
+        if (capabilities == null) {
+            Slog.wtf(TAG, "Network constraint satisfied with null capabilities");
+            return !mCcConfig.AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+        }
+
+        if (sNetworkTransportAffinities.size() == 0) {
+            return !mCcConfig.AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+        }
+
+        final int[] transports = capabilities.getTransportTypes();
+        if (transports.length == 0) {
+            return !mCcConfig.AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+        }
+
+        for (int t : transports) {
+            int affinity = sNetworkTransportAffinities.get(t, TRANSPORT_AFFINITY_UNDEFINED);
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "satisfiesTransportAffinities transport=" + t + " aff=" + affinity);
+            }
+            switch (affinity) {
+                case TRANSPORT_AFFINITY_UNDEFINED:
+                    if (mCcConfig.AVOID_UNDEFINED_TRANSPORT_AFFINITY) {
+                        // Avoided transports take precedence.
+                        // Return as soon as we encounter a transport to avoid.
+                        return false;
+                    }
+                    break;
+                case TRANSPORT_AFFINITY_PREFER:
+                    // Nothing to do here. We like this transport.
+                    break;
+                case TRANSPORT_AFFINITY_AVOID:
+                    // Avoided transports take precedence.
+                    // Return as soon as we encounter a transport to avoid.
+                    return false;
+            }
+        }
+
+        // Didn't see any transport to avoid.
+        return true;
     }
 
     @GuardedBy("mLock")
@@ -1172,6 +1289,12 @@ public final class ConnectivityController extends RestrictingController implemen
 
     @Nullable
     private NetworkCapabilities getNetworkCapabilities(@Nullable Network network) {
+        final CachedNetworkMetadata metadata = getNetworkMetadata(network);
+        return metadata == null ? null : metadata.networkCapabilities;
+    }
+
+    @Nullable
+    private CachedNetworkMetadata getNetworkMetadata(@Nullable Network network) {
         if (network == null) {
             return null;
         }
@@ -1234,14 +1357,16 @@ public final class ConnectivityController extends RestrictingController implemen
             return updateConstraintsSatisfied(jobStatus, nowElapsed, null, null);
         }
         final Network network = getNetworkLocked(jobStatus);
-        final NetworkCapabilities capabilities = getNetworkCapabilities(network);
-        return updateConstraintsSatisfied(jobStatus, nowElapsed, network, capabilities);
+        final CachedNetworkMetadata networkMetadata = getNetworkMetadata(network);
+        return updateConstraintsSatisfied(jobStatus, nowElapsed, network, networkMetadata);
     }
 
     private boolean updateConstraintsSatisfied(JobStatus jobStatus, final long nowElapsed,
-            Network network, NetworkCapabilities capabilities) {
+            Network network, @Nullable CachedNetworkMetadata networkMetadata) {
         // TODO: consider matching against non-default networks
 
+        final NetworkCapabilities capabilities =
+                networkMetadata == null ? null : networkMetadata.networkCapabilities;
         final boolean satisfied = isSatisfied(jobStatus, network, capabilities, mConstants);
 
         if (!satisfied && jobStatus.network != null
@@ -1263,10 +1388,10 @@ public final class ConnectivityController extends RestrictingController implemen
 
         final boolean changed = jobStatus.setConnectivityConstraintSatisfied(nowElapsed, satisfied);
 
-        if (jobStatus.getPreferUnmetered()) {
-            jobStatus.setHasAccessToUnmetered(satisfied && capabilities != null
-                    && capabilities.hasCapability(NET_CAPABILITY_NOT_METERED));
-
+        jobStatus.setTransportAffinitiesSatisfied(satisfied && networkMetadata != null
+                && networkMetadata.satisfiesTransportAffinities);
+        if (jobStatus.canApplyTransportAffinities()) {
+            // Only modify the flex constraint if the job actually needs it.
             jobStatus.setFlexibilityConstraintSatisfied(nowElapsed,
                     mFlexibilityController.isFlexibilitySatisfiedLocked(jobStatus));
         }
@@ -1367,7 +1492,6 @@ public final class ConnectivityController extends RestrictingController implemen
             final JobStatus js = jobs.valueAt(i);
 
             final Network net = getNetworkLocked(js);
-            final NetworkCapabilities netCap = getNetworkCapabilities(net);
             final boolean match = (filterNetwork == null
                     || Objects.equals(filterNetwork, net));
 
@@ -1375,7 +1499,7 @@ public final class ConnectivityController extends RestrictingController implemen
             // job hasn't yet been evaluated against the currently
             // active network; typically when we just lost a network.
             if (match || !Objects.equals(js.network, net)) {
-                changed |= updateConstraintsSatisfied(js, nowElapsed, net, netCap);
+                changed |= updateConstraintsSatisfied(js, nowElapsed, net, getNetworkMetadata(net));
             }
         }
         return changed;
@@ -1417,10 +1541,18 @@ public final class ConnectivityController extends RestrictingController implemen
                 Slog.v(TAG, "onCapabilitiesChanged: " + network);
             }
             synchronized (mLock) {
-                final NetworkCapabilities oldCaps = mAvailableNetworks.put(network, capabilities);
-                if (oldCaps != null) {
-                    maybeUnregisterSignalStrengthCallbackLocked(oldCaps);
+                CachedNetworkMetadata cnm = mAvailableNetworks.get(network);
+                if (cnm == null) {
+                    cnm = new CachedNetworkMetadata();
+                    mAvailableNetworks.put(network, cnm);
+                } else {
+                    final NetworkCapabilities oldCaps = cnm.networkCapabilities;
+                    if (oldCaps != null) {
+                        maybeUnregisterSignalStrengthCallbackLocked(oldCaps);
+                    }
                 }
+                cnm.networkCapabilities = capabilities;
+                cnm.satisfiesTransportAffinities = satisfiesTransportAffinities(capabilities);
                 maybeRegisterSignalStrengthCallbackLocked(capabilities);
                 updateTrackedJobsLocked(-1, network);
                 postAdjustCallbacks();
@@ -1433,9 +1565,9 @@ public final class ConnectivityController extends RestrictingController implemen
                 Slog.v(TAG, "onLost: " + network);
             }
             synchronized (mLock) {
-                final NetworkCapabilities capabilities = mAvailableNetworks.remove(network);
-                if (capabilities != null) {
-                    maybeUnregisterSignalStrengthCallbackLocked(capabilities);
+                final CachedNetworkMetadata cnm = mAvailableNetworks.remove(network);
+                if (cnm != null && cnm.networkCapabilities != null) {
+                    maybeUnregisterSignalStrengthCallbackLocked(cnm.networkCapabilities);
                 }
                 for (int u = 0; u < mCurrentDefaultNetworkCallbacks.size(); ++u) {
                     UidDefaultNetworkCallback callback = mCurrentDefaultNetworkCallbacks.valueAt(u);
@@ -1451,7 +1583,7 @@ public final class ConnectivityController extends RestrictingController implemen
         @GuardedBy("mLock")
         private void maybeRegisterSignalStrengthCallbackLocked(
                 @NonNull NetworkCapabilities capabilities) {
-            if (!capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            if (!capabilities.hasTransport(TRANSPORT_CELLULAR)) {
                 return;
             }
             TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
@@ -1476,14 +1608,17 @@ public final class ConnectivityController extends RestrictingController implemen
         @GuardedBy("mLock")
         private void maybeUnregisterSignalStrengthCallbackLocked(
                 @NonNull NetworkCapabilities capabilities) {
-            if (!capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            if (!capabilities.hasTransport(TRANSPORT_CELLULAR)) {
                 return;
             }
             ArraySet<Integer> activeIds = new ArraySet<>();
             for (int i = 0, size = mAvailableNetworks.size(); i < size; ++i) {
-                NetworkCapabilities nc = mAvailableNetworks.valueAt(i);
-                if (nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    activeIds.addAll(nc.getSubscriptionIds());
+                final CachedNetworkMetadata metadata = mAvailableNetworks.valueAt(i);
+                if (metadata == null || metadata.networkCapabilities == null) {
+                    continue;
+                }
+                if (metadata.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+                    activeIds.addAll(metadata.networkCapabilities.getSubscriptionIds());
                 }
             }
             if (DEBUG) {
@@ -1570,6 +1705,57 @@ public final class ConnectivityController extends RestrictingController implemen
                         break;
                 }
             }
+        }
+    }
+
+    @VisibleForTesting
+    class CcConfig {
+        private boolean mFlexIsEnabled = FlexibilityController.FcConfig.DEFAULT_FLEXIBILITY_ENABLED;
+        private boolean mShouldReprocessNetworkCapabilities = false;
+
+        /**
+         * Prefix to use with all constant keys in order to "sub-namespace" the keys.
+         * "conn_" is used for legacy reasons.
+         */
+        private static final String CC_CONFIG_PREFIX = "conn_";
+
+        @VisibleForTesting
+        static final String KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY =
+                CC_CONFIG_PREFIX + "avoid_undefined_transport_affinity";
+
+        private static final boolean DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY = false;
+
+        /**
+         * If true, will avoid network transports that don't have an explicitly defined affinity.
+         */
+        public boolean AVOID_UNDEFINED_TRANSPORT_AFFINITY =
+                DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+
+        @GuardedBy("mLock")
+        public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
+                @NonNull String key) {
+            switch (key) {
+                case KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY:
+                    final boolean avoid = properties.getBoolean(key,
+                            DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY);
+                    if (AVOID_UNDEFINED_TRANSPORT_AFFINITY != avoid) {
+                        AVOID_UNDEFINED_TRANSPORT_AFFINITY = avoid;
+                        mShouldReprocessNetworkCapabilities = true;
+                    }
+                    break;
+            }
+        }
+
+        private void dump(IndentingPrintWriter pw) {
+            pw.println();
+            pw.print(ConnectivityController.class.getSimpleName());
+            pw.println(":");
+            pw.increaseIndent();
+
+            pw.print(KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY,
+                    AVOID_UNDEFINED_TRANSPORT_AFFINITY).println();
+
+            pw.decreaseIndent();
         }
     }
 
@@ -1676,6 +1862,18 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     }
 
+    private static class CachedNetworkMetadata {
+        public NetworkCapabilities networkCapabilities;
+        public boolean satisfiesTransportAffinities;
+
+        public String toString() {
+            return "CNM{"
+                    + networkCapabilities.toString()
+                    + ", satisfiesTransportAffinities=" + satisfiesTransportAffinities
+                    + "}";
+        }
+    }
+
     private static class UidStats {
         public final int uid;
         public int baseBias;
@@ -1737,6 +1935,17 @@ public final class ConnectivityController extends RestrictingController implemen
                 mHandler.obtainMessage(MSG_UPDATE_ALL_TRACKED_JOBS, 1, 0).sendToTarget();
             }
         }
+    }
+
+    @VisibleForTesting
+    @NonNull
+    CcConfig getCcConfig() {
+        return mCcConfig;
+    }
+
+    @Override
+    public void dumpConstants(IndentingPrintWriter pw) {
+        mCcConfig.dump(pw);
     }
 
     @GuardedBy("mLock")

@@ -998,6 +998,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_SYSTEM_STOP_TO_FAILURE_RATIO);
         }
 
+        // TODO(141645789): move into ConnectivityController.CcConfig
         private void updateConnectivityConstantsLocked() {
             CONN_CONGESTION_DELAY_FRAC = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_CONN_CONGESTION_DELAY_FRAC,

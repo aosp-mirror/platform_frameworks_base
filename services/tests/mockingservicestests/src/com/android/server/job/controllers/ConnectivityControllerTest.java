@@ -24,7 +24,9 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
@@ -38,6 +40,10 @@ import static com.android.server.job.Flags.FLAG_RELAX_PREFETCH_CONNECTIVITY_CONS
 import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
 import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
+import static com.android.server.job.controllers.ConnectivityController.CcConfig.KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+import static com.android.server.job.controllers.ConnectivityController.TRANSPORT_AFFINITY_AVOID;
+import static com.android.server.job.controllers.ConnectivityController.TRANSPORT_AFFINITY_PREFER;
+import static com.android.server.job.controllers.ConnectivityController.TRANSPORT_AFFINITY_UNDEFINED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -64,16 +70,19 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
+import android.net.NetworkRequest;
 import android.os.Build;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.DeviceConfig;
 import android.telephony.CellSignalStrength;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.DataUnit;
 
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.job.JobSchedulerService;
@@ -114,6 +123,7 @@ public class ConnectivityControllerTest {
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private Constants mConstants;
+    private DeviceConfig.Properties.Builder mDeviceConfigPropertiesBuilder;
 
     private FlexibilityController mFlexibilityController;
     private static final int UID_RED = 10001;
@@ -134,6 +144,9 @@ public class ConnectivityControllerTest {
         // Used in JobStatus.
         LocalServices.removeServiceForTest(JobSchedulerInternal.class);
         LocalServices.addService(JobSchedulerInternal.class, mock(JobSchedulerInternal.class));
+
+        mDeviceConfigPropertiesBuilder =
+                new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
 
         // Freeze the clocks at this moment in time
         JobSchedulerService.sSystemClock =
@@ -164,7 +177,7 @@ public class ConnectivityControllerTest {
         when(mPackageManager.hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(false);
         mFlexibilityController =
-                new FlexibilityController(mService, mock(PrefetchController.class));
+                spy(new FlexibilityController(mService, mock(PrefetchController.class)));
     }
 
     @Test
@@ -954,6 +967,12 @@ public class ConnectivityControllerTest {
 
     @Test
     public void testUpdates() throws Exception {
+        ConnectivityController.sNetworkTransportAffinities.put(
+                NetworkCapabilities.TRANSPORT_CELLULAR, TRANSPORT_AFFINITY_AVOID);
+        ConnectivityController.sNetworkTransportAffinities.put(
+                NetworkCapabilities.TRANSPORT_WIFI, TRANSPORT_AFFINITY_PREFER);
+        ConnectivityController.sNetworkTransportAffinities.put(
+                NetworkCapabilities.TRANSPORT_TEST, TRANSPORT_AFFINITY_UNDEFINED);
         final ArgumentCaptor<NetworkCallback> callbackCaptor =
                 ArgumentCaptor.forClass(NetworkCallback.class);
         doNothing().when(mConnManager).registerNetworkCallback(any(), callbackCaptor.capture());
@@ -966,15 +985,23 @@ public class ConnectivityControllerTest {
         doNothing().when(mConnManager).registerDefaultNetworkCallbackForUid(
                 eq(UID_BLUE), blueCallbackCaptor.capture(), any());
 
+        doReturn(true).when(mFlexibilityController).isEnabled();
+
         final ConnectivityController controller = new ConnectivityController(mService,
                 mFlexibilityController);
-
 
         final Network meteredNet = mock(Network.class);
         final NetworkCapabilities meteredCaps = createCapabilitiesBuilder().build();
         final Network unmeteredNet = mock(Network.class);
         final NetworkCapabilities unmeteredCaps = createCapabilitiesBuilder()
                 .addCapability(NET_CAPABILITY_NOT_METERED)
+                .build();
+        final NetworkCapabilities meteredWifiCaps = createCapabilitiesBuilder()
+                .addTransportType(TRANSPORT_WIFI)
+                .build();
+        final NetworkCapabilities unmeteredCelullarCaps = createCapabilitiesBuilder()
+                .addCapability(NET_CAPABILITY_NOT_METERED)
+                .addTransportType(TRANSPORT_CELLULAR)
                 .build();
 
         final JobStatus red = createJobStatus(createJob()
@@ -983,11 +1010,29 @@ public class ConnectivityControllerTest {
         final JobStatus blue = createJobStatus(createJob()
                 .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY), UID_BLUE);
-        assertFalse(red.getPreferUnmetered());
-        assertTrue(blue.getPreferUnmetered());
+        final JobStatus red2 = createJobStatus(createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
+                .setRequiredNetwork(
+                        new NetworkRequest.Builder()
+                                .addTransportType(TRANSPORT_CELLULAR)
+                                .build()),
+                        UID_RED);
+        final JobStatus blue2 = createJobStatus(createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
+                .setRequiredNetwork(
+                        new NetworkRequest.Builder()
+                                .addTransportType(TRANSPORT_WIFI)
+                                .build()),
+                        UID_BLUE);
+        assertTrue(red.canApplyTransportAffinities());
+        assertTrue(blue.canApplyTransportAffinities());
+        assertFalse(red2.canApplyTransportAffinities());
+        assertFalse(blue2.canApplyTransportAffinities());
 
         controller.maybeStartTrackingJobLocked(red, null);
         controller.maybeStartTrackingJobLocked(blue, null);
+        controller.maybeStartTrackingJobLocked(red2, null);
+        controller.maybeStartTrackingJobLocked(blue2, null);
         final NetworkCallback generalCallback = callbackCaptor.getValue();
         final NetworkCallback redCallback = redCallbackCaptor.getValue();
         final NetworkCallback blueCallback = blueCallbackCaptor.getValue();
@@ -998,9 +1043,13 @@ public class ConnectivityControllerTest {
             answerNetwork(generalCallback, blueCallback, null, null, null);
 
             assertFalse(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(red.getHasAccessToUnmetered());
             assertFalse(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(blue.getHasAccessToUnmetered());
+            assertFalse(red2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertFalse(blue2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertFalse(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
         }
 
         // Metered network
@@ -1011,12 +1060,26 @@ public class ConnectivityControllerTest {
             generalCallback.onCapabilitiesChanged(meteredNet, meteredCaps);
 
             assertFalse(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(red.getHasAccessToUnmetered());
             assertTrue(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(blue.getHasAccessToUnmetered());
+            assertFalse(red2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertFalse(blue2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            // No transport is specified. Accept the network for transport affinity.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, false);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertTrue(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
+            // No transport is specified. Avoid the network for transport affinity.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, true);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertFalse(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
         }
 
-        // Unmetered network background
+        // Unmetered network background for general; metered network for apps
         {
             answerNetwork(generalCallback, redCallback, meteredNet, meteredNet, meteredCaps);
             answerNetwork(generalCallback, blueCallback, meteredNet, meteredNet, meteredCaps);
@@ -1024,10 +1087,22 @@ public class ConnectivityControllerTest {
             generalCallback.onCapabilitiesChanged(unmeteredNet, unmeteredCaps);
 
             assertFalse(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(red.getHasAccessToUnmetered());
-
             assertTrue(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(blue.getHasAccessToUnmetered());
+
+            // No transport is specified. Accept the network for transport affinity.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, false);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertTrue(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
+            // No transport is specified. Avoid the network for transport affinity.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, true);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertFalse(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
         }
 
         // Lost metered network
@@ -1038,10 +1113,7 @@ public class ConnectivityControllerTest {
             generalCallback.onLost(meteredNet);
 
             assertTrue(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(red.getHasAccessToUnmetered());
-
             assertTrue(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertTrue(blue.getHasAccessToUnmetered());
         }
 
         // Specific UID was blocked
@@ -1052,9 +1124,99 @@ public class ConnectivityControllerTest {
             generalCallback.onCapabilitiesChanged(unmeteredNet, unmeteredCaps);
 
             assertFalse(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(red.getHasAccessToUnmetered());
             assertTrue(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertTrue(blue.getHasAccessToUnmetered());
+        }
+
+        // Metered wifi
+        {
+            answerNetwork(generalCallback, redCallback, null, meteredNet, meteredWifiCaps);
+            answerNetwork(generalCallback, blueCallback, unmeteredNet, meteredNet, meteredWifiCaps);
+
+            generalCallback.onCapabilitiesChanged(meteredNet, meteredWifiCaps);
+
+            assertFalse(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertTrue(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertFalse(red2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertTrue(blue2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+
+            // Wifi is preferred.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, false);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertTrue(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertTrue(blue2.areTransportAffinitiesSatisfied());
+            // Wifi is preferred.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, true);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertTrue(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertTrue(blue2.areTransportAffinitiesSatisfied());
+        }
+
+        // Unmetered cellular
+        {
+            answerNetwork(generalCallback, redCallback, meteredNet,
+                    unmeteredNet, unmeteredCelullarCaps);
+            answerNetwork(generalCallback, blueCallback, meteredNet,
+                    unmeteredNet, unmeteredCelullarCaps);
+
+            generalCallback.onCapabilitiesChanged(unmeteredNet, unmeteredCelullarCaps);
+
+            assertTrue(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertTrue(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertTrue(red2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertFalse(blue2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+
+            // Cellular is avoided.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, false);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertFalse(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
+            // Cellular is avoided.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, true);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertFalse(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
+        }
+
+        // Undefined affinity
+        final NetworkCapabilities unmeteredTestCaps = createCapabilitiesBuilder()
+                .addCapability(NET_CAPABILITY_NOT_METERED)
+                .addTransportType(TRANSPORT_TEST)
+                .build();
+        {
+            answerNetwork(generalCallback, redCallback, unmeteredNet,
+                    unmeteredNet, unmeteredTestCaps);
+            answerNetwork(generalCallback, blueCallback, unmeteredNet,
+                    unmeteredNet, unmeteredTestCaps);
+
+            generalCallback.onCapabilitiesChanged(unmeteredNet, unmeteredTestCaps);
+
+            assertTrue(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertTrue(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertFalse(red2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+            assertFalse(blue2.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+
+            // Undefined is preferred.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, false);
+            controller.onConstantsUpdatedLocked();
+            assertTrue(red.areTransportAffinitiesSatisfied());
+            assertTrue(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
+            // Undefined is avoided.
+            setDeviceConfigBoolean(controller, KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY, true);
+            controller.onConstantsUpdatedLocked();
+            assertFalse(red.areTransportAffinitiesSatisfied());
+            assertFalse(blue.areTransportAffinitiesSatisfied());
+            assertFalse(red2.areTransportAffinitiesSatisfied());
+            assertFalse(blue2.areTransportAffinitiesSatisfied());
         }
     }
 
@@ -1461,5 +1623,25 @@ public class ConnectivityControllerTest {
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
         return new JobStatus(job.build(), uid, null, -1, 0, null, null,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis, 0, 0, 0, null, 0, 0);
+    }
+
+    private void setDeviceConfigBoolean(ConnectivityController connectivityController,
+            String key, boolean val) {
+        mDeviceConfigPropertiesBuilder.setBoolean(key, val);
+        synchronized (connectivityController.mLock) {
+            connectivityController.prepareForUpdatedConstantsLocked();
+            mFlexibilityController.prepareForUpdatedConstantsLocked();
+            connectivityController.getCcConfig()
+                    .processConstantLocked(mDeviceConfigPropertiesBuilder.build(), key);
+            mFlexibilityController.getFcConfig()
+                    .processConstantLocked(mDeviceConfigPropertiesBuilder.build(), key);
+            connectivityController.onConstantsUpdatedLocked();
+            mFlexibilityController.onConstantsUpdatedLocked();
+        }
+        waitForNonDelayedMessagesProcessed();
+    }
+
+    private void waitForNonDelayedMessagesProcessed() {
+        AppSchedulingModuleThread.getHandler().runWithScissors(() -> {}, 15_000);
     }
 }
