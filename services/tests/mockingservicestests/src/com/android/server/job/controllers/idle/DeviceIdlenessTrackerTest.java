@@ -163,6 +163,77 @@ public class DeviceIdlenessTrackerTest {
     }
 
     @Test
+    public void testAlarmSkippedIfAlreadyIdle() {
+        setDeviceConfigLong(KEY_INACTIVITY_IDLE_THRESHOLD_MS, MINUTE_IN_MILLIS);
+        setDeviceConfigLong(KEY_INACTIVITY_STABLE_POWER_IDLE_THRESHOLD_MS, 5 * MINUTE_IN_MILLIS);
+        setBatteryState(false, false);
+
+        Intent dockIdleIntent = new Intent(Intent.ACTION_DOCK_IDLE);
+        mBroadcastReceiver.onReceive(mContext, dockIdleIntent);
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        long expectedAlarmElapsed = nowElapsed + MINUTE_IN_MILLIS;
+
+        ArgumentCaptor<AlarmManager.OnAlarmListener> onAlarmListenerCaptor =
+                ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
+
+        InOrder inOrder = inOrder(mAlarmManager);
+        inOrder.verify(mAlarmManager)
+                .setWindow(anyInt(), eq(expectedAlarmElapsed), anyLong(), anyString(),
+                        eq(AppSchedulingModuleThread.getExecutor()),
+                        onAlarmListenerCaptor.capture());
+
+        AlarmManager.OnAlarmListener onAlarmListener = onAlarmListenerCaptor.getValue();
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+
+        onAlarmListener.onAlarm();
+
+        // Now in idle.
+
+        // Trigger SCREEN_OFF. Make sure alarm isn't set again.
+        Intent screenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
+        mBroadcastReceiver.onReceive(mContext, screenOffIntent);
+
+        inOrder.verify(mAlarmManager, never())
+                .setWindow(anyInt(), anyLong(), anyLong(), anyString(),
+                        eq(AppSchedulingModuleThread.getExecutor()), any());
+    }
+
+    @Test
+    public void testAlarmSkippedIfNoThresholdChange() {
+        setDeviceConfigLong(KEY_INACTIVITY_IDLE_THRESHOLD_MS, 10 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(KEY_INACTIVITY_STABLE_POWER_IDLE_THRESHOLD_MS, 10 * MINUTE_IN_MILLIS);
+        setBatteryState(false, false);
+
+        Intent screenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
+        mBroadcastReceiver.onReceive(mContext, screenOffIntent);
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        long expectedAlarmElapsed = nowElapsed + 10 * MINUTE_IN_MILLIS;
+
+        InOrder inOrder = inOrder(mAlarmManager);
+        inOrder.verify(mAlarmManager)
+                .setWindow(anyInt(), eq(expectedAlarmElapsed), anyLong(), anyString(),
+                        eq(AppSchedulingModuleThread.getExecutor()), any());
+
+        // Advanced the clock a little to make sure the tracker continues to use the original time.
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+
+        // Now on stable power. Thresholds are the same, so alarm doesn't need to be rescheduled.
+        setBatteryState(true, true);
+        inOrder.verify(mAlarmManager, never())
+                .setWindow(anyInt(), eq(expectedAlarmElapsed), anyLong(), anyString(),
+                        eq(AppSchedulingModuleThread.getExecutor()), any());
+
+        // Not on stable power. Thresholds are the same, so alarm doesn't need to be rescheduled.
+        setBatteryState(false, false);
+        inOrder.verify(mAlarmManager, never())
+                .setWindow(anyInt(), anyLong(), anyLong(), anyString(),
+                        eq(AppSchedulingModuleThread.getExecutor()), any());
+    }
+
+    @Test
     public void testThresholdChangeWithStablePowerChange() {
         setDeviceConfigLong(KEY_INACTIVITY_IDLE_THRESHOLD_MS, 10 * MINUTE_IN_MILLIS);
         setDeviceConfigLong(KEY_INACTIVITY_STABLE_POWER_IDLE_THRESHOLD_MS, 5 * MINUTE_IN_MILLIS);
