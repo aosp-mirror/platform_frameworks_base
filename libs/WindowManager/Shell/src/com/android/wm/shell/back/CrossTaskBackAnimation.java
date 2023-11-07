@@ -20,6 +20,7 @@ import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_CROSS_TASK;
+import static com.android.wm.shell.back.BackAnimationConstants.UPDATE_SYSUI_FLAGS_THRESHOLD;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
 import android.animation.Animator;
@@ -287,12 +288,16 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
             float progress = animation.getAnimatedFraction();
             updatePostCommitEnteringAnimation(progress);
             updatePostCommitClosingAnimation(progress);
+            if (progress > 1 - UPDATE_SYSUI_FLAGS_THRESHOLD) {
+                mBackground.resetStatusBarCustomization();
+            }
             mTransaction.apply();
         });
 
         valueAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                mBackground.resetStatusBarCustomization();
                 finishAnimation();
             }
         });
