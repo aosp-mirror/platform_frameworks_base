@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.testTag
@@ -43,6 +44,9 @@ internal class Scene(
     var userActions by mutableStateOf(actions)
     var zIndex by mutableFloatStateOf(zIndex)
     var size by mutableStateOf(IntSize.Zero)
+
+    /** The shared values in this scene that are not tied to a specific element. */
+    val sharedValues = SnapshotStateMap<ValueKey, Element.SharedValue<*>>()
 
     @Composable
     fun Content(modifier: Modifier = Modifier) {
@@ -68,16 +72,18 @@ private class SceneScopeImpl(
     override fun <T> animateSharedValueAsState(
         value: T,
         key: ValueKey,
-        element: ElementKey,
+        element: ElementKey?,
         lerp: (T, T, Float) -> T,
         canOverflow: Boolean
     ): State<T> {
         val element =
-            layoutImpl.elements[element]
-                ?: error(
-                    "Element $element is not composed. Make sure to call animateSharedXAsState " +
-                        "*after* Modifier.element(key)."
-                )
+            element?.let { key ->
+                layoutImpl.elements[key]
+                    ?: error(
+                        "Element $key is not composed. Make sure to call animateSharedXAsState " +
+                            "*after* Modifier.element(key)."
+                    )
+            }
 
         return animateSharedValueAsState(
             layoutImpl,
