@@ -252,12 +252,7 @@ public class KeyguardTransitionHandler
                 Log.wtf(TAG, "RemoteException thrown from KeyguardService transition", e);
             }
             nextFinishCallback.onTransitionFinished(null);
-        } else if (nextInfo.getType() == TRANSIT_SLEEP) {
-            // An empty SLEEP transition comes in as a signal to abort transitions whenever a sleep
-            // token is held. In cases where keyguard is showing, we are running the animation for
-            // the device sleeping/waking, so it's best to ignore this and keep playing anyway.
-            return;
-        } else if (handles(nextInfo)) {
+        } else {
             // In all other cases, fast-forward to let the next queued transition start playing.
             finishAnimationImmediately(currentTransition, playing);
         }
