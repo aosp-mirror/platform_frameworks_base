@@ -1281,12 +1281,19 @@ public class StatsPullAtomService extends SystemService {
 
     private void addBytesTransferByTagAndMeteredAtoms(@NonNull NetworkStatsExt statsExt,
             @NonNull List<StatsEvent> pulledData) {
+        // Workaround for 5G NSA mode, see {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+        // 5G NSA mode means the primary cell is LTE with a secondary connection to an
+        // NR cell. To mitigate risk, NetworkStats is currently storing this state as
+        // a fake RAT type rather than storing the boolean separately.
+        final boolean is5GNsa = statsExt.ratType == NetworkStatsManager.NETWORK_TYPE_5G_NSA;
+
         for (NetworkStats.Entry entry : statsExt.stats) {
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
                     FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED, entry.getUid(),
                     entry.getMetered() == NetworkStats.METERED_YES, entry.getTag(),
                     entry.getRxBytes(), entry.getRxPackets(), entry.getTxBytes(),
-                    entry.getTxPackets()));
+                    entry.getTxPackets(),
+                    is5GNsa ? TelephonyManager.NETWORK_TYPE_LTE : statsExt.ratType));
         }
     }
 
