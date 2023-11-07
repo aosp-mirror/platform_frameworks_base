@@ -29,6 +29,7 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.isSpecified
@@ -110,13 +111,12 @@ internal class Element(val key: ElementKey) {
 }
 
 /** The implementation of [SceneScope.element]. */
-@Composable
 @OptIn(ExperimentalComposeUiApi::class)
 internal fun Modifier.element(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     key: ElementKey,
-): Modifier {
+): Modifier = composed {
     val sceneValues = remember(scene, key) { Element.TargetValues() }
     val element =
         // Get the element associated to [key] if it was already composed in another scene,
@@ -160,7 +160,7 @@ internal fun Modifier.element(
         }
     }
 
-    return drawWithContent {
+    drawWithContent {
             if (shouldDrawElement(layoutImpl, scene, element)) {
                 drawContent()
             }

@@ -117,7 +117,7 @@ interface SceneScope {
      * TODO(b/291566282): Migrate this to the new Modifier Node API and remove the @Composable
      *   constraint.
      */
-    @Composable fun Modifier.element(key: ElementKey): Modifier
+    fun Modifier.element(key: ElementKey): Modifier
 
     /**
      * Create a *movable* element identified by [key].
