@@ -1030,14 +1030,25 @@ public class RecentTasksTest extends WindowTestsBase {
 
         // If the task has a non-stopped activity, the removal will wait for its onDestroy.
         final Task task = tasks.get(0);
+        final ActivityRecord bottom = new ActivityBuilder(mAtm).setTask(task).build();
         final ActivityRecord top = new ActivityBuilder(mAtm).setTask(task).build();
-        top.lastVisibleTime = 123;
+        bottom.lastVisibleTime = top.lastVisibleTime = 123;
         top.setState(ActivityRecord.State.RESUMED, "test");
         mRecentTasks.removeTasksByPackageName(task.getBasePackageName(), TEST_USER_0_ID);
         assertTrue(task.mKillProcessesOnDestroyed);
         top.setState(ActivityRecord.State.DESTROYING, "test");
+        bottom.destroyed("test");
+        assertTrue("Wait for all destroyed", task.mKillProcessesOnDestroyed);
         top.destroyed("test");
-        assertFalse(task.mKillProcessesOnDestroyed);
+        assertFalse("Consume kill", task.mKillProcessesOnDestroyed);
+
+        // If the process is died, the state should be cleared.
+        final Task lastTask = tasks.get(0);
+        lastTask.intent.setComponent(top.mActivityComponent);
+        lastTask.addChild(top);
+        lastTask.mKillProcessesOnDestroyed = true;
+        top.handleAppDied();
+        assertFalse(lastTask.mKillProcessesOnDestroyed);
     }
 
     @Test
