@@ -272,6 +272,7 @@ public abstract class Context {
             BIND_IMPORTANT,
             BIND_ADJUST_WITH_ACTIVITY,
             BIND_NOT_PERCEPTIBLE,
+            BIND_DENY_ACTIVITY_STARTS_PRE_34,
             BIND_INCLUDE_CAPABILITIES
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -391,6 +392,14 @@ public abstract class Context {
 
     /***********    Public flags above this line ***********/
     /***********    Hidden flags below this line ***********/
+
+    /**
+     * Flag for {@link #bindService}: If binding from an app that is visible, the bound service is
+     * allowed to start an activity from background. Add a flag so that this behavior can be opted
+     * out.
+     * @hide
+     */
+    public static final int BIND_DENY_ACTIVITY_STARTS_PRE_34 = 0X000004000;
 
     /**
      * Flag for {@link #bindService}: This flag is only intended to be used by the system to
