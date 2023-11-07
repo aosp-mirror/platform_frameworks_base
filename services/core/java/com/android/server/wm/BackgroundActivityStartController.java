@@ -30,6 +30,7 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.window.flags.Flags.balShowToasts;
+import static com.android.window.flags.Flags.balShowToastsBlocked;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -472,7 +473,7 @@ public class BackgroundActivityStartController {
             // anything that has fallen through would currently be aborted
             Slog.w(TAG, "Background activity launch blocked! "
                     + state.dump(resultForCaller));
-            showBalToast("BAL blocked", state);
+            showBalBlockedToast("BAL blocked", state);
             return statsLog(BalVerdict.BLOCK, state);
         }
 
@@ -515,7 +516,7 @@ public class BackgroundActivityStartController {
                     "With Android 15 BAL hardening this activity start would be blocked"
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
-            showBalToast("BAL would be blocked", state);
+            showBalRiskToast("BAL would be blocked", state);
             // return the realCaller result for backwards compatibility
             return statsLog(resultForRealCaller, state);
         }
@@ -527,7 +528,7 @@ public class BackgroundActivityStartController {
                     "With Android 15 BAL hardening this activity start would be blocked"
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
-            showBalToast("BAL would be blocked", state);
+            showBalRiskToast("BAL would be blocked", state);
             return statsLog(resultForCaller, state);
         }
         if (resultForRealCaller.allows()
@@ -539,7 +540,7 @@ public class BackgroundActivityStartController {
                         "With Android 14 BAL hardening this activity start would be blocked"
                                 + " (missing opt in by PI sender)! "
                                 + state.dump(resultForCaller, resultForRealCaller));
-                showBalToast("BAL would be blocked", state);
+                showBalBlockedToast("BAL would be blocked", state);
                 return statsLog(resultForRealCaller, state);
             }
             Slog.wtf(TAG, "Without Android 14 BAL hardening this activity start would be allowed"
@@ -550,7 +551,7 @@ public class BackgroundActivityStartController {
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity launch blocked! "
                 + state.dump(resultForCaller, resultForRealCaller));
-        showBalToast("BAL blocked", state);
+        showBalBlockedToast("BAL blocked", state);
         return statsLog(BalVerdict.BLOCK, state);
     }
 
@@ -925,7 +926,15 @@ public class BackgroundActivityStartController {
         return true;
     }
 
-    private void showBalToast(String toastText, BalState state) {
+    private void showBalBlockedToast(String toastText, BalState state) {
+        if (balShowToastsBlocked()) {
+            showToast(toastText
+                    + " caller:" + state.mCallingPackage
+                    + " realCaller:" + state.mRealCallingPackage);
+        }
+    }
+
+    private void showBalRiskToast(String toastText, BalState state) {
         if (balShowToasts()) {
             showToast(toastText
                     + " caller:" + state.mCallingPackage
