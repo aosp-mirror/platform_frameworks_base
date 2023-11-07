@@ -100,7 +100,8 @@ class BouncerViewModel(
                 initialValue = emptyList(),
             )
 
-    val isUserSwitcherVisible: Boolean = bouncerInteractor.isUserSwitcherVisible
+    val isUserSwitcherVisible: Boolean
+        get() = bouncerInteractor.isUserSwitcherVisible
 
     private val isInputEnabled: StateFlow<Boolean> =
         bouncerInteractor.isThrottled
@@ -162,6 +163,23 @@ class BouncerViewModel(
             initialValue = null
         )
 
+    /**
+     * Whether the "side-by-side" layout is supported.
+     *
+     * When presented on its own, without a user switcher (e.g. not on communal devices like
+     * tablets, for example), some authentication method UIs don't do well if they're shown in the
+     * side-by-side layout; these need to be shown with the standard layout so they can take up as
+     * much width as possible.
+     */
+    val isSideBySideSupported: StateFlow<Boolean> =
+        authMethodViewModel
+            .map { authMethod -> isSideBySideSupported(authMethod) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = isSideBySideSupported(authMethodViewModel.value),
+            )
+
     init {
         if (flags.isEnabled()) {
             applicationScope.launch {
@@ -188,6 +206,10 @@ class BouncerViewModel(
     /** Notifies that a throttling dialog has been dismissed by the user. */
     fun onThrottlingDialogDismissed() {
         _throttlingDialogMessage.value = null
+    }
+
+    private fun isSideBySideSupported(authMethod: AuthMethodBouncerViewModel?): Boolean {
+        return isUserSwitcherVisible || authMethod !is PasswordBouncerViewModel
     }
 
     private fun toMessageViewModel(

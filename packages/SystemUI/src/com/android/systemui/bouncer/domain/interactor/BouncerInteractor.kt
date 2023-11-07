@@ -97,7 +97,8 @@ constructor(
     val isPatternVisible: StateFlow<Boolean> = authenticationInteractor.isPatternVisible
 
     /** Whether the user switcher should be displayed within the bouncer UI on large screens. */
-    val isUserSwitcherVisible: Boolean = repository.isUserSwitcherVisible
+    val isUserSwitcherVisible: Boolean
+        get() = repository.isUserSwitcherVisible
 
     init {
         if (flags.isEnabled()) {

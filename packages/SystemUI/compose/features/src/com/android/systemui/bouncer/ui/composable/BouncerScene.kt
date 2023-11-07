@@ -142,7 +142,11 @@ private fun SceneScope.BouncerScene(
     modifier: Modifier = Modifier,
 ) {
     val backgroundColor = MaterialTheme.colorScheme.surface
-    val layout = calculateLayout()
+    val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsState()
+    val layout =
+        calculateLayout(
+            isSideBySideSupported = isSideBySideSupported,
+        )
 
     Box(modifier) {
         Canvas(Modifier.element(Bouncer.Elements.Background).fillMaxSize()) {
@@ -567,6 +571,11 @@ private fun SwappableLayout(
 /**
  * Arranges the bouncer contents and user switcher contents side-by-side, supporting a double tap
  * anywhere on the background to flip their positions.
+ *
+ * In situations when [isUserSwitcherVisible] is `false`, one of two things may happen: either the
+ * UI for the bouncer will be shown on its own, taking up one side, with the other side just being
+ * empty space or, if that kind of "stand-alone side-by-side" isn't supported, the standard
+ * rendering of the bouncer will be used instead of the side-by-side layout.
  */
 @Composable
 private fun SideBySide(
@@ -628,7 +637,9 @@ private fun Stacked(
 }
 
 @Composable
-private fun calculateLayout(): Layout {
+private fun calculateLayout(
+    isSideBySideSupported: Boolean,
+): Layout {
     val windowSizeClass = LocalWindowSizeClass.current
     val width = windowSizeClass.widthSizeClass
     val height = windowSizeClass.heightSizeClass
@@ -657,7 +668,7 @@ private fun calculateLayout(): Layout {
         // Large and tall devices (i.e. tablet in portrait).
         isTall -> Layout.STACKED
         // Large and wide/square devices (i.e. tablet in landscape, unfolded).
-        else -> Layout.SIDE_BY_SIDE
+        else -> if (isSideBySideSupported) Layout.SIDE_BY_SIDE else Layout.STANDARD
     }
 }
 
