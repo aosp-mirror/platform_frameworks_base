@@ -1829,7 +1829,7 @@ public class OomAdjuster {
                     // screen on or animating, promote UI
                     state.setCurProcState(ActivityManager.PROCESS_STATE_PERSISTENT_UI);
                     state.setCurrentSchedulingGroup(SCHED_GROUP_TOP_APP);
-                } else {
+                } else if (!app.getWindowProcessController().isShowingUiWhileDozing()) {
                     // screen off, restrict UI scheduling
                     state.setCurProcState(PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
                     state.setCurrentSchedulingGroup(SCHED_GROUP_RESTRICTED);

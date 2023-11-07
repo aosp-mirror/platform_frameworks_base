@@ -414,6 +414,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     boolean mHasCompanionDeviceSetupFeature;
     /** The process of the top most activity. */
     volatile WindowProcessController mTopApp;
+    /** The process showing UI while the device is dozing. */
+    volatile WindowProcessController mVisibleDozeUiProcess;
     /**
      * This is the process holding the activity the user last visited that is in a different process
      * from the one they are currently in.

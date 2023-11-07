@@ -274,6 +274,26 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertEquals(mAppWindow, policy.getTopFullscreenOpaqueWindow());
     }
 
+    @SetupWindows(addWindows = W_NOTIFICATION_SHADE)
+    @Test
+    public void testVisibleProcessWhileDozing() {
+        final WindowProcessController wpc = mNotificationShadeWindow.getProcess();
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        policy.addWindowLw(mNotificationShadeWindow, mNotificationShadeWindow.mAttrs);
+
+        policy.screenTurnedOff();
+        policy.setAwake(false);
+        policy.screenTurnedOn(null /* screenOnListener */);
+        assertTrue(wpc.isShowingUiWhileDozing());
+        policy.screenTurnedOff();
+        assertFalse(wpc.isShowingUiWhileDozing());
+
+        policy.screenTurnedOn(null /* screenOnListener */);
+        assertTrue(wpc.isShowingUiWhileDozing());
+        policy.setAwake(true);
+        assertFalse(wpc.isShowingUiWhileDozing());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testMainAppWindowDisallowFitSystemWindowTypes() {
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
