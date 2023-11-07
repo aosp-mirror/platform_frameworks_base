@@ -5990,6 +5990,13 @@
     <permission android:name="android.permission.MEDIA_CONTENT_CONTROL"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to control the routing of media apps.
+         <p>Only for use by role COMPANION_DEVICE_WATCH</p>
+         @FlaggedApi("com.android.media.flags.enable_privileged_routing_for_media_routing_control")
+         -->
+    <permission android:name="android.permission.MEDIA_ROUTING_CONTROL"
+                android:protectionLevel="signature|appop" />
+
     <!-- @SystemApi @hide Allows an application to set the volume key long-press listener.
          <p>When it's set, the application will receive the volume key long-press event
          instead of changing volume.</p>

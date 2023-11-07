@@ -95,7 +95,7 @@ class SectionHeaderNodeControllerImpl @Inject constructor(
     }
 
     override fun onViewAdded() {
-        headerView?.isContentVisible = true
+        headerView?.setContentVisibleAnimated(true)
     }
 
     override val view: View

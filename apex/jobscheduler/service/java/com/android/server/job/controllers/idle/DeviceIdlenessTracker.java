@@ -82,6 +82,10 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
      * be a negative value if the device is not in state to be considered idle.
      */
     private long mIdlenessCheckScheduledElapsed = -1;
+    /**
+     * Time (in the elapsed realtime timebase) when the device can be considered idle.
+     */
+    private long mIdleStartElapsed = Long.MAX_VALUE;
 
     private IdlenessListener mIdleListener;
     private final UiModeManager.OnProjectionStateChangedListener mOnProjectionStateChangedListener =
@@ -191,11 +195,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         }
         mProjectionActive = projectionActive;
         if (mProjectionActive) {
-            cancelIdlenessCheck();
-            if (mIdle) {
-                mIdle = false;
-                mIdleListener.reportNewIdleState(mIdle);
-            }
+            exitIdle();
         } else {
             maybeScheduleIdlenessCheck("Projection ended");
         }
@@ -209,6 +209,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         pw.print("  mDockIdle: "); pw.println(mDockIdle);
         pw.print("  mProjectionActive: "); pw.println(mProjectionActive);
         pw.print("  mIdlenessCheckScheduledElapsed: "); pw.println(mIdlenessCheckScheduledElapsed);
+        pw.print("  mIdleStartElapsed: "); pw.println(mIdleStartElapsed);
     }
 
     @Override
@@ -270,11 +271,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
                 if (DEBUG) {
                     Slog.v(TAG, "exiting idle");
                 }
-                cancelIdlenessCheck();
-                if (mIdle) {
-                    mIdle = false;
-                    mIdleListener.reportNewIdleState(mIdle);
-                }
+                exitIdle();
                 break;
             case Intent.ACTION_SCREEN_OFF:
             case Intent.ACTION_DREAMING_STARTED:
@@ -302,6 +299,12 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
     }
 
     private void maybeScheduleIdlenessCheck(String reason) {
+        if (mIdle) {
+            if (DEBUG) {
+                Slog.w(TAG, "Already idle. Redundant reason=" + reason);
+            }
+            return;
+        }
         if ((!mScreenOn || mDockIdle) && !mProjectionActive) {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             final long inactivityThresholdMs = mIsStablePower
@@ -319,19 +322,32 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
                 mIdlenessCheckScheduledElapsed = nowElapsed;
             }
             final long when = mIdlenessCheckScheduledElapsed + inactivityThresholdMs;
+            if (when == mIdleStartElapsed) {
+                if (DEBUG) {
+                    Slog.i(TAG, "No change to idle start time");
+                }
+                return;
+            }
+            mIdleStartElapsed = when;
             if (DEBUG) {
                 Slog.v(TAG, "Scheduling idle : " + reason + " now:" + nowElapsed
-                        + " checkElapsed=" + mIdlenessCheckScheduledElapsed + " when=" + when);
+                        + " checkElapsed=" + mIdlenessCheckScheduledElapsed
+                        + " when=" + mIdleStartElapsed);
             }
             mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    when, mIdleWindowSlop, "JS idleness",
+                    mIdleStartElapsed, mIdleWindowSlop, "JS idleness",
                     AppSchedulingModuleThread.getExecutor(), mIdleAlarmListener);
         }
     }
 
-    private void cancelIdlenessCheck() {
+    private void exitIdle() {
         mAlarm.cancel(mIdleAlarmListener);
         mIdlenessCheckScheduledElapsed = -1;
+        mIdleStartElapsed = Long.MAX_VALUE;
+        if (mIdle) {
+            mIdle = false;
+            mIdleListener.reportNewIdleState(false);
+        }
     }
 
     private void handleIdleTrigger() {

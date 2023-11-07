@@ -250,8 +250,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Bezovta qilinmasin"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Ulangan qurilmalar topilmadi"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Qurilma ulash yoki uzish uchun tegining"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Yangi qurilmani ulash"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Hammasi"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth ishlatish"</string>

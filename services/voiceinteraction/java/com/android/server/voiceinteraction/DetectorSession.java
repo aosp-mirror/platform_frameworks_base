@@ -51,6 +51,10 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENT
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_SECURITY_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_UNEXPECTED_CALLBACK;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_SECURITY_EXCEPTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_EGRESS_LIMIT_REACHED;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_REMOTE_EXCEPTION;
 import static com.android.server.voiceinteraction.HotwordDetectionConnection.ENFORCE_HOTWORD_PHRASE_ID;
 
 import android.annotation.NonNull;
@@ -648,12 +652,21 @@ abstract class DetectorSession {
     void sendTrainingData(
             TrainingDataEgressCallback callback, HotwordTrainingData data) throws RemoteException {
         Slog.d(TAG, "onTrainingData()");
+        int detectorType = getDetectorType();
+        HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                detectorType,
+                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA,
+                mVoiceInteractionServiceUid);
 
         // Check training data permission is granted.
         try {
             enforcePermissionForTrainingDataDelivery();
         } catch (SecurityException e) {
             Slog.w(TAG, "Ignoring training data due to a SecurityException", e);
+            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                    detectorType,
+                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_SECURITY_EXCEPTION,
+                    mVoiceInteractionServiceUid);
             try {
                 callback.onHotwordDetectionServiceFailure(
                         new HotwordDetectionServiceFailure(
@@ -662,6 +675,10 @@ abstract class DetectorSession {
                                         + "in #onTrainingData method."));
             } catch (RemoteException e1) {
                 notifyOnDetectorRemoteException();
+                HotwordMetricsLogger.writeDetectorEvent(
+                        detectorType,
+                        HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
+                        mVoiceInteractionServiceUid);
                 throw e1;
             }
             return;
@@ -672,6 +689,10 @@ abstract class DetectorSession {
                                                                     .incrementEgressCount();
         if (!withinEgressLimit) {
             Slog.d(TAG, "Ignoring training data as exceeded egress limit.");
+            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                    detectorType,
+                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_EGRESS_LIMIT_REACHED,
+                    mVoiceInteractionServiceUid);
             try {
                 callback.onHotwordDetectionServiceFailure(
                         new HotwordDetectionServiceFailure(
@@ -679,6 +700,10 @@ abstract class DetectorSession {
                                 "Training data egress limit exceeded."));
             } catch (RemoteException e) {
                 notifyOnDetectorRemoteException();
+                HotwordMetricsLogger.writeDetectorEvent(
+                        detectorType,
+                        HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
+                        mVoiceInteractionServiceUid);
                 throw e;
             }
             return;
@@ -692,6 +717,10 @@ abstract class DetectorSession {
             callback.onTrainingData(data);
         } catch (RemoteException e) {
             notifyOnDetectorRemoteException();
+            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                    detectorType,
+                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_REMOTE_EXCEPTION,
+                    mVoiceInteractionServiceUid);
             throw e;
         }
     }

@@ -60,7 +60,7 @@ public class FooterViewTest extends SysuiTestCase {
 
         mView = (FooterView) LayoutInflater.from(mSpyContext).inflate(
                 R.layout.status_bar_notification_footer, null, false);
-        mView.setDuration(0);
+        mView.setAnimationDuration(0);
     }
 
     @Test
@@ -107,10 +107,10 @@ public class FooterViewTest extends SysuiTestCase {
 
     @Test
     public void testPerformSecondaryVisibilityAnimation() {
-        mView.setSecondaryVisible(false /* visible */, false /* animate */);
-        assertFalse(mView.isSecondaryVisible());
+        mView.setClearAllButtonVisible(false /* visible */, false /* animate */);
+        assertFalse(mView.isClearAllButtonVisible());
 
-        mView.setSecondaryVisible(true /* visible */, true /* animate */);
+        mView.setClearAllButtonVisible(true /* visible */, true /* animate */);
     }
 
     @Test

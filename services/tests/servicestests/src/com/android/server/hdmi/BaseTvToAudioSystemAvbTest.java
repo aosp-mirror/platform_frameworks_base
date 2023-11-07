@@ -190,12 +190,13 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
                 eq(AudioManager.ADJUST_UNMUTE), anyInt());
         clearInvocations(mAudioManager);
 
-        // Repeat of earlier message: sets neither volume nor mute
+        // Repeat of earlier message: sets volume only (to ensure volume UI is shown)
         receiveReportAudioStatus(32, false);
-        verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(8),
+        verify(mAudioManager).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(8),
                 anyInt());
         verify(mAudioManager, never()).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC),
                 eq(AudioManager.ADJUST_UNMUTE), anyInt());
+        clearInvocations(mAudioManager);
 
         // Volume not within range [0, 100]: sets neither volume nor mute
         receiveReportAudioStatus(127, true);
@@ -391,14 +392,16 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
                 INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute()));
         mTestLooper.dispatchAll();
 
-        // HdmiControlService calls setStreamVolume and adjustStreamVolume to trigger volume UI
+        // HdmiControlService calls setStreamVolume to trigger volume UI
         verify(mAudioManager).setStreamVolume(
                 eq(AudioManager.STREAM_MUSIC),
                 // Volume level is rescaled to the max volume of STREAM_MUSIC
                 eq(INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume()
                         * STREAM_MUSIC_MAX_VOLUME / AudioStatus.MAX_VOLUME),
                 eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));
-        verify(mAudioManager).adjustStreamVolume(
+        // adjustStreamVolume is not called because mute status didn't change,
+        // and setStreamVolume is sufficient to show volume UI
+        verify(mAudioManager, never()).adjustStreamVolume(
                 eq(AudioManager.STREAM_MUSIC),
                 eq(AudioManager.ADJUST_UNMUTE),
                 eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));

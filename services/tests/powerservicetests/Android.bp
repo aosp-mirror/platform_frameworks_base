@@ -11,6 +11,7 @@ android_test {
     ],
 
     static_libs: [
+        "flag-junit",
         "frameworks-base-testutils",
         "platform-compat-test-rules",
         "platform-test-annotations",

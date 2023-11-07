@@ -222,6 +222,8 @@ constructor(
         subscriptionInfoCache.clear()
     }
 
+    override suspend fun isInEcmMode(): Boolean = false
+
     private fun processMobileEvent(event: FakeNetworkEventModel) {
         when (event) {
             is Mobile -> {

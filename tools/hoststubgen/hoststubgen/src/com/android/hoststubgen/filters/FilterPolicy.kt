@@ -56,6 +56,12 @@ enum class FilterPolicy {
     Throw,
 
     /**
+     * Only usable with methods. The item will be kept in the impl jar file, but when called,
+     * it'll no-op.  Currently only supported for methods returning `void`.
+     */
+    Ignore,
+
+    /**
      * Remove the item completely.
      */
     Remove;

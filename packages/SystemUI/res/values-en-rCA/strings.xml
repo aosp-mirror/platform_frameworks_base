@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Face Unlock unavailable"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth connected."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth device icon"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Click to configure device detail"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Battery percentage unknown."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Connected to <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Connected to <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -1181,8 +1180,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Camera and microphone blocked"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Microphone blocked"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Priority mode on"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"User presence is detected"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Set default notes app in Settings"</string>
     <string name="install_app" msgid="5066668100199613936">"Install app"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Mirror to external display?"</string>

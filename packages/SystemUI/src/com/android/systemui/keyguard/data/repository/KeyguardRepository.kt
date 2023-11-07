@@ -18,6 +18,8 @@ package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
+import com.android.keyguard.KeyguardClockSwitch.ClockSize
+import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.biometrics.AuthController
@@ -190,6 +192,12 @@ interface KeyguardRepository {
     /** Observable updated when keyguardDone should be called either now or soon. */
     val keyguardDone: Flow<KeyguardDone>
 
+    /** Receive SMALL or LARGE clock should be displayed on keyguard. */
+    val clockSize: Flow<Int>
+
+    /** Receive whether clock should be centered on lockscreen. */
+    val clockShouldBeCentered: Flow<Boolean>
+
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -238,6 +246,10 @@ interface KeyguardRepository {
     fun setDismissAction(dismissAction: DismissAction)
 
     suspend fun setKeyguardDone(keyguardDoneType: KeyguardDone)
+
+    fun setClockSize(@ClockSize size: Int)
+
+    fun setClockShouldBeCentered(shouldBeCentered: Boolean)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -280,6 +292,12 @@ constructor(
 
     private val _clockPosition = MutableStateFlow(Position(0, 0))
     override val clockPosition = _clockPosition.asStateFlow()
+
+    private val _clockSize = MutableStateFlow(LARGE)
+    override val clockSize: Flow<Int> = _clockSize.asStateFlow()
+
+    private val _clockShouldBeCentered = MutableStateFlow(true)
+    override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered.asStateFlow()
 
     override val isKeyguardShowing: Flow<Boolean> =
         conflatedCallbackFlow {
@@ -661,6 +679,14 @@ constructor(
 
     override fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
         _isActiveDreamLockscreenHosted.value = isLockscreenHosted
+    }
+
+    override fun setClockSize(@ClockSize size: Int) {
+        _clockSize.value = size
+    }
+
+    override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
+        _clockShouldBeCentered.value = shouldBeCentered
     }
 
     private fun statusBarStateIntToObject(value: Int): StatusBarState {

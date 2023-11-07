@@ -16,7 +16,7 @@ flag {
 
 flag {
   name: "get_op_id_crypto_object"
-  namespace: "biometrics"
+  namespace: "biometrics_framework"
   description: "Feature flag for adding a get operation id api to CryptoObject."
   bug: "307601768"
 }

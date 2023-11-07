@@ -57,4 +57,9 @@
           - 0 for radial vanish + slide up
           - 1 for fade out -->
     <integer name="starting_window_exit_animation_type">1</integer>
+
+    <!-- Whether this device allows to use the appIcon as a fallback icon for the splash screen
+        window. If false, the splash screen will be a solid color splash screen whenever the
+        app has not provided a windowSplashScreenAnimatedIcon. -->
+    <bool name="config_canUseAppIconForSplashScreen">false</bool>
 </resources>

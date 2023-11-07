@@ -91,6 +91,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 FakeAirplaneModeRepository(),
                 FakeConnectivityRepository(),
+                FakeMobileConnectionsRepository(),
             )
         connectionsRepository =
             FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), tableLogBuffer)

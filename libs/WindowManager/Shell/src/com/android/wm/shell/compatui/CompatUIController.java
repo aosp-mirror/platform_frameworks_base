@@ -20,8 +20,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
-import android.app.TaskInfo.CameraCompatControlState;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -239,7 +239,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     public void onCompatInfoChanged(@NonNull TaskInfo taskInfo,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
-        if (taskInfo != null && !taskInfo.topActivityInSizeCompat) {
+        if (taskInfo != null && !taskInfo.appCompatTaskInfo.topActivityInSizeCompat) {
             mSetOfTaskIdsShowingRestartDialog.remove(taskInfo.taskId);
         }
 
@@ -267,7 +267,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 }
                 return;
             }
-            if (!taskInfo.isFromLetterboxDoubleTap) {
+            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap) {
                 createOrUpdateUserAspectRatioSettingsLayout(taskInfo, taskListener);
             }
         }
@@ -348,7 +348,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         // as they are still relevant. Else, if the activity is visible and focused (the one the
         // user can see and is using), the user aspect ratio button can potentially be displayed so
         // start tracking the buttons visibility for this task.
-        if (mTopActivityTaskId != taskInfo.taskId && !taskInfo.isTopActivityTransparent
+        if (mTopActivityTaskId != taskInfo.taskId
+                && !taskInfo.isTopActivityTransparent
                 && taskInfo.isVisible && taskInfo.isFocused) {
             mTopActivityTaskId = taskInfo.taskId;
             setHasShownUserAspectRatioSettingsButton(false);

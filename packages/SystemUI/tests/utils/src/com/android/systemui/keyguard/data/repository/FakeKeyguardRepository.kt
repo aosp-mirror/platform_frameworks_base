@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
@@ -41,6 +42,11 @@ import kotlinx.coroutines.flow.asStateFlow
 class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _deferKeyguardDone: MutableSharedFlow<KeyguardDone> = MutableSharedFlow()
     override val keyguardDone: Flow<KeyguardDone> = _deferKeyguardDone
+    private val _clockSize = MutableStateFlow<Int>(LARGE)
+    override val clockSize: Flow<Int> = _clockSize
+
+    private val _clockShouldBeCentered = MutableStateFlow<Boolean>(true)
+    override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered
 
     private val _dismissAction = MutableStateFlow<DismissAction>(DismissAction.None)
     override val dismissAction: StateFlow<DismissAction> = _dismissAction
@@ -175,6 +181,14 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override suspend fun setKeyguardDone(timing: KeyguardDone) {
         _deferKeyguardDone.emit(timing)
+    }
+
+    override fun setClockSize(size: Int) {
+        _clockSize.value = size
+    }
+
+    override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
+        _clockShouldBeCentered.value = shouldBeCentered
     }
 
     fun dozeTimeTick(millis: Long) {

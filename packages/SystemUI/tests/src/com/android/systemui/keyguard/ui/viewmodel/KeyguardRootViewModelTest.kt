@@ -21,8 +21,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.SysUITestComponent
 import com.android.SysUITestModule
 import com.android.TestMocksModule
+import com.android.collectLastValue
+import com.android.runCurrent
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
@@ -319,12 +323,10 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
 
     @Component(modules = [SysUITestModule::class])
     @SysUISingleton
-    interface TestComponent {
-        val underTest: KeyguardRootViewModel
+    interface TestComponent : SysUITestComponent<KeyguardRootViewModel> {
         val deviceEntryRepository: FakeDeviceEntryRepository
         val notifsKeyguardRepository: FakeNotificationsKeyguardViewStateRepository
         val repository: FakeKeyguardRepository
-        val testScope: TestScope
         val transitionRepository: FakeKeyguardTransitionRepository
 
         @Component.Factory
@@ -356,28 +358,25 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
                     TestMocksModule(
                         dozeParameters = dozeParams,
                         screenOffAnimationController = screenOffAnimController,
-                    )
+                    ),
             )
-            .run {
+            .runTest {
                 reset(clockController)
                 underTest.clockControllerProvider = Provider { clockController }
-                testScope.runTest {
-                    runCurrent()
-                    block()
-                }
+                block()
             }
 
     @Test
     fun iconContainer_isNotVisible_notOnKeyguard_dontShowAodIconsWhenShade() = runTest {
-        val isVisible by testScope.collectLastValue(underTest.isNotifIconContainerVisible)
-        testScope.runCurrent()
+        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+        runCurrent()
         transitionRepository.sendTransitionSteps(
             from = KeyguardState.OFF,
             to = KeyguardState.GONE,
             testScope,
         )
         whenever(screenOffAnimController.shouldShowAodIconsWhenShade()).thenReturn(false)
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.value).isFalse()
         assertThat(isVisible?.isAnimating).isFalse()
@@ -385,33 +384,33 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
 
     @Test
     fun iconContainer_isVisible_bypassEnabled() = runTest {
-        val isVisible by testScope.collectLastValue(underTest.isNotifIconContainerVisible)
-        testScope.runCurrent()
+        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+        runCurrent()
         deviceEntryRepository.setBypassEnabled(true)
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.value).isTrue()
     }
 
     @Test
     fun iconContainer_isNotVisible_pulseExpanding_notBypassing() = runTest {
-        val isVisible by testScope.collectLastValue(underTest.isNotifIconContainerVisible)
-        testScope.runCurrent()
+        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+        runCurrent()
         notifsKeyguardRepository.setPulseExpanding(true)
         deviceEntryRepository.setBypassEnabled(false)
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.value).isEqualTo(false)
     }
 
     @Test
     fun iconContainer_isVisible_notifsFullyHidden_bypassEnabled() = runTest {
-        val isVisible by testScope.collectLastValue(underTest.isNotifIconContainerVisible)
-        testScope.runCurrent()
+        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+        runCurrent()
         notifsKeyguardRepository.setPulseExpanding(false)
         deviceEntryRepository.setBypassEnabled(true)
         notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.value).isTrue()
         assertThat(isVisible?.isAnimating).isTrue()
@@ -419,13 +418,13 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
 
     @Test
     fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled_aodDisabled() = runTest {
-        val isVisible by testScope.collectLastValue(underTest.isNotifIconContainerVisible)
-        testScope.runCurrent()
+        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+        runCurrent()
         notifsKeyguardRepository.setPulseExpanding(false)
         deviceEntryRepository.setBypassEnabled(false)
         whenever(dozeParams.alwaysOn).thenReturn(false)
         notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.value).isTrue()
         assertThat(isVisible?.isAnimating).isFalse()
@@ -433,14 +432,14 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
 
     @Test
     fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled_displayNeedsBlanking() = runTest {
-        val isVisible by testScope.collectLastValue(underTest.isNotifIconContainerVisible)
-        testScope.runCurrent()
+        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+        runCurrent()
         notifsKeyguardRepository.setPulseExpanding(false)
         deviceEntryRepository.setBypassEnabled(false)
         whenever(dozeParams.alwaysOn).thenReturn(true)
         whenever(dozeParams.displayNeedsBlanking).thenReturn(true)
         notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.value).isTrue()
         assertThat(isVisible?.isAnimating).isFalse()
@@ -448,14 +447,14 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
 
     @Test
     fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled() = runTest {
-        val isVisible by testScope.collectLastValue(underTest.isNotifIconContainerVisible)
-        testScope.runCurrent()
+        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+        runCurrent()
         notifsKeyguardRepository.setPulseExpanding(false)
         deviceEntryRepository.setBypassEnabled(false)
         whenever(dozeParams.alwaysOn).thenReturn(true)
         whenever(dozeParams.displayNeedsBlanking).thenReturn(false)
         notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.value).isTrue()
         assertThat(isVisible?.isAnimating).isTrue()
@@ -463,18 +462,18 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
 
     @Test
     fun isIconContainerVisible_stopAnimation() = runTest {
-        val isVisible by testScope.collectLastValue(underTest.isNotifIconContainerVisible)
-        testScope.runCurrent()
+        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+        runCurrent()
         notifsKeyguardRepository.setPulseExpanding(false)
         deviceEntryRepository.setBypassEnabled(false)
         whenever(dozeParams.alwaysOn).thenReturn(true)
         whenever(dozeParams.displayNeedsBlanking).thenReturn(false)
         notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.isAnimating).isEqualTo(true)
         isVisible?.stopAnimating()
-        testScope.runCurrent()
+        runCurrent()
 
         assertThat(isVisible?.isAnimating).isEqualTo(false)
     }

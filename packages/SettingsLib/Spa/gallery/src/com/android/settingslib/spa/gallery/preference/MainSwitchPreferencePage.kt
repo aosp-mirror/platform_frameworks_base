@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,17 @@ package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.MainSwitchPreference
 import com.android.settingslib.spa.widget.preference.Preference
@@ -43,13 +44,13 @@ object MainSwitchPreferencePageProvider : SettingsPageProvider {
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
-            SettingsEntryBuilder.create( "MainSwitchPreference", owner)
+            SettingsEntryBuilder.create("MainSwitchPreference", owner)
                 .setUiLayoutFn {
                     SampleMainSwitchPreference()
                 }.build()
         )
         entryList.add(
-            SettingsEntryBuilder.create( "MainSwitchPreference not changeable", owner)
+            SettingsEntryBuilder.create("MainSwitchPreference not changeable", owner)
                 .setUiLayoutFn {
                     SampleNotChangeableMainSwitchPreference()
                 }.build()
@@ -75,25 +76,25 @@ object MainSwitchPreferencePageProvider : SettingsPageProvider {
 
 @Composable
 private fun SampleMainSwitchPreference() {
-    val checked = rememberSaveable { mutableStateOf(false) }
+    var checked by rememberSaveable { mutableStateOf(false) }
     MainSwitchPreference(remember {
         object : SwitchPreferenceModel {
             override val title = "MainSwitchPreference"
-            override val checked = checked
-            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+            override val checked = { checked }
+            override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
         }
     })
 }
 
 @Composable
 private fun SampleNotChangeableMainSwitchPreference() {
-    val checked = rememberSaveable { mutableStateOf(true) }
+    var checked by rememberSaveable { mutableStateOf(true) }
     MainSwitchPreference(remember {
         object : SwitchPreferenceModel {
             override val title = "Not changeable"
-            override val changeable = stateOf(false)
-            override val checked = checked
-            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+            override val changeable = { false }
+            override val checked = { checked }
+            override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
         }
     })
 }

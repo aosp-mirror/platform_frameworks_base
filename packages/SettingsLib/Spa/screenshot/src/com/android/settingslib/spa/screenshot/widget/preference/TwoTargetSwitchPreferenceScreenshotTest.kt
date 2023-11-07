@@ -50,21 +50,21 @@ class TwoTargetSwitchPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec
             Column {
                 TwoTargetSwitchPreference(object : SwitchPreferenceModel {
                     override val title = "TwoTargetSwitchPreference"
-                    override val checked = stateOf(false)
+                    override val checked = { false }
                     override val onCheckedChange = null
                 }) {}
 
                 TwoTargetSwitchPreference(object : SwitchPreferenceModel {
                     override val title = "TwoTargetSwitchPreference"
                     override val summary = { "With summary" }
-                    override val checked = stateOf(true)
+                    override val checked = { true }
                     override val onCheckedChange = null
                 }) {}
 
                 TwoTargetSwitchPreference(object : SwitchPreferenceModel {
                     override val title = "Not changeable"
-                    override val changeable = stateOf(false)
-                    override val checked = stateOf(true)
+                    override val changeable = { false }
+                    override val checked = { true }
                     override val onCheckedChange = null
                 }) {}
             }

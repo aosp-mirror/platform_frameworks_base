@@ -17,10 +17,12 @@ package com.android.systemui.statusbar.notification.icon.domain.interactor
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.SysUITestComponent
 import com.android.SysUITestModule
 import com.android.TestMocksModule
+import com.android.collectLastValue
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository
@@ -43,8 +45,6 @@ import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
 import java.util.Optional
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,12 +57,10 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
 
     @Component(modules = [SysUITestModule::class])
     @SysUISingleton
-    interface TestComponent {
-        val underTest: NotificationIconsInteractor
+    interface TestComponent : SysUITestComponent<NotificationIconsInteractor> {
 
         val activeNotificationListRepository: ActiveNotificationListRepository
         val keyguardViewStateRepository: FakeNotificationsKeyguardViewStateRepository
-        val testScope: TestScope
 
         @Component.Factory
         interface Factory {
@@ -75,97 +73,78 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
             .create(test = this, mocks = TestMocksModule(bubbles = Optional.of(bubbles)))
 
     @Before
-    fun setup() =
-        with(testComponent) {
+    fun setup() {
+        testComponent.apply {
             activeNotificationListRepository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()
                     .apply { testIcons.forEach(::addIndividualNotif) }
                     .build()
         }
+    }
 
     @Test
     fun filteredEntrySet() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.filteredNotifSet())
-                assertThat(filteredSet).containsExactlyElementsIn(testIcons)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.filteredNotifSet())
+            assertThat(filteredSet).containsExactlyElementsIn(testIcons)
         }
 
     @Test
     fun filteredEntrySet_noExpandedBubbles() =
-        with(testComponent) {
-            testScope.runTest {
-                whenever(bubbles.isBubbleExpanded(eq("notif1"))).thenReturn(true)
-                val filteredSet by collectLastValue(underTest.filteredNotifSet())
-                assertThat(filteredSet).comparingElementsUsing(byKey).doesNotContain("notif1")
-            }
+        testComponent.runTest {
+            whenever(bubbles.isBubbleExpanded(eq("notif1"))).thenReturn(true)
+            val filteredSet by collectLastValue(underTest.filteredNotifSet())
+            assertThat(filteredSet).comparingElementsUsing(byKey).doesNotContain("notif1")
         }
 
     @Test
     fun filteredEntrySet_noAmbient() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.filteredNotifSet(showAmbient = false))
-                assertThat(filteredSet).comparingElementsUsing(byIsAmbient).doesNotContain(true)
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsSuppressedFromStatusBar)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.filteredNotifSet(showAmbient = false))
+            assertThat(filteredSet).comparingElementsUsing(byIsAmbient).doesNotContain(true)
+            assertThat(filteredSet)
+                .comparingElementsUsing(byIsSuppressedFromStatusBar)
+                .doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noLowPriority() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by
-                    collectLastValue(underTest.filteredNotifSet(showLowPriority = false))
-                assertThat(filteredSet).comparingElementsUsing(byIsSilent).doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.filteredNotifSet(showLowPriority = false))
+            assertThat(filteredSet).comparingElementsUsing(byIsSilent).doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noDismissed() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by
-                    collectLastValue(underTest.filteredNotifSet(showDismissed = false))
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsRowDismissed)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.filteredNotifSet(showDismissed = false))
+            assertThat(filteredSet).comparingElementsUsing(byIsRowDismissed).doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noRepliedMessages() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by
-                    collectLastValue(underTest.filteredNotifSet(showRepliedMessages = false))
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsLastMessageFromReply)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by
+                collectLastValue(underTest.filteredNotifSet(showRepliedMessages = false))
+            assertThat(filteredSet)
+                .comparingElementsUsing(byIsLastMessageFromReply)
+                .doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noPulsing_notifsNotFullyHidden() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.filteredNotifSet(showPulsing = false))
-                keyguardViewStateRepository.setNotificationsFullyHidden(false)
-                assertThat(filteredSet).comparingElementsUsing(byIsPulsing).doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.filteredNotifSet(showPulsing = false))
+            keyguardViewStateRepository.setNotificationsFullyHidden(false)
+            assertThat(filteredSet).comparingElementsUsing(byIsPulsing).doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noPulsing_notifsFullyHidden() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.filteredNotifSet(showPulsing = false))
-                keyguardViewStateRepository.setNotificationsFullyHidden(true)
-                assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.filteredNotifSet(showPulsing = false))
+            keyguardViewStateRepository.setNotificationsFullyHidden(true)
+            assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
         }
 }
 
@@ -177,13 +156,11 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
 
     @Component(modules = [SysUITestModule::class])
     @SysUISingleton
-    interface TestComponent {
-        val underTest: AlwaysOnDisplayNotificationIconsInteractor
+    interface TestComponent : SysUITestComponent<AlwaysOnDisplayNotificationIconsInteractor> {
 
         val activeNotificationListRepository: ActiveNotificationListRepository
         val deviceEntryRepository: FakeDeviceEntryRepository
         val keyguardViewStateRepository: FakeNotificationsKeyguardViewStateRepository
-        val testScope: TestScope
 
         @Component.Factory
         interface Factory {
@@ -191,105 +168,88 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
         }
     }
 
-    val testComponent: TestComponent =
+    private val testComponent: TestComponent =
         DaggerAlwaysOnDisplayNotificationIconsInteractorTest_TestComponent.factory()
             .create(test = this, mocks = TestMocksModule(bubbles = Optional.of(bubbles)))
 
     @Before
-    fun setup() =
-        with(testComponent) {
+    fun setup() {
+        testComponent.apply {
             activeNotificationListRepository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()
                     .apply { testIcons.forEach(::addIndividualNotif) }
                     .build()
         }
+    }
 
     @Test
     fun filteredEntrySet_noExpandedBubbles() =
-        with(testComponent) {
-            testScope.runTest {
-                whenever(bubbles.isBubbleExpanded(eq("notif1"))).thenReturn(true)
-                val filteredSet by collectLastValue(underTest.aodNotifs)
-                assertThat(filteredSet).comparingElementsUsing(byKey).doesNotContain("notif1")
-            }
+        testComponent.runTest {
+            whenever(bubbles.isBubbleExpanded(eq("notif1"))).thenReturn(true)
+            val filteredSet by collectLastValue(underTest.aodNotifs)
+            assertThat(filteredSet).comparingElementsUsing(byKey).doesNotContain("notif1")
         }
 
     @Test
     fun filteredEntrySet_noAmbient() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.aodNotifs)
-                assertThat(filteredSet).comparingElementsUsing(byIsAmbient).doesNotContain(true)
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsSuppressedFromStatusBar)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.aodNotifs)
+            assertThat(filteredSet).comparingElementsUsing(byIsAmbient).doesNotContain(true)
+            assertThat(filteredSet)
+                .comparingElementsUsing(byIsSuppressedFromStatusBar)
+                .doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noDismissed() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.aodNotifs)
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsRowDismissed)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.aodNotifs)
+            assertThat(filteredSet).comparingElementsUsing(byIsRowDismissed).doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noRepliedMessages() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.aodNotifs)
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsLastMessageFromReply)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.aodNotifs)
+            assertThat(filteredSet)
+                .comparingElementsUsing(byIsLastMessageFromReply)
+                .doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_showPulsing_notifsNotFullyHidden_bypassDisabled() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.aodNotifs)
-                deviceEntryRepository.setBypassEnabled(false)
-                keyguardViewStateRepository.setNotificationsFullyHidden(false)
-                assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.aodNotifs)
+            deviceEntryRepository.setBypassEnabled(false)
+            keyguardViewStateRepository.setNotificationsFullyHidden(false)
+            assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
         }
 
     @Test
     fun filteredEntrySet_showPulsing_notifsFullyHidden_bypassDisabled() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.aodNotifs)
-                deviceEntryRepository.setBypassEnabled(false)
-                keyguardViewStateRepository.setNotificationsFullyHidden(true)
-                assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.aodNotifs)
+            deviceEntryRepository.setBypassEnabled(false)
+            keyguardViewStateRepository.setNotificationsFullyHidden(true)
+            assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
         }
 
     @Test
     fun filteredEntrySet_noPulsing_notifsNotFullyHidden_bypassEnabled() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.aodNotifs)
-                deviceEntryRepository.setBypassEnabled(true)
-                keyguardViewStateRepository.setNotificationsFullyHidden(false)
-                assertThat(filteredSet).comparingElementsUsing(byIsPulsing).doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.aodNotifs)
+            deviceEntryRepository.setBypassEnabled(true)
+            keyguardViewStateRepository.setNotificationsFullyHidden(false)
+            assertThat(filteredSet).comparingElementsUsing(byIsPulsing).doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_showPulsing_notifsFullyHidden_bypassEnabled() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.aodNotifs)
-                deviceEntryRepository.setBypassEnabled(true)
-                keyguardViewStateRepository.setNotificationsFullyHidden(true)
-                assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.aodNotifs)
+            deviceEntryRepository.setBypassEnabled(true)
+            keyguardViewStateRepository.setNotificationsFullyHidden(true)
+            assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
         }
 }
 
@@ -301,13 +261,11 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
 
     @Component(modules = [SysUITestModule::class])
     @SysUISingleton
-    interface TestComponent {
-        val underTest: StatusBarNotificationIconsInteractor
+    interface TestComponent : SysUITestComponent<StatusBarNotificationIconsInteractor> {
 
         val activeNotificationListRepository: ActiveNotificationListRepository
         val keyguardViewStateRepository: FakeNotificationsKeyguardViewStateRepository
         val notificationListenerSettingsRepository: NotificationListenerSettingsRepository
-        val testScope: TestScope
 
         @Component.Factory
         interface Factory {
@@ -320,76 +278,63 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
             .create(test = this, mocks = TestMocksModule(bubbles = Optional.of(bubbles)))
 
     @Before
-    fun setup() =
-        with(testComponent) {
+    fun setup() {
+        testComponent.apply {
             activeNotificationListRepository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()
                     .apply { testIcons.forEach(::addIndividualNotif) }
                     .build()
         }
+    }
 
     @Test
     fun filteredEntrySet_noExpandedBubbles() =
-        with(testComponent) {
-            testScope.runTest {
-                whenever(bubbles.isBubbleExpanded(eq("notif1"))).thenReturn(true)
-                val filteredSet by collectLastValue(underTest.statusBarNotifs)
-                assertThat(filteredSet).comparingElementsUsing(byKey).doesNotContain("notif1")
-            }
+        testComponent.runTest {
+            whenever(bubbles.isBubbleExpanded(eq("notif1"))).thenReturn(true)
+            val filteredSet by collectLastValue(underTest.statusBarNotifs)
+            assertThat(filteredSet).comparingElementsUsing(byKey).doesNotContain("notif1")
         }
 
     @Test
     fun filteredEntrySet_noAmbient() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.statusBarNotifs)
-                assertThat(filteredSet).comparingElementsUsing(byIsAmbient).doesNotContain(true)
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsSuppressedFromStatusBar)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.statusBarNotifs)
+            assertThat(filteredSet).comparingElementsUsing(byIsAmbient).doesNotContain(true)
+            assertThat(filteredSet)
+                .comparingElementsUsing(byIsSuppressedFromStatusBar)
+                .doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noLowPriority_whenDontShowSilentIcons() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.statusBarNotifs)
-                notificationListenerSettingsRepository.showSilentStatusIcons.value = false
-                assertThat(filteredSet).comparingElementsUsing(byIsSilent).doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.statusBarNotifs)
+            notificationListenerSettingsRepository.showSilentStatusIcons.value = false
+            assertThat(filteredSet).comparingElementsUsing(byIsSilent).doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_showLowPriority_whenShowSilentIcons() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.statusBarNotifs)
-                notificationListenerSettingsRepository.showSilentStatusIcons.value = true
-                assertThat(filteredSet).comparingElementsUsing(byIsSilent).contains(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.statusBarNotifs)
+            notificationListenerSettingsRepository.showSilentStatusIcons.value = true
+            assertThat(filteredSet).comparingElementsUsing(byIsSilent).contains(true)
         }
 
     @Test
     fun filteredEntrySet_noDismissed() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.statusBarNotifs)
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsRowDismissed)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.statusBarNotifs)
+            assertThat(filteredSet).comparingElementsUsing(byIsRowDismissed).doesNotContain(true)
         }
 
     @Test
     fun filteredEntrySet_noRepliedMessages() =
-        with(testComponent) {
-            testScope.runTest {
-                val filteredSet by collectLastValue(underTest.statusBarNotifs)
-                assertThat(filteredSet)
-                    .comparingElementsUsing(byIsLastMessageFromReply)
-                    .doesNotContain(true)
-            }
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.statusBarNotifs)
+            assertThat(filteredSet)
+                .comparingElementsUsing(byIsLastMessageFromReply)
+                .doesNotContain(true)
         }
 }
 

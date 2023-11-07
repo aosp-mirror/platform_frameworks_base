@@ -16,10 +16,16 @@
 
 package com.android.settingslib.spa.framework.util
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 
 /**
  * Returns a [Flow] whose values are a list which containing the results of applying the given
@@ -46,3 +52,19 @@ inline fun <T> Flow<List<T>>.filterItem(crossinline predicate: (T) -> Boolean): 
  */
 fun <T1, T2> Flow<T1>.waitFirst(otherFlow: Flow<T2>): Flow<T1> =
     combine(otherFlow.take(1)) { value, _ -> value }
+
+
+/**
+ * Collects the latest value of given flow with a provided action with [LifecycleOwner].
+ */
+fun <T> Flow<T>.collectLatestWithLifecycle(
+    lifecycleOwner: LifecycleOwner,
+    minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
+    action: suspend (value: T) -> Unit,
+) {
+    lifecycleOwner.lifecycleScope.launch {
+        lifecycleOwner.repeatOnLifecycle(minActiveState) {
+            collectLatest(action)
+        }
+    }
+}

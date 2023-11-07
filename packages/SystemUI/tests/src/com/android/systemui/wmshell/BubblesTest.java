@@ -395,7 +395,7 @@ public class BubblesTest extends SysuiTestCase {
                 mTestScope.getBackgroundScope(),
                 new SceneContainerRepository(
                         mTestScope.getBackgroundScope(),
-                        mUtils.fakeSceneContainerConfig(mUtils.fakeSceneKeys())),
+                        mUtils.fakeSceneContainerConfig()),
                 powerRepository,
                 mock(SceneLogger.class));
 

@@ -34,8 +34,8 @@ fun TwoTargetSwitchPreference(
             icon = icon,
         ) {
             SettingsSwitch(
-                checked = model.checked.value,
-                changeable = { model.changeable.value },
+                checked = model.checked(),
+                changeable = model.changeable,
                 onCheckedChange = model.onCheckedChange,
             )
         }

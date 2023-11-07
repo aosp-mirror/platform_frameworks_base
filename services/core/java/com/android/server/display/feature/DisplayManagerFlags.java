@@ -18,11 +18,13 @@ package com.android.server.display.feature;
 
 import android.os.Build;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.server.display.feature.flags.Flags;
 import com.android.server.display.utils.DebugUtils;
 
+import java.io.PrintWriter;
 import java.util.function.Supplier;
 
 /**
@@ -160,6 +162,25 @@ public class DisplayManagerFlags {
         return mSmallAreaDetectionFlagState.isEnabled();
     }
 
+    /**
+     * dumps all flagstates
+     * @param pw printWriter
+     */
+    public void dump(PrintWriter pw) {
+        pw.println("DisplayManagerFlags:");
+        pw.println(" " + mAdaptiveToneImprovements1);
+        pw.println(" " + mAdaptiveToneImprovements2);
+        pw.println(" " + mBackUpSmoothDisplayAndForcePeakRefreshRateFlagState);
+        pw.println(" " + mConnectedDisplayErrorHandlingFlagState);
+        pw.println(" " + mConnectedDisplayManagementFlagState);
+        pw.println(" " + mDisplayOffloadFlagState);
+        pw.println(" " + mExternalDisplayLimitModeState);
+        pw.println(" " + mHdrClamperFlagState);
+        pw.println(" " + mNbmControllerFlagState);
+        pw.println(" " + mPowerThrottlingClamperFlagState);
+        pw.println(" " + mSmallAreaDetectionFlagState);
+    }
+
     private static class FlagState {
 
         private final String mName;
@@ -196,6 +217,17 @@ public class DisplayManagerFlags {
                         flagValue);
             }
             return flagValue;
+        }
+
+        @Override
+        public String toString() {
+            // remove com.android.server.display.feature.flags. from the beginning of the name.
+            // align all isEnabled() values.
+            // Adjust lengths if we end up with longer names
+            final int nameLength = mName.length();
+            return TextUtils.substring(mName,  41, nameLength) + ": "
+                    + TextUtils.formatSimple("%" + (93 - nameLength) + "s%s", " " , isEnabled())
+                    + " (def:" + mFlagFunction.get() + ")";
         }
     }
 }

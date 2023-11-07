@@ -2440,7 +2440,7 @@ public class DisplayManagerServiceTest {
         callback.waitForExpectedEvent();
         callback.clear();
 
-        callback.expectsEvent(EVENT_DISPLAY_CONNECTED);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
         callback.waitForExpectedEvent();

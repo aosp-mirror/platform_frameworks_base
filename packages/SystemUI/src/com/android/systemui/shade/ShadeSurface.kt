@@ -17,7 +17,6 @@ package com.android.systemui.shade
 
 import android.view.ViewPropertyAnimator
 import com.android.systemui.statusbar.GestureRecorder
-import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -33,7 +32,6 @@ interface ShadeSurface : ShadeViewController {
         centralSurfaces: CentralSurfaces,
         recorder: GestureRecorder,
         hideExpandedRunnable: Runnable,
-        notificationShelfController: NotificationShelfController,
         headsUpManager: HeadsUpManager
     )
 

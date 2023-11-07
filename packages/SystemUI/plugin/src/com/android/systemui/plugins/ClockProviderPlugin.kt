@@ -17,6 +17,7 @@ import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintSet
 import com.android.internal.annotations.Keep
 import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.annotations.ProvidesInterface
@@ -85,6 +86,9 @@ interface ClockFaceController {
     /** View that renders the clock face */
     val view: View
 
+    /** Layout specification for this clock */
+    val layout: ClockFaceLayout
+
     /** Determines the way the hosting app should behave when rendering this clock face */
     val config: ClockFaceConfig
 
@@ -96,6 +100,30 @@ interface ClockFaceController {
 
     /** Some clocks may log debug information */
     var messageBuffer: MessageBuffer?
+}
+
+/** Specifies layout information for the */
+interface ClockFaceLayout {
+    /** All clock views to add to the root constraint layout before applying constraints. */
+    val views: List<View>
+
+    /** Custom constraints to apply to Lockscreen ConstraintLayout. */
+    fun applyConstraints(constraints: ConstraintSet): ConstraintSet
+}
+
+/** A ClockFaceLayout that applies the default lockscreen layout to a single view */
+class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
+    // both small and large clock should have a container (RelativeLayout in
+    // SimpleClockFaceController)
+    override val views = listOf(view)
+    override fun applyConstraints(constraints: ConstraintSet): ConstraintSet {
+        if (views.size != 1) {
+            throw IllegalArgumentException(
+                "Should have only one container view when using DefaultClockFaceLayout"
+            )
+        }
+        return constraints
+    }
 }
 
 /** Events that should call when various rendering parameters change */

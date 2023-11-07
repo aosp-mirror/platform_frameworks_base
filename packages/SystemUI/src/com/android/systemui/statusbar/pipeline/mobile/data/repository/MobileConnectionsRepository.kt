@@ -98,4 +98,10 @@ interface MobileConnectionsRepository {
      * [android.telephony.TelephonyManager.SIM_STATE_PERM_DISABLED]
      */
     val isAnySimSecure: Flow<Boolean>
+
+    /**
+     * Checks if any subscription has [android.telephony.TelephonyManager.getEmergencyCallbackMode]
+     * == true
+     */
+    suspend fun isInEcmMode(): Boolean
 }

@@ -32,10 +32,6 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
 
     private int mInitialAudioStatusRetriesLeft = 2;
 
-    // Flag to notify AudioService of the next audio status reported,
-    // regardless of whether the audio status changed.
-    private boolean mForceNextAudioStatusUpdate = false;
-
     private static final int STATE_WAIT_FOR_INITIAL_AUDIO_STATUS = 1;
     private static final int STATE_MONITOR_AUDIO_STATUS = 2;
 
@@ -74,13 +70,11 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
         return false;
     }
 
-
     /**
      * If AVB has been enabled, send <Give Audio Status> and notify AudioService of the response.
      */
     void requestAndUpdateAudioStatus() {
         if (mState == STATE_MONITOR_AUDIO_STATUS) {
-            mForceNextAudioStatusUpdate = true;
             sendGiveAudioStatus();
         }
     }
@@ -104,15 +98,20 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
             localDevice().getService().enableAbsoluteVolumeBehavior(audioStatus);
             mState = STATE_MONITOR_AUDIO_STATUS;
         } else if (mState == STATE_MONITOR_AUDIO_STATUS) {
-            if (mForceNextAudioStatusUpdate
-                    || audioStatus.getVolume() != mLastAudioStatus.getVolume()) {
+            // On TV panels, we notify AudioService even if neither volume nor mute state changed.
+            // This ensures that the user sees volume UI if they tried to adjust the AVR's volume,
+            // even if the new volume level is the same as the previous one.
+            boolean notifyAvbVolumeToShowUi = localDevice().getService().isTvDevice()
+                    && audioStatus.equals(mLastAudioStatus);
+
+            if (audioStatus.getVolume() != mLastAudioStatus.getVolume()
+                    || notifyAvbVolumeToShowUi) {
                 localDevice().getService().notifyAvbVolumeChange(audioStatus.getVolume());
             }
-            if (mForceNextAudioStatusUpdate
-                    || audioStatus.getMute() != mLastAudioStatus.getMute()) {
+
+            if (audioStatus.getMute() != mLastAudioStatus.getMute()) {
                 localDevice().getService().notifyAvbMuteChange(audioStatus.getMute());
             }
-            mForceNextAudioStatusUpdate = false;
         }
         mLastAudioStatus = audioStatus;
 

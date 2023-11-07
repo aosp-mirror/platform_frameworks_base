@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -28,7 +30,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -81,13 +82,13 @@ class MainSwitchPreferenceTest {
 
 @Composable
 private fun TestMainSwitchPreference(changeable: Boolean) {
-    val checked = rememberSaveable { mutableStateOf(false) }
+    var checked by rememberSaveable { mutableStateOf(false) }
     MainSwitchPreference(remember {
         object : SwitchPreferenceModel {
             override val title = TITLE
-            override val checked = checked
-            override val changeable = stateOf(changeable)
-            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+            override val checked = { checked }
+            override val changeable = { changeable }
+            override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
         }
     })
 }

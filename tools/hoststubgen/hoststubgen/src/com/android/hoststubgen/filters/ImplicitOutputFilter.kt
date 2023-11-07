@@ -23,6 +23,7 @@ import com.android.hoststubgen.asm.isAnonymousInnerClass
 import com.android.hoststubgen.log
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.isVisibilityPrivateOrPackagePrivate
+import org.objectweb.asm.tree.ClassNode
 
 /**
  * Filter implementing "implicit" rules, such as:
@@ -35,10 +36,7 @@ class ImplicitOutputFilter(
         private val classes: ClassNodes,
         fallback: OutputFilter
 ) : DelegatingFilter(fallback) {
-    private fun getClassImplicitPolicy(className: String): FilterPolicyWithReason? {
-        // TODO: This check should be cached.
-        val cn = classes.getClass(className)
-
+    private fun getClassImplicitPolicy(className: String, cn: ClassNode): FilterPolicyWithReason? {
         if (isAnonymousInnerClass(cn)) {
             log.forDebug {
 //                log.d("  anon-inner class: ${className} outer: ${cn.outerClass}  ")
@@ -57,10 +55,24 @@ class ImplicitOutputFilter(
     }
 
     override fun getPolicyForClass(className: String): FilterPolicyWithReason {
-        // Use the implicit policy, if any.
-        getClassImplicitPolicy(className)?.let { return it }
+        val fallback = super.getPolicyForClass(className)
 
-        return super.getPolicyForClass(className)
+        // TODO: This check should be cached.
+        val cn = classes.getClass(className)
+
+        if (cn.superName == "java/lang/Enum" &&
+                fallback.policy == FilterPolicy.Keep) {
+            return FilterPolicy.KeepClass.withReason("enum")
+        }
+        if (cn.interfaces.contains("java/lang/annotation/Annotation") &&
+                fallback.policy == FilterPolicy.Keep) {
+            return FilterPolicy.KeepClass.withReason("annotation")
+        }
+
+        // Use the implicit policy, if any.
+        getClassImplicitPolicy(className, cn)?.let { return it }
+
+        return fallback
     }
 
     override fun getPolicyForMethod(
@@ -86,10 +98,10 @@ class ImplicitOutputFilter(
         // If we throw from the static initializer, the class would be useless, so we convert it
         // "keep" instead.
         if (methodName == CLASS_INITIALIZER_NAME && descriptor == CLASS_INITIALIZER_DESC &&
-            fallback.policy == FilterPolicy.Throw) {
+                fallback.policy == FilterPolicy.Throw) {
             // TODO Maybe show a warning?? But that'd be too noisy with --default-throw.
-            return FilterPolicy.Keep.withReason(
-                "'throw' on static initializer is handled as 'keep'" +
+            return FilterPolicy.Ignore.withReason(
+                "'throw' on static initializer is handled as 'ignore'" +
                         " [original throw reason: ${fallback.reason}]")
         }
 

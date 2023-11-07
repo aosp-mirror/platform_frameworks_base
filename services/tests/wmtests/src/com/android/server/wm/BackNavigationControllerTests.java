@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.window.BackNavigationInfo.typeToString;
@@ -224,6 +225,20 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CROSS_ACTIVITY));
+    }
+
+    @Test
+    public void backTypeDialogCloseWhenBackFromDialog() {
+        DialogCloseTestCase testCase = createTopTaskWithActivityAndDialog();
+        IOnBackInvokedCallback callback = withSystemCallback(testCase.task);
+
+        BackNavigationInfo backNavigationInfo = startBackNavigation();
+        assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
+        assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_DIALOG_CLOSE));
+        // verify if back animation would start.
+        assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
     }
 
     @Test
@@ -605,8 +620,14 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         final ArrayList<ActivityRecord> openActivities = new ArrayList<>();
         openActivities.add(homeActivity);
         final BackNavigationController.AnimationHandler.ScheduleAnimationBuilder toHomeBuilder =
-                animationHandler.prepareAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME,
-                        mBackAnimationAdapter, task, mRootHomeTask, bottomActivity, openActivities);
+                animationHandler.prepareAnimation(
+                        BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                        mBackAnimationAdapter,
+                        task,
+                        mRootHomeTask,
+                        bottomActivity,
+                        openActivities,
+                        task);
         assertTrue(toHomeBuilder.mIsLaunchBehind);
         toHomeBuilder.build();
         verify(mAtm.mTaskOrganizerController, never()).addWindowlessStartingSurface(
@@ -619,8 +640,13 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         openActivities.add(bottomActivity);
         final BackNavigationController.AnimationHandler.ScheduleAnimationBuilder toActivityBuilder =
                 animationHandler.prepareAnimation(
-                        BackNavigationInfo.TYPE_CROSS_ACTIVITY, mBackAnimationAdapter, task, task,
-                        topActivity, openActivities);
+                        BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                        mBackAnimationAdapter,
+                        task,
+                        task,
+                        topActivity,
+                        openActivities,
+                        topActivity);
         assertFalse(toActivityBuilder.mIsLaunchBehind);
         toActivityBuilder.build();
         if (preferWindowlessSurface) {
@@ -646,6 +672,31 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         addToWindowMap(window, true);
         makeWindowVisibleAndDrawn(window);
         return task;
+    }
+
+    @NonNull
+    private DialogCloseTestCase createTopTaskWithActivityAndDialog() {
+        Task task = createTask(mDefaultDisplay);
+        ActivityRecord record = createActivityRecord(task);
+        // enable OnBackInvokedCallbacks
+        record.info.applicationInfo.privateFlagsExt |=
+                PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
+        WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, record, "window");
+        WindowState dialog = createWindow(null, TYPE_APPLICATION, record, "dialog");
+        when(record.mSurfaceControl.isValid()).thenReturn(true);
+        Mockito.doNothing().when(task).reparentSurfaceControl(any(), any());
+        mAtm.setFocusedTask(task.mTaskId, record);
+        addToWindowMap(window, true);
+        addToWindowMap(dialog, true);
+
+        makeWindowVisibleAndDrawn(dialog);
+
+        DialogCloseTestCase testCase = new DialogCloseTestCase();
+        testCase.task = task;
+        testCase.record = record;
+        testCase.windowBack = window;
+        testCase.windowFront = dialog;
+        return testCase;
     }
 
     @NonNull
@@ -694,6 +745,13 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         public ActivityRecord recordBack;
         public WindowState windowBack;
         public ActivityRecord recordFront;
+        public WindowState windowFront;
+    }
+
+    private class DialogCloseTestCase {
+        public Task task;
+        public ActivityRecord record;
+        public WindowState windowBack;
         public WindowState windowFront;
     }
 }

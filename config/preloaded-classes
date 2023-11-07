@@ -370,6 +370,7 @@ android.app.BackgroundServiceStartNotAllowedException
 android.app.BroadcastOptions
 android.app.ClientTransactionHandler
 android.app.ComponentOptions
+android.app.ConfigurationChangedListenerController
 android.app.ConfigurationController
 android.app.ContentProviderHolder$1
 android.app.ContentProviderHolder
@@ -1275,6 +1276,8 @@ android.appwidget.AppWidgetManager$$ExternalSyntheticLambda1
 android.appwidget.AppWidgetManager$$ExternalSyntheticLambda2
 android.appwidget.AppWidgetManager$$ExternalSyntheticLambda3
 android.appwidget.AppWidgetManager$$ExternalSyntheticLambda4
+android.appwidget.AppWidgetManager$$ExternalSyntheticLambda5
+android.appwidget.AppWidgetManager$$ExternalSyntheticLambda6
 android.appwidget.AppWidgetManager
 android.appwidget.AppWidgetManagerInternal
 android.appwidget.AppWidgetProvider
@@ -1342,6 +1345,7 @@ android.content.ComponentName$1
 android.content.ComponentName$WithComponentName
 android.content.ComponentName
 android.content.ContentCaptureOptions$1
+android.content.ContentCaptureOptions$ContentProtectionOptions
 android.content.ContentCaptureOptions
 android.content.ContentInterface
 android.content.ContentProvider$1
@@ -8417,6 +8421,7 @@ android.view.IScrollCaptureCallbacks
 android.view.IScrollCaptureResponseListener$Stub$Proxy
 android.view.IScrollCaptureResponseListener$Stub
 android.view.IScrollCaptureResponseListener
+android.view.ISurfaceControlViewHost
 android.view.ISurfaceControlViewHostParent$Stub
 android.view.ISurfaceControlViewHostParent
 android.view.ISystemGestureExclusionListener$Stub$Proxy
@@ -9002,7 +9007,9 @@ android.view.autofill.AutofillManager$AugmentedAutofillManagerClient
 android.view.autofill.AutofillManager$AutofillCallback
 android.view.autofill.AutofillManager$AutofillClient
 android.view.autofill.AutofillManager$AutofillManagerClient$$ExternalSyntheticLambda10
+android.view.autofill.AutofillManager$AutofillManagerClient$$ExternalSyntheticLambda11
 android.view.autofill.AutofillManager$AutofillManagerClient$$ExternalSyntheticLambda13
+android.view.autofill.AutofillManager$AutofillManagerClient$$ExternalSyntheticLambda14
 android.view.autofill.AutofillManager$AutofillManagerClient$$ExternalSyntheticLambda16
 android.view.autofill.AutofillManager$AutofillManagerClient
 android.view.autofill.AutofillManager$CompatibilityBridge
@@ -9076,6 +9083,7 @@ android.view.contentcapture.MainContentCaptureSession
 android.view.contentcapture.ViewNode$ViewNodeText
 android.view.contentcapture.ViewNode$ViewStructureImpl
 android.view.contentcapture.ViewNode
+android.view.contentprotection.ContentProtectionEventProcessor
 android.view.displayhash.DisplayHash$1
 android.view.displayhash.DisplayHash
 android.view.displayhash.DisplayHashManager
@@ -9173,10 +9181,15 @@ android.view.inputmethod.JoinOrSplitGesture
 android.view.inputmethod.ParcelableHandwritingGesture$1
 android.view.inputmethod.ParcelableHandwritingGesture
 android.view.inputmethod.PreviewableHandwritingGesture
+android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda11
 android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda24
 android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda25
+android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda27
+android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda28
 android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda37
+android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda39
 android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda40
+android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda42
 android.view.inputmethod.RemoteInputConnectionImpl$$ExternalSyntheticLambda8
 android.view.inputmethod.RemoteInputConnectionImpl$1
 android.view.inputmethod.RemoteInputConnectionImpl$KnownAlwaysTrueEndBatchEditCache
@@ -9640,7 +9653,6 @@ android.widget.RemoteViews$MethodArgs
 android.widget.RemoteViews$MethodKey
 android.widget.RemoteViews$NightModeReflectionAction
 android.widget.RemoteViews$OnViewAppliedListener
-android.widget.RemoteViews$OverrideTextColorsAction
 android.widget.RemoteViews$ReflectionAction
 android.widget.RemoteViews$RemoteCollectionItems$1
 android.widget.RemoteViews$RemoteCollectionItems
@@ -9662,7 +9674,6 @@ android.widget.RemoteViews$SetRadioGroupCheckedAction
 android.widget.RemoteViews$SetRemoteCollectionItemListAdapterAction
 android.widget.RemoteViews$SetRemoteInputsAction
 android.widget.RemoteViews$SetRemoteViewsAdapterIntent
-android.widget.RemoteViews$SetRemoteViewsAdapterList
 android.widget.RemoteViews$SetRippleDrawableColor
 android.widget.RemoteViews$SetViewOutlinePreferredRadiusAction
 android.widget.RemoteViews$TextViewDrawableAction
@@ -9733,6 +9744,7 @@ android.widget.TextClock
 android.widget.TextView$$ExternalSyntheticLambda2
 android.widget.TextView$$ExternalSyntheticLambda3
 android.widget.TextView$$ExternalSyntheticLambda4
+android.widget.TextView$$ExternalSyntheticLambda5
 android.widget.TextView$1
 android.widget.TextView$2
 android.widget.TextView$3

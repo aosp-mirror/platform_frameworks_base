@@ -50,6 +50,9 @@ import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.SceneContainerRepository
@@ -70,8 +73,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.currentTime
 
 /**
@@ -82,8 +83,9 @@ import kotlinx.coroutines.test.currentTime
 class SceneTestUtils(
     test: SysuiTestCase,
 ) {
-    val testDispatcher = StandardTestDispatcher()
-    val testScope = TestScope(testDispatcher)
+    val kosmos = Kosmos()
+    val testDispatcher = kosmos.testDispatcher
+    val testScope = kosmos.testScope
     val featureFlags =
         FakeFeatureFlagsClassic().apply {
             set(Flags.FACE_AUTH_REFACTOR, false)
@@ -125,23 +127,11 @@ class SceneTestUtils(
     }
 
     fun fakeSceneKeys(): List<SceneKey> {
-        return listOf(
-            SceneKey.QuickSettings,
-            SceneKey.Shade,
-            SceneKey.Lockscreen,
-            SceneKey.Bouncer,
-            SceneKey.Gone,
-            SceneKey.Communal,
-        )
+        return kosmos.sceneKeys
     }
 
-    fun fakeSceneContainerConfig(
-        sceneKeys: List<SceneKey> = fakeSceneKeys(),
-    ): SceneContainerConfig {
-        return SceneContainerConfig(
-            sceneKeys = sceneKeys,
-            initialSceneKey = SceneKey.Lockscreen,
-        )
+    fun fakeSceneContainerConfig(): SceneContainerConfig {
+        return kosmos.sceneContainerConfig
     }
 
     @JvmOverloads

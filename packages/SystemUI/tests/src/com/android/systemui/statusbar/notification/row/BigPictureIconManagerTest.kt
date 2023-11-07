@@ -57,6 +57,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
     private val testScope = TestScope(testDispatcher)
     private val testableResources = context.orCreateTestableResources
     private val imageLoader: ImageLoader = ImageLoader(context, testDispatcher)
+    private val statsManager = BigPictureStatsManager(mock(), testDispatcher, mock())
     private var mockConsumer: NotificationDrawableConsumer = mock()
     private val drawableCaptor = argumentCaptor<Drawable>()
 
@@ -87,6 +88,7 @@ class BigPictureIconManagerTest : SysuiTestCase() {
             BigPictureIconManager(
                 context,
                 imageLoader,
+                statsManager,
                 scope = testScope,
                 mainDispatcher = testDispatcher,
                 bgDispatcher = testDispatcher

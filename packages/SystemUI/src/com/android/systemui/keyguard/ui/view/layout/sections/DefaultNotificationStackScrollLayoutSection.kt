@@ -27,10 +27,11 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
+import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -47,6 +48,7 @@ constructor(
     private val sharedNotificationContainer: SharedNotificationContainer,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     private val controller: NotificationStackScrollLayoutController,
+    private val smartspaceViewModel: KeyguardSmartspaceViewModel
 ) : KeyguardSection() {
     private val placeHolderId = R.id.nssl_placeholder
 
@@ -92,13 +94,25 @@ constructor(
                 } else {
                     BOTTOM
                 }
-            connect(
-                R.id.nssl_placeholder,
-                TOP,
-                R.id.keyguard_status_view,
-                topAlignment,
-                bottomMargin
-            )
+            if (featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+                connect(
+                    R.id.nssl_placeholder,
+                    TOP,
+                    smartspaceViewModel.smartspaceViewId,
+                    topAlignment,
+                    bottomMargin
+                )
+                setGoneMargin(R.id.nssl_placeholder, TOP, bottomMargin)
+            } else {
+                connect(
+                    R.id.nssl_placeholder,
+                    TOP,
+                    R.id.keyguard_status_view,
+                    topAlignment,
+                    bottomMargin
+                )
+            }
+
             connect(R.id.nssl_placeholder, START, PARENT_ID, START)
             connect(R.id.nssl_placeholder, END, PARENT_ID, END)
             connect(R.id.nssl_placeholder, BOTTOM, R.id.lock_icon_view, TOP)

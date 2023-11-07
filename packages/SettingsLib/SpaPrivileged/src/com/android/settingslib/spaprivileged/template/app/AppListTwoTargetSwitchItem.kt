@@ -17,7 +17,6 @@
 package com.android.settingslib.spaprivileged.template.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spa.widget.preference.TwoTargetSwitchPreference
@@ -26,8 +25,8 @@ import com.android.settingslib.spaprivileged.model.app.AppRecord
 @Composable
 fun <T : AppRecord> AppListItemModel<T>.AppListTwoTargetSwitchItem(
     onClick: () -> Unit,
-    checked: State<Boolean?>,
-    changeable: State<Boolean>,
+    checked: () -> Boolean?,
+    changeable: () -> Boolean,
     onCheckedChange: ((newChecked: Boolean) -> Unit)?,
 ) {
     TwoTargetSwitchPreference(

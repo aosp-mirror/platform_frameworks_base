@@ -39,3 +39,6 @@
 
 --class-load-hook-annotation
     android.hosttest.annotation.HostSideTestClassLoadHook
+
+--stub-static-initializer-annotation
+    android.hosttest.annotation.HostSideTestStaticInitializerStub

@@ -538,6 +538,9 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun demoIsNotInEcmState() = testScope.runTest { assertThat(underTest.isInEcmMode()).isFalse() }
+
     private fun TestScope.startCollection(conn: DemoMobileConnectionRepository): Job {
         val job = launch {
             launch { conn.cdmaLevel.collect {} }

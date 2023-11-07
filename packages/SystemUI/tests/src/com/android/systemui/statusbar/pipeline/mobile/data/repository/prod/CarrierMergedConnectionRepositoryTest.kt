@@ -69,6 +69,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
                 SUB_ID,
                 logger,
                 telephonyManager,
+                testScope.backgroundScope.coroutineContext,
                 testScope.backgroundScope,
                 wifiRepository,
             )

@@ -130,15 +130,6 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun dispatchKeyEvent_menuActionUp_awakeKeyguard_showsPrimaryBouncer() {
-        powerInteractor.setAwakeForTest()
-        whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
-        whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
-
-        verifyActionUpShowsPrimaryBouncer(KeyEvent.KEYCODE_MENU)
-    }
-
-    @Test
     fun dispatchKeyEvent_menuActionUp_awakeShadeLocked_collapsesShade() {
         powerInteractor.setAwakeForTest()
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)

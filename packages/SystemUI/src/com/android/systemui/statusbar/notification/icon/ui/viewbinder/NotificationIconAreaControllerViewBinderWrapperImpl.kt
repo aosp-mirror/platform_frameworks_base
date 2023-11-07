@@ -19,11 +19,9 @@ import android.content.Context
 import android.graphics.Rect
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
-import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import javax.inject.Inject
@@ -41,9 +39,6 @@ class NotificationIconAreaControllerViewBinderWrapperImpl @Inject constructor() 
 
     /** Called by the Keyguard*ViewController whose view contains the aod icons. */
     override fun setupAodIcons(aodIcons: NotificationIconContainer?) = unsupported
-
-    override fun setupShelf(notificationShelfController: NotificationShelfController) =
-        NotificationShelfViewBinderWrapperControllerImpl.unsupported
 
     override fun setShelfIcons(icons: NotificationIconContainer) = unsupported
 
