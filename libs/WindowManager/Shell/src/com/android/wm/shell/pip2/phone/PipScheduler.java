@@ -57,11 +57,6 @@ public class PipScheduler {
     @Nullable
     private SurfaceControl mPinnedTaskLeash;
 
-    // the leash of the original task of the PiP activity;
-    // used to synchronize app drawings in the multi-activity case
-    @Nullable
-    private SurfaceControl mOriginalTaskLeash;
-
     /**
      * A temporary broadcast receiver to initiate exit PiP via expand.
      * This will later be modified to be triggered by the PiP menu.
@@ -93,10 +88,6 @@ public class PipScheduler {
 
     void setPinnedTaskLeash(SurfaceControl pinnedTaskLeash) {
         mPinnedTaskLeash = pinnedTaskLeash;
-    }
-
-    void setOriginalTaskLeash(SurfaceControl originalTaskLeash) {
-        mOriginalTaskLeash = originalTaskLeash;
     }
 
     void setPipTaskToken(@Nullable WindowContainerToken pipTaskToken) {
@@ -133,6 +124,5 @@ public class PipScheduler {
     void onExitPip() {
         mPipTaskToken = null;
         mPinnedTaskLeash = null;
-        mOriginalTaskLeash = null;
     }
 }

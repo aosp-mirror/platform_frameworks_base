@@ -4624,7 +4624,12 @@ class Task extends TaskFragment {
             if (topActivity != null) {
                 mTaskSupervisor.mNoAnimActivities.add(topActivity);
             }
-            super.setWindowingMode(windowingMode);
+
+            final boolean isPip2ExperimentEnabled =
+                    ActivityTaskManagerService.isPip2ExperimentEnabled();
+            if (!isPip2ExperimentEnabled) {
+                super.setWindowingMode(windowingMode);
+            }
 
             if (currentMode == WINDOWING_MODE_PINNED && topActivity != null) {
                 // Try reparent pinned activity back to its original task after
@@ -4633,32 +4638,37 @@ class Task extends TaskFragment {
                 // PiP, we set final windowing mode on the ActivityRecord first and then on its
                 // Task when the exit PiP transition finishes. Meanwhile, the exit transition is
                 // always performed on its original task, reparent immediately in ActivityRecord
-                // breaks it.
-                if (topActivity.getLastParentBeforePip() != null) {
-                    // Do not reparent if the pinned task is in removal, indicated by the
-                    // force hidden flag.
-                    if (!isForceHidden()) {
-                        final Task lastParentBeforePip = topActivity.getLastParentBeforePip();
-                        if (lastParentBeforePip.isAttached()) {
-                            topActivity.reparent(lastParentBeforePip,
-                                    lastParentBeforePip.getChildCount() /* top */,
-                                    "movePinnedActivityToOriginalTask");
-                            final DisplayContent dc = topActivity.getDisplayContent();
-                            if (dc != null && dc.isFixedRotationLaunchingApp(topActivity)) {
-                                // Expanding pip into new rotation, so create a rotation leash
-                                // until the display is rotated.
-                                topActivity.getOrCreateFixedRotationLeash(
-                                        topActivity.getPendingTransaction());
-                            }
-                            lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
-                        }
+                // breaks it. Do not reparent if the pinned task is in removal, indicated by the
+                // force hidden flag.
+                if (topActivity.getLastParentBeforePip() != null && !isForceHidden()
+                        && topActivity.getLastParentBeforePip().isAttached()) {
+                    // We need to collect the pip activity to allow for screenshots
+                    // to be taken as a part of reparenting.
+                    mTransitionController.collect(topActivity);
+
+                    final Task lastParentBeforePip = topActivity.getLastParentBeforePip();
+                    topActivity.reparent(lastParentBeforePip,
+                            lastParentBeforePip.getChildCount() /* top */,
+                            "movePinnedActivityToOriginalTask");
+                    final DisplayContent dc = topActivity.getDisplayContent();
+                    if (dc != null && dc.isFixedRotationLaunchingApp(topActivity)) {
+                        // Expanding pip into new rotation, so create a rotation leash
+                        // until the display is rotated.
+                        topActivity.getOrCreateFixedRotationLeash(
+                                topActivity.getSyncTransaction());
                     }
+                    lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
+                }
+                if (isPip2ExperimentEnabled) {
+                    super.setWindowingMode(windowingMode);
                 }
                 // Resume app-switches-allowed flag when exiting from pinned mode since
                 // it does not follow the ActivityStarter path.
                 if (topActivity.shouldBeVisible()) {
                     mAtmService.resumeAppSwitches();
                 }
+            } else if (isPip2ExperimentEnabled) {
+                super.setWindowingMode(windowingMode);
             }
 
             if (creating) {
