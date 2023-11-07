@@ -16,7 +16,7 @@
 
 package android.media.projection;
 
-
+import static android.Manifest.permission.MANAGE_MEDIA_PROJECTION;
 import static android.media.projection.MediaProjection.MEDIA_PROJECTION_REQUIRES_CALLBACK;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -42,6 +42,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.test.FakePermissionEnforcer;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
 import android.view.Display;
@@ -80,7 +81,7 @@ public class MediaProjectionTest {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     // Fake the connection to the system server.
-    private final FakeIMediaProjection mFakeIMediaProjection = new FakeIMediaProjection();
+    private FakeIMediaProjection mFakeIMediaProjection;
     // Callback registered by an app.
     private MediaProjection mMediaProjection;
 
@@ -112,7 +113,10 @@ public class MediaProjectionTest {
                         .strictness(Strictness.LENIENT)
                         .startMocking();
 
+        FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
+        permissionEnforcer.grant(MANAGE_MEDIA_PROJECTION);
         // Support the MediaProjection instance.
+        mFakeIMediaProjection = new FakeIMediaProjection(permissionEnforcer);
         mFakeIMediaProjection.setLaunchCookie(mock(IBinder.class));
         mMediaProjection = new MediaProjection(mTestableContext, mFakeIMediaProjection,
                 mDisplayManager);
