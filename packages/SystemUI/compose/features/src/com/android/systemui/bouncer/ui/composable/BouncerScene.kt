@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -206,8 +207,7 @@ private fun Bouncer(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(60.dp),
-        modifier = modifier.padding(start = 32.dp, top = 92.dp, end = 32.dp, bottom = 92.dp)
+        modifier = modifier.padding(start = 32.dp, top = 92.dp, end = 32.dp, bottom = 0.dp)
     ) {
         Crossfade(
             targetState = message,
@@ -221,6 +221,8 @@ private fun Bouncer(
             )
         }
 
+        Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
+
         Box(Modifier.weight(1f)) {
             UserInputArea(
                 viewModel = viewModel,
@@ -229,7 +231,22 @@ private fun Bouncer(
             )
         }
 
-        actionButton?.let { BouncerActionButton(viewModel = it) }
+        Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
+
+        val actionButtonModifier = Modifier.height(56.dp)
+
+        actionButton.let { actionButtonViewModel ->
+            if (actionButtonViewModel != null) {
+                BouncerActionButton(
+                    viewModel = actionButtonViewModel,
+                    modifier = actionButtonModifier,
+                )
+            } else {
+                Spacer(modifier = actionButtonModifier)
+            }
+        }
+
+        Spacer(Modifier.height(48.dp))
 
         if (dialogMessage != null) {
             if (dialog == null) {
