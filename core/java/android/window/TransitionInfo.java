@@ -55,6 +55,7 @@ import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Used to communicate information about what is changing during a transition to a TransitionPlayer.
@@ -610,7 +611,7 @@ public final class TransitionInfo implements Parcelable {
         private final WindowContainerToken mContainer;
         private WindowContainerToken mParent;
         private WindowContainerToken mLastParent;
-        private final SurfaceControl mLeash;
+        private SurfaceControl mLeash;
         private @TransitionMode int mMode = TRANSIT_NONE;
         private @ChangeFlags int mFlags = FLAG_NONE;
         private final Rect mStartAbsBounds = new Rect();
@@ -695,6 +696,11 @@ public final class TransitionInfo implements Parcelable {
          */
         public void setLastParent(@Nullable WindowContainerToken lastParent) {
             mLastParent = lastParent;
+        }
+
+        /** Sets the animation leash for controlling this change's container */
+        public void setLeash(@NonNull SurfaceControl leash) {
+            mLeash = Objects.requireNonNull(leash);
         }
 
         /** Sets the transition mode for this change */
