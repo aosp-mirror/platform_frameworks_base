@@ -1829,9 +1829,12 @@ public class BubbleStackView extends FrameLayout
                 }
                 bubble.cleanupViews(); // cleans up the icon view
                 updateExpandedView(); // resets state for no expanded bubble
+                mExpandedBubble = null;
             });
             logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
             return;
+        } else if (getBubbleCount() == 1) {
+            mExpandedBubble = null;
         }
         // Remove it from the views
         for (int i = 0; i < getBubbleCount(); i++) {
@@ -2420,14 +2423,13 @@ public class BubbleStackView extends FrameLayout
         mExpandedAnimationController.notifyPreparingToCollapse();
 
         updateOverflowDotVisibility(false /* expanding */);
-        final Runnable collapseBackToStack = () -> mExpandedAnimationController.collapseBackToStack(
-                mStackAnimationController
-                        .getStackPositionAlongNearestHorizontalEdge()
-                /* collapseTo */,
-                () -> {
-                    mBubbleContainer.setActiveController(mStackAnimationController);
-                    updateOverflowVisibility();
-                });
+        final Runnable collapseBackToStack = () ->
+                mExpandedAnimationController.collapseBackToStack(
+                        mStackAnimationController.getStackPositionAlongNearestHorizontalEdge(),
+                        () -> {
+                            mBubbleContainer.setActiveController(mStackAnimationController);
+                            updateOverflowVisibility();
+                        });
 
         final Runnable after = () -> {
             final BubbleViewProvider previouslySelected = mExpandedBubble;
