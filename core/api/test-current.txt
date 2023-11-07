@@ -3604,6 +3604,8 @@ package android.view.accessibility {
   public final class AccessibilityManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public java.util.List<java.lang.String> getAccessibilityShortcutTargets(int);
     method public boolean hasAnyDirectConnection();
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean startFlashNotificationSequence(@NonNull android.content.Context, int);
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean stopFlashNotificationSequence(@NonNull android.content.Context);
   }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {
