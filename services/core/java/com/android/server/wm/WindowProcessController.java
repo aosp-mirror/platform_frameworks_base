@@ -530,16 +530,41 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     private boolean isBoundByForegroundUid() {
-        for (int i = mBoundClientUids.size() - 1; i >= 0; --i) {
-            if (mAtm.isUidForeground(mBoundClientUids.valueAt(i))) {
-                return true;
+        synchronized (this) {
+            if (mBoundClientUids != null) {
+                for (int i = mBoundClientUids.size() - 1; i >= 0; --i) {
+                    if (mAtm.isUidForeground(mBoundClientUids.valueAt(i))) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
     }
 
-    public void setBoundClientUids(ArraySet<Integer> boundClientUids) {
-        mBoundClientUids = boundClientUids;
+    /**
+     * Clear all bound client Uids.
+     */
+    public void clearBoundClientUids() {
+        synchronized (this) {
+            if (mBoundClientUids == null) {
+                mBoundClientUids = new ArraySet<>();
+            } else {
+                mBoundClientUids.clear();
+            }
+        }
+    }
+
+    /**
+     * Add bound client Uid.
+     */
+    public void addBoundClientUid(int clientUid, String clientPackageName, int bindFlags) {
+        if ((bindFlags & Context.BIND_DENY_ACTIVITY_STARTS) == 0) {
+            if (mBoundClientUids == null) {
+                mBoundClientUids = new ArraySet<>();
+            }
+            mBoundClientUids.add(clientUid);
+        }
     }
 
     public void setInstrumenting(boolean instrumenting,
