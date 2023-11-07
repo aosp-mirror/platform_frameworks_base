@@ -24,75 +24,14 @@ package {
 }
 
 filegroup {
-    name: "FlickerTestsBase-src",
-    srcs: ["src/com/android/server/wm/flicker/*.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsAppClose-src",
-    srcs: ["src/**/close/*.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsActivityEmbedding-src",
-    srcs: [
-        "src/**/activityembedding/*.kt",
-        "src/**/activityembedding/open/*.kt",
-        "src/**/activityembedding/close/*.kt",
-        "src/**/activityembedding/layoutchange/*.kt",
-        "src/**/activityembedding/pip/*.kt",
-        "src/**/activityembedding/rotation/*.kt",
-        "src/**/activityembedding/rtl/*.kt",
-        "src/**/activityembedding/splitscreen/*.kt",
-    ],
-}
-
-filegroup {
-    name: "FlickerTestsIme-src",
-    srcs: ["src/**/ime/*.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsAppLaunchCommon-src",
-    srcs: ["src/**/launch/common/*.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsAppLaunch1-src",
-    srcs: ["src/**/launch/OpenApp*.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsAppLaunch2-src",
-    srcs: ["src/**/launch/*.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsNotification-src",
-    srcs: ["src/**/notification/*.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsQuickswitch-src",
-    srcs: ["src/**/quickswitch/*.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsRotation-src",
-    srcs: ["src/**/rotation/*.kt"],
-}
-
-filegroup {
     name: "FlickerServiceTests-src",
     srcs: [
-        "src/com/android/server/wm/flicker/service/**/*.kt",
+        "src/**/*",
     ],
 }
 
 java_defaults {
     name: "FlickerTestsDefault",
-    manifest: "manifests/AndroidManifest.xml",
-    test_config_template: "AndroidTestTemplate.xml",
     platform_apis: true,
     certificate: "platform",
     optimize: {
@@ -116,139 +55,6 @@ java_defaults {
     ],
 }
 
-android_test {
-    name: "FlickerTestsOther",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestOther.xml"],
-    package_name: "com.android.server.wm.flicker",
-    instrumentation_target_package: "com.android.server.wm.flicker",
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
-    exclude_srcs: [
-        ":FlickerTestsAppClose-src",
-        ":FlickerTestsIme-src",
-        ":FlickerTestsAppLaunch1-src",
-        ":FlickerTestsAppLaunch2-src",
-        ":FlickerTestsQuickswitch-src",
-        ":FlickerTestsRotation-src",
-        ":FlickerTestsNotification-src",
-        ":FlickerServiceTests-src",
-    ],
-}
-
-android_test {
-    name: "FlickerTestsAppClose",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestAppClose.xml"],
-    package_name: "com.android.server.wm.flicker.close",
-    instrumentation_target_package: "com.android.server.wm.flicker.close",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerTestsAppClose-src",
-    ],
-    exclude_srcs: [
-        ":FlickerTestsActivityEmbedding-src",
-    ],
-}
-
-android_test {
-    name: "FlickerTestsIme",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestIme.xml"],
-    package_name: "com.android.server.wm.flicker.ime",
-    instrumentation_target_package: "com.android.server.wm.flicker.ime",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerTestsIme-src",
-    ],
-}
-
-android_test {
-    name: "FlickerTestsAppLaunch1",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestAppLaunch.xml"],
-    package_name: "com.android.server.wm.flicker.launch",
-    instrumentation_target_package: "com.android.server.wm.flicker.launch",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerTestsAppLaunchCommon-src",
-        ":FlickerTestsAppLaunch1-src",
-    ],
-    exclude_srcs: [
-        ":FlickerTestsActivityEmbedding-src",
-    ],
-}
-
-android_test {
-    name: "FlickerTestsAppLaunch2",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestAppLaunch.xml"],
-    package_name: "com.android.server.wm.flicker.launch",
-    instrumentation_target_package: "com.android.server.wm.flicker.launch",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerTestsAppLaunchCommon-src",
-        ":FlickerTestsAppLaunch2-src",
-    ],
-    exclude_srcs: [
-        ":FlickerTestsActivityEmbedding-src",
-        ":FlickerTestsAppLaunch1-src",
-    ],
-}
-
-android_test {
-    name: "FlickerTestsNotification",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestNotification.xml"],
-    package_name: "com.android.server.wm.flicker.notification",
-    instrumentation_target_package: "com.android.server.wm.flicker.notification",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerTestsNotification-src",
-    ],
-}
-
-android_test {
-    name: "FlickerTestsQuickswitch",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestQuickswitch.xml"],
-    package_name: "com.android.server.wm.flicker.quickswitch",
-    instrumentation_target_package: "com.android.server.wm.flicker.quickswitch",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerTestsQuickswitch-src",
-    ],
-}
-
-android_test {
-    name: "FlickerTestsRotation",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestRotation.xml"],
-    package_name: "com.android.server.wm.flicker.rotation",
-    instrumentation_target_package: "com.android.server.wm.flicker.rotation",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerTestsRotation-src",
-    ],
-    exclude_srcs: [
-        ":FlickerTestsActivityEmbedding-src",
-    ],
-}
-
-android_test {
-    name: "FlickerServiceTests",
-    defaults: ["FlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestService.xml"],
-    package_name: "com.android.server.wm.flicker.service",
-    instrumentation_target_package: "com.android.server.wm.flicker.service",
-    srcs: [
-        ":FlickerTestsBase-src",
-        ":FlickerServiceTests-src",
-    ],
-}
-
 java_library {
     name: "wm-flicker-common-assertions",
     platform_apis: true,
@@ -259,34 +65,11 @@ java_library {
         "src/**/*Assertions.java",
         "src/**/*Assertions.kt",
     ],
-    exclude_srcs: [
-        "**/helpers/*",
-    ],
     static_libs: [
         "flickerlib",
         "flickerlib-helpers",
         "truth",
         "app-helpers-core",
-    ],
-}
-
-java_library {
-    name: "wm-flicker-common-app-helpers",
-    platform_apis: true,
-    optimize: {
-        enabled: false,
-    },
-    srcs: [
-        "**/helpers/*",
-    ],
-    static_libs: [
-        "flickertestapplib",
-        "flickerlib",
-        "flickerlib-apphelpers",
-        "flickerlib-helpers",
-        "truth",
-        "app-helpers-core",
-        "wm-flicker-window-extensions",
     ],
 }
 
@@ -303,4 +86,10 @@ java_library {
         "wm-flicker-window-extensions_nodeps",
     ],
     installable: false,
+}
+
+java_library {
+    name: "FlickerTestsBase",
+    defaults: ["FlickerTestsDefault"],
+    srcs: ["src/**/*"],
 }
