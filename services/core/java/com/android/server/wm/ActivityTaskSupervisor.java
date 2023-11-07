@@ -1891,7 +1891,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // DestroyActivityItem may be called first.
         final ActivityRecord top = task.getTopMostActivity();
         if (top != null && top.finishing && !top.mAppStopped && top.lastVisibleTime > 0
-                && !task.mKillProcessesOnDestroyed) {
+                && !task.mKillProcessesOnDestroyed && top.hasProcess()) {
             task.mKillProcessesOnDestroyed = true;
             mHandler.sendMessageDelayed(
                     mHandler.obtainMessage(KILL_TASK_PROCESSES_TIMEOUT_MSG, task),
@@ -1901,8 +1901,26 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         killTaskProcessesIfPossible(task);
     }
 
+    void removeTimeoutOfKillProcessesOnProcessDied(@NonNull ActivityRecord r, @NonNull Task task) {
+        if (r.packageName.equals(task.getBasePackageName())) {
+            task.mKillProcessesOnDestroyed = false;
+            mHandler.removeMessages(KILL_TASK_PROCESSES_TIMEOUT_MSG, task);
+        }
+    }
+
     void killTaskProcessesOnDestroyedIfNeeded(Task task) {
         if (task == null || !task.mKillProcessesOnDestroyed) return;
+        final int[] numDestroyingActivities = new int[1];
+        task.forAllActivities(r ->  {
+            if (r.finishing && r.lastVisibleTime > 0 && r.attachedToProcess()) {
+                numDestroyingActivities[0]++;
+            }
+        });
+        if (numDestroyingActivities[0] > 1) {
+            // Skip if there are still destroying activities. When the last activity reports
+            // destroyed, the number will be 1 to proceed the kill.
+            return;
+        }
         mHandler.removeMessages(KILL_TASK_PROCESSES_TIMEOUT_MSG, task);
         killTaskProcessesIfPossible(task);
     }
@@ -2763,7 +2781,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 } break;
                 case KILL_TASK_PROCESSES_TIMEOUT_MSG: {
                     final Task task = (Task) msg.obj;
-                    if (task.mKillProcessesOnDestroyed) {
+                    if (task.mKillProcessesOnDestroyed && task.hasActivity()) {
                         Slog.i(TAG, "Destroy timeout of remove-task, attempt to kill " + task);
                         killTaskProcessesIfPossible(task);
                     }
