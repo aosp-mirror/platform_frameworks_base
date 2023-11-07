@@ -7782,6 +7782,15 @@
     <permission android:name="android.permission.WRITE_FLAGS"
         android:protectionLevel="signature" />
 
+    <!-- @hide @SystemApi
+         @FlaggedApi("android.app.get_binding_uid_importance")
+         Allows to get the importance of an UID that has a service
+         binding to the app.
+         <p>Protection level: signature|privileged
+    -->
+    <permission android:name="android.permission.GET_BINDING_UID_IMPORTANCE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @hide Allows internal applications to manage displays.
         <p>This means intercept internal signals about displays being (dis-)connected
         and being able to enable or disable the external displays.

@@ -79,6 +79,7 @@ import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
+import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_BTOP;
@@ -7715,11 +7716,97 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "getUidProcessState", callingPackage); // Ignore return value
 
         synchronized (mProcLock) {
-            if (mPendingStartActivityUids.isPendingTopUid(uid)) {
-                return PROCESS_STATE_TOP;
-            }
-            return mProcessList.getUidProcStateLOSP(uid);
+            return getUidProcessStateInnerLOSP(uid);
         }
+    }
+
+    @Override
+    public int getBindingUidProcessState(int targetUid, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.GET_BINDING_UID_IMPORTANCE,
+                    "getBindingUidProcessState");
+        }
+        // We don't need to do a cross-user check here (unlike getUidProcessState),
+        // because we only allow to see UIDs that are actively communicating with the caller.
+
+        final int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final boolean allowed = (callingUid == targetUid)
+                        || hasServiceBindingOrProviderUseLocked(callingUid, targetUid);
+                if (!allowed) {
+                    return PROCESS_STATE_NONEXISTENT;
+                }
+                return getUidProcessStateInnerLOSP(targetUid);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @GuardedBy(anyOf = {"this", "mProcLock"})
+    private int getUidProcessStateInnerLOSP(int uid) {
+        if (mPendingStartActivityUids.isPendingTopUid(uid)) {
+            return PROCESS_STATE_TOP;
+        }
+        return mProcessList.getUidProcStateLOSP(uid);
+    }
+
+    /**
+     * Ensure that {@code clientUid} has a bound service client to {@code callingUid}
+     */
+    @GuardedBy("this")
+    private boolean hasServiceBindingOrProviderUseLocked(int callingUid, int clientUid) {
+        // See if there's a service binding
+        final Boolean hasBinding = mProcessList.searchEachLruProcessesLOSP(
+                false, pr -> {
+                    if (pr.uid == callingUid) {
+                        final ProcessServiceRecord psr = pr.mServices;
+                        final int serviceCount = psr.mServices.size();
+                        for (int svc = 0; svc < serviceCount; svc++) {
+                            final ArrayMap<IBinder, ArrayList<ConnectionRecord>> conns =
+                                    psr.mServices.valueAt(svc).getConnections();
+                            final int size = conns.size();
+                            for (int conni = 0; conni < size; conni++) {
+                                final ArrayList<ConnectionRecord> crs = conns.valueAt(conni);
+                                for (int con = 0; con < crs.size(); con++) {
+                                    final ConnectionRecord cr = crs.get(con);
+                                    final ProcessRecord clientPr = cr.binding.client;
+
+                                    if (clientPr.uid == clientUid) {
+                                        return Boolean.TRUE;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                });
+        if (Boolean.TRUE.equals(hasBinding)) {
+            return true;
+        }
+
+        final Boolean hasProviderClient = mProcessList.searchEachLruProcessesLOSP(
+                false, pr -> {
+                    if (pr.uid == callingUid) {
+                        final ProcessProviderRecord ppr = pr.mProviders;
+                        for (int provi = ppr.numberOfProviders() - 1; provi >= 0; provi--) {
+                            ContentProviderRecord cpr = ppr.getProviderAt(provi);
+
+                            for (int i = cpr.connections.size() - 1; i >= 0; i--) {
+                                ContentProviderConnection conn = cpr.connections.get(i);
+                                ProcessRecord client = conn.client;
+                                if (client.uid == clientUid) {
+                                    return Boolean.TRUE;
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                });
+
+        return Boolean.TRUE.equals(hasProviderClient);
     }
 
     @Override

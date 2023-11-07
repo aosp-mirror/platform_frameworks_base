@@ -529,6 +529,7 @@ applications that come with the platform
         <permission name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"/>
         <!-- Permission required for CTS test IntentRedirectionTest -->
         <permission name="android.permission.QUERY_CLONED_APPS"/>
+        <permission name="android.permission.GET_BINDING_UID_IMPORTANCE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
