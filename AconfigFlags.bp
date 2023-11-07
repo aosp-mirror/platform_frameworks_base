@@ -60,6 +60,7 @@ aconfig_srcjars = [
     ":device_policy_aconfig_flags_lib{.generated_srcjars}",
     ":service-jobscheduler-deviceidle.flags-aconfig-java{.generated_srcjars}",
     ":surfaceflinger_flags_java_lib{.generated_srcjars}",
+    ":android.view.contentcapture.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -665,5 +666,18 @@ java_aconfig_library {
 java_aconfig_library {
     name: "surfaceflinger_flags_java_lib",
     aconfig_declarations: "surfaceflinger_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Content Capture
+aconfig_declarations {
+    name: "android.view.contentcapture.flags-aconfig",
+    package: "android.view.contentcapture.flags",
+    srcs: ["core/java/android/view/contentcapture/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.view.contentcapture.flags-aconfig-java",
+    aconfig_declarations: "android.view.contentcapture.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
