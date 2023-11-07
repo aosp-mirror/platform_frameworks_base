@@ -2289,7 +2289,7 @@ public abstract class WallpaperService extends Service {
                         mInputEventReceiver = null;
                     }
 
-                    mSession.remove(mWindow);
+                    mSession.remove(mWindow.asBinder());
                 } catch (RemoteException e) {
                 }
                 mSurfaceHolder.mSurface.release();

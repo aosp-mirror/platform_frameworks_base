@@ -30,7 +30,6 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 
@@ -100,10 +99,10 @@ class EmbeddedWindowController {
         }
     }
 
-    void remove(IWindow client) {
+    void remove(IBinder client) {
         for (int i = mWindows.size() - 1; i >= 0; i--) {
             EmbeddedWindow ew = mWindows.valueAt(i);
-            if (ew.mClient == client.asBinder()) {
+            if (ew.mClient == client) {
                 mWindows.removeAt(i).onRemoved();
                 mWindowsByInputTransferToken.remove(ew.getInputTransferToken());
                 mWindowsByWindowToken.remove(ew.getWindowToken());

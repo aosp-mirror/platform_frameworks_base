@@ -253,8 +253,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void remove(IWindow window) {
-        mService.removeWindow(this, window);
+    public void remove(IBinder clientToken) {
+        mService.removeClientToken(this, clientToken);
     }
 
     @Override

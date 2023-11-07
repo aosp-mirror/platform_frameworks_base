@@ -1369,7 +1369,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
 
         // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
-        mWm.removeWindow(session, client);
+        mWm.removeClientToken(session, client.asBinder());
         waitHandlerIdle(mWm.mH);
 
         assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
