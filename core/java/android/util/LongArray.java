@@ -23,8 +23,6 @@ import android.os.Build;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
-import libcore.util.EmptyArray;
-
 import java.util.Arrays;
 
 /**

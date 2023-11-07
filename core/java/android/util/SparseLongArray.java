@@ -19,8 +19,6 @@ package android.util;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
-import libcore.util.EmptyArray;
-
 /**
  * SparseLongArrays map integers to longs.  Unlike a normal array of longs,
  * there can be gaps in the indices.  It is intended to be more memory efficient

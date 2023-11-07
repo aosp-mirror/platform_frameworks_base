@@ -20,8 +20,6 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 
-import libcore.util.EmptyArray;
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;

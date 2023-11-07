@@ -21,10 +21,9 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.util.ArraySet;
+import android.util.EmptyArray;
 
 import dalvik.system.VMRuntime;
-
-import libcore.util.EmptyArray;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -82,6 +81,38 @@ public class ArrayUtils {
     @SuppressWarnings("unchecked")
     public static <T> T[] newUnpaddedArray(Class<T> clazz, int minLen) {
         return (T[])VMRuntime.getRuntime().newUnpaddedArray(clazz, minLen);
+    }
+
+    public static byte[] newUnpaddedByteArray$ravenwood(int minLen) {
+        return new byte[minLen];
+    }
+
+    public static char[] newUnpaddedCharArray$ravenwood(int minLen) {
+        return new char[minLen];
+    }
+
+    public static int[] newUnpaddedIntArray$ravenwood(int minLen) {
+        return new int[minLen];
+    }
+
+    public static boolean[] newUnpaddedBooleanArray$ravenwood(int minLen) {
+        return new boolean[minLen];
+    }
+
+    public static long[] newUnpaddedLongArray$ravenwood(int minLen) {
+        return new long[minLen];
+    }
+
+    public static float[] newUnpaddedFloatArray$ravenwood(int minLen) {
+        return new float[minLen];
+    }
+
+    public static Object[] newUnpaddedObjectArray$ravenwood(int minLen) {
+        return new Object[minLen];
+    }
+
+    public static <T> T[] newUnpaddedArray$ravenwood(Class<T> clazz, int minLen) {
+        return (T[]) Array.newInstance(clazz, minLen);
     }
 
     /**
