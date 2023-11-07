@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -67,6 +68,18 @@ private class SceneScopeImpl(
     override fun Modifier.element(key: ElementKey): Modifier {
         return element(layoutImpl, scene, key)
     }
+
+    override fun Modifier.nestedScrollToScene(
+        orientation: Orientation,
+        startBehavior: NestedScrollBehavior,
+        endBehavior: NestedScrollBehavior,
+    ): Modifier =
+        nestedScrollToScene(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            startBehavior = startBehavior,
+            endBehavior = endBehavior,
+        )
 
     @Composable
     override fun <T> animateSharedValueAsState(
