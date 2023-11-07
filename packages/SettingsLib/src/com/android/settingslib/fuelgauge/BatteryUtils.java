@@ -16,9 +16,16 @@
 
 package com.android.settingslib.fuelgauge;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.provider.Settings;
+import android.util.ArraySet;
+import android.view.accessibility.AccessibilityManager;
+
+import java.util.List;
 
 public final class BatteryUtils {
 
@@ -29,5 +36,36 @@ public final class BatteryUtils {
     public static Intent getBatteryIntent(Context context) {
         return context.registerReceiver(
                 /*receiver=*/ null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    }
+
+    /** Gets the current active accessibility related packages. */
+    public static ArraySet<String> getA11yPackageNames(Context context) {
+        context = context.getApplicationContext();
+        final ArraySet<String> packageNames = new ArraySet<>();
+        final String defaultTtsPackageName = Settings.Secure.getString(
+                context.getContentResolver(), Settings.Secure.TTS_DEFAULT_SYNTH);
+        if (defaultTtsPackageName != null) {
+            packageNames.add(defaultTtsPackageName);
+        }
+        // Checks the current active packages.
+        final AccessibilityManager accessibilityManager =
+                context.getSystemService(AccessibilityManager.class);
+        if (!accessibilityManager.isEnabled()) {
+            return packageNames;
+        }
+        final List<AccessibilityServiceInfo> serviceInfoList =
+                accessibilityManager.getEnabledAccessibilityServiceList(
+                        AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+        if (serviceInfoList == null || serviceInfoList.isEmpty()) {
+            return packageNames;
+        }
+        for (AccessibilityServiceInfo serviceInfo : serviceInfoList) {
+            final ComponentName serviceComponent = ComponentName.unflattenFromString(
+                    serviceInfo.getId());
+            if (serviceComponent != null) {
+                packageNames.add(serviceComponent.getPackageName());
+            }
+        }
+        return packageNames;
     }
 }
