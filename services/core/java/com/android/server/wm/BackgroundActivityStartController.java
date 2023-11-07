@@ -30,6 +30,7 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.window.flags.Flags.balShowToasts;
+import static com.android.window.flags.Flags.balShowToastsBlocked;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -321,6 +322,7 @@ public class BackgroundActivityStartController {
                     .append(getDebugPackageName(mCallingPackage, mCallingUid));
             sb.append("; callingUid: ").append(mCallingUid);
             sb.append("; callingPid: ").append(mCallingPid);
+            sb.append("; isPendingIntent: ").append(isPendingIntent());
             sb.append("; appSwitchState: ").append(mAppSwitchState);
             sb.append("; callingUidHasAnyVisibleWindow: ").append(mCallingUidHasAnyVisibleWindow);
             sb.append("; callingUidProcState: ").append(DebugUtils.valueToString(
@@ -328,7 +330,7 @@ public class BackgroundActivityStartController {
             sb.append("; isCallingUidPersistentSystemProcess: ")
                     .append(mIsCallingUidPersistentSystemProcess);
             sb.append("; balAllowedByPiCreator: ").append(mBalAllowedByPiCreator);
-            if (!isPendingIntent()) {
+            if (isPendingIntent()) {
                 sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
                 sb.append("; realCallingPackage: ")
                         .append(getDebugPackageName(mRealCallingPackage, mRealCallingUid));
@@ -340,16 +342,18 @@ public class BackgroundActivityStartController {
                         ActivityManager.class, "PROCESS_STATE_", mRealCallingUidProcState));
                 sb.append("; isRealCallingUidPersistentSystemProcess: ")
                         .append(mIsRealCallingUidPersistentSystemProcess);
+                sb.append("; originatingPendingIntent: ").append(mOriginatingPendingIntent);
             }
-            sb.append("; originatingPendingIntent: ").append(mOriginatingPendingIntent);
             sb.append("; backgroundStartPrivileges: ").append(mBackgroundStartPrivileges);
             sb.append("; intent: ").append(mIntent);
             sb.append("; callerApp: ").append(mCallerApp);
-            sb.append("; realCallerApp: ").append(mRealCallerApp);
+            if (isPendingIntent()) {
+                sb.append("; realCallerApp: ").append(mRealCallerApp);
+            }
             if (mCallerApp != null) {
                 sb.append("; inVisibleTask: ").append(mCallerApp.hasActivityInVisibleTask());
             }
-            if (!isPendingIntent()) {
+            if (isPendingIntent()) {
                 if (mRealCallerApp != null) {
                     sb.append("; realInVisibleTask: ")
                             .append(mRealCallerApp.hasActivityInVisibleTask());
@@ -469,7 +473,7 @@ public class BackgroundActivityStartController {
             // anything that has fallen through would currently be aborted
             Slog.w(TAG, "Background activity launch blocked! "
                     + state.dump(resultForCaller));
-            showBalToast("BAL blocked", state);
+            showBalBlockedToast("BAL blocked", state);
             return statsLog(BalVerdict.BLOCK, state);
         }
 
@@ -512,7 +516,7 @@ public class BackgroundActivityStartController {
                     "With Android 15 BAL hardening this activity start would be blocked"
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
-            showBalToast("BAL would be blocked", state);
+            showBalRiskToast("BAL would be blocked", state);
             // return the realCaller result for backwards compatibility
             return statsLog(resultForRealCaller, state);
         }
@@ -524,7 +528,7 @@ public class BackgroundActivityStartController {
                     "With Android 15 BAL hardening this activity start would be blocked"
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
-            showBalToast("BAL would be blocked", state);
+            showBalRiskToast("BAL would be blocked", state);
             return statsLog(resultForCaller, state);
         }
         if (resultForRealCaller.allows()
@@ -536,7 +540,7 @@ public class BackgroundActivityStartController {
                         "With Android 14 BAL hardening this activity start would be blocked"
                                 + " (missing opt in by PI sender)! "
                                 + state.dump(resultForCaller, resultForRealCaller));
-                showBalToast("BAL would be blocked", state);
+                showBalBlockedToast("BAL would be blocked", state);
                 return statsLog(resultForRealCaller, state);
             }
             Slog.wtf(TAG, "Without Android 14 BAL hardening this activity start would be allowed"
@@ -547,7 +551,7 @@ public class BackgroundActivityStartController {
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity launch blocked! "
                 + state.dump(resultForCaller, resultForRealCaller));
-        showBalToast("BAL blocked", state);
+        showBalBlockedToast("BAL blocked", state);
         return statsLog(BalVerdict.BLOCK, state);
     }
 
@@ -922,7 +926,15 @@ public class BackgroundActivityStartController {
         return true;
     }
 
-    private void showBalToast(String toastText, BalState state) {
+    private void showBalBlockedToast(String toastText, BalState state) {
+        if (balShowToastsBlocked()) {
+            showToast(toastText
+                    + " caller:" + state.mCallingPackage
+                    + " realCaller:" + state.mRealCallingPackage);
+        }
+    }
+
+    private void showBalRiskToast(String toastText, BalState state) {
         if (balShowToasts()) {
             showToast(toastText
                     + " caller:" + state.mCallingPackage
