@@ -6188,8 +6188,13 @@ package android.hardware.usb {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int COMPLIANCE_WARNING_BC_1_2 = 3; // 0x3
     field public static final int COMPLIANCE_WARNING_DEBUG_ACCESSORY = 2; // 0x2
+    field @FlaggedApi("android.hardware.usb.flags.enable_usb_data_compliance_warning") public static final int COMPLIANCE_WARNING_ENUMERATION_FAIL = 7; // 0x7
+    field @FlaggedApi("android.hardware.usb.flags.enable_usb_data_compliance_warning") public static final int COMPLIANCE_WARNING_FLAKY_CONNECTION = 8; // 0x8
+    field @FlaggedApi("android.hardware.usb.flags.enable_usb_data_compliance_warning") public static final int COMPLIANCE_WARNING_INPUT_POWER_LIMITED = 5; // 0x5
+    field @FlaggedApi("android.hardware.usb.flags.enable_usb_data_compliance_warning") public static final int COMPLIANCE_WARNING_MISSING_DATA_LINES = 6; // 0x6
     field public static final int COMPLIANCE_WARNING_MISSING_RP = 4; // 0x4
     field public static final int COMPLIANCE_WARNING_OTHER = 1; // 0x1
+    field @FlaggedApi("android.hardware.usb.flags.enable_usb_data_compliance_warning") public static final int COMPLIANCE_WARNING_UNRELIABLE_IO = 9; // 0x9
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.usb.UsbPortStatus> CREATOR;
     field public static final int DATA_ROLE_DEVICE = 2; // 0x2
     field public static final int DATA_ROLE_HOST = 1; // 0x1

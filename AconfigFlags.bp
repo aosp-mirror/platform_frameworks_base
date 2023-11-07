@@ -61,6 +61,7 @@ aconfig_srcjars = [
     ":service-jobscheduler-deviceidle.flags-aconfig-java{.generated_srcjars}",
     ":surfaceflinger_flags_java_lib{.generated_srcjars}",
     ":android.view.contentcapture.flags-aconfig-java{.generated_srcjars}",
+    ":android.hardware.usb.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -679,5 +680,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.view.contentcapture.flags-aconfig-java",
     aconfig_declarations: "android.view.contentcapture.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// USB
+aconfig_declarations {
+    name: "android.hardware.usb.flags-aconfig",
+    package: "android.hardware.usb.flags",
+    srcs: ["core/java/android/hardware/usb/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.hardware.usb.flags-aconfig-java",
+    aconfig_declarations: "android.hardware.usb.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
