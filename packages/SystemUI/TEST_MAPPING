@@ -88,20 +88,6 @@
           "include-filter": "android.permissionui.cts.CameraMicIndicatorsPermissionTest"
         }
       ]
-    },
-    {
-      "name": "SystemUIGoogleScreenshotTests",
-      "options": [
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-            "include-annotation": "android.platform.test.annotations.Postsubmit"
-        }
-      ]
     }
   ],
   
@@ -171,12 +157,6 @@
         },
         {
           "include-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     },
@@ -188,28 +168,18 @@
         },
         {
           "include-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     },
-    {      "name": "SystemUIGoogleBiometricsScreenshotTests",
+    {
+      // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
+      "name": "SystemUIGoogleBiometricsScreenshotTests",
       "options": [
         {
           "exclude-annotation": "org.junit.Ignore"
         },
         {
           "include-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     }
