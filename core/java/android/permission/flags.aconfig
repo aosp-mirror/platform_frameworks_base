@@ -49,3 +49,10 @@ flag {
   description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"
   bug: "222650148"
 }
+
+flag {
+  name: "factory_reset_prep_permission_apis"
+  namespace: "wallet_integration"
+  description: "enable Permission PREPARE_FACTORY_RESET."
+  bug: "302016478"
+}
