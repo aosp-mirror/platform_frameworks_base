@@ -18,4 +18,8 @@ package com.android.systemui.accessibility.floatingmenu;
 
 interface IRadiiAnimationListener {
     void onRadiiAnimationUpdate(float[] radii);
+
+    void onRadiiAnimationStart();
+
+    void onRadiiAnimationStop();
 }
