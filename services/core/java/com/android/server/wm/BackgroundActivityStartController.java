@@ -513,7 +513,9 @@ public class BackgroundActivityStartController {
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
             // Both caller and real caller allow with system defined behavior
             Slog.wtf(TAG,
-                    "With Android 15 BAL hardening this activity start would be blocked"
+                    "With Android 15 BAL hardening this activity start may be blocked"
+                            + " if the PI creator upgrades target_sdk to 35+"
+                            + " AND the PI sender upgrades target_sdk to 34+! "
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
             showBalRiskToast("BAL would be blocked", state);
@@ -525,7 +527,8 @@ public class BackgroundActivityStartController {
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
             // Allowed before V by creator
             Slog.wtf(TAG,
-                    "With Android 15 BAL hardening this activity start would be blocked"
+                    "With Android 15 BAL hardening this activity start may be blocked"
+                            + " if the PI creator upgrades target_sdk to 35+! "
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
             showBalRiskToast("BAL would be blocked", state);
@@ -537,7 +540,8 @@ public class BackgroundActivityStartController {
             // Allowed before U by sender
             if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG,
-                        "With Android 14 BAL hardening this activity start would be blocked"
+                        "With Android 14 BAL hardening this activity start will be blocked"
+                                + " if the PI sender upgrades target_sdk to 34+! "
                                 + " (missing opt in by PI sender)! "
                                 + state.dump(resultForCaller, resultForRealCaller));
                 showBalBlockedToast("BAL would be blocked", state);
